@@ -1919,7 +1919,7 @@ const ExploreByEquipment = () => {
                         acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
                     }
                     else {
-                        acd.push(obj[val[i]])
+                        acd.push(obj[val[i]].toFixed(2))
                     }
                 }
                 abc.push(acd);
