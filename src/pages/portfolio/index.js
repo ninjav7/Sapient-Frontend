@@ -622,19 +622,25 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <div className="portfolio-consume-widget-wrapper mt-5 ml-2">
-                        <EnergyConsumptionTotals
-                            series={series}
-                            options={options}
-                            energyConsumption={energyConsumption}
-                            isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                        />
-                        <EnergyConsumptionHistory
-                            series={energyConsumptionChart}
-                            isConsumpHistoryLoading={isConsumpHistoryLoading}
-                            startEndDayCount={startEndDayCount}
-                        />
-                    </div>
+                    {/* <div className="portfolio-consume-widget-wrapper mt-5 ml-2"> */}
+                    <Row className="ml-0 mt-3">
+                        <Col xl={6}>
+                            <EnergyConsumptionTotals
+                                series={series}
+                                options={options}
+                                energyConsumption={energyConsumption}
+                                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                            />
+                        </Col>
+                        <Col xl={6}>
+                            <EnergyConsumptionHistory
+                                series={energyConsumptionChart}
+                                isConsumpHistoryLoading={isConsumpHistoryLoading}
+                                startEndDayCount={startEndDayCount}
+                            />
+                        </Col>
+                    </Row>
+                    {/* </div> */}
                 </>
             ) : (
                 <p>You don't have the permission to view this page</p>
