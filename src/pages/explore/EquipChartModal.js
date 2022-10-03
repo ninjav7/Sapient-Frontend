@@ -468,7 +468,7 @@ const EquipChartModal = ({
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
                             .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A`)}</div>
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -852,7 +852,7 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        //fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
         fetchEndUseData();
