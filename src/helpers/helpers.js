@@ -29,8 +29,11 @@ export const xaxisFilters = (daysCount, timezone) => {
                 formatter: function (val, timestamp) {
                     return `${moment(timestamp).tz(timezone).format('HH:00')}`;
                 },
+                offsetX: 0,
+                offsetY: 0,
             },
             tickAmount: 9,
+            tickPlacement: 'between',
         };
         return xaxisObj;
     }
@@ -43,6 +46,8 @@ export const xaxisFilters = (daysCount, timezone) => {
                 formatter: function (val, timestamp) {
                     return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
                 },
+                offsetX: 0,
+                offsetY: 0,
             },
             tickAmount: daysCount * 4,
         };
@@ -57,6 +62,8 @@ export const xaxisFilters = (daysCount, timezone) => {
                 formatter: function (val, timestamp) {
                     return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
                 },
+                offsetX: 0,
+                offsetY: 0,
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
                 trim: false,
@@ -77,6 +84,8 @@ export const xaxisFilters = (daysCount, timezone) => {
                 formatter: function (val, timestamp) {
                     return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
                 },
+                offsetX: 0,
+                offsetY: 0,
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
                 trim: false,
@@ -100,6 +109,8 @@ export const xaxisFilters = (daysCount, timezone) => {
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
                 trim: false,
+                offsetX: 0,
+                offsetY: 0,
             },
             tickAmount: (daysCount / 3).toFixed(0),
             axisTicks: {
