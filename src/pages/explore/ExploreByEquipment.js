@@ -956,9 +956,9 @@ const ExploreByEquipment = () => {
         }
     };
 
-    const handleSelectedLocation = (e, locName) => {
-        var spacedata = [];
-        var sp = [];
+    const handleSelectedLocation = async (e, locName) => {
+        let spacedata = [];
+        let sp = [];
         let selection = document.getElementById(e.target.value);
         if (selection.checked === true) {
             // if (selectedLocation.length === 0) {
@@ -973,15 +973,25 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
-            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 spacedata = res.data.data;
+                console.log(res.data.data)
             });
+            let rvmsp = [];
+            for (var i = 0; i < removeLocationDuplication.length; i++) {
+                for (var j = 0; j < spacedata.length; j++) {
+                    if (removeLocationDuplication[i].location.includes(spacedata[j].name))
+                        rvmsp.push(spacedata[j]);
+                }
+            }
+            console.log(rvmsp)
             selectedLocation.map((ele) => {
                 sp.push(ele);
             })
-            spacedata.map((el) => {
+            rvmsp.map((el) => {
                 sp.push(el?._id)
             })
+            console.log(sp);
             setSelectedLocation(sp)
         } else {
             // if (selectedLocation.length === 1) {
@@ -1004,16 +1014,16 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
-            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 spacedata = res.data.data;
             });
-            let arr = [];
+            let arr = selectedLocation;
             spacedata.map((el) => {
-                arr = selectedLocation.filter(function (item) {
+                arr = arr.filter(function (item) {
                     return item !== el?._id;
                 });
             })
-
+            console.log(arr);
             setSelectedLocation(arr);
         }
     };
@@ -2033,11 +2043,36 @@ const ExploreByEquipment = () => {
         };
         const params = `?floor_id=${item?.floor_id}&building_id=${bldgId}`;
         axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
-
-            setSpaceListAPI(res.data.data);
+            let spacedata = res.data.data;
+            let rvmsp = [];
+            for (var i = 0; i < removeLocationDuplication.length; i++) {
+                for (var j = 0; j < spacedata.length; j++) {
+                    if (removeLocationDuplication[i].location.includes(spacedata[j].name))
+                        rvmsp.push(spacedata[j]);
+                }
+            }
+            console.log(rvmsp)
+            setSpaceListAPI(rvmsp);
             setShowSpace(true);
 
         });
+    }
+    const handleSelectedSpaces = (e, txt) => {
+        let selection = document.getElementById(e.target.value);
+        if (selection.checked === true) {
+            let arr = selectedLocation.filter(function (item) {
+                return item === e.target.value;
+            });
+            if (arr.length === 0) {
+                setSelectedLocation([...selectedLocation, e.target.value])
+            }
+        }
+        else {
+            let arr = selectedLocation.filter(function (item) {
+                return item !== e.target.value;
+            });
+            setSelectedLocation(arr);
+        }
     }
 
     return (
@@ -2298,7 +2333,7 @@ const ExploreByEquipment = () => {
                                                 </div>
                                                 <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
                                                     <span className="pop-text">
-                                                        {localStorage.getItem('exploreBldName')} {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ""}
+                                                        <button style={{ border: "none", backgroundColor: "white" }} onClick={(e) => { setShowSpace(false) }}>{localStorage.getItem('exploreBldName')}</button> {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ""}
                                                     </span>
                                                 </div>
                                                 {showSpace === false ?
@@ -2373,7 +2408,7 @@ const ExploreByEquipment = () => {
                                                                                 id={record._id}
                                                                                 value={record._id}
                                                                                 onClick={(e) => {
-                                                                                    handleSelectedLocation(e, record.name);
+                                                                                    handleSelectedSpaces(e, record.name);
                                                                                 }}
                                                                             />
                                                                             <span>{record.name}</span>
