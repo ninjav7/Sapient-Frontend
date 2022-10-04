@@ -28,11 +28,12 @@ import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
 import SingleRoleNew from '../pages/settings/SingleRoleNew';
 
-// controls
-import PlugRules from '../pages/controls/PlugRules';
 import { userPermissionData } from '../store/globalState';
 import { useAtom } from 'jotai';
 
+// controls
+const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
+const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
@@ -611,6 +612,14 @@ const controlRoutes = {
     visibility: true,
     children: [
         {
+            path: '/control/plug-rules/:ruleId',
+            name: 'Plug Rule',
+            component: PlugRule,
+            route: PrivateRoute,
+            parent: "control",
+            visibility: false,
+        },
+        {
             path: '/control/plug-rules',
             name: 'Plug Rules',
             component: PlugRules,
@@ -618,6 +627,7 @@ const controlRoutes = {
             parent: 'control',
             visibility: true,
         },
+       
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],

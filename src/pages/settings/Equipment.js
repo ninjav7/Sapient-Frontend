@@ -52,7 +52,13 @@ import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 import ThreeDots from '../../assets/images/threeDots.png';
 import Pen from '../../assets/images/pen.png';
 import Delete from '../../assets/images/delete.png';
-import { allEquipmentDataGlobal, equipmentData, equipmentDataGlobal, equipmentId } from '../../store/globalState';
+import {
+    allEquipmentDataGlobal,
+    equipmentData,
+    equipmentDataGlobal,
+    equipmentId,
+    toggleRecord,
+} from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
@@ -73,8 +79,8 @@ const EquipmentTable = ({
     setPageSize,
     setIsDelete,
     setIsEdit,
-    formValidation,
-    setFormValidation,
+    // formValidation,
+    // setFormValidation,
 }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
@@ -173,6 +179,7 @@ const EquipmentTable = ({
 
     const [toggleEdit, setToggleEdit] = useState(false);
     const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
+    const [toggleRecordData, setToggleRecordData] = useAtom(toggleRecord);
 
     return (
         <>
@@ -400,7 +407,7 @@ const EquipmentTable = ({
                                                     key={index}
                                                     onClick={() => {
                                                         setEquipData(record);
-                                                        setFormValidation(false);
+                                                        // setFormValidation(false);
                                                     }}
                                                     className="mouse-pointer">
                                                     {selectedOptions.some((record) => record.value === 'status') && (
@@ -509,6 +516,7 @@ const EquipmentTable = ({
                                                                     'equipments_name_plus',
                                                                     record?.equipments_id
                                                                 );
+                                                                setToggleRecordData(record);
                                                                 setToggleEdit(true);
                                                                 setEqupimentIdData(record?.equipments_id);
                                                             }}
@@ -536,6 +544,8 @@ const EquipmentTable = ({
                                                     <div
                                                         onClick={() => {
                                                             setIsEdit(true);
+                                                            // Toggle(record);
+                                                            Toggle(toggleRecordData);
                                                         }}
                                                         style={{
                                                             display: 'flex',
@@ -637,8 +647,8 @@ const EquipmentTable = ({
                         fetchEquipmentData={fetchEquipmentData}
                         showWindow={'configure'}
                         deviceType={'active'}
-                        formValidation={formValidation}
-                        setFormValidation={setFormValidation}
+                        // formValidation={formValidation}
+                        // setFormValidation={setFormValidation}
                     />
                     <EquipmentDeviceChartModel
                         showChart={modal2}
@@ -650,8 +660,8 @@ const EquipmentTable = ({
                         showWindow={'configure'}
                         deviceType={'passive'}
                         locationData={locationData}
-                        formValidation={formValidation}
-                        setFormValidation={setFormValidation}
+                        // formValidation={formValidation}
+                        // setFormValidation={setFormValidation}
                     />
                 </div>
             ) : (
@@ -669,7 +679,7 @@ const Equipment = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [formValidation, setFormValidation] = useState(false);
+    // const [formValidation, setFormValidation] = useState(false);
 
     const [isDelete, setIsDelete] = useState(false);
     const handleDeleteClose = () => setIsDelete(false);
@@ -696,17 +706,17 @@ const Equipment = () => {
         space_id: '',
     });
 
-    useEffect(() => {
-        if (
-            createEqipmentData.name.length > 0 &&
-            createEqipmentData?.equipment_type?.length > 0 &&
-            createEqipmentData?.end_use?.length > 0
-        ) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-    }, [createEqipmentData]);
+    // useEffect(() => {
+    //     if (
+    //         createEqipmentData.name.length > 0 &&
+    //         createEqipmentData?.equipment_type?.length > 0 &&
+    //         createEqipmentData?.end_use?.length > 0
+    //     ) {
+    //         setFormValidation(true);
+    //     } else {
+    //         setFormValidation(false);
+    //     }
+    // }, [createEqipmentData]);
 
     console.log('createEqipmentData', createEqipmentData);
     const [locationData, setLocationData] = useState([]);
@@ -830,7 +840,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&end_use=${result.name}&page_size=100&page_no=1`;
+            let params = `?building_id=${bldgId}&end_use=${result.name}`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 setEquipmentSelectedTypeData(res.data.data);
             });
@@ -859,7 +869,7 @@ const Equipment = () => {
                     setTimeout(function () {
                         fetchEquipmentData();
                     }, 0);
-                    setFormValidation(false);
+                    // setFormValidation(false);
                 });
 
             setIsProcessing(false);
@@ -933,7 +943,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
-                setFormValidation(false);
+                // setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -972,7 +982,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
-                setFormValidation(false);
+                // setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -983,6 +993,7 @@ const Equipment = () => {
 
     const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
     const [allEqupimentDataNow, setAllEqupimentDataNow] = useAtom(allEquipmentDataGlobal);
+    const [searchText, setSearchText] = useState('');
 
     const fetchEquipmentData = async () => {
         try {
@@ -992,7 +1003,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1011,7 +1022,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
-                setFormValidation(false);
+                // setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -1145,31 +1156,31 @@ const Equipment = () => {
         });
     };
 
-    const equpimentLastUsed = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
+    // const equpimentLastUsed = async () => {
+    //     try {
+    //         let headers = {
+    //             'Content-Type': 'application/json',
+    //             accept: 'application/json',
+    //             Authorization: `Bearer ${userdata.token}`,
+    //         };
 
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${lastUsedEquimentDevice}${params}`, allEqupimentDataNow, { headers })
-                .then((res) => {
-                    // setEndUseData(res.data);
-                });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch End Use Data');
-        }
-    };
+    //         let params = `?building_id=${bldgId}`;
+    //         await axios
+    //             .post(`${BaseUrl}${lastUsedEquimentDevice}${params}`, allEqupimentDataNow, { headers })
+    //             .then((res) => {
+    //                 // setEndUseData(res.data);
+    //             });
+    //     } catch (error) {
+    //         console.log(error);
+    //         console.log('Failed to fetch End Use Data');
+    //     }
+    // };
 
-    useEffect(() => {
-        if (allEqupimentDataNow) {
-            equpimentLastUsed();
-        }
-    }, [allEqupimentDataNow]);
+    // useEffect(() => {
+    //     if (allEqupimentDataNow) {
+    //         equpimentLastUsed();
+    //     }
+    // }, [allEqupimentDataNow]);
 
     return (
         <React.Fragment>
@@ -1192,7 +1203,7 @@ const Equipment = () => {
                                             end_use: '',
                                             space_id: '',
                                         });
-                                        setFormValidation(false);
+                                        // setFormValidation(false);
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add Equipment
                                 </button>
@@ -1263,10 +1274,6 @@ const Equipment = () => {
                         </div>
                     </div>
 
-                    <button type="button" className="btn btn-white d-inline ml-2">
-                        <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
-
                     {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">
                         <MultiSelect
@@ -1303,8 +1310,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
-                            formValidation={formValidation}
-                            setFormValidation={setFormValidation}
+                            // formValidation={formValidation}
+                            // setFormValidation={setFormValidation}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -1324,8 +1331,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
-                            formValidation={formValidation}
-                            setFormValidation={setFormValidation}
+                            // formValidation={formValidation}
+                            // setFormValidation={setFormValidation}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -1345,8 +1352,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
-                            formValidation={formValidation}
-                            setFormValidation={setFormValidation}
+                            // formValidation={formValidation}
+                            // setFormValidation={setFormValidation}
                         />
                     )}
                 </Col>
@@ -1477,7 +1484,8 @@ const Equipment = () => {
                             onClick={() => {
                                 saveDeviceData();
                             }}
-                            disabled={!formValidation}>
+                            // disabled={!formValidation}
+                        >
                             {isProcessing ? 'Adding...' : 'Add'}
                         </Button>
                     </div>

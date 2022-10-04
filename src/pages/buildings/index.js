@@ -20,7 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
@@ -33,6 +33,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -74,9 +75,11 @@ const BuildingOverview = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -253,26 +256,12 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -280,20 +269,24 @@ const BuildingOverview = () => {
                             series[seriesIndex][dataPointIndex],
                             4
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
         xaxis: {
-            type: 'datetime',
             labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
-                    return `${weekText} - ${dateText}`;
+                formatter: function (val) {
+                    return moment(val).tz(timeZone).format('MM/DD HH:00');
                 },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: 12,
+            axisTicks: {
+                show: true,
             },
             style: {
                 colors: ['#1D2939'],
@@ -588,6 +581,7 @@ const BuildingOverview = () => {
 
     const [hoverRef, isHovered] = useHover();
     const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -607,8 +601,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -637,8 +632,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -727,8 +723,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -763,13 +760,14 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -781,14 +779,14 @@ const BuildingOverview = () => {
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
@@ -821,7 +819,7 @@ const BuildingOverview = () => {
                         }
 
                         for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            let matchedRecord = weekendsData.find((record) => record.x === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
                                 newWeekendsData[0].data.push(matchedRecord);
@@ -869,13 +867,14 @@ const BuildingOverview = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -936,6 +935,11 @@ const BuildingOverview = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
+        setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
+    }, [startEndDayCount]);
 
     return (
         <React.Fragment>

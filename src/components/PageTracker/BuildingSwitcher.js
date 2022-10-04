@@ -26,7 +26,7 @@ const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
         '/settings/layout',
         '/settings/equipment',
         '/settings/panels',
-        '/active-devices',
+        '/settings/active-devices',
         '/settings/passive-devices',
     ];
 

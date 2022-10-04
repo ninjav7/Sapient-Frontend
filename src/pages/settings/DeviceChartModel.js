@@ -3,6 +3,7 @@ import { Input, Spinner } from 'reactstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
+import 'moment-timezone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
@@ -12,7 +13,7 @@ import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import ModalHeader from '../../components/ModalHeader';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
 
@@ -37,6 +38,7 @@ const DeviceChartModel = ({
     timeZone,
     selectedUnit,
     setSelectedUnit,
+    daysCount,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -62,17 +64,12 @@ const DeviceChartModel = ({
     const [options, setOptions] = useState({
         chart: {
             id: 'chart-line2',
-
             type: 'line',
-
             height: 180,
-
             toolbar: {
                 autoSelected: 'pan',
-
                 show: false,
             },
-
             animations: {
                 enabled: false,
             },
@@ -95,8 +92,9 @@ const DeviceChartModel = ({
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    // return moment(timestamp).format('DD/MMM - HH:mm');
-                    return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
+                    return `${moment(timestamp).tz(timeZone).format('DD/MM')} ${moment(timestamp)
+                        .tz(timeZone)
+                        .format('LT')}`;
                 },
             },
             style: {
@@ -132,20 +130,6 @@ const DeviceChartModel = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
@@ -158,9 +142,9 @@ const DeviceChartModel = ({
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             0
                         )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -186,10 +170,6 @@ const DeviceChartModel = ({
 
             selection: {
                 enabled: true,
-                // xaxis: {
-                //     min: new Date('19 July 2022').getTime(),
-                //     max: new Date('20 July 2022').getTime(),
-                // },
             },
             animations: {
                 enabled: false,
@@ -258,6 +238,12 @@ const DeviceChartModel = ({
     };
 
     useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setOptions({ ...options, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+    }, [daysCount]);
+
+    useEffect(() => {
         if (startDate === null) {
             return;
         }
@@ -277,13 +263,14 @@ const DeviceChartModel = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&tz_info=${timeZone}`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -317,6 +304,7 @@ const DeviceChartModel = ({
                     });
             } catch (error) {
                 console.log(error);
+                setIsSensorChartLoading(false);
                 console.log('Failed to fetch Sensor Graph data');
             }
         };
@@ -333,26 +321,12 @@ const DeviceChartModel = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                let timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -360,13 +334,15 @@ const DeviceChartModel = ({
                             series[seriesIndex][dataPointIndex],
                             0
                         )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         };
-        setOptions({ ...options, tooltip: toolTip });
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
     }, [selectedUnit]);
 
     return (

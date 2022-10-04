@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import 'moment-timezone';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
@@ -16,7 +17,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUseType = () => {
@@ -29,6 +30,7 @@ const EndUseType = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [equipTypeChartOptions, setEquipTypeChartOptions] = useState({
         chart: {
@@ -126,8 +128,6 @@ const EndUseType = () => {
             enabled: false,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -135,15 +135,6 @@ const EndUseType = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -160,9 +151,9 @@ const EndUseType = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -170,8 +161,8 @@ const EndUseType = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
@@ -275,15 +266,6 @@ const EndUseType = () => {
                         fontWeight: 600,
                         cssClass: 'apexcharts-xaxis-label',
                     },
-                    x: {
-                        show: true,
-                        type: 'datetime',
-                        labels: {
-                            formatter: function (val, timestamp) {
-                                return moment(timestamp).format('DD/MMM - HH:mm');
-                            },
-                        },
-                    },
                     y: {
                         formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                             return value + ' K';
@@ -302,9 +284,9 @@ const EndUseType = () => {
                                 series[seriesIndex][dataPointIndex],
                                 0
                             )} kWh</div>
-                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                                `MMM D 'YY @ hh:mm A`
-                            )}</div>
+                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                                .tz(timeZone)
+                                .format(`MMM D 'YY @ hh:mm A`)}</div>
                         </div>`;
                     },
                 },
@@ -362,8 +344,9 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -394,8 +377,9 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -446,13 +430,14 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -485,6 +470,11 @@ const EndUseType = () => {
         equipmentUsageDataFetch();
         plugUsageDataFetch();
     }, [startDate, endDate, endUseType, bldgId]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setEnergyChartOptions({ ...energyChartOptions, xaxis: xaxisObj });
+    }, [daysCount]);
 
     return (
         <React.Fragment>
