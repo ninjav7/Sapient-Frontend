@@ -26,12 +26,18 @@ import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
+import Select from 'react-select';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
 
@@ -68,6 +74,9 @@ const IndividualActiveDevice = () => {
     const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
     const [selectedSensorId, setSelectedSensorId] = useState('');
     const [newEquipTypeID, setNewEquipTypeID] = useState('');
+    const [newEquipTypeValue, setNewEquipTypeValue] = useState([]);
+
+    console.log('newEquipTypeID', newEquipTypeID);
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
@@ -82,28 +91,58 @@ const IndividualActiveDevice = () => {
         },
     ]);
 
+    // locationData
+    const [locationDataNow, setLocationDataNow] = useState([]);
+    // equipmentTypeDevices
+    const [equipmentTypeDataNow, setEqupimentTypeDataNow] = useState([]);
+
+    const addLocationType = () => {
+        locationData.map((item) => {
+            setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    const addEquipmentType = () => {
+        equipmentTypeDevices.map((item) => {
+            setEqupimentTypeDataNow((el) => [
+                ...el,
+                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (locationData) {
+            addLocationType();
+        }
+    }, [locationData]);
+
+    useEffect(() => {
+        if (equipmentTypeDevices) {
+            addEquipmentType();
+        }
+    }, [equipmentTypeDevices]);
+
     // *********************************************************************************** //
 
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
 
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Energy Consumed (Wh)' },
-
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-
-        { value: 'mV', label: 'Voltage (mV)' },
-
-        { value: 'mAh', label: 'Current (mA)' },
-
-        { value: 'power', label: 'Real Power (W)' },
+        { value: 'energy', label: 'Energy Consumed (Wh)', unit: 'Wh' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)', unit: 'Wh' },
+        { value: 'mV', label: 'Voltage (mV)', unit: 'mV' },
+        { value: 'mAh', label: 'Current (mA)', unit: 'mA' },
+        { value: 'power', label: 'Real Power (W)', unit: 'W' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -257,23 +296,20 @@ const IndividualActiveDevice = () => {
 
     const fetchSensorGraphData = async (id) => {
         try {
-            let endDate = new Date(); // today
-            let startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
-
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&tz_info=${timeZone}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -316,6 +352,7 @@ const IndividualActiveDevice = () => {
                 });
         } catch (error) {
             console.log(error);
+            setIsSensorChartLoading(false);
             console.log('Failed to fetch Sensor Graph data');
         }
     };
@@ -470,6 +507,19 @@ const IndividualActiveDevice = () => {
                                                     );
                                                 })}
                                             </Input>
+                                            // locationDataNow
+                                            // <Select
+                                            //     id="exampleSelect"
+                                            //     placeholder="Select Location"
+                                            //     name="select"
+                                            //     isSearchable={true}
+                                            //     defaultValue={'Select Location'}
+                                            //     options={locationDataNow}
+                                            //     onChange={(e) => {
+                                            //         setActiveLocationId(e.value);
+                                            //     }}
+                                            //     className="basic-single font-weight-bold"
+                                            // />
                                         )}
 
                                         <Form.Label className="device-sub-label-style mt-1">
@@ -670,6 +720,7 @@ const IndividualActiveDevice = () => {
                                                         onClick={() => {
                                                             handleChartShow(record.id);
                                                         }}
+                                                        className="mouse-pointer"
                                                     />
                                                     <Button
                                                         type="button"
@@ -678,6 +729,7 @@ const IndividualActiveDevice = () => {
                                                             fetchEquipmentTypeData();
                                                             setSelectedEquipTypeId(record.equipment_type_id);
                                                             setNewEquipTypeID(record.equipment_type_id);
+                                                            setNewEquipTypeValue(record.equipment_type);
                                                             setSelectedSensorId(record.id);
                                                             handleEquipmentShow();
                                                         }}>
@@ -708,10 +760,13 @@ const IndividualActiveDevice = () => {
                 setMetric={setMetric}
                 selectedConsumption={selectedConsumption}
                 setConsumption={setConsumption}
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
+                daysCount={daysCount}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
@@ -773,7 +828,7 @@ const IndividualActiveDevice = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
@@ -786,7 +841,21 @@ const IndividualActiveDevice = () => {
                                 {equipmentTypeDevices.map((record) => {
                                     return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                 })}
-                            </Input>
+                            </Input> */}
+                            {/* equipmentTypeDataNow */}
+                            <Select
+                                id="exampleSelect"
+                                placeholder="Select Equipment Type"
+                                name="select"
+                                isSearchable={true}
+                                // defaultValue={'Select Equipment Type'}
+                                options={equipmentTypeDataNow}
+                                defaultValue={newEquipTypeValue}
+                                onChange={(e) => {
+                                    setNewEquipTypeID(e.value);
+                                }}
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

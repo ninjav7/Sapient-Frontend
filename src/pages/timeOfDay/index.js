@@ -23,6 +23,27 @@ const TimeOfDay = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
+    // temperory soln
+    const getTimeData = (value) => {
+        if (value === 1) {
+            return '12AM';
+        }
+        if (value === 13) {
+            return '12PM';
+        }
+        if (value >= 2 && value <= 12) {
+            let num = value - 1;
+            let time = `${num}AM`;
+            return time;
+        }
+        if (value >= 14) {
+            let num = value - 13;
+            let time = `${num}PM`;
+            return time;
+        }
+    };
 
     const areaChartOptions = {
         chart: {
@@ -158,15 +179,15 @@ const TimeOfDay = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                     return value + ' K';
@@ -176,13 +197,32 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { colors } = w.globals;
+                console.log(colors);
+                const { seriesX } = w.globals;
+                const { seriesNames } = w.globals;
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
+                const day = seriesNames[seriesIndex];
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">Time: ${getTimeData(
+                        w.globals.labels[dataPointIndex]
+                    )}</div><table style="border:none;">`;
+                for (let i = 0; i < series.length; i++) {
+                    ch =
+                        ch +
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                            0
+                        )} kWh </td></tr>`;
+                }
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                    </div>`;
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
+                        ${ch}
+                    </table></div>`;
             },
         },
     };
@@ -459,8 +499,9 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -472,15 +513,15 @@ const TimeOfDay = () => {
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                x: parseInt(moment.utc(el.x).format('HH')),
+                                y: el.y.toFixed(0),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                x: parseInt(moment.utc(el.x).format('HH')),
+                                y: el.y.toFixed(0),
                             };
                         });
 
@@ -538,8 +579,9 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${avgDailyUsageByHour}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

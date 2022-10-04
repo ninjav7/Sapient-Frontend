@@ -23,7 +23,7 @@ const donutChartDataMock = [
 
 const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyConsumptionChartLoading }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = energy_consumption.now.toFixed(5);
+        let val = energy_consumption.now.toFixed(0);
         let value = parseFloat(val);
         console.log(value);
         console.log(val);

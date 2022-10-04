@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
+import moment from 'moment';
 import axios from 'axios';
 import {
     BaseUrl,
@@ -21,11 +22,16 @@ import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
 
@@ -67,17 +73,20 @@ const IndividualPassiveDevice = () => {
     const [deviceData, setDeviceData] = useState([]);
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const CONVERSION_ALLOWED_UNITS = ['power'];
+
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
-        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
-        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
-        { value: 'power', label: 'power' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA' },
+        { value: 'power', label: 'Power (W)', unit: 'W' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -118,57 +127,49 @@ const IndividualPassiveDevice = () => {
 
     const fetchSensorGraphData = async (id) => {
         try {
-            let endDate = new Date(); // today
-            let startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
-
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${
-                id === sensorId ? sensorId : id
-            }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
                 .then((res) => {
                     let response = res.data;
-
                     let data = response;
 
                     let exploreData = [];
 
                     let recordToInsert = {
                         data: data,
-
                         name: getRequiredConsumptionLabel(selectedConsumption),
                     };
 
                     try {
                         recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
                             _data[0] = new Date(_data[0]);
+                            // moment(_data[0]).tz(timeZone).format();
+
                             if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                 _data[1] = _data[1] / UNIT_DIVIDER;
                             }
-
                             return _data;
                         });
                     } catch (error) {}
 
                     exploreData.push(recordToInsert);
-
                     setDeviceData(exploreData);
-
-                    console.log('UPDATED_CODE', seriesData);
 
                     setSeriesData([
                         {
@@ -179,6 +180,7 @@ const IndividualPassiveDevice = () => {
                 });
         } catch (error) {
             console.log(error);
+            setIsSensorChartLoading(false);
             console.log('Failed to fetch Sensor Graph data');
         }
     };
@@ -457,6 +459,7 @@ const IndividualPassiveDevice = () => {
                                                                 onClick={() => {
                                                                     handleChartShow(record.id);
                                                                 }}
+                                                                className="mouse-pointer"
                                                             />
                                                             <button
                                                                 type="button"
@@ -529,10 +532,13 @@ const IndividualPassiveDevice = () => {
                 setMetric={setMetric}
                 selectedConsumption={selectedConsumption}
                 setConsumption={setConsumption}
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
+                daysCount={daysCount}
             />
 
             <AddSensorPanelModel

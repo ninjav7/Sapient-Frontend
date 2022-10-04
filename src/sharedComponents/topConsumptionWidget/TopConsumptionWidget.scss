@@ -10,7 +10,7 @@
     }
 
     &-table {
-        display: grid;
+        display: inline-grid;
         gap: 0.5rem;
 
         &-head-cell {

@@ -1,24 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Input, FormGroup, Button } from 'reactstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import {
-    BaseUrl,
-    listSensor,
-    updateBreakers,
-    generalPassiveDevices,
-    resetBreakers,
-    deleteBreaker,
-} from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices, searchDevices } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
-import { Handle } from 'react-flow-renderer';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import '../style.css';
 import './panel-style.css';
 import Select from 'react-select';
@@ -30,6 +21,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [breakerObj, setBreakerObj] = useState(data);
 
     const [breakerData, setBreakerData] = useState(data);
+
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
 
@@ -38,24 +30,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [tripleBreakerChanges, setTripleBreakerChanges] = useState({});
 
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isResetting, setIsResetting] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
     const handleEditBreakerClose = () => setShowEditBreaker(false);
     const handleEditBreakerShow = () => setShowEditBreaker(true);
-
-    // Unlink Alert Modal
-    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
-    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
-    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
-
-    // Delete Alert Modal
-    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
-    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
-    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
 
     const [sensorData, setSensorData] = useState([]);
     const [doubleSensorData, setDoubleSensorData] = useState([]);
@@ -165,60 +145,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             }
             console.log('Failed to fetch Sensor Data');
-        }
-    };
-
-    const unLinkCurrentBreaker = async () => {
-        try {
-            let breakersList = [];
-            setIsResetting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            if (breakerData.breakerType === 1) {
-                breakersList.push(id);
-            }
-            if (breakerData.breakerType === 2) {
-                breakersList.push(id);
-                breakersList.push(doubleBreakerData.id);
-            }
-            if (breakerData.breakerType === 3) {
-                breakersList.push(id);
-                breakersList.push(doubleBreakerData.id);
-                breakersList.push(tripleBreakerData.id);
-            }
-            await axios.post(`${BaseUrl}${resetBreakers}`, { breaker_id: breakersList }, { headers }).then((res) => {
-                let response = res.data;
-                setIsResetting(false);
-                handleUnlinkAlertClose();
-                triggerBreakerAPI();
-            });
-        } catch (error) {
-            setIsResetting(false);
-            console.log('Failed to unlink Breaker from Panel');
-        }
-    };
-
-    const deleteCurrentBreaker = async () => {
-        try {
-            setIsDeleting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?breaker_id=${id}`;
-            await axios.delete(`${BaseUrl}${deleteBreaker}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setIsDeleting(false);
-                handleDeleteAlertClose();
-                triggerBreakerAPI();
-            });
-        } catch (error) {
-            setIsDeleting(false);
-            console.log('Failed to unlink Breaker from Panel');
         }
     };
 
@@ -388,7 +314,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then((res) => {
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${updateBreakers}${params}`, [breakerObj], { headers }).then((res) => {
                 setIsProcessing(false);
                 setTimeout(() => {
                     triggerBreakerAPI();
@@ -463,13 +390,16 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then((res) => {
-                setIsProcessing(false);
-                setTimeout(() => {
-                    triggerBreakerAPI();
-                }, 1000);
-                handleEditBreakerClose();
-            });
+            let params = `?building_id=${bldgId}`;
+            await axios
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
+                .then((res) => {
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
+                });
         } catch (error) {
             console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
@@ -561,8 +491,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
+                    headers,
+                })
                 .then((res) => {
                     setIsProcessing(false);
                     setTimeout(() => {
@@ -673,7 +606,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        console.log('previousSensorId', previousSensorId, 'newSensorId', newSensorId);
         if (previousSensorId === '') {
             let newSensorList = linkedSensors;
             newSensorList.push(newSensorId);
@@ -775,23 +707,56 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     }, [passiveDeviceData]);
 
     const [sensorDataSearch, setSensorDataSearch] = useState([]);
+    const [doubleSensorDataSearch, setDoubleSensorDataSearch] = useState([]);
+    const [tripleSensorDataSearch, setTripleSensorDataSearch] = useState([]);
 
     const sensorDataFunc = () => {
+        setSensorDataSearch([]);
+        setDoubleSensorDataSearch([]);
+        setTripleSensorDataSearch([]);
         sensorData.map((item) => {
             setSensorDataSearch((el) => [
                 ...el,
-                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
+            ]);
+        });
+        doubleSensorData.map((item) => {
+            setDoubleSensorDataSearch((el) => [
+                ...el,
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
+            ]);
+        });
+        tripleSensorData.map((item) => {
+            setTripleSensorDataSearch((el) => [
+                ...el,
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
             ]);
         });
     };
 
     useEffect(() => {
-        if (sensorData) {
+        if (sensorData || doubleSensorData) {
             sensorDataFunc();
         }
-    }, [sensorData]);
-
-    console.log('sensorDataSearch', sensorDataSearch);
+    }, [sensorData, doubleSensorData, tripleSensorData]);
 
     const [equipmentDataSearch, setEquipmentDataSearch] = useState([]);
 
@@ -804,15 +769,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         });
     };
 
-    console.log('equipmentData', equipmentData);
-
     useEffect(() => {
         if (equipmentData) {
             equpimentDataFunc();
         }
     }, [equipmentData]);
-
-    console.log('linkedSensors', linkedSensors);
 
     return (
         <React.Fragment>
@@ -1038,16 +999,20 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
-                                                    defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorData(e.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     // onInputChange={handleInputChange}
+
                                                     className="font-weight-bold"
                                                 />
                                             </Form.Group>
+                                            {/* {console.log('breakerData.device_id', breakerData.device_id)} */}
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Sensor #</Form.Label>
@@ -1095,12 +1060,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
-                                                            handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleLinkedSensor(breakerData.sensor_id, e.value);
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
                                                         isOptionDisabled={(option) =>
@@ -1159,8 +1124,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
-                                                    defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    defaultValue={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'double');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
@@ -1219,6 +1186,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
@@ -1276,6 +1246,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForDouble(e.value);
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
@@ -1334,8 +1307,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
+                                                        value={doubleSensorDataSearch.filter((option) => {
+                                                            return option.value === doubleBreakerData?.data?.sensor_id;
+                                                        })}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1350,6 +1325,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         }
                                                     />
                                                 )}
+                                                {}
                                             </Form.Group>
                                         </div>
                                     </>
@@ -1404,6 +1380,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'triple');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
@@ -1465,6 +1444,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
@@ -1522,6 +1504,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForDouble(e.value);
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
@@ -1580,8 +1565,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
+                                                        value={doubleSensorDataSearch.filter(
+                                                            (option) =>
+                                                                option.value === doubleBreakerData?.data?.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1646,6 +1634,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === tripleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForTriple(e.value);
                                                         handleTripleBreakerChange(id, 'device_id', e.value);
@@ -1704,8 +1695,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={tripleSensorDataSearch}
+                                                        value={tripleSensorDataSearch.filter(
+                                                            (option) =>
+                                                                option.value === tripleBreakerData?.data?.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 tripleBreakerData?.data?.sensor_id,
@@ -1761,7 +1755,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     id="userState"
                                     placeholder="Select Equipment"
                                     isSearchable={true}
-                                    defaultValue={'Select Equipment'}
+                                    value={equipmentDataSearch.filter(
+                                        (option) => option.value === breakerData.equipment_link[0]
+                                    )}
                                     options={equipmentDataSearch}
                                     onChange={(e) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);
@@ -1770,85 +1766,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     isOptionDisabled={(option) => option.breakerId !== ''}
                                 />
                             </Form.Group>
-
-                            <div className="edit-form-breaker ml-2 mr-2 mb-3" />
-
-                            <FormGroup>
-                                <div className="unlink-delete-breaker ml-2 mr-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            handleEditBreakerClose();
-                                            handleUnlinkAlertShow();
-                                        }}
-                                        className="btn btn-md btn-danger font-weight-bold unlink-breaker-style">
-                                        <FontAwesomeIcon
-                                            icon={faLinkHorizontalSlash}
-                                            color="#B42318"
-                                            size="md"
-                                            className="mr-2"
-                                        />
-                                        Unlink Breaker
-                                    </button>
-                                    {disconnectedBreakersData.length !== breakerData.breaker_number ? (
-                                        <button
-                                            type="button"
-                                            className="btn btn-md btn-danger font-weight-bold disabled-breaker-style"
-                                            disabled>
-                                            <FontAwesomeIcon
-                                                icon={faTrash}
-                                                color="#FDA29B"
-                                                size="md"
-                                                className="mr-2"
-                                            />
-                                            Delete Breaker
-                                        </button>
-                                    ) : (
-                                        <>
-                                            {breakerData.breakerType === 2 || breakerData.breakerType === 3 ? (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-md btn-danger font-weight-bold disabled-breaker-style"
-                                                    disabled>
-                                                    <FontAwesomeIcon
-                                                        icon={faTrash}
-                                                        color="#FDA29B"
-                                                        size="md"
-                                                        className="mr-2"
-                                                    />
-                                                    Delete Breaker
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-md btn-danger font-weight-bold unlink-breaker-style"
-                                                    onClick={() => {
-                                                        handleEditBreakerClose();
-                                                        handleDeleteAlertShow();
-                                                    }}>
-                                                    <FontAwesomeIcon
-                                                        icon={faTrash}
-                                                        color="#B42318"
-                                                        size="md"
-                                                        className="mr-2"
-                                                    />
-                                                    Delete Breaker
-                                                </button>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                                {disconnectedBreakersData.length === breakerData.breaker_number && (
-                                    <>
-                                        {breakerData.breakerType === 2 ||
-                                            (breakerData.breakerType === 3 && (
-                                                <div className="grouped-breaker-warn mt-2 mr-2">
-                                                    Grouped breakers cannot be deleted
-                                                </div>
-                                            ))}
-                                    </>
-                                )}
-                            </FormGroup>
                         </Form>
                     </Modal.Body>
                 </>
@@ -1871,72 +1788,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                             }
                         }}>
                         {isProcessing ? 'Saving...' : 'Save'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink Breaker</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">Are you sure you want to unlink this breaker?</div>
-                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="light"
-                        onClick={() => {
-                            handleUnlinkAlertClose();
-                            handleEditBreakerShow();
-                        }}
-                        className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            unLinkCurrentBreaker();
-                        }}
-                        className="unlink-reset-style">
-                        {isResetting ? 'Resetting' : 'Reset'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Breaker</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">Are you sure you want to delete the Breaker?</div>
-                        <div className="unlink-alert-styling">
-                            This will remove the breaker from the panel and is not recoverable.
-                        </div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="light"
-                        onClick={() => {
-                            handleDeleteAlertClose();
-                            handleEditBreakerShow();
-                        }}
-                        className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            deleteCurrentBreaker();
-                        }}
-                        className="unlink-reset-style">
-                        {isDeleting ? 'Deleting' : 'Delete'}
                     </Button>
                 </Modal.Footer>
             </Modal>

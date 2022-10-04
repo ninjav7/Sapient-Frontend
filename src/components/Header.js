@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../store/DateRangeStore';
@@ -10,6 +9,8 @@ import Select from '../sharedComponents/form/select';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
+import { dateApplied } from '../store/globalState';
+import { useAtom } from 'jotai';
 
 const Header = (props) => {
     const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
@@ -19,6 +20,9 @@ const Header = (props) => {
     const [dateFilter, setDateFilter] = useState(dateValue);
     const [startDate, setStartDate] = useState(customStartDate);
     const [endDate, setEndDate] = useState(customEndDate);
+    // const [first, setfirst] = useState(second)
+
+    const [apply, setApply] = useAtom(dateApplied);
 
     const customDaySelect = [
         {
@@ -42,18 +46,6 @@ const Header = (props) => {
             value: 365,
         },
         {
-            label: 'Month to Date',
-            value: 30,
-        },
-        {
-            label: 'Quarter to Date',
-            value: 120,
-        },
-        {
-            label: 'Year to Date',
-            value: 365,
-        },
-        {
             label: 'Custom',
             value: -1,
         },
@@ -66,6 +58,7 @@ const Header = (props) => {
         setEndDate(end);
         localStorage.setItem('dateFilter', -1);
         setDateFilter(-1);
+        setApply(true);
     };
 
     const handleDateFilterChange = (value) => {
@@ -98,12 +91,21 @@ const Header = (props) => {
             let startCustomDate = dates[0];
             let endCustomDate = dates[1];
 
+            let end = new Date(endDate);
+            let start = new Date(startDate);
+
+            let time_difference = end.getTime() - start.getTime();
+            let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            days_difference = parseInt(days_difference + 1);
+
             localStorage.setItem('startDate', startCustomDate);
             localStorage.setItem('endDate', endCustomDate);
+            localStorage.setItem('daysCount', days_difference);
 
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
+                s.daysCount = days_difference;
             });
         };
         setCustomDate([startDate, endDate]);
@@ -137,10 +139,6 @@ const Header = (props) => {
                             <DateRangePicker
                                 startDate={startDate}
                                 endDate={endDate}
-                                // initialSettings={{
-                                //     startDate: startDate?.toISOString(),
-                                //     endDate: endDate?.toISOString(),
-                                // }}
                                 alwaysShowCalendars={false}
                                 onApply={handleEvent}>
                                 <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
@@ -149,21 +147,7 @@ const Header = (props) => {
                                 </button>
                             </DateRangePicker>
                         </div>
-
-                        {/* {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
-                            <div className="float-right ml-2">
-                                <Link
-                                    to={{
-                                        pathname: `/explore-page/by-buildings`,
-                                    }}>
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                        <i className="uil uil-pen mr-1"></i>Explore
-                                    </button>
-                                </Link>
-                            </div>
-                        )} */}
                     </div>
-                    {/* )} */}
                 </Col>
             </Row>
         </React.Fragment>

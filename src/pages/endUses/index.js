@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import 'moment-timezone';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
@@ -14,7 +15,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -25,11 +26,12 @@ const EndUsesPage = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const barChartOptions = {
+    const [barChartOptions, setBarChartOptions] = useState({
         chart: {
             type: 'bar',
             height: 400,
@@ -38,6 +40,9 @@ const EndUsesPage = () => {
                 show: true,
             },
             animations: {
+                enabled: false,
+            },
+            zoom: {
                 enabled: false,
             },
         },
@@ -55,8 +60,6 @@ const EndUsesPage = () => {
             show: false,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -64,15 +67,6 @@ const EndUsesPage = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -92,9 +86,9 @@ const EndUsesPage = () => {
                             series[seriesIndex][dataPointIndex],
                             0
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -102,8 +96,8 @@ const EndUsesPage = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('M/DD');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('M/DD');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} ${dateText}`;
                 },
             },
@@ -148,7 +142,7 @@ const EndUsesPage = () => {
         grid: {
             borderColor: '#f1f3fa',
         },
-    };
+    });
 
     const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
@@ -193,8 +187,9 @@ const EndUsesPage = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -251,14 +246,15 @@ const EndUsesPage = () => {
                 //     filter = 'month';
                 // }
 
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
 
                 await axios
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -282,6 +278,11 @@ const EndUsesPage = () => {
         endUsesDataFetch();
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setBarChartOptions({ ...barChartOptions, xaxis: xaxisObj });
+    }, [daysCount]);
 
     return (
         <React.Fragment>

@@ -17,13 +17,34 @@ import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { buildingData } from '../../store/globalState';
 import { useAtom } from 'jotai';
 
-const PortfolioItem = ({ handlePortfolioClick }) => {
+const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
     const location = useLocation();
     const history = useHistory();
 
+    const configRoutes = [
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/settings/active-devices',
+        '/settings/passive-devices',
+    ];
+
+    const handleChange = () => {
+        if (configRoutes.includes(location.pathname)) {
+            history.push({
+                pathname: `/settings/account`,
+            });
+        } else {
+            history.push({
+                pathname: `/energy/portfolio/overview`,
+            });
+        }
+    };
+
     return (
         <div>
-            {location.pathname === '/energy/portfolio/overview' ? (
+            {location.pathname === '/energy/portfolio/overview' && (
                 <Dropdown.Item
                     className="selected"
                     onClick={() => {
@@ -42,13 +63,13 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                         </div>
                     </div>
                 </Dropdown.Item>
-            ) : (
+            )}
+
+            {location.pathname !== '/energy/portfolio/overview' && (
                 <Dropdown.Item
                     onClick={() => {
                         handlePortfolioClick && handlePortfolioClick('Portfolio');
-                        history.push({
-                            pathname: `/energy/portfolio/overview`,
-                        });
+                        handleChange();
                     }}>
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
                     <span className="portfolio-txt-style">Portfolio</span>
@@ -78,6 +99,16 @@ const BuildingSwitcher = () => {
 
     const location = useLocation();
 
+    const accountRoutes = [
+        '/energy/portfolio/overview',
+        '/energy/compare-buildings',
+        '/settings/account',
+        '/settings/buildings',
+        '/settings/users',
+        '/settings/roles',
+        '/settings/equipment-types',
+    ];
+
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
@@ -85,8 +116,6 @@ const BuildingSwitcher = () => {
     const [portfolioName, setPortfolioName] = useState('');
 
     const [buildingListData] = useAtom(buildingData);
-
-    console.log(buildingList, 'buildingListNew');
 
     useEffect(() => {
         const getBuildingList = async () => {
@@ -101,10 +130,8 @@ const BuildingSwitcher = () => {
         });
     }, [portfolioName]);
 
-    const dropDownTitle =
-        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
-            ? 'Portfolio'
-            : bldStoreName;
+    const dropDownTitle = accountRoutes.includes(location.pathname) ? 'Portfolio' : bldStoreName;
+
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });
@@ -128,7 +155,7 @@ const BuildingSwitcher = () => {
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
                         <div className="tracker-dropdown-content">
-                            <PortfolioItem handlePortfolioClick={setPortfolioName} />
+                            <PortfolioItem handlePortfolioClick={setPortfolioName} bldStoreId={bldStoreId} />
 
                             <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />
                         </div>

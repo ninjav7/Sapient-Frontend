@@ -42,7 +42,7 @@ import './style.css';
 import Pen from '../../../assets/images/pen.png';
 import Delete from '../../../assets/images/delete.png';
 import { useAtom } from 'jotai';
-import { deviceId, identifier, passiveDeviceModal } from '../../../store/globalState';
+import { deviceId, identifier, passiveDeviceModal, userPermissionData } from '../../../store/globalState';
 import Select from 'react-select';
 
 const PassiveDevicesTable = ({
@@ -60,6 +60,10 @@ const PassiveDevicesTable = ({
     isEdit,
     setIsDelete,
 }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
+    console.log('deviceData', deviceData, 'selectedOptions', selectedOptions);
+
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -268,20 +272,32 @@ const PassiveDevicesTable = ({
                                                         )}
                                                     </td>
                                                 )}
-
-                                                <Link
-                                                    to={{
-                                                        pathname: `/settings/passive-devices/single/${record.equipments_id}`,
-                                                    }}>
-                                                    {selectedOptions.some(
-                                                        (record) => record.value === 'identifier'
-                                                    ) && (
-                                                        <td className="font-weight-bold panel-name">
-                                                            {record.identifier}
-                                                        </td>
-                                                    )}
-                                                </Link>
-
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions
+                                                    ?.advanced_passive_device_permission?.edit ? (
+                                                    <Link
+                                                        to={{
+                                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                                        }}>
+                                                        {selectedOptions.some(
+                                                            (record) => record.value === 'identifier'
+                                                        ) && (
+                                                            <td className="font-weight-bold panel-name">
+                                                                {record.identifier}
+                                                            </td>
+                                                        )}
+                                                    </Link>
+                                                ) : (
+                                                    <>
+                                                        {selectedOptions.some(
+                                                            (record) => record.value === 'identifier'
+                                                        ) && (
+                                                            <td className="font-weight-bold panel-name">
+                                                                {record.identifier}
+                                                            </td>
+                                                        )}
+                                                    </>
+                                                )}
                                                 {selectedOptions.some((record) => record.value === 'model') && (
                                                     <td>
                                                         {record.model.charAt(0).toUpperCase() + record.model.slice(1)}
@@ -315,7 +331,7 @@ const PassiveDevicesTable = ({
                                     );
                                 })}
 
-                                <Dropdown
+                                <UncontrolledDropdown
                                     style={{
                                         width: '30px',
                                         position: 'absolute',
@@ -328,7 +344,6 @@ const PassiveDevicesTable = ({
                                     }}>
                                     <DropdownToggle
                                         tag="button"
-                                        size="sm"
                                         className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
                                     <DropdownMenu right>
                                         <DropdownItem
@@ -338,31 +353,26 @@ const PassiveDevicesTable = ({
                                             <div
                                                 style={{
                                                     display: 'flex',
-                                                    // justifyContent: 'space-between',
+                                                    justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Pen} style={{ width: '20px' }} />
-                                                <span style={{ marginLeft: '20px', fontWeight: '700' }}>Edit</span>
+                                                <span>Edit</span>
                                             </div>
                                         </DropdownItem>
                                         <DropdownItem onClick={() => {}}>
                                             <div
-                                                onClick={() => {
-                                                    setIsDelete(true);
-                                                }}
                                                 style={{
                                                     display: 'flex',
-                                                    // justifyContent: 'space-between',
+                                                    justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red', marginLeft: '20px', fontWeight: '700' }}>
-                                                    Delete
-                                                </span>
+                                                <span style={{ color: 'red' }}>Delete</span>
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>
-                                </Dropdown>
+                                </UncontrolledDropdown>
                             </tbody>
                         )}
                     </Table>
@@ -410,6 +420,10 @@ const PassiveDevicesTable = ({
 const PassiveDevices = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const [formValidation, setFormValidation] = useState(false);
+
+    const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -459,7 +473,18 @@ const PassiveDevices = () => {
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
+        mac_address: '',
     });
+
+    useEffect(() => {
+        if (createDeviceData.mac_address.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [createDeviceData]);
+
+    console.log('createDeviceData', createDeviceData);
     const [search, setSearch] = useState('');
 
     const [locationDataNow, setLocationDataNow] = useState([]);
@@ -551,31 +576,6 @@ const PassiveDevices = () => {
     const handleSearchtxt = (e) => {
         if (e.target.value !== '') {
             setSearch(e.target.value.toUpperCase());
-        } else {
-            setPassiveDeviceData(duplicatePassiveDeviceData);
-        }
-    };
-
-    const handleSearch = async () => {
-        if (search !== '') {
-            try {
-                setIsDeviceProcessing(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_type=passive&building_id=${bldgId}&mac=${search}`;
-                await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPassiveDeviceData(res.data);
-                });
-                setIsDeviceProcessing(false);
-            } catch (error) {
-                console.log(error);
-                setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
-            }
         } else {
             setPassiveDeviceData(duplicatePassiveDeviceData);
         }
@@ -713,6 +713,8 @@ const PassiveDevices = () => {
 
     const [deviceSearch, setDeviceSearch] = useState('');
 
+    console.log('deviceSearch', deviceSearch);
+
     const fetchPassiveDeviceData = async () => {
         try {
             setIsDeviceProcessing(true);
@@ -744,6 +746,27 @@ const PassiveDevices = () => {
         }
     };
 
+    const handleSearch = async () => {
+        try {
+            setIsDeviceProcessing(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_type=passive&building_id=${bldgId}&mac=${deviceSearch}`;
+            await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(res.data);
+            });
+            setIsDeviceProcessing(false);
+        } catch (error) {
+            console.log(error);
+            setIsDeviceProcessing(false);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
     const fetchLocationData = async () => {
         try {
             let headers = {
@@ -766,7 +789,7 @@ const PassiveDevices = () => {
 
     useEffect(() => {
         fetchPassiveDeviceData();
-    }, [pageRefresh, bldgId, deviceSearch]);
+    }, [pageRefresh, bldgId]);
 
     useEffect(() => {
         fetchLocationData();
@@ -812,14 +835,20 @@ const PassiveDevices = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Passive Device
-                            </button>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                        setFormValidation(false);
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Passive Device
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -835,7 +864,7 @@ const PassiveDevices = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                setDeviceSearch(e);
+                                setDeviceSearch(e.target.value);
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
@@ -988,6 +1017,7 @@ const PassiveDevices = () => {
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     setIdentifierVal(e.target.value);
+                                    setFormValidation(true);
                                 }}
                                 value={identifierVal}
                                 autoFocus
@@ -1078,6 +1108,7 @@ const PassiveDevices = () => {
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('mac_address', e.target.value);
+                                    // setFormValidation(true);
                                 }}
                                 autoFocus
                             />
@@ -1144,18 +1175,23 @@ const PassiveDevices = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                            handleClose();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            onClick={() => {
+                                saveDeviceData();
+                                handleClose();
+                            }}
+                            disabled={!formValidation}>
+                            {isProcessing ? 'Adding...' : 'Add'}
+                        </Button>
+                        {console.log('formValidation', formValidation)}
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

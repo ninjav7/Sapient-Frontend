@@ -47,6 +47,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import moment from 'moment';
+import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -57,6 +58,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
+import ModalHeader from '../../components/ModalHeader';
 
 const EquipmentDeviceChartModel = ({
     showChart,
@@ -68,10 +70,14 @@ const EquipmentDeviceChartModel = ({
     fetchEquipmentData,
     deviceType,
     locationData,
+    // formValidation,
+    // setFormValidation,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     console.log(equipData);
+
+    // const [formValidation, setFormValidation] = useState(false);
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -81,7 +87,9 @@ const EquipmentDeviceChartModel = ({
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
-    const [startDate, endDate] = dateRange;
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
@@ -89,6 +97,15 @@ const EquipmentDeviceChartModel = ({
     const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
+
+    // useEffect(() => {
+    //     if (selectedZones?.length > 0) {
+    //         setFormValidation(true);
+    //     } else {
+    //         setFormValidation(false);
+    //     }
+    // }, []);
+
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [showTab, setShowTab] = useState('');
@@ -134,30 +151,30 @@ const EquipmentDeviceChartModel = ({
         return label;
     };
 
-    useEffect(() => {
-        const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
-            let startCustomDate = new Date();
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate());
+    // useEffect(() => {
+    //     const setCustomDate = (date) => {
+    //         let endCustomDate = new Date(); // today
+    //         let startCustomDate = new Date();
+    //         startCustomDate.setDate(startCustomDate.getDate() - date);
+    //         endCustomDate.setDate(endCustomDate.getDate());
 
-            setDateRange([startCustomDate, endCustomDate]);
+    //         setDateRange([startCustomDate, endCustomDate]);
 
-            DateRangeStore.update((s) => {
-                s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
-            });
+    //         DateRangeStore.update((s) => {
+    //             s.dateFilter = date;
+    //             s.startDate = startCustomDate;
+    //             s.endDate = endCustomDate;
+    //         });
 
-            // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
-            // let sstr =
-            //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
-            // setEDateStr(estr);
-            // setSDateStr(sstr);
-        };
+    //         // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
+    //         // let sstr =
+    //         //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
+    //         // setEDateStr(estr);
+    //         // setSDateStr(sstr);
+    //     };
 
-        setCustomDate(dateFilter);
-    }, [dateFilter]);
+    //     setCustomDate(dateFilter);
+    // }, [dateFilter]);
     const exploreDataFetch = async () => {
         try {
             console.log(sensorData.length);
@@ -175,30 +192,20 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
                 .then((res) => {
                     let response = res.data;
-                    let data = response;
+                    let data = response.data;
                     let exploreData = [];
-
                     let recordToInsert = {
                         data: data,
-                        name: getRequiredConsumptionLabel(selectedConsumption),
+                        name: 'AHUs',
                     };
-                    try {
-                        recordToInsert.data = recordToInsert.data.map((_data) => {
-                            _data[0] = new Date(_data[0]);
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                _data[1] = _data[1] / UNIT_DIVIDER;
-                            }
-
-                            return _data;
-                        });
-                    } catch (error) {}
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
                     setSeriesData([
@@ -206,6 +213,12 @@ const EquipmentDeviceChartModel = ({
                             data: exploreData[0].data,
                         },
                     ]);
+                    // setDeviceData(exploreData);
+                    // setSeriesData([
+                    //     {
+                    //         data: exploreData[0].data,
+                    //     },
+                    // ]);
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
@@ -233,8 +246,9 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -367,23 +381,67 @@ const EquipmentDeviceChartModel = ({
         },
         xaxis: {
             type: 'datetime',
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
+            //             .tz(timeZone)
+            //             .format('LT')}`;
+            //     },
+            // },
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
+                },
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
                 },
             },
         },
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
         tooltip: {
-            x: {
-                show: true,
-                format: 'MM/dd HH:mm',
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
+                    </div>`;
             },
         },
     });
@@ -401,6 +459,68 @@ const EquipmentDeviceChartModel = ({
             ],
         },
     ]);
+
+    // const [optionsLine, setOptionsLine] = useState({
+    //     chart: {
+    //         id: 'chart1',
+    //         height: 90,
+    //         type: 'area',
+    //         brush: {
+    //             target: 'chart2',
+    //             enabled: true,
+    //         },
+    //         toolbar: {
+    //             show: false,
+    //         },
+
+    //         selection: {
+    //             enabled: true,
+    //             // xaxis: {
+    //             //     min: new Date('19 July 2022').getTime(),
+    //             //     max: new Date('20 July 2022').getTime(),
+    //             // },
+    //         },
+    //         animations: {
+    //             enabled: false,
+    //         },
+    //     },
+
+    //     colors: ['#008FFB'],
+
+    //     fill: {
+    //         type: 'gradient',
+
+    //         gradient: {
+    //             opacityFrom: 0.91,
+
+    //             opacityTo: 0.1,
+    //         },
+    //     },
+
+    //     xaxis: {
+    //         type: 'datetime',
+
+    //         tooltip: {
+    //             enabled: false,
+    //         },
+
+    //         labels: {
+    //             formatter: function (val, timestamp) {
+    //                 return moment(timestamp).format('DD/MMM');
+    //             },
+    //         },
+    //     },
+
+    //     yaxis: {
+    //         tickAmount: 2,
+
+    //         labels: {
+    //             formatter: function (val) {
+    //                 return val.toFixed(2);
+    //             },
+    //         },
+    //     },
+    // });
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -448,7 +568,7 @@ const EquipmentDeviceChartModel = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM');
+                    return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },
@@ -635,6 +755,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            // disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -682,6 +803,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            // disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -839,7 +961,7 @@ const EquipmentDeviceChartModel = ({
                                     </Input>
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Input
                                         type="select"
                                         name="select"
@@ -854,21 +976,9 @@ const EquipmentDeviceChartModel = ({
                                             return <option value={el.value}>{el.label}</option>;
                                         })}
                                     </Input>
-                                </div>
+                                </div> */}
 
-                                <div>
-                                    <DatePicker
-                                        selectsRange={true}
-                                        startDate={startDate}
-                                        endDate={endDate}
-                                        onChange={(update) => {
-                                            setDateRange(update);
-                                        }}
-                                        dateFormat="MMMM d"
-                                        className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                                        placeholderText="Select Date Range"
-                                    />
-                                </div>
+                                <ModalHeader />
 
                                 <div className="mr-3 sensor-chart-options">
                                     <Dropdown>
@@ -936,6 +1046,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                // setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -951,6 +1062,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                // setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1186,6 +1298,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                // setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -1201,6 +1314,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                // setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1240,6 +1354,7 @@ const EquipmentDeviceChartModel = ({
                                             // defaultValue={loc.length===0?"":loc.location_id}
                                             onChange={(e) => {
                                                 handleChange('space_id', e.target.value);
+                                                // setFormValidation(true);
                                             }}>
                                             <option value="" selected>
                                                 Select Location

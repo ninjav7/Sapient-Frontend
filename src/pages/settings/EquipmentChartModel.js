@@ -100,8 +100,9 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     .post(
                         `${BaseUrl}${equipmentGraphData}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -146,8 +147,9 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -186,8 +188,9 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     .post(
                         `${BaseUrl}${equipmentGraphData}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
