@@ -13,6 +13,7 @@ import {
     equipmentType,
     getEndUseId,
     getSpaceTypes,
+    getSpaces
 } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -776,6 +777,9 @@ const ExploreByEquipment = () => {
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
     const [objectExplore, setObjectExplore] = useState([]);
+    const [showSpace, setShowSpace] = useState(false);
+    const [spaceListAPI, setSpaceListAPI] = useState([]);
+    const [selectedLoc, setSelectedLoc] = useState({});
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
@@ -953,32 +957,63 @@ const ExploreByEquipment = () => {
     };
 
     const handleSelectedLocation = (e, locName) => {
+        var spacedata = [];
+        var sp = [];
         let selection = document.getElementById(e.target.value);
         if (selection.checked === true) {
-            if (selectedLocation.length === 0) {
-                setLocationTxt(`${locName}`);
-            } else {
-                setLocationTxt(`${selectedLocation.length + 1} Locations`);
-            }
-            setSelectedLocation([...selectedLocation, e.target.value]);
-        } else {
-            if (selectedLocation.length === 1) {
-                setLocationTxt('');
-            } else if (selectedLocation.length === 2) {
-                let arr = selectedLocation.filter(function (item) {
-                    return item !== e.target.value;
-                });
-                let arr1 = floorListAPI.filter(function (item) {
-                    return item.floor_id === arr[0];
-                });
+            // if (selectedLocation.length === 0) {
+            //     setLocationTxt(`${locName}`);
+            // } else {
+            //     setLocationTxt(`${selectedLocation.length + 1} Locations`);
+            // }
 
-                setLocationTxt(`${arr1[0].name}`);
-            } else {
-                setLocationTxt(`${selectedLocation.length - 1} Locations`);
-            }
-            let arr = selectedLocation.filter(function (item) {
-                return item !== e.target.value;
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+                spacedata = res.data.data;
             });
+            selectedLocation.map((ele) => {
+                sp.push(ele);
+            })
+            spacedata.map((el) => {
+                sp.push(el?._id)
+            })
+            setSelectedLocation(sp)
+        } else {
+            // if (selectedLocation.length === 1) {
+            //     setLocationTxt('');
+            // } else if (selectedLocation.length === 2) {
+            // let arr = selectedLocation.filter(function (item) {
+            //     return item !== e.target.value;
+            // });
+            // let arr1 = floorListAPI.filter(function (item) {
+            //     return item.floor_id === arr[0];
+            // });
+
+            //     setLocationTxt(`${arr1[0].name}`);
+            // } else {
+            //     setLocationTxt(`${selectedLocation.length - 1} Locations`);
+            // }
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+                spacedata = res.data.data;
+            });
+            let arr = [];
+            spacedata.map((el) => {
+                arr = selectedLocation.filter(function (item) {
+                    return item !== el?._id;
+                });
+            })
+
             setSelectedLocation(arr);
         }
     };
@@ -1131,6 +1166,7 @@ const ExploreByEquipment = () => {
             return false;
         });
 
+        console.log("loc ", uniqueLocation);
         setRemoveEndUseDuplication(uniqueEndUse);
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
@@ -1397,6 +1433,7 @@ const ExploreByEquipment = () => {
                     rvmLocation.push(floorListAPI[j]);
             }
         }
+        console.log("loc ", rvmLocation);
         setFilteredLocationOptions(rvmLocation);
         setFilteredLocationOptionsCopy(rvmLocation);
     }, [floorListAPI, removeLocationDuplication]);
@@ -1986,6 +2023,22 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         if (equipmentSearchTxt === '') exploreDataFetch(arr);
     }, [equipmentSearchTxt]);
+    const handleGetSpaceByLocation = (e, item) => {
+        console.log(item);
+        setSelectedLoc(item);
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        const params = `?floor_id=${item?.floor_id}&building_id=${bldgId}`;
+        axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+
+            setSpaceListAPI(res.data.data);
+            setShowSpace(true);
+
+        });
+    }
 
     return (
         <>
@@ -2245,52 +2298,100 @@ const ExploreByEquipment = () => {
                                                 </div>
                                                 <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
                                                     <span className="pop-text">
-                                                        {localStorage.getItem('exploreBldName')}
+                                                        {localStorage.getItem('exploreBldName')} {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ""}
                                                     </span>
                                                 </div>
-                                                <div
-                                                    className={floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
-                                                    <div className="floor-box">
-                                                        <div>
-                                                            <input
-                                                                type="checkbox"
-                                                                className="mr-2"
-                                                                id="allLocation"
-                                                                onClick={(e) => {
-                                                                    handleAllLocation(e);
-                                                                }}
-                                                            />
-                                                            <span>Select All</span>
+                                                {showSpace === false ?
+                                                    <div
+                                                        className={floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
+                                                        <div className="floor-box">
+                                                            <div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="mr-2"
+                                                                    id="allLocation"
+                                                                    onClick={(e) => {
+                                                                        handleAllLocation(e);
+                                                                    }}
+                                                                />
+                                                                <span>Select All</span>
+                                                            </div>
                                                         </div>
+                                                        {filteredLocationOptions.map((record) => {
+                                                            return (
+                                                                <div className="floor-box">
+                                                                    <div>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            className="mr-2"
+                                                                            id={record.floor_id}
+                                                                            value={record.floor_id}
+                                                                            onClick={(e) => {
+                                                                                handleSelectedLocation(e, record.name);
+                                                                            }}
+                                                                        />
+                                                                        <button style={{ backgroundColor: "white", border: "none" }} onClick={(e) => { handleGetSpaceByLocation(e, record) }}>{record.name}</button>
+                                                                    </div>
+                                                                    <div style={{ display: 'flex' }}>
+                                                                        <button
+                                                                            style={{
+                                                                                border: 'none',
+                                                                                backgroundColor: 'white',
+                                                                            }}
+                                                                            onClick={(e) => { handleGetSpaceByLocation(e, record) }}
+                                                                        >
+                                                                            <i className="uil uil-angle-right"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
-                                                    {floorListAPI.map((record) => {
-                                                        return (
+                                                    : <>
+                                                        <div
+                                                            className={spaceListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
                                                             <div className="floor-box">
                                                                 <div>
                                                                     <input
                                                                         type="checkbox"
                                                                         className="mr-2"
-                                                                        id={record.floor_id}
-                                                                        value={record.floor_id}
+                                                                        id="allLocation"
                                                                         onClick={(e) => {
-                                                                            handleSelectedLocation(e, record.name);
+                                                                            handleAllLocation(e);
                                                                         }}
                                                                     />
-                                                                    <span>{record.name}</span>
-                                                                </div>
-                                                                <div style={{ display: 'flex' }}>
-                                                                    <button
-                                                                        style={{
-                                                                            border: 'none',
-                                                                            backgroundColor: 'white',
-                                                                        }}>
-                                                                        <i className="uil uil-angle-right"></i>
-                                                                    </button>
+                                                                    <span>Select All</span>
                                                                 </div>
                                                             </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                                            {spaceListAPI.map((record) => {
+                                                                return (
+                                                                    <div className="floor-box">
+                                                                        <div>
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                className="mr-2"
+                                                                                id={record._id}
+                                                                                value={record._id}
+                                                                                onClick={(e) => {
+                                                                                    handleSelectedLocation(e, record.name);
+                                                                                }}
+                                                                            />
+                                                                            <span>{record.name}</span>
+                                                                        </div>
+                                                                        <div style={{ display: 'flex' }}>
+                                                                            <button
+                                                                                style={{
+                                                                                    border: 'none',
+                                                                                    backgroundColor: 'white',
+                                                                                }}>
+                                                                                <i className="uil uil-angle-right"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </>}
                                                 <div></div>
                                             </div>
                                         </Dropdown.Menu>
