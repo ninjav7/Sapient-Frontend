@@ -7,7 +7,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, createBuilding, generalBuilding } from '../../services/Network';
+import { BaseUrl, getBuilding,createBuilding, generalBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -169,11 +169,11 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                         <div
                                                             className="buildings-name"
                                                             onClick={() => {
-                                                                console.log(
-                                                                    'recordBuilding_idName',
-                                                                    record.building_id,
-                                                                    record.building_name
-                                                                );
+                                                                // console.log(
+                                                                //     'recordBuilding_idName',
+                                                                //     record.building_id,
+                                                                //     record.building_name
+                                                                // );
                                                                 localStorage.setItem('buildingId', record.building_id);
                                                                 localStorage.setItem(
                                                                     'buildingName',
@@ -191,11 +191,11 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                     <div
                                                         className="buildings-name"
                                                         onClick={() => {
-                                                            console.log(
-                                                                'recordBuilding_idName',
-                                                                record.building_id,
-                                                                record.building_name
-                                                            );
+                                                            // console.log(
+                                                            //     'recordBuilding_idName',
+                                                            //     record.building_id,
+                                                            //     record.building_name
+                                                            // );
                                                             localStorage.setItem('buildingId', record.building_id);
                                                             localStorage.setItem('buildingName', record.building_name);
                                                             BuildingStore.update((s) => {
@@ -341,13 +341,13 @@ const Buildings = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        const { data } = await axios.get(`${BaseUrl}${generalBuilding}`, { headers });
+        const { data } = await axios.get(`${BaseUrl}${getBuilding}`, { headers });
         setBuildingsData(data);
         return data;
     };
     const { data, error, isError, isLoading } = useQuery('generalBuilding', fetchGeneralBuildingData);
 
-    console.log('data', data, 'isLoading', isLoading, 'erro', error);
+    //console.log('data', data, 'isLoading', isLoading, 'erro', error);
     const [userPermission] = useAtom(userPermissionData);
 
     return (
