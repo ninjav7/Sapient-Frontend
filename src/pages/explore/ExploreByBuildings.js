@@ -30,6 +30,8 @@ import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { xaxisFilters } from '../../helpers/explorehelpers';
+import Enumerable from "linq";
+import "./Linq";
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -215,7 +217,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -228,7 +230,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -241,7 +243,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -254,7 +256,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -267,7 +269,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -280,7 +282,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -383,6 +385,7 @@ const ExploreByBuildings = () => {
     const [buildingListArray, setBuildingListArray] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
+    const [objectExplore, setObjectExplore] = useState([]);
 
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -419,9 +422,10 @@ const ExploreByBuildings = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         fill: {
             opacity: 1,
+            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         },
         markers: {
             size: 0,
@@ -449,11 +453,11 @@ const ExploreByBuildings = () => {
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch=''
-                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
-                for(let i=0;i<series.length;i++){
-                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                let ch = ''
+                ch = ch + `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`
+                for (let i = 0; i < series.length; i++) {
+                    ch = ch + `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
                         3
                     )} kWh </td></tr>`
                 }
@@ -511,7 +515,7 @@ const ExploreByBuildings = () => {
         legend: {
             show: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -715,6 +719,31 @@ const ExploreByBuildings = () => {
                             data: data,
                             id: arr[0].building_id,
                         };
+                        let coll = [];
+                        let sname = arr[0].building_name;
+                        data.map((el) => {
+                            let ab = {};
+                            ab['timestamp'] = el[0];
+                            ab[sname] = el[1];
+                            coll.push(ab);
+                        });
+                        if (objectExplore.length === 0) {
+                            setObjectExplore(coll);
+                        } else {
+                            console.log(objectExplore);
+                            const result = Enumerable.from(objectExplore)
+                                .fullOuterJoin(
+                                    Enumerable.from(coll),
+                                    pk => pk.timestamp,
+                                    fk => fk.timestamp,
+                                    (left, right) => ({ ...left, ...right })
+                                )
+                                .toArray();
+                            console.log("join Result ", result);
+                            setObjectExplore(result);
+
+                        }
+
                         // console.log(recordToInsert);
 
                         // console.log(recordToInsert);
@@ -1023,19 +1052,29 @@ const ExploreByBuildings = () => {
     };
 
     const getCSVLinkChartData = () => {
-        let arr = [];
-        let aname = '';
-        seriesData.map(function (obj) {
-            let abc = [];
-            obj.data.map((ele) => {
-                abc.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`), ele[1]]);
-            });
-            arr = abc;
-            aname = obj.name;
-        });
-        let streamData = seriesData.length > 0 ? arr : [];
+        let abc = [];
+        let val = [];
+        if (objectExplore.length !== 0) {
+            val = Object.keys(objectExplore[0])
 
-        return [['timestamp', `${aname} energy`], ...streamData];
+            objectExplore.map(function (obj) {
+                let acd = []
+                for (let i = 0; i < val.length; i++) {
+                    if (val[i] === "timestamp") {
+                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
+                    }
+                    else {
+                        acd.push(obj[val[i]].toFixed(2))
+                    }
+                }
+                abc.push(acd);
+            })
+            console.log(abc);
+        }
+
+        let streamData = objectExplore.length > 0 ? abc : [];
+
+        return [val, ...streamData];
     };
 
     useEffect(() => {

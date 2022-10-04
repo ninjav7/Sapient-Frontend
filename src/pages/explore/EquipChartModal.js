@@ -468,7 +468,7 @@ const EquipChartModal = ({
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
                             .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A`)}</div>
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -572,19 +572,7 @@ const EquipChartModal = ({
     };
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
-        // if (key === 'equipment_type') {
-        //     const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-        //     // console.log(result1.end_use_name);
-        //     const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
-        //     // console.log(eq_id);
-        //     if (deviceType === 'passive') {
-        //         var x = document.getElementById('endUsePop');
-        //         x.value = eq_id.end_user_id;
-        //     }
-        //     obj['end_use'] = eq_id.end_user_id;
-        // }
         obj[key] = value;
-        // // console.log(obj);
         setUpdateEqipmentData(obj);
     };
     const handleSave = () => {
@@ -852,7 +840,7 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        //fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
         fetchEndUseData();

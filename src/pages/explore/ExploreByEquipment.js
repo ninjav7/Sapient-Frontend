@@ -41,6 +41,8 @@ import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import Enumerable from "linq";
+import "./Linq";
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -230,7 +232,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -243,7 +245,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -256,7 +258,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -269,7 +271,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -282,7 +284,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -295,7 +297,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -599,10 +601,10 @@ const ExploreByEquipment = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         fill: {
             opacity: 1,
-            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         },
         markers: {
             size: 0,
@@ -645,12 +647,11 @@ const ExploreByEquipment = () => {
                 ch =
                     ch +
                     `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`;
+                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
                     ch =
                         ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
                         };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
                             3
                         )} kWh </td></tr>`;
@@ -710,7 +711,7 @@ const ExploreByEquipment = () => {
         legend: {
             show: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -1499,19 +1500,30 @@ const ExploreByEquipment = () => {
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
-                            var s = new Set();
-                            var result = [];
-                            objectExplore.forEach(function (e) {
-                                result.push(Object.assign({}, e));
-                                s.add(e.timestamp);
-                            });
-                            coll.forEach(function (e) {
-                                if (!s.has(e.timestamp)) {
-                                    var temp = Object.assign({}, e);
-                                    temp[sname] = null;
-                                    result.push(temp);
-                                }
-                            });
+                            console.log(objectExplore);
+                            const result = Enumerable.from(objectExplore)
+                                .fullOuterJoin(
+                                    Enumerable.from(coll),
+                                    pk => pk.timestamp,
+                                    fk => fk.timestamp,
+                                    (left, right) => ({ ...left, ...right })
+                                )
+                                .toArray();
+                            console.log("join Result ", result);
+                            setObjectExplore(result);
+                            // var s = new Set();
+                            // var result = [];
+                            // objectExplore.forEach(function (e) {
+                            //     result.push(Object.assign({}, e));
+                            //     s.add(e.timestamp);
+                            // });
+                            // coll.forEach(function (e) {
+                            //     if (!s.has(e.timestamp)) {
+                            //         var temp = Object.assign({}, e);
+                            //         temp[sname] = null;
+                            //         result.push(temp);
+                            //     }
+                            // });
                         }
 
                         setSeriesData([...seriesData, recordToInsert]);
@@ -1895,22 +1907,32 @@ const ExploreByEquipment = () => {
     };
 
     const getCSVLinkChartData = () => {
-        let arr = [];
-        let aname = '';
-        seriesData.map(function (obj) {
-            let abc = [];
-            obj.data.map((ele) => {
-                abc.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`), ele[1]]);
-            });
-            arr = abc;
-            aname = obj.name;
-        });
-        let streamData = seriesData.length > 0 ? arr : [];
+        let abc = [];
+        let val = [];
+        if (objectExplore.length !== 0) {
+            val = Object.keys(objectExplore[0])
 
-        return [['timestamp', `${aname} energy`], ...streamData];
+            objectExplore.map(function (obj) {
+                let acd = []
+                for (let i = 0; i < val.length; i++) {
+                    if (val[i] === "timestamp") {
+                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
+                    }
+                    else {
+                        acd.push(obj[val[i]].toFixed(2))
+                    }
+                }
+                abc.push(acd);
+            })
+            console.log(abc);
+        }
+
+        let streamData = objectExplore.length > 0 ? abc : [];
+
+        return [val, ...streamData];
     };
 
-    useEffect(() => {}, [showDropdown]);
+    useEffect(() => { }, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
