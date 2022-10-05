@@ -9,10 +9,10 @@ export default {
     component: ButtonGroup,
 };
 const buttonsExample = [
-    { label: 'left', icon: <PlusSVG />},
+    { label: 'left', icon: <PlusSVG />, disabled: true },
     { label: 'center', icon: <PlusSVG /> },
-    {  icon: <PlusSVG />, },
-    { label: 'right', icon: <PlusSVG />, iconAlignment: 'right', },
+    { icon: <PlusSVG /> },
+    { label: 'right', icon: <PlusSVG />, iconAlignment: 'right' },
 ];
 export const Default = () => {
     const handleButtonClick = (id) => {
@@ -21,9 +21,7 @@ export const Default = () => {
     return (
         <>
             <h6>Primary</h6>
-            <ButtonGroup
-                buttons={buttonsExample}
-                handleButtonClick={(id) => handleButtonClick(id)}></ButtonGroup>
+            <ButtonGroup buttons={buttonsExample} handleButtonClick={(id) => handleButtonClick(id)}></ButtonGroup>
         </>
     );
 };

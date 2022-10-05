@@ -58,6 +58,14 @@
             }
             &.icon-right {
                 flex-direction: row-reverse;
+                svg {
+                    margin-left: 8px;
+                }
+            }
+            &.icon-left {
+                svg {
+                    margin-right: 8px;
+                }
             }
             &:last-child {
                 border-top-right-radius: 8px;
@@ -82,7 +90,7 @@
                     }
                 }
             }
-            
+
             &.active {
                 background-color: #444ce7;
                 color: #fff;

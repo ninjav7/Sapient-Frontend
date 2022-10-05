@@ -12,18 +12,14 @@ const ButtonGroup = ({ buttons, handleButtonClick }) => {
         <div className="button-group-wrapper">
             <ul>
                 {buttons.map((buttonItem, i) => {
-                    const iconAlignment =
-                        buttonItem.iconAlignment == 'right'
-                            ? 'icon-right'
-                            : buttonItem.iconAlignment == 'left'
-                            ? 'icon-left'
-                            : '';
-                    const iconPlacement = iconAlignment.length && buttonItem.icon ? iconAlignment : null;
-                    const disabledClass = buttonItem.disabled?'disabled':null;
+                    const iconAlignment = buttonItem.iconAlignment == 'right' ? 'icon-right' : 'icon-left';
+                    const iconPlacement =
+                        iconAlignment.length && buttonItem.label && buttonItem.icon ? iconAlignment : null;
+                    const disabledClass = buttonItem.disabled ? 'disabled' : null;
                     return (
                         <li
-                            onClick={(event) => !buttonItem?.disabled&&handleClick(event, i)}
-                            className={classNames(iconPlacement,disabledClass, i === clickedId ? 'active' : '')}>
+                            onClick={(event) => !buttonItem?.disabled && handleClick(event, i)}
+                            className={classNames(iconPlacement, disabledClass, i === clickedId ? 'active' : '')}>
                             {buttonItem.icon && React.cloneElement(buttonItem.icon)}
                             {buttonItem.label}
                         </li>
