@@ -404,7 +404,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq. ft.
+                                                {parseFloat((record.energy_density)/1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
@@ -832,9 +832,13 @@ const CompareBuildings = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
             let params = `?days=${count}&building_name=${buildingInput}`;
-            await axios.get(`${BaseUrl}${searchCompareBuildings}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -857,6 +861,9 @@ const CompareBuildings = () => {
             }
         }
     };
+    useEffect(() => {
+        if (buildingInput === '') compareBuildingsData();
+    }, [buildingInput]);
 
     return (
         <React.Fragment>

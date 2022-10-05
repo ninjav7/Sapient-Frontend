@@ -33,16 +33,15 @@ import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -62,6 +61,8 @@ import {
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
+import Dropdown from 'react-bootstrap/Dropdown';
+import './style.css';
 
 const EquipmentTable = ({
     equipmentData,
@@ -479,74 +480,77 @@ const EquipmentTable = ({
                                                     {selectedOptions.some((record) => record.value === 'device_id') && (
                                                         <td className="font-weight-bold">{record.device_mac}</td>
                                                     )}
-                                                    <td className="font-weight-bold">
-                                                        <img
-                                                            style={{ width: '20px' }}
-                                                            src={ThreeDots}
-                                                            onClick={() => {
-                                                                console.log(
-                                                                    'equipments_name_plus',
-                                                                    record?.equipments_id
-                                                                );
-                                                                setToggleRecordData(record);
-                                                                setToggleEdit(true);
-                                                                setEqupimentIdData(record?.equipments_id);
-                                                            }}
-                                                        />
+                                                    <td>
+                                                        <Dropdown className="float-end" align="end">
+                                                            <div
+                                                                onClick={() => {
+                                                                    setEqupimentIdData(record?.equipments_id);
+                                                                    setToggleRecordData(record);
+                                                                    setToggleEdit(true);
+                                                                }}>
+                                                                <Dropdown.Toggle
+                                                                    as="a"
+                                                                    className="cursor-pointer arrow-none text-muted">
+                                                                    <div className="triple-dot-style">
+                                                                        <FontAwesomeIcon
+                                                                            icon={faEllipsisVertical}
+                                                                            color="#1D2939"
+                                                                            size="lg"
+                                                                        />
+                                                                    </div>
+                                                                </Dropdown.Toggle>
+                                                            </div>
+                                                            <Dropdown.Menu>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        setIsEdit(true);
+                                                                        Toggle(toggleRecordData);
+                                                                    }}>
+                                                                    <Dropdown.Item>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faPen}
+                                                                            color="#1D2939"
+                                                                            size="lg"
+                                                                            className="mr-4"
+                                                                        />
+                                                                        Edit
+                                                                    </Dropdown.Item>
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        if (record.device_type === 'active') {
+                                                                            return;
+                                                                        }
+                                                                        setIsDelete(true);
+                                                                    }}>
+                                                                    <Dropdown.Item
+                                                                        disabled={record.device_type === 'active'}>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faTrash}
+                                                                            color={
+                                                                                record.device_type === 'active'
+                                                                                    ? '#ad716c'
+                                                                                    : '#d92d20'
+                                                                            }
+                                                                            size="lg"
+                                                                            className="mr-4"
+                                                                        />
+                                                                        <span
+                                                                            className={
+                                                                                record.device_type === 'active'
+                                                                                    ? 'disable-delete-btn-style'
+                                                                                    : 'delete-btn-style'
+                                                                            }>
+                                                                            Delete
+                                                                        </span>
+                                                                    </Dropdown.Item>
+                                                                </div>
+                                                            </Dropdown.Menu>
+                                                        </Dropdown>
                                                     </td>
                                                 </tr>
                                             );
                                         })}
-                                        <UncontrolledDropdown
-                                            style={actionStyle}
-                                            isOpen={toggleEdit}
-                                            toggle={() => {
-                                                setToggleEdit(!toggleEdit);
-                                            }}>
-                                            <DropdownToggle
-                                                tag="button"
-                                                className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
-                                            <DropdownMenu right>
-                                                <DropdownItem>
-                                                    <div
-                                                        onClick={() => {
-                                                            setIsEdit(true);
-                                                            // Toggle(record);
-                                                            Toggle(toggleRecordData);
-                                                        }}
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}>
-                                                        <img src={Pen} style={{ width: '20px' }} />
-                                                        <span style={{ marginLeft: '20px', fontWeight: '700' }}>
-                                                            Edit
-                                                        </span>
-                                                    </div>
-                                                </DropdownItem>
-                                                <DropdownItem
-                                                    disabled={equpimentDataNow?.includes(equpimentIdData)}
-                                                    onClick={() => {
-                                                        setIsDelete(true);
-                                                    }}>
-                                                    <div
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}>
-                                                        <img src={Delete} style={{ width: '20px' }} />
-                                                        <span
-                                                            style={{
-                                                                color: 'red',
-                                                                marginLeft: '20px',
-                                                                fontWeight: '700',
-                                                            }}>
-                                                            Delete
-                                                        </span>
-                                                    </div>
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
                                     </tbody>
                                 )}
                             </Table>

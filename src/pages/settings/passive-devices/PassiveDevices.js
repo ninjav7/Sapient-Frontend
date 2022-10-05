@@ -11,7 +11,6 @@ import {
     DropdownItem,
     Button,
     Input,
-    Dropdown,
 } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
@@ -38,12 +37,14 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import ThreeDots from '../../../assets/images/threeDots.png';
-import './style.css';
+import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import Pen from '../../../assets/images/pen.png';
 import Delete from '../../../assets/images/delete.png';
 import { useAtom } from 'jotai';
 import { deviceId, identifier, passiveDeviceModal, userPermissionData } from '../../../store/globalState';
 import Select from 'react-select';
+import Dropdown from 'react-bootstrap/Dropdown';
+import './style.css';
 
 const PassiveDevicesTable = ({
     deviceData,
@@ -247,6 +248,14 @@ const PassiveDevicesTable = ({
                                         <td>
                                             <Skeleton count={5} />
                                         </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
                                 </SkeletonTheme>
                             </tbody>
@@ -312,65 +321,63 @@ const PassiveDevicesTable = ({
                                                     <td>{record.sensor_number}</td>
                                                 )}
                                                 <td>
-                                                    <img
-                                                        onClick={() => {
-                                                            setToggleEdit(true);
-                                                            setSensorId(record?.identifier);
-                                                            setIdentifierVal(record?.identifier);
-                                                            setDeviceIdVal(record?.equipments_id);
-                                                            setModalVal(record?.model);
-                                                        }}
-                                                        style={{ width: '20px' }}
-                                                        src={ThreeDots}
-                                                    />
+                                                    <Dropdown className="float-end" align="end">
+                                                        <div
+                                                            onClick={() => {
+                                                                setToggleEdit(true);
+                                                                setSensorId(record?.identifier);
+                                                                setIdentifierVal(record?.identifier);
+                                                                setDeviceIdVal(record?.equipments_id);
+                                                                setModalVal(record?.model);
+                                                            }}>
+                                                            <Dropdown.Toggle
+                                                                as="a"
+                                                                className="cursor-pointer arrow-none text-muted">
+                                                                <div className="triple-dot-style">
+                                                                    <FontAwesomeIcon
+                                                                        icon={faEllipsisVertical}
+                                                                        color="#1D2939"
+                                                                        size="lg"
+                                                                    />
+                                                                </div>
+                                                            </Dropdown.Toggle>
+                                                        </div>
+                                                        <Dropdown.Menu>
+                                                            <div
+                                                                onClick={() => {
+                                                                    setIsEdit(true);
+                                                                }}>
+                                                                <Dropdown.Item>
+                                                                    <FontAwesomeIcon
+                                                                        icon={faPen}
+                                                                        color="#1D2939"
+                                                                        size="lg"
+                                                                        className="mr-4"
+                                                                    />
+                                                                    Edit
+                                                                </Dropdown.Item>
+                                                            </div>
+                                                            <div
+                                                                onClick={() => {
+                                                                    setIsDelete(true);
+                                                                }}>
+                                                                <Dropdown.Item>
+                                                                    <FontAwesomeIcon
+                                                                        icon={faTrash}
+                                                                        color="#d92d20"
+                                                                        size="lg"
+                                                                        className="mr-4"
+                                                                    />
+                                                                    <span className="delete-btn-style">Delete</span>
+                                                                </Dropdown.Item>
+                                                            </div>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
                                                 </td>
                                             </tr>
                                         </>
                                     );
                                 })}
-
-                                <UncontrolledDropdown
-                                    style={{
-                                        width: '30px',
-                                        position: 'absolute',
-                                        top: '10px',
-                                        right: 0,
-                                    }}
-                                    isOpen={toggleEdit}
-                                    toggle={() => {
-                                        setToggleEdit(!toggleEdit);
-                                    }}>
-                                    <DropdownToggle
-                                        tag="button"
-                                        className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
-                                    <DropdownMenu right>
-                                        <DropdownItem
-                                            onClick={() => {
-                                                setIsEdit(true);
-                                            }}>
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                }}>
-                                                <img src={Pen} style={{ width: '20px' }} />
-                                                <span>Edit</span>
-                                            </div>
-                                        </DropdownItem>
-                                        <DropdownItem onClick={() => {}}>
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                }}>
-                                                <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red' }}>Delete</span>
-                                            </div>
-                                        </DropdownItem>
-                                    </DropdownMenu>
-                                </UncontrolledDropdown>
                             </tbody>
                         )}
                     </Table>
@@ -1015,10 +1022,9 @@ const PassiveDevices = () => {
                                     setFormValidation(true);
                                 }}
                                 value={identifierVal}
-                                autoFocus
                             />
                         </Form.Group>
-                        <button
+                        {/* <button
                             style={{
                                 backgroundColor: '#FFEEF1',
                                 width: '200px',
@@ -1033,7 +1039,7 @@ const PassiveDevices = () => {
                             <span style={{ color: 'red', marginTop: '10px', marginBottom: '10px', marginLeft: '5px' }}>
                                 Delete Passive Device
                             </span>
-                        </button>
+                        </button> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer
@@ -1064,7 +1070,7 @@ const PassiveDevices = () => {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <span>Are you sure you want to delete the passive device</span>
+                            <span>Are you sure you want to delete the Passive Device?</span>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
