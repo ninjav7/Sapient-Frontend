@@ -404,7 +404,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq. ft.
+                                                {parseFloat((record.energy_density)/1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
