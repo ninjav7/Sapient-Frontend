@@ -94,11 +94,7 @@ const EquipmentTable = ({
 
     const [equpimentDataNow] = useAtom(equipmentDataGlobal);
 
-    console.log('equpimentDataNow', equpimentDataNow);
-
     const [userPermission] = useAtom(userPermissionData);
-
-    console.log(selectedOptions, 'selectedOptions');
 
     const handleColumnSort = (order, columnName) => {
         if (columnName === 'equipments_name') {
@@ -180,6 +176,13 @@ const EquipmentTable = ({
     const [toggleEdit, setToggleEdit] = useState(false);
     const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
     const [toggleRecordData, setToggleRecordData] = useAtom(toggleRecord);
+
+    const [actionStyle, setActionStyle] = useState({
+        width: '30px',
+        position: 'absolute',
+        top: '100px',
+        right: 0,
+    });
 
     return (
         <>
@@ -396,6 +399,9 @@ const EquipmentTable = ({
                                                 <td>
                                                     <Skeleton count={5} />
                                                 </td>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
                                             </tr>
                                         </SkeletonTheme>
                                     </tbody>
@@ -411,11 +417,7 @@ const EquipmentTable = ({
                                                     }}
                                                     className="mouse-pointer">
                                                     {selectedOptions.some((record) => record.value === 'status') && (
-                                                        <td
-                                                            className="text-center"
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td className="text-center">
                                                             <div>
                                                                 {record.status === 'Online' && (
                                                                     <div className="icon-bg-styling">
@@ -431,11 +433,7 @@ const EquipmentTable = ({
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'name') && (
-                                                        <td
-                                                            className="font-weight-bold"
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td className="font-weight-bold">
                                                             {!(record.equipments_name === '')
                                                                 ? record.equipments_name
                                                                 : '-'}
@@ -443,30 +441,16 @@ const EquipmentTable = ({
                                                     )}
                                                     {selectedOptions.some(
                                                         (record) => record.value === 'equip_type'
-                                                    ) && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}
-                                                            className="font-weight-bold">
-                                                            {record.equipments_type}
-                                                        </td>
-                                                    )}
+                                                    ) && <td className="font-weight-bold">{record.equipments_type}</td>}
                                                     {selectedOptions.some((record) => record.value === 'location') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.location === ' > '
                                                                 ? ' - '
                                                                 : record.location.split('>').reverse().join(' > ')}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'tags') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {
                                                                 <div className="badge badge-light mr-2 font-weight-bold week-day-style">
                                                                     {record.tags.length === 0
@@ -481,31 +465,19 @@ const EquipmentTable = ({
                                                     {selectedOptions.some(
                                                         (record) => record.value === 'sensor_number'
                                                     ) && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.sensor_number === 0 ? '-' : record.sensor_number}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.last_data === ''
                                                                 ? '-'
                                                                 : moment(record?.last_data).fromNow()}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'device_id') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}
-                                                            className="font-weight-bold">
-                                                            {record.device_mac}
-                                                        </td>
+                                                        <td className="font-weight-bold">{record.device_mac}</td>
                                                     )}
                                                     <td className="font-weight-bold">
                                                         <img
@@ -526,12 +498,7 @@ const EquipmentTable = ({
                                             );
                                         })}
                                         <UncontrolledDropdown
-                                            style={{
-                                                width: '30px',
-                                                position: 'absolute',
-                                                top: '100px',
-                                                right: 0,
-                                            }}
+                                            style={actionStyle}
                                             isOpen={toggleEdit}
                                             toggle={() => {
                                                 setToggleEdit(!toggleEdit);
@@ -718,7 +685,6 @@ const Equipment = () => {
     //     }
     // }, [createEqipmentData]);
 
-    console.log('createEqipmentData', createEqipmentData);
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
@@ -738,6 +704,8 @@ const Equipment = () => {
 
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [search, setSearch] = useState('');
+
+    const [equipSearch, setEquipSearch] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
     const [endUseDataNow, setEndUseDataNow] = useState([]);
@@ -792,27 +760,23 @@ const Equipment = () => {
     };
 
     const handleSearch = async () => {
-        if (search !== '') {
-            try {
-                setIsEquipDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&name=${search}`;
-                await axios.post(`${BaseUrl}${searchEquipment}${params}`, {}, { headers }).then((res) => {
-                    let response = res.data;
-                    setGeneralEquipmentData(res.data);
-                });
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
-            } catch (error) {
-                console.log(error);
-                setIsEquipDataFetched(false);
-                console.log('Failed to fetch all Equipment Data');
-            }
-        } else {
-            setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipment Data');
         }
     };
 
@@ -1003,7 +967,8 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
+            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            // let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1225,7 +1190,7 @@ const Equipment = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                handleSearchtxt(e);
+                                setEquipSearch(e.target.value);
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>

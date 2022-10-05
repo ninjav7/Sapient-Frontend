@@ -62,8 +62,6 @@ const PassiveDevicesTable = ({
 }) => {
     const [userPermission] = useAtom(userPermissionData);
 
-    console.log('deviceData', deviceData, 'selectedOptions', selectedOptions);
-
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -484,7 +482,6 @@ const PassiveDevices = () => {
         }
     }, [createDeviceData]);
 
-    console.log('createDeviceData', createDeviceData);
     const [search, setSearch] = useState('');
 
     const [locationDataNow, setLocationDataNow] = useState([]);
@@ -712,8 +709,6 @@ const PassiveDevices = () => {
     };
 
     const [deviceSearch, setDeviceSearch] = useState('');
-
-    console.log('deviceSearch', deviceSearch);
 
     const fetchPassiveDeviceData = async () => {
         try {
@@ -1190,7 +1185,6 @@ const PassiveDevices = () => {
                             disabled={!formValidation}>
                             {isProcessing ? 'Adding...' : 'Add'}
                         </Button>
-                        {console.log('formValidation', formValidation)}
                     </div>
                 </Modal.Footer>
             </Modal>
