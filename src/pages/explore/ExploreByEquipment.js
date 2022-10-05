@@ -114,6 +114,7 @@ const ExploreEquipmentTable = ({
                                             type="checkbox"
                                             className="mr-4"
                                             id="selection"
+                                            disabled
                                             onClick={(e) => {
                                                 handleSelectionAll(e);
                                             }}
@@ -123,7 +124,7 @@ const ExploreEquipmentTable = ({
                                     <th className="table-heading-style">Energy Consumption</th>
                                     <th className="table-heading-style">% Change</th>
                                     <th className="table-heading-style">Location</th>
-                                    <th className="table-heading-style">Location Type</th>
+                                    <th className="table-heading-style">Space Type</th>
                                     <th className="table-heading-style">Equipment Type</th>
                                     <th className="table-heading-style">End Use Category</th>
                                 </tr>
@@ -929,27 +930,64 @@ const ExploreByEquipment = () => {
         }
     };
 
-    const handleAllLocation = (e) => {
+    const handleAllLocation = async (e) => {
         let slt = document.getElementById('allLocation');
+        let spacedata = [];
+        let sp = [];
         if (slt.checked === true) {
             let selectLoc = [];
-            for (let i = 0; i < floorListAPI.length; i++) {
-                selectLoc.push(floorListAPI[i].floor_id);
-                let check = document.getElementById(floorListAPI[i].floor_id);
+            for (let i = 0; i < filteredLocationOptions.length; i++) {
+                //selectLoc.push(filteredLocationOptions[i].floor_id);
+                let check = document.getElementById(filteredLocationOptions[i].floor_id);
                 check.checked = slt.checked;
+                const headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let spc = [];
+                const params = `?floor_id=${filteredLocationOptions[i].floor_id}&building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+                    spc = res.data.data;
+                    spc.map((ele) => {
+                        spacedata.push(ele);
+                    })
+                });
+                console.log(spacedata);
             }
-            if (floorListAPI.length === 1) {
-                setLocationTxt(`${floorListAPI[0].name}`);
-            } else if (floorListAPI.length === 0) {
-                setLocationTxt('');
-            } else {
-                setLocationTxt(`${floorListAPI.length} Locations`);
+            console.log(spacedata);
+            let rvmsp = [];
+            for (var i = 0; i < removeLocationDuplication.length; i++) {
+                for (var j = 0; j < spacedata.length; j++) {
+                    if (removeLocationDuplication[i].location.includes(spacedata[j].name)) {
+                        let arr = rvmsp.filter(function (item) {
+                            return item.name === spacedata[j].name;
+                        });
+                        if (arr.length === 0)
+                            rvmsp.push(spacedata[j]);
+                    }
+                }
             }
-            setSelectedLocation(selectLoc);
+            console.log(rvmsp)
+            selectedLocation.map((ele) => {
+                sp.push(ele);
+            })
+            rvmsp.map((el) => {
+                sp.push(el?._id)
+            })
+            console.log(sp);
+            // if (filteredLocationOptions.length === 1) {
+            //     setLocationTxt(`${filteredLocationOptions[0].name}`);
+            // } else if (filteredLocationOptions.length === 0) {
+            //     setLocationTxt('');
+            // } else {
+            //     setLocationTxt(`${floorListAPI.length} Locations`);
+            // }
+            setSelectedLocation(sp);
         } else {
             setSelectedLocation([]);
-            for (let i = 0; i < floorListAPI.length; i++) {
-                let check = document.getElementById(floorListAPI[i].floor_id);
+            for (let i = 0; i < filteredLocationOptions.length; i++) {
+                let check = document.getElementById(filteredLocationOptions[i].floor_id);
                 check.checked = slt.checked;
             }
             setLocationTxt('');
@@ -980,8 +1018,13 @@ const ExploreByEquipment = () => {
             let rvmsp = [];
             for (var i = 0; i < removeLocationDuplication.length; i++) {
                 for (var j = 0; j < spacedata.length; j++) {
-                    if (removeLocationDuplication[i].location.includes(spacedata[j].name))
-                        rvmsp.push(spacedata[j]);
+                    if (removeLocationDuplication[i].location.includes(spacedata[j].name)) {
+                        let arr = rvmsp.filter(function (item) {
+                            return item.name === spacedata[j].name;
+                        });
+                        if (arr.length === 0)
+                            rvmsp.push(spacedata[j]);
+                    }
                 }
             }
             console.log(rvmsp)
@@ -1439,8 +1482,13 @@ const ExploreByEquipment = () => {
         let rvmLocation = [];
         for (var i = 0; i < removeLocationDuplication.length; i++) {
             for (var j = 0; j < floorListAPI.length; j++) {
-                if (removeLocationDuplication[i].location.includes(floorListAPI[j].name))
-                    rvmLocation.push(floorListAPI[j]);
+                if (removeLocationDuplication[i].location.includes(floorListAPI[j].name)) {
+                    let arr = rvmLocation.filter(function (item) {
+                        return item.name === floorListAPI[j].name;
+                    });
+                    if (arr.length === 0)
+                        rvmLocation.push(floorListAPI[j]);
+                }
             }
         }
         console.log("loc ", rvmLocation);
@@ -1833,12 +1881,13 @@ const ExploreByEquipment = () => {
     }, [APIFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
 
     const clearFilterData = () => {
+        setSelectedLocation([]);
         let arr = {
             date_from: startDate.toLocaleDateString(),
             date_to: endDate.toLocaleDateString(),
             tz_info: timeZone,
         };
-        exploreFilterDataFetch(arr);
+        exploreDataFetch(arr);
     };
     const handleEndUseSearch = (e) => {
         let txt = e.target.value;
@@ -2047,8 +2096,15 @@ const ExploreByEquipment = () => {
             let rvmsp = [];
             for (var i = 0; i < removeLocationDuplication.length; i++) {
                 for (var j = 0; j < spacedata.length; j++) {
-                    if (removeLocationDuplication[i].location.includes(spacedata[j].name))
-                        rvmsp.push(spacedata[j]);
+                    if (removeLocationDuplication[i].location.includes(spacedata[j].name)) {
+
+
+                        let arr = rvmsp.filter(function (item) {
+                            return item.name === spacedata[j].name;
+                        });
+                        if (arr.length === 0)
+                            rvmsp.push(spacedata[j]);
+                    }
                 }
             }
             console.log(rvmsp)
@@ -2072,6 +2128,34 @@ const ExploreByEquipment = () => {
                 return item !== e.target.value;
             });
             setSelectedLocation(arr);
+        }
+    }
+    const handleAllSelectedSpaces = (e, txt) => {
+        let selection = document.getElementById("allSpaces");
+        if (selection.checked === true) {
+            let selectLoc = [];
+            for (let i = 0; i < spaceListAPI.length; i++) {
+                let check = document.getElementById(spaceListAPI[i]._id);
+                check.checked = selection.checked;
+                let arr = selectedLocation.filter(function (item) {
+                    return item === spaceListAPI[i]._id;
+                });
+                if (arr.length === 0) {
+                    selectLoc.push(spaceListAPI[i]._id);
+                }
+            }
+            selectedLocation.map((ele) => {
+                selectLoc.push(ele);
+            })
+            setSelectedLocation(selectLoc);
+
+        }
+        else {
+            for (let i = 0; i < spaceListAPI.length; i++) {
+                let check = document.getElementById(spaceListAPI[i]._id);
+                check.checked = selection.checked;
+            }
+            setSelectedLocation([]);
         }
     }
 
@@ -2124,9 +2208,9 @@ const ExploreByEquipment = () => {
                                 type="search"
                                 name="search"
                                 placeholder="Search..."
-                                onCommit={() => {
-                                    exploreDataFetch(arr);
-                                }}
+                                // onCommit={() => {
+                                //     exploreDataFetch(arr);
+                                // }}
                                 onChange={(e) => {
                                     setEquipmentSearchTxt(e.target.value);
                                 }}
@@ -2390,9 +2474,9 @@ const ExploreByEquipment = () => {
                                                                     <input
                                                                         type="checkbox"
                                                                         className="mr-2"
-                                                                        id="allLocation"
+                                                                        id="allSpaces"
                                                                         onClick={(e) => {
-                                                                            handleAllLocation(e);
+                                                                            handleAllSelectedSpaces(e);
                                                                         }}
                                                                     />
                                                                     <span>Select All</span>
