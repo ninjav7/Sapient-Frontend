@@ -213,8 +213,18 @@
 }
 
 .plug-rule-body {
-    margin-left: 3vw !important;
-    margin-right: 3vw !important;
+    padding: 12px 45px;
+    .plug-rule-body-container {
+        display: flex;
+        column-gap: 32px;
+        width: 100%;
+        .plug-rule-body-left-column {
+            width: 30%;
+        }
+        .plug-rule-body-right-column {
+            width: 70%;
+        }
+    }
 }
 
 .plug-rule-title {
@@ -242,21 +252,17 @@
 }
 
 .plug-rule-schedule-container {
-    width: 57vw;
     background: #ffffff;
     border: 1px solid #eaecf0;
     border-radius: 8px;
 }
 
 .plug-rule-demand-chart-container {
-    margin-left: 4vw !important;
-    margin-right: 4vw !important;
-    width: 87vw;
+    margin: 12px 45px;
     height: auto;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid #eaecf0;
     border-radius: 8px;
-    margin-bottom: 25px;
 }
 
 .plug-rule-chart-header {
@@ -268,28 +274,24 @@
     align-content: stretch;
 }
 
-
 .plug-rule-danger-zone-container {
-    margin-left: 4vw !important;
-    margin-right: 4vw !important;
-    width: 87vw;
+    margin: 16px 45px;
     height: auto;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid #eaecf0;
     border-radius: 8px;
     margin-bottom: 25px;
 
-    .plug-rule-danger-zone-header{
+    .plug-rule-danger-zone-header {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: space-between;
         align-items: center;
         align-content: stretch;
-        background:#F9FAFB;
+        background: #f9fafb;
     }
 }
-
 
 .plug-rule-chart-title {
     font-family: 'Inter';

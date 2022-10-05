@@ -9,6 +9,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory, useParams } from 'react-router-dom';
+import Select from '../../sharedComponents/form/select';
 
 import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import moment from 'moment';
@@ -618,7 +619,7 @@ const PlugRule = () => {
         let currentObj = currentData;
         currentObj.action.forEach((record) => {
             if (record.condition_id === condition_id) {
-                record[key] = value === 'true' ? true : false;
+                record[key] = value === true
             }
         });
         handleCurrentDataChange('action', currentObj.action);
@@ -947,8 +948,8 @@ const PlugRule = () => {
             {selectedTab === 0 && (
                 <>
                     <div className="plug-rule-body">
-                        <div className="row">
-                            <div className="col-4">
+                        <div className="plug-rule-body-container">
+                            <div className="plug-rule-body-left-column">
                                 <h5 className="plug-rule-title">Details</h5>
                                 <span className="plug-rule-subtitle">
                                     Set filters to choose equipment for this rule.
@@ -986,7 +987,7 @@ const PlugRule = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-8">
+                            <div className="plug-rule-body-right-column">
                                 <h5 className="plug-rule-title">Schedule</h5>
                                 <span className="plug-rule-subtitle">Choose actions and times for this rule.</span>
 
@@ -998,7 +999,7 @@ const PlugRule = () => {
                                     </div>
 
                                     <hr className="plug-rule-schedule-breaker" />
-
+{console.log("currentData",currentData)}
                                     {currentData.action &&
                                         currentData.action.map((record, index) => {
                                             return (
@@ -1006,23 +1007,30 @@ const PlugRule = () => {
                                                     <div className="plug-rule-schedule-row mb-1">
                                                         <div className="schedule-left-flex">
                                                             <div>
-                                                                <Input
-                                                                    type="select"
-                                                                    name="state"
-                                                                    id="userState"
-                                                                    className="font-weight-bold"
-                                                                    size="sm"
-                                                                    onChange={(e) => {
-                                                                        handleSchedularConditionChange(
-                                                                            'action_type',
-                                                                            e.target.value,
-                                                                            record.condition_id
-                                                                        );
-                                                                    }}
-                                                                    value={record.action_type}>
-                                                                    <option value={false}>Turn Off</option>
-                                                                    <option value={true}>Turn On</option>
-                                                                </Input>
+                                                                {console.log("record.action_type",record.action_type)}
+                                                                <Select
+                                                                defaultValue={record.action_type}
+                                                                label="Select"
+                                                                onChange={(event ) => {
+                                                                    console.log("value4234234",event.value);
+                                                                    console.log("record.condition_id",record.condition_id);
+                                                                    handleSchedularConditionChange(
+                                                                        'action_type',
+                                                                        event.value,
+                                                                        record.condition_id
+                                                                    );
+                                                                }}
+                                                                options={[
+                                                                    {
+                                                                        label: 'Turn Off',
+                                                                        value: false,
+                                                                    },
+                                                                    {
+                                                                        label: 'Turn On',
+                                                                        value: true,
+                                                                    }
+                                                                ]}
+                                                                />
                                                             </div>
                                                             <div>at</div>
                                                             <div>
