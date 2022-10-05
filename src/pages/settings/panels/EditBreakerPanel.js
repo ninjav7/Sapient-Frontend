@@ -673,7 +673,7 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&page_size=100&page_no=1`;
+                let params = `?building_id=${bldgId}&page_size=1000&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
