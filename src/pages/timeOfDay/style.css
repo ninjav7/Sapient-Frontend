@@ -10,6 +10,13 @@
     align-items: center;
     justify-content: center;
 }
+.tooltipclass{
+    height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  display: inline-block;
+
+}
 
 .timeofday-content-style {
     background: #ffffff;
