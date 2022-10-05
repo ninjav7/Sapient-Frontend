@@ -94,7 +94,7 @@ const EquipmentDeviceChartModel = ({
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
     const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
-    const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
+    //const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
 
@@ -282,7 +282,7 @@ const EquipmentDeviceChartModel = ({
             setShowTab('configure');
             setConfigureClass('mr-3 single-passive-tab-active tab-switch');
             setMetricClass('mr-3 single-passive-tab tab-switch');
-            setHistoryClass('mr-3 single-passive-tab tab-switch');
+            //setHistoryClass('mr-3 single-passive-tab tab-switch');
         }
         if (showWindow === 'metrics') setShowTab('metrics');
         //exploreDataFetch();
@@ -652,20 +652,20 @@ const EquipmentDeviceChartModel = ({
                 setShowTab('metrics');
                 setMetricClass('mr-3 single-passive-tab-active tab-switch');
                 setConfigureClass('mr-3 single-passive-tab tab-switch');
-                setHistoryClass('mr-3 single-passive-tab tab-switch');
+               // setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
             case 'configure':
                 setShowTab('configure');
                 setMetricClass('mr-3 single-passive-tab tab-switch');
                 setConfigureClass('mr-3 single-passive-tab-active tab-switch');
-                setHistoryClass('mr-3 single-passive-tab tab-switch');
+               // setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
-            case 'history':
-                setShowTab('history');
-                setMetricClass('mr-3 single-passive-tab tab-switch');
-                setConfigureClass('mr-3 single-passive-tab tab-switch');
-                setHistoryClass('mr-3 single-passive-tab-active tab-switch');
-                break;
+            // case 'history':
+            //     setShowTab('history');
+            //     setMetricClass('mr-3 single-passive-tab tab-switch');
+            //     setConfigureClass('mr-3 single-passive-tab tab-switch');
+            //     setHistoryClass('mr-3 single-passive-tab-active tab-switch');
+            //     break;
         }
     };
     const handleChange = (key, value) => {
@@ -835,13 +835,13 @@ const EquipmentDeviceChartModel = ({
                             }}>
                             Configure
                         </button>
-                        <button
+                        {/* <button
                             className={historyClass}
                             onClick={(e) => {
                                 handleSwitch('history');
                             }}>
                             History
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>
