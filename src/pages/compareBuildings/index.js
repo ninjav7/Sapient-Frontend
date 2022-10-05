@@ -832,9 +832,13 @@ const CompareBuildings = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
             let params = `?days=${count}&building_name=${buildingInput}`;
-            await axios.get(`${BaseUrl}${searchCompareBuildings}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -857,6 +861,9 @@ const CompareBuildings = () => {
             }
         }
     };
+    useEffect(() => {
+        if (buildingInput === '') compareBuildingsData();
+    }, [buildingInput]);
 
     return (
         <React.Fragment>
