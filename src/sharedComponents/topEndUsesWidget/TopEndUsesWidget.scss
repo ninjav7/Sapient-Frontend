@@ -1,0 +1,37 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.top-end-uses {
+    &-wrapper {
+        display: flex;
+        column-gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    @extend .borders-base;
+    display: inline-block;
+    min-width: 22.8125rem;
+
+    padding: 1.5rem;
+
+    .top-end-uses-widget-content {
+        &:not(:last-child) {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .button-wrapper {
+        margin: auto 0 auto auto;
+
+        .button.md {
+            padding-top: 0.375rem;
+            padding-bottom: 0.375rem;
+        }
+    }
+
+    &-trends-badge-wrapper {
+        .top-end-uses-trend-badge:not(:last-child) {
+            margin-bottom: 0.25rem;
+        }
+    }
+}
