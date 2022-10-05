@@ -17,6 +17,7 @@ import { Cookies } from 'react-cookie';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { timeZone } from '../../utils/helper';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
@@ -403,7 +404,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq. ft.
+                                                {parseFloat((record.energy_density)/1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
@@ -707,7 +708,9 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
-    const daysCount = DateRangeStore.useState((s) => s.dateFilter);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const tableColumnOptions = [
@@ -764,10 +767,15 @@ const CompareBuildings = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
 
             let count = parseInt(localStorage.getItem('dateFilter'));
-            let params = `?days=${count}`;
-            await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
+            let params = `?days=${daysCount}`;
+            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -793,9 +801,14 @@ const CompareBuildings = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
             let count = parseInt(localStorage.getItem('dateFilter'));
-            let params = `?days=${count}&${filterBy}=${order}`;
-            await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
+            let params = `?days=${daysCount}&${filterBy}=${order}`;
+            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -819,9 +832,13 @@ const CompareBuildings = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
             let params = `?days=${count}&building_name=${buildingInput}`;
-            await axios.get(`${BaseUrl}${searchCompareBuildings}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -844,6 +861,9 @@ const CompareBuildings = () => {
             }
         }
     };
+    useEffect(() => {
+        if (buildingInput === '') compareBuildingsData();
+    }, [buildingInput]);
 
     return (
         <React.Fragment>
