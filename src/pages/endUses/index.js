@@ -47,6 +47,10 @@ const EndUsesPage = () => {
             },
         },
         colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
+        fill: {
+            opacity: 1,
+            colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
+        },
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -76,20 +80,44 @@ const EndUsesPage = () => {
             marker: {
                 show: false,
             },
+            // custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+            //     const { seriesX } = w.globals;
+            //     const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+            //     return `<div class="line-chart-widget-tooltip">
+            //             <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+            //             <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+            //                 series[seriesIndex][dataPointIndex],
+            //                 0
+            //             )} kWh</div>
+            //             <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+            //                 .tz(timeZone)
+            //                 .format(`MMM D 'YY @ hh:mm A`)}</div>
+            //         </div>`;
+            // },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { colors } = w.globals;
+                // console.log(colors);
                 const { seriesX } = w.globals;
+                const { seriesNames } = w.globals;
                 const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(seriesX[0][dataPointIndex]).tz(timeZone)
+                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
+                for (let i = 0; i < series.length; i++) {
+                    ch =
+                        ch +
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(0
+                        )} kWh </td></tr>`;
+                }
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            0
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
+                        ${ch}
+                    </table></div>`;
             },
         },
         xaxis: {

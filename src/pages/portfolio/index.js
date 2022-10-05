@@ -448,14 +448,23 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setenergyConsumption(res.data);
+                        let response = res?.data;
+                        response.forEach((record) => {
+                            record.energy_consumption.now = parseInt(record.energy_consumption.now / 1000);
+                            record.energy_consumption.old = parseInt(record.energy_consumption.old / 1000);
+                            record.after_hours_energy_consumption.now = parseInt(
+                                record.after_hours_energy_consumption.now / 1000
+                            );
+                            record.after_hours_energy_consumption.old = parseInt(
+                                record.after_hours_energy_consumption.old / 1000
+                            );
+                        });
+                        setenergyConsumption(response);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption));
+                            newDonutData.push(parseInt(record.energy_consumption.now));
                         });
-                        console.log(newDonutData);
                         setSeries(newDonutData);
                         setIsEnergyConsumptionChartLoading(false);
                     });
