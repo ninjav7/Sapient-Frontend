@@ -850,9 +850,9 @@ const ActiveDevices = () => {
                         </div>
                     </div>
 
-                    <button type="button" className="btn btn-white d-inline ml-2">
+                    {/* <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
+                    </button> */}
 
                     {/* ---------------------------------------------------------------------- */}
 

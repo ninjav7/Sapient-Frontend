@@ -290,10 +290,10 @@ const Panels = () => {
                     </div> */}
                 </Col>
                 <Col xl={9}>
-                    <button type="button" className="btn btn-white d-inline ml-2">
+                    {/* <button type="button" className="btn btn-white d-inline ml-2">
                         <FontAwesomeIcon icon={faPlus} size="md" color="#344054" className="mr-1" />
                         Add Filter
-                    </button>
+                    </button> */}
 
                     {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">
