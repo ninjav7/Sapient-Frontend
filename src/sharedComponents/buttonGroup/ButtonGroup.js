@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import './ButtonGroup.scss';
+import Typography from '../typography';
 
 const ButtonGroup = ({ buttons, handleButtonClick }) => {
     const [clickedId, setClickedId] = useState(-1);
-    const handleClick = (event, id) => {
+    const handleClick = (id) => {
         setClickedId(id);
-        handleButtonClick(event);
+        handleButtonClick(id);
     };
     return (
         <div className="button-group-wrapper">
@@ -18,10 +19,12 @@ const ButtonGroup = ({ buttons, handleButtonClick }) => {
                     const disabledClass = buttonItem.disabled ? 'disabled' : null;
                     return (
                         <li
-                            onClick={(event) => !buttonItem?.disabled && handleClick(event, i)}
+                            onClick={() => !buttonItem?.disabled && handleClick(i)}
                             className={classNames(iconPlacement, disabledClass, i === clickedId ? 'active' : '')}>
                             {buttonItem.icon && React.cloneElement(buttonItem.icon)}
-                            {buttonItem.label}
+                            <Typography.Body size={Typography.Sizes.md}>
+                                {buttonItem.label}
+                            </Typography.Body>
                         </li>
                     );
                 })}

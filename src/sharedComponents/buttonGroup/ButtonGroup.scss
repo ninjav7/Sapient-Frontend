@@ -14,7 +14,7 @@
         li {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
+            padding: 7px 12px;
             border-top: 1px solid rgba(124, 135, 156, 1);
             border-right: 1px solid rgba(124, 135, 156, 1);
             border-bottom: 1px solid rgba(124, 135, 156, 1);
@@ -93,7 +93,9 @@
 
             &.active {
                 background-color: #444ce7;
-                color: #fff;
+                div{
+                    color: #fff!important;
+                }
                 &:hover {
                     background-color: #6172f3;
                 }
