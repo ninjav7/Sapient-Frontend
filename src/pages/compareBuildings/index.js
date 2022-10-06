@@ -1,34 +1,23 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Progress,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+//import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, compareBuildings, sortCompareBuildings } from '../../services/Network';
+import { BaseUrl, compareBuildings, searchCompareBuildings, sortCompareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
-import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { timeZone } from '../../utils/helper';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
@@ -342,7 +331,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     </div>
                                 </th>
                             )}
-                            {selectedOptions.some((record) => record.value === 'load') && (
+                            {/* {selectedOptions.some((record) => record.value === 'load') && (
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
@@ -357,7 +346,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         Monitored Load
                                     </button>
                                 </th>
-                            )}
+                            )} */}
                         </tr>
                     </thead>
                     {isBuildingDataFetched ? (
@@ -383,6 +372,17 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
+                                    {/* <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -404,8 +404,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq.
-                                                ft.
+                                                {parseFloat((record.energy_density)/1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
@@ -421,7 +420,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#D14065`}
@@ -432,7 +431,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#DF5775`}
@@ -443,7 +442,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -454,7 +453,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -465,7 +464,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FC9EAC`}
@@ -476,7 +475,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FFCFD6`}
@@ -521,7 +520,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'hvac') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq.
+                                                {parseFloat(record.hvac_consumption.now).toFixed(0)} kWh / sq. ft.sq.
                                                 ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
@@ -549,7 +548,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#D14065`}
@@ -561,7 +560,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#DF5775`}
@@ -573,7 +572,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -585,7 +584,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -597,7 +596,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FC9EAC`}
@@ -609,7 +608,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FFCFD6`}
@@ -654,7 +653,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'total') && (
                                             <td className="value-style">
-                                                {(record.total_consumption / 1000).toFixed(5)}
+                                                {(record.total_consumption / 1000).toFixed(0)}
                                                 kWh
                                             </td>
                                         )}
@@ -709,7 +708,9 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
-    const daysCount = DateRangeStore.useState((s) => s.dateFilter);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const tableColumnOptions = [
@@ -747,42 +748,48 @@ const CompareBuildings = () => {
         let arr = [
             { label: 'Name', value: 'name' },
             { label: 'Energy Density', value: 'density' },
-            // { label: '% Change', value: 'per_change' },
-            // { label: 'HVAC Consumption', value: 'hvac' },
-            // { label: 'HVAC % change', value: 'hvac_per' },
+            //{ label: '% Change', value: 'per_change' },
+            //{ label: 'HVAC Consumption', value: 'hvac' },
+            //{ label: 'HVAC % change', value: 'hvac_per' },
             { label: 'Total Consumption', value: 'total' },
-            // { label: 'Total % change', value: 'total_per' },
+            { label: 'Total % change', value: 'total_per' },
             { label: 'Sq. ft.', value: 'sq_ft' },
-            { label: 'Monitored Load', value: 'load' },
+            // { label: 'Monitored Load', value: 'load' },
         ];
         setSelectedOptions(arr);
     }, []);
 
-    useEffect(() => {
-        const compareBuildingsData = async () => {
-            try {
-                setIsBuildingDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
+    const compareBuildingsData = async () => {
+        try {
+            setIsBuildingDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
 
-                let count = parseInt(localStorage.getItem('dateFilter'));
-                let params = `?days=${count}`;
-                await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                    setBuildingsData(response);
-                    setIsBuildingDataFetched(false);
-                    // console.log('setBuildingsData => ', res.data);
-                });
-            } catch (error) {
-                console.log(error);
+            let count = parseInt(localStorage.getItem('dateFilter'));
+            let params = `?days=${daysCount}`;
+            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
+                let response = res.data;
+                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response);
                 setIsBuildingDataFetched(false);
-                console.log('Failed to fetch Buildings Data');
-            }
-        };
+                // console.log('setBuildingsData => ', res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsBuildingDataFetched(false);
+            console.log('Failed to fetch Buildings Data');
+        }
+    };
+
+    useEffect(() => {
         compareBuildingsData();
     }, [daysCount]);
 
@@ -794,9 +801,14 @@ const CompareBuildings = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
             let count = parseInt(localStorage.getItem('dateFilter'));
-            let params = `?days=${count}&${filterBy}=${order}`;
-            await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
+            let params = `?days=${daysCount}&${filterBy}=${order}`;
+            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -808,6 +820,50 @@ const CompareBuildings = () => {
             console.log('Failed to fetch all Equipments Data');
         }
     };
+
+    const [buildingInput, setBuildingInput] = useState('');
+
+    const searchCompareBuildingsFunc = async () => {
+        setIsBuildingDataFetched(true);
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let count = parseInt(localStorage.getItem('dateFilter'));
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            let params = `?days=${count}&building_name=${buildingInput}`;
+            await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
+                let response = res.data;
+                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response);
+                setIsBuildingDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsBuildingDataFetched(false);
+            console.log('Failed to fetch all Equipments Data');
+        }
+    };
+
+    const handleKeyDownSearch = (e) => {
+        if (e.key === 'Enter') {
+            if (buildingInput.length >= 1) {
+                searchCompareBuildingsFunc();
+            }
+            if (buildingInput.length === 0) {
+                compareBuildingsData();
+            }
+        }
+    };
+    useEffect(() => {
+        if (buildingInput === '') compareBuildingsData();
+    }, [buildingInput]);
 
     return (
         <React.Fragment>
@@ -828,18 +884,31 @@ const CompareBuildings = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e) => {
+                                setBuildingInput(e.target.value);
+                            }}
+                            onKeyDown={handleKeyDownSearch}
                         />
-                        <span className="input-group-text border-0" id="search-addon">
+                        <span
+                            className="input-group-text border-0"
+                            id="search-addon"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                if (buildingInput.length >= 1) {
+                                    searchCompareBuildingsFunc();
+                                }
+                                if (buildingInput.length === 0) {
+                                    compareBuildingsData();
+                                }
+                            }}>
                             <Search className="icon-sm" />
                         </span>
                     </div>
                 </Col>
-                <Col xl={9}>
+                {/* <Col xl={9}>
                     <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
                     </button>
-
-                    {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">
                         <MultiSelect
                             options={tableColumnOptions}
@@ -853,7 +922,7 @@ const CompareBuildings = () => {
                             ClearSelectedIcon={null}
                         />
                     </div>
-                </Col>
+                </Col> */}
             </Row>
             <Row>
                 <Col xl={12}>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, FormGroup, Label, Input } from 'reactstrap';
+
 import { Search } from 'react-feather';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, createBuilding, generalBuilding } from '../../services/Network';
+import { BaseUrl, getBuilding,createBuilding, generalBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -15,82 +16,213 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import { useAtom } from 'jotai';
-import { buildingData } from '../../store/globalState';
+import { buildingData, userPermissionData } from '../../store/globalState';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { useQuery } from 'react-query';
+import { QueryClient } from 'react-query';
+import Select from 'react-select';
 
-const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
+const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, error }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
+    const [internalRoute, setInternalRoute] = useState([
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/settings/active-devices',
+    ]);
+
+    useEffect(() => {
+        if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/general';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/layout';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/panels';
+                    })
+                );
+                if (!internalRoute.includes('/settings/active-devices')) {
+                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                }
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_details_permission?.view &&
+                !internalRoute.includes('/settings/general')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/general']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_layout_permission?.view &&
+                !internalRoute.includes('/settings/layout')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/layout']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
+                !internalRoute.includes('/settings/equipment')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/equipment']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_panels_permission?.view &&
+                !internalRoute.includes('/settings/panels')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/panels']);
+            }
+        }
+        if (userPermission.user_role === 'admin') {
+            setInternalRoute([]);
+            setInternalRoute(['/settings/general']);
+        }
+    }, [userPermission]);
+
     return (
         <Card>
             <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Sq. Ft.</th>
-                            <th>Devices</th>
-                        </tr>
-                    </thead>
-                    {isDataProcessing ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {buildingsData.map((record, index) => {
-                                return (
-                                    <tr key={index} className="mouse-pointer">
-                                        <th scope="row">
-                                            <Link to="/settings/general">
-                                                <div
-                                                    className="buildings-name"
-                                                    onClick={() => {
-                                                        localStorage.setItem('buildingId', record.building_id);
-                                                        localStorage.setItem('buildingName', record.building_name);
-                                                        localStorage.setItem(
-                                                            'buildingTimeZone',
-                                                            record.timezone === '' ? 'US/Eastern' : record.timezone
-                                                        );
-                                                        BuildingStore.update((s) => {
-                                                            s.BldgId = record.building_id;
-                                                            s.BldgName = record.building_name;
-                                                            s.BldgTimeZone =
-                                                                record.timezone === '' ? 'US/Eastern' : record.timezone;
-                                                        });
-                                                    }}>
-                                                    {record.building_name}
-                                                </div>
-                                            </Link>
-                                            <span className="badge badge-soft-secondary label-styling mr-2">
-                                                {record.building_type}
-                                            </span>
-                                        </th>
-                                        <td className="font-weight-bold">
-                                            {record.building_size.toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                {error ? (
+                    <>
+                        <p>You don't have view access of this page</p>
+                    </>
+                ) : (
+                    <Table className="mb-0 bordered table-hover">
+                        <thead>
+                            <tr className="mouse-pointer">
+                                <th>Name</th>
+                                <th>Sq. Ft.</th>
+                                <th>Devices</th>
+                            </tr>
+                        </thead>
+                        {isDataProcessing ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td className="font-weight-bold">{record.num_of_devices}</td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {buildingsData.map((record, index) => {
+                                    return (
+                                        <tr key={index} className="mouse-pointer">
+                                            <th scope="row">
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
+                                                    <Link to={`${internalRoute[0]}`}>
+                                                        <div
+                                                            className="buildings-name"
+                                                            onClick={() => {
+                                                                // console.log(
+                                                                //     'recordBuilding_idName',
+                                                                //     record.building_id,
+                                                                //     record.building_name
+                                                                // );
+                                                                localStorage.setItem('buildingId', record.building_id);
+                                                                localStorage.setItem(
+                                                                    'buildingName',
+                                                                    record.building_name
+                                                                );
+                                                                BuildingStore.update((s) => {
+                                                                    s.BldgId = record.building_id;
+                                                                    s.BldgName = record.building_name;
+                                                                });
+                                                            }}>
+                                                            {record.building_name}
+                                                        </div>
+                                                    </Link>
+                                                ) : (
+                                                    <div
+                                                        className="buildings-name"
+                                                        onClick={() => {
+                                                            // console.log(
+                                                            //     'recordBuilding_idName',
+                                                            //     record.building_id,
+                                                            //     record.building_name
+                                                            // );
+                                                            localStorage.setItem('buildingId', record.building_id);
+                                                            localStorage.setItem('buildingName', record.building_name);
+                                                            BuildingStore.update((s) => {
+                                                                s.BldgId = record.building_id;
+                                                                s.BldgName = record.building_name;
+                                                            });
+                                                        }}>
+                                                        {record.building_name}
+                                                    </div>
+                                                )}
+                                                <span className="badge badge-soft-secondary label-styling mr-2">
+                                                    {record.building_type}
+                                                </span>
+                                            </th>
+                                            <td className="font-weight-bold">
+                                                {record.building_size.toLocaleString(undefined, {
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                            </td>
+                                            <td className="font-weight-bold">{record.num_of_devices}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
+                    </Table>
+                )}
             </CardBody>
         </Card>
     );
@@ -99,6 +231,12 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
 const Buildings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const location = useLocation();
+    const controller = new AbortController();
+
+    const [formalidation, setFormalidation] = useState(false);
+
+    const queryClient = new QueryClient();
 
     // Modal states
     const [show, setShow] = useState(false);
@@ -114,7 +252,13 @@ const Buildings = () => {
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
     const [buildingName, setBuildingName] = useState('');
-    const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
+    const [buildingTypeSelected, setBuildingTypeSelected] = useState('');
+
+    useEffect(() => {
+        if (buildingName.length > 0 && buildingTypeSelected.length > 0) {
+            setFormalidation(true);
+        }
+    }, [buildingName, buildingTypeSelected]);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
 
@@ -144,15 +288,10 @@ const Buildings = () => {
             console.log(createBuildingData);
             await axios.post(`${BaseUrl}${createBuilding}`, buildingData, { headers }).then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
-                // console.log('setOverview => ', res.data);
                 handleClose();
+                fetchGeneralBuildingData();
                 fetchBuildingData();
             });
-            // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
-            //     console.log('createBuilding sending data to API => ', res.data);
-
-            // });
-
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
@@ -184,8 +323,6 @@ const Buildings = () => {
     const fetchBuildingData = async () => {
         try {
             setIsDataProcessing(true);
-
-            //setBuildingsData(buildingListData);
             setIsDataProcessing(false);
         } catch (error) {
             console.log(error);
@@ -199,25 +336,19 @@ const Buildings = () => {
     }, [buildingListData]);
 
     const fetchGeneralBuildingData = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            await axios.get(`${BaseUrl}${generalBuilding}`, { headers }).then((res) => {
-                console.log('createBuilding sending data to API => ', res.data);
-                setBuildingsData(res.data);
-            });
-        } catch (error) {
-            console.log('Failed to create Building');
-        }
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        const { data } = await axios.get(`${BaseUrl}${getBuilding}`, { headers });
+        setBuildingsData(data);
+        return data;
     };
+    const { data, error, isError, isLoading } = useQuery('generalBuilding', fetchGeneralBuildingData);
 
-    useEffect(() => {
-        fetchGeneralBuildingData();
-    }, []);
+    //console.log('data', data, 'isLoading', isLoading, 'erro', error);
+    const [userPermission] = useAtom(userPermissionData);
 
     return (
         <React.Fragment>
@@ -227,15 +358,20 @@ const Buildings = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>
-                                Add Building
-                            </button>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.create ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>
+                                    Add Building
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -252,8 +388,6 @@ const Buildings = () => {
                                     type="search"
                                     name="search"
                                     placeholder="Search..."
-                                    // value={searchSensor}
-                                    // onChange={handleSearchChange}
                                 />
                             </div>
                         </div>
@@ -267,6 +401,7 @@ const Buildings = () => {
                         buildingsData={buildingsData}
                         isDataProcessing={isDataProcessing}
                         setIsDataProcessing={setIsDataProcessing}
+                        error={error}
                     />
                 </Col>
             </Row>
@@ -295,44 +430,49 @@ const Buildings = () => {
                                 Type
                             </Label>
                             <div>
-                                <Input
-                                    type="select"
+                                <Select
+                                    options={buildingType}
                                     name="typee"
                                     id="exampleSelect"
                                     onChange={(e) => {
-                                        setBuildingTypeSelected(e.target.value);
+                                        setBuildingTypeSelected(e.value);
                                     }}
-                                    className="font-weight-bold">
-                                    <option>Select Building Type</option>
-                                    {buildingType.map((record) => {
-                                        return <option value={record.value}>{record.label}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold"
+                                />
                             </div>
                         </FormGroup>
-
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Area (Sq. Ft.)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                placeholder="Enter Area in Sq. Ft."
-                                className="font-weight-bold"
-                            />
-                        </Form.Group> */}
-
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>No of Devices</Form.Label>
-                            <Form.Control type="number" placeholder="Enter Devices" className="font-weight-bold" />
-                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" disabled={isProcessing} onClick={saveBuilding}>
-                        {isProcessing ? 'Adding...' : 'Add Building'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={() => {
+                                setFormalidation(false);
+                                handleClose();
+                            }}>
+                            Cancel
+                        </Button>
+                        <div style={{ width: '50%' }}>
+                            {!formalidation ? (
+                                <Button
+                                    style={{ width: '100%', backgroundColor: '#444CE7', border: 'none' }}
+                                    variant="primary"
+                                    disabled={true}
+                                    onClick={saveBuilding}>
+                                    {isProcessing ? 'Adding...' : 'Add Building'}
+                                </Button>
+                            ) : (
+                                <Button
+                                    style={{ width: '100%', backgroundColor: '#444CE7', border: 'none' }}
+                                    variant="primary"
+                                    disabled={isProcessing}
+                                    onClick={saveBuilding}>
+                                    {isProcessing ? 'Adding...' : 'Add Building'}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

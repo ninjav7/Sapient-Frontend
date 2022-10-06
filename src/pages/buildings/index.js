@@ -20,7 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
@@ -33,6 +33,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -72,8 +73,13 @@ const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -94,35 +100,6 @@ const BuildingOverview = () => {
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
-
-    const [buildingAlert, setBuildingAlerts] = useState([]);
-
-    const [buildingPeak, setBuildingPeak] = useState([
-        {
-            type: 'string',
-            building_name: 'New Building Peak',
-            building_address: 'address',
-            trend: 'string',
-            last_known_value: '100',
-            current_value: '10',
-            message: 'test',
-            due_message: '10',
-            created_at: 'Today',
-        },
-        {
-            type: 'type2',
-            building_name: 'Energy trend Upward',
-            building_address: 'address',
-            trend: 'string',
-            last_known_value: '100',
-            current_value: '10',
-            message: 'test',
-            due_message: '10',
-            created_at: 'Today',
-        },
-    ]);
-
-    const [buildingsEnergyConsume, setbuildingsEnergyConsume] = useState([]);
 
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
@@ -242,139 +219,15 @@ const BuildingOverview = () => {
 
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
 
-    const [lineChartSeries, setLineChartSeries] = useState([
-        {
-            data: [
-                {
-                    x: new Date('2022-10-1').getTime(),
-                    y: 22000,
-                },
-                {
-                    x: new Date('2022-10-2').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-3').getTime(),
-                    y: 21500,
-                },
-                {
-                    x: new Date('2022-10-4').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-5').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-6').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-7').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-8').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-9').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-10').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-11').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-12').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-13').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-14').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-15').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-16').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-17').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-18').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-19').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-20').getTime(),
-                    y: 22000,
-                },
-                {
-                    x: new Date('2022-10-21').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-22').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-23').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-24').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-25').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-26').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-27').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-28').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-29').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-30').getTime(),
-                    y: 20000,
-                },
-            ],
-        },
-    ]);
-
     const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
             type: 'bar',
             height: 350,
             toolbar: {
                 show: true,
+            },
+            zoom: {
+                enabled: false,
             },
             animations: {
                 enabled: false,
@@ -403,26 +256,12 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -430,20 +269,24 @@ const BuildingOverview = () => {
                             series[seriesIndex][dataPointIndex],
                             4
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
         xaxis: {
-            type: 'datetime',
             labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
-                    return `${weekText} - ${dateText}`;
+                formatter: function (val) {
+                    return moment(val).tz(timeZone).format('MM/DD HH:00');
                 },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: 12,
+            axisTicks: {
+                show: true,
             },
             style: {
                 colors: ['#1D2939'],
@@ -555,6 +398,50 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
+        },
     });
 
     const [weekDaysSeries, setWeekDaysSeries] = useState([
@@ -644,483 +531,57 @@ const BuildingOverview = () => {
                 '11PM',
             ],
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
+        },
     });
-
-    const handleChange = (e, value) => {
-        // console.log('Selected Item ', value);
-        if (value === 'HVAC') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(0);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Lighting') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(1);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Process') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(2);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Plug') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(3);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        }
-    };
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [daysCount, setDaysCount] = useState(1);
 
     const [hoverRef, isHovered] = useHover();
     const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1140,8 +601,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1170,8 +632,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1260,8 +723,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1296,13 +760,14 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1314,14 +779,14 @@ const BuildingOverview = () => {
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
@@ -1354,7 +819,7 @@ const BuildingOverview = () => {
                         }
 
                         for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            let matchedRecord = weekendsData.find((record) => record.x === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
                                 newWeekendsData[0].data.push(matchedRecord);
@@ -1363,6 +828,24 @@ const BuildingOverview = () => {
                                     x: i,
                                     y: 0,
                                 });
+                            }
+                        }
+                        //console.log(newWeekdaysData);
+                        //console.log(newWeekendsData);
+                        for (let i = 0; i < 24; i++) {
+                            if (i === 0) {
+                                newWeekdaysData[0].data[i].x = '12AM';
+                                newWeekendsData[0].data[i].x = '12AM';
+                            } else if (i === 12) {
+                                newWeekdaysData[0].data[i].x = '12PM';
+                                newWeekendsData[0].data[i].x = '12PM';
+                            } else if (i > 12) {
+                                let a = i % 12;
+                                newWeekdaysData[0].data[i].x = a + 'PM';
+                                newWeekendsData[0].data[i].x = a + 'PM';
+                            } else {
+                                newWeekdaysData[0].data[i].x = i + 'AM';
+                                newWeekendsData[0].data[i].x = i + 'AM';
                             }
                         }
                         setWeekDaysSeries(newWeekdaysData);
@@ -1384,13 +867,14 @@ const BuildingOverview = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1408,7 +892,6 @@ const BuildingOverview = () => {
                                 y: parseInt(record?.y / 1000),
                             });
                         });
-                        console.log('Sudhanshu :>> ', newArray);
                         setBuildingConsumptionChartData(newArray);
                         setIsEnergyConsumptionDataLoading(false);
                     });
@@ -1452,6 +935,11 @@ const BuildingOverview = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
+        setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
+    }, [startEndDayCount]);
 
     return (
         <React.Fragment>
@@ -1528,7 +1016,7 @@ const BuildingOverview = () => {
                             />
                         </div>
                     </div> */}
-                    <div className="card-box-style button-style">
+                    {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
@@ -1544,14 +1032,14 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            {/* {/* <Link
+                            {<Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link> */}
+                            </Link>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </Row>
 
@@ -1810,11 +1298,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6
-                                    className="card-title custom-title"
-                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                    Hourly Average Consumption
-                                </h6>
+                                <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
                                 {isAvgConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
@@ -1843,7 +1327,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                                <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                     Hourly Energy Consumption (kWh)
                                 </h6>

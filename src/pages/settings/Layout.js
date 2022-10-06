@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap';
+import {
+    Row,
+    Col,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownItem,
+    DropdownToggle,
+    // Modal,
+    Form,
+    Button,
+} from 'reactstrap';
 import { useAtom } from 'jotai';
 import './style.css';
 import axios from 'axios';
@@ -21,11 +31,13 @@ import {
     currentFloorIdNow7,
     currentFloorIdNow8,
     currentFloorIdNow9,
+    deleteFloor,
     floorid,
     flooridNew,
     floorIdState,
     floorState,
     floorStaticId,
+    getFloorsData,
     iterationDataList,
     iterationNumber,
     reloadSpaces,
@@ -51,10 +63,13 @@ import {
     spaceName8,
     spaceName9,
     spaceNameList,
+    userPermissionData,
 } from '../../store/globalState';
 import InfiniteSpae from '../../components/Layouts/InfiniteSpace';
 import EditSpace from '../../components/Layouts/EditSpace';
 import InfiniteSpace from '../../components/Layouts/InfiniteSpace';
+import Edit from '../../assets/icon/pencil.png';
+import { Modal } from 'antd';
 
 const Layout = () => {
     let cookies = new Cookies();
@@ -75,7 +90,6 @@ const Layout = () => {
     console.log('flootListsuccess', flootListsuccess);
 
     const [modalShow, setModalShow] = useState(false);
-    const [floorId, setFloorId] = useState('');
     const [floorid, setFloorid] = useAtom(floorIdState);
 
     const [currentFloorId2, setCurrentFloorId2] = useAtom(currentFloorIdNow2);
@@ -150,6 +164,7 @@ const Layout = () => {
     const [modalSpaceShow20, setModalSpaceShow20] = useState(false);
 
     const [editFloor, setEditFloor] = useState(false);
+    const [editSpace2, setEditSpace2] = useState(false);
 
     const [closeModal] = useAtom(closeEditSpaceModal);
 
@@ -162,22 +177,8 @@ const Layout = () => {
         building_id: bldgId,
     });
 
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        const params = `?building_id=${bldgId}`;
-        axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
-            setFloorListAPI(res.data.data);
-            setFlootListsuccess(true);
-        });
-    }, [bldgId]);
-
-    // Call only when floor create modal is completed
-    useEffect(() => {
-        if (floorModal) {
+    const getFloorsFunc = () => {
+        try {
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -187,7 +188,36 @@ const Layout = () => {
             axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
                 setFloorListAPI(res.data.data);
                 setFlootListsuccess(true);
+                setFloorData(res.data.data);
             });
+        } catch (err) {
+            console.log(err, 'errLayout');
+        }
+    };
+
+    useEffect(() => {
+        getFloorsFunc();
+    }, [bldgId]);
+
+    const [floorData, setFloorData] = useAtom(getFloorsData);
+
+    // Call only when floor create modal is completed
+    useEffect(() => {
+        try {
+            if (floorModal) {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                const params = `?building_id=${bldgId}`;
+                axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
+                    setFloorListAPI(res.data.data);
+                    setFlootListsuccess(true);
+                });
+            }
+        } catch (err) {
+            console.log(err, 'errFloorModal');
         }
     }, [floorModal]);
 
@@ -220,7 +250,7 @@ const Layout = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            const params = `?floor_id=${floorid}`;
+            const params = `?floor_id=${floorid}&building_id=${bldgId}`;
             axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 if (modelToShow >= 2) {
                     setSpaceListAPI(res.data.data);
@@ -237,7 +267,8 @@ const Layout = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {});
+        let params = `?building_id=${bldgId}`;
+        axios.post(`${BaseUrl}${createSpace}${params}`, spaceBody, { headers }).then((res) => {});
     };
 
     useEffect(() => {
@@ -246,7 +277,8 @@ const Layout = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
+        let params = `?building_id=${bldgId}`;
+        axios.get(`${BaseUrl}${getSpaceTypes}${params}`, { headers }).then((res) => {
             let response = res?.data?.data?.[0]?.generic_spacetypes;
             response.sort((a, b) => {
                 return a.name.localeCompare(b.name);
@@ -261,9 +293,57 @@ const Layout = () => {
         }
     }, [closeModal]);
 
+    const [userPermission] = useAtom(userPermissionData);
+
+    // const [deleteFloorModal, setDeleteFloorModal] = useState(false);
+
+    const [deletingFloor, setDeletingFloorModal] = useAtom(deleteFloor);
+    const handleDeleteClose = () => {
+        setDeletingFloorModal(false);
+    };
+
+    console.log('deletingFloor', deletingFloor);
+
+    // useEffect(() => {
+    //     if (deletingFloor && modalShow) {
+    //         setModalShow(false);
+    //         setDeleteFloorModal(deletingFloor);
+    //     }
+    // }, [deletingFloor, modalShow]);
+
+    // console.log('deleteFloorModal', deleteFloorModal);
+
+    const DeleteFloorsFunc = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        axios.delete(`${BaseUrl}${deleteFloor}/${floorid}`, { headers }).then((res) => {
+            console.log('res', res);
+        });
+    };
+
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
+    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
+
+    console.log('showDeleteAlert', showDeleteAlert);
+
+    const [floorName, setFloorName] = useState('');
+
     return (
         <React.Fragment>
-            <EditFloorModal editFloor={editFloor} show={modalShow} onHide={() => setModalShow(false)} />
+            <EditFloorModal
+                editFloor={editFloor}
+                show={modalShow}
+                floorName={floorName}
+                setModalShow={setModalShow}
+                handleDeleteAlertShow={handleDeleteAlertShow}
+                onHide={() => setModalShow(false)}
+            />
+
             <EditSpace currentFloorId={currentFloorId} show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <EditSpace
                 show={modalSpaceShow2}
@@ -361,23 +441,30 @@ const Layout = () => {
                 <Col lg={12}>
                     <div className="layout-container mt-4">
                         {/* Floor List */}
-
                         <div className="container-column">
                             <div className="container-heading">
                                 <span>Building Root</span>
+
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
-                                    {/* <i className="uil uil-plus mr-2"></i> */}
+
                                     <UncontrolledDropdown className="align-self-center float-right">
                                         <DropdownToggle
                                             tag="button"
                                             className="btn btn-link p-0 dropdown-toggle text-muted">
-                                            <i className="uil uil-plus mr-2"></i>
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_layout_permission
+                                                ?.create ? (
+                                                <i className="uil uil-plus mr-2"></i>
+                                            ) : (
+                                                ''
+                                            )}
                                         </DropdownToggle>
                                         <DropdownMenu right>
                                             <DropdownItem
                                                 onClick={() => {
                                                     setModalShow(true);
+                                                    setEditFloor(false);
                                                 }}>
                                                 Add Floor
                                             </DropdownItem>
@@ -392,21 +479,18 @@ const Layout = () => {
                                     <>
                                         {floorListAPI.map((floorName, i) => (
                                             <div
-                                                className="container-single-content "
+                                                key={i}
+                                                className="container-single-content"
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
-                                                    // setFloorId(floorName?.floor_id);
+                                                    setFloorName(floorName?.name);
                                                     setFloorid(floorName?.floor_id);
-                                                    // setSpaceID(floorName?.floor_id);
                                                     setCurrentFloorId(floorName?.floor_id);
                                                     setGetSpaceName(floorName?.name);
                                                     setFloorIdNow(floorName?.floor_id);
                                                     setModelToShow(2);
                                                 }}>
                                                 <span> {floorName?.name}</span>
-                                                {/* <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                    {spaceName?.type}
-                                                </span> */}
                                             </div>
                                         ))}
                                     </>
@@ -425,16 +509,27 @@ const Layout = () => {
                                             setEditFloor(true);
                                             setModalShow(true);
                                         }}>
-                                        <i className="uil uil-pen mr-2"></i>
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.building_layout_permission?.edit ? (
+                                            <i className="uil uil-pen mr-2"></i>
+                                        ) : (
+                                            ''
+                                        )}
                                     </div>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -480,14 +575,33 @@ const Layout = () => {
                             <div className="container-column">
                                 <div className="container-heading">
                                     <span>{getSpaceName2}</span>
+                                    <div
+                                        className="ml-2"
+                                        onClick={() => {
+                                            setEditSpace2(true);
+                                            setModalShow(true);
+                                        }}>
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.building_layout_permission?.edit ? (
+                                            <i className="uil uil-pen mr-2"></i>
+                                        ) : (
+                                            ''
+                                        )}
+                                    </div>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -529,12 +643,18 @@ const Layout = () => {
                                     <span>{getSpaceName3}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -577,12 +697,18 @@ const Layout = () => {
                                     <span>{getSpaceName4}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -625,12 +751,18 @@ const Layout = () => {
                                     <span>{getSpaceName5}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -675,12 +807,18 @@ const Layout = () => {
                                     <span>{getSpaceName6}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -725,12 +863,18 @@ const Layout = () => {
                                     <span>{getSpaceName7}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -775,12 +919,18 @@ const Layout = () => {
                                     <span>{getSpaceName8}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -824,12 +974,18 @@ const Layout = () => {
                                     <span>{getSpaceName9}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -873,12 +1029,18 @@ const Layout = () => {
                                     <span>{getSpaceName10}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -922,12 +1084,18 @@ const Layout = () => {
                                     <span>{getSpaceName11}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -971,12 +1139,18 @@ const Layout = () => {
                                     <span>{getSpaceName12}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1020,12 +1194,18 @@ const Layout = () => {
                                     <span>{getSpaceName13}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1069,12 +1249,18 @@ const Layout = () => {
                                     <span>{getSpaceName14}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1118,12 +1304,18 @@ const Layout = () => {
                                     <span>{getSpaceName15}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1167,12 +1359,18 @@ const Layout = () => {
                                     <span>{getSpaceName16}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1216,12 +1414,18 @@ const Layout = () => {
                                     <span>{getSpaceName17}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1265,12 +1469,18 @@ const Layout = () => {
                                     <span>{getSpaceName18}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1314,7 +1524,7 @@ const Layout = () => {
                                     <span>{getSpaceName19}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
+
                                         <UncontrolledDropdown className="align-self-center float-right">
                                             <DropdownToggle
                                                 tag="button"
@@ -1358,6 +1568,44 @@ const Layout = () => {
                     </div>
                 </Col>
             </Row>
+            {/* {showDeleteAlert} */}
+            {/* {showDeleteAlert && ( */}
+            {/* <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Breaker</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">Are you sure you want to delete the Breaker?</div>
+                        <div className="unlink-alert-styling">
+                            This will remove the breaker from the panel and is not recoverable.
+                        </div>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="light"
+                        onClick={() => {
+                            handleDeleteAlertClose();
+                            // handleEditBreakerShow();
+                        }}
+                        className="unlink-cancel-style">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        // onClick={() => {
+                        //     deleteCurrentBreaker();
+                        // }}
+                        className="unlink-reset-style">
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal> */}
+
+            {/* {showDeleteAlert && <div>manas</div>} */}
+            {/* )} */}
         </React.Fragment>
     );
 };

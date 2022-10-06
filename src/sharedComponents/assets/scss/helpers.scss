@@ -18,6 +18,9 @@
     &-md {
         box-shadow: 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.01), 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.06);
     }
+    &-lg {
+        box-shadow: 0 0.25rem 0.375rem -0.0625rem rgba(16, 24, 40, 0.02), 0px 2px 4px -1px rgba(16, 24, 40, 0.06);
+    }
 }
 
 .borders {
@@ -38,10 +41,40 @@
     &-left {
         border-bottom: 0.0625rem solid $primary-gray-200;
     }
+
+    &-base {
+        @extend .borders;
+        @extend .box-shadow-md;
+        border-radius: 0.5rem;
+    }
 }
 
 .vertical-line {
     height: 100%;
     width: 1px;
     background: $primary-gray-200;
+}
+
+.reset-styles {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+}
+
+$text-colors: (
+    'error-600': $error-600,
+    'gray-550': $primary-gray-550,
+    'gray-800': $primary-gray-800,
+);
+
+@each $color, $value in $text-colors {
+    html body .#{$color} {
+        color: $value !important;
+
+        path {
+            fill: $value;
+        }
+    }
 }

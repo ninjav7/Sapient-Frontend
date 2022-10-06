@@ -34,6 +34,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 import './panel-style.css';
+import Select from 'react-select';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -130,6 +131,35 @@ const EditBreakerPanel = () => {
 
     const [activePanelType, setActivePanelType] = useState('distribution');
     const [panelsDataList, setPanelsDataList] = useState([]);
+
+    const [parentPanel, setParentPanel] = useState([]);
+    const [location, setLocation] = useState([]);
+
+    const addPanelData = () => {
+        panelsDataList.map((item) => {
+            setParentPanel((el) => [...el, { value: `${item?.panel_id}`, label: `${item?.panel_name}` }]);
+        });
+    };
+
+    const addLocationData = () => {
+        locationDataList.map((item) => {
+            setLocation((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (panelsDataList) {
+            addPanelData();
+        }
+    }, [panelsDataList]);
+
+    useEffect(() => {
+        if (locationDataList) {
+            addLocationData();
+        }
+    }, [locationDataList]);
+
+    console.log('parentPanel', parentPanel);
 
     const [isEditable, setIsEditable] = useState(true);
 
@@ -378,7 +408,8 @@ const EditBreakerPanel = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.post(`${BaseUrl}${resetBreakers}`, { panel_id: panelId }, { headers }).then((res) => {
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
                 let response = res.data;
                 setIsResetting(false);
                 handleUnlinkAlertClose();
@@ -474,7 +505,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
@@ -567,7 +598,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
@@ -642,7 +673,7 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&page_size=100&page_no=1`;
+                let params = `?building_id=${bldgId}&page_size=10000&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
@@ -878,23 +909,20 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
+                                    isSearchable={true}
+                                    defaultValue={'Select Parent Panel'}
+                                    options={parentPanel}
                                     onChange={(e) => {
-                                        handleChange('parent_id', e.target.value);
+                                        handleChange('parent_id', e.value);
                                     }}
-                                    value={panel.parent_id}>
-                                    <option>None</option>
-                                    {panelsDataList.map((record) => {
-                                        if (record.panel_id === panelId) {
-                                            return;
-                                        }
-                                        return <option value={record.panel_id}>{record.panel_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
 
@@ -907,23 +935,37 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                // <Input
+                                //     type="select"
+                                //     name="state"
+                                //     id="userState"
+                                //     className="font-weight-bold"
+                                //     onChange={(e) => {
+                                //         if (e.target.value === 'Select Location') {
+                                //             return;
+                                //         }
+                                //         handleChange('location_id', e.target.value);
+                                //     }}
+                                //     value={panel.location_id}>
+                                //     <option>Select Location</option>
+                                //     {locationDataList.map((record) => {
+                                //         return <option value={record.location_id}>{record.location_name}</option>;
+                                //     })}
+                                // </Input>
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
+                                    isSearchable={true}
+                                    defaultValue={'Select Location Type'}
+                                    options={location}
                                     onChange={(e) => {
-                                        if (e.target.value === 'Select Location') {
-                                            return;
-                                        }
-                                        handleChange('location_id', e.target.value);
+                                        handleChange('location_id', e.value);
                                     }}
-                                    value={panel.location_id}>
-                                    <option>Select Location</option>
-                                    {locationDataList.map((record) => {
-                                        return <option value={record.location_id}>{record.location_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
                     </div>
@@ -978,7 +1020,8 @@ const EditBreakerPanel = () => {
                                                         type="number"
                                                         name="breakers"
                                                         id="breakers"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers_linked}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
@@ -997,7 +1040,8 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,

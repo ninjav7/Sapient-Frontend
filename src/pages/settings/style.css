@@ -280,25 +280,28 @@
 .container-content-group {
     padding-left: 10px;
     display: flex;
-
     flex-direction: column;
 }
 
-.container-single-content:hover {
+/* .container-single-content:hover { */
+/* background: #f3f4f7; */
+/* font-weight: 700; */
+/* background-image: url('../../assets/icon/pencil.png'); */
+/* background-repeat: no-repeat; */
+/* background-position: 225px 10px; */
+/* } */
+.hover-image-delete:hover {
     background: #f3f4f7;
-    font-weight: 700;
-    background-image: url('../../assets/icon/arrow.svg');
-    background-repeat: no-repeat;
-    background-position: 225px 10px;
+    background-image: url('../../assets/icon/pencil.png');
 }
 
-.container-single-content:active {
+/* .container-single-content:active {
     background: #f2f4f7;
     font-weight: 700;
     background-image: url('../../assets/icon/arrow.svg');
     background-repeat: no-repeat;
     background-position: 225px 10px;
-}
+} */
 
 .container-single-content {
     padding-top: 5px;
@@ -710,6 +713,10 @@
     justify-content: center;
 }
 
+.header-container {
+    display: flex;
+    justify-content: space-between;
+}
 .chart-border-style {
     background: #ffffff;
     border: 1px solid #eaecf0;
@@ -718,4 +725,27 @@
     border-radius: 8px;
     margin-top: 15px;
     padding: 1rem;
+}
+
+.triple-dot-style {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 7px;
+    gap: 8px;
+    width: 34px;
+    height: 34px;
+    background: #ffffff;
+    border: 1px solid #d9dde2;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+    border-radius: 6px;
+}
+
+.delete-btn-style {
+    color: #d92d20;
+}
+
+.disable-delete-btn-style {
+    color: #ad716c;
 }
