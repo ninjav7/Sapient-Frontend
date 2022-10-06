@@ -683,7 +683,7 @@ const PassiveDevices = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    passiveDeviceDataWithFilter('ace', 'identifier');
                     handleEditClose();
                 });
         } catch (error) {
@@ -706,7 +706,7 @@ const PassiveDevices = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    passiveDeviceDataWithFilter('ace', 'identifier');
                     handleDeleteClose();
                 });
         } catch (error) {
