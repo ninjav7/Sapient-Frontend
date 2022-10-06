@@ -74,7 +74,8 @@ const ExploreBuildingsTable = ({
                 var checking = document.getElementById(exploreTableData[i].building_id);
                 checking.checked = ischecked.checked;
             }
-            setBuildingListArray(arr);
+            setTotalBuildingId(arr);
+            //setBuildingListArray(arr);
         } else {
             for (var i = 0; i < exploreTableData.length; i++) {
                 var checking = document.getElementById(exploreTableData[i].building_id);
@@ -625,8 +626,8 @@ const ExploreByBuildings = () => {
                 .then((res) => {
                     let responseData = res.data;
                     // console.log(responseData[0]);
-                    setSeriesData([]);
-                    setSeriesLineData([]);
+                    //setSeriesData([]);
+                    //setSeriesLineData([]);
                     setExploreTableData(responseData);
                     // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
                     setTopEnergyConsumption(responseData[0].consumption.now);
@@ -648,8 +649,8 @@ const ExploreByBuildings = () => {
             return;
         }
         let result = [];
-        setSeriesData([]);
-        setSeriesLineData([]);
+        //setSeriesData([]);
+        //setSeriesLineData([]);
 
         exploreDataFetch();
     }, [startDate, endDate]);
