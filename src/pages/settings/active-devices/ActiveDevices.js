@@ -637,7 +637,7 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=ace`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -697,7 +697,7 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=ace`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
