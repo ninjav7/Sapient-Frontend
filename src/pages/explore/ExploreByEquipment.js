@@ -481,7 +481,7 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                        <div className="page-button-style">
+                        {/* <div className="page-button-style">
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold mt-4"
@@ -520,7 +520,7 @@ const ExploreEquipmentTable = ({
                                     ))}
                                 </select>
                             </div>
-                        </div>
+                        </div> */}
                     </Col>
                 </CardBody>
             </Card>
@@ -1022,8 +1022,9 @@ const ExploreByEquipment = () => {
                         let arr = rvmsp.filter(function (item) {
                             return item.name === spacedata[j].name;
                         });
-                        if (arr.length === 0)
+                        if (arr.length === 0) {
                             rvmsp.push(spacedata[j]);
+                        }
                     }
                 }
             }
@@ -2015,7 +2016,7 @@ const ExploreByEquipment = () => {
                         acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
                     }
                     else {
-                        acd.push(obj[val[i]].toFixed(2))
+                        acd.push(obj[val[i]]?.toFixed(2))
                     }
                 }
                 abc.push(acd);

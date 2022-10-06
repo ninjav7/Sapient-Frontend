@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import {
     BaseUrl,
     generalEquipments,
@@ -32,25 +18,16 @@ import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown, Search } from 'react-feather';
-import { TagsInput } from 'react-tag-input-component';
+import { Search } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
-import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import { MultiSelect } from 'react-multi-select-component';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { result } from 'lodash';
-import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
-import ThreeDots from '../../assets/images/threeDots.png';
-import Pen from '../../assets/images/pen.png';
-import Delete from '../../assets/images/delete.png';
 import {
     allEquipmentDataGlobal,
     equipmentData,
@@ -62,6 +39,7 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
+import EquipChartModal from '../explore/EquipChartModal';
 import './style.css';
 
 const EquipmentTable = ({
@@ -80,6 +58,9 @@ const EquipmentTable = ({
     setPageSize,
     setIsDelete,
     setIsEdit,
+    setEquipmentFilter,
+    handleChartOpen,
+    setEquipmentIdData,
     // formValidation,
     // setFormValidation,
 }) => {
@@ -173,17 +154,6 @@ const EquipmentTable = ({
         }
     };
     const [equipData, setEquipData] = useState(null);
-
-    const [toggleEdit, setToggleEdit] = useState(false);
-    const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
-    const [toggleRecordData, setToggleRecordData] = useAtom(toggleRecord);
-
-    const [actionStyle, setActionStyle] = useState({
-        width: '30px',
-        position: 'absolute',
-        top: '100px',
-        right: 0,
-    });
 
     return (
         <>
@@ -482,12 +452,7 @@ const EquipmentTable = ({
                                                     )}
                                                     <td>
                                                         <Dropdown className="float-end" align="end">
-                                                            <div
-                                                                onClick={() => {
-                                                                    setEqupimentIdData(record?.equipments_id);
-                                                                    setToggleRecordData(record);
-                                                                    setToggleEdit(true);
-                                                                }}>
+                                                            <div>
                                                                 <Dropdown.Toggle
                                                                     as="a"
                                                                     className="cursor-pointer arrow-none text-muted">
@@ -503,8 +468,11 @@ const EquipmentTable = ({
                                                             <Dropdown.Menu>
                                                                 <div
                                                                     onClick={() => {
-                                                                        setIsEdit(true);
-                                                                        Toggle(toggleRecordData);
+                                                                        setEquipmentFilter({
+                                                                            equipment_id: record?.equipments_id,
+                                                                            equipment_name: record?.equipments_name,
+                                                                        });
+                                                                        handleChartOpen();
                                                                     }}>
                                                                     <Dropdown.Item>
                                                                         <FontAwesomeIcon
@@ -521,6 +489,7 @@ const EquipmentTable = ({
                                                                         if (record.device_type === 'active') {
                                                                             return;
                                                                         }
+                                                                        setEquipmentIdData(record?.equipments_id);
                                                                         setIsDelete(true);
                                                                     }}>
                                                                     <Dropdown.Item
@@ -606,7 +575,8 @@ const EquipmentTable = ({
                     )}
                 </CardBody>
             </Card>
-            {userPermission?.user_role === 'admin' ||
+
+            {/* {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.building_equipment_permission?.edit ? (
                 <div>
                     <EquipmentDeviceChartModel
@@ -637,7 +607,7 @@ const EquipmentTable = ({
                 </div>
             ) : (
                 <></>
-            )}
+            )} */}
         </>
     );
 };
@@ -659,6 +629,13 @@ const Equipment = () => {
     const [isEdit, setIsEdit] = useState(false);
     const handleEditClose = () => setIsEdit(false);
 
+    const [equipmentFilter, setEquipmentFilter] = useState({});
+    const [selectedModalTab, setSelectedModalTab] = useState(1);
+
+    const [showEquipmentChart, setShowEquipmentChart] = useState(false);
+    const handleChartOpen = () => setShowEquipmentChart(true);
+    const handleChartClose = () => setShowEquipmentChart(false);
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(true);
 
@@ -676,18 +653,6 @@ const Equipment = () => {
         end_use: '',
         space_id: '',
     });
-
-    // useEffect(() => {
-    //     if (
-    //         createEqipmentData.name.length > 0 &&
-    //         createEqipmentData?.equipment_type?.length > 0 &&
-    //         createEqipmentData?.end_use?.length > 0
-    //     ) {
-    //         setFormValidation(true);
-    //     } else {
-    //         setFormValidation(false);
-    //     }
-    // }, [createEqipmentData]);
 
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
@@ -1107,8 +1072,8 @@ const Equipment = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
-    const [equpimentIdData] = useAtom(equipmentId);
     const [processdelete, setProcessdelete] = useState(false);
+    const [equipmentIdData, setEquipmentIdData] = useState('');
 
     const deleteEquipmentFunc = async () => {
         setProcessdelete(true);
@@ -1117,7 +1082,7 @@ const Equipment = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        let params = `?equipment_id=${equpimentIdData}&building_id=${bldgId}`;
+        let params = `?equipment_id=${equipmentIdData}&building_id=${bldgId}`;
         await axios.delete(`${BaseUrl}${deleteEquipment}${params}`, { headers }).then(() => {
             setProcessdelete(false);
             fetchEquipmentData();
@@ -1279,6 +1244,9 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            setEquipmentFilter={setEquipmentFilter}
+                            handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
@@ -1300,6 +1268,9 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            setEquipmentFilter={setEquipmentFilter}
+                            handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
@@ -1321,6 +1292,9 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            setEquipmentFilter={setEquipmentFilter}
+                            handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
@@ -1493,6 +1467,16 @@ const Equipment = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <EquipChartModal
+                showEquipmentChart={showEquipmentChart}
+                handleChartClose={handleChartClose}
+                equipmentFilter={equipmentFilter}
+                fetchEquipmentData={fetchEquipmentData}
+                selectedTab={selectedModalTab}
+                setSelectedTab={setSelectedModalTab}
+                activePage="equipment"
+            />
         </React.Fragment>
     );
 };
