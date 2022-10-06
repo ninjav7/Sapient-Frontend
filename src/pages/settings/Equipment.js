@@ -28,7 +28,6 @@ import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 import {
     allEquipmentDataGlobal,
     equipmentData,
@@ -40,8 +39,8 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
-import './style.css';
 import EquipChartModal from '../explore/EquipChartModal';
+import './style.css';
 
 const EquipmentTable = ({
     equipmentData,
@@ -61,6 +60,7 @@ const EquipmentTable = ({
     setIsEdit,
     setEquipmentFilter,
     handleChartOpen,
+    setEquipmentIdData,
     // formValidation,
     // setFormValidation,
 }) => {
@@ -154,21 +154,6 @@ const EquipmentTable = ({
         }
     };
     const [equipData, setEquipData] = useState(null);
-
-    const [toggleEdit, setToggleEdit] = useState(false);
-    const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
-    const [toggleRecordData, setToggleRecordData] = useAtom(toggleRecord);
-
-    const [actionStyle, setActionStyle] = useState({
-        width: '30px',
-        position: 'absolute',
-        top: '100px',
-        right: 0,
-    });
-
-    useEffect(() => {
-        console.log('equipmentData :>> ', equipmentData);
-    });
 
     return (
         <>
@@ -504,6 +489,7 @@ const EquipmentTable = ({
                                                                         if (record.device_type === 'active') {
                                                                             return;
                                                                         }
+                                                                        setEquipmentIdData(record?.equipments_id);
                                                                         setIsDelete(true);
                                                                     }}>
                                                                     <Dropdown.Item
@@ -1086,8 +1072,8 @@ const Equipment = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
-    const [equpimentIdData] = useAtom(equipmentId);
     const [processdelete, setProcessdelete] = useState(false);
+    const [equipmentIdData, setEquipmentIdData] = useState('');
 
     const deleteEquipmentFunc = async () => {
         setProcessdelete(true);
@@ -1096,7 +1082,7 @@ const Equipment = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        let params = `?equipment_id=${equpimentIdData}&building_id=${bldgId}`;
+        let params = `?equipment_id=${equipmentIdData}&building_id=${bldgId}`;
         await axios.delete(`${BaseUrl}${deleteEquipment}${params}`, { headers }).then(() => {
             setProcessdelete(false);
             fetchEquipmentData();
@@ -1260,6 +1246,7 @@ const Equipment = () => {
                             setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
@@ -1283,6 +1270,7 @@ const Equipment = () => {
                             setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
@@ -1306,6 +1294,7 @@ const Equipment = () => {
                             setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
+                            setEquipmentIdData={setEquipmentIdData}
                             // formValidation={formValidation}
                             // setFormValidation={setFormValidation}
                         />
