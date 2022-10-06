@@ -101,7 +101,7 @@ const EquipChartModal = ({
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
     const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
-    const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
+    //const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
@@ -554,20 +554,20 @@ const EquipChartModal = ({
                 setShowTab('metrics');
                 setMetricClass('mr-3 single-passive-tab-active tab-switch');
                 setConfigureClass('mr-3 single-passive-tab tab-switch');
-                setHistoryClass('mr-3 single-passive-tab tab-switch');
+                //setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
             case 'configure':
                 setShowTab('configure');
                 setMetricClass('mr-3 single-passive-tab tab-switch');
                 setConfigureClass('mr-3 single-passive-tab-active tab-switch');
-                setHistoryClass('mr-3 single-passive-tab tab-switch');
+                //setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
-            case 'history':
-                setShowTab('history');
-                setMetricClass('mr-3 single-passive-tab tab-switch');
-                setConfigureClass('mr-3 single-passive-tab tab-switch');
-                setHistoryClass('mr-3 single-passive-tab-active tab-switch');
-                break;
+            // case 'history':
+            //     setShowTab('history');
+            //     setMetricClass('mr-3 single-passive-tab tab-switch');
+            //     setConfigureClass('mr-3 single-passive-tab tab-switch');
+            //     setHistoryClass('mr-3 single-passive-tab-active tab-switch');
+            //     break;
         }
     };
     const handleChange = (key, value) => {
@@ -1023,11 +1023,11 @@ const EquipChartModal = ({
                             onClick={() => setSelectedTab(1)}>
                             Configure
                         </span>
-                        <span
+                        {/* <span
                             className={selectedTab === 2 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
                             onClick={() => setSelectedTab(2)}>
                             History
-                        </span>
+                        </span> */}
                     </div>
 
                     {selectedTab === 0 && (

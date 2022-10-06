@@ -707,7 +707,7 @@ const General = () => {
     // };
 
     useEffect(() => {
-        getPlacesAutocomplete();
+        // getPlacesAutocomplete();
         // getGooglePlacesAutocomplete();
     }, [textLocation]);
 
