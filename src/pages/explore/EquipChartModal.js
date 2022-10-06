@@ -100,7 +100,6 @@ const EquipChartModal = ({
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
-        console.log(obj.unit);
     };
 
     const buildingAlertsData = async () => {
@@ -556,13 +555,11 @@ const EquipChartModal = ({
     }, [equipmentFilter]);
 
     useEffect(() => {
-        console.log(equipmentTypeData);
         if (equipmentTypeData.lenght === 0 || Object.keys(equipmentData).length === 0) {
             return;
         }
         let res = [];
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
-        console.log(res);
         setEquipResult(res);
     }, [equipmentTypeData, equipmentData]);
 
