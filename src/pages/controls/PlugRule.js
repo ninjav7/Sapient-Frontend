@@ -11,6 +11,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 
+import { timePicker15MinutesIntervalOption } from '../../constants/time';
+
 import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import moment from 'moment';
 import { Cookies } from 'react-cookie';
@@ -619,7 +621,7 @@ const PlugRule = () => {
         let currentObj = currentData;
         currentObj.action.forEach((record) => {
             if (record.condition_id === condition_id) {
-                record[key] = value === true
+                record[key] = value === true;
             }
         });
         handleCurrentDataChange('action', currentObj.action);
@@ -910,7 +912,7 @@ const PlugRule = () => {
                                 className="btn btn-default plug-rule-cancel"
                                 onClick={() => {
                                     history.push({
-                                        pathname: `/control/plug-rules/`,
+                                        pathname: `/control/plug-rules`,
                                     });
                                 }}>
                                 Cancel
@@ -923,7 +925,7 @@ const PlugRule = () => {
                                     updateSocketLink();
                                     updateSocketUnlink();
                                     history.push({
-                                        pathname: `/control/plug-rules/`,
+                                        pathname: `/control/plug-rules`,
                                     });
                                 }}>
                                 Save
@@ -999,7 +1001,7 @@ const PlugRule = () => {
                                     </div>
 
                                     <hr className="plug-rule-schedule-breaker" />
-{console.log("currentData",currentData)}
+
                                     {currentData.action &&
                                         currentData.action.map((record, index) => {
                                             return (
@@ -1007,48 +1009,41 @@ const PlugRule = () => {
                                                     <div className="plug-rule-schedule-row mb-1">
                                                         <div className="schedule-left-flex">
                                                             <div>
-                                                                {console.log("record.action_type",record.action_type)}
                                                                 <Select
-                                                                defaultValue={record.action_type}
-                                                                label="Select"
-                                                                onChange={(event ) => {
-                                                                    console.log("value4234234",event.value);
-                                                                    console.log("record.condition_id",record.condition_id);
-                                                                    handleSchedularConditionChange(
-                                                                        'action_type',
-                                                                        event.value,
-                                                                        record.condition_id
-                                                                    );
-                                                                }}
-                                                                options={[
-                                                                    {
-                                                                        label: 'Turn Off',
-                                                                        value: false,
-                                                                    },
-                                                                    {
-                                                                        label: 'Turn On',
-                                                                        value: true,
-                                                                    }
-                                                                ]}
+                                                                    defaultValue={record.action_type}
+                                                                    label="Select"
+                                                                    onChange={(event) => {
+                                                                        handleSchedularConditionChange(
+                                                                            'action_type',
+                                                                            event.value,
+                                                                            record.condition_id
+                                                                        );
+                                                                    }}
+                                                                    options={[
+                                                                        {
+                                                                            label: 'Turn Off',
+                                                                            value: false,
+                                                                        },
+                                                                        {
+                                                                            label: 'Turn On',
+                                                                            value: true,
+                                                                        },
+                                                                    ]}
                                                                 />
                                                             </div>
                                                             <div>at</div>
                                                             <div>
-                                                                <DatePicker
-                                                                    value={record.action_time}
-                                                                    showTimeSelect
-                                                                    showTimeSelectOnly
-                                                                    timeIntervals={15}
-                                                                    timeCaption="Time"
-                                                                    dateFormat="h:mm aa"
-                                                                    className="time-picker"
-                                                                    onChange={(date) => {
+                                                                <Select
+                                                                    defaultValue={record.action_time}
+                                                                    label="Select"
+                                                                    onChange={(event) => {
                                                                         handleSchedularTimeChange(
                                                                             'action_time',
-                                                                            moment(date).format('hh:mm A'),
+                                                                            event.value,
                                                                             record.condition_id
                                                                         );
                                                                     }}
+                                                                    options={timePicker15MinutesIntervalOption}
                                                                 />
                                                             </div>
                                                             <div>on</div>
