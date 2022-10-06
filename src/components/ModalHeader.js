@@ -117,7 +117,7 @@ const ModalHeader = (props) => {
                 />
             </div>
 
-            <div style={{ width: '9vw' }} className="mr-1">
+            <div style={{ width: 'max-content' }} className="mr-1">
                 <DateRangePicker
                     startDate={startDate}
                     endDate={endDate}

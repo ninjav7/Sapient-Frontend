@@ -62,12 +62,12 @@ import { xaxisFilters } from '../../helpers/explorehelpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
-    handleChartOpen,
-    equipData,
     handleChartClose,
     fetchEquipmentData,
-    showWindow,
     equipmentFilter,
+    selectedTab,
+    setSelectedTab,
+    activePage,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -82,7 +82,6 @@ const EquipChartModal = ({
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
-    const [selectedTab, setSelectedTab] = useState(0);
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
@@ -489,7 +488,6 @@ const EquipChartModal = ({
 
             selection: {
                 enabled: true,
-
             },
             animations: {
                 enabled: false,
@@ -942,10 +940,15 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
                                                     setEquipmentData({});
+                                                    if (activePage === 'explore') {
+                                                        setSelectedTab(0);
+                                                    }
+                                                    if (activePage === 'equipment') {
+                                                        setSelectedTab(1);
+                                                    }
                                                 }}>
                                                 Cancel
                                             </button>
@@ -1404,14 +1407,14 @@ const EquipChartModal = ({
                                         </Col>
                                         <Col lg={6}>
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                <Form.Label>Equipment Type</Form.Label>
+                                                <Form.Label>Equipment Typee</Form.Label>
                                                 <Input
                                                     type="select"
                                                     name="select"
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
                                                     defaultValue={
-                                                        equipResult.length === 0 ? '' : equipResult.equipment_id
+                                                        equipResult?.length === 0 ? '' : equipResult?.equipment_id
                                                     }
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
