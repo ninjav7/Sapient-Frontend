@@ -33,16 +33,15 @@ import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -62,6 +61,8 @@ import {
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
+import Dropdown from 'react-bootstrap/Dropdown';
+import './style.css';
 
 const EquipmentTable = ({
     equipmentData,
@@ -94,11 +95,7 @@ const EquipmentTable = ({
 
     const [equpimentDataNow] = useAtom(equipmentDataGlobal);
 
-    console.log('equpimentDataNow', equpimentDataNow);
-
     const [userPermission] = useAtom(userPermissionData);
-
-    console.log(selectedOptions, 'selectedOptions');
 
     const handleColumnSort = (order, columnName) => {
         if (columnName === 'equipments_name') {
@@ -180,6 +177,13 @@ const EquipmentTable = ({
     const [toggleEdit, setToggleEdit] = useState(false);
     const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
     const [toggleRecordData, setToggleRecordData] = useAtom(toggleRecord);
+
+    const [actionStyle, setActionStyle] = useState({
+        width: '30px',
+        position: 'absolute',
+        top: '100px',
+        right: 0,
+    });
 
     return (
         <>
@@ -396,6 +400,9 @@ const EquipmentTable = ({
                                                 <td>
                                                     <Skeleton count={5} />
                                                 </td>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
                                             </tr>
                                         </SkeletonTheme>
                                     </tbody>
@@ -411,11 +418,7 @@ const EquipmentTable = ({
                                                     }}
                                                     className="mouse-pointer">
                                                     {selectedOptions.some((record) => record.value === 'status') && (
-                                                        <td
-                                                            className="text-center"
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td className="text-center">
                                                             <div>
                                                                 {record.status === 'Online' && (
                                                                     <div className="icon-bg-styling">
@@ -431,11 +434,7 @@ const EquipmentTable = ({
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'name') && (
-                                                        <td
-                                                            className="font-weight-bold"
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td className="font-weight-bold">
                                                             {!(record.equipments_name === '')
                                                                 ? record.equipments_name
                                                                 : '-'}
@@ -443,30 +442,16 @@ const EquipmentTable = ({
                                                     )}
                                                     {selectedOptions.some(
                                                         (record) => record.value === 'equip_type'
-                                                    ) && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}
-                                                            className="font-weight-bold">
-                                                            {record.equipments_type}
-                                                        </td>
-                                                    )}
+                                                    ) && <td className="font-weight-bold">{record.equipments_type}</td>}
                                                     {selectedOptions.some((record) => record.value === 'location') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.location === ' > '
                                                                 ? ' - '
                                                                 : record.location.split('>').reverse().join(' > ')}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'tags') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {
                                                                 <div className="badge badge-light mr-2 font-weight-bold week-day-style">
                                                                     {record.tags.length === 0
@@ -481,105 +466,91 @@ const EquipmentTable = ({
                                                     {selectedOptions.some(
                                                         (record) => record.value === 'sensor_number'
                                                     ) && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.sensor_number === 0 ? '-' : record.sensor_number}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}>
+                                                        <td>
                                                             {record.last_data === ''
                                                                 ? '-'
                                                                 : moment(record?.last_data).fromNow()}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'device_id') && (
-                                                        <td
-                                                            onClick={() => {
-                                                                Toggle(record);
-                                                            }}
-                                                            className="font-weight-bold">
-                                                            {record.device_mac}
-                                                        </td>
+                                                        <td className="font-weight-bold">{record.device_mac}</td>
                                                     )}
-                                                    <td className="font-weight-bold">
-                                                        <img
-                                                            style={{ width: '20px' }}
-                                                            src={ThreeDots}
-                                                            onClick={() => {
-                                                                console.log(
-                                                                    'equipments_name_plus',
-                                                                    record?.equipments_id
-                                                                );
-                                                                setToggleRecordData(record);
-                                                                setToggleEdit(true);
-                                                                setEqupimentIdData(record?.equipments_id);
-                                                            }}
-                                                        />
+                                                    <td>
+                                                        <Dropdown className="float-end" align="end">
+                                                            <div
+                                                                onClick={() => {
+                                                                    setEqupimentIdData(record?.equipments_id);
+                                                                    setToggleRecordData(record);
+                                                                    setToggleEdit(true);
+                                                                }}>
+                                                                <Dropdown.Toggle
+                                                                    as="a"
+                                                                    className="cursor-pointer arrow-none text-muted">
+                                                                    <div className="triple-dot-style">
+                                                                        <FontAwesomeIcon
+                                                                            icon={faEllipsisVertical}
+                                                                            color="#1D2939"
+                                                                            size="lg"
+                                                                        />
+                                                                    </div>
+                                                                </Dropdown.Toggle>
+                                                            </div>
+                                                            <Dropdown.Menu>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        setIsEdit(true);
+                                                                        Toggle(toggleRecordData);
+                                                                    }}>
+                                                                    <Dropdown.Item>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faPen}
+                                                                            color="#1D2939"
+                                                                            size="lg"
+                                                                            className="mr-4"
+                                                                        />
+                                                                        Edit
+                                                                    </Dropdown.Item>
+                                                                </div>
+                                                                <div
+                                                                    onClick={() => {
+                                                                        if (record.device_type === 'active') {
+                                                                            return;
+                                                                        }
+                                                                        setIsDelete(true);
+                                                                    }}>
+                                                                    <Dropdown.Item
+                                                                        disabled={record.device_type === 'active'}>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faTrash}
+                                                                            color={
+                                                                                record.device_type === 'active'
+                                                                                    ? '#ad716c'
+                                                                                    : '#d92d20'
+                                                                            }
+                                                                            size="lg"
+                                                                            className="mr-4"
+                                                                        />
+                                                                        <span
+                                                                            className={
+                                                                                record.device_type === 'active'
+                                                                                    ? 'disable-delete-btn-style'
+                                                                                    : 'delete-btn-style'
+                                                                            }>
+                                                                            Delete
+                                                                        </span>
+                                                                    </Dropdown.Item>
+                                                                </div>
+                                                            </Dropdown.Menu>
+                                                        </Dropdown>
                                                     </td>
                                                 </tr>
                                             );
                                         })}
-                                        <UncontrolledDropdown
-                                            style={{
-                                                width: '30px',
-                                                position: 'absolute',
-                                                top: '100px',
-                                                right: 0,
-                                            }}
-                                            isOpen={toggleEdit}
-                                            toggle={() => {
-                                                setToggleEdit(!toggleEdit);
-                                            }}>
-                                            <DropdownToggle
-                                                tag="button"
-                                                className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
-                                            <DropdownMenu right>
-                                                <DropdownItem>
-                                                    <div
-                                                        onClick={() => {
-                                                            setIsEdit(true);
-                                                            // Toggle(record);
-                                                            Toggle(toggleRecordData);
-                                                        }}
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}>
-                                                        <img src={Pen} style={{ width: '20px' }} />
-                                                        <span style={{ marginLeft: '20px', fontWeight: '700' }}>
-                                                            Edit
-                                                        </span>
-                                                    </div>
-                                                </DropdownItem>
-                                                <DropdownItem
-                                                    disabled={equpimentDataNow?.includes(equpimentIdData)}
-                                                    onClick={() => {
-                                                        setIsDelete(true);
-                                                    }}>
-                                                    <div
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}>
-                                                        <img src={Delete} style={{ width: '20px' }} />
-                                                        <span
-                                                            style={{
-                                                                color: 'red',
-                                                                marginLeft: '20px',
-                                                                fontWeight: '700',
-                                                            }}>
-                                                            Delete
-                                                        </span>
-                                                    </div>
-                                                </DropdownItem>
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
                                     </tbody>
                                 )}
                             </Table>
@@ -718,7 +689,6 @@ const Equipment = () => {
     //     }
     // }, [createEqipmentData]);
 
-    console.log('createEqipmentData', createEqipmentData);
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
@@ -738,6 +708,8 @@ const Equipment = () => {
 
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [search, setSearch] = useState('');
+
+    const [equipSearch, setEquipSearch] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
     const [endUseDataNow, setEndUseDataNow] = useState([]);
@@ -792,27 +764,23 @@ const Equipment = () => {
     };
 
     const handleSearch = async () => {
-        if (search !== '') {
-            try {
-                setIsEquipDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&name=${search}`;
-                await axios.post(`${BaseUrl}${searchEquipment}${params}`, {}, { headers }).then((res) => {
-                    let response = res.data;
-                    setGeneralEquipmentData(res.data);
-                });
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
-            } catch (error) {
-                console.log(error);
-                setIsEquipDataFetched(false);
-                console.log('Failed to fetch all Equipment Data');
-            }
-        } else {
-            setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipment Data');
         }
     };
 
@@ -1003,7 +971,8 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
+            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            // let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1225,7 +1194,7 @@ const Equipment = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                handleSearchtxt(e);
+                                setEquipSearch(e.target.value);
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
