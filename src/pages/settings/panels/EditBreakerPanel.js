@@ -918,6 +918,7 @@ const EditBreakerPanel = () => {
                                     onChange={(e) => {
                                         handleChange('parent_id', e.value);
                                     }}
+                                    value={parentPanel.filter((option) => option.value === panel.parent_id)}
                                     className="font-weight-bold dropdownScrollaleDisable"
                                     menuPlacement="auto"
                                     menuPosition="fixed"
@@ -958,6 +959,7 @@ const EditBreakerPanel = () => {
                                     isSearchable={true}
                                     defaultValue={'Select Location Type'}
                                     options={location}
+                                    value={location.filter((option) => option.value === panel.location_id)}
                                     onChange={(e) => {
                                         handleChange('location_id', e.value);
                                     }}
