@@ -1143,7 +1143,7 @@ const EquipChartModal = ({
                                         </Col>
                                         <Col lg={6}>
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                <Form.Label>Equipment Typee</Form.Label>
+                                                <Form.Label>Equipment Type</Form.Label>
                                                 <Input
                                                     type="select"
                                                     name="select"
