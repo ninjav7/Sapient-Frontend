@@ -1,25 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-    Spinner,
-} from 'reactstrap';
+import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faXmark, faEllipsisV, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -32,33 +17,23 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
-import Select from 'react-select';
 import axios from 'axios';
-import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
-import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
-import { ComponentStore } from '../../store/ComponentStore';
-import { ChevronDown, Search } from 'react-feather';
-import './style.css';
 import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import { MultiSelect } from 'react-multi-select-component';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import { result } from 'lodash';
-import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import { xaxisFilters } from '../../helpers/explorehelpers';
+import './style.css';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -86,7 +61,6 @@ const EquipChartModal = ({
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
         { value: 'power', label: 'Power (W)', unit: 'W' },
-        // { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -94,13 +68,11 @@ const EquipChartModal = ({
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
     const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
-    //const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
@@ -110,8 +82,6 @@ const EquipChartModal = ({
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
-
-    const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
@@ -136,49 +106,15 @@ const EquipChartModal = ({
         }
     }, [equipmentTypeData]);
 
-    const customDaySelect = [
-        {
-            label: 'Last 7 Days',
-            value: 7,
-        },
-        {
-            label: 'Last 5 Days',
-            value: 5,
-        },
-        {
-            label: 'Last 3 Days',
-            value: 3,
-        },
-        {
-            label: 'Last 1 Day',
-            value: 1,
-        },
-    ];
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const [equipFilter, setEquipFilter] = useState(equipmentFilter);
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
-    const [dateFilter, setDateFilter] = useState(dateValue);
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
-    const UNIT_DIVIDER = 1000;
-    const getRequiredConsumptionLabel = (value) => {
-        let label = '';
-
-        metric.map((m) => {
-            if (m.value === value) {
-                label = m.label;
-            }
-
-            return m;
-        });
-
-        return label;
-    };
 
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
         console.log(obj.unit);
     };
+
     const buildingAlertsData = async () => {
         if (startDate === null) {
             return;
@@ -212,174 +148,6 @@ const EquipChartModal = ({
             console.log('Failed to fetch Building Alert Data');
         }
     };
-
-    const generateDayWiseTimeSeries = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
-
-    const handleRefresh = () => {
-        setDateFilter(dateValue);
-        let endDate = new Date(); // today
-        let startDate = new Date();
-        startDate.setDate(startDate.getDate() - 7);
-        setDateRange([startDate, endDate]);
-        setDeviceData([]);
-        setSeriesData([]);
-    };
-    const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
-
-    const data = generateDayWiseTimeSeries(new Date('11 Feb 2022').getTime(), 185, {
-        min: 30,
-        max: 90,
-    });
-
-    const data1 = generateDayWiseTimeSeries1(new Date('11 Feb 2022').getTime(), 190, {
-        min: 30,
-        max: 90,
-    });
-
-    const [series, setSeries] = useState([
-        {
-            name: 'AHU 1',
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
-
-    // const [options, setOptions] = useState({
-    //     chart: {
-    //         id: 'chart2',
-    //         type: 'line',
-    //         height: 180,
-    //         toolbar: {
-    //             autoSelected: 'pan',
-
-    //             show: false,
-    //         },
-
-    //         animations: {
-    //             enabled: false,
-    //         },
-    //     },
-    //     colors: ['#546E7A'],
-    //     stroke: {
-    //         width: 3,
-    //     },
-    //     dataLabels: {
-    //         enabled: false,
-    //     },
-    //     colors: ['#10B981', '#2955E7'],
-    //     fill: {
-    //         opacity: 1,
-    //     },
-    //     markers: {
-    //         size: 0,
-    //     },
-    //     xaxis: {
-    //         type: 'datetime',
-    //         labels: {
-    //             formatter: function (val, timestamp) {
-    //                 return moment.utc(timestamp).format('DD/MMM - HH:mm');
-    //             },
-    //         },
-    //     },
-    //     yaxis: {
-    //         labels: {
-    //             formatter: function (val) {
-    //                 return val.toFixed(2);
-    //             },
-    //         },
-    //     },
-    //     tooltip: {
-    //         //@TODO NEED?
-    //         // enabled: false,
-    //         shared: false,
-    //         intersect: false,
-    //         style: {
-    //             fontSize: '12px',
-    //             fontFamily: 'Inter, Arial, sans-serif',
-    //             fontWeight: 600,
-    //             cssClass: 'apexcharts-xaxis-label',
-    //         },
-    //         // x: {
-    //         //     show: true,
-    //         //     type: 'datetime',
-    //         //     labels: {
-    //         //         formatter: function (val, timestamp) {
-    //         //             return moment.utc(timestamp).format('DD/MM - HH:mm');
-    //         //         },
-    //         //     },
-    //         // },
-    //         // y: {
-    //         //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-    //         //         return value;
-    //         //     },
-    //         // },
-    //         marker: {
-    //             show: false,
-    //         },
-    //         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-    //             const { seriesX } = w.globals;
-    //             const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-
-    //             return `<div class="line-chart-widget-tooltip">
-    //                     <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-    //                     <div class="line-chart-widget-tooltip-value">${
-    //                         w.config.series[0].unit === 'kWh'
-    //                             ? series[seriesIndex][dataPointIndex].toFixed(3)
-    //                             : series[seriesIndex][dataPointIndex].toFixed(3)
-    //                     }
-    //                      ${w.config.series[0].unit}</div>
-    //                     <div class="line-chart-widget-tooltip-time-period">${moment
-    //                         .utc(timestamp)
-    //                         .format(`MMM D 'YY @ HH:mm A`)}</div>
-    //                 </div>`;
-    //         },
-    //     },
-    // });
-
-    // const [seriesLine, setSeriesLine] = useState([
-    //     {
-    //         data: [
-    //             [1650874614695, 784.55],
-    //             [1650874694654, 169],
-    //             [1650782931595, 210],
-    //             [1650874587699, 825],
-    //             [1650955774141, 234.55],
-    //             [1650874722069, 240],
-    //             [1650874733485, 989.55],
-    //         ],
-    //     },
-    // ]);
 
     const [options, setOptions] = useState({
         chart: {
@@ -532,42 +300,12 @@ const EquipChartModal = ({
     });
 
     const getCSVLinkData = () => {
-        // console.log("csv entered");
         let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        // console.log(arr);
-        // console.log(sData);
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
-
         // streamData.unshift(['Timestamp', selectedConsumption])
-
         return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
-    //Single Active Equipment Manipulation
 
-    //let equipResult = [];
-
-    const handleSwitch = (val) => {
-        switch (val) {
-            case 'metrics':
-                setShowTab('metrics');
-                setMetricClass('mr-3 single-passive-tab-active tab-switch');
-                setConfigureClass('mr-3 single-passive-tab tab-switch');
-                //setHistoryClass('mr-3 single-passive-tab tab-switch');
-                break;
-            case 'configure':
-                setShowTab('configure');
-                setMetricClass('mr-3 single-passive-tab tab-switch');
-                setConfigureClass('mr-3 single-passive-tab-active tab-switch');
-                //setHistoryClass('mr-3 single-passive-tab tab-switch');
-                break;
-            // case 'history':
-            //     setShowTab('history');
-            //     setMetricClass('mr-3 single-passive-tab tab-switch');
-            //     setConfigureClass('mr-3 single-passive-tab tab-switch');
-            //     setHistoryClass('mr-3 single-passive-tab-active tab-switch');
-            //     break;
-        }
-    };
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
         obj[key] = value;
@@ -593,7 +331,6 @@ const EquipChartModal = ({
                         date_to: endDate.toLocaleDateString(),
                         tz_info: timeZone,
                     };
-                    // console.log(res.data);
                     setSelectedTab(0);
                     setEquipResult([]);
                     setEquipmentData({});
@@ -606,7 +343,6 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-        console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
@@ -632,7 +368,6 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            // Add TimeZone
             let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(
@@ -704,7 +439,6 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-        console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
@@ -740,6 +474,7 @@ const EquipChartModal = ({
                 console.log('Failed to fetch Explore Data');
             }
         };
+
         const fetchEquipmentDetails = async (equipId) => {
             try {
                 let headers = {
@@ -759,6 +494,7 @@ const EquipChartModal = ({
                 console.log('Failed to fetch Explore Data');
             }
         };
+
         const fetchBuildingAlerts = async () => {
             try {
                 let headers = {
@@ -785,6 +521,7 @@ const EquipChartModal = ({
                 console.log('Failed to fetch Building Alert Data');
             }
         };
+
         const fetchEndUseData = async () => {
             try {
                 let headers = {
@@ -821,6 +558,7 @@ const EquipChartModal = ({
                 console.log('Failed to fetch Equipment Type Data');
             }
         };
+
         const fetchLocationData = async () => {
             try {
                 let headers = {
@@ -861,10 +599,9 @@ const EquipChartModal = ({
         if (equipmentData.length === 0) {
             return;
         }
+
         const fetchActiveDeviceSensorData = async () => {
-            // console.log(equipmentData);
             if (equipmentData !== null) {
-                // console.log(equipmentData.device_type);
                 if (
                     equipmentData.device_type === 'passive' ||
                     equipmentData.device_id === '' ||
@@ -886,14 +623,13 @@ const EquipChartModal = ({
                     let sensorId = response.find(
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
-                    // console.log(sensorId);
-                    // setSensorData(sensorId);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Active device sensor data');
             }
         };
+
         if (equipmentData !== null) {
             if (equipmentData.device_type !== 'passive') {
                 fetchActiveDeviceSensorData();
