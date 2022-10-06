@@ -1,0 +1,134 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.button-group-wrapper {
+    display: flex;
+    .button-wrapper:not(:first-child):not(:last-child) {
+        button {
+            border-radius: 0 !important;
+        }
+    }
+    ul {
+        display: flex;
+        justify-content: space-around;
+        li {
+            display: flex;
+            align-items: center;
+            padding: 7px 12px;
+            border-top: 1px solid rgba(124, 135, 156, 1);
+            border-right: 1px solid rgba(124, 135, 156, 1);
+            border-bottom: 1px solid rgba(124, 135, 156, 1);
+            list-style-type: none;
+            &.disabled {
+                cursor: not-allowed !important;
+                color: #d9dde2;
+                border-top: 1px solid #d9dde2;
+                border-right: 1px solid #d9dde2;
+                border-bottom: 1px solid #d9dde2;
+                svg {
+                    path {
+                        fill: #d9dde2;
+                    }
+                }
+            }
+            &:first-child {
+                border-left: 1px solid rgba(124, 135, 156, 1);
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+                &:focus,
+                &:active {
+                    background-color: #eef4ff;
+                    border-top: 1px solid #444ce7;
+                    border-left: 1px solid #444ce7;
+                    border-bottom: 1px solid #444ce7;
+                }
+
+                &.disabled {
+                    cursor: not-allowed !important;
+                    color: #d9dde2;
+                    border-top: 1px solid #d9dde2;
+                    border-left: 1px solid #d9dde2;
+                    border-bottom: 1px solid #d9dde2;
+                    svg {
+                        path {
+                            fill: #d9dde2;
+                        }
+                    }
+                }
+            }
+            &.icon-right {
+                flex-direction: row-reverse;
+                svg {
+                    margin-left: 8px;
+                }
+            }
+            &.icon-left {
+                svg {
+                    margin-right: 8px;
+                }
+            }
+            &:last-child {
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+                &:focus,
+                &:active {
+                    background-color: #eef4ff;
+                    border-top: 1px solid #444ce7;
+                    border-right: 1px solid #444ce7;
+                    border-bottom: 1px solid #444ce7;
+                }
+                &.disabled {
+                    cursor: not-allowed !important;
+                    color: #d9dde2;
+                    border-top: 1px solid #d9dde2;
+                    border-right: 1px solid #d9dde2;
+                    border-bottom: 1px solid #d9dde2;
+                    svg {
+                        path {
+                            fill: #d9dde2;
+                        }
+                    }
+                }
+            }
+
+            &.active {
+                background-color: #444ce7;
+                div{
+                    color: #fff!important;
+                }
+                &:hover {
+                    background-color: #6172f3;
+                }
+
+                &:focus,
+                &:active {
+                    background-color: #444ce7;
+                    border-top: 1px solid #2d3282;
+                    border-right: 1px solid #2d3282;
+                    border-bottom: 1px solid #2d3282;
+                }
+                svg {
+                    path {
+                        fill: #fff;
+                    }
+                }
+            }
+            &:hover {
+                cursor: pointer;
+                background-color: #eef4ff;
+            }
+        }
+    }
+    .button-wrapper:first-child {
+        button {
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+    }
+    .button-wrapper:last-child {
+        button {
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+        }
+    }
+}
