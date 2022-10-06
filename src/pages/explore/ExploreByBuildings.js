@@ -113,6 +113,7 @@ const ExploreBuildingsTable = ({
                                             type="checkbox"
                                             className="mr-4"
                                             id="selection"
+                                            disabled
                                             onClick={(e) => {
                                                 handleSelectionAll(e);
                                             }}
