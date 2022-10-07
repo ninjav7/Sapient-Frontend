@@ -94,11 +94,6 @@ const EquipChartModal = ({
         });
     };
 
-    useEffect(() => {
-        console.log('SSR equipmentData => ', equipmentData);
-        console.log('SSR selectedTab => ', selectedTab);
-    });
-
     const [buildingAlert, setBuildingAlerts] = useState([]);
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
 
