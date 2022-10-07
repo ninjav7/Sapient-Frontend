@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import ExploreBuildingList from './ExploreBuildingList';
 import Input from '../../sharedComponents/form/input/Input';
@@ -33,12 +33,14 @@ const PortfolioItem = ({ exploreBldName, exploreBldId }) => {
             ) : (
                 <Dropdown.Item
                     onClick={() => {
-                        localStorage.setItem('exploreBldId', 'portfolio');
-                        localStorage.setItem('exploreBldName', 'Portfolio');
-                        ExploreBuildingStore.update((s) => {
-                            s.exploreBldId = 'portfolio';
-                            s.exploreBldName = 'Portfolio';
+                        localStorage.setItem('buildingId', 'portfolio');
+                        localStorage.setItem('buildingName', 'Portfolio');
+
+                        BuildingStore.update((s) => {
+                            s.BldgId = 'portfolio';
+                            s.BldgName = 'Portfolio';
                         });
+
                         history.push({
                             pathname: `/explore-page/by-buildings`,
                         });
@@ -68,13 +70,16 @@ const FilterBuildings = ({ handleValueChange, value }) => {
 const ExploreBuildingSwitcher = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const location = useLocation();
 
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
-    const exploreBldId = ExploreBuildingStore.useState((s) => s.exploreBldId);
-    const exploreBldName = ExploreBuildingStore.useState((s) => s.exploreBldName);
+    const exploreBldId = BuildingStore.useState((s) => s.BldgId);
+    const exploreBldName = BuildingStore.useState((s) => s.BldgName);
 
     const [buildingListData] = useAtom(buildingData);
+
+    const dropDownTitle = location.pathname === '/explore-page/by-buildings' ? 'Portfolio' : exploreBldName;
 
     useEffect(() => {
         const getBuildingList = async () => {
@@ -96,7 +101,8 @@ const ExploreBuildingSwitcher = () => {
                     id="bts-button-styling"
                     className="bts-btn-style page-tracker-dropdown-btn"
                     variant="secondary">
-                    <div className="page-tracker-dropdown-text">{exploreBldName}</div>
+                    <div className="page-tracker-dropdown-text">{dropDownTitle}</div>
+                    {/* <div className="page-tracker-dropdown-text">{exploreBldName}</div> */}
 
                     <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                 </Dropdown.Toggle>
