@@ -1,7 +1,7 @@
 import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 
 const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
@@ -18,13 +18,16 @@ const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
                         <Dropdown.Item
                             className={activeItem && 'selected'}
                             onClick={() => {
-                                localStorage.setItem('exploreBldId', record.building_id);
-                                localStorage.setItem('exploreBldName', record.building_name);
-                                localStorage.setItem('exploreBldTimeZone', record.timezone);
-                                ExploreBuildingStore.update((s) => {
-                                    s.exploreBldId = record.building_id;
-                                    s.exploreBldName = record.building_name;
-                                    s.exploreBldTimeZone = record.timezone;
+                                localStorage.setItem('buildingId', record.building_id);
+                                localStorage.setItem('buildingName', record.building_name);
+                                localStorage.setItem(
+                                    'buildingTimeZone',
+                                    record.timezone === '' ? 'US/Eastern' : record.timezone
+                                );
+                                BuildingStore.update((s) => {
+                                    s.BldgId = record.building_id;
+                                    s.BldgName = record.building_name;
+                                    s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezonee;
                                 });
                                 history.push({
                                     pathname: `/explore-page/by-equipment/${record.building_id}`,

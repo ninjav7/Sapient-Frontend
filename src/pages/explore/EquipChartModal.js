@@ -31,7 +31,6 @@ import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import ModalHeader from '../../components/ModalHeader';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import { xaxisFilters } from '../../helpers/explorehelpers';
 import './style.css';
 
@@ -46,14 +45,15 @@ const EquipChartModal = ({
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const bldgId = localStorage.getItem('exploreBldId');
-    const bldgName = localStorage.getItem('exploreBldName');
 
     const history = useHistory();
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
@@ -395,16 +395,6 @@ const EquipChartModal = ({
         if (equipDeviceId === '' || equipDeviceId === null) {
             return;
         }
-
-        localStorage.setItem('buildingId', bldgId);
-        localStorage.setItem('buildingName', bldgName);
-        localStorage.setItem('buildingTimeZone', timeZone === '' ? 'US/Eastern' : timeZone);
-
-        BuildingStore.update((s) => {
-            s.BldgId = bldgId;
-            s.BldgName = bldgName;
-            s.BldgTimeZone = timeZone;
-        });
 
         if (deviceType === 'active-device') {
             history.push({
@@ -1069,7 +1059,7 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="endUsePop"
                                                         className="font-weight-bold"
-                                                        defaultValue={equipResult?.end_use_id}>
+                                                        value={equipResult?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1250,7 +1240,7 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="endUsePop"
                                                         className="font-weight-bold"
-                                                        defaultValue={equipResult?.end_use_id}>
+                                                        value={equipResult?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (

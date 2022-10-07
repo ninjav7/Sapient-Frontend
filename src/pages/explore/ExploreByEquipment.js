@@ -41,7 +41,6 @@ import Header from '../../components/Header';
 import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import Enumerable from 'linq';
 import './Linq';
 
@@ -542,7 +541,7 @@ const ExploreByEquipment = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
@@ -2449,7 +2448,7 @@ const ExploreByEquipment = () => {
                                                             onClick={(e) => {
                                                                 setShowSpace(false);
                                                             }}>
-                                                            {localStorage.getItem('exploreBldName')}
+                                                            {localStorage.getItem('buildingName')}
                                                         </button>{' '}
                                                         {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ''}
                                                     </span>
