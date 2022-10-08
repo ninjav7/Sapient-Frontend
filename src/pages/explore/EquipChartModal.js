@@ -1076,7 +1076,6 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        // defaultValue={loc.length===0?"":loc.location_id}
                                                         onChange={(e) => {
                                                             handleChange('space_id', e.target.value);
                                                         }}>
@@ -1597,7 +1596,7 @@ const EquipChartModal = ({
                                                         Installed at
                                                     </h6>
                                                     <h6 className="card-title">
-                                                        {equipmentData !== null ? equipmentData.device_location : ''}
+                                                        {equipmentData !== null ? equipmentData.location : ''}
                                                     </h6>
                                                 </div>
                                             </FormGroup>
