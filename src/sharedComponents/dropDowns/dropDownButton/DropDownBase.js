@@ -26,10 +26,12 @@ const DropDownBase = (props) => {
 
     const setOpen = () => {
         setIsOpen(true);
+        props.onOpen && props.onOpen();
     };
 
     const setClose = () => {
         setIsOpen(false);
+        props.onClose && props.onClose();
     };
 
     const handleSearchChange = (event) => {
@@ -39,6 +41,9 @@ const DropDownBase = (props) => {
     const dropDownClasses = cx('drop-down-button-wrapper', {
         isOpen: isOpen,
     });
+
+    const triggerButton =
+        typeof props.triggerButton === 'function' ? props.triggerButton({ isOpen }) : props.triggerButton;
 
     const links = props.links
         .filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -65,15 +70,16 @@ const DropDownBase = (props) => {
                 </Link>
             );
         });
-
+    
     return (
         <div className={dropDownClasses}>
             <DropDown
+                placement={props.placement}
                 isOpen={isOpen}
-                triggerButton={React.cloneElement(props.triggerButton, { ...props.triggerButton.props })}
+                triggerButton={React.cloneElement(triggerButton, { ...triggerButton.props })}
                 onOpen={setOpen}
                 onClose={setClose}>
-                <div className="drop-down-button-menu">
+                <div className={cx('drop-down-button-menu', props.classNameMenu)}>
                     {props.header && (
                         <div className={cx('drop-down-button-menu-header', 'border-bottom', props.header.className)}>
                             {React.cloneElement(props.header, { ...props.header.props })}
@@ -111,6 +117,7 @@ DropDownBase.propTypes = {
     withSearch: PropTypes.bool,
     header: PropTypes.node,
     triggerButton: PropTypes.node.isRequired,
+    classNameMenu: PropTypes.string,
 };
 
 DropDownBase.defaultProps = {
