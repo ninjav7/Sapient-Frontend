@@ -775,10 +775,9 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value;
+                    return value.toFixed(0);
                 },
             },
-            tickAmount: 2,
         },
         legend: {
             show: false,
