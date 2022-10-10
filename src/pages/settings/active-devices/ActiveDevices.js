@@ -637,7 +637,7 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=ace`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -697,7 +697,7 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=ace`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -850,9 +850,9 @@ const ActiveDevices = () => {
                         </div>
                     </div>
 
-                    <button type="button" className="btn btn-white d-inline ml-2">
+                    {/* <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
+                    </button> */}
 
                     {/* ---------------------------------------------------------------------- */}
 

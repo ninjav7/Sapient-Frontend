@@ -202,10 +202,11 @@ const Panels = () => {
     };
 
     useEffect(() => {
-        fetchPanelsData();
-    }, [bldgId, panelSearch]);
+        if (panelSearch === '') fetchPanelsData();
+    }, [panelSearch]);
 
     useEffect(() => {
+        fetchPanelsData();
         fetchLocationData();
     }, [bldgId]);
 
@@ -280,7 +281,12 @@ const Panels = () => {
                                 setPanelSearch(e.target.value);
                             }}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
+                        <span
+                            class="input-group-text border-0"
+                            id="search-addon"
+                            onClick={() => {
+                                fetchPanelsData();
+                            }}>
                             <Search className="icon-sm" />
                         </span>
                     </div>
@@ -290,10 +296,10 @@ const Panels = () => {
                     </div> */}
                 </Col>
                 <Col xl={9}>
-                    <button type="button" className="btn btn-white d-inline ml-2">
+                    {/* <button type="button" className="btn btn-white d-inline ml-2">
                         <FontAwesomeIcon icon={faPlus} size="md" color="#344054" className="mr-1" />
                         Add Filter
-                    </button>
+                    </button> */}
 
                     {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">

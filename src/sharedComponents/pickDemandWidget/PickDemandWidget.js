@@ -7,7 +7,7 @@ import { PickDemandBox } from './components/pickDemandBox';
 import Typography from '../typography';
 import { stringOrNumberPropTypes } from '../helpers/helper';
 import Brick from '../brick';
-import { Button, ButtonTertiary } from '../button';
+import { Button } from '../button';
 
 const PickDemandWidget = (props) => {
     return (
@@ -18,7 +18,7 @@ const PickDemandWidget = (props) => {
                     <Typography.Body size={Typography.Sizes.xs}>{props.subtitle}</Typography.Body>
                 </div>
 
-                {props.buttonLabel && <ButtonTertiary onClick={props.handleClick} size={Button.Sizes.lg} label={props.buttonLabel} />}
+                {props.buttonLabel && <Button onClick={props.handleClick} size={Button.Sizes.lg} label={props.buttonLabel} />}
             </div>
 
             <Brick />

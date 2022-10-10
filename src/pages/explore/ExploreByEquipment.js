@@ -5,6 +5,7 @@ import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { xaxisFilters } from '../../helpers/explorehelpers';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import {
     BaseUrl,
     getExploreEquipmentList,
@@ -13,7 +14,7 @@ import {
     equipmentType,
     getEndUseId,
     getSpaceTypes,
-    getSpaces
+    getSpaces,
 } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -41,9 +42,8 @@ import Header from '../../components/Header';
 import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
-import Enumerable from "linq";
-import "./Linq";
+import Enumerable from 'linq';
+import './Linq';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -234,7 +234,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -247,7 +247,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -260,7 +260,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -273,7 +273,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -286,7 +286,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -299,7 +299,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -481,7 +481,7 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                        <div className="page-button-style">
+                        {/* <div className="page-button-style">
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold mt-4"
@@ -520,7 +520,7 @@ const ExploreEquipmentTable = ({
                                     ))}
                                 </select>
                             </div>
-                        </div>
+                        </div> */}
                     </Col>
                 </CardBody>
             </Card>
@@ -542,7 +542,7 @@ const ExploreByEquipment = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
@@ -582,6 +582,9 @@ const ExploreByEquipment = () => {
                 autoScaleYaxis: true,
             },
         },
+        dataLabels: {
+            enabled: true
+          }, 
         legend: {
             position: 'top',
             horizontalAlign: 'left',
@@ -603,10 +606,32 @@ const ExploreByEquipment = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+        colors: [
+            '#3C6DF5',
+            '#12B76A',
+            '#DC6803',
+            '#088AB2',
+            '#EF4444',
+            '#800000',
+            '#FFA500',
+            '#0AFFFF',
+            '#033E3E',
+            '#E2F516',
+        ],
         fill: {
             opacity: 1,
-            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+            colors: [
+                '#3C6DF5',
+                '#12B76A',
+                '#DC6803',
+                '#088AB2',
+                '#EF4444',
+                '#800000',
+                '#FFA500',
+                '#0AFFFF',
+                '#033E3E',
+                '#E2F516',
+            ],
         },
         markers: {
             size: 0,
@@ -648,15 +673,16 @@ const ExploreByEquipment = () => {
                 let ch = '';
                 ch =
                     ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
+                        .utc(seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
+                    if(isNaN(parseInt(series[i][dataPointIndex]))===false)
                     ch =
                         ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            3
-                        )} kWh </td></tr>`;
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(series[i][dataPointIndex])} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -673,16 +699,22 @@ const ExploreByEquipment = () => {
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
-            tickAmount: 24,
-            tickPlacement: 'between',
+            // tickAmount: 24,
+            //tickPlacement: 'on',
         },
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(3);
+                    return value.toFixed(0);
                 },
             },
         },
+        // grid: {
+        //     padding: {
+        //       left: 10,
+        //       right: 60 // Also you may want to increase this (based on the length of your labels)
+        //     },
+        //   },
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
@@ -713,7 +745,18 @@ const ExploreByEquipment = () => {
         legend: {
             show: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+        colors: [
+            '#3C6DF5',
+            '#12B76A',
+            '#DC6803',
+            '#088AB2',
+            '#EF4444',
+            '#800000',
+            '#FFA500',
+            '#0AFFFF',
+            '#033E3E',
+            '#E2F516',
+        ],
         fill: {
             type: 'gradient',
             gradient: {
@@ -732,10 +775,9 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value;
+                    return value.toFixed(0);
                 },
             },
-            tickAmount: 2,
         },
         legend: {
             show: false,
@@ -762,6 +804,7 @@ const ExploreByEquipment = () => {
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
     const [equipmentFilter, setEquipmentFilter] = useState({});
+    const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
     const [minPerValue, set_minPerValue] = useState(0);
@@ -951,7 +994,7 @@ const ExploreByEquipment = () => {
                     spc = res.data.data;
                     spc.map((ele) => {
                         spacedata.push(ele);
-                    })
+                    });
                 });
                 console.log(spacedata);
             }
@@ -963,18 +1006,17 @@ const ExploreByEquipment = () => {
                         let arr = rvmsp.filter(function (item) {
                             return item.name === spacedata[j].name;
                         });
-                        if (arr.length === 0)
-                            rvmsp.push(spacedata[j]);
+                        if (arr.length === 0) rvmsp.push(spacedata[j]);
                     }
                 }
             }
-            console.log(rvmsp)
+            console.log(rvmsp);
             selectedLocation.map((ele) => {
                 sp.push(ele);
-            })
+            });
             rvmsp.map((el) => {
-                sp.push(el?._id)
-            })
+                sp.push(el?._id);
+            });
             console.log(sp);
             // if (filteredLocationOptions.length === 1) {
             //     setLocationTxt(`${filteredLocationOptions[0].name}`);
@@ -1013,7 +1055,7 @@ const ExploreByEquipment = () => {
             const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 spacedata = res.data.data;
-                console.log(res.data.data)
+                console.log(res.data.data);
             });
             let rvmsp = [];
             for (var i = 0; i < removeLocationDuplication.length; i++) {
@@ -1022,20 +1064,21 @@ const ExploreByEquipment = () => {
                         let arr = rvmsp.filter(function (item) {
                             return item.name === spacedata[j].name;
                         });
-                        if (arr.length === 0)
+                        if (arr.length === 0) {
                             rvmsp.push(spacedata[j]);
+                        }
                     }
                 }
             }
-            console.log(rvmsp)
+            console.log(rvmsp);
             selectedLocation.map((ele) => {
                 sp.push(ele);
-            })
+            });
             rvmsp.map((el) => {
-                sp.push(el?._id)
-            })
+                sp.push(el?._id);
+            });
             console.log(sp);
-            setSelectedLocation(sp)
+            setSelectedLocation(sp);
         } else {
             // if (selectedLocation.length === 1) {
             //     setLocationTxt('');
@@ -1065,7 +1108,7 @@ const ExploreByEquipment = () => {
                 arr = arr.filter(function (item) {
                     return item !== el?._id;
                 });
-            })
+            });
             console.log(arr);
             setSelectedLocation(arr);
         }
@@ -1219,7 +1262,7 @@ const ExploreByEquipment = () => {
             return false;
         });
 
-        console.log("loc ", uniqueLocation);
+        console.log('loc ', uniqueLocation);
         setRemoveEndUseDuplication(uniqueEndUse);
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
@@ -1486,12 +1529,11 @@ const ExploreByEquipment = () => {
                     let arr = rvmLocation.filter(function (item) {
                         return item.name === floorListAPI[j].name;
                     });
-                    if (arr.length === 0)
-                        rvmLocation.push(floorListAPI[j]);
+                    if (arr.length === 0) rvmLocation.push(floorListAPI[j]);
                 }
             }
         }
-        console.log("loc ", rvmLocation);
+        console.log('loc ', rvmLocation);
         setFilteredLocationOptions(rvmLocation);
         setFilteredLocationOptionsCopy(rvmLocation);
     }, [floorListAPI, removeLocationDuplication]);
@@ -1539,6 +1581,47 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
+
+    // const getFormattedTimeIntervalData=(data)=>{
+    //     //console.log("new",startDate)
+    //     let ee=startDate.toLocaleDateString()
+    //     let str=new Date(ee);
+    //     let a=str.getMonth()+1;
+    //     let b=str.getDate();
+    //     let mon=a<10?"0"+a:a;
+    //     let dt=b<10?"0"+b:b
+    //     let ss=str.getFullYear()+"-"+mon+"-"+dt+"T00:00:00.000Z"
+    //     let startTime=new Date(ss);
+    //     let st=startTime.getTime();
+
+    //     let ff=endDate.toLocaleDateString()
+    //     let stre=new Date(ff);
+    //     let ab=stre.getMonth()+1;
+    //     let ba=stre.getDate()+1;
+    //     let mone=ab<10?"0"+ab:ab;
+    //     let dte=ba<10?"0"+ba:ba
+    //     let sse=stre.getFullYear()+"-"+mone+"-"+dte+"T00:00:00.000Z"
+    //     let endTime=new Date(sse);
+    //     let et=endTime.getTime();
+    //     let newArr=[];
+    //     for(let i=st,j=1;i<=et;i+=900000){
+    //         let tt=new Date();
+    //         if(data[j]!==undefined)
+    //             tt=new Date(data[j][0]);
+    //         if(tt.getTime()===i){
+    //             let te=new Date(i);
+    //             newArr.push([te,data[j][1]])
+    //             j++;
+    //         }
+    //         else{
+    //             let te=new Date(i);
+    //             newArr.push([te,null])
+    //         }
+    //     }
+    //     return newArr;
+    // }
+
+    
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1578,10 +1661,11 @@ const ExploreByEquipment = () => {
                         } else {
                             legendName = arr[0].equipment_name + ' - ' + sg;
                         }
-
+                        const formattedData=getFormattedTimeIntervalData(data, startDate, endDate);
+                        console.log("new",formattedData)
                         let recordToInsert = {
                             name: legendName,
-                            data: data,
+                            data: formattedData,
                             id: arr[0].equipment_id,
                         };
                         let coll = [];
@@ -1599,12 +1683,12 @@ const ExploreByEquipment = () => {
                             const result = Enumerable.from(objectExplore)
                                 .fullOuterJoin(
                                     Enumerable.from(coll),
-                                    pk => pk.timestamp,
-                                    fk => fk.timestamp,
+                                    (pk) => pk.timestamp,
+                                    (fk) => fk.timestamp,
                                     (left, right) => ({ ...left, ...right })
                                 )
                                 .toArray();
-                            console.log("join Result ", result);
+                            console.log('join Result ', result);
                             setObjectExplore(result);
                             // var s = new Set();
                             // var result = [];
@@ -1694,10 +1778,11 @@ const ExploreByEquipment = () => {
                     } else {
                         legendName = arr[0].equipment_name + ' - ' + sg;
                     }
-
+                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
+                    // console.log("new",formattedData)
                     let recordToInsert = {
                         name: legendName,
-                        data: data,
+                        data: formattedData,
                         id: arr[0].equipment_id,
                     };
                     dataarr.push(recordToInsert);
@@ -2006,20 +2091,19 @@ const ExploreByEquipment = () => {
         let abc = [];
         let val = [];
         if (objectExplore.length !== 0) {
-            val = Object.keys(objectExplore[0])
+            val = Object.keys(objectExplore[0]);
 
             objectExplore.map(function (obj) {
-                let acd = []
+                let acd = [];
                 for (let i = 0; i < val.length; i++) {
-                    if (val[i] === "timestamp") {
-                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
-                    }
-                    else {
-                        acd.push(obj[val[i]].toFixed(2))
+                    if (val[i] === 'timestamp') {
+                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`));
+                    } else {
+                        acd.push(obj[val[i]]?.toFixed(2));
                     }
                 }
                 abc.push(acd);
-            })
+            });
             console.log(abc);
         }
 
@@ -2028,7 +2112,7 @@ const ExploreByEquipment = () => {
         return [val, ...streamData];
     };
 
-    useEffect(() => { }, [showDropdown]);
+    useEffect(() => {}, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
@@ -2097,22 +2181,18 @@ const ExploreByEquipment = () => {
             for (var i = 0; i < removeLocationDuplication.length; i++) {
                 for (var j = 0; j < spacedata.length; j++) {
                     if (removeLocationDuplication[i].location.includes(spacedata[j].name)) {
-
-
                         let arr = rvmsp.filter(function (item) {
                             return item.name === spacedata[j].name;
                         });
-                        if (arr.length === 0)
-                            rvmsp.push(spacedata[j]);
+                        if (arr.length === 0) rvmsp.push(spacedata[j]);
                     }
                 }
             }
-            console.log(rvmsp)
+            console.log(rvmsp);
             setSpaceListAPI(rvmsp);
             setShowSpace(true);
-
         });
-    }
+    };
     const handleSelectedSpaces = (e, txt) => {
         let selection = document.getElementById(e.target.value);
         if (selection.checked === true) {
@@ -2120,18 +2200,17 @@ const ExploreByEquipment = () => {
                 return item === e.target.value;
             });
             if (arr.length === 0) {
-                setSelectedLocation([...selectedLocation, e.target.value])
+                setSelectedLocation([...selectedLocation, e.target.value]);
             }
-        }
-        else {
+        } else {
             let arr = selectedLocation.filter(function (item) {
                 return item !== e.target.value;
             });
             setSelectedLocation(arr);
         }
-    }
+    };
     const handleAllSelectedSpaces = (e, txt) => {
-        let selection = document.getElementById("allSpaces");
+        let selection = document.getElementById('allSpaces');
         if (selection.checked === true) {
             let selectLoc = [];
             for (let i = 0; i < spaceListAPI.length; i++) {
@@ -2146,18 +2225,16 @@ const ExploreByEquipment = () => {
             }
             selectedLocation.map((ele) => {
                 selectLoc.push(ele);
-            })
+            });
             setSelectedLocation(selectLoc);
-
-        }
-        else {
+        } else {
             for (let i = 0; i < spaceListAPI.length; i++) {
                 let check = document.getElementById(spaceListAPI[i]._id);
                 check.checked = selection.checked;
             }
             setSelectedLocation([]);
         }
-    }
+    };
 
     return (
         <>
@@ -2417,12 +2494,21 @@ const ExploreByEquipment = () => {
                                                 </div>
                                                 <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
                                                     <span className="pop-text">
-                                                        <button style={{ border: "none", backgroundColor: "white" }} onClick={(e) => { setShowSpace(false) }}>{localStorage.getItem('exploreBldName')}</button> {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ""}
+                                                        <button
+                                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                                            onClick={(e) => {
+                                                                setShowSpace(false);
+                                                            }}>
+                                                            {localStorage.getItem('buildingName')}
+                                                        </button>{' '}
+                                                        {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ''}
                                                     </span>
                                                 </div>
-                                                {showSpace === false ?
+                                                {showSpace === false ? (
                                                     <div
-                                                        className={floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
+                                                        className={
+                                                            floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`
+                                                        }>
                                                         <div className="floor-box">
                                                             <div>
                                                                 <input
@@ -2449,7 +2535,16 @@ const ExploreByEquipment = () => {
                                                                                 handleSelectedLocation(e, record.name);
                                                                             }}
                                                                         />
-                                                                        <button style={{ backgroundColor: "white", border: "none" }} onClick={(e) => { handleGetSpaceByLocation(e, record) }}>{record.name}</button>
+                                                                        <button
+                                                                            style={{
+                                                                                backgroundColor: 'white',
+                                                                                border: 'none',
+                                                                            }}
+                                                                            onClick={(e) => {
+                                                                                handleGetSpaceByLocation(e, record);
+                                                                            }}>
+                                                                            {record.name}
+                                                                        </button>
                                                                     </div>
                                                                     <div style={{ display: 'flex' }}>
                                                                         <button
@@ -2457,8 +2552,9 @@ const ExploreByEquipment = () => {
                                                                                 border: 'none',
                                                                                 backgroundColor: 'white',
                                                                             }}
-                                                                            onClick={(e) => { handleGetSpaceByLocation(e, record) }}
-                                                                        >
+                                                                            onClick={(e) => {
+                                                                                handleGetSpaceByLocation(e, record);
+                                                                            }}>
                                                                             <i className="uil uil-angle-right"></i>
                                                                         </button>
                                                                     </div>
@@ -2466,9 +2562,12 @@ const ExploreByEquipment = () => {
                                                             );
                                                         })}
                                                     </div>
-                                                    : <>
+                                                ) : (
+                                                    <>
                                                         <div
-                                                            className={spaceListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
+                                                            className={
+                                                                spaceListAPI.length > 4 ? `hScroll` : `hHundredPercent`
+                                                            }>
                                                             <div className="floor-box">
                                                                 <div>
                                                                     <input
@@ -2492,7 +2591,10 @@ const ExploreByEquipment = () => {
                                                                                 id={record._id}
                                                                                 value={record._id}
                                                                                 onClick={(e) => {
-                                                                                    handleSelectedSpaces(e, record.name);
+                                                                                    handleSelectedSpaces(
+                                                                                        e,
+                                                                                        record.name
+                                                                                    );
                                                                                 }}
                                                                             />
                                                                             <span>{record.name}</span>
@@ -2510,7 +2612,8 @@ const ExploreByEquipment = () => {
                                                                 );
                                                             })}
                                                         </div>
-                                                    </>}
+                                                    </>
+                                                )}
                                                 <div></div>
                                             </div>
                                         </Dropdown.Menu>
@@ -2824,10 +2927,12 @@ const ExploreByEquipment = () => {
 
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
-                handleChartOpen={handleChartOpen}
                 handleChartClose={handleChartClose}
                 equipmentFilter={equipmentFilter}
                 fetchEquipmentData={exploreDataFetch}
+                selectedTab={selectedModalTab}
+                setSelectedTab={setSelectedModalTab}
+                activePage="explore"
             />
         </>
     );

@@ -11,9 +11,14 @@ const SIZES = Object.freeze({
 });
 
 const BUTTON_TYPES = Object.freeze({
-    secondaryGrey: 'secondary-grey',
     primary: 'primary',
+    secondary: 'secondary',
+    secondaryGrey: 'secondary-grey',
     tertiary: 'tertiary',
+    tertiaryGrey: 'tertiary-grey',
+    primaryDistructive: 'primary-distructive',
+    secondaryDistructive: 'secondary-distructive',
+    link: 'link',
 });
 
 const BUTTON_ICON_ALIGNMENT = Object.freeze({
@@ -118,7 +123,7 @@ Button.Sizes = SIZES;
 Button.IconAlignment = BUTTON_ICON_ALIGNMENT;
 
 Button.propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.node.isRequired,
     type: PropTypes.oneOf(Object.values(BUTTON_TYPES)).isRequired,
     size: PropTypes.oneOf(Object.values(SIZES)).isRequired,
     icon: PropTypes.node,

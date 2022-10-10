@@ -252,10 +252,6 @@ const PassiveDevicesTable = ({
                                         <td>
                                             <Skeleton count={5} />
                                         </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
                                     </tr>
                                 </SkeletonTheme>
                             </tbody>
@@ -683,7 +679,7 @@ const PassiveDevices = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    passiveDeviceDataWithFilter('ace', 'identifier');
                     handleEditClose();
                 });
         } catch (error) {
@@ -706,7 +702,7 @@ const PassiveDevices = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    passiveDeviceDataWithFilter('ace', 'identifier');
                     handleDeleteClose();
                 });
         } catch (error) {
@@ -725,7 +721,7 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&device_search=${deviceSearch}`;
+            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&device_search=${deviceSearch}&sort_by=ace`;
             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let data = res.data;
                 setPassiveDeviceData(data.data);
@@ -916,9 +912,9 @@ const PassiveDevices = () => {
                         </div>
                     </div>
 
-                    <button type="button" className="btn btn-white d-inline ml-2">
+                    {/* <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
+                    </button> */}
 
                     {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">
