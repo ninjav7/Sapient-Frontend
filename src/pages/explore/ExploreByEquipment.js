@@ -5,6 +5,7 @@ import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { xaxisFilters } from '../../helpers/explorehelpers';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import {
     BaseUrl,
     getExploreEquipmentList,
@@ -581,6 +582,9 @@ const ExploreByEquipment = () => {
                 autoScaleYaxis: true,
             },
         },
+        dataLabels: {
+            enabled: true
+          }, 
         legend: {
             position: 'top',
             horizontalAlign: 'left',
@@ -695,16 +699,22 @@ const ExploreByEquipment = () => {
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
-            tickAmount: 24,
-            tickPlacement: 'between',
+            // tickAmount: 24,
+            //tickPlacement: 'on',
         },
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(3);
+                    return value.toFixed(0);
                 },
             },
         },
+        // grid: {
+        //     padding: {
+        //       left: 10,
+        //       right: 60 // Also you may want to increase this (based on the length of your labels)
+        //     },
+        //   },
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
@@ -1573,54 +1583,44 @@ const ExploreByEquipment = () => {
     }, []);
 
 
-    const getFormattedTimeIntervalData=(data)=>{
-        //console.log("new",startDate)
-        let ee=startDate.toLocaleDateString()
-        let str=new Date(ee);
-        let a=str.getMonth()+1;
-        let b=str.getDate();
-        let mon=a<10?"0"+a:a;
-        let dt=b<10?"0"+b:b
-        let ss=str.getFullYear()+"-"+mon+"-"+dt+"T00:00:00.000Z"
-        let startTime=new Date(ss);
-        const result = startDate.toISOString().slice(0, -1);
-        console.log("new",new Date(startTime.toISOString()));
-        let st=startTime.getTime();
+    // const getFormattedTimeIntervalData=(data)=>{
+    //     //console.log("new",startDate)
+    //     let ee=startDate.toLocaleDateString()
+    //     let str=new Date(ee);
+    //     let a=str.getMonth()+1;
+    //     let b=str.getDate();
+    //     let mon=a<10?"0"+a:a;
+    //     let dt=b<10?"0"+b:b
+    //     let ss=str.getFullYear()+"-"+mon+"-"+dt+"T00:00:00.000Z"
+    //     let startTime=new Date(ss);
+    //     let st=startTime.getTime();
 
-        let ff=endDate.toLocaleDateString()
-        let stre=new Date(ff);
-        let ab=stre.getMonth()+1;
-        let ba=stre.getDate()+1;
-        let mone=ab<10?"0"+ab:ab;
-        let dte=ba<10?"0"+ba:ba
-        let sse=stre.getFullYear()+"-"+mone+"-"+dte+"T00:00:00.000Z"
-        let endTime=new Date(sse);
-        console.log("new",new Date(endTime.toISOString()));
-        let et=endTime.getTime();
-        //console.log("new",st);
-        //let endTime=new Date(endDate.toLocaleDateString());
-        //let et=endTime.getTime();
-        // console.log("new",endTime)
-        // console.log("new",et);
-        let newArr=[];
-        for(let i=st,j=1;i<=et;i+=900000){
-            let tt=new Date();
-            if(data[j]!==undefined)
-                tt=new Date(data[j][0]);
-            //console.log("new ",i,"   ",tt.getTime())
-            if(tt.getTime()===i){
-                let te=new Date(i);
-                newArr.push([te,data[j][1]])
-                j++;
-            }
-            else{
-                let te=new Date(i);
-                newArr.push([te,null])
-            }
-        }
-        //console.log("new ",newArr);
-        return newArr;
-    }
+    //     let ff=endDate.toLocaleDateString()
+    //     let stre=new Date(ff);
+    //     let ab=stre.getMonth()+1;
+    //     let ba=stre.getDate()+1;
+    //     let mone=ab<10?"0"+ab:ab;
+    //     let dte=ba<10?"0"+ba:ba
+    //     let sse=stre.getFullYear()+"-"+mone+"-"+dte+"T00:00:00.000Z"
+    //     let endTime=new Date(sse);
+    //     let et=endTime.getTime();
+    //     let newArr=[];
+    //     for(let i=st,j=1;i<=et;i+=900000){
+    //         let tt=new Date();
+    //         if(data[j]!==undefined)
+    //             tt=new Date(data[j][0]);
+    //         if(tt.getTime()===i){
+    //             let te=new Date(i);
+    //             newArr.push([te,data[j][1]])
+    //             j++;
+    //         }
+    //         else{
+    //             let te=new Date(i);
+    //             newArr.push([te,null])
+    //         }
+    //     }
+    //     return newArr;
+    // }
 
     
     useEffect(() => {
@@ -1662,7 +1662,7 @@ const ExploreByEquipment = () => {
                         } else {
                             legendName = arr[0].equipment_name + ' - ' + sg;
                         }
-                        const formattedData=getFormattedTimeIntervalData(data);
+                        const formattedData=getFormattedTimeIntervalData(data, startDate, endDate);
                         console.log("new",formattedData)
                         let recordToInsert = {
                             name: legendName,
@@ -1779,7 +1779,7 @@ const ExploreByEquipment = () => {
                     } else {
                         legendName = arr[0].equipment_name + ' - ' + sg;
                     }
-                    const formattedData=getFormattedTimeIntervalData(data);
+                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                     // console.log("new",formattedData)
                     let recordToInsert = {
                         name: legendName,

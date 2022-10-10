@@ -7,6 +7,7 @@ import { percentageHandler } from '../../utils/helper';
 import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
@@ -486,6 +487,7 @@ const ExploreByBuildings = () => {
                         .utc(seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
+                    if(isNaN(parseInt(series[i][dataPointIndex]))===false)
                     ch =
                         ch +
                         `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
@@ -758,9 +760,10 @@ const ExploreByBuildings = () => {
                         let exploreData = [];
                         // data.forEach((record) => {
                         //     if (record.building_name !== null) {
+                        const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                         let recordToInsert = {
                             name: arr[0].building_name,
-                            data: data,
+                            data: formattedData,
                             id: arr[0].building_id,
                         };
                         let coll = [];
@@ -862,9 +865,10 @@ const ExploreByBuildings = () => {
                     let exploreData = [];
                     // data.forEach((record) => {
                     //     if (record.building_name !== null) {
+                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
-                        data: data,
+                        data: formattedData,
                         id: arr[0].building_id,
                     };
                     // console.log(recordToInsert);
