@@ -647,6 +647,7 @@ const Equipment = () => {
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [equipmentSelectedTypeData, setEquipmentSelectedTypeData] = useState([]);
+
     const [createEqipmentData, setCreateEqipmentData] = useState({
         name: '',
         equipment_type: '',
@@ -708,6 +709,12 @@ const Equipment = () => {
     }, [equipmentTypeData]);
 
     useEffect(() => {
+        if (equipSearch === '') {
+            fetchEquipmentData();
+        }
+    }, [equipSearch]);
+
+    useEffect(() => {
         if (endUseData) {
             addEndUseType();
         }
@@ -752,13 +759,8 @@ const Equipment = () => {
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
         if (key === 'equipment_type') {
-            const result = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-            // console.log(result.end_use_name);
-            const eq_id = endUseData.find(({ name }) => name === result.end_use_name);
-            // console.log(eq_id.end_user_id);
-            var x = document.getElementById('endUseSelect');
-            x.value = eq_id.end_user_id;
-            obj['end_use'] = eq_id.end_user_id;
+            let endUseObj = equipmentTypeData.find((record) => record?.equipment_id === value);
+            obj['end_use'] = endUseObj.end_use_id;
         }
         obj[key] = value;
         setCreateEqipmentData(obj);
@@ -987,7 +989,8 @@ const Equipment = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
-                    setEndUseData(res.data);
+                    let response = res.data;
+                    setEndUseData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1317,6 +1320,7 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('name', e.target.value);
                                 }}
+                                value={createEqipmentData?.name}
                                 autoFocus
                             />
                         </Form.Group>
@@ -1346,6 +1350,9 @@ const Equipment = () => {
                                 isSearchable={true}
                                 defaultValue={'Select Type'}
                                 options={equipmentTypeDataNow}
+                                value={equipmentTypeDataNow.filter(
+                                    (option) => option.value === createEqipmentData?.equipment_type
+                                )}
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.value);
                                 }}
@@ -1376,10 +1383,12 @@ const Equipment = () => {
                                 isSearchable={true}
                                 defaultValue={'Select Category'}
                                 options={endUseDataNow}
+                                value={endUseDataNow.filter((option) => option.value === createEqipmentData?.end_use)}
                                 onChange={(e) => {
                                     handleChange('end_use', e.value);
                                 }}
                                 className="basic-single font-weight-bold"
+                                isDisabled
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1407,6 +1416,9 @@ const Equipment = () => {
                                 isSearchable={true}
                                 defaultValue={'Select Location'}
                                 options={locationDataNow}
+                                value={locationDataNow.filter(
+                                    (option) => option.value === createEqipmentData?.space_id
+                                )}
                                 onChange={(e) => {
                                     handleChange('space_id', e.value);
                                 }}
