@@ -62,7 +62,7 @@
         @extend .dropdown-menu-base;
         @extend .box-shadow-xl;
 
-        width: 13.78rem;
+        min-width: 13.78rem;
 
         .search-field-wrapper {
             padding: 0.625rem 0.75rem 0.5625rem;
