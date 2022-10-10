@@ -40,8 +40,6 @@ const mixColors = function (color_1, color_2, weight) {
 
 const stringOrNumberPropTypes = PropTypes.oneOfType([PropTypes.string, PropTypes.number]);
 
-
-
 function arrayMoveMutable(array, fromIndex, toIndex) {
     const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
 
@@ -64,9 +62,19 @@ const getStatesForSelectAllCheckbox = (values, options) => {
     const allSelected = values.length === options.length;
     const someSelected = values.length > 0;
     const optionsAreExisted = options.length > 0;
-    
-    return {checked: optionsAreExisted && !noneSelected && allSelected, indeterminate: optionsAreExisted && !noneSelected && someSelected && !allSelected }
-}
 
+    return {
+        checked: optionsAreExisted && !noneSelected && allSelected,
+        indeterminate: optionsAreExisted && !noneSelected && someSelected && !allSelected,
+    };
+};
 
-export { generateID, kFormatter, mixColors, arrayMoveMutable, arrayMoveImmutable, stringOrNumberPropTypes, getStatesForSelectAllCheckbox };
+export {
+    generateID,
+    kFormatter,
+    mixColors,
+    arrayMoveMutable,
+    arrayMoveImmutable,
+    stringOrNumberPropTypes,
+    getStatesForSelectAllCheckbox,
+};

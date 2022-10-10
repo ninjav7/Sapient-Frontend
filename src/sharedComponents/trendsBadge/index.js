@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import { ReactComponent as IncreaseSVG } from '../assets/icons/arrow-trend-up.svg';
 import { ReactComponent as DecreaseSVG } from '../assets/icons/arrow-trend-down.svg';
 import { ReactComponent as NeutralSVG } from '../assets/icons/arrow-trend-neutral.svg';
 
 import './style.scss';
-import PropTypes from 'prop-types';
 
 const TRENDS_BADGE_TYPES = Object.freeze({
     DOWNWARD_TREND: 'downward-trend',
@@ -30,12 +31,12 @@ const valueMap = {
     [TRENDS_BADGE_TYPES.NEUTRAL_UP_TREND]: 1,
 };
 
-const TrendsBadge = ({ value = null, type = TRENDS_BADGE_TYPES.UPWARD_TREND }) => {
+const TrendsBadge = ({ className = '', value = null, type = TRENDS_BADGE_TYPES.UPWARD_TREND }) => {
     const Icon = iconMap[type];
     const renderValue = value === null ? valueMap[type] : value;
 
     return (
-        <div className={`trends-badge ${type}`}>
+        <div className={`trends-badge ${type} ${className}`}>
             <Icon className="trends-badge-badge-icon" />
             {renderValue}%
         </div>
