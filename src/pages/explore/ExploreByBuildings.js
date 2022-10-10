@@ -7,6 +7,7 @@ import { percentageHandler } from '../../utils/helper';
 import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
@@ -17,7 +18,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
-import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { BuildingStore } from '../../store/BuildingStore';
 // import ApexCharts from 'apexcharts';
 import RangeSlider from './RangeSlider';
 import { selectedBuilding, totalSelectionBuildingId } from '../../store/globalState';
@@ -30,8 +31,8 @@ import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { xaxisFilters } from '../../helpers/explorehelpers';
-import Enumerable from "linq";
-import "./Linq";
+import Enumerable from 'linq';
+import './Linq';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -50,14 +51,16 @@ const ExploreBuildingsTable = ({
     const history = useHistory();
 
     const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone) => {
-        localStorage.setItem('exploreBldId', bldId);
-        localStorage.setItem('exploreBldName', bldName);
-        localStorage.setItem('exploreBldTimeZone', bldTimeZone);
-        ExploreBuildingStore.update((s) => {
-            s.exploreBldId = bldId;
-            s.exploreBldName = bldName;
-            s.exploreBldTimeZone = bldTimeZone;
+        localStorage.setItem('buildingId', bldId);
+        localStorage.setItem('buildingName', bldName);
+        localStorage.setItem('buildingTimeZone', bldTimeZone === '' ? 'US/Eastern' : bldTimeZone);
+
+        BuildingStore.update((s) => {
+            s.BldgId = bldId;
+            s.BldgName = bldName;
+            s.BldgTimeZone = bldTimeZone === '' ? 'US/Eastern' : bldTimeZone;
         });
+
         history.push({
             pathname: `/explore-page/by-equipment/${bldId}`,
         });
@@ -219,7 +222,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -232,7 +235,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -245,7 +248,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -258,7 +261,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -271,7 +274,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -284,7 +287,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -424,10 +427,32 @@ const ExploreByBuildings = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+        colors: [
+            '#3C6DF5',
+            '#12B76A',
+            '#DC6803',
+            '#088AB2',
+            '#EF4444',
+            '#800000',
+            '#FFA500',
+            '#0AFFFF',
+            '#033E3E',
+            '#E2F516',
+        ],
         fill: {
             opacity: 1,
-            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+            colors: [
+                '#3C6DF5',
+                '#12B76A',
+                '#DC6803',
+                '#088AB2',
+                '#EF4444',
+                '#800000',
+                '#FFA500',
+                '#0AFFFF',
+                '#033E3E',
+                '#E2F516',
+            ],
         },
         markers: {
             size: 0,
@@ -455,13 +480,19 @@ const ExploreByBuildings = () => {
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = ''
-                ch = ch + `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
+                        .utc(seriesX[0][dataPointIndex])
+                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
-                    ch = ch + `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                        3
-                    )} kWh </td></tr>`
+                    if(isNaN(parseInt(series[i][dataPointIndex]))===false)
+                    ch =
+                        ch +
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(series[i][dataPointIndex])} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -517,7 +548,18 @@ const ExploreByBuildings = () => {
         legend: {
             show: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444', '#800000', '#FFA500', '#0AFFFF', '#033E3E', '#E2F516'],
+        colors: [
+            '#3C6DF5',
+            '#12B76A',
+            '#DC6803',
+            '#088AB2',
+            '#EF4444',
+            '#800000',
+            '#FFA500',
+            '#0AFFFF',
+            '#033E3E',
+            '#E2F516',
+        ],
         fill: {
             type: 'gradient',
             gradient: {
@@ -585,11 +627,13 @@ const ExploreByBuildings = () => {
             ComponentStore.update((s) => {
                 s.parent = 'explore';
             });
-            localStorage.setItem('exploreBldId', 'portfolio');
-            localStorage.setItem('exploreBldName', 'Portfolio');
-            ExploreBuildingStore.update((s) => {
-                s.exploreBldId = 'portfolio';
-                s.exploreBldName = 'Portfolio';
+
+            localStorage.setItem('buildingId', 'portfolio');
+            localStorage.setItem('buildingName', 'Portfolio');
+
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
             });
         };
         updateBreadcrumbStore();
@@ -716,9 +760,10 @@ const ExploreByBuildings = () => {
                         let exploreData = [];
                         // data.forEach((record) => {
                         //     if (record.building_name !== null) {
+                        const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                         let recordToInsert = {
                             name: arr[0].building_name,
-                            data: data,
+                            data: formattedData,
                             id: arr[0].building_id,
                         };
                         let coll = [];
@@ -736,14 +781,13 @@ const ExploreByBuildings = () => {
                             const result = Enumerable.from(objectExplore)
                                 .fullOuterJoin(
                                     Enumerable.from(coll),
-                                    pk => pk.timestamp,
-                                    fk => fk.timestamp,
+                                    (pk) => pk.timestamp,
+                                    (fk) => fk.timestamp,
                                     (left, right) => ({ ...left, ...right })
                                 )
                                 .toArray();
-                            console.log("join Result ", result);
+                            console.log('join Result ', result);
                             setObjectExplore(result);
-
                         }
 
                         // console.log(recordToInsert);
@@ -821,9 +865,10 @@ const ExploreByBuildings = () => {
                     let exploreData = [];
                     // data.forEach((record) => {
                     //     if (record.building_name !== null) {
+                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
-                        data: data,
+                        data: formattedData,
                         id: arr[0].building_id,
                     };
                     // console.log(recordToInsert);
@@ -1057,20 +1102,19 @@ const ExploreByBuildings = () => {
         let abc = [];
         let val = [];
         if (objectExplore.length !== 0) {
-            val = Object.keys(objectExplore[0])
+            val = Object.keys(objectExplore[0]);
 
             objectExplore.map(function (obj) {
-                let acd = []
+                let acd = [];
                 for (let i = 0; i < val.length; i++) {
-                    if (val[i] === "timestamp") {
-                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`))
-                    }
-                    else {
-                        acd.push(obj[val[i]].toFixed(2))
+                    if (val[i] === 'timestamp') {
+                        acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`));
+                    } else {
+                        acd.push(obj[val[i]].toFixed(2));
                     }
                 }
                 abc.push(acd);
-            })
+            });
             console.log(abc);
         }
 

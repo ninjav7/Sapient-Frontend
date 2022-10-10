@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient.azurewebsites.net';
+export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
 
 // new things
 
