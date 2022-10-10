@@ -2,18 +2,22 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { MultiSelect } from 'react-multi-select-component';
 import Form from 'react-bootstrap/Form';
-import { Table, Input, Button } from 'reactstrap';
+import { Table } from 'reactstrap';
+import Input from '../../sharedComponents/form/input/Input';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
 import LineChart from '../charts/LineChart';
-import DatePicker from 'react-datepicker';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import Button from '../../sharedComponents/button/Button';
+import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
+
 import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 
 import { timePicker15MinutesIntervalOption } from '../../constants/time';
 
-import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import moment from 'moment';
 import { Cookies } from 'react-cookie';
 import {
@@ -32,7 +36,6 @@ import { ceil } from 'lodash';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 const PlugRule = () => {
-    let cookies = new Cookies();
     const { ruleId } = useParams();
 
     const [rulesToUnLink, setRulesToUnLink] = useState({
@@ -123,6 +126,27 @@ const PlugRule = () => {
     ]);
     const [hoursNew, setHoursNew] = useState([]);
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Plug Rules',
+                    path: '/control/plug-rules',
+                    active: false,
+                },
+                {
+                    label: currentData?.name,
+                    path: '/control/plug-rules/:ruleId',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'control';
+        });
+    };
+
     const hours = [];
     const generateHours = () => {
         for (let day = 0; day < 8; day++) {
@@ -137,6 +161,10 @@ const PlugRule = () => {
         generateHours();
         fetchPlugRuleDetail();
     }, []);
+
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, [currentData.name]);
 
     const fetchPlugRuleDetail = async () => {
         await fetchPlugRuleDetails(ruleId).then((res) => {
@@ -956,36 +984,30 @@ const PlugRule = () => {
                                 <span className="plug-rule-subtitle">
                                     Set filters to choose equipment for this rule.
                                 </span>
-                                <div className="mt-2">
+                                <div className="description-and-name-container">
                                     <div>
-                                        <Form.Group className="mb-2" controlId="exampleForm.ControlInput1">
-                                            <Form.Label className="device-label">Name</Form.Label>
-                                            <Form.Control
-                                                type="textarea"
-                                                placeholder="Enter Rule Name"
-                                                className="passive-location font-weight-bold"
-                                                style={{ cursor: 'pointer' }}
-                                                value={currentData.name}
-                                                onChange={(e) => {
-                                                    handleCurrentDataChange('name', e.target.value);
-                                                }}
-                                            />
-                                        </Form.Group>
-                                        <Form.Group className="mb-2" controlId="exampleForm.ControlInput1">
-                                            <Form.Label className="device-label">Description</Form.Label>
-                                            <Input
-                                                type="textarea"
-                                                name="text"
-                                                id="exampleText"
-                                                rows="4"
-                                                placeholder="Enter Description of Rule"
-                                                value={currentData.description}
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    handleCurrentDataChange('description', e.target.value);
-                                                }}
-                                            />
-                                        </Form.Group>
+                                        <Input
+                                            label="Name"
+                                            id="name"
+                                            placeholder="Enter Rule Name"
+                                            value={currentData.name}
+                                            onChange={(e) => {
+                                                handleCurrentDataChange('name', e.target.value);
+                                            }}
+                                        />
+                                        <Textarea
+                                            type="textarea"
+                                            label="Description"
+                                            name="text"
+                                            id="description"
+                                            rows="4"
+                                            placeholder="Enter Description of Rule"
+                                            value={currentData.description}
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                handleCurrentDataChange('description', e.target.value);
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -1381,14 +1403,15 @@ const PlugRule = () => {
                                                         </div>
 
                                                         <div>
-                                                            <FontAwesomeIcon
-                                                                icon={faTrashCan}
-                                                                size="md"
+                                                            <Button
                                                                 onClick={() => {
                                                                     showOptionToDelete(record.condition_id);
                                                                     setCurrentScheduleIdToDelete(record.condition_id);
                                                                     setShowDeleteConditionModal(true);
                                                                 }}
+                                                                size={Button.Sizes.md}
+                                                                icon={<DeleteIcon />}
+                                                                type={Button.Type.primaryDistructive}
                                                             />
                                                         </div>
                                                     </div>
@@ -1439,18 +1462,18 @@ const PlugRule = () => {
                         <div className="total-eng-consumtn card-body">
                             <Button
                                 onClick={() => setShowDeleteModal(true)}
-                                type="button"
-                                className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                <i className="uil uil-trash mr-2"></i>
-                                Delete rule
-                            </Button>
+                                label="Delete rule"
+                                size={Button.Sizes.lg}
+                                icon={<DeleteIcon />}
+                                type={Button.Type.primaryDistructive}
+                            />
                         </div>
                     </div>
                 </>
             )}
 
             {selectedTab === 1 && (
-                <div className="plug-rule-body-style">
+                <div className="plug-rule-body">
                     <div className="row">
                         <div className="socket-filters-flex">
                             <div>
@@ -1592,30 +1615,10 @@ const PlugRule = () => {
                                     <Form.Label for="userState" className="card-title">
                                         Tags
                                     </Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        className="font-weight-bold socket-filter-width">
-                                        <option>All</option>
-                                    </Input>
                                 </Form.Group>
                             </div>
 
                             <div>
-                                <Form.Group>
-                                    <Form.Label for="userState" className="card-title">
-                                        Assigned Rule
-                                    </Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        className="font-weight-bold socket-filter-width">
-                                        <option>None</option>
-                                        {/* <option>Option 1</option> */}
-                                    </Input>
-                                </Form.Group>
                             </div>
                         </div>
                     </div>
@@ -1958,17 +1961,20 @@ const PlugRule = () => {
                     <div className="panel-edit-model-row-style ml-2 mr-2"></div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={() => setShowDeleteModal(false)} className="unlink-cancel-style">
-                        Cancel
-                    </Button>
                     <Button
-                        variant="primary"
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        onClick={() => setShowDeleteModal(false)}
+                    />
+                    <Button
+                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primaryDistructive}
                         onClick={() => {
                             deletePlugRule();
                         }}
-                        className="unlink-reset-style">
-                        {isDeletting ? 'Deletting' : 'Delete'}
-                    </Button>
+                    />
                 </Modal.Footer>
             </Modal>
 
@@ -1989,19 +1995,20 @@ const PlugRule = () => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
-                        variant="light"
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
                         onClick={() => setShowDeleteConditionModal(false)}
-                        className="unlink-cancel-style">
-                        Cancel
-                    </Button>
+                    />
+
                     <Button
-                        variant="primary"
+                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primaryDistructive}
                         onClick={() => {
                             deleteScheduleCondition(currentScheduleIdToDelete);
                         }}
-                        className="unlink-reset-style">
-                        {isDeletting ? 'Deletting' : 'Delete'}
-                    </Button>
+                    />
                 </Modal.Footer>
             </Modal>
         </>
