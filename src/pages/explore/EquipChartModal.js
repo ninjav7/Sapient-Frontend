@@ -17,6 +17,7 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
@@ -392,8 +393,9 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
+                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
                     let recordToInsert = {
-                        data: data,
+                        data: formattedData,
                         name: 'AHUs',
                         unit: selectedUnit,
                     };
