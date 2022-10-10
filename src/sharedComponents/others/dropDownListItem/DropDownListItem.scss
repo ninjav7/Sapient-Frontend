@@ -1,0 +1,12 @@
+@import '../../../assets/scss/colors';
+@import '../../assets/scss/helpers';
+
+.drop-down-list-item {
+    &-wrapper {
+        padding: 0.625rem 0.875rem;
+
+        .checkbox-wrapper.sm .form-check-input {
+            margin-right: 1rem;
+        }
+    }
+}
