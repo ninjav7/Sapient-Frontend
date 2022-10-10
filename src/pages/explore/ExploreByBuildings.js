@@ -490,9 +490,7 @@ const ExploreByBuildings = () => {
                         ch +
                         `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
                             colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            3
-                        )} kWh </td></tr>`;
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(series[i][dataPointIndex])} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
