@@ -10,6 +10,7 @@ import {
     generalPassiveDevices,
     resetBreakers,
     deleteBreaker,
+    searchDevices,
 } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { Handle } from 'react-flow-renderer';
@@ -18,6 +19,7 @@ import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import '../style.css';
@@ -834,6 +836,33 @@ const BreakersComponent = ({ data, id }) => {
         }
     }, [equipmentData]);
 
+    const loadOptions = (inputValue) => {
+        if (inputValue.length < 3) {
+            return;
+        }
+
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        let params = `?device_type=passive&building_id=${bldgId}&mac=${inputValue}`;
+
+        return axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+            let response = res?.data;
+            let results = [];
+            response.forEach((record) => {
+                let obj = {
+                    label: record.identifier,
+                    value: record.equipments_id,
+                };
+                results.push(obj);
+            });
+            return results;
+        });
+    };
+
     return (
         <React.Fragment>
             {/* Left Breaker Connection Point  */}
@@ -1101,23 +1130,38 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorData(e.value);
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="exampleSelect"
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
                                                     value={deviceIdDataLevelOne.filter(
                                                         (option) => option.value === breakerData.device_id
                                                     )}
-                                                    options={deviceIdDataLevelOne}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorData(e.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1225,7 +1269,25 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchSensorDataForSelectionOne(e.value, 'double');
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                        if (doubleBreakerData.data.device_id === '') {
+                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="userState"
                                                     placeholder="Select Device"
                                                     name="select"
@@ -1244,7 +1306,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1346,7 +1408,22 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForDouble(e.value);
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="userState"
                                                     placeholder="Select Device"
                                                     name="select"
@@ -1362,7 +1439,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1480,7 +1557,28 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchSensorDataForSelectionOne(e.value, 'triple');
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                        if (doubleBreakerData.data.device_id === '') {
+                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                        if (tripleBreakerData.data.device_id === '') {
+                                                            handleTripleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="userState"
                                                     placeholder="Select Device"
                                                     name="select"
@@ -1502,7 +1600,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1604,7 +1702,22 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForDouble(e.value);
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="userState"
                                                     placeholder="Select Device"
                                                     name="select"
@@ -1620,7 +1733,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1731,7 +1844,22 @@ const BreakersComponent = ({ data, id }) => {
                                                         <option value="show-more">Show More</option>
                                                     )}
                                                 </Input> */}
-                                                <Select
+                                                <AsyncSelect
+                                                    name="select"
+                                                    defaultOptions={deviceIdDataLevelOne}
+                                                    loadOptions={loadOptions}
+                                                    placeholder="Select Device"
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === tripleBreakerData?.data?.device_id
+                                                    )}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForTriple(e.value);
+                                                        handleTripleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    className="font-weight-bold"
+                                                    cacheOptions
+                                                />
+                                                {/* <Select
                                                     id="userState"
                                                     placeholder="Select Device"
                                                     name="select"
@@ -1747,7 +1875,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     }}
                                                     // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
-                                                />
+                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
