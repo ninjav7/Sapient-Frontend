@@ -1,0 +1,13 @@
+@import '../../../assets/scss/colors';
+@import '../../assets/scss/helpers';
+
+.drop-down-menu-base {
+    &-wrapper {
+        @extend .box-shadow-xl;
+        @extend .borders;
+
+        border-radius: 0.375rem;
+        overflow: hidden;
+        
+    }
+}
