@@ -15,9 +15,7 @@ const buttonsExample = [
     { label: 'right', icon: <PlusSVG />, iconAlignment: 'right' },
 ];
 export const Default = () => {
-    const handleButtonClick = (id) => {
-        console.log('IDOFCLICKED', id);
-    };
+    const handleButtonClick = (id) => {};
     return (
         <>
             <h6>Primary</h6>

@@ -50,8 +50,6 @@ const DonutChartWidget = ({
         colors,
         id,
     };
-    console.log(series);
-    console.log(items.map(({ trendValue }) => trendValue));
     return (
         <>
             <div className="donut-main-wrapper">

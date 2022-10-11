@@ -476,15 +476,12 @@ const ActiveDevices = () => {
                 .post(`${BaseUrl}${createDevice}`, createDeviceData, {
                     headers: header,
                 })
-                .then((res) => {
-                    console.log(res.data);
-                });
+                .then((res) => {});
 
             setIsProcessing(false);
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to create Active device data');
         }
     };
 
@@ -515,9 +512,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch Filtered Active Devices');
         }
     };
     const handleSearchtxt = (e) => {
@@ -544,9 +539,7 @@ const ActiveDevices = () => {
                 });
                 setIsDeviceProcessing(false);
             } catch (error) {
-                console.log(error);
                 setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
             }
         } else {
             setActiveDeviceData(duplicateactiveDeviceData);
@@ -583,9 +576,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -619,9 +610,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -642,9 +631,7 @@ const ActiveDevices = () => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
                     setduplicateActiveDeviceData(response.data);
-                    // console.log(response.data);
                     const sampleData = response.data;
-                    // console.log('sampleData => ', sampleData);
                     setPaginationData(res.data);
 
                     let onlineData = [];
@@ -659,9 +646,7 @@ const ActiveDevices = () => {
                     setIsDeviceProcessing(false);
                 });
             } catch (error) {
-                // console.log(error);
                 setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
             }
         };
 
@@ -675,10 +660,7 @@ const ActiveDevices = () => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
+            } catch (error) {}
         };
 
         fetchActiveDeviceData();
@@ -716,9 +698,7 @@ const ActiveDevices = () => {
                 });
                 setIsDeviceProcessing(false);
             } catch (error) {
-                console.log(error);
                 setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
             }
         };
         fetchActiveDeviceData();

@@ -174,9 +174,7 @@ export default function CustomEdge({
                         triggerBreakerAPI();
                     }, 1000);
                 });
-        } catch (error) {
-            console.log('Failed to update Breaker Linking!');
-        }
+        } catch (error) {}
     };
 
     const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
@@ -198,9 +196,7 @@ export default function CustomEdge({
                         triggerBreakerAPI();
                     }, 1000);
                 });
-        } catch (error) {
-            console.log('Failed to update Breaker Linking!');
-        }
+        } catch (error) {}
     };
 
     const linkBreakers = () => {
@@ -457,7 +453,6 @@ export default function CustomEdge({
             }
             return;
         }
-        console.log('Execute kiya kya :>> ');
         if (sourceBreakerObj?.data?.breakerType === 3 && targetBreakerObj?.data?.breakerType === 3) {
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
