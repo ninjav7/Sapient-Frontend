@@ -75,7 +75,6 @@ const EquipmentDeviceChartModel = ({
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    console.log(equipData);
 
     // const [formValidation, setFormValidation] = useState(false);
 
@@ -177,7 +176,6 @@ const EquipmentDeviceChartModel = ({
     // }, [dateFilter]);
     const exploreDataFetch = async () => {
         try {
-            console.log(sensorData.length);
             if (equipData.equipments_id === undefined) {
                 return;
             }
@@ -221,10 +219,7 @@ const EquipmentDeviceChartModel = ({
                     // ]);
                     setIsSensorChartLoading(false);
                 });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Graph data');
-        }
+        } catch (error) {}
     };
     const buildingAlertsData = async () => {
         if (startDate === null) {
@@ -254,12 +249,8 @@ const EquipmentDeviceChartModel = ({
                 )
                 .then((res) => {
                     setBuildingAlerts(res.data);
-                    // console.log('Building Alert => ', res.data);
                 });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Building Alert Data');
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {
@@ -585,10 +576,7 @@ const EquipmentDeviceChartModel = ({
     });
 
     const getCSVLinkData = () => {
-        // console.log("csv entered");
         let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        // console.log(arr);
-        // console.log(sData);
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
@@ -599,9 +587,7 @@ const EquipmentDeviceChartModel = ({
 
     useEffect(() => {
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipData);
             if (equipData !== null) {
-                console.log(equipData.device_type);
                 if (equipData.device_type === 'passive' || equipData.device_id === '') {
                     return;
                 }
@@ -619,15 +605,10 @@ const EquipmentDeviceChartModel = ({
                     let sensorId = response.find(
                         ({ equipment_type_name }) => equipment_type_name === equipData.equipments_type
                     );
-                    console.log(sensorId);
                     setSensorData(sensorId);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Active device sensor data');
-            }
+            } catch (error) {}
         };
-        console.log(equipData !== null ? equipData.device_type : '');
         if (equipData !== null) {
             if (equipData.device_type !== 'passive') {
                 // fetchActiveDeviceSensorData();
@@ -640,25 +621,22 @@ const EquipmentDeviceChartModel = ({
         if (equipmentTypeData !== undefined)
             result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
         // var x=document.getElementById('endUsePop');
-        // console.log(x);
         // if(x!==null)
         // x.value=result.end_use_name;
-        // console.log(result);
     }
-    console.log(equipData);
     const handleSwitch = (val) => {
         switch (val) {
             case 'metrics':
                 setShowTab('metrics');
                 setMetricClass('mr-3 single-passive-tab-active tab-switch');
                 setConfigureClass('mr-3 single-passive-tab tab-switch');
-               // setHistoryClass('mr-3 single-passive-tab tab-switch');
+                // setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
             case 'configure':
                 setShowTab('configure');
                 setMetricClass('mr-3 single-passive-tab tab-switch');
                 setConfigureClass('mr-3 single-passive-tab-active tab-switch');
-               // setHistoryClass('mr-3 single-passive-tab tab-switch');
+                // setHistoryClass('mr-3 single-passive-tab tab-switch');
                 break;
             // case 'history':
             //     setShowTab('history');
@@ -672,9 +650,7 @@ const EquipmentDeviceChartModel = ({
         let obj = Object.assign({}, updateEqipmentData);
         if (key === 'equipment_type') {
             const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-            // console.log(result1.end_use_name);
             const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
-            // console.log(eq_id);
             if (deviceType === 'passive') {
                 var x = document.getElementById('endUsePop');
                 x.value = eq_id.end_user_id;
@@ -682,7 +658,6 @@ const EquipmentDeviceChartModel = ({
             obj['end_use'] = eq_id.end_user_id;
         }
         obj[key] = value;
-        // console.log(obj);
         setUpdateEqipmentData(obj);
     };
     const handleSave = () => {
@@ -700,13 +675,10 @@ const EquipmentDeviceChartModel = ({
                     headers: header,
                 })
                 .then((res) => {
-                    // console.log(res.data);
                     fetchEquipmentData();
                     handleChartClose();
                 });
-        } catch (error) {
-            console.log('Failed to update Passive device data');
-        }
+        } catch (error) {}
     };
 
     return (

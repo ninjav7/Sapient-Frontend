@@ -583,8 +583,8 @@ const ExploreByEquipment = () => {
             },
         },
         dataLabels: {
-            enabled: true
-          }, 
+            enabled: true,
+        },
         legend: {
             position: 'top',
             horizontalAlign: 'left',
@@ -666,7 +666,6 @@ const ExploreByEquipment = () => {
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { colors } = w.globals;
-                console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
@@ -677,12 +676,14 @@ const ExploreByEquipment = () => {
                         .utc(seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
-                    if(isNaN(parseInt(series[i][dataPointIndex]))===false)
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(series[i][dataPointIndex])} kWh </td></tr>`;
+                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
+                        ch =
+                            ch +
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                                colors[i]
+                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
+                                series[i][dataPointIndex]
+                            )} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -996,9 +997,7 @@ const ExploreByEquipment = () => {
                         spacedata.push(ele);
                     });
                 });
-                console.log(spacedata);
             }
-            console.log(spacedata);
             let rvmsp = [];
             for (var i = 0; i < removeLocationDuplication.length; i++) {
                 for (var j = 0; j < spacedata.length; j++) {
@@ -1010,14 +1009,12 @@ const ExploreByEquipment = () => {
                     }
                 }
             }
-            console.log(rvmsp);
             selectedLocation.map((ele) => {
                 sp.push(ele);
             });
             rvmsp.map((el) => {
                 sp.push(el?._id);
             });
-            console.log(sp);
             // if (filteredLocationOptions.length === 1) {
             //     setLocationTxt(`${filteredLocationOptions[0].name}`);
             // } else if (filteredLocationOptions.length === 0) {
@@ -1055,7 +1052,6 @@ const ExploreByEquipment = () => {
             const params = `?floor_id=${e.target.value}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 spacedata = res.data.data;
-                console.log(res.data.data);
             });
             let rvmsp = [];
             for (var i = 0; i < removeLocationDuplication.length; i++) {
@@ -1070,14 +1066,12 @@ const ExploreByEquipment = () => {
                     }
                 }
             }
-            console.log(rvmsp);
             selectedLocation.map((ele) => {
                 sp.push(ele);
             });
             rvmsp.map((el) => {
                 sp.push(el?._id);
             });
-            console.log(sp);
             setSelectedLocation(sp);
         } else {
             // if (selectedLocation.length === 1) {
@@ -1109,7 +1103,6 @@ const ExploreByEquipment = () => {
                     return item !== el?._id;
                 });
             });
-            console.log(arr);
             setSelectedLocation(arr);
         }
     };
@@ -1208,8 +1201,6 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore Data');
             setIsExploreDataLoading(false);
         }
     };
@@ -1262,7 +1253,6 @@ const ExploreByEquipment = () => {
             return false;
         });
 
-        console.log('loc ', uniqueLocation);
         setRemoveEndUseDuplication(uniqueEndUse);
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
@@ -1305,8 +1295,6 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore Data');
             setIsExploreDataLoading(false);
         }
     };
@@ -1362,10 +1350,7 @@ const ExploreByEquipment = () => {
                     }
                     setEquipOptions(equipData);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Equipment Type Data');
-            }
+            } catch (error) {}
         };
         const fetchEndUseData = async () => {
             try {
@@ -1383,10 +1368,7 @@ const ExploreByEquipment = () => {
                     }
                     setEndUseOptions(equipData);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch End Use Data');
-            }
+            } catch (error) {}
         };
 
         exploreDataFetch(arr);
@@ -1428,8 +1410,6 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore by equipment');
             setIsExploreDataLoading(false);
         }
     };
@@ -1467,8 +1447,6 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore by equipment');
             setIsExploreDataLoading(false);
         }
     };
@@ -1533,7 +1511,6 @@ const ExploreByEquipment = () => {
                 }
             }
         }
-        console.log('loc ', rvmLocation);
         setFilteredLocationOptions(rvmLocation);
         setFilteredLocationOptionsCopy(rvmLocation);
     }, [floorListAPI, removeLocationDuplication]);
@@ -1581,9 +1558,7 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
-
     // const getFormattedTimeIntervalData=(data)=>{
-    //     //console.log("new",startDate)
     //     let ee=startDate.toLocaleDateString()
     //     let str=new Date(ee);
     //     let a=str.getMonth()+1;
@@ -1621,7 +1596,6 @@ const ExploreByEquipment = () => {
     //     return newArr;
     // }
 
-    
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1661,8 +1635,7 @@ const ExploreByEquipment = () => {
                         } else {
                             legendName = arr[0].equipment_name + ' - ' + sg;
                         }
-                        const formattedData=getFormattedTimeIntervalData(data, startDate, endDate);
-                        console.log("new",formattedData)
+                        const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                         let recordToInsert = {
                             name: legendName,
                             data: formattedData,
@@ -1676,11 +1649,10 @@ const ExploreByEquipment = () => {
                             ab[sname] = el[1];
                             coll.push(ab);
                         });
-                        
+
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
-                            console.log(objectExplore);
                             const result = Enumerable.from(objectExplore)
                                 .fullOuterJoin(
                                     Enumerable.from(coll),
@@ -1689,7 +1661,6 @@ const ExploreByEquipment = () => {
                                     (left, right) => ({ ...left, ...right })
                                 )
                                 .toArray();
-                            console.log('join Result ', result);
                             setObjectExplore(result);
                             // var s = new Set();
                             // var result = [];
@@ -1713,8 +1684,6 @@ const ExploreByEquipment = () => {
                         //setIsExploreDataLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
                 //setIsExploreDataLoading(false);
             }
         };
@@ -1779,49 +1748,46 @@ const ExploreByEquipment = () => {
                     } else {
                         legendName = arr[0].equipment_name + ' - ' + sg;
                     }
-                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
-                    // console.log("new",formattedData)
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: legendName,
                         data: formattedData,
                         id: arr[0].equipment_id,
                     };
                     let coll = [];
-                        let sname = arr[0].equipment_name;
-                        formattedData.map((el) => {
-                            let ab = {};
-                            ab['timestamp'] = el[0];
-                            ab[sname] = el[1];
-                            coll.push(ab);
-                        });
-                        if (objectExplore.length === 0) {
-                            setObjectExplore(coll);
-                        } else {
-                            console.log(objectExplore);
-                            const result = Enumerable.from(objectExplore)
-                                .fullOuterJoin(
-                                    Enumerable.from(coll),
-                                    (pk) => pk.timestamp,
-                                    (fk) => fk.timestamp,
-                                    (left, right) => ({ ...left, ...right })
-                                )
-                                .toArray();
-                            console.log('join Result ', result);
-                            setObjectExplore(result);
-                            // var s = new Set();
-                            // var result = [];
-                            // objectExplore.forEach(function (e) {
-                            //     result.push(Object.assign({}, e));
-                            //     s.add(e.timestamp);
-                            // });
-                            // coll.forEach(function (e) {
-                            //     if (!s.has(e.timestamp)) {
-                            //         var temp = Object.assign({}, e);
-                            //         temp[sname] = null;
-                            //         result.push(temp);
-                            //     }
-                            // });
-                        }
+                    let sname = arr[0].equipment_name;
+                    formattedData.map((el) => {
+                        let ab = {};
+                        ab['timestamp'] = el[0];
+                        ab[sname] = el[1];
+                        coll.push(ab);
+                    });
+                    if (objectExplore.length === 0) {
+                        setObjectExplore(coll);
+                    } else {
+                        const result = Enumerable.from(objectExplore)
+                            .fullOuterJoin(
+                                Enumerable.from(coll),
+                                (pk) => pk.timestamp,
+                                (fk) => fk.timestamp,
+                                (left, right) => ({ ...left, ...right })
+                            )
+                            .toArray();
+                        setObjectExplore(result);
+                        // var s = new Set();
+                        // var result = [];
+                        // objectExplore.forEach(function (e) {
+                        //     result.push(Object.assign({}, e));
+                        //     s.add(e.timestamp);
+                        // });
+                        // coll.forEach(function (e) {
+                        //     if (!s.has(e.timestamp)) {
+                        //         var temp = Object.assign({}, e);
+                        //         temp[sname] = null;
+                        //         result.push(temp);
+                        //     }
+                        // });
+                    }
                     dataarr.push(recordToInsert);
                     if (totalEquipmentId.length === dataarr.length) {
                         setSeriesData(dataarr);
@@ -1830,8 +1796,6 @@ const ExploreByEquipment = () => {
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore Data');
             //setIsExploreDataLoading(false);
         }
     };
@@ -2086,8 +2050,6 @@ const ExploreByEquipment = () => {
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
                 setIsExploreDataLoading(false);
             }
         };
@@ -2141,7 +2103,6 @@ const ExploreByEquipment = () => {
                 }
                 abc.push(acd);
             });
-            console.log(abc);
         }
 
         let streamData = objectExplore.length > 0 ? abc : [];
@@ -2204,7 +2165,6 @@ const ExploreByEquipment = () => {
         if (equipmentSearchTxt === '') exploreDataFetch(arr);
     }, [equipmentSearchTxt]);
     const handleGetSpaceByLocation = (e, item) => {
-        console.log(item);
         setSelectedLoc(item);
         const headers = {
             'Content-Type': 'application/json',
@@ -2225,7 +2185,6 @@ const ExploreByEquipment = () => {
                     }
                 }
             }
-            console.log(rvmsp);
             setSpaceListAPI(rvmsp);
             setShowSpace(true);
         });

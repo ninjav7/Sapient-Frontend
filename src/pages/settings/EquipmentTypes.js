@@ -35,14 +35,11 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
         obj[key] = value;
         setEditEqipmentData(obj);
     };
-    // console.log(equipData);
-    //  console.log(endUseData);
     const editDeviceData = async () => {
         let obj = Object.assign({}, editEqipmentData);
         obj['eqt_id'] = equipData.equipment_id;
         obj['is_active'] = true;
         setEditEqipmentData(obj);
-        // console.log(obj);
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -55,13 +52,10 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
                     headers: header,
                 })
                 .then((res) => {
-                    // console.log(res.data);
                     close();
                     getDevices();
                 });
-        } catch (error) {
-            console.log('Failed to Edit Equipment data');
-        }
+        } catch (error) {}
     };
 
     return (
@@ -339,12 +333,10 @@ const EquipmentTypes = () => {
 
     const handleSearch = async (e) => {
         var txt = e.target.value;
-        // console.log(e.target.value);
         if (txt === '') {
             setGeneralEquipmentTypeData(equipmentTypeData);
         } else {
             if (txt.length > 0) {
-                // console.log(txt)
                 try {
                     setIsDeviceProcessing(true);
                     let headers = {
@@ -354,13 +346,10 @@ const EquipmentTypes = () => {
                     };
                     let params = `?eqt_name=${txt}`;
                     await axios.get(`${BaseUrl}${getEquipmentType}${params}`, { headers }).then((res) => {
-                        // console.log('setGeneralEquipmentTypeData => ', res.data);
                         setGeneralEquipmentTypeData(res.data);
                         setIsDeviceProcessing(false);
                     });
                 } catch (error) {
-                    console.log(error);
-                    console.log('Failed to fetch Equipment Type Data');
                     setIsDeviceProcessing(false);
                 }
             }
@@ -394,7 +383,6 @@ const EquipmentTypes = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    // console.log(res.data);
                     fetchEquipTypeData();
                     setFormValidation(false);
                 });
@@ -402,12 +390,10 @@ const EquipmentTypes = () => {
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to create Passive device data');
         }
     };
 
     const nextPageData = async (path) => {
-        // console.log("next path ",path);
         try {
             setIsDeviceProcessing(true);
             if (path === null) {
@@ -428,8 +414,6 @@ const EquipmentTypes = () => {
                 setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
             setIsDeviceProcessing(false);
         }
     };
@@ -455,8 +439,6 @@ const EquipmentTypes = () => {
                 setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
             setIsDeviceProcessing(false);
         }
     };
@@ -489,7 +471,6 @@ const EquipmentTypes = () => {
             };
             let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                // console.log('setGeneralEquipmentTypeData => ', res.data);
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);
                 setEquipmentTypeData(res.data.data);
@@ -497,8 +478,6 @@ const EquipmentTypes = () => {
                 setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Equipment Type Data');
             setIsDeviceProcessing(false);
         }
     };
@@ -522,10 +501,7 @@ const EquipmentTypes = () => {
                     });
                     setEndUseData(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch End Use Data');
-            }
+            } catch (error) {}
         };
 
         fetchEquipTypeData();

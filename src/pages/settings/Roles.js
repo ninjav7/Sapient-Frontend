@@ -126,8 +126,6 @@ const Roles = () => {
                 setSetProcessing(false);
             });
         } catch (err) {
-            console.log(err);
-
             setSetProcessing(false);
         }
     };

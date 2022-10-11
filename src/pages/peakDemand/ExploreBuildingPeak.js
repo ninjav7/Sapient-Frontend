@@ -401,12 +401,8 @@ const SelectPeakTable = () => {
                     )
                     .then((res) => {
                         setBuildingAlerts(res.data);
-                        // console.log('Building Alert => ', res.data);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Alert Data');
-            }
+            } catch (error) {}
         };
         buildingAlertsData();
     }, [startDate, endDate, bldgId]);

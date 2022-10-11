@@ -131,12 +131,8 @@ const Gateways = () => {
                 .get(`${BaseUrl}${generalGateway}${params}`, { headers })
                 .then((res) => {
                     setGeneralGatewayData(res.data);
-                    console.log(res.data);
                 })
-                .catch((error) => {
-                    console.log(error);
-                    console.log('Failed to fetch Gateway data');
-                });
+                .catch((error) => {});
         };
         fetchGatewayData();
     }, []);
