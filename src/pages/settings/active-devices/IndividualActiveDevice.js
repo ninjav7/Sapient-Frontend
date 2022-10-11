@@ -76,8 +76,6 @@ const IndividualActiveDevice = () => {
     const [newEquipTypeID, setNewEquipTypeID] = useState('');
     const [newEquipTypeValue, setNewEquipTypeValue] = useState([]);
 
-    console.log('newEquipTypeID', newEquipTypeID);
-
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
     const [breakerModal, setBreakerModal] = useState([
@@ -169,7 +167,6 @@ const IndividualActiveDevice = () => {
     const handleChartShow = (id) => {
         setSensorId(id);
         let obj = sensors.find((o) => o.id === id);
-        console.log('Sensor Data Object => ', obj);
         setSensorData(obj);
         fetchSensorGraphData(id);
         setShowChart(true);
@@ -197,10 +194,7 @@ const IndividualActiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Active device data');
-            }
+            } catch (error) {}
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -216,10 +210,7 @@ const IndividualActiveDevice = () => {
                     setSensors(response);
                     setIsFetchingSensorData(false);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Active device sensor data');
-            }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -241,9 +232,7 @@ const IndividualActiveDevice = () => {
                     setIsLocationFetched(false);
                 });
             } catch (error) {
-                console.log(error);
                 setIsLocationFetched(false);
-                console.log('Failed to fetch Location Data');
             }
         };
 
@@ -286,9 +275,7 @@ const IndividualActiveDevice = () => {
                     setIsFetchingSensorData(false);
                 });
             } catch (error) {
-                console.log(error);
                 setIsFetchingSensorData(false);
-                console.log('Failed to fetch Active device sensor data');
             }
         };
         fetchActiveDeviceSensorData();
@@ -341,8 +328,6 @@ const IndividualActiveDevice = () => {
 
                     setDeviceData(exploreData);
 
-                    console.log('UPDATED_CODE', seriesData);
-
                     setSeriesData([
                         {
                             data: exploreData[0].data,
@@ -351,9 +336,7 @@ const IndividualActiveDevice = () => {
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
-            console.log(error);
             setIsSensorChartLoading(false);
-            console.log('Failed to fetch Sensor Graph data');
         }
     };
 
@@ -373,10 +356,7 @@ const IndividualActiveDevice = () => {
                 });
                 setEquipmentTypeDevices(response);
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Equipment Type data');
-        }
+        } catch (error) {}
     };
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
@@ -395,10 +375,7 @@ const IndividualActiveDevice = () => {
             await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to link Sensor with Equipment');
-        }
+        } catch (error) {}
     };
 
     const updateActiveDeviceData = async () => {
@@ -420,12 +397,8 @@ const IndividualActiveDevice = () => {
                     )
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
-                        console.log(res.data);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to link Sensor with Equipment');
-            }
+            } catch (error) {}
         }
     };
 

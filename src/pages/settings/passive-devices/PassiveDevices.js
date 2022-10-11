@@ -528,16 +528,13 @@ const PassiveDevices = () => {
                 .post(`${BaseUrl}${createDevice}${params}`, createDeviceData, {
                     headers: header,
                 })
-                .then((res) => {
-                    console.log(res.data);
-                });
+                .then((res) => {});
 
             setPageRefresh(!pageRefresh);
 
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to create Passive device data');
         }
     };
 
@@ -568,9 +565,7 @@ const PassiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch Filtered Active Devices');
         }
     };
     const handleSearchtxt = (e) => {
@@ -611,9 +606,7 @@ const PassiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -647,9 +640,7 @@ const PassiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -682,10 +673,7 @@ const PassiveDevices = () => {
                     passiveDeviceDataWithFilter('ace', 'identifier');
                     handleEditClose();
                 });
-        } catch (error) {
-            console.log('error', error);
-            console.log('Failed to create Passive device data');
-        }
+        } catch (error) {}
     };
 
     const deleteDeviceData = async () => {
@@ -705,10 +693,7 @@ const PassiveDevices = () => {
                     passiveDeviceDataWithFilter('ace', 'identifier');
                     handleDeleteClose();
                 });
-        } catch (error) {
-            console.log('error', error);
-            console.log('Failed to create Passive device data');
-        }
+        } catch (error) {}
     };
 
     const [deviceSearch, setDeviceSearch] = useState('');
@@ -738,9 +723,7 @@ const PassiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Passive devices');
         }
     };
 
@@ -759,9 +742,7 @@ const PassiveDevices = () => {
             });
             setIsDeviceProcessing(false);
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -779,10 +760,7 @@ const PassiveDevices = () => {
                 });
                 setLocationData(response);
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Location Data');
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {
