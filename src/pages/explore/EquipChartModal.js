@@ -393,7 +393,7 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
-                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         data: formattedData,
                         name: 'AHUs',
@@ -843,7 +843,9 @@ const EquipChartModal = ({
                                             <Skeleton count={1} />
                                         ) : (
                                             <div className="ytd-flex">
-                                                <span className="mr-1 ytd-value">{ytdData?.ytd?.ytd / 1000}</span>
+                                                <span className="mr-1 ytd-value">
+                                                    {parseInt(ytdData?.ytd?.ytd / 1000)}
+                                                </span>
                                                 <span className="ytd-unit">kWh</span>
                                             </div>
                                         )}
@@ -854,7 +856,9 @@ const EquipChartModal = ({
                                             <Skeleton count={1} />
                                         ) : (
                                             <div className="ytd-flex">
-                                                <span className="mr-1 ytd-value">{ytdData?.ytd_peak?.energy}</span>
+                                                <span className="mr-1 ytd-value">
+                                                    {ytdData?.ytd_peak?.energy ? ytdData?.ytd_peak?.energy : 0}
+                                                </span>
                                                 <span className="ytd-unit">
                                                     {`kWh @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
                                                         'MM/DD H:MM'
