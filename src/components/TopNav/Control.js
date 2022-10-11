@@ -79,7 +79,6 @@ const Control = () => {
         '/settings/active-devices',
     ]);
 
-    console.log('Allroute', internalRoute);
     const [userPermission] = useAtom(userPermissionData);
 
     useEffect(() => {
