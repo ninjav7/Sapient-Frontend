@@ -170,13 +170,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {nameOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(true, 'building_name')}>
+                                                onClick={() => handleColumnSort("ace", 'building_name')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(false, 'building_name')}>
+                                                onClick={() => handleColumnSort("dce", 'building_name')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -198,13 +198,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {densityOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(true, 'energy_density')}>
+                                                onClick={() => handleColumnSort("ace", 'energy_density')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(false, 'energy_density')}>
+                                                onClick={() => handleColumnSort("dce", 'energy_density')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -274,13 +274,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {totalOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(true, 'total_consumption')}>
+                                                onClick={() => handleColumnSort("ace", 'total_consumption')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(false, 'total_consumption')}>
+                                                onClick={() => handleColumnSort("dce", 'total_consumption')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -318,13 +318,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {squareFtOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(true, 'square_footage')}>
+                                                onClick={() => handleColumnSort("ace", 'square_footage')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort(false, 'square_footage')}>
+                                                onClick={() => handleColumnSort("dce", 'square_footage')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -692,7 +692,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'sq_ft') && (
                                             <td className="value-style">
-                                                {record.sq_ft.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                {record.sq_ft?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                             </td>
                                         )}
                                     </tr>
@@ -776,9 +776,10 @@ const CompareBuildings = () => {
             let count = parseInt(localStorage.getItem('dateFilter'));
             let params = `?days=${daysCount}`;
             await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
-                let response = res.data;
-                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                setBuildingsData(response);
+                let response = res?.data;
+                console.log(response?.data)
+                //response.data.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
                 // console.log('setBuildingsData => ', res.data);
             });
@@ -807,11 +808,19 @@ const CompareBuildings = () => {
                 tz_info: timeZone,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-            let params = `?days=${daysCount}&${filterBy}=${order}`;
+            let params=""
+            if(buildingInput.length>1){
+                params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
+            }
+            else{
+            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
+            }
             await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
-                let response = res.data;
-                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                setBuildingsData(response);
+                let response = res?.data;
+                console.log(response);
+                //response.data.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                console.log(response);
+                setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
             });
         } catch (error) {
@@ -894,12 +903,12 @@ const CompareBuildings = () => {
                             id="search-addon"
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
-                                // if (buildingInput.length >= 1) {
-                                //     searchCompareBuildingsFunc();
-                                // }
-                                // if (buildingInput.length === 0) {
-                                //     compareBuildingsData();
-                                // }
+                                if (buildingInput.length >= 1) {
+                                    buildingDataWithFilter("ace","building_name");
+                                }
+                                if (buildingInput.length === 0) {
+                                    compareBuildingsData();
+                                }
                             }}>
                             <Search className="icon-sm" />
                         </span>
