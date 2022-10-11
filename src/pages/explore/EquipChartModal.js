@@ -844,7 +844,7 @@ const EquipChartModal = ({
                                         ) : (
                                             <div className="ytd-flex">
                                                 <span className="mr-1 ytd-value">
-                                                    {parseInt(ytdData?.ytd?.ytd / 1000)}
+                                                    {formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)}
                                                 </span>
                                                 <span className="ytd-unit">kWh</span>
                                             </div>
@@ -857,12 +857,12 @@ const EquipChartModal = ({
                                         ) : (
                                             <div className="ytd-flex">
                                                 <span className="mr-1 ytd-value">
-                                                    {ytdData?.ytd_peak?.energy ? ytdData?.ytd_peak?.energy : 0}
+                                                    {formatConsumptionValue(ytdData?.ytd_peak?.power / 1000000, 1)}
                                                 </span>
                                                 <span className="ytd-unit">
-                                                    {`kWh @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                        'MM/DD H:MM'
-                                                    )}                                                    `}
+                                                    {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
+                                                        'MM/DD  H:mm'
+                                                    )}`}
                                                 </span>
                                             </div>
                                         )}
