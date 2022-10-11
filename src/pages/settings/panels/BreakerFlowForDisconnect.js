@@ -1039,7 +1039,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
                                                 />
                                             </Form.Group>
 
@@ -1095,12 +1094,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'double');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
-                                                        if (doubleBreakerData.data.device_id === '') {
-                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
-                                                        }
+                                                        // if (doubleBreakerData.data.device_id === '') {
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        // }
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
                                                 />
                                             </Form.Group>
 
@@ -1153,7 +1151,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
+                                                    isDisabled
                                                 />
                                             </Form.Group>
 
@@ -1211,15 +1209,14 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'triple');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
-                                                        if (doubleBreakerData.data.device_id === '') {
-                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
-                                                        }
-                                                        if (tripleBreakerData.data.device_id === '') {
-                                                            handleTripleBreakerChange(id, 'device_id', e.value);
-                                                        }
+                                                        // if (doubleBreakerData.data.device_id === '') {
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        // }
+                                                        // if (tripleBreakerData.data.device_id === '') {
+                                                        handleTripleBreakerChange(id, 'device_id', e.value);
+                                                        // }
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
                                                 />
                                             </Form.Group>
 
@@ -1272,7 +1269,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
+                                                    isDisabled
                                                 />
                                             </Form.Group>
 
@@ -1328,7 +1325,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         handleTripleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     className="font-weight-bold"
-                                                    cacheOptions
+                                                    isDisabled
                                                 />
                                             </Form.Group>
 
