@@ -705,7 +705,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return value;
                 },
             },
         },
@@ -1670,12 +1670,13 @@ const ExploreByEquipment = () => {
                         };
                         let coll = [];
                         let sname = arr[0].equipment_name;
-                        data.map((el) => {
+                        formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
                             ab[sname] = el[1];
                             coll.push(ab);
                         });
+                        
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
@@ -1785,6 +1786,42 @@ const ExploreByEquipment = () => {
                         data: formattedData,
                         id: arr[0].equipment_id,
                     };
+                    let coll = [];
+                        let sname = arr[0].equipment_name;
+                        formattedData.map((el) => {
+                            let ab = {};
+                            ab['timestamp'] = el[0];
+                            ab[sname] = el[1];
+                            coll.push(ab);
+                        });
+                        if (objectExplore.length === 0) {
+                            setObjectExplore(coll);
+                        } else {
+                            console.log(objectExplore);
+                            const result = Enumerable.from(objectExplore)
+                                .fullOuterJoin(
+                                    Enumerable.from(coll),
+                                    (pk) => pk.timestamp,
+                                    (fk) => fk.timestamp,
+                                    (left, right) => ({ ...left, ...right })
+                                )
+                                .toArray();
+                            console.log('join Result ', result);
+                            setObjectExplore(result);
+                            // var s = new Set();
+                            // var result = [];
+                            // objectExplore.forEach(function (e) {
+                            //     result.push(Object.assign({}, e));
+                            //     s.add(e.timestamp);
+                            // });
+                            // coll.forEach(function (e) {
+                            //     if (!s.has(e.timestamp)) {
+                            //         var temp = Object.assign({}, e);
+                            //         temp[sname] = null;
+                            //         result.push(temp);
+                            //     }
+                            // });
+                        }
                     dataarr.push(recordToInsert);
                     if (totalEquipmentId.length === dataarr.length) {
                         setSeriesData(dataarr);
