@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
+import { Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices, searchDevices } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
-import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
+import { Handle } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -41,6 +41,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [sensorData, setSensorData] = useState([]);
     const [doubleSensorData, setDoubleSensorData] = useState([]);
     const [tripleSensorData, setTripleSensorData] = useState([]);
+
+    const [selectedDeviceData, setSelectedDeviceData] = useState({});
 
     const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
@@ -85,11 +87,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
             setIsSensorDataFetchedForDouble(false);
             setIsSensorDataFetchedForTriple(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -135,7 +135,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             });
         } catch (error) {
-            console.log(error);
             if (breakerNo === 'first') {
                 setIsSensorDataFetched(false);
             }
@@ -145,7 +144,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             if (breakerNo === 'third') {
                 setIsSensorDataFetchedForTriple(false);
             }
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -186,9 +184,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -217,9 +213,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -244,9 +238,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForDouble(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetchedForDouble(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -271,9 +263,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetchedForTriple(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -324,7 +314,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 handleEditBreakerClose();
             });
         } catch (error) {
-            console.log('Failed to update Breaker');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -402,7 +391,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     handleEditBreakerClose();
                 });
         } catch (error) {
-            console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -505,7 +493,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     handleEditBreakerClose();
                 });
         } catch (error) {
-            console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -623,6 +610,13 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     useEffect(() => {
+        if (breakerObj?.device_id !== '') {
+            setSelectedDeviceData({
+                value: breakerObj?.device_id,
+                label: breakerObj?.device_name,
+            });
+        }
+
         if (!breakerObj.isLinked) {
             return;
         }
@@ -683,10 +677,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     s.totalPassiveDeviceCount = res?.data?.total_data;
                 });
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Passive devices');
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {
@@ -792,6 +783,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     value: record.equipments_id,
                 };
                 results.push(obj);
+                setSelectedDeviceData(obj);
             });
             return results;
         });
@@ -802,6 +794,19 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             equpimentDataFunc();
         }
     }, [equipmentData]);
+
+    useEffect(() => {
+        if (selectedDeviceData.value) {
+            let newDeviceList = [];
+            newDeviceList.push(selectedDeviceData);
+            deviceIdDataLevelOne.forEach((record) => {
+                if (record.value !== selectedDeviceData.value) {
+                    newDeviceList.push(record);
+                }
+            });
+            setDeviceIdDataLevelOne(newDeviceList);
+        }
+    }, [selectedDeviceData]);
 
     return (
         <React.Fragment>

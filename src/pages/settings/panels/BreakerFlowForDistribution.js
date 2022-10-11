@@ -39,6 +39,8 @@ const BreakersComponent = ({ data, id }) => {
     const [doubleBreakerChanges, setDoubleBreakerChanges] = useState({});
     const [tripleBreakerChanges, setTripleBreakerChanges] = useState({});
 
+    const [selectedDeviceData, setSelectedDeviceData] = useState({});
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -103,9 +105,7 @@ const BreakersComponent = ({ data, id }) => {
                 setIsSensorDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -134,9 +134,7 @@ const BreakersComponent = ({ data, id }) => {
                 setIsSensorDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -170,11 +168,9 @@ const BreakersComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetched(false);
             setIsSensorDataFetchedForDouble(false);
             setIsSensorDataFetchedForTriple(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -220,7 +216,6 @@ const BreakersComponent = ({ data, id }) => {
                 }
             });
         } catch (error) {
-            console.log(error);
             if (breakerNo === 'first') {
                 setIsSensorDataFetched(false);
             }
@@ -230,7 +225,6 @@ const BreakersComponent = ({ data, id }) => {
             if (breakerNo === 'third') {
                 setIsSensorDataFetchedForTriple(false);
             }
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -267,7 +261,6 @@ const BreakersComponent = ({ data, id }) => {
                 });
         } catch (error) {
             setIsResetting(false);
-            console.log('Failed to unlink Breaker from Panel');
         }
     };
 
@@ -288,7 +281,6 @@ const BreakersComponent = ({ data, id }) => {
             });
         } catch (error) {
             setIsDeleting(false);
-            console.log('Failed to unlink Breaker from Panel');
         }
     };
 
@@ -323,9 +315,7 @@ const BreakersComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForDouble(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetchedForDouble(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -350,9 +340,7 @@ const BreakersComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             });
         } catch (error) {
-            console.log(error);
             setIsSensorDataFetchedForTriple(false);
-            console.log('Failed to fetch Sensor Data');
         }
     };
 
@@ -403,7 +391,6 @@ const BreakersComponent = ({ data, id }) => {
                 handleEditBreakerClose();
             });
         } catch (error) {
-            console.log('Failed to update Breaker');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -481,7 +468,6 @@ const BreakersComponent = ({ data, id }) => {
                     handleEditBreakerClose();
                 });
         } catch (error) {
-            console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -584,7 +570,6 @@ const BreakersComponent = ({ data, id }) => {
                     handleEditBreakerClose();
                 });
         } catch (error) {
-            console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
             handleEditBreakerClose();
         }
@@ -702,6 +687,13 @@ const BreakersComponent = ({ data, id }) => {
     };
 
     useEffect(() => {
+        if (breakerObj?.device_id !== '') {
+            setSelectedDeviceData({
+                value: breakerObj?.device_id,
+                label: breakerObj?.device_name,
+            });
+        }
+
         if (!breakerObj.isLinked) {
             return;
         }
@@ -763,10 +755,7 @@ const BreakersComponent = ({ data, id }) => {
                         s.totalPassiveDeviceCount = res?.data?.total_data;
                     });
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
+            } catch (error) {}
         };
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
@@ -858,10 +847,24 @@ const BreakersComponent = ({ data, id }) => {
                     value: record.equipments_id,
                 };
                 results.push(obj);
+                setSelectedDeviceData(obj);
             });
             return results;
         });
     };
+
+    useEffect(() => {
+        if (selectedDeviceData.value) {
+            let newDeviceList = [];
+            newDeviceList.push(selectedDeviceData);
+            deviceIdDataLevelOne.forEach((record) => {
+                if (record.value !== selectedDeviceData.value) {
+                    newDeviceList.push(record);
+                }
+            });
+            setDeviceIdDataLevelOne(newDeviceList);
+        }
+    }, [selectedDeviceData]);
 
     return (
         <React.Fragment>

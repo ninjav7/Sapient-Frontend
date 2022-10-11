@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels, getLocation } from '../../../services/Network';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
@@ -24,10 +13,10 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import AddPanelModel from './AddPanelModel';
-import 'react-loading-skeleton/dist/skeleton.css';
-import '../style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
+import 'react-loading-skeleton/dist/skeleton.css';
+import '../style.css';
 
 const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -175,12 +164,9 @@ const Panels = () => {
             await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
                 setPanelData(res.data);
                 setIsPanelDataFetched(false);
-                console.log(res.data);
             });
         } catch (error) {
-            console.log(error);
             setIsPanelDataFetched(false);
-            console.log('Failed to fetch Panels Data List');
         }
     };
 
@@ -195,10 +181,7 @@ const Panels = () => {
             await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
                 setLocationData(res.data);
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Location Data');
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {
