@@ -57,7 +57,6 @@ class Login extends Component {
      * Handles the submit
      */
     handleValidSubmit = (event, values) => {
-        // console.log(this.props.history);
         this.props.loginUser(values.username.trim(), values.password.trim(), this.props.history);
         if (values.username === '' || values.password === '') {
         }

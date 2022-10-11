@@ -21,8 +21,6 @@ import { timeZone } from '../../utils/helper';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
-    // console.log(items);
-    // console.log(config);
     const sortedItems = useMemo(() => {
         let sortableItems = [...items];
         if (sortConfig !== null) {
@@ -170,13 +168,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {nameOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("ace", 'building_name')}>
+                                                onClick={() => handleColumnSort('ace', 'building_name')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("dce", 'building_name')}>
+                                                onClick={() => handleColumnSort('dce', 'building_name')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -198,13 +196,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {densityOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("ace", 'energy_density')}>
+                                                onClick={() => handleColumnSort('ace', 'energy_density')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("dce", 'energy_density')}>
+                                                onClick={() => handleColumnSort('dce', 'energy_density')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -274,13 +272,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {totalOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("ace", 'total_consumption')}>
+                                                onClick={() => handleColumnSort('ace', 'total_consumption')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("dce", 'total_consumption')}>
+                                                onClick={() => handleColumnSort('dce', 'total_consumption')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -318,13 +316,13 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         {squareFtOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("ace", 'square_footage')}>
+                                                onClick={() => handleColumnSort('ace', 'square_footage')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort("dce", 'square_footage')}>
+                                                onClick={() => handleColumnSort('dce', 'square_footage')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -404,7 +402,8 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat((record.energy_density)/1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                                {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq.
+                                                ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
@@ -777,16 +776,12 @@ const CompareBuildings = () => {
             let params = `?days=${daysCount}`;
             await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res?.data;
-                console.log(response?.data)
                 //response.data.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
-                // console.log('setBuildingsData => ', res.data);
             });
         } catch (error) {
-            console.log(error);
             setIsBuildingDataFetched(false);
-            console.log('Failed to fetch Buildings Data');
         }
     };
 
@@ -808,25 +803,19 @@ const CompareBuildings = () => {
                 tz_info: timeZone,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-            let params=""
-            if(buildingInput.length>1){
+            let params = '';
+            if (buildingInput.length > 1) {
                 params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
-            }
-            else{
-            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
+            } else {
+                params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
             }
             await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res?.data;
-                console.log(response);
-                //response.data.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                console.log(response);
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsBuildingDataFetched(false);
-            console.log('Failed to fetch all Equipments Data');
         }
     };
 
@@ -854,9 +843,7 @@ const CompareBuildings = () => {
     //             setIsBuildingDataFetched(false);
     //         });
     //     } catch (error) {
-    //         console.log(error);
     //         setIsBuildingDataFetched(false);
-    //         console.log('Failed to fetch all Equipments Data');
     //     }
     // };
 
@@ -904,7 +891,7 @@ const CompareBuildings = () => {
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
                                 if (buildingInput.length >= 1) {
-                                    buildingDataWithFilter("ace","building_name");
+                                    buildingDataWithFilter('ace', 'building_name');
                                 }
                                 if (buildingInput.length === 0) {
                                     compareBuildingsData();

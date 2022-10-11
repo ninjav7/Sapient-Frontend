@@ -116,9 +116,7 @@ class LeftSidebar extends Component {
      * @param {*} e
      * @param {*} item
      */
-    handleClick(e) {
-        console.log(e);
-    }
+    handleClick(e) {}
 
     render() {
         const isCondensed = this.props.isCondensed || false;

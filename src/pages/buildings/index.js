@@ -427,10 +427,8 @@ const BuildingOverview = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                //console.log(w);
                 const { seriesNames } = w.globals;
                 const day = seriesNames[seriesIndex];
-                //console.log(day);
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
@@ -560,10 +558,8 @@ const BuildingOverview = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                //console.log(w);
                 const { seriesNames } = w.globals;
                 const day = seriesNames[seriesIndex];
-                //console.log(day);
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
@@ -609,15 +605,8 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        console.log(
-                            'setOverview => ',
-                            percentageHandler(res.data.average_energy_density.now, res.data.average_energy_density.old)
-                        );
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Overall Data');
-            }
+            } catch (error) {}
         };
 
         const buildingEndUserData = async () => {
@@ -646,13 +635,9 @@ const BuildingOverview = () => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
                             newDonutData.push(fixedConsumption);
                         });
-                        console.log(newDonutData);
                         setDonutChartData(newDonutData);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building EndUses Data');
-            }
+            } catch (error) {}
         };
 
         // const buildingAlertsData = async () => {
@@ -674,11 +659,8 @@ const BuildingOverview = () => {
         //             )
         //             .then((res) => {
         //                 setBuildingAlerts(res.data);
-        //                 // console.log('Building Alert => ', res.data);
         //             });
         //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch Building Alert Data');
         //     }
         // };
 
@@ -701,12 +683,8 @@ const BuildingOverview = () => {
         //             )
         //             .then((res) => {
         //                 setTopContributors(res.data);
-        //                 // console.log('setTopContributors => ', res.data);
-        //                 // console.log(res.data);
         //             });
         //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch Building Peak Data');
         //     }
         // };
 
@@ -730,9 +708,7 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log('result top ', res);
                         let data = res.data[0].top_contributors;
-                        // console.log('HeatMap Data => ', data);
                         // const dataset=[
                         //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1216, old: 0}},
                         //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1561676, old: 0}},
@@ -746,9 +722,7 @@ const BuildingOverview = () => {
                         setIsEquipmentProcessing(false);
                     });
             } catch (error) {
-                console.log(error);
                 setIsEquipmentProcessing(false);
-                console.log('Failed to fetch Building Equipments Data');
             }
         };
 
@@ -830,8 +804,6 @@ const BuildingOverview = () => {
                                 });
                             }
                         }
-                        //console.log(newWeekdaysData);
-                        //console.log(newWeekendsData);
                         for (let i = 0; i < 24; i++) {
                             if (i === 0) {
                                 newWeekdaysData[0].data[i].x = '12AM';
@@ -853,8 +825,6 @@ const BuildingOverview = () => {
                         setIsAvgConsumptionDataLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Hourly Data');
                 setIsAvgConsumptionDataLoading(false);
             }
         };
@@ -896,8 +866,6 @@ const BuildingOverview = () => {
                         setIsEnergyConsumptionDataLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Consumption Chart');
                 setIsEnergyConsumptionDataLoading(false);
             }
         };
