@@ -25,7 +25,7 @@ import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-ico
 import '../style.css';
 import './panel-style.css';
 
-const BreakersComponent = ({ data, id }) => {
+const DistributedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -1106,33 +1106,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchDeviceSensorData(e.target.value);
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
-                                                    }}
-                                                    value={breakerData.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {breakerData.device_id !== '' && <option value="">None</option>}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1242,36 +1215,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchSensorDataForSelectionOne(e.target.value, 'double');
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
-                                                        if (doubleBreakerData.data.device_id === '') {
-                                                            handleDoubleBreakerChange(id, 'device_id', e.target.value);
-                                                        }
-                                                    }}
-                                                    value={breakerData.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {breakerData.device_id !== '' && <option value="">None</option>}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1382,35 +1325,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchDeviceSensorDataForDouble(e.target.value);
-                                                        handleDoubleBreakerChange(id, 'device_id', e.target.value);
-                                                    }}
-                                                    value={doubleBreakerData?.data?.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {doubleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1527,39 +1441,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchSensorDataForSelectionOne(e.target.value, 'triple');
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
-                                                        if (doubleBreakerData.data.device_id === '') {
-                                                            handleDoubleBreakerChange(id, 'device_id', e.target.value);
-                                                        }
-                                                        if (tripleBreakerData.data.device_id === '') {
-                                                            handleTripleBreakerChange(id, 'device_id', e.target.value);
-                                                        }
-                                                    }}
-                                                    value={breakerData.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {breakerData.device_id !== '' && <option value="">None</option>}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1676,35 +1557,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchDeviceSensorDataForDouble(e.target.value);
-                                                        handleDoubleBreakerChange(id, 'device_id', e.target.value);
-                                                    }}
-                                                    value={doubleBreakerData?.data?.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {doubleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1818,35 +1670,6 @@ const BreakersComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchDeviceSensorDataForTriple(e.target.value);
-                                                        handleTripleBreakerChange(id, 'device_id', e.target.value);
-                                                    }}
-                                                    value={tripleBreakerData?.data?.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {tripleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
                                                 <AsyncSelect
                                                     name="select"
                                                     defaultOptions={deviceIdDataLevelOne}
@@ -1862,23 +1685,6 @@ const BreakersComponent = ({ data, id }) => {
                                                     className="font-weight-bold"
                                                     cacheOptions
                                                 />
-                                                {/* <Select
-                                                    id="userState"
-                                                    placeholder="Select Device"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    defaultValue={'Select Device'}
-                                                    options={deviceIdDataLevelOne}
-                                                    value={deviceIdDataLevelOne.filter(
-                                                        (option) => option.value === tripleBreakerData?.data?.device_id
-                                                    )}
-                                                    onChange={(e) => {
-                                                        fetchDeviceSensorDataForTriple(e.value);
-                                                        handleTripleBreakerChange(id, 'device_id', e.value);
-                                                    }}
-                                                    // onInputChange={handleInputChange}
-                                                    className="font-weight-bold"
-                                                /> */}
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1886,45 +1692,6 @@ const BreakersComponent = ({ data, id }) => {
                                                 {isSensorDataFetchedForTriple ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    // <Input
-                                                    //     type="select"
-                                                    //     name="state"
-                                                    //     id="userState"
-                                                    //     className="font-weight-bold breaker-phase-selection"
-                                                    //     placeholder="Select Sensor"
-                                                    //     onChange={(e) => {
-                                                    //         if (e.target.value === 'Select Sensor') {
-                                                    //             return;
-                                                    //         }
-                                                    //         handleLinkedSensor(
-                                                    //             tripleBreakerData?.data?.sensor_id,
-                                                    //             e.target.value
-                                                    //         );
-                                                    //         handleTripleBreakerChange(id, 'sensor_id', e.target.value);
-                                                    //     }}
-                                                    //     value={tripleBreakerData?.data?.sensor_id}>
-                                                    //     <option>Select Sensor</option>
-                                                    //     {tripleSensorData.map((record) => {
-                                                    //         return (
-                                                    //             <option
-                                                    //                 value={record.id}
-                                                    //                 disabled={
-                                                    //                     record.breaker_id !== '' ||
-                                                    //                     linkedSensors.includes(record.id)
-                                                    //                 }
-                                                    //                 className={
-                                                    //                     (record.breaker_id !== '' ||
-                                                    //                         linkedSensors.includes(record.id)) &&
-                                                    //                     'fields-disabled-style'
-                                                    //                 }>
-                                                    //                 {record.name}
-                                                    //             </option>
-                                                    //         );
-                                                    //     })}
-                                                    //     {tripleBreakerData?.data?.sensor_id !== '' && (
-                                                    //         <option value="">None</option>
-                                                    //     )}
-                                                    // </Input>
                                                     <Select
                                                         id="userState"
                                                         placeholder="Select Sensor"
@@ -1959,32 +1726,6 @@ const BreakersComponent = ({ data, id }) => {
 
                             <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
                                 <Form.Label>Equipment</Form.Label>
-                                {/* <Input
-                                    type="select"
-                                    name="state"
-                                    id="userState"
-                                    className="font-weight-bold breaker-phase-selection"
-                                    placeholder="Select Equipment"
-                                    onChange={(e) => {
-                                        if (e.target.value === 'Select Equipment') {
-                                            return;
-                                        }
-                                        handleSingleBreakerChange(id, 'equipment_link', e.target.value);
-                                    }}
-                                    value={breakerData.equipment_link[0]}>
-                                    <option>Select Equipment</option>
-                                    {equipmentData.map((record) => {
-                                        return (
-                                            <option
-                                                value={record.value}
-                                                disabled={record.breakerId !== ''}
-                                                className={record.breakerId !== '' && 'fields-disabled-style'}>
-                                                {record.label}
-                                            </option>
-                                        );
-                                    })}
-                                    {breakerData?.equipment_link?.length !== 0 && <option value="">None</option>}
-                                </Input> */}
                                 <Select
                                     name="state"
                                     id="userState"
@@ -2177,4 +1918,4 @@ const BreakersComponent = ({ data, id }) => {
     );
 };
 
-export default BreakersComponent;
+export default DistributedBreakerComponent;
