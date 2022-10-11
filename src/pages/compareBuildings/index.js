@@ -8,7 +8,7 @@ import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
 //import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, compareBuildings, searchCompareBuildings, sortCompareBuildings } from '../../services/Network';
+import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
@@ -775,7 +775,7 @@ const CompareBuildings = () => {
 
             let count = parseInt(localStorage.getItem('dateFilter'));
             let params = `?days=${daysCount}`;
-            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -808,7 +808,7 @@ const CompareBuildings = () => {
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
             let params = `?days=${daysCount}&${filterBy}=${order}`;
-            await axios.post(`${BaseUrl}${sortCompareBuildings}${params}`, arr, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
                 let response = res.data;
                 response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                 setBuildingsData(response);
@@ -823,44 +823,44 @@ const CompareBuildings = () => {
 
     const [buildingInput, setBuildingInput] = useState('');
 
-    const searchCompareBuildingsFunc = async () => {
-        setIsBuildingDataFetched(true);
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let count = parseInt(localStorage.getItem('dateFilter'));
-            let arr = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
-            let params = `?days=${count}&building_name=${buildingInput}`;
-            await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
-                let response = res.data;
-                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                setBuildingsData(response);
-                setIsBuildingDataFetched(false);
-            });
-        } catch (error) {
-            console.log(error);
-            setIsBuildingDataFetched(false);
-            console.log('Failed to fetch all Equipments Data');
-        }
-    };
+    // const searchCompareBuildingsFunc = async () => {
+    //     setIsBuildingDataFetched(true);
+    //     try {
+    //         let headers = {
+    //             'Content-Type': 'application/json',
+    //             accept: 'application/json',
+    //             Authorization: `Bearer ${userdata.token}`,
+    //         };
+    //         let count = parseInt(localStorage.getItem('dateFilter'));
+    //         let arr = {
+    //             date_from: startDate.toLocaleDateString(),
+    //             date_to: endDate.toLocaleDateString(),
+    //             tz_info: timeZone,
+    //         };
+    //         let params = `?days=${count}&building_name=${buildingInput}`;
+    //         await axios.post(`${BaseUrl}${searchCompareBuildings}${params}`, arr, { headers }).then((res) => {
+    //             let response = res.data;
+    //             response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+    //             setBuildingsData(response);
+    //             setIsBuildingDataFetched(false);
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //         setIsBuildingDataFetched(false);
+    //         console.log('Failed to fetch all Equipments Data');
+    //     }
+    // };
 
-    const handleKeyDownSearch = (e) => {
-        if (e.key === 'Enter') {
-            if (buildingInput.length >= 1) {
-                searchCompareBuildingsFunc();
-            }
-            if (buildingInput.length === 0) {
-                compareBuildingsData();
-            }
-        }
-    };
+    // const handleKeyDownSearch = (e) => {
+    //     if (e.key === 'Enter') {
+    //         if (buildingInput.length >= 1) {
+    //             searchCompareBuildingsFunc();
+    //         }
+    //         if (buildingInput.length === 0) {
+    //             compareBuildingsData();
+    //         }
+    //     }
+    // };
     useEffect(() => {
         if (buildingInput === '') compareBuildingsData();
     }, [buildingInput]);
@@ -887,19 +887,19 @@ const CompareBuildings = () => {
                             onChange={(e) => {
                                 setBuildingInput(e.target.value);
                             }}
-                            onKeyDown={handleKeyDownSearch}
+                            // onKeyDown={handleKeyDownSearch}
                         />
                         <span
                             className="input-group-text border-0"
                             id="search-addon"
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
-                                if (buildingInput.length >= 1) {
-                                    searchCompareBuildingsFunc();
-                                }
-                                if (buildingInput.length === 0) {
-                                    compareBuildingsData();
-                                }
+                                // if (buildingInput.length >= 1) {
+                                //     searchCompareBuildingsFunc();
+                                // }
+                                // if (buildingInput.length === 0) {
+                                //     compareBuildingsData();
+                                // }
                             }}>
                             <Search className="icon-sm" />
                         </span>
