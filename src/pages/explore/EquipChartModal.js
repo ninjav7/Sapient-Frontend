@@ -17,6 +17,7 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
@@ -28,10 +29,11 @@ import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import ModalHeader from '../../components/ModalHeader';
-import { xaxisFilters } from '../../helpers/explorehelpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import './style.css';
 
 const EquipChartModal = ({
@@ -71,6 +73,9 @@ const EquipChartModal = ({
     const [seriesData, setSeriesData] = useState([]);
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
+    const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
+    const [ytdData, setYtdData] = useState({});
+
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
     const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
@@ -83,6 +88,10 @@ const EquipChartModal = ({
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState({});
 
+    const [location, setLocation] = useState('');
+    const [equipType, setEquipType] = useState('');
+    const [endUses, setEndUses] = useState('');
+
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
     const addEquimentType = () => {
@@ -93,11 +102,6 @@ const EquipChartModal = ({
             ]);
         });
     };
-
-    useEffect(() => {
-        console.log('SSR equipmentData => ', equipmentData);
-        console.log('SSR selectedTab => ', selectedTab);
-    });
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
@@ -135,10 +139,7 @@ const EquipChartModal = ({
                 .then((res) => {
                     setBuildingAlerts(res.data);
                 });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Building Alert Data');
-        }
+        } catch (error) {}
     };
 
     const [options, setOptions] = useState({
@@ -301,6 +302,30 @@ const EquipChartModal = ({
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
         obj[key] = value;
+        if (key === 'space_id') {
+            setLocation(value);
+        }
+        if (key === 'equipment_type') {
+            setEquipType(value);
+        }
+        setUpdateEqipmentData(obj);
+    };
+
+    const handleEquipTypeChange = (key, value, deviceType) => {
+        let obj = Object.assign({}, updateEqipmentData);
+
+        if (deviceType === 'passive') {
+            let data = equipmentTypeData.find((record) => record?.equipment_id === value);
+            obj['end_use'] = data?.end_use_id;
+            setEndUses(data?.end_use_id);
+            setEquipType(value);
+        }
+
+        if (deviceType === 'active') {
+            setEquipType(value);
+        }
+
+        obj[key] = value;
         setUpdateEqipmentData(obj);
     };
 
@@ -336,9 +361,7 @@ const EquipChartModal = ({
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
-        } catch (error) {
-            console.log('Failed to update Passive device data');
-        }
+        } catch (error) {}
     };
 
     const fetchEquipmentChart = async (equipId) => {
@@ -370,8 +393,9 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
-                        data: data,
+                        data: formattedData,
                         name: 'AHUs',
                         unit: selectedUnit,
                     };
@@ -385,8 +409,6 @@ const EquipChartModal = ({
                     setIsEquipDataFetched(false);
                 });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Explore Data');
             setIsEquipDataFetched(false);
         }
     };
@@ -416,6 +438,7 @@ const EquipChartModal = ({
 
         const fetchEquipmentYTDUsageData = async (equipId) => {
             try {
+                setIsYtdDataFetching(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -435,14 +458,14 @@ const EquipChartModal = ({
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
-                        let data = response.data;
-                        setTopConsumption(data[0].ytd.ytd);
-                        setPeak(data[0].ytd_peak.energy);
+                        let response = res.data.data;
+                        setYtdData(response[0]);
+                        // setTopConsumption(data[0].ytd.ytd);
+                        // setPeak(data[0].ytd_peak.energy);
+                        setIsYtdDataFetching(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
+                setIsYtdDataFetching(false);
             }
         };
 
@@ -457,13 +480,13 @@ const EquipChartModal = ({
                 let params = `/${equipId}`;
 
                 await axios.get(`${BaseUrl}${equipmentDetails}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setEquipmentData(response.data);
+                    let response = res.data.data;
+                    setLocation(response?.location_id);
+                    setEquipType(response?.equipments_type_id);
+                    setEndUses(response?.end_use_id);
+                    setEquipmentData(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-            }
+            } catch (error) {}
         };
 
         const fetchBuildingAlerts = async () => {
@@ -487,10 +510,7 @@ const EquipChartModal = ({
                     .then((res) => {
                         setBuildingAlerts(res.data);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Alert Data');
-            }
+            } catch (error) {}
         };
 
         const fetchEndUseData = async () => {
@@ -503,10 +523,7 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     setEndUse(res.data);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch End Use Data');
-            }
+            } catch (error) {}
         };
 
         const fetchEquipTypeData = async () => {
@@ -524,10 +541,7 @@ const EquipChartModal = ({
                     });
                     setEquipmentTypeData(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Equipment Type Data');
-            }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -540,10 +554,7 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
+            } catch (error) {}
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
@@ -592,10 +603,7 @@ const EquipChartModal = ({
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Active device sensor data');
-            }
+            } catch (error) {}
         };
 
         if (equipmentData !== null) {
@@ -826,16 +834,38 @@ const EquipChartModal = ({
                     </div>
 
                     {selectedTab === 0 && (
-                        <Row className="mt-2">
+                        <Row className="mt-4">
                             <Col lg={4}>
-                                <div className="single-consumption-container">
-                                    <h6 className="top-equip-title">Top Consumption YTD</h6>
-                                    <div className="font-weight-bold" style={{ color: 'black' }}>
-                                        {topConsumption} kWh
+                                <div className="ytd-container">
+                                    <div>
+                                        <div className="ytd-heading">Total Consumption YTD</div>
+                                        {isYtdDataFetching ? (
+                                            <Skeleton count={1} />
+                                        ) : (
+                                            <div className="ytd-flex">
+                                                <span className="mr-1 ytd-value">
+                                                    {formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)}
+                                                </span>
+                                                <span className="ytd-unit">kWh</span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <h6 className="top-equip-title">Peak kW YTD</h6>
-                                    <div className="font-weight-bold" style={{ color: 'black' }}>
-                                        {peak} kW
+                                    <div>
+                                        <div className="ytd-heading">Peak kW YTD</div>
+                                        {isYtdDataFetching ? (
+                                            <Skeleton count={1} />
+                                        ) : (
+                                            <div className="ytd-flex">
+                                                <span className="mr-1 ytd-value">
+                                                    {formatConsumptionValue(ytdData?.ytd_peak?.power / 1000000, 1)}
+                                                </span>
+                                                <span className="ytd-unit">
+                                                    {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
+                                                        'MM/DD  H:mm'
+                                                    )}`}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -993,7 +1023,7 @@ const EquipChartModal = ({
                     {selectedTab === 1 && (
                         <>
                             {equipmentData?.device_type === 'passive' ? (
-                                <Row>
+                                <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
                                             <Col lg={12}>
@@ -1024,9 +1054,13 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        value={equipResult?.equipment_id}
+                                                        value={equipType}
                                                         onChange={(e) => {
-                                                            handleChange('equipment_type', e.target.value);
+                                                            handleEquipTypeChange(
+                                                                'equipment_type',
+                                                                e.target.value,
+                                                                'passive'
+                                                            );
                                                         }}>
                                                         <option selected>Select Type</option>
                                                         {equipmentTypeData?.map((record) => {
@@ -1059,7 +1093,8 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="endUsePop"
                                                         className="font-weight-bold"
-                                                        value={equipResult?.end_use_id}>
+                                                        value={endUses}
+                                                        disabled>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1081,10 +1116,10 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        // defaultValue={loc.length===0?"":loc.location_id}
                                                         onChange={(e) => {
                                                             handleChange('space_id', e.target.value);
-                                                        }}>
+                                                        }}
+                                                        value={location}>
                                                         <option value="" selected>
                                                             Select Location
                                                         </option>
@@ -1174,7 +1209,7 @@ const EquipChartModal = ({
                             )}
 
                             {equipmentData?.device_type === '' ? (
-                                <Row>
+                                <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
                                             <Col lg={12}>
@@ -1204,10 +1239,14 @@ const EquipChartModal = ({
                                                         type="select"
                                                         name="select"
                                                         id="exampleSelect"
-                                                        className="font-weight-bold"
-                                                        value={equipResult?.equipment_id}
+                                                        className="font-weight-bold disabled"
+                                                        value={equipType}
                                                         onChange={(e) => {
-                                                            handleChange('equipment_type', e.target.value);
+                                                            handleEquipTypeChange(
+                                                                'equipment_type',
+                                                                e.target.value,
+                                                                'passive'
+                                                            );
                                                         }}>
                                                         <option selected>Select Type</option>
                                                         {equipmentTypeData?.map((record) => {
@@ -1239,8 +1278,9 @@ const EquipChartModal = ({
                                                         type="select"
                                                         name="select"
                                                         id="endUsePop"
-                                                        className="font-weight-bold"
-                                                        value={equipResult?.end_use_id}>
+                                                        className="font-weight-bold disabled"
+                                                        value={endUses}
+                                                        disabled>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1265,7 +1305,8 @@ const EquipChartModal = ({
                                                         // defaultValue={loc.length===0?"":loc.location_id}
                                                         onChange={(e) => {
                                                             handleChange('space_id', e.target.value);
-                                                        }}>
+                                                        }}
+                                                        value={location}>
                                                         <option value="" selected>
                                                             Select Location
                                                         </option>
@@ -1355,7 +1396,7 @@ const EquipChartModal = ({
                             )}
 
                             {equipmentData?.device_type === 'active' ? (
-                                <Row>
+                                <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
                                             <Col lg={12}>
@@ -1385,9 +1426,13 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        value={equipResult?.equipment_id}
+                                                        value={equipType}
                                                         onChange={(e) => {
-                                                            handleChange('equipment_type', e.target.value);
+                                                            handleEquipTypeChange(
+                                                                'equipment_type',
+                                                                e.target.value,
+                                                                'active'
+                                                            );
                                                         }}>
                                                         <option selected>Select Type</option>
                                                         {equipmentTypeData.map((record) => {
@@ -1424,7 +1469,8 @@ const EquipChartModal = ({
                                                         type="select"
                                                         name="select"
                                                         id="exampleSelect"
-                                                        className="font-weight-bold">
+                                                        className="font-weight-bold"
+                                                        disabled>
                                                         <option selected>Desktop PC</option>
                                                         <option>Refigerator</option>
                                                     </Input>
@@ -1602,7 +1648,7 @@ const EquipChartModal = ({
                                                         Installed at
                                                     </h6>
                                                     <h6 className="card-title">
-                                                        {equipmentData !== null ? equipmentData.device_location : ''}
+                                                        {equipmentData !== null ? equipmentData.location : ''}
                                                     </h6>
                                                 </div>
                                             </FormGroup>

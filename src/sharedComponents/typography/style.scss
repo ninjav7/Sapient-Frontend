@@ -101,7 +101,7 @@ $text-colors: (
         font-weight: 500;
         font-size: 0.875rem;
         line-height: 1.1875rem;
-        border-bottom: 1px solid;
+        border-bottom: 0.0625rem solid;
         color: $primary-indigo-600;
         text-decoration: none;
     }
@@ -109,15 +109,19 @@ $text-colors: (
     &.Light {
         font-weight: 300 !important;
     }
+
     &.Regular {
         font-weight: 400 !important;
     }
+
     &.Medium {
         font-weight: 500 !important;
     }
+
     &.SemiBold {
         font-weight: 600 !important;
     }
+
     &.Bold {
         font-weight: 700 !important;
     }
