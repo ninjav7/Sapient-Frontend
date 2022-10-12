@@ -358,8 +358,6 @@ const EndUseType = () => {
                         setIsEndUsesDataFetched(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch EndUses Data');
                 setIsEndUsesDataFetched(false);
             }
         };
@@ -416,8 +414,6 @@ const EndUseType = () => {
                         setIsEquipTypeChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch EndUses Floor Data');
                 setIsEquipTypeChartLoading(false);
             }
         };
@@ -460,8 +456,6 @@ const EndUseType = () => {
                         setIsPlugLoadChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch EndUses Usage Data');
                 setIsPlugLoadChartLoading(false);
             }
         };

@@ -15,22 +15,16 @@ const EditFloorModal = (props) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    console.log('props.floorName', props.floorName);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // API Body
     const [apiBody, setApiBody] = useState({ parent_building: bldgId });
-
-    console.log('apiBody', apiBody);
-
     const [floorsName, setFloorName] = useState('');
     const [floors, setFloors] = useAtom(floorList);
     const [floorModal, setFloorModal] = useAtom(closedEditFloorModal);
     const [floorid] = useAtom(floorIdState);
     const [floorNameApi, setFloorNameApi] = useState();
-
-    console.log('floorsName', floorsName);
 
     useEffect(() => {
         setFloorNameApi({ name: floorsName });
@@ -44,7 +38,6 @@ const EditFloorModal = (props) => {
         };
         let params = `?building_id=${bldgId}`;
         axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {
-            console.log('res', res);
         });
     };
 
@@ -56,11 +49,9 @@ const EditFloorModal = (props) => {
         };
         const params = `${floorid}`;
         axios.patch(`${BaseUrl}${updateSpace}?floor_id=${params}`, floorNameApi, { headers }).then((res) => {
-            console.log('resupdated', res);
         });
     };
 
-    console.log('editFloor', props.editFloor);
 
     const [deletingFloor, setDeletingFloor] = useAtom(deleteFloor);
 

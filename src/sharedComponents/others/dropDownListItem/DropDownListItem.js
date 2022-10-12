@@ -22,8 +22,6 @@ const DropDownListItem = (props) => {
         return acc;
     }, {});
 
-    console.log(props, checkboxProps);
-
     return (
         <div className={className}>
             {props.noDefinedContent ? (

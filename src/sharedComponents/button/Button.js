@@ -10,7 +10,7 @@ const SIZES = Object.freeze({
     lg: 'lg',
 });
 
-const BUTTON_TYPES = Object.freeze({
+export const BUTTON_TYPES = Object.freeze({
     primary: 'primary',
     secondary: 'secondary',
     secondaryGrey: 'secondary-grey',

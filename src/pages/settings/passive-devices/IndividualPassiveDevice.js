@@ -179,9 +179,7 @@ const IndividualPassiveDevice = () => {
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
-            console.log(error);
             setIsSensorChartLoading(false);
-            console.log('Failed to fetch Sensor Graph data');
         }
     };
 
@@ -204,12 +202,8 @@ const IndividualPassiveDevice = () => {
                     )
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
-                        console.log(res.data);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to link Sensor with Equipment');
-            }
+            } catch (error) {}
         }
     };
 
@@ -228,10 +222,7 @@ const IndividualPassiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Passive device data');
-            }
+            } catch (error) {}
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -249,9 +240,7 @@ const IndividualPassiveDevice = () => {
                 });
                 setIsFetchingSensorData(false);
             } catch (error) {
-                console.log(error);
                 setIsFetchingSensorData(false);
-                console.log('Failed to fetch Active device sensor data');
             }
         };
 
@@ -272,9 +261,7 @@ const IndividualPassiveDevice = () => {
                 });
                 setIsLocationFetched(false);
             } catch (error) {
-                console.log(error);
                 setIsLocationFetched(false);
-                console.log('Failed to fetch Location Data');
             }
         };
         fetchSinglePassiveDevice();

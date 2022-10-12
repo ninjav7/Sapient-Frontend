@@ -45,15 +45,12 @@ const TopNav = () => {
                 setUserPermissionDataNow(data);
             });
         } catch (err) {
-            console.log(err);
         }
     };
 
     useEffect(() => {
         getUserPermissionDetail();
     }, []);
-
-    console.log('userPermissionDataNow', userPermissionDataNow);
 
     useEffect(() => {
         const getBuildingList = async () => {

@@ -3,16 +3,20 @@ import React from 'react';
 import { Row, Col, Card, CardBody } from 'reactstrap';
 import Select from 'react-select';
 import MaskedInput from 'react-text-mask';
-import Flatpickr from 'react-flatpickr'
+import Flatpickr from 'react-flatpickr';
 
 import PageTitle from '../../components/PageTitle';
-
 
 const ReactSelect = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-1">React Select <a href="https://github.com/JedWatson/react-select" className="ml-2 font-size-13"><i className='uil uil-external-link-alt'></i></a></h4>
+                <h4 className="header-title mt-0 mb-1">
+                    React Select{' '}
+                    <a href="https://github.com/JedWatson/react-select" className="ml-2 font-size-13">
+                        <i className="uil uil-external-link-alt"></i>
+                    </a>
+                </h4>
                 <Row>
                     <Col xl={6}>
                         <p className="mb-1 mt-3 font-weight-bold">Single Selection</p>
@@ -40,12 +44,10 @@ const ReactSelect = () => {
                             classNamePrefix="react-select"></Select>
                     </Col>
                 </Row>
-                
             </CardBody>
         </Card>
     );
 };
-
 
 const DatePickers = () => {
     return (
@@ -61,18 +63,19 @@ const DatePickers = () => {
                         <div className="form-group">
                             <label>Basic Date</label> <br />
                             <div className="form-group mb-sm-0 mr-2">
-                                <Flatpickr value={new Date()}
-                                    onChange={date => { console.log(date) }}
-                                    className="form-control" />
+                                <Flatpickr value={new Date()} onChange={(date) => {}} className="form-control" />
                             </div>
                         </div>
                     </Col>
                     <Col lg={6}>
                         <div className="form-group">
                             <label>Date &amp; Time</label> <br />
-                            <Flatpickr value={new Date()} options={{enableTime: true}}
-                                onChange={date => { console.log(date) }}
-                                className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ enableTime: true }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                 </Row>
@@ -81,17 +84,23 @@ const DatePickers = () => {
                     <Col lg={6}>
                         <div className="form-group">
                             <label>Human-friendly Dates</label> <br />
-                            <Flatpickr value={new Date()} options={{altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d"}}
-                                    onChange={date => { console.log(date) }}
-                                    className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ altInput: true, altFormat: 'F j, Y', dateFormat: 'Y-m-d' }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                     <Col lg={6}>
                         <div className="form-group">
                             <label>MinDate and MaxDate</label> <br />
-                            <Flatpickr value={new Date()} options={{minDate: "today", maxDate: new Date().fp_incr(14)}}
-                                onChange={date => { console.log(date) }}
-                                className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ minDate: 'today', maxDate: new Date().fp_incr(14) }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                 </Row>
@@ -100,17 +109,23 @@ const DatePickers = () => {
                     <Col lg={6}>
                         <div className="form-group">
                             <label>Selecting multiple dates</label> <br />
-                            <Flatpickr value={new Date()} options={{mode: "multiple", dateFormat: "Y-m-d"}}
-                                onChange={date => { console.log(date) }}
-                                className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ mode: 'multiple', dateFormat: 'Y-m-d' }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                     <Col lg={6}>
                         <div className="form-group">
                             <label>Date Range</label> <br />
-                            <Flatpickr value={new Date()} options={{mode: "range"}}
-                                    onChange={date => { console.log(date) }}
-                                    className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ mode: 'range' }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                 </Row>
@@ -119,17 +134,23 @@ const DatePickers = () => {
                     <Col lg={6}>
                         <div className="form-group">
                             <label>Basic Time</label> <br />
-                            <Flatpickr value={new Date()} options={{enableTime: true, noCalendar: true, dateFormat: "H:i"}}
-                                onChange={date => { console.log(date) }}
-                                className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                     <Col lg={6}>
                         <div className="form-group">
                             <label>24-hour Time Picker</label> <br />
-                            <Flatpickr value={new Date()}  options={{enableTime: true, noCalendar: true, dateFormat: "H:i",  time_24hr: true}}
-                                    onChange={date => { console.log(date) }}
-                                    className="form-control" />
+                            <Flatpickr
+                                value={new Date()}
+                                options={{ enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true }}
+                                onChange={(date) => {}}
+                                className="form-control"
+                            />
                         </div>
                     </Col>
                 </Row>

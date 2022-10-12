@@ -19,14 +19,12 @@ import { BaseUrl, createSpace, getSpaceTypes } from '../../services/Network';
 import axios from 'axios';
 
 const EditSpace = (props) => {
-    console.log('floorId', props.floorId);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [floorIdNow] = useAtom(floorStaticId);
-    console.log('floorIdNow', floorIdNow);
 
     const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
 
@@ -41,18 +39,12 @@ const EditSpace = (props) => {
         building_id: bldgId,
     });
 
-    console.log('spaceBody', spaceBody);
-    console.log('props.currentFloorId', props.currentFloorId);
 
     useEffect(() => {
         if (props.currentFloorId) {
             setSpaceBody({ ...spaceBody, parent_space: props.currentFloorId });
         }
     }, [props.currentFloorId]);
-
-    console.log('spaceBody', spaceBody);
-
-    console.log('floor2', floor2);
 
     useEffect(() => {
         if (floorIdNow) {

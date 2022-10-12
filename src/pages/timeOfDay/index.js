@@ -198,7 +198,6 @@ const TimeOfDay = () => {
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { colors } = w.globals;
-                // console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
@@ -325,10 +324,8 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                //console.log(w);
                 const { seriesNames } = w.globals;
                 const day = seriesNames[seriesIndex];
-                //console.log(day);
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
@@ -560,8 +557,6 @@ const TimeOfDay = () => {
                         setIsAvgUsageChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Daily Usage Hour Data');
                 setIsAvgUsageChartLoading(false);
             }
         };
@@ -728,7 +723,6 @@ const TimeOfDay = () => {
                         let sat = [];
                         let sun = [];
 
-                        // console.log('heat map raw ', response);
                         // Seperate record based on days
 
                         response.map((record) => {
@@ -775,13 +769,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -813,13 +805,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -851,13 +841,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -889,13 +877,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -927,13 +913,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -965,13 +949,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -1003,13 +985,11 @@ const TimeOfDay = () => {
                                             }
                                         }
                                         if (found !== undefined) {
-                                            // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
                                                 y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
-                                            // console.log('Inside else block');
                                             newData.push({
                                                 x: xval,
                                                 y: 0,
@@ -1027,8 +1007,6 @@ const TimeOfDay = () => {
                         setIsAvgHourlyChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Daily Usage Hour Data');
                 setIsAvgHourlyChartLoading(false);
             }
         };

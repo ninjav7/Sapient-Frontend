@@ -24,13 +24,12 @@ const FileUpload = () => {
                     <Card>
                         <CardBody>
                             <h4 className="header-title mt-0 mb-1">Dropzone File Upload</h4>
-                            <p className="sub-header">DropzoneJS is an open source library that provides drag and drop file uploads with image previews.</p>
+                            <p className="sub-header">
+                                DropzoneJS is an open source library that provides drag and drop file uploads with image
+                                previews.
+                            </p>
 
-                            <FileUploader
-                                onFileUpload={files => {
-                                    console.log(files);
-                                }}
-                            />
+                            <FileUploader onFileUpload={(files) => {}} />
                         </CardBody>
                     </Card>
                 </Col>

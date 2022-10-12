@@ -54,7 +54,6 @@ const General = () => {
     });
 
     const [bldgData, setBldgData] = useState({});
-    console.log(bldgData, 'bldgData');
     const [isbuildingDetailsFetched, setIsbuildingDetailsFetched] = useState(true);
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
@@ -66,7 +65,6 @@ const General = () => {
     const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
 
     const [textLocation, settextLocation] = useState('');
-    console.log('textLocation', textLocation.split(' ').join('+'));
 
     const [timeZone, setTimeZone] = useState('');
 
@@ -243,11 +241,6 @@ const General = () => {
                 .then(
                     axios.spread((data1, data2, data3) => {
                         setLoadButton(false);
-                        console.log('Data1 => ', data1);
-
-                        console.log('Data2 => ', data2);
-
-                        console.log('Data3 => ', data3);
                         localStorage.removeItem('generalState');
                         localStorage.removeItem('generalStreetAddress');
                         localStorage.removeItem('generalBuildingName');
@@ -258,14 +251,10 @@ const General = () => {
                         });
                     })
                 );
-        } catch (error) {
-            console.log('Failed to save General Building Data');
-        }
+        } catch (error) {}
     };
 
     const [buildingListData] = useAtom(buildingData);
-
-    console.log('buildingListData', buildingListData);
 
     const fetchBuildingData = async () => {
         let fixing = true;
@@ -365,7 +354,6 @@ const General = () => {
                     });
                     setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
-                    // console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
                     setWeekToggle({
@@ -442,8 +430,6 @@ const General = () => {
     }, []);
 
     const inputsBuildingHandler = (e) => {
-        // console.log(e.target.name);
-
         setInputField({ [e.target.name]: e.target.value });
     };
 
@@ -499,7 +485,6 @@ const General = () => {
         let obj = buildingDetails;
 
         obj.active = !buildingDetails.active;
-        // console.log('obj.active', obj.active);
         localStorage.setItem('generalObjectActive', obj.active);
         handleBldgSettingChanges('active', obj.active);
     };
@@ -608,10 +593,6 @@ const General = () => {
         if (answer) {
             //some code
 
-            // console.log("'Are you sure wants o delete!!!'");
-
-            // console.log('helloo');
-
             const headers = {
                 'Content-Type': 'application/json',
 
@@ -621,8 +602,6 @@ const General = () => {
             };
 
             axios.delete(`${BaseUrl}${generalBldgDelete}/${bldgId}`, { headers }).then((res) => {
-                console.log(res.data);
-
                 setRender(!render);
             });
         }
@@ -661,19 +640,15 @@ const General = () => {
     // useEffect(() => {
     //     const el = document.querySelector('ge-autocomplete');
     //     // 'select' event handler - when a user selects an item from the suggestions
-    //     console.log(el);
     //     if (el) {
     //         el.addEventListener('select', (event) => {
-    //             console.log(event.detail, event);
     //         });
     //     }
     // }, []);
 
     const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
-    console.log(getResponseOfPlaces, 'getResponseOfPlaces');
     const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
     const [totalSelectedData, setTotalSelectedData] = useState();
-    console.log('totalSelectedData', totalSelectedData);
     const [openDropdown, setopenDropdown] = useState(false);
     const getPlacesAutocomplete = async () => {
         const params = `${textLocation.split(' ').join('+')}`;
@@ -702,7 +677,6 @@ const General = () => {
     //         )
     //         .then((res) => {
     //             // setGetResponseOfPlaces(res?.data);
-    //             console.log(res, 'maps.googleapis.com');
     //         });
     // };
 
@@ -817,7 +791,6 @@ const General = () => {
                                                     name="name"
                                                     id="buildingName"
                                                     onChange={(e) => {
-                                                        console.log(e.target.value, 'buildingObj');
                                                         localStorage.setItem('generalBuildingName', e.target.value);
                                                         handleBldgSettingChanges('name', e.target.value);
                                                     }}
@@ -934,7 +907,6 @@ const General = () => {
                                                     onChange={(e) => {
                                                         handleBldgSettingChanges('street_address', e.target.value);
                                                         settextLocation(e.target.value);
-                                                        console.log('e.target.valueBuildingAddress', e.target.value);
                                                         if (getResponseOfPlaces) {
                                                             setopenDropdown(true);
                                                         }
@@ -954,7 +926,6 @@ const General = () => {
                                                                 <div
                                                                     className="onchangedrowpdown"
                                                                     onClick={() => {
-                                                                        console.log(item, 'clickedgetResponseOfPlaces');
                                                                         setSelectedPlaceLabel(item?.properties?.label);
                                                                         localStorage.setItem(
                                                                             'generalStreetAddress',
@@ -972,7 +943,6 @@ const General = () => {
                                             </div>
                                             // <ge-autocomplete
                                             //     onChange={(e) => {
-                                            //         console.log(e, 'e');
                                             //     }}
                                             //     api_key="ge-2200db37475e4ed3"></ge-autocomplete>
                                         )}
@@ -1191,9 +1161,7 @@ const General = () => {
                                             </div>
 
                                             <DatePicker
-                                                onInputClick={() => {
-                                                    console.log('manas');
-                                                }}
+                                                onInputClick={() => {}}
                                                 style={{ position: 'relative' }}
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'mon', 'frm', 'to');

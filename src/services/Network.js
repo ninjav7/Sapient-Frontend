@@ -83,9 +83,7 @@ export const getBuilding = '/api/config/get_buildings';
 export const energyUsage = '/api/energy/energy/usage';
 
 // compare-buildings
-export const compareBuildings = '/api/energy/energy/compare_building';
-export const sortCompareBuildings = '/api/energy/energy/sort-compare-buildings';
-export const searchCompareBuildings = '/api/energy/energy/search-compare-buildings';
+export const compareBuildings = '/api/energy/energy/compare-buildings';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';

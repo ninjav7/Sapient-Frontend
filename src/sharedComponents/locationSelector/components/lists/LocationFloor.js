@@ -17,7 +17,8 @@ import { spaceId } from '../../../../store/globalState';
 const LocationFloor = () => {
     const [floor, setFloor] = useState({});
 
-    const { selectedLevels, handleSelect, selectedRooms, selectedMap, helpers, selectAllRooms } = useContext(LocationSelectorContext);
+    const { selectedLevels, handleSelect, selectedRooms, selectedMap, helpers, selectAllRooms } =
+        useContext(LocationSelectorContext);
 
     const floorId = selectedLevels.floor.id;
     const { fetchFloorById } = helpers;
@@ -33,18 +34,14 @@ const LocationFloor = () => {
 
     const handleClickCheckBox = ({ event, spaceId, name }) => {
         event.stopPropagation();
-        selectAllRooms({spaceId, floorId})
+        selectAllRooms({ spaceId, floorId });
     };
 
     const isSelectedSpace = (spaceId) => {
         return !!selectedItem({ selectedMap, spaceId, floorId });
     };
-    
-    const isIndeterminate = () => {
-        
-    }
 
-    console.log(selectedRooms({ floor_id: floorId, space_id: spaceId }));
+    const isIndeterminate = () => {};
 
     return (
         <div>

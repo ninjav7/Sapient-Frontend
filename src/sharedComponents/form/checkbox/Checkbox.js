@@ -55,7 +55,7 @@ const Checkbox = ({
 
     return (
         <div className={classNameWrapper}>
-            <div className="form-check p-0 d-flex">
+            <div className="form-check p-0 d-flex align-items-center">
                 <input
                     {...props}
                     autoFocus={autoFocus}
@@ -64,17 +64,19 @@ const Checkbox = ({
                     ref={checkboxRef}
                     type="checkbox"
                 />
-                <label className="m-0 w-100 cursor-pointer" htmlFor={id}>
-                    <Typography.Body size={labelSize}>{label}</Typography.Body>
+                {label && <label className="m-0 w-100 cursor-pointer" htmlFor={id}>
+                    <Typography.Body size={labelSize} {...props.typographyProps}>{label}</Typography.Body>
                     {description && type !== CHECKBOX_TYPES.dropDownCheckbox && (
                         <Typography.Body
                             className="checkbox-description"
                             size={descriptionSize}
-                            fontWeight={Typography.Types.Light}>
+                            fontWeight={Typography.Types.Light}
+                            {...props.typographyProps}    
+                        >
                             {description}
                         </Typography.Body>
                     )}
-                </label>
+                </label>}
             </div>
         </div>
     );
@@ -92,6 +94,7 @@ Checkbox.propTypes = {
     indeterminate: PropTypes.bool,
     classInput: PropTypes.string,
     type: PropTypes.oneOf(Object.values(CHECKBOX_TYPES)),
+    typographyProps: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default Checkbox;

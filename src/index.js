@@ -9,9 +9,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 const queryClient = new QueryClient();
 
-// function SetLogout(){
-// console.log("entered in set logout")
-// }
 ReactDOM.render(
     <QueryClientProvider client={queryClient}>
         <Provider store={configureStore()}>
