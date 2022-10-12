@@ -1136,23 +1136,23 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
-                                        <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown className="" align="end">
+                                        <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
+                                                style={{ backgroundColor: 'white', color: 'black', borderColor: 'black' }}>
                                                 {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}{' '}
-                                            </Dropdown.Toggle>
-                                            <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
+                                                <button
+                                                style={{ border : 'none' ,backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
                                                     setConsumptionTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
+                                            </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
@@ -1194,23 +1194,23 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                                    <Dropdown className="" align="end">
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
+                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
                                                 All {el.label}{' '}
-                                            </Dropdown.Toggle>
-                                            <button
+                                                <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
+                                            </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
@@ -1243,22 +1243,22 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                                    <Dropdown className="" align="end">
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
+                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
                                                 {sq_ftTxt === '' ? `All ${el.label}` : sq_ftTxt}
-                                            </Dropdown.Toggle>
-                                            <button
+                                                <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
+                                            </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
@@ -1300,17 +1300,16 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                                    <Dropdown className="" align="end">
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
+                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
                                                 {buildingTypeTxt === '' ? `All ${el.label}` : buildingTypeTxt}{' '}
-                                            </Dropdown.Toggle>
-                                            <button
+                                                <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
@@ -1318,6 +1317,7 @@ const ExploreByBuildings = () => {
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
+                                            </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div>
@@ -1397,7 +1397,7 @@ const ExploreByBuildings = () => {
 
             <Row>
                 <div className="explore-table-style" >
-                    <Col lg={12} className="ml-2">
+                    <Col lg={12} >
                         <ExploreBuildingsTable
                             exploreTableData={exploreTableData}
                             isExploreDataLoading={isExploreDataLoading}
