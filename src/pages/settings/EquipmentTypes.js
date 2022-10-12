@@ -553,7 +553,7 @@ const EquipmentTypes = () => {
             </Row>
 
             <Row>
-                <Col lg={7}>
+                <Col lg={12}>
                     <EquipmentTable
                         equipmentTypeData={generalEquipmentTypeData}
                         endUseData={endUseData}

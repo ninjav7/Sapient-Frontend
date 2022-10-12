@@ -22,6 +22,7 @@ import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { useQuery } from 'react-query';
 import { QueryClient } from 'react-query';
 import Select from 'react-select';
+import { textAlign } from '@mui/system';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, error }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -205,7 +206,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </td>
-                                            <td className="font-weight-bold">{record.num_of_devices}</td>
+                                            <td className="font-weight-bold"> - </td>
                                         </tr>
                                     );
                                 })}
@@ -379,7 +380,7 @@ const Buildings = () => {
             </Row>
 
             <Row>
-                <Col lg={6}>
+                <Col lg={10}>
                     <BuildingTable
                         buildingsData={buildingsData}
                         isDataProcessing={isDataProcessing}

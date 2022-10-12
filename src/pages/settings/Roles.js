@@ -183,7 +183,7 @@ const Roles = () => {
             </Row>
 
             <Row>
-                <Col lg={6}>
+                <Col lg={12}>
                     <RoleTable
                         roleDataList={roleDataList}
                         permissionData={permissionData}

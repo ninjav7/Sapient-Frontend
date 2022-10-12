@@ -69,7 +69,7 @@ const PassiveDevicesTable = ({
     const [sensorOrder, setSensorOrder] = useState(false);
 
     const handleColumnSort = (order, columnName) => {
-        if (columnName === 'mac_address') {
+        if (columnName === 'identifier') {
             setModelOrder(false);
             setLocationOrder(false);
             setSensorOrder(false);
@@ -147,13 +147,13 @@ const PassiveDevicesTable = ({
                                             {identifierOrder ? (
                                                 <div
                                                     className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                    onClick={() => handleColumnSort('ace', 'identifier')}>
                                                     <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                                 </div>
                                             ) : (
                                                 <div
                                                     className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                    onClick={() => handleColumnSort('dce', 'identifier')}>
                                                     <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                                 </div>
                                             )}
@@ -169,7 +169,7 @@ const PassiveDevicesTable = ({
                                                     <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                                 </div>
                                             ) : (
-                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <div className="ml-2" onClick={() => handleColumnSort('dce', 'model')}>
                                                     <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                                 </div>
                                             )}
@@ -191,7 +191,7 @@ const PassiveDevicesTable = ({
                                             ) : (
                                                 <div
                                                     className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'location')}>
+                                                    onClick={() => handleColumnSort('dce', 'location')}>
                                                     <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                                 </div>
                                             )}
@@ -211,7 +211,7 @@ const PassiveDevicesTable = ({
                                             ) : (
                                                 <div
                                                     className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                    onClick={() => handleColumnSort('dce', 'sensor_count')}>
                                                     <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                                 </div>
                                             )}
@@ -308,9 +308,9 @@ const PassiveDevicesTable = ({
                                                 )}
                                                 {selectedOptions.some((record) => record.value === 'location') && (
                                                     <td>
-                                                        {record.location === ' > '
+                                                        {record.location === ''
                                                             ? ' - '
-                                                            : record.location.split('>').reverse().join(' > ')}
+                                                            : record.location}
                                                     </td>
                                                 )}
                                                 {selectedOptions.some((record) => record.value === 'sensors') && (
@@ -404,7 +404,7 @@ const PassiveDevicesTable = ({
                                 onChange={(e) => {
                                     setPageSize(parseInt(e.target.value));
                                 }}>
-                                {[10, 25, 50].map((pageSize) => (
+                                {[20, 50, 100].map((pageSize) => (
                                     <option key={pageSize} value={pageSize} className="align-options-center">
                                         Show {pageSize} devices
                                     </option>
@@ -452,7 +452,7 @@ const PassiveDevices = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
@@ -556,7 +556,7 @@ const PassiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -597,7 +597,7 @@ const PassiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -711,10 +711,11 @@ const PassiveDevices = () => {
                 let data = res.data;
                 setPassiveDeviceData(data.data);
                 setDuplicatePassiveDeviceData(data.data);
+                setPaginationData(res.data);
                 let onlineData = [];
                 let offlineData = [];
 
-                data.forEach((record) => {
+                data.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -764,16 +765,14 @@ const PassiveDevices = () => {
     };
 
     useEffect(() => {
+        if(deviceSearch.length===0)
         fetchPassiveDeviceData();
-    }, [pageRefresh, bldgId]);
+    }, [deviceSearch,pageSize]);
 
     useEffect(() => {
         fetchLocationData();
     }, [pageRefresh, bldgId]);
 
-    useEffect(() => {
-        fetchPassiveDeviceData();
-    }, [pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -912,7 +911,7 @@ const PassiveDevices = () => {
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={12}>
                     {selectedTab === 0 && (
                         <PassiveDevicesTable
                             deviceData={passiveDeviceData}
@@ -975,15 +974,14 @@ const PassiveDevices = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Model</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Model"
                                 className="font-weight-bold"
-                                value={modalVal}
-                                disabled={true}>
-                                <option selected>{modalVal}</option>
-                            </Input>
+                                disabled={true}
+                                value={modalVal.charAt(0).toUpperCase()+modalVal.slice(1)}
+                                style={{backgroundColor:"#F5F5F5"}}
+                            />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Identifier</Form.Label>

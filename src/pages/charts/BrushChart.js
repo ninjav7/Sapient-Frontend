@@ -14,7 +14,7 @@ const BrushChart = ({
     className = '',
 }) => {
     return (
-        <Card style={{ width: '95%' }}>
+        <Card style={{ width: '100%' }}>
             <CardBody>
                 <div id="wrapper">
                     <div id="chart-line2" className={`line-chart-widget-wrapper ${className}`}>

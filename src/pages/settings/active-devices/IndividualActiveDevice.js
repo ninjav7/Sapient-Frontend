@@ -548,7 +548,7 @@ const IndividualActiveDevice = () => {
                                         />
                                     </div>
 
-                                    <div>
+                                    {/* <div>
                                         <button
                                             type="button"
                                             className={
@@ -596,7 +596,7 @@ const IndividualActiveDevice = () => {
                                             onClick={() => setSelectedTab(3)}>
                                             No Data
                                         </button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 

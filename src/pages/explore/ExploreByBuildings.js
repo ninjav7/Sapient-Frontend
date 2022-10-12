@@ -102,7 +102,7 @@ const ExploreBuildingsTable = ({
         <>
             <Card>
                 <CardBody>
-                    <Col md={6}>
+                    <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
                                 <tr>
@@ -1051,7 +1051,7 @@ const ExploreByBuildings = () => {
     }, [buildingSearchTxt]);
     return (
         <>
-            <Row className="ml-2 mt-2 explore-filters-style">
+            <Row className="ml-2 mt-2 mr-4 explore-filters-style">
                 <Header title="" />
             </Row>
 
@@ -1059,13 +1059,13 @@ const ExploreByBuildings = () => {
                 <div className="explore-table-style">
                     {isExploreChartDataLoading ? (
                         <div className="loader-center-style" style={{ height: '400px' }}>
-                            <Spinner className="m-2" color={'primary'} />
+                            {/* <Spinner className="m-2" color={'primary'} /> */}
                         </div>
                     ) : (
                         <>
                             <Row>
                                 <Col lg={11}></Col>
-                                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px" }}>
                                     <CSVLink
                                         style={{ color: 'black' }}
                                         className="btn btn-white d-inline btnHover font-weight-bold"
@@ -1088,7 +1088,7 @@ const ExploreByBuildings = () => {
                 </div>
             </Row>
 
-            <Row className="mt-3 mb-1">
+            <Row className="mt-3 mb-1 ml-3 mr-3">
                 <Col lg={11} style={{ display: 'flex', justifyContent: 'flex-start' }}>
                     <div className="explore-search-filter-style">
                         <div className="explore-search mr-2">
@@ -1382,7 +1382,7 @@ const ExploreByBuildings = () => {
                         })}
                     </div>
                 </Col>
-                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px"}}>
                     <CSVLink
                         style={{ color: 'black' }}
                         className="btn btn-white d-inline btnHover font-weight-bold"
@@ -1396,7 +1396,7 @@ const ExploreByBuildings = () => {
             </Row>
 
             <Row>
-                <div className="explore-table-style">
+                <div className="explore-table-style" >
                     <Col lg={12} className="ml-2">
                         <ExploreBuildingsTable
                             exploreTableData={exploreTableData}

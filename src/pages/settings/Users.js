@@ -315,7 +315,7 @@ const Users = () => {
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={12}>
                     <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
                 </Col>
             </Row>
