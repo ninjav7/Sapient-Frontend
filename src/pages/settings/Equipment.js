@@ -409,7 +409,7 @@ const EquipmentTable = ({
                                                                         ? 'None'
                                                                         : `${`${record.tags[0]} + ${
                                                                               record?.tags?.length - 1
-                                                                          }`} + ${record?.tags?.length - 1}`}
+                                                                          }`} `}
                                                                 </div>
                                                             }
                                                         </td>
@@ -504,7 +504,7 @@ const EquipmentTable = ({
                                     </tbody>
                                 )}
                             </Table>
-                            {/* <div className="page-button-style">
+                            <div className="page-button-style">
                                 <button
                                     type="button"
                                     className="btn btn-md btn-light font-weight-bold mt-4"
@@ -549,7 +549,7 @@ const EquipmentTable = ({
                                         ))}
                                     </select>
                                 </div>
-                            </div> */}
+                            </div>
                         </>
                     ) : (
                         <p>You don't have view access</p>
