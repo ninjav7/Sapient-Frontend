@@ -33,7 +33,6 @@ const MenuListHeader = ({ title, badge }) => {
     }
 
     if (LOCATION_LEVEL.ROOM === level) {
-        console.log(selectedEquipments());
     }
 
     const handleSelectAll = () => {

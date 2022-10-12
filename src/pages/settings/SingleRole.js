@@ -92,8 +92,6 @@ const SingleRole = () => {
     const { roleId } = useParams();
     let history = useHistory();
 
-    console.log('roleId', roleId);
-
     const [checked, setChecked] = useState(false);
     const [checkedBuildingConf, setCheckedBuildingConf] = useState(false);
     const [checkedAdvancedConf, setCheckedAdvancedConf] = useState(false);
@@ -298,11 +296,7 @@ const SingleRole = () => {
         }
     }, [userPermissionRoleBody]);
 
-    console.log('userPermissionRoleBody', userPermissionRoleBody);
-
     const [singlePermissionDetail, setSinglePermissionDetail] = useState([]);
-
-    console.log('singlePermissionDetail', singlePermissionDetail);
 
     useEffect(() => {
         if (checked) {
@@ -763,7 +757,6 @@ const SingleRole = () => {
                                                                     edit: e.target.checked,
                                                                 },
                                                             });
-                                                            console.log(e.target.checked, 'e.target.checked');
                                                         }}
                                                     />
                                                 </div>

@@ -41,8 +41,6 @@ const UserProfileNew = () => {
 
     const [userPermissionList, setUserPermissionList] = useState();
 
-    console.log('userPermissionList', userPermissionList);
-
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -110,8 +108,6 @@ const UserProfileNew = () => {
         }
     }, [userDetail]);
 
-    console.log('updateUserDetail', updateUserDetail);
-
     const [roleDataList, setRoleDataList] = useState();
 
     const [locationDataNow, setLocationDataNow] = useState([]);
@@ -145,21 +141,15 @@ const UserProfileNew = () => {
                     setAllBuildings((el) => [...el, item?.building_id]);
                 });
             });
-        } catch (err) {
-            console.log(err);
-        }
+        } catch (err) {}
     };
 
     useEffect(() => {
         getPermissionRoleFunc();
     }, [buildingListData]);
 
-    console.log('allBuildings', allBuildings);
-
     const [permissionValue, setPermissionValue] = useState('');
     const [show, setShow] = useState(false);
-
-    console.log('buildingListData', buildingListData);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -186,9 +176,7 @@ const UserProfileNew = () => {
                     getSingleUserDetailFunc();
                     setShow(false);
                 });
-        } catch (err) {
-            console.log(err);
-        }
+        } catch (err) {}
     };
 
     return (

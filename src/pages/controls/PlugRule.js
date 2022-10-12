@@ -619,9 +619,7 @@ const PlugRule = () => {
         }
         setIsProcessing(true);
 
-        await linkSocketRequest(rulesToLink).then((res) => {
-            console.log(res.data);
-        });
+        await linkSocketRequest(rulesToLink).then((res) => {});
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
@@ -634,12 +632,8 @@ const PlugRule = () => {
         setIsProcessing(true);
 
         await unlinkSocketRequest(rulesToUnLink)
-            .then((res) => {
-                console.log(res.data);
-            })
-            .catch((error) => {
-                console.log('Failed to update requested Socket Unlinking!', error);
-            });
+            .then((res) => {})
+            .catch((error) => {});
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
@@ -733,7 +727,6 @@ const PlugRule = () => {
             })
             .catch((error) => {
                 setIsProcessing(false);
-                console.log('Failed to update requested Plug Rule', error);
             });
     };
 
@@ -864,9 +857,7 @@ const PlugRule = () => {
                 });
                 setLinkedRuleData(linkedData);
             })
-            .catch((error) => {
-                console.log('Failed to fetch list of Linked Rules data', error);
-            });
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -1618,8 +1609,7 @@ const PlugRule = () => {
                                 </Form.Group>
                             </div>
 
-                            <div>
-                            </div>
+                            <div></div>
                         </div>
                     </div>
 

@@ -409,8 +409,6 @@ const PeakDemand = () => {
                         setIsTopBuildingPeaksLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Top Building Peak Data');
                 setIsTopBuildingPeaksLoading(false);
             }
         };
@@ -447,8 +445,6 @@ const PeakDemand = () => {
                         setIsPeakTrendChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Peak-Demand Trend Chart Data');
                 setIsPeakTrendChartLoading(false);
             }
         };
@@ -473,8 +469,6 @@ const PeakDemand = () => {
                         setIsPeakContentLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Peak-Demand Yearly Peak Data');
                 setIsPeakContentLoading(false);
             }
         };
@@ -509,8 +503,6 @@ const PeakDemand = () => {
                         setIsTopPeakCategoriesLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Top Peak Categories');
                 setIsTopPeakCategoriesLoading(false);
             }
         };
@@ -539,8 +531,6 @@ const PeakDemand = () => {
                         setIsTopPeakContributersLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Top Peak Contributer');
                 setIsTopPeakContributersLoading(false);
             }
         };

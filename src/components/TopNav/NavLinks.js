@@ -53,20 +53,11 @@ const NavLinks = () => {
     };
 
     const [userPermission] = useAtom(userPermissionData);
-
-    console.log('userPermissionnowdatanow', userPermission);
-
     const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
     const [userPermisionBuildingEnergy, setuserPermisionBuildingEnergy] = useState('');
     const [userPermisionBuildingControl, setuserPermisionBuildingControl] = useState('');
 
-    console.log(
-        'userPermissionBuildingExplore',
-        userPermissionBuildingExplore,
-        'userPermisionBuildingEnergy',
-        userPermisionBuildingEnergy
-    );
-
+    
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
@@ -125,7 +116,6 @@ const NavLinks = () => {
                         item?.name !== userPermisionBuildingControl
                 )
                 .map((item, index) => {
-                    console.log('item.visibility', item.visibility);
                     const Icon = item.icon || null;
                     if (!item.visibility) {
                         return;

@@ -121,7 +121,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             });
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to Create Panel & Breakers!');
         }
     };
 
@@ -164,8 +163,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             addPanelData();
         }
     }, [panelData]);
-
-    console.log('location', location);
 
     return (
         <>
@@ -233,7 +230,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     defaultValue={'Select Panel Type'}
                                     options={panelOption}
                                     onChange={(e) => {
-                                        console.log('evolts', e.value);
                                         handleChange('panel_type', e.value);
                                     }}
                                     className="font-weight-bold"

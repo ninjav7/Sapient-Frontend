@@ -162,9 +162,7 @@ export default function CustomEdge({
                         triggerBreakerAPI();
                     }, 1000);
                 });
-        } catch (error) {
-            console.log('Failed to update Breaker Linking!');
-        }
+        } catch (error) {}
     };
 
     const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
@@ -186,9 +184,7 @@ export default function CustomEdge({
                         triggerBreakerAPI();
                     }, 1000);
                 });
-        } catch (error) {
-            console.log('Failed to update Breaker Linking!');
-        }
+        } catch (error) {}
     };
 
     const linkBreakers = () => {
