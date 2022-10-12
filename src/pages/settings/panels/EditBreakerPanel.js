@@ -159,8 +159,6 @@ const EditBreakerPanel = () => {
         }
     }, [locationDataList]);
 
-    console.log('parentPanel', parentPanel);
-
     const [isEditable, setIsEditable] = useState(true);
 
     const [dynamicDistributeHeight, setDynamicDistributeHeight] = useState(300);
@@ -396,7 +394,6 @@ const EditBreakerPanel = () => {
             });
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to update Panel');
         }
     };
 
@@ -417,7 +414,6 @@ const EditBreakerPanel = () => {
             });
         } catch (error) {
             setIsResetting(false);
-            console.log('Failed to unlink all Breakers from Panel');
         }
     };
 
@@ -440,7 +436,6 @@ const EditBreakerPanel = () => {
             });
         } catch (error) {
             setIsDeleting(false);
-            console.log('Failed to unlink all Breakers from Panel');
         }
     };
 
@@ -516,12 +511,10 @@ const EditBreakerPanel = () => {
                     });
                 });
             } catch (error) {
-                console.log(error);
                 setBreakerDataFetched(false);
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
-                console.log('Failed to fetch Breakers Data List');
             }
         };
         const fetchEquipmentData = async () => {
@@ -551,10 +544,7 @@ const EditBreakerPanel = () => {
                         s.equipmentData = equipArray;
                     });
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Equipments Data');
-            }
+            } catch (error) {}
         };
         fetchBreakersData();
         fetchEquipmentData();
@@ -583,8 +573,6 @@ const EditBreakerPanel = () => {
                 });
             } catch (error) {
                 setIsPanelDataFetched(false);
-                console.log(error);
-                console.log('Failed to fetch Panels Data List');
             }
         };
 
@@ -609,9 +597,7 @@ const EditBreakerPanel = () => {
                     });
                 });
             } catch (error) {
-                console.log(error);
                 setBreakerDataFetched(false);
-                console.log('Failed to fetch Breakers Data List');
             }
         };
 
@@ -627,10 +613,7 @@ const EditBreakerPanel = () => {
                     let response = res.data;
                     setPanelsDataList(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Panels Data List');
-            }
+            } catch (error) {}
         };
 
         const fetchEquipmentData = async () => {
@@ -660,10 +643,7 @@ const EditBreakerPanel = () => {
                         s.equipmentData = equipArray;
                     });
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Equipments Data');
-            }
+            } catch (error) {}
         };
 
         const fetchPassiveDeviceData = async () => {
@@ -673,7 +653,7 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&page_size=10000&page_no=1`;
+                let params = `?building_id=${bldgId}&page_size=150&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
@@ -692,10 +672,7 @@ const EditBreakerPanel = () => {
                         s.totalPassiveDeviceCount = res?.data?.total_data;
                     });
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -714,10 +691,7 @@ const EditBreakerPanel = () => {
                 await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
                     setLocationDataList(res.data);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
+            } catch (error) {}
         };
 
         fetchSinglePanelData();
@@ -752,6 +726,7 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
+                    device_name: record.device_name,
                     breakerType: record.breaker_type,
                     parentBreaker: record.parent_breaker,
                     isLinked: record.is_linked,
@@ -778,6 +753,7 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
+                    device_name: record.device_name,
                     breakerType: record.breaker_type,
                     parentBreaker: record.parent_breaker,
                     isLinked: record.is_linked,

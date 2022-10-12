@@ -61,11 +61,7 @@ const EquipmentTable = ({
     setEquipmentFilter,
     handleChartOpen,
     setEquipmentIdData,
-    // formValidation,
-    // setFormValidation,
 }) => {
-    const [modal1, setModal1] = useState(false);
-    const [modal2, setModal2] = useState(false);
     const [nameOrder, setNameOrder] = useState(false);
     const [equipTypeOrder, setEquipTypeOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -138,21 +134,6 @@ const EquipmentTable = ({
         equipmentDataWithFilter(order, columnName);
     };
 
-    const Close1 = () => {
-        setModal1(false);
-    };
-    const Close2 = () => {
-        setModal2(false);
-    };
-    const Toggle = (record) => {
-        if (record.device_type === 'passive') {
-            setModal2(!modal2);
-        } else if (record.device_type === 'active') {
-            setModal1(!modal1);
-        } else {
-            setModal2(!modal2);
-        }
-    };
     const [equipData, setEquipData] = useState(null);
 
     return (
@@ -620,14 +601,8 @@ const Equipment = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    // const [formValidation, setFormValidation] = useState(false);
-
     const [isDelete, setIsDelete] = useState(false);
     const handleDeleteClose = () => setIsDelete(false);
-    // const handleEditShow = () => setIsDelete(true);
-
-    const [isEdit, setIsEdit] = useState(false);
-    const handleEditClose = () => setIsEdit(false);
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(1);
@@ -646,7 +621,6 @@ const Equipment = () => {
     const [onlineEquipData, setOnlineEquipData] = useState([]);
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
-    const [equipmentSelectedTypeData, setEquipmentSelectedTypeData] = useState([]);
 
     const [createEqipmentData, setCreateEqipmentData] = useState({
         name: '',
@@ -657,7 +631,6 @@ const Equipment = () => {
 
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
-    const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [paginationData, setPaginationData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
@@ -673,7 +646,6 @@ const Equipment = () => {
     ];
 
     const [selectedOptions, setSelectedOptions] = useState([]);
-    const [search, setSearch] = useState('');
 
     const [equipSearch, setEquipSearch] = useState('');
 
@@ -708,11 +680,11 @@ const Equipment = () => {
         }
     }, [equipmentTypeData]);
 
-    useEffect(() => {
-        if (equipSearch === '') {
-            fetchEquipmentData();
-        }
-    }, [equipSearch]);
+    // useEffect(() => {
+    //     if (equipSearch === '') {
+    //         fetchEquipmentData();
+    //     }
+    // }, [equipSearch]);
 
     useEffect(() => {
         if (endUseData) {
@@ -725,15 +697,6 @@ const Equipment = () => {
             addLocationType();
         }
     }, [locationData]);
-
-    // search_by_equipment
-    const handleSearchtxt = (e) => {
-        if (e.target.value !== '') {
-            setSearch(e.target.value);
-        } else {
-            setGeneralEquipmentData(DuplicateGeneralEquipmentData);
-        }
-    };
 
     const handleSearch = async () => {
         try {
@@ -750,9 +713,7 @@ const Equipment = () => {
                 setIsEquipDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsEquipDataFetched(false);
-            console.log('Failed to fetch all Equipment Data');
         }
     };
 
@@ -764,25 +725,6 @@ const Equipment = () => {
         }
         obj[key] = value;
         setCreateEqipmentData(obj);
-    };
-
-    const handleEquipmentTypeCall = async (value) => {
-        const result = endUseData.find(({ end_user_id }) => end_user_id === value);
-        // console.log(result.name);
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&end_use=${result.name}`;
-            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                setEquipmentSelectedTypeData(res.data.data);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Equipment Type Data');
-        }
     };
 
     const saveDeviceData = async () => {
@@ -811,9 +753,9 @@ const Equipment = () => {
             handleClose();
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to create Passive device data');
         }
     };
+
     const equipmentDataWithFilter = async (order, filterBy) => {
         try {
             setIsEquipDataFetched(true);
@@ -842,13 +784,11 @@ const Equipment = () => {
                 setIsEquipDataFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsEquipDataFetched(false);
-            console.log('Failed to fetch all Equipments Data');
         }
     };
+
     const nextPageData = async (path) => {
-        // console.log("next path ",path);
         try {
             setIsEquipDataFetched(true);
             if (path === null) {
@@ -881,8 +821,6 @@ const Equipment = () => {
                 // setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
             setIsEquipDataFetched(false);
         }
     };
@@ -920,8 +858,6 @@ const Equipment = () => {
                 // setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
             setIsEquipDataFetched(false);
         }
     };
@@ -939,7 +875,6 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            // let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&equipment_search=${searchText}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -961,9 +896,7 @@ const Equipment = () => {
                 // setFormValidation(false);
             });
         } catch (error) {
-            console.log(error);
             setIsEquipDataFetched(false);
-            console.log('Failed to fetch all Equipments Data');
         }
     };
 
@@ -992,10 +925,7 @@ const Equipment = () => {
                     let response = res.data;
                     setEndUseData(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch End Use Data');
-            }
+            } catch (error) {}
         };
 
         const fetchEquipTypeData = async () => {
@@ -1013,10 +943,7 @@ const Equipment = () => {
                     });
                     setEquipmentTypeData(response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Equipment Type Data');
-            }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -1029,10 +956,7 @@ const Equipment = () => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
+            } catch (error) {}
         };
 
         fetchEquipmentData();
@@ -1092,32 +1016,6 @@ const Equipment = () => {
             setIsDelete(false);
         });
     };
-
-    // const equpimentLastUsed = async () => {
-    //     try {
-    //         let headers = {
-    //             'Content-Type': 'application/json',
-    //             accept: 'application/json',
-    //             Authorization: `Bearer ${userdata.token}`,
-    //         };
-
-    //         let params = `?building_id=${bldgId}`;
-    //         await axios
-    //             .post(`${BaseUrl}${lastUsedEquimentDevice}${params}`, allEqupimentDataNow, { headers })
-    //             .then((res) => {
-    //                 // setEndUseData(res.data);
-    //             });
-    //     } catch (error) {
-    //         console.log(error);
-    //         console.log('Failed to fetch End Use Data');
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     if (allEqupimentDataNow) {
-    //         equpimentLastUsed();
-    //     }
-    // }, [allEqupimentDataNow]);
 
     return (
         <React.Fragment>
@@ -1246,7 +1144,6 @@ const Equipment = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
-                            setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
                             setEquipmentIdData={setEquipmentIdData}
@@ -1270,7 +1167,6 @@ const Equipment = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
-                            setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
                             setEquipmentIdData={setEquipmentIdData}
@@ -1294,7 +1190,6 @@ const Equipment = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
-                            setIsEdit={setIsEdit}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
                             setEquipmentIdData={setEquipmentIdData}
