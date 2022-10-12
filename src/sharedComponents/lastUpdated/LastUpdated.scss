@@ -1,0 +1,26 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.last-updated {
+    &-wrapper {
+        @extend .borders;
+        @extend .box-shadow-xs;
+
+        border-radius: 0.375rem;
+        padding: 1.5rem;
+        display: inline-block;
+    }
+
+    &-label-related {
+        display: flex;
+        gap: 0.5rem;
+        padding-left: 2rem;
+
+        .input-wrapper {
+            flex: 0 0 4.375rem;
+        }
+        .react-select-wrapper {
+            flex: 1;
+        }
+    }
+}
