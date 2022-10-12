@@ -97,20 +97,24 @@ const EndUsesPage = () => {
             // },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { colors } = w.globals;
-                // console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
                 let ch = '';
                 ch =
                     ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(seriesX[0][dataPointIndex]).tz(timeZone)
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(
+                        seriesX[0][dataPointIndex]
+                    )
+                        .tz(timeZone)
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
                     ch =
                         ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(0
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                            0
                         )} kWh </td></tr>`;
                 }
 
@@ -246,8 +250,6 @@ const EndUsesPage = () => {
                         setIsEndUsesDataFetched(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch EndUses Data');
                 setIsEndUsesDataFetched(false);
             }
         };
@@ -297,8 +299,6 @@ const EndUsesPage = () => {
                         setIsEndUsesChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch EndUses Data');
                 setIsEndUsesChartLoading(false);
             }
         };

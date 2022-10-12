@@ -11,7 +11,6 @@ const SideNav = () => {
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const location = useLocation();
-    // console.log(parentRoute);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');
@@ -24,7 +23,6 @@ const SideNav = () => {
     const [buildingPermissionLayouts, setBuildingPermissionLayouts] = useState('');
     const [buildingPermissionPanels, setBuildingPermissionPanels] = useState('');
 
-    // console.log('userPermissionListBuildings', userPermissionListBuildings);
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
@@ -101,7 +99,6 @@ const SideNav = () => {
         }
     }, [userPermission]);
 
-    console.log('userPermissionListRoles', userPermissionListRoles);
 
     useEffect(() => {
         let activeSideRoutes = [];
@@ -121,7 +118,6 @@ const SideNav = () => {
                 if (route.parent === parentRoute && route.visibility === true) {
                     activeSideRoutes.push(route);
                 }
-                console.log('router', route);
             });
         setActiveRoute(activeSideRoutes);
     }, [

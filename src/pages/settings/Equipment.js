@@ -396,9 +396,9 @@ const EquipmentTable = ({
                                                     ) && <td className="font-weight-bold">{record.equipments_type}</td>}
                                                     {selectedOptions.some((record) => record.value === 'location') && (
                                                         <td>
-                                                            {record.location === ' > '
+                                                            {record.location === ''
                                                                 ? ' - '
-                                                                : record.location.split('>').reverse().join(' > ')}
+                                                                : record.location}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'tags') && (
@@ -409,7 +409,7 @@ const EquipmentTable = ({
                                                                         ? 'None'
                                                                         : `${`${record.tags[0]} + ${
                                                                               record?.tags?.length - 1
-                                                                          }`} + ${record?.tags?.length - 1}`}
+                                                                          }`} `}
                                                                 </div>
                                                             }
                                                         </td>
@@ -680,11 +680,11 @@ const Equipment = () => {
         }
     }, [equipmentTypeData]);
 
-    // useEffect(() => {
-    //     if (equipSearch === '') {
-    //         fetchEquipmentData();
-    //     }
-    // }, [equipSearch]);
+    useEffect(() => {
+        if (equipSearch === '') {
+            fetchEquipmentData();
+        }
+    }, [equipSearch]);
 
     useEffect(() => {
         if (endUseData) {
@@ -706,7 +706,8 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace`;
+            // let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
@@ -764,11 +765,12 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&ordered_by=${filterBy}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&sort_by=${order}&ordered_by=${filterBy}`;
+            // let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
-                setGeneralEquipmentData(responseData);
-                setDuplicateGeneralEquipmentData(responseData);
+                setGeneralEquipmentData(responseData.data);
+                setDuplicateGeneralEquipmentData(responseData.data);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
@@ -874,7 +876,8 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&ordered_by=equipments_name&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace`;
+            // let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -959,7 +962,7 @@ const Equipment = () => {
             } catch (error) {}
         };
 
-        fetchEquipmentData();
+        //fetchEquipmentData();
         fetchEndUseData();
         // fetchOnlineEquipData();
         // fetchOfflineEquipData();
@@ -1127,7 +1130,7 @@ const Equipment = () => {
             </Row>
 
             <Row>
-                <Col lg={11}>
+                <Col lg={12}>
                     {selectedTab === 0 && (
                         <EquipmentTable
                             equipmentData={generalEquipmentData}
@@ -1210,7 +1213,7 @@ const Equipment = () => {
                             <Form.Label>Equipment Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Equipment"
+                                placeholder="Enter Equipment Name"
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('name', e.target.value);
@@ -1222,28 +1225,12 @@ const Equipment = () => {
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            {/* equipmentTypeDataNow */}
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('equipment_type', e.target.value);
-                                }}>
-                                <option value="" selected>
-                                    Select Type
-                                </option>
-                                {equipmentTypeData.map((record) => {
-                                    return <option value={record.equipment_id}>{record.equipment_type}</option>;
-                                })}
-                            </Input> */}
                             <Select
                                 id="exampleSelect"
-                                placeholder="Select Type"
+                                placeholder="Select Equipment Type"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Select Type'}
+                                defaultValue={'Select Equipment Type'}
                                 options={equipmentTypeDataNow}
                                 value={equipmentTypeDataNow.filter(
                                     (option) => option.value === createEqipmentData?.equipment_type
@@ -1256,27 +1243,12 @@ const Equipment = () => {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use Category</Form.Label>
-                            {/* endUseDataNow */}
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="endUseSelect"
-                                className="font-weight-bold"
-                                defaultValue={selectedEndUse}
-                                onChange={(e) => {
-                                    handleChange('end_use', e.target.value);
-                                }}>
-                                <option value="">Select Category</option>
-                                {endUseData.map((record) => {
-                                    return <option value={record.end_user_id}>{record.name}</option>;
-                                })}
-                            </Input> */}
                             <Select
                                 id="endUseSelect"
-                                placeholder="Select Type"
+                                placeholder="Selected End Use"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Select Category'}
+                                defaultValue={'Selected End Use'}
                                 options={endUseDataNow}
                                 value={endUseDataNow.filter((option) => option.value === createEqipmentData?.end_use)}
                                 onChange={(e) => {
@@ -1288,28 +1260,12 @@ const Equipment = () => {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Location</Form.Label>
-                            {/* locationDataNow */}
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('space_id', e.target.value);
-                                }}>
-                                <option value="" selected>
-                                    Select Location
-                                </option>
-                                {locationData.map((record) => {
-                                    return <option value={record.location_id}>{record.location_name}</option>;
-                                })}
-                            </Input> */}
                             <Select
                                 id="exampleSelect"
-                                placeholder="Select Location"
+                                placeholder="Select Equipment Location"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Select Location'}
+                                defaultValue={'Select Equipment Location'}
                                 options={locationDataNow}
                                 value={locationDataNow.filter(
                                     (option) => option.value === createEqipmentData?.space_id

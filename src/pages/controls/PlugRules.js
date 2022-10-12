@@ -153,7 +153,6 @@ const PlugRules = () => {
             })
             .catch((error) => {
                 setIsProcessing(false);
-                console.log('Failed to update requested Plug Rule', error);
             });
     };
 
@@ -166,7 +165,6 @@ const PlugRules = () => {
             })
             .catch((error) => {
                 setIsProcessing(false);
-                console.log('Failed to update requested Plug Rule', error);
             });
     };
 
@@ -187,15 +185,12 @@ const PlugRules = () => {
                 .post(`${BaseUrl}${linkSocket}`, rulesToLink, {
                     headers: header,
                 })
-                .then((res) => {
-                    console.log(res.data);
-                });
+                .then((res) => {});
 
             setIsProcessing(false);
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to update requested Socket Linking!');
         }
     };
 
@@ -225,10 +220,7 @@ const PlugRules = () => {
                     localStorage.setItem('timeZone', record.timezone);
                 }
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Building Data');
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {

@@ -45,7 +45,6 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                     <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                     {buildingList.length === 0 && 'No Buildings found.'}
                     {buildingList.map((record) => {
-                        console.log('buildingListTimeZone', record.timezone);
                         const activeItem =
                             // eslint-disable-next-line no-restricted-globals
                             location.pathname !== '/energy/portfolio/overview' &&

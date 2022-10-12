@@ -57,25 +57,15 @@ const ActiveDevicesTable = ({
     const [userPermission] = useAtom(userPermissionData);
 
     const handleColumnSort = (order, columnName) => {
-        if (columnName === 'mac_address') {
+        if (columnName === 'identifier') {
             setModelOrder(false);
             setLocationOrder(false);
-            setDeviceTypeOrder(false);
             setSensorOrder(false);
             setFirmwareOrder(false);
             setHardwareOrder(false);
         }
         if (columnName === 'model') {
             setIdentifierOrder(false);
-            setLocationOrder(false);
-            setDeviceTypeOrder(false);
-            setSensorOrder(false);
-            setFirmwareOrder(false);
-            setHardwareOrder(false);
-        }
-        if (columnName === 'device_description') {
-            setIdentifierOrder(false);
-            setModelOrder(false);
             setLocationOrder(false);
             setSensorOrder(false);
             setFirmwareOrder(false);
@@ -84,7 +74,6 @@ const ActiveDevicesTable = ({
         if (columnName === 'location') {
             setIdentifierOrder(false);
             setModelOrder(false);
-            setDeviceTypeOrder(false);
             setSensorOrder(false);
             setFirmwareOrder(false);
             setHardwareOrder(false);
@@ -93,7 +82,6 @@ const ActiveDevicesTable = ({
             setIdentifierOrder(false);
             setModelOrder(false);
             setLocationOrder(false);
-            setDeviceTypeOrder(false);
             setFirmwareOrder(false);
             setHardwareOrder(false);
         }
@@ -101,7 +89,6 @@ const ActiveDevicesTable = ({
             setIdentifierOrder(false);
             setModelOrder(false);
             setLocationOrder(false);
-            setDeviceTypeOrder(false);
             setSensorOrder(false);
             setHardwareOrder(false);
         }
@@ -109,7 +96,6 @@ const ActiveDevicesTable = ({
             setIdentifierOrder(false);
             setModelOrder(false);
             setLocationOrder(false);
-            setDeviceTypeOrder(false);
             setSensorOrder(false);
             setFirmwareOrder(false);
         }
@@ -138,13 +124,13 @@ const ActiveDevicesTable = ({
                                         {identifierOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                onClick={() => handleColumnSort('ace', 'identifier')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                onClick={() => handleColumnSort('dce', 'identifier')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -160,7 +146,7 @@ const ActiveDevicesTable = ({
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'model')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -176,29 +162,7 @@ const ActiveDevicesTable = ({
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'description') && (
-                                <th
-                                    className="active-device-header"
-                                    onClick={() => setDeviceTypeOrder(!deviceTypeOrder)}>
-                                    <div className="active-device-flex">
-                                        <div>Device Type</div>
-                                        {deviceTypeOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'device_description')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'device_description')}>
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'location')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -218,7 +182,7 @@ const ActiveDevicesTable = ({
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                onClick={() => handleColumnSort('dce', 'sensor_count')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -238,7 +202,7 @@ const ActiveDevicesTable = ({
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'firmware_version')}>
+                                                onClick={() => handleColumnSort('dce', 'firmware_version')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -258,7 +222,7 @@ const ActiveDevicesTable = ({
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'hardware_version')}>
+                                                onClick={() => handleColumnSort('dce', 'hardware_version')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -271,10 +235,6 @@ const ActiveDevicesTable = ({
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
                                 <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
@@ -345,22 +305,19 @@ const ActiveDevicesTable = ({
                                         )}
                                         {selectedOptions.some((record) => record.value === 'location') && (
                                             <td>
-                                                {record.location === ' > '
+                                                {record.location === ''
                                                     ? ' - '
-                                                    : record.location.split('>').reverse().join(' > ')}
+                                                    : record.location}
                                             </td>
                                         )}
-                                        {selectedOptions.some((record) => record.value === 'description') && (
-                                            <th>{record.description}</th>
-                                        )}
                                         {selectedOptions.some((record) => record.value === 'sensors') && (
-                                            <td>{record.sensor_number}</td>
+                                            <td style={{textAlign:"center"}}>{record.sensor_number}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'firmware-version') && (
                                             <td>{record.firmware_version === null ? '-' : record.firmware_version}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                            <td>{record.hardware_version === null ? '-' : record.hardware_version}</td>
+                                            <td style={{textAlign:"center"}}>{record.hardware_version === null ? '-' : record.hardware_version}</td>
                                         )}
                                     </tr>
                                 );
@@ -395,7 +352,7 @@ const ActiveDevicesTable = ({
                             onChange={(e) => {
                                 setPageSize(parseInt(e.target.value));
                             }}>
-                            {[10, 25, 50].map((pageSize) => (
+                            {[20, 50, 100].map((pageSize) => (
                                 <option key={pageSize} value={pageSize} className="align-options-center">
                                     Show {pageSize} devices
                                 </option>
@@ -419,7 +376,6 @@ const ActiveDevices = () => {
         { label: 'Identifier (MAC)', value: 'identifier' },
         { label: 'Model', value: 'model' },
         { label: 'Location', value: 'location' },
-        { label: 'Device Type', value: 'description' },
         { label: 'Sensors', value: 'sensors' },
         { label: 'Firmware Version', value: 'firmware-version' },
         { label: 'Hardware Version', value: 'hardware-version' },
@@ -436,7 +392,7 @@ const ActiveDevices = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
 
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
 
     const [pageRequest, setPageRequest] = useState('');
@@ -476,15 +432,12 @@ const ActiveDevices = () => {
                 .post(`${BaseUrl}${createDevice}`, createDeviceData, {
                     headers: header,
                 })
-                .then((res) => {
-                    console.log(res.data);
-                });
+                .then((res) => {});
 
             setIsProcessing(false);
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to create Active device data');
         }
     };
 
@@ -506,7 +459,7 @@ const ActiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -515,9 +468,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch Filtered Active Devices');
         }
     };
     const handleSearchtxt = (e) => {
@@ -544,9 +495,7 @@ const ActiveDevices = () => {
                 });
                 setIsDeviceProcessing(false);
             } catch (error) {
-                console.log(error);
                 setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
             }
         } else {
             setActiveDeviceData(duplicateactiveDeviceData);
@@ -574,7 +523,7 @@ const ActiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -583,9 +532,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -610,7 +557,7 @@ const ActiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
@@ -619,9 +566,7 @@ const ActiveDevices = () => {
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
-            console.log(error);
             setIsDeviceProcessing(false);
-            console.log('Failed to fetch all Active Devices');
         }
     };
 
@@ -642,66 +587,7 @@ const ActiveDevices = () => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
                     setduplicateActiveDeviceData(response.data);
-                    // console.log(response.data);
                     const sampleData = response.data;
-                    // console.log('sampleData => ', sampleData);
-                    setPaginationData(res.data);
-
-                    let onlineData = [];
-                    let offlineData = [];
-
-                    response.forEach((record) => {
-                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-                    });
-
-                    setOnlineDeviceData(onlineData);
-                    setOfflineDeviceData(offlineData);
-                    setIsDeviceProcessing(false);
-                });
-            } catch (error) {
-                // console.log(error);
-                setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
-        fetchActiveDeviceData();
-        fetchLocationData();
-    }, [bldgId, pageRefresh]);
-
-    useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            try {
-                setIsDeviceProcessing(true);
-                setOnlineDeviceData([]);
-                setOfflineDeviceData([]);
-                setActiveDeviceData([]);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=ace`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActiveDeviceData(response.data);
-                    setduplicateActiveDeviceData(response.data);
                     setPaginationData(res.data);
 
                     let onlineData = [];
@@ -713,16 +599,15 @@ const ActiveDevices = () => {
 
                     setOnlineDeviceData(onlineData);
                     setOfflineDeviceData(offlineData);
+                    setIsDeviceProcessing(false);
                 });
-                setIsDeviceProcessing(false);
             } catch (error) {
-                console.log(error);
                 setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
             }
         };
+
         fetchActiveDeviceData();
-    }, [pageSize]);
+    }, [bldgId, pageRefresh, pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -747,7 +632,6 @@ const ActiveDevices = () => {
             { label: 'Identifier (MAC)', value: 'identifier' },
             { label: 'Model', value: 'model' },
             { label: 'Location', value: 'location' },
-            { label: 'Device Type', value: 'description' },
             { label: 'Sensors', value: 'sensors' },
             { label: 'Firmware Version', value: 'firmware-version' },
             { label: 'Hardware Version', value: 'hardware-version' },
@@ -873,7 +757,7 @@ const ActiveDevices = () => {
             </Row>
 
             <Row>
-                <Col lg={10}>
+                <Col lg={12}>
                     {selectedTab === 0 && (
                         <ActiveDevicesTable
                             deviceData={activeDeviceData}

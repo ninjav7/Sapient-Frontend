@@ -18,7 +18,6 @@ const EditFloorModal = (props) => {
     // API Body
     const [apiBody, setApiBody] = useState({ parent_building: bldgId });
 
-    console.log('apiBody', apiBody);
 
     const [floorName, setFloorName] = useState('');
     const [floors, setFloors] = useAtom(floorList);
@@ -32,7 +31,6 @@ const EditFloorModal = (props) => {
         };
         let params = `?building_id=${bldgId}`;
         axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {
-            console.log('res', res);
         });
     };
 

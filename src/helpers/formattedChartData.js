@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 export const getFormattedTimeIntervalData=(data, startDate, endDate)=>{
   
 
-    //console.log("new",startDate)
     let ee=startDate.toLocaleDateString()
     let str=new Date(ee);
     let a=str.getMonth()+1;

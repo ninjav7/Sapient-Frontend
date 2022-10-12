@@ -183,9 +183,6 @@ const Users = () => {
         }
     }, [userObj]);
 
-    console.log('userData', userData);
-    console.log('userObj', userObj);
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, userObj);
         obj[key] = value;
@@ -209,10 +206,8 @@ const Users = () => {
             });
             setIsUserDataFetched(false);
         } catch (error) {
-            console.log(error);
             setDataFetched(true);
             setIsUserDataFetched(false);
-            console.log('Failed to fetch End Use Data');
         }
     };
 
@@ -241,7 +236,6 @@ const Users = () => {
             handleClose();
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to Create Panel');
         }
     };
 
@@ -321,7 +315,7 @@ const Users = () => {
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={12}>
                     <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
                 </Col>
             </Row>
