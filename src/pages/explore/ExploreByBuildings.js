@@ -130,22 +130,23 @@ const ExploreBuildingsTable = ({
                                     <SkeletonTheme color="#202020" height={35}>
                                         <tr>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
 
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
 
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
+                                            
                                         </tr>
                                     </SkeletonTheme>
                                 </tbody>
@@ -505,7 +506,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return parseInt(value);
                 },
             },
         },
@@ -565,7 +566,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return parseInt(value);
                 },
             },
         },

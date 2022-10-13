@@ -1,0 +1,41 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.time-frame-selector {
+    &-wrapper {
+        .btn-group {
+            [class*='-control'] {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                border-right-width: 0.0313rem;
+            }
+            .datepicker-wrapper {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+                border-left-width: 0.0313rem;
+            }
+        }
+
+        svg {
+            transition: none !important;
+        }
+
+        .is-open {
+            background: $primary-indigo-600;
+            border-color: $primary-indigo-600 !important;
+            color: $base-white;
+            outline: none;
+            box-shadow: none !important;
+
+            & > .typography-wrapper,
+            .single-value-custom .typography-wrapper {
+                color: $base-white !important;
+            }
+            svg:not(.Calendar--arrow-left):not(.Calendar--arrow-right) {
+                path {
+                    fill: $base-white !important;
+                }
+            }
+        }
+    }
+}
