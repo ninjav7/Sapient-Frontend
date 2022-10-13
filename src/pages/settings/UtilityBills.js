@@ -60,9 +60,7 @@ const UtilityBills = () => {
                     setIsUtilityBillsFetched(false);
                 });
             } catch (error) {
-                console.log(error);
                 setIsUtilityBillsFetched(false);
-                console.log('Failed to fetch UtilityBills Data');
             }
         };
         fetchUtilityBillsData();
@@ -105,9 +103,7 @@ const UtilityBills = () => {
                 setIsUtilityBillsFetched(false);
             });
         } catch (error) {
-            console.log(error);
             setIsUtilityBillsFetched(false);
-            console.log('Failed to fetch UtilityBills Data');
         }
     };
 
@@ -138,18 +134,14 @@ const UtilityBills = () => {
                     let response = res.data;
                 });
             fetchUtilityBillsData();
-        } catch (error) {
-            console.log('Failed to update Uility Bill Data');
-        }
+        } catch (error) {}
     };
 
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Utility Bills
-                    </span>
+                    <span className="heading-style">Utility Bills</span>
                 </Col>
             </Row>
 

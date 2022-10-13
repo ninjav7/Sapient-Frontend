@@ -62,9 +62,7 @@ const AddSensorPanelModel = ({
             });
             setBreakerDataFetched(false);
         } catch (error) {
-            console.log(error);
             setBreakerDataFetched(false);
-            console.log('Failed to fetch Breakers Data List');
         }
     };
 
@@ -90,9 +88,7 @@ const AddSensorPanelModel = ({
                 });
                 setPanelDataFetched(false);
             } catch (error) {
-                console.log(error);
                 setPanelDataFetched(false);
-                console.log('Failed to fetch Panels Data List');
             }
         };
         fetchPanelsData();

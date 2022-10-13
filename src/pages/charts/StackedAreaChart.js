@@ -11,9 +11,7 @@ const StackedAreaChart = () => {
             type: 'area',
             stacked: true,
             events: {
-                selection: function(chart, e) {
-                    console.log(new Date(e.xaxis.min));
-                },
+                selection: function (chart, e) {},
             },
         },
         colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
@@ -22,7 +20,7 @@ const StackedAreaChart = () => {
         },
         tooltip: {
             theme: 'dark',
-            x: { show: false }
+            x: { show: false },
         },
         stroke: {
             width: 2,

@@ -291,7 +291,6 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     const handleChange = (e, value) => {
-        // console.log("Selected Item ",value);
         if (value === 'HVAC') {
             const seriesIndex = 0;
             const dataPointIndex = 0;
@@ -424,8 +423,6 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 setIsKPIsLoading(false);
-                console.log(error);
-                console.log('Failed to fetch Portfolio Overall Data');
             }
         };
 
@@ -469,8 +466,6 @@ const PortfolioOverview = () => {
                         setIsEnergyConsumptionChartLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Portfolio EndUses Data');
                 setIsEnergyConsumptionChartLoading(false);
             }
         };
@@ -513,8 +508,6 @@ const PortfolioOverview = () => {
                         setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Energy Consumption Data');
                 setIsConsumpHistoryLoading(false);
             }
         };
@@ -554,10 +547,7 @@ const PortfolioOverview = () => {
                         ];
                         setMarkers(markerArr);
                     });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Portfolio Buildings Data');
-            }
+            } catch (error) {}
         };
 
         // const calculateDays = () => {

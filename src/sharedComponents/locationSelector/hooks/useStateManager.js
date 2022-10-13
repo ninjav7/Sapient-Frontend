@@ -323,32 +323,24 @@ const useStateManager = (props) => {
 
             const currentRooms = newState.floors[floor.id].spaces.find(({ _id }) => _id === space.id).rooms;
 
-
-            
             if (!currentRooms.find(({ name }) => name === room.id)) {
                 const fetchedRoom = fetchRoomByIdAndSpaceIdAndFloorId({
                     roomId: room.id,
                     space_id: space.id,
                     floor_id: floor.id,
-                })
-                    
-                
-                
+                });
+
                 newState.floors[floor.id].spaces.find(({ _id }) => _id === space.id).rooms = [
                     ...currentRooms,
                     {
                         ...fetchedRoom,
-                        equipments: 
-                            fetchedRoom.equipments.filter(( eq ) => eq.equipment_id === equipment_id)
-                        
-                    }
-                    ,
+                        equipments: fetchedRoom.equipments.filter((eq) => eq.equipment_id === equipment_id),
+                    },
                 ];
-                alert(1)
+                alert(1);
             }
 
-            debugger
-
+            debugger;
 
             try {
                 const isAddedRoom = getRoomByIdAndSpaceIdAndFloorId({
@@ -365,7 +357,6 @@ const useStateManager = (props) => {
     const selectedLevels = { space, room, floor };
 
     try {
-        console.log(selectedMap.floors);
     } catch (e) {}
 
     return {

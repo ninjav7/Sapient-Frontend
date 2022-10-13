@@ -8,15 +8,14 @@ import RichTextEditor from '../../../components/RichTextEditor';
 import LeftSide from './LeftSide';
 import { emails } from './Data';
 
-
 // Compose
 class Compose extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            totalUnreadEmails: emails.filter(e => e.is_read === false).length,
-            newReplyContent: null
+            totalUnreadEmails: emails.filter((e) => e.is_read === false).length,
+            newReplyContent: null,
         };
         this.onEditorContentChange = this.onEditorContentChange.bind(this);
         this.handleSave = this.handleSave.bind(this);
@@ -25,21 +24,18 @@ class Compose extends Component {
     /**
      * On onEditorContentChange
      */
-    onEditorContentChange = editorContent => {
-        this.setState({newReplyContent: editorContent});
-    }
+    onEditorContentChange = (editorContent) => {
+        this.setState({ newReplyContent: editorContent });
+    };
 
     /**
      * Handles the save
-     * @param {*} event 
-     * @param {*} values 
+     * @param {*} event
+     * @param {*} values
      */
-    handleSave(event, values) {
-        console.log(values, this.state.newReplyContent);
-    }
+    handleSave(event, values) {}
 
     render() {
-        
         return (
             <React.Fragment>
                 <Row className="page-title">
@@ -65,7 +61,12 @@ class Compose extends Component {
                             <div className="inbox-rightbar p-4">
                                 <AvForm onValidSubmit={this.handleSave}>
                                     <AvField type="email" name="to" placeholder="To" label="To" required></AvField>
-                                    <AvField type="text" name="subject" label="Subject" placeholder="Subject" required></AvField>
+                                    <AvField
+                                        type="text"
+                                        name="subject"
+                                        label="Subject"
+                                        placeholder="Subject"
+                                        required></AvField>
 
                                     <Row>
                                         <Col>
@@ -74,7 +75,9 @@ class Compose extends Component {
                                     </Row>
                                     <Row className="mt-3 text-right">
                                         <Col>
-                                            <Button color="primary">Send<i className='uil uil-message ml-2'></i></Button>
+                                            <Button color="primary">
+                                                Send<i className="uil uil-message ml-2"></i>
+                                            </Button>
                                         </Col>
                                     </Row>
                                 </AvForm>

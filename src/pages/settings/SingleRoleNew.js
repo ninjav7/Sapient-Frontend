@@ -102,20 +102,9 @@ const SingleRoleNew = () => {
 
     const [formValidation, setFormValidation] = useState(false);
 
-    console.log('roleId', roleId);
-
     const [checked, setChecked] = useState(false);
     const [checkedBuildingConf, setCheckedBuildingConf] = useState(false);
     const [checkedAdvancedConf, setCheckedAdvancedConf] = useState(false);
-
-    console.log(
-        'checked',
-        checked,
-        'checkedBuildingConf',
-        checkedBuildingConf,
-        'checkedAdvancedConf',
-        checkedAdvancedConf
-    );
 
     const [buildingViewChecked, setBuildingViewChecked] = useState(false);
     const [portfolioChecked, setPortfolioChecked] = useState(false);
@@ -148,8 +137,6 @@ const SingleRoleNew = () => {
     };
 
     const [roleName, setRoleName] = useState('Account Administrator');
-
-    console.log('roleName', roleName);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -300,11 +287,7 @@ const SingleRoleNew = () => {
         }
     }, [userPermissionRoleBody]);
 
-    console.log('userPermissionRoleBody', userPermissionRoleBody);
-
     const [singlePermissionDetail, setSinglePermissionDetail] = useState([]);
-
-    console.log('singlePermissionDetail', singlePermissionDetail);
 
     useEffect(() => {
         if (checked) {
@@ -581,7 +564,6 @@ const SingleRoleNew = () => {
                 headers: header,
             })
             .then((res) => {
-                console.log(res?.data?.data, 'permissionRoleUpdateSingle');
                 getUserPermissionDetail();
                 setFormValidation(false);
             });
@@ -796,7 +778,6 @@ const SingleRoleNew = () => {
                                                                         edit: e.target.checked,
                                                                     },
                                                                 });
-                                                                console.log(e.target.checked, 'e.target.checked');
                                                             }}
                                                         />
                                                     </div>

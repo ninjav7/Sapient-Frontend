@@ -75,8 +75,6 @@ const Layout = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    console.log('userdata', userdata);
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // Saving API data
@@ -84,10 +82,6 @@ const Layout = () => {
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [flootListsuccess, setFlootListsuccess] = useState(false);
     const [spaceListsuccess, setSpaceListsuccess] = useState(false);
-
-    console.log('floorListAPI', floorListAPI);
-    console.log('spaceListsuccess', spaceListsuccess);
-    console.log('flootListsuccess', flootListsuccess);
 
     const [modalShow, setModalShow] = useState(false);
     const [floorid, setFloorid] = useAtom(floorIdState);
@@ -111,8 +105,6 @@ const Layout = () => {
     const [currentFloorId18, setCurrentFloorId18] = useState('');
     const [currentFloorId19, setCurrentFloorId19] = useState('');
     const [currentFloorId20, setCurrentFloorId20] = useState('');
-
-    console.log('currentFloorId3', currentFloorId3);
 
     const [floorModal] = useAtom(closedEditFloorModal);
 
@@ -171,7 +163,6 @@ const Layout = () => {
     const [currentFloorId, setCurrentFloorId] = useAtom(flooridNew);
 
     const [floor2, setFloor1] = useAtom(floorState);
-    console.log('floor2', floor2);
     const [spaceBody, setSpaceBody] = useState({
         floor_id: currentFloorId,
         building_id: bldgId,
@@ -190,9 +181,7 @@ const Layout = () => {
                 setFlootListsuccess(true);
                 setFloorData(res.data.data);
             });
-        } catch (err) {
-            console.log(err, 'errLayout');
-        }
+        } catch (err) {}
     };
 
     useEffect(() => {
@@ -216,9 +205,7 @@ const Layout = () => {
                     setFlootListsuccess(true);
                 });
             }
-        } catch (err) {
-            console.log(err, 'errFloorModal');
-        }
+        } catch (err) {}
     }, [floorModal]);
 
     useEffect(() => {
@@ -241,7 +228,6 @@ const Layout = () => {
     }, []);
 
     const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
-    console.log('reloadSpace', reloadSpace);
 
     useEffect(() => {
         if (floorid || reloadSpace === 'true') {
@@ -302,16 +288,12 @@ const Layout = () => {
         setDeletingFloorModal(false);
     };
 
-    console.log('deletingFloor', deletingFloor);
-
     // useEffect(() => {
     //     if (deletingFloor && modalShow) {
     //         setModalShow(false);
     //         setDeleteFloorModal(deletingFloor);
     //     }
     // }, [deletingFloor, modalShow]);
-
-    // console.log('deleteFloorModal', deleteFloorModal);
 
     const DeleteFloorsFunc = () => {
         const headers = {
@@ -320,16 +302,12 @@ const Layout = () => {
             Authorization: `Bearer ${userdata.token}`,
         };
 
-        axios.delete(`${BaseUrl}${deleteFloor}/${floorid}`, { headers }).then((res) => {
-            console.log('res', res);
-        });
+        axios.delete(`${BaseUrl}${deleteFloor}/${floorid}`, { headers }).then((res) => {});
     };
 
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const handleDeleteAlertClose = () => setShowDeleteAlert(false);
     const handleDeleteAlertShow = () => setShowDeleteAlert(true);
-
-    console.log('showDeleteAlert', showDeleteAlert);
 
     const [floorName, setFloorName] = useState('');
 

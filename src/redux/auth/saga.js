@@ -1,11 +1,7 @@
 // @flow
 import { Cookies } from 'react-cookie';
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
-import {
-    BaseUrl,
-    signin,
-    signup
-} from '../../services/Network';
+import { BaseUrl, signin, signup } from '../../services/Network';
 import { fetchJSON } from '../../helpers/api';
 
 import { LOGIN_USER, LOGOUT_USER, REGISTER_USER, FORGET_PASSWORD } from './constants';
@@ -17,14 +13,14 @@ import {
     registerUserFailed,
     forgetPasswordSuccess,
     forgetPasswordFailed,
-    logoutUser
+    logoutUser,
 } from './actions';
 
 /**
  * Sets the session
  * @param {*} user
  */
-const setSession = user => {
+const setSession = (user) => {
     let cookies = new Cookies();
     if (user) cookies.set('user', JSON.stringify(user), { path: '/' });
     else cookies.remove('user', { path: '/' });
@@ -40,28 +36,25 @@ function* login({ payload: { username, password } }) {
             password: password,
         }),
         method: 'POST',
-        headers: {  "access-control-allow-origin" : "*",
-        "Content-type": "application/json; charset=UTF-8",  accept: 'application/json' },
+        headers: {
+            'access-control-allow-origin': '*',
+            'Content-type': 'application/json; charset=UTF-8',
+            accept: 'application/json',
+        },
     };
 
     try {
         const response = yield call(fetchJSON, `${BaseUrl}${signin}`, options);
-        // console.log(response);
-        if(response.success===false){
-            // console.log("error")
-        localStorage.setItem("login_success",false);
-        localStorage.setItem('failed_message',response.message);
-        }
-        else{
-        
-        localStorage.setItem("login_success",true);
-        
+        if (response.success === false) {
+            localStorage.setItem('login_success', false);
+            localStorage.setItem('failed_message', response.message);
+        } else {
+            localStorage.setItem('login_success', true);
         }
         setSession(response.data);
         yield put(loginUserSuccess(response.data));
     } catch (error) {
         let message;
-        console.log(error);
         switch (error.status) {
             case 500:
                 message = 'Internal Server Error';
@@ -72,7 +65,7 @@ function* login({ payload: { username, password } }) {
             default:
                 message = error;
         }
-        
+
         yield put(loginUserFailed(message));
         setSession(null);
     }
@@ -84,7 +77,6 @@ function* login({ payload: { username, password } }) {
  */
 function* logout({ payload: { history } }) {
     try {
-        // console.log("logout entered");
         setSession(null);
         yield put(logoutUser(history));
         yield call(() => {
@@ -99,26 +91,23 @@ function* logout({ payload: { history } }) {
 function* register({ payload: { fullname, email, password, user_id, vendor } }) {
     const options = {
         body: JSON.stringify({
-            "email": email,
-            "user_id": user_id,
-            "name": fullname,
-            "password": password,
-            "vendor": vendor
-          }),
+            email: email,
+            user_id: user_id,
+            name: fullname,
+            password: password,
+            vendor: vendor,
+        }),
         method: 'POST',
-        headers: {  "access-control-allow-origin" : "*",
-        "Content-type": "application/json; charset=UTF-8"},
+        headers: { 'access-control-allow-origin': '*', 'Content-type': 'application/json; charset=UTF-8' },
     };
 
     try {
         const response = yield call(fetchJSON, `${BaseUrl}${signup}`, options);
-        console.log(response);
-        if(response.success===true){
-            localStorage.setItem("signup_success",true)
-        }
-        else{
-            localStorage.setItem('signup_success',false);
-            localStorage.setItem('failed_message',response.message)
+        if (response.success === true) {
+            localStorage.setItem('signup_success', true);
+        } else {
+            localStorage.setItem('signup_success', false);
+            localStorage.setItem('failed_message', response.message);
         }
         yield put(registerUserSuccess(response.data));
     } catch (error) {
