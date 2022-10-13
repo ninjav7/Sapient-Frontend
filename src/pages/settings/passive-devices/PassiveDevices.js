@@ -307,11 +307,7 @@ const PassiveDevicesTable = ({
                                                     </td>
                                                 )}
                                                 {selectedOptions.some((record) => record.value === 'location') && (
-                                                    <td>
-                                                        {record.location === ''
-                                                            ? ' - '
-                                                            : record.location}
-                                                    </td>
+                                                    <td>{record.location === '' ? ' - ' : record.location}</td>
                                                 )}
                                                 {selectedOptions.some((record) => record.value === 'sensors') && (
                                                     <td>{record.sensor_number}</td>
@@ -403,6 +399,7 @@ const PassiveDevicesTable = ({
                                 className="btn btn-md btn-light font-weight-bold mt-4"
                                 onChange={(e) => {
                                     setPageSize(parseInt(e.target.value));
+                                    window.scrollTo(0, 0);
                                 }}>
                                 {[20, 50, 100].map((pageSize) => (
                                     <option key={pageSize} value={pageSize} className="align-options-center">
@@ -765,14 +762,12 @@ const PassiveDevices = () => {
     };
 
     useEffect(() => {
-        if(deviceSearch.length===0)
-        fetchPassiveDeviceData();
-    }, [deviceSearch,pageSize]);
+        if (deviceSearch.length === 0) fetchPassiveDeviceData();
+    }, [deviceSearch, pageSize]);
 
     useEffect(() => {
         fetchLocationData();
     }, [pageRefresh, bldgId]);
-
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -979,8 +974,8 @@ const PassiveDevices = () => {
                                 placeholder="Enter Model"
                                 className="font-weight-bold"
                                 disabled={true}
-                                value={modalVal.charAt(0).toUpperCase()+modalVal.slice(1)}
-                                style={{backgroundColor:"#F5F5F5"}}
+                                value={modalVal.charAt(0).toUpperCase() + modalVal.slice(1)}
+                                style={{ backgroundColor: '#F5F5F5' }}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

@@ -254,8 +254,8 @@ const DistributedBreakerComponent = ({ data, id }) => {
             await axios
                 .post(`${BaseUrl}${resetBreakers}${params}`, { breaker_id: breakersList }, { headers })
                 .then((res) => {
-                    let response = res.data;
                     setIsResetting(false);
+                    window.scrollTo(0, 0);
                     handleUnlinkAlertClose();
                     triggerBreakerAPI();
                 });
