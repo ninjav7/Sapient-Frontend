@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
@@ -28,10 +28,6 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
     const options = props.isSelectAll ? [selectAllOption, ...props.options] : props.options;
 
     const handleChange = (selected) => {
-        props.onChange && props.onChange(selected);
-
-        setValue(selected);
-
         if (
             _.isEqual(
                 _.sortBy(selected, [
@@ -46,8 +42,11 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
             )
         ) {
             setValue(options);
+            props.onChange && props.onChange(props.withSelectAllOption ? options : props.options);
         } else {
-            setValue(selected.filter((option) => option.value !== selectAllOption.value));
+            const selectedOptions = selected.filter((option) => option.value !== selectAllOption.value);
+            setValue(selectedOptions);
+            props.onChange && props.onChange(selectedOptions);
         }
     };
 
@@ -59,6 +58,10 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
         setIsOpen(false);
     };
 
+    useEffect(() => {
+        setValue(props.value);
+    }, [props.value]);
+
     return (
         <div className={`react-select-wrapper ${className}`} ref={ref} onClick={handleClick} onBlur={handleBlur}>
             <ReactSelect
@@ -66,23 +69,28 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
                 type={type}
                 options={options}
                 value={value}
-                components={Object.assign(
-                    {
-                        ValueContainer,
-                        DropdownIndicator,
-                        Control,
-                        Option,
-                    },
-                    props.isSearchable ? { MenuList } : null
-                )}
+                components={{
+                    ...Object.assign(
+                        {
+                            ValueContainer,
+                            DropdownIndicator,
+                            Control,
+                            Option,
+                        },
+                        props.isSearchable ? { MenuList } : null
+                    ),
+                    ...props.components,
+                }}
                 className={selectClassName}
                 menuIsOpen={isOpen}
                 onChange={handleChange}
                 checkAllCheckboxes={() => {
                     if ((value || []).find((option) => option.value === selectAllOption.value)) {
+                        props.onChange && props.onChange([]);
                         setValue([]);
                         return;
                     }
+                    props.onChange && props.onChange(props.withSelectAllOption ? options : props.options);
                     setValue(options);
                 }}
                 isMulti={true}
@@ -118,6 +126,7 @@ MultiSelect.propTypes = {
     hideTick: PropTypes.bool,
     isSelectAll: PropTypes.bool,
     isSearchable: PropTypes.bool,
+    withSelectAllOption: PropTypes.bool,
 };
 
 export default MultiSelect;
