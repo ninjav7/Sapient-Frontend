@@ -323,36 +323,36 @@ const EquipmentTable = ({
                                         <SkeletonTheme color="#202020" height={35}>
                                             <tr>
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
 
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
 
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
 
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
 
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
 
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
                                                 <td>
-                                                    <Skeleton count={5} />
+                                                    <Skeleton count={10} />
                                                 </td>
                                             </tr>
                                         </SkeletonTheme>
@@ -684,7 +684,7 @@ const Equipment = () => {
         if (equipSearch === '') {
             fetchEquipmentData();
         }
-    }, [equipSearch]);
+    }, [equipSearch, pageSize]);
 
     useEffect(() => {
         if (endUseData) {
@@ -706,8 +706,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace`;
-            // let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
@@ -765,8 +764,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&sort_by=${order}&ordered_by=${filterBy}`;
-            // let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData.data);
@@ -876,8 +874,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace`;
-            // let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);

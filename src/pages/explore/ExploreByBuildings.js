@@ -506,7 +506,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return parseInt(value);
                 },
             },
         },
@@ -566,7 +566,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return parseInt(value);
                 },
             },
         },

@@ -19,6 +19,12 @@ const Default = (arg) => {
                 </div>
 
                 <div>
+                    <h5>Default with search</h5>
+                    <Select {...arg} isSearchable={true} />
+                    <Brick />
+                </div>
+
+                <div>
                     <h5>With Icon</h5>
                     <Select {...arg} type={Select.Types.Icon} icon={<ProfileSVG style={{ marginRight: 10 }} />} />
                 </div>
