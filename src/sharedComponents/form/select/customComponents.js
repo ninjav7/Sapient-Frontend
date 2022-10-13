@@ -231,7 +231,9 @@ export const MenuList = ({ selectProps: { onMenuInputFocus }, ...props }) => {
         setValue(event.target.value);
     };
 
-    const filteredChildren = props.children.filter(({ props }) => props.data.label.includes(value));
+    const filteredChildren = React.Children.toArray(props.children).filter(({ props }) =>
+        props.data.label.toLowerCase().includes(value.toLowerCase())
+    );
 
     return (
         <>

@@ -3,7 +3,7 @@ import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
 
 import MultiSelect from './MultiSelect';
-import { Control, DropdownIndicator, Option, SingleValue } from './customComponents';
+import { Control, DropdownIndicator, MenuList, Option, SingleValue } from './customComponents';
 
 import { stringOrNumberPropTypes } from '../../helpers/helper';
 
@@ -23,7 +23,7 @@ const Select = ({
     defaultValue,
     ...props
 }) => {
-    const selectedOption = options.filter(({ value }) => value === defaultValue);
+    const selectedOption = options.find(({ value }) => value === defaultValue);
 
     return (
         <div className={`react-select-wrapper ${className}`}>
@@ -31,11 +31,17 @@ const Select = ({
                 {...props}
                 type={type}
                 options={options}
-                // defaultValue={selectedOption}
-                value={options.filter((option) => option.value === defaultValue)}
-                components={{ DropdownIndicator, Control, Option, SingleValue, ...props.components }}
+                defaultValue={selectedOption}
+                components={{
+                    ...Object.assign(
+                        { DropdownIndicator, Control, Option, SingleValue },
+                        props.isSearchable ? { MenuList } : null
+                    ),
+                    ...props.components,
+                }}
                 className={selectClassName}
                 isSearchable={false}
+                backspaceRemovesValue={false}
             />
         </div>
     );
@@ -66,6 +72,9 @@ Select.propTypes = {
     type: PropTypes.oneOf(Object.values(DROPDOWN_INPUT_TYPES)),
     icon: PropTypes.node,
     hideTick: PropTypes.bool,
+    isSearchable: PropTypes.bool,
+    defaultMenuIsOpen: PropTypes.bool,
+    menuIsOpen: PropTypes.bool,
 };
 
 export default Select;
