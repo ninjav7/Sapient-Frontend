@@ -130,22 +130,23 @@ const ExploreBuildingsTable = ({
                                     <SkeletonTheme color="#202020" height={35}>
                                         <tr>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
 
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
 
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
                                             <td>
-                                                <Skeleton count={5} />
+                                                <Skeleton count={10} />
                                             </td>
+                                            
                                         </tr>
                                     </SkeletonTheme>
                                 </tbody>

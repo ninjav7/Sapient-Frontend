@@ -12,6 +12,7 @@ import { faGear, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { DateRangeStore } from '../../store/DateRangeStore';
 
 const Control = () => {
     const location = useLocation();
@@ -25,9 +26,14 @@ const Control = () => {
         const isAuthTokenValid = isUserAuthenticated();
 
         logoutUser(history);
+
         if (isAuthTokenValid) {
             return <Redirect to="/" />;
         } else {
+            localStorage.removeItem('dateFilter');
+            localStorage.removeItem('startDate');
+            localStorage.removeItem('endDate');
+
             history.push('/account/login');
             window.location.reload();
         }
