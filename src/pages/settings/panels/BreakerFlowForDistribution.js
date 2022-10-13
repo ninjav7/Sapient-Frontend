@@ -770,6 +770,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (passiveDeviceData) {
+            setDeviceIdDataLevelOne([]);
             addDevideIdType();
         }
     }, [passiveDeviceData]);
@@ -779,7 +780,6 @@ const DistributedBreakerComponent = ({ data, id }) => {
     const [tripleSensorDataSearch, setTripleSensorDataSearch] = useState([]);
 
     const sensorDataFunc = () => {
-        setSensorDataSearch([]);
         setDoubleSensorDataSearch([]);
         setTripleSensorDataSearch([]);
         sensorData.map((item) => {
@@ -804,6 +804,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (sensorData || doubleSensorData || tripleSensorData) {
+            setSensorDataSearch([]);
             sensorDataFunc();
         }
     }, [sensorData, doubleSensorData, tripleSensorData]);
@@ -821,6 +822,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (equipmentData) {
+            setEquipmentDataSearch([]);
             equpimentDataFunc();
         }
     }, [equipmentData]);
@@ -1129,10 +1131,10 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                 ) : (
                                                     <Select
                                                         id="exampleSelect"
-                                                        placeholder="Select Device"
+                                                        placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
@@ -1192,7 +1194,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
@@ -1245,7 +1247,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={doubleSensorDataSearch}
                                                         value={doubleSensorDataSearch.filter((option) => {
                                                             return option.value === doubleBreakerData?.data?.sensor_id;
@@ -1310,7 +1312,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
@@ -1363,7 +1365,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={doubleSensorDataSearch}
                                                         value={doubleSensorDataSearch.filter(
                                                             (option) =>
@@ -1420,7 +1422,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={tripleSensorDataSearch}
                                                         value={tripleSensorDataSearch.filter(
                                                             (option) =>

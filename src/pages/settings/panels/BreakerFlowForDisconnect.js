@@ -694,6 +694,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (passiveDeviceData) {
+            setDeviceIdDataLevelOne([]);
             addDevideIdType();
         }
     }, [passiveDeviceData]);
@@ -703,7 +704,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [tripleSensorDataSearch, setTripleSensorDataSearch] = useState([]);
 
     const sensorDataFunc = () => {
-        setSensorDataSearch([]);
         setDoubleSensorDataSearch([]);
         setTripleSensorDataSearch([]);
         sensorData.map((item) => {
@@ -746,6 +746,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (sensorData || doubleSensorData) {
+            setSensorDataSearch([]);
             sensorDataFunc();
         }
     }, [sensorData, doubleSensorData, tripleSensorData]);
@@ -791,6 +792,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     useEffect(() => {
         if (equipmentData) {
+            setEquipmentDataSearch([]);
             equpimentDataFunc();
         }
     }, [equipmentData]);
@@ -1049,10 +1051,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 ) : (
                                                     <Select
                                                         id="exampleSelect"
-                                                        placeholder="Select Device"
+                                                        placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
@@ -1112,7 +1114,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
@@ -1230,7 +1232,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
+                                                        defaultValue={'Select Sensor'}
                                                         options={sensorDataSearch}
                                                         value={sensorDataSearch.filter(
                                                             (option) => option.value === breakerData.sensor_id
