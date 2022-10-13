@@ -706,7 +706,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value;
+                    return parseInt(value);
                 },
             },
         },
@@ -776,7 +776,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value.toFixed(0);
+                    return parseInt(value);
                 },
             },
         },
