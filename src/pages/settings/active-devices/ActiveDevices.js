@@ -122,15 +122,11 @@ const ActiveDevicesTable = ({
                                     <div className="active-device-flex">
                                         <div>Identifier (MAC)</div>
                                         {identifierOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'identifier')}>
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'identifier')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'identifier')}>
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'identifier')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -304,20 +300,18 @@ const ActiveDevicesTable = ({
                                             <td>{record.model}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>
-                                                {record.location === ''
-                                                    ? ' - '
-                                                    : record.location}
-                                            </td>
+                                            <td>{record.location === '' ? ' - ' : record.location}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'sensors') && (
-                                            <td style={{textAlign:"center"}}>{record.sensor_number}</td>
+                                            <td style={{ textAlign: 'center' }}>{record.sensor_number}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'firmware-version') && (
                                             <td>{record.firmware_version === null ? '-' : record.firmware_version}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                            <td style={{textAlign:"center"}}>{record.hardware_version === null ? '-' : record.hardware_version}</td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                {record.hardware_version === null ? '-' : record.hardware_version}
+                                            </td>
                                         )}
                                     </tr>
                                 );
@@ -351,6 +345,7 @@ const ActiveDevicesTable = ({
                             className="btn btn-md btn-light font-weight-bold mt-4"
                             onChange={(e) => {
                                 setPageSize(parseInt(e.target.value));
+                                window.scrollTo(0, 0);
                             }}>
                             {[20, 50, 100].map((pageSize) => (
                                 <option key={pageSize} value={pageSize} className="align-options-center">
