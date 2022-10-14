@@ -7,13 +7,13 @@ export const percentageHandler = (now, old) => {
     }
     let percentage = 0.0;
 
-    // --------------- Experimenting value caluclation -- please dont remove below comments ---------------
-
-    // if (now > old) {
-    //     percentage = ((now - old) / now) * 100;
-    // } else {
-    //     percentage = ((now - old) / old) * 100;
-    // }
+    //  Experimenting value caluclation -- please dont remove below comments
+    /* if (now > old) {
+         percentage = ((now - old) / now) * 100;
+     } else {
+         percentage = ((now - old) / old) * 100;
+     }
+    */
 
     percentage = ((now - old) / old) * 100;
     const value = Math.abs(percentage).toFixed(2) || 0;
