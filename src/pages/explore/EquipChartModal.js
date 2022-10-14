@@ -28,8 +28,12 @@ import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
+import SingleBreakerLinked from '../../assets/images/equip-modal/Single_Breaker_Linked.svg';
+import DoubleBreakerLinked from '../../assets/images/equip-modal/Double_Breaker_Linked.svg';
+import TripleBreakerLinked from '../../assets/images/equip-modal/Triple_Breaker_Linked.svg';
+import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import ModalHeader from '../../components/ModalHeader';
@@ -86,6 +90,7 @@ const EquipChartModal = ({
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
+    const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [equipResult, setEquipResult] = useState({});
 
     const [location, setLocation] = useState('');
@@ -484,6 +489,7 @@ const EquipChartModal = ({
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
                     setEndUses(response?.end_use_id);
+                    setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
                 });
             } catch (error) {}
@@ -642,6 +648,10 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
+
+    useEffect(() => {
+        console.log('equipBreakerLink', equipBreakerLink);
+    });
 
     return (
         <Modal
@@ -1184,7 +1194,39 @@ const EquipChartModal = ({
                                     <Col lg={4}>
                                         <div className="modal-right-container">
                                             <div className="pic-container">
-                                                <div className="modal-right-pic"></div>
+                                                {/* <div className="modal-right-pic"></div> */}
+                                                {equipBreakerLink.length === 0 ? (
+                                                    <div className="equip-breaker-style">
+                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {equipBreakerLink.length === 1 && (
+                                                            <div className="equip-breaker-style">
+                                                                <img
+                                                                    src={SingleBreakerLinked}
+                                                                    alt="SingleBreakerLinked"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 2 && (
+                                                            <div className="equip-breaker-style">
+                                                                <img
+                                                                    src={DoubleBreakerLinked}
+                                                                    alt="DoubleBreakerLinked"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 3 && (
+                                                            <div className="equip-breaker-style">
+                                                                <img
+                                                                    src={TripleBreakerLinked}
+                                                                    alt="TripleBreakerLinked"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
@@ -1199,6 +1241,29 @@ const EquipChartModal = ({
                                                         }}>
                                                         View
                                                     </button>
+                                                </div>
+                                                <div className="equip-breaker-container">
+                                                    <div className="equip-breaker-detail">
+                                                        <div className="phase-style">
+                                                            <div className="equip-breaker-header mb-1">Phases</div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink[0]?.phase_configuration}
+                                                            </div>
+                                                        </div>
+                                                        <div className="installed-style">
+                                                            <div className="equip-breaker-header mb-1">
+                                                                Installed at
+                                                            </div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink.length === 1 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 2 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 3 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1371,7 +1436,16 @@ const EquipChartModal = ({
                                     <Col lg={4}>
                                         <div className="modal-right-container">
                                             <div className="pic-container">
-                                                <div className="modal-right-pic"></div>
+                                                {/* <div className="modal-right-pic"></div> */}
+                                                {equipBreakerLink.length === 0 ? (
+                                                    <div className="equip-breaker-style">
+                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="equip-breaker-style">
+                                                        <img src={DoubleBreakerLinked} alt="DoubleBreakerLinked" />
+                                                    </div>
+                                                )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 

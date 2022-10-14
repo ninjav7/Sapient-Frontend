@@ -1,16 +1,21 @@
-export const percentageHandler = (v1, v2) => {
-    if (v1 === v2) {
+export const percentageHandler = (now, old) => {
+    if (now === old) {
         return 0;
     }
-    if (v2 === 0) {
+    if (old === 0) {
         return 100;
     }
     let percentage = 0.0;
-    if (v1 > v2) {
-        percentage = ((v1 - v2) / v1) * 100;
-    } else {
-        percentage = ((v1 - v2) / v2) * 100;
-    }
+
+    //  Experimenting value caluclation -- please dont remove below comments
+    /* if (now > old) {
+         percentage = ((now - old) / now) * 100;
+     } else {
+         percentage = ((now - old) / old) * 100;
+     }
+    */
+
+    percentage = ((now - old) / old) * 100;
     const value = Math.abs(percentage).toFixed(2) || 0;
     return value;
 };
