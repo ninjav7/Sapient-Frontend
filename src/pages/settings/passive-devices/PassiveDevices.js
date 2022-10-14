@@ -494,6 +494,7 @@ const PassiveDevices = () => {
 
     useEffect(() => {
         if (locationData) {
+            setLocationDataNow([]);
             addLocationType();
         }
     }, [locationData]);
