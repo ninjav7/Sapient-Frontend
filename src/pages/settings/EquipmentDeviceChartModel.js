@@ -150,30 +150,6 @@ const EquipmentDeviceChartModel = ({
         return label;
     };
 
-    // useEffect(() => {
-    //     const setCustomDate = (date) => {
-    //         let endCustomDate = new Date(); // today
-    //         let startCustomDate = new Date();
-    //         startCustomDate.setDate(startCustomDate.getDate() - date);
-    //         endCustomDate.setDate(endCustomDate.getDate());
-
-    //         setDateRange([startCustomDate, endCustomDate]);
-
-    //         DateRangeStore.update((s) => {
-    //             s.dateFilter = date;
-    //             s.startDate = startCustomDate;
-    //             s.endDate = endCustomDate;
-    //         });
-
-    //         // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
-    //         // let sstr =
-    //         //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
-    //         // setEDateStr(estr);
-    //         // setSDateStr(sstr);
-    //     };
-
-    //     setCustomDate(dateFilter);
-    // }, [dateFilter]);
     const exploreDataFetch = async () => {
         try {
             if (equipData.equipments_id === undefined) {

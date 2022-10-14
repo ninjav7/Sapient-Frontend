@@ -6,13 +6,13 @@ export const formatConsumptionValue = (value, fixed) =>
 export const handleDateFormat = (customDate, dateType) => {
     if (dateType === 'startDate' && customDate === null) {
         let startDate = new Date();
-        startDate.setDate(startDate.getDate() - 7);
+        startDate.setDate(startDate.getDate() - 6);
         return startDate;
     }
 
     if (dateType === 'endDate' && customDate === null) {
         let endDate = new Date();
-        endDate.setDate(endDate.getDate() - 1);
+        endDate.setDate(endDate.getDate());
         return endDate;
     }
 
