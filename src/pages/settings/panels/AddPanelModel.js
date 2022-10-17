@@ -154,12 +154,14 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
     useEffect(() => {
         if (locationData) {
+            setLocation([]);
             addLocationData();
         }
     }, [locationData]);
 
     useEffect(() => {
         if (panelData) {
+            setParentPanel([]);
             addPanelData();
         }
     }, [panelData]);
@@ -227,7 +229,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     id="exampleSelect"
                                     name="state"
                                     isSearchable={true}
-                                    defaultValue={'Select Panel Type'}
+                                    placeholder={'Select Panel Type'}
                                     options={panelOption}
                                     onChange={(e) => {
                                         handleChange('panel_type', e.value);
@@ -282,7 +284,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                         <div style={{ width: '100%' }}>
                             <Select
                                 isSearchable={true}
-                                defaultValue={'Select Location Type'}
+                                placeholder={'Select Location'}
                                 options={location}
                                 onChange={(e) => {
                                     handleChange('space_id', e.value);
@@ -301,7 +303,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                         </Label>
                         <Select
                             isSearchable={true}
-                            defaultValue={'Select Parent Panel'}
+                            placeholder={'Select Parent Panel'}
                             options={parentPanel}
                             onChange={(e) => {
                                 handleChange('parent_panel', e.value);

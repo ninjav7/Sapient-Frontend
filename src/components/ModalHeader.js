@@ -22,19 +22,19 @@ const ModalHeader = (props) => {
     const customDaySelect = [
         {
             label: 'Last 7 Days',
-            value: 7,
+            value: 6,
         },
         {
             label: 'Last 5 Days',
-            value: 5,
+            value: 4,
         },
         {
             label: 'Last 3 Days',
-            value: 3,
+            value: 2,
         },
         {
             label: 'Last 1 Day',
-            value: 1,
+            value: 0,
         },
         {
             label: 'Custom',
@@ -55,7 +55,7 @@ const ModalHeader = (props) => {
         let end = new Date();
         let start = new Date();
         if (value !== 0) {
-            end.setDate(end.getDate() - 1);
+            end.setDate(end.getDate());
         }
         start.setDate(start.getDate() - value);
         setStartDate(start);

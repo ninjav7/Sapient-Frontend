@@ -395,11 +395,7 @@ const EquipmentTable = ({
                                                         (record) => record.value === 'equip_type'
                                                     ) && <td className="font-weight-bold">{record.equipments_type}</td>}
                                                     {selectedOptions.some((record) => record.value === 'location') && (
-                                                        <td>
-                                                            {record.location === ''
-                                                                ? ' - '
-                                                                : record.location}
-                                                        </td>
+                                                        <td>{record.location === '' ? ' - ' : record.location}</td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'tags') && (
                                                         <td>
@@ -540,7 +536,8 @@ const EquipmentTable = ({
                                         value={pageSize}
                                         className="btn btn-md btn-light font-weight-bold mt-4"
                                         onChange={(e) => {
-                                            setPageSize(parseInt(e.target.value));
+                                            setPageSize(+e.target.value);
+                                            window.scrollTo(0, 0);
                                         }}>
                                         {[20, 50, 100].map((pageSize) => (
                                             <option key={pageSize} value={pageSize} className="align-options-center">
@@ -676,6 +673,7 @@ const Equipment = () => {
 
     useEffect(() => {
         if (equipmentTypeData) {
+            setEquipmentTypeDataNow([]);
             addEquimentType();
         }
     }, [equipmentTypeData]);
@@ -694,6 +692,7 @@ const Equipment = () => {
 
     useEffect(() => {
         if (locationData) {
+            setLocationDataNow([]);
             addLocationType();
         }
     }, [locationData]);
@@ -935,6 +934,7 @@ const Equipment = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setEquipmentTypeData([]);
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                     let response = res.data.data;

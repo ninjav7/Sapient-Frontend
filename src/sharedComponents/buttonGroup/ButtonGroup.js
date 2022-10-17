@@ -3,8 +3,8 @@ import classNames from 'classnames';
 import './ButtonGroup.scss';
 import Typography from '../typography';
 
-const ButtonGroup = ({ buttons, handleButtonClick }) => {
-    const [clickedId, setClickedId] = useState(-1);
+const ButtonGroup = ({ buttons, handleButtonClick, currentButtonId }) => {
+    const [clickedId, setClickedId] = useState(currentButtonId);
     const handleClick = (id) => {
         setClickedId(id);
         handleButtonClick(id);
