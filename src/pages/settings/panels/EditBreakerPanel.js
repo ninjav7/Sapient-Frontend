@@ -407,8 +407,8 @@ const EditBreakerPanel = () => {
             };
             let params = `?building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
-                let response = res.data;
                 setIsResetting(false);
+                window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
                 triggerBreakerAPI();
             });

@@ -6,7 +6,9 @@ import moment from 'moment';
 import 'moment-timezone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
+
 import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
+
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
@@ -217,7 +219,6 @@ const DeviceChartModel = ({
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
         else setDropDown('dropdown-menu dropdown-menu-right');
     };
-
     const removeDuplicates = (arr = []) => {
         const map = new Map();
         arr.forEach((x) => map.set(JSON.stringify(x), x));

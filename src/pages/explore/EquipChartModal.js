@@ -28,13 +28,18 @@ import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
+import SingleBreakerLinked from '../../assets/images/equip-modal/Single_Breaker_Linked.svg';
+import DoubleBreakerLinked from '../../assets/images/equip-modal/Double_Breaker_Linked.svg';
+import TripleBreakerLinked from '../../assets/images/equip-modal/Triple_Breaker_Linked.svg';
+import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import ModalHeader from '../../components/ModalHeader';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import './style.css';
+import { DivideSquare } from 'react-feather';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -86,6 +91,7 @@ const EquipChartModal = ({
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
+    const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [equipResult, setEquipResult] = useState({});
 
     const [location, setLocation] = useState('');
@@ -93,6 +99,10 @@ const EquipChartModal = ({
     const [endUses, setEndUses] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
+
+    useEffect(() => {
+        console.log('equipBreakerLink', equipBreakerLink);
+    });
 
     const addEquimentType = () => {
         equipmentTypeData.map((item) => {
@@ -484,6 +494,7 @@ const EquipChartModal = ({
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
                     setEndUses(response?.end_use_id);
+                    setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
                 });
             } catch (error) {}
@@ -642,6 +653,10 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
+
+    useEffect(() => {
+        console.log('equipBreakerLink', equipBreakerLink);
+    });
 
     return (
         <Modal
@@ -1183,8 +1198,109 @@ const EquipChartModal = ({
                                     </Col>
                                     <Col lg={4}>
                                         <div className="modal-right-container">
-                                            <div className="pic-container">
-                                                <div className="modal-right-pic"></div>
+                                            <div className="equip-panel-info">
+                                                {/* <div className="modal-right-pic"></div> */}
+                                                {equipBreakerLink.length === 0 ? (
+                                                    <div className="equip-breaker-style">
+                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {equipBreakerLink.length === 1 && (
+                                                            <div className="breaker-container-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[1]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-single-style"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 2 && (
+                                                            <div className="breaker-container-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[0]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[1]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-double-style"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 3 && (
+                                                            <div className="breaker-container-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[2]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[0]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[1]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[2]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-triple-style"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
@@ -1199,6 +1315,29 @@ const EquipChartModal = ({
                                                         }}>
                                                         View
                                                     </button>
+                                                </div>
+                                                <div className="equip-breaker-container">
+                                                    <div className="equip-breaker-detail">
+                                                        <div className="phase-style">
+                                                            <div className="equip-breaker-header mb-1">Phases</div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink[0]?.breaker_type}
+                                                            </div>
+                                                        </div>
+                                                        <div className="installed-style">
+                                                            <div className="equip-breaker-header mb-1">
+                                                                Installed at
+                                                            </div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink.length === 1 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 2 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 3 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1370,8 +1509,108 @@ const EquipChartModal = ({
                                     </Col>
                                     <Col lg={4}>
                                         <div className="modal-right-container">
-                                            <div className="pic-container">
-                                                <div className="modal-right-pic"></div>
+                                            <div className="equip-panel-info">
+                                                {equipBreakerLink.length === 0 ? (
+                                                    <div className="equip-breaker-style">
+                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {equipBreakerLink.length === 1 && (
+                                                            <div className="breaker-container-disabled-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[0]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-single-style-disabled"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 2 && (
+                                                            <div className="breaker-container-disabled-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[0]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[1]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-double-style-disabled"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {equipBreakerLink.length === 3 && (
+                                                            <div className="breaker-container-disabled-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                    <div>{equipBreakerLink[2]?.breaker_number}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[0]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[1]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                    <div
+                                                                        className={
+                                                                            equipBreakerLink[2]?.sensor_id === ''
+                                                                                ? 'breaker-offline-style'
+                                                                                : 'breaker-online-style'
+                                                                        }></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket1-style"></div>
+                                                                    <div className="breaker-socket-triple-style-disabled"></div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
@@ -1386,6 +1625,29 @@ const EquipChartModal = ({
                                                         }}>
                                                         View
                                                     </button>
+                                                </div>
+                                                <div className="equip-breaker-container">
+                                                    <div className="equip-breaker-detail">
+                                                        <div className="phase-style">
+                                                            <div className="equip-breaker-header mb-1">Phases</div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink[0]?.breaker_type}
+                                                            </div>
+                                                        </div>
+                                                        <div className="installed-style">
+                                                            <div className="equip-breaker-header mb-1">
+                                                                Installed at
+                                                            </div>
+                                                            <div className="equip-breaker-value float-left">
+                                                                {equipBreakerLink.length === 1 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 2 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                {equipBreakerLink.length === 3 &&
+                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

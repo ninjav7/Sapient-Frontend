@@ -1,0 +1,102 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.data-table-widget {
+    &-wrapper {
+        @extend .box-shadow-sm;
+
+        .button-group-wrapper {
+            ul {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        [class*='menu'] {
+            min-width: 13.75rem;
+            max-width: 37.5rem;
+            width: auto;
+        }
+
+        .table-wrapper {
+            .form-check-input {
+                margin: 0 !important;
+            }
+        }
+
+        .drop-down-button-wrapper .button svg path {
+            fill: $primary-gray-800 !important;
+        }
+
+        .table-filter-widget-header-button-label {
+            display: flex;
+            align-items: center;
+            gap: 0.59rem;
+
+            position: relative;
+
+            &-icon {
+                display: none;
+                position: absolute;
+                right: 0;
+
+                svg path {
+                    fill: $primary-gray-800 !important;
+                }
+            }
+            &-text {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            &:hover,
+            &.is-open {
+                .table-filter-widget-header-button-label-icon {
+                    display: block;
+                }
+                .table-filter-widget-header-button-label-text {
+                    max-width: calc(100% - 1.6875rem);
+                }
+            }
+        }
+    }
+
+    &-action-button {
+        padding: 0 !important;
+        height: 2.25rem;
+        width: 2.25rem;
+        justify-content: center;
+    }
+
+    &-action-button-wrapper {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    &-drop-down-button-menu {
+        width: auto !important;
+        min-width: 7.5rem;
+    }
+
+    &-filters {
+        display: flex;
+        gap: 0.8rem;
+
+        .react-select-wrapper {
+            min-width: auto;
+        }
+    }
+
+    &-drop-down-button-menu {
+        min-width: 6.875rem !important;
+    }
+
+    &-drag-handle {
+        cursor: move;
+    }
+}
+
+.data-table-widget-last-updated {
+    overflow: visible !important;
+}
