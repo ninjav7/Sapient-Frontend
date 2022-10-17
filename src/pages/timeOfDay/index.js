@@ -8,7 +8,7 @@ import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
-import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Network';
+import { BaseUrl, builidingHourly, avgDailyUsageByHour, buildingAfterHours } from '../../services/Network';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -344,12 +344,14 @@ const TimeOfDay = () => {
 
     const weekdaysChartHeight = 235;
 
+    const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
+
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
@@ -483,6 +485,37 @@ const TimeOfDay = () => {
         if (endDate === null) {
             return;
         }
+
+        const endUsesByOfHour = async () => {
+            try {
+                setIsEndUsageChartLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${buildingAfterHours}${params}`,
+                        {
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res?.data;
+
+                        setDonutChartOpts();
+                        setIsEndUsageChartLoading(false);
+                    });
+            } catch (error) {
+                setIsEndUsageChartLoading(false);
+            }
+        };
+        
         const dailyUsageByHour = async () => {
             try {
                 setIsAvgUsageChartLoading(true);
@@ -1011,6 +1044,7 @@ const TimeOfDay = () => {
             }
         };
 
+        endUsesByOfHour();
         dailyUsageByHour();
         averageUsageByHourFetch();
     }, [startDate, endDate, bldgId]);
@@ -1028,9 +1062,16 @@ const TimeOfDay = () => {
                             After-Hours Energy
                         </h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                        <div className="mt-2 ">
-                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={200} />
-                        </div>
+                        {isEndUsageChartLoading?(
+                        <div className="mt-2" style={{ height: '400px' }}>
+                                <Spinner className="m-2" color={'primary'} />
+                                </div>
+                        ):(
+                            <DonutChart 
+                                donutChartOpts={donutChartOpts} 
+                                donutChartData={donutChartData} 
+                                height={200} />
+                        )}
                     </div>
                 </Col>
                 <Col xl={9}>
