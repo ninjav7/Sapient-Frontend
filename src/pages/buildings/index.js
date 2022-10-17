@@ -927,7 +927,11 @@ const BuildingOverview = () => {
                                     overview.total_consumption.old
                                 )}
                                 consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
-                                infoText={`Total energy consumption accross all your buildings for the past ${daysCount} days.`}
+                                infoText={
+                                    startEndDayCount > 1
+                                        ? `Total energy consumption accross all your buildings for the past ${startEndDayCount} days.`
+                                        : `Total energy consumption accross all your buildings for the past ${startEndDayCount} day.`
+                                }
                                 infoType={`total-bld-cnsmp`}
                             />
                         </div>
@@ -963,7 +967,11 @@ const BuildingOverview = () => {
                                 consumptionNormal={
                                     overview.average_energy_density.now >= overview.average_energy_density.old
                                 }
-                                infoText={`Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} days.`}
+                                infoText={
+                                    startEndDayCount > 1
+                                        ? `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} days.`
+                                        : `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} day.`
+                                }
                                 infoType={`avg-bld-dnty`}
                             />
                         </div>

@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import { DONUT_CHART_TYPES } from '.';
 import { UNITS } from '../../constants/units';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 export const configDonutChartWidget = (type) => {
     const options = {
@@ -44,7 +45,7 @@ export const configDonutChartWidget = (type) => {
                             fontWeight: 500,
                             lineHeight: '1rem',
                             formatter: function (val) {
-                                return `${val} ${UNITS.KWH}`;
+                                return `${formatConsumptionValue(val, 0)} ${UNITS.KWH}`;
                             },
                         },
                         total: {
@@ -55,12 +56,10 @@ export const configDonutChartWidget = (type) => {
                             fontWeight: 500,
                             lineHeight: '1rem',
                             formatter: function (w) {
-                                let sum = w.globals.seriesTotals
-                                    .reduce((a, b) => {
-                                        return Number(a) + Number(b);
-                                    }, 0)
-                                    .toFixed(3);
-                                return `${parseFloat(sum)} ${UNITS.KWH}`;
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
+                                    return Number(a) + Number(b);
+                                }, 0);
+                                return `${formatConsumptionValue(sum, 0)} ${UNITS.KWH}`;
                             },
                         },
                     },
