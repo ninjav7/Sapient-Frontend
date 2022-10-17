@@ -53,7 +53,7 @@ const TimeOfDay = () => {
                 enabled: false,
             },
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         colors: ['#5369f8', '#43d39e'],
@@ -232,7 +232,7 @@ const TimeOfDay = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         dataLabels: {
@@ -349,9 +349,14 @@ const TimeOfDay = () => {
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
+            events: {
+                mounted: function (chartContext, config) {
+                    chartContext.toggleDataPointSelection(0, 1);
+                },
+            },
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
@@ -383,7 +388,7 @@ const TimeOfDay = () => {
                         },
                         value: {
                             show: true,
-                            fontSize: '20px',
+                            fontSize: '15px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
                             color: 'red',
@@ -422,16 +427,16 @@ const TimeOfDay = () => {
                     chart: {
                         width: 300,
                     },
-                    legend: {
-                        show: true,
-                        showForSingleSeries: true,
-                        onItemHover: {
-                            highlightDataSeries: true,
-                        },
-                        onItemClick: {
-                            toggleDataSeries: true,
-                        },
-                    },
+                    // legend: {
+                    //     show: true,
+                    //     showForSingleSeries:true,
+                    //     onItemHover: {
+                    //         highlightDataSeries: true
+                    //     },
+                    //     onItemClick: {
+                    //         toggleDataSeries: true
+                    //     },
+                    // },
                 },
             },
         ],
@@ -443,7 +448,8 @@ const TimeOfDay = () => {
             x: { show: false },
         },
         legend: {
-            show: false,
+            show: true,
+            position: 'bottom',
         },
         stroke: {
             width: 0,
@@ -452,12 +458,9 @@ const TimeOfDay = () => {
         itemMargin: {
             horizontal: 10,
         },
-        dataLabels: {
-            enabled: false,
-        },
     });
 
-    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333, 5452]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1044,7 +1047,7 @@ const TimeOfDay = () => {
             }
         };
 
-        endUsesByOfHour();
+        //endUsesByOfHour();
         dailyUsageByHour();
         averageUsageByHourFetch();
     }, [startDate, endDate, bldgId]);
@@ -1056,8 +1059,8 @@ const TimeOfDay = () => {
             </div>
 
             <Row className="ml-2">
-                <Col xl={3}>
-                    <div className="card-body timeofday-content-style">
+                <Col xl={4}>
+                    <div className="card-body timeofday-content-style" >
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             After-Hours Energy
                         </h6>
@@ -1070,11 +1073,11 @@ const TimeOfDay = () => {
                             <DonutChart 
                                 donutChartOpts={donutChartOpts} 
                                 donutChartData={donutChartData} 
-                                height={200} />
+                                height={290} />
                         )}
                     </div>
                 </Col>
-                <Col xl={9}>
+                <Col xl={8}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Hourly Average Consumption
@@ -1097,7 +1100,7 @@ const TimeOfDay = () => {
             </Row>
 
             <Row className="mt-2 ml-2">
-                <Col xl={11}>
+                <Col xl={12}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>

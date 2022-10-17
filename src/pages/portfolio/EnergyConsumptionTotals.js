@@ -35,7 +35,7 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyC
     });
 
     return (
-        <div>
+        <div style={{borde :'black'}}>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
                 title="Energy Consumption by End Use"

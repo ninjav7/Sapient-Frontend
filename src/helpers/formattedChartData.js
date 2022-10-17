@@ -65,9 +65,9 @@ export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
 
 export const getFormattedTimeIntervalObjectData = (data, startDate, endDate) => {
 
-    console.log(data[0].data)
-    console.log(startDate);
-    console.log(endDate);
+    // console.log(data[0].data)
+    // console.log(startDate);
+    // console.log(endDate);
     let newDataSet = [];
     let newdata = data[0].data;
     // Defs
@@ -136,6 +136,6 @@ export const getFormattedTimeIntervalObjectData = (data, startDate, endDate) => 
         }
     }
     newDataSet.push({ name: "Energy", data: newArr })
-    console.log(newDataSet)
+   // console.log(newDataSet)
     return newDataSet;
 }
