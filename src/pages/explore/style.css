@@ -482,7 +482,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: -1.5rem;
-    top: 0.9rem;
+    top: 2.9rem;
 }
 
 .breaker-socket-triple-style-disabled {
@@ -494,7 +494,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: 1.5rem;
-    top: 0.9rem;
+    top: 2.9rem;
 }
 
 .breaker-socket-double-style {
@@ -506,7 +506,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: -1.5rem;
-    top: 1.1rem;
+    top: 3.1rem;
 }
 
 .breaker-socket-double-style-disabled {
@@ -518,7 +518,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: -1.5rem;
-    top: 1.1rem;
+    top: 3.1rem;
 }
 
 .breaker-socket-single-style {
@@ -530,7 +530,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: -1.5rem;
-    top: 1.3rem;
+    top: 3.2rem;
 }
 
 .breaker-socket-single-style-disabled {
@@ -542,7 +542,7 @@
         inset 4px 4px 7px rgba(0, 0, 0, 0.4), inset 6px 10px 10px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
     margin-left: 1.5rem;
-    top: 1.3rem;
+    top: 3.2rem;
 }
 
 .breaker-voltage-style {
@@ -560,4 +560,8 @@
     display: flex;
     align-items: center;
     color: #f2f4f7;
+}
+
+.equip-panel-info {
+    padding: 2rem;
 }

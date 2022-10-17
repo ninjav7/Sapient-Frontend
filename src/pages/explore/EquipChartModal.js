@@ -1198,7 +1198,7 @@ const EquipChartModal = ({
                                     </Col>
                                     <Col lg={4}>
                                         <div className="modal-right-container">
-                                            <div className="pic-container">
+                                            <div className="equip-panel-info">
                                                 {/* <div className="modal-right-pic"></div> */}
                                                 {equipBreakerLink.length === 0 ? (
                                                     <div className="equip-breaker-style">
@@ -1509,8 +1509,7 @@ const EquipChartModal = ({
                                     </Col>
                                     <Col lg={4}>
                                         <div className="modal-right-container">
-                                            <div className="pic-container">
-                                                {/* <div className="modal-right-pic"></div> */}
+                                            <div className="equip-panel-info">
                                                 {equipBreakerLink.length === 0 ? (
                                                     <div className="equip-breaker-style">
                                                         <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
