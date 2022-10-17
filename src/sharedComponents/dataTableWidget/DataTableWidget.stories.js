@@ -33,7 +33,7 @@ Default.args = {
     onStatus: (query) => alert('Status changed to: ' + query),
     totalPages: 90,
     headers: [
-        { name: 'Name', accessor: 'name' },
+        { name: 'Name', accessor: 'name', onSort: alert },
         { name: 'Description', accessor: 'description' },
         { name: 'Location', accessor: 'location' },
         { name: 'Breakers', accessor: 'breakers' },
