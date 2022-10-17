@@ -1207,7 +1207,7 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
@@ -1226,8 +1226,8 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[1]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
@@ -1248,9 +1248,9 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[2]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
@@ -1488,7 +1488,7 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
@@ -1507,8 +1507,8 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[1]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
@@ -1529,9 +1529,9 @@ const EquipChartModal = ({
                                                                     <div>{equipBreakerLink[2]?.breaker_number}</div>
                                                                 </div>
                                                                 <div className="breaker-number-style">
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
-                                                                    <div className="breaker-status-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
+                                                                    <div className="breaker-online-style"></div>
                                                                 </div>
                                                                 <div className="breaker-voltage-style">
                                                                     <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
