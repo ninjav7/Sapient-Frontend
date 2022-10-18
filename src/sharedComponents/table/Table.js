@@ -17,8 +17,8 @@ const Row = ({ children, ...props }) => (
         {children}
     </tr>
 );
-const Cell = ({ children, ...props }) => (
-    <td className="table-cell" {...props}>
+const Cell = ({ children, className = '', ...props }) => (
+    <td {...props} className={`table-cell ${className}`}>
         {children}
     </td>
 );
