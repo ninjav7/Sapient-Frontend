@@ -189,6 +189,7 @@ const PlugRule = () => {
         await getGraphDataRequest(activeBuildingId, sensorsIdNow).then((res) => {
             if (res.status) {
                 let response = res.data;
+                console.log("GRAPHDATA",response);
                 setTotalGraphData(response);
             }
         });
@@ -484,6 +485,7 @@ const PlugRule = () => {
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
     useEffect(() => {
+        console.log("sensorsIdNow234423",sensorsIdNow);
         if (sensorsIdNow) {
             getGraphData();
         }
