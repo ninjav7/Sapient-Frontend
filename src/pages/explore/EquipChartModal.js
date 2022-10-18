@@ -100,10 +100,6 @@ const EquipChartModal = ({
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
-
     const addEquimentType = () => {
         equipmentTypeData.map((item) => {
             setEquipmentTypeDataNow((el) => [
@@ -653,10 +649,6 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
-
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
 
     return (
         <Modal

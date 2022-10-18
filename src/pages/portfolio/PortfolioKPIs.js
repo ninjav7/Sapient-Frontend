@@ -29,8 +29,8 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }, i
                     unit={KPI_UNITS.KWH}
                     tooltipText={
                         daysCount > 1
-                            ? `Total energy consumption accross all your buildings for the past ${daysCount} days.`
-                            : `Total energy consumption accross all your buildings for the past ${daysCount} day.`
+                            ? `Total energy consumption across all your buildings for the past ${daysCount} days.`
+                            : `Total energy consumption across all your buildings for the past ${daysCount} day.`
                     }
                     tooltipId="total-eng-cnsmp"
                     type={
@@ -50,8 +50,8 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }, i
                     unit={KPI_UNITS.KWH_SQ_FT}
                     tooltipText={
                         daysCount > 1
-                            ? `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} days.`
-                            : `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} day.`
+                            ? `Average energy density (kWh / sq. ft.) across all your buildings for the past ${daysCount} days.`
+                            : `Average energy density (kWh / sq. ft.) across all your buildings for the past ${daysCount} day.`
                     }
                     tooltipId="avg-eng-dnty"
                     type={
