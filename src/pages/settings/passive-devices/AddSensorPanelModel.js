@@ -1,44 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalPanels, getBreakers } from '../../../services/Network';
+import { BaseUrl, generalPanels, getBreakers, linkPassiveSensorToBreaker } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
-const AddSensorPanelModel = ({
-    showBreaker,
-    handleBreakerClose,
-    currentRecord,
-    setCurrentRecord,
-    sensors,
-    setSensors,
-    currentIndex,
-    setCurrentIndex,
-    bldgId,
-    equipmentId,
-}) => {
+const AddSensorPanelModel = ({ showBreaker, handleBreakerClose, bldgId, sensorObj }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const [panelData, setPanelData] = useState([]);
     const [breakersData, setBreakersData] = useState([]);
+    const [passiveSensorObj, setPassiveSensorObj] = useState({
+        panel_id: '',
+        breaker_id: '',
+    });
 
     const [isPanelDataFetched, setPanelDataFetched] = useState(true);
     const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
 
-    const saveToSensorArray = () => {
-        let currentArray = sensors;
-        currentArray[currentIndex] = currentRecord;
-        setSensors(currentArray);
-    };
-
-    const handleSensorChange = (key, value) => {
-        let obj = Object.assign({}, currentRecord);
+    const handlePassiveSensorChange = (key, value) => {
+        let obj = Object.assign({}, passiveSensorObj);
+        if (key === 'panel_id') {
+            obj['breaker_id'] = '';
+        }
+        if (value === 'Select Breaker') {
+            value = '';
+        }
         obj[key] = value;
-        setCurrentRecord(obj);
+        setPassiveSensorObj(obj);
     };
 
     const fetchBreakersList = async (panelId) => {
@@ -55,14 +48,41 @@ const AddSensorPanelModel = ({
             let params = `?panel_id=${panelId}`;
             await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                 let response = res.data.data;
-                response.sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                });
                 setBreakersData(response);
             });
             setBreakerDataFetched(false);
         } catch (error) {
             setBreakerDataFetched(false);
+        }
+    };
+
+    const linkPassiveSensorToPanelBreaker = async () => {
+        try {
+            setBreakerDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?sensor_id=${sensorObj?.id}&breaker_id=${passiveSensorObj?.breaker_id}&building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${linkPassiveSensorToBreaker}${params}`, {}, { headers }).then((res) => {
+                let response = res.data;
+            });
+        } catch (error) {}
+    };
+
+    const getAvailableBreaker = () => {
+        if (breakersData.length === 0) {
+            return;
+        }
+        if (passiveSensorObj?.panel_id === '') {
+            return;
+        }
+        let breakerObj = breakersData.find((record) => record.sensor_link === '');
+        if (typeof breakerObj !== 'undefined') {
+            let obj = Object.assign({}, passiveSensorObj);
+            obj['breaker_id'] = breakerObj?.id;
+            setPassiveSensorObj(obj);
         }
     };
 
@@ -81,10 +101,15 @@ const AddSensorPanelModel = ({
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    response.sort((a, b) => {
-                        return a.panel_name.localeCompare(b.panel_name);
+                    let data = [];
+                    response.forEach((element) => {
+                        let obj = {
+                            label: element?.panel_name,
+                            value: element?.panel_id,
+                        };
+                        data.push(obj);
                     });
-                    setPanelData(response);
+                    setPanelData(data);
                 });
                 setPanelDataFetched(false);
             } catch (error) {
@@ -96,7 +121,13 @@ const AddSensorPanelModel = ({
 
     return (
         <>
-            <Modal show={showBreaker} onHide={handleBreakerClose} size={'md'} centered>
+            <Modal
+                show={showBreaker}
+                onHide={handleBreakerClose}
+                size={'md'}
+                centered
+                backdrop="static"
+                keyboard={false}>
                 <Modal.Header className="m-3 p-2 mb-0">
                     <Modal.Title>Select Breaker</Modal.Title>
                 </Modal.Header>
@@ -111,14 +142,14 @@ const AddSensorPanelModel = ({
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
-                                defaultValue={currentRecord.panel_name}
+                                value={passiveSensorObj?.panel_id}
                                 onChange={(e) => {
-                                    handleSensorChange('panel_name', e.target.value);
+                                    handlePassiveSensorChange('panel_id', e.target.value);
                                     fetchBreakersList(e.target.value);
                                 }}>
                                 <option selected>Select Panel</option>
                                 {panelData.map((record) => {
-                                    return <option value={record.panel_id}>{record.panel_name}</option>;
+                                    return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         )}
@@ -134,35 +165,46 @@ const AddSensorPanelModel = ({
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
-                                defaultValue={currentRecord.breaker_name}
+                                value={passiveSensorObj?.breaker_id}
                                 onChange={(e) => {
-                                    handleSensorChange('breaker_name', e.target.value);
+                                    handlePassiveSensorChange('breaker_id', e.target.value);
                                 }}>
                                 <option selected>Select Breaker</option>
                                 {breakersData.map((record) => {
-                                    return <option value={record.id}>{record.name}</option>;
+                                    return (
+                                        <option value={record?.id} disabled={record?.sensor_link === '' ? false : true}>
+                                            {record?.name}
+                                        </option>
+                                    );
                                 })}
                             </Input>
                         )}
                     </Form.Group>
 
-                    {equipmentId === '' && (
+                    {passiveSensorObj?.breaker_id === '' && (
                         <Form.Group className="mb-3 mt-2">
-                            <Button variant="light" className="select-breaker-style">
+                            <Button variant="light" className="select-breaker-style" onClick={getAvailableBreaker}>
                                 Select Next Available Breaker
                             </Button>
                         </Form.Group>
                     )}
                 </Form>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleBreakerClose}>
+                    <Button
+                        variant="light"
+                        onClick={() => {
+                            setPassiveSensorObj({
+                                panel_id: '',
+                                breaker_id: '',
+                            });
+                            handleBreakerClose();
+                        }}>
                         Cancel
                     </Button>
                     <Button
                         variant="primary"
                         onClick={() => {
-                            handleBreakerClose();
-                            saveToSensorArray();
+                            linkPassiveSensorToPanelBreaker();
                         }}>
                         Save
                     </Button>
