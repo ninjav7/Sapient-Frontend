@@ -959,7 +959,7 @@ const Equipment = () => {
             } catch (error) {}
         };
 
-        //fetchEquipmentData();
+        fetchEquipmentData();
         fetchEndUseData();
         // fetchOnlineEquipData();
         // fetchOfflineEquipData();
