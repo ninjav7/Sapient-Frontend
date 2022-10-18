@@ -15,7 +15,7 @@ const StatusFilter = (props) => {
 
     return (
         <ButtonGroup
-            currentButtonId={widgetProps.currentStatusId - 1  || 0}
+            currentButtonId={widgetProps.status || 0}
             buttons={widgetProps.buttonGroupFilterOptions || STATUS_FILTER_OPTIONS}
             {...props}
             handleButtonClick={(id) => widgetProps.onStatus(id, STATUS_FILTER_OPTIONS[id].label)}
