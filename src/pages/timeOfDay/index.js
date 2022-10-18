@@ -9,6 +9,8 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
 import { BaseUrl, builidingHourly, avgDailyUsageByHour, buildingAfterHours } from '../../services/Network';
+
+import EndUseTotals from './EndUseTotals';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -342,7 +344,9 @@ const TimeOfDay = () => {
     const [weekdaysSeries, setWeekdaysSeries] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = 235;
+    const weekdaysChartHeight = '100%';
+
+    const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
 
@@ -509,9 +513,16 @@ const TimeOfDay = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res?.data;
+                        setEnergyConsumption(res?.data?.data);
+                        const energyData = res?.data?.data;
+                        let newDonutData = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = parseInt(record.consumption / 1000);
+                            newDonutData.push(fixedConsumption);
+                        });
+                        setDonutChartData(newDonutData);
 
-                        setDonutChartOpts();
+                        //setDonutChartOpts();
                         setIsEndUsageChartLoading(false);
                     });
             } catch (error) {
@@ -1047,42 +1058,32 @@ const TimeOfDay = () => {
             }
         };
 
-        //endUsesByOfHour();
+        endUsesByOfHour();
         dailyUsageByHour();
         averageUsageByHourFetch();
     }, [startDate, endDate, bldgId]);
 
     return (
         <React.Fragment>
-            <div className="ml-2">
+            <div className="ml-2" >
                 <Header title="Time of Day" />
             </div>
 
-            <Row className="ml-2">
+            <Row className="ml-2 mb-2">
                 <Col xl={4}>
-                    <div className="card-body timeofday-content-style" >
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            After-Hours Energy
-                        </h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                        {isEndUsageChartLoading?(
-                        <div className="mt-2" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                                </div>
-                        ):(
-                            <DonutChart 
-                                donutChartOpts={donutChartOpts} 
-                                donutChartData={donutChartData} 
-                                height={290} />
-                        )}
-                    </div>
+                    
+                            <EndUseTotals
+                                series={donutChartData}
+                                options={donutChartOpts}
+                                energyConsumption={energyConsumption}
+                            />
                 </Col>
                 <Col xl={8}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Hourly Average Consumption
                         </h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour</h6>
+                        <h6 className="card-subtitle mb-3 custom-subtitle-style">Energy Usage By Hour</h6>
 
                         {isAvgHourlyChartLoading ? (
                             <div className="loader-center-style" style={{ height: '400px' }}>
