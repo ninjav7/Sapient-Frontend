@@ -632,7 +632,7 @@ const BuildingOverview = () => {
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now / 1000;
+                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);
