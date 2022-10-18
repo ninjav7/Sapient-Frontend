@@ -256,6 +256,7 @@ const EquipmentTable = ({
                                 className="btn btn-md btn-light font-weight-bold mt-4"
                                 onChange={(e) => {
                                     setPageSize(parseInt(e.target.value));
+                                    window.scrollTo(0, 0);
                                 }}>
                                 {[20, 50, 100].map((pageSize) => (
                                     <option key={pageSize} value={pageSize} className="align-options-center">

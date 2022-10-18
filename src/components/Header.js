@@ -31,19 +31,19 @@ const Header = (props) => {
         },
         {
             label: 'Last 7 Days',
-            value: 7,
+            value: 6,
         },
         {
             label: 'Last 4 Weeks',
-            value: 28,
+            value: 27,
         },
         {
             label: 'Last 3 Months',
-            value: 90,
+            value: 89,
         },
         {
             label: 'Last 12 Months',
-            value: 365,
+            value: 364,
         },
         {
             label: 'Custom',
@@ -65,7 +65,7 @@ const Header = (props) => {
         let end = new Date();
         let start = new Date();
         if (value !== 0) {
-            end.setDate(end.getDate() - 1);
+            end.setDate(end.getDate());
         }
         start.setDate(start.getDate() - value);
         setStartDate(start);
