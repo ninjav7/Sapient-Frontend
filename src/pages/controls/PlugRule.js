@@ -771,7 +771,10 @@ const PlugRule = () => {
                         { value: record?.equipment_link_location_id, label: record?.equipment_link_location },
                     ]);
                 }
-                setSensorOptions((el) => [...el, { value: record?.sensor_number_2, label: record?.sensor_number_2 }]);
+                setSensorOptions((el) => [
+                    ...el,
+                    { value: record?.equipment_type_name, label: record?.equipment_type_name },
+                ]);
             });
     };
 
@@ -834,7 +837,7 @@ const PlugRule = () => {
             sensorTypeFilterString
         ).then((res) => {
             setUnlinkedSocketRuleSuccess(res.status);
-            let response = res.data;
+            let response = res.data.data;
             setTotalSocket(parseInt(response.total_data));
             let unLinkedData = [];
             response.data.forEach((record) => {
@@ -882,7 +885,7 @@ const PlugRule = () => {
             await getListSensorsForBuildingsRequest(totalSocket, pageNo, ruleId, activeBuildingId).then((res) => {
                 let response = res.data;
                 let unLinkedData = [];
-                response.data.forEach((record) => {
+                response.data.data.forEach((record) => {
                     record.linked_rule = false;
                     unLinkedData.push(record);
                 });
