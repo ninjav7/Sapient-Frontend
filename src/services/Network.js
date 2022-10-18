@@ -86,6 +86,7 @@ export const sensorGraphData = '/api/config/sensor/graph';
 export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const updateDevice = '/api/config/devices/update_device';
 export const deletePassiveDevice = `/api/config/devices/delete/passive`;
+export const linkPassiveSensorToBreaker = `/api/config/sensor/passive/lnk_pas_snr_to_pnl_bkr`;
 
 //gateway
 export const generalGateway = '/api/config/gateway';

@@ -768,6 +768,7 @@ const PassiveDevices = () => {
 
     useEffect(() => {
         fetchLocationData();
+        fetchPassiveDeviceData();
     }, [pageRefresh, bldgId]);
 
     useEffect(() => {
