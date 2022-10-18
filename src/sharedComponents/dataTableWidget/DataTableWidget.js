@@ -17,7 +17,7 @@ import { TableCellCheckBox } from './components/TableComponents/TableCellCheckBo
 import { MenuListPerRow } from './components/TableComponents/MenuListPerRow';
 
 import useDebounce from '../hooks/useDebounce';
-import useLocalStorage from '../hooks/useLocalStorage /useLocalStorage';
+import useLocalStorage from '../hooks/useLocalStorage/useLocalStorage';
 import { arrayMoveImmutable, getStatesForSelectAllCheckbox } from '../helpers/helper';
 
 import { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES } from './constants';
