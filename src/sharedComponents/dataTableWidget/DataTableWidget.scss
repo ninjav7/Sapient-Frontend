@@ -66,6 +66,12 @@
                 &:hover {
                     background: $primary-gray-50;
                 }
+                &.sort-type-selected {
+                    background: $primary-gray-50;
+                    &:hover {
+                        background: $primary-gray-150;
+                    } 
+                }
             }
         }
     }

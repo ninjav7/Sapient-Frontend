@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import cx from 'classnames';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 import { Table } from '../table';
@@ -6,6 +8,8 @@ import { DropDownIcon } from '../dropDowns/dropDownButton';
 import Typography from '../typography';
 import Brick from '../brick';
 import { TimeFrameSelector } from '../timeFrameSelector';
+import Pagination from '../pagination/Pagination';
+import { DownloadButton } from './components/DownloadButton';
 
 import { Filters } from './components/Filters';
 import { DraggableColumns } from './components/DraggableColumns';
@@ -13,15 +17,14 @@ import { TableCellCheckBox } from './components/TableComponents/TableCellCheckBo
 import { MenuListPerRow } from './components/TableComponents/MenuListPerRow';
 
 import useDebounce from '../hooks/useDebounce';
+import useLocalStorage from '../hooks/useLocalStorage /useLocalStorage';
 import { arrayMoveImmutable, getStatesForSelectAllCheckbox } from '../helpers/helper';
 
-import { FILTER_TYPES, LOCAL_STORAGE } from './constants';
+import { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES } from './constants';
 
 import './DataTableWidget.scss';
-import useLocalStorage from '../hooks/useLocalStorage /useLocalStorage';
-import Pagination from '../pagination/Pagination';
-import { DownloadButton } from './components/DownloadButton';
-import PropTypes from 'prop-types';
+
+import { ReactComponent as ArrowSortSVG } from '../assets/icons/arrow-sort.svg';
 
 export const DataTableWidgetContext = React.createContext({});
 
@@ -183,14 +186,51 @@ const DataTableWidget = (props) => {
         );
     }, []);
 
-    const cellCheckboxTemplate = useCallback((rowId) => <TableCellCheckBox
-        onChange={(event) => handleCheckboxChange(event, rowId)}
-        defaultChecked={selectedRows.includes(rowId)}
-    />, [selectedRows]);
+    const cellCheckboxTemplate = useCallback(
+        (rowId) => (
+            <TableCellCheckBox
+                onChange={(event) => handleCheckboxChange(event, rowId)}
+                defaultChecked={selectedRows.includes(rowId)}
+            />
+        ),
+        [selectedRows]
+    );
 
     const currentRows = searchMode ? searchedRows : rows;
 
     const isActionsAvailable = props.onDeleteRow && props.onEditRow;
+
+    const HeadComponent = ({ onSort, name, accessor }) => {
+        const [state, setState] = useState(0);
+
+        const cellProps = {
+            onClick: onSort && (() => {
+                      setState((prevState) => {
+                          if (state === 2) {
+                              onSort(SORT_TYPES[0], accessor, name);
+                              return 0;
+                          }
+                          onSort(SORT_TYPES[prevState + 1], accessor, name);
+                          return prevState + 1;
+                      });
+                  }),
+            role: onSort && 'button',
+            className: cx(
+                SORT_TYPES[state],
+                SORT_TYPES[state] !== null && 'sort-type-selected',
+                onSort && 'on-sort'
+            ),
+        };
+
+        return (
+            <Table.Cell {...cellProps}>
+                <div className="d-flex justify-content-between align-items-center">
+                    <Typography.Subheader size={Typography.Sizes.sm}>{name}</Typography.Subheader>
+                    {onSort && SORT_TYPES[state] && <ArrowSortSVG className={state === 2 && 'rotate-180'} />}
+                </div>
+            </Table.Cell>
+        );
+    };
 
     return (
         <DataTableWidgetContext.Provider
@@ -238,19 +278,9 @@ const DataTableWidget = (props) => {
                                 </>
                             )}
 
-                            {filteredHeaders.map(({ name, onSort }) => {
-                                 const cellProps = {
-                                    onClick: onSort ? onSort : null,    
-                                     role: onSort ? 'button' : null,
-                                     className: onSort ? 'on-sort' : undefined,
-                                 }
-                                 
-                                return (
-                                    <Table.Cell {...cellProps}>
-                                        <Typography.Subheader size={Typography.Sizes.sm}>{name}</Typography.Subheader>
-                                    </Table.Cell>
-                                );
-                            })}
+                            {filteredHeaders.map(({ name, onSort, accessor}, index) => (
+                                <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
+                            ))}
 
                             {isActionsAvailable && (
                                 <Table.Cell>
@@ -342,6 +372,8 @@ const DataTableWidget = (props) => {
     );
 };
 
+DataTableWidget.SortTypes = SORT_TYPES;
+
 DataTableWidget.propTypes = {
     onDownload: PropTypes.func,
     onSearch: PropTypes.func,
@@ -352,6 +384,7 @@ DataTableWidget.propTypes = {
     onPageSize: PropTypes.func.isRequired,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func.isRequired,
+    status: PropTypes.number.isRequired,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
     filterOptions: PropTypes.array,
@@ -365,7 +398,6 @@ DataTableWidget.propTypes = {
     ),
     onCheckboxRow: PropTypes.func,
     onCheckAll: PropTypes.func,
-    currentStatusId: PropTypes.number,
     id: PropTypes.string,
     buttonGroupFilterOptions: PropTypes.array,
     customComponentForCells: PropTypes.node,
