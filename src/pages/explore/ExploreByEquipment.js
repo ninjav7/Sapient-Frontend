@@ -317,10 +317,7 @@ const ExploreEquipmentTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -332,10 +329,7 @@ const ExploreEquipmentTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
