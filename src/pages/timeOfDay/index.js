@@ -513,7 +513,7 @@ const TimeOfDay = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setEnergyConsumption(res?.data);
+                        setEnergyConsumption(res?.data||[]);
                         const energyData = res?.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
