@@ -880,8 +880,6 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            console.log('SSR pageSize => ', pageSize);
-            console.log('SSR pageNo => ', pageNo);
 
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
