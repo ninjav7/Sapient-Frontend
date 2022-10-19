@@ -56,7 +56,7 @@ const DonutChartWidget = ({
                 {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
                 <div
                     className={`donut-chart-widget-wrapper ${className} ${type}`}
-                    style={{ width: '100%', justifyContent: 'center' }}>
+                    style={{ width: '100%', justifyContent: 'space-around' }}>
                     {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
                     {/* {isEnergyConsumptionChartLoading ? (
                         <div className="loader-center-style">
@@ -67,7 +67,7 @@ const DonutChartWidget = ({
                         <div className={`chart-wrapper ${type}`}>
                             <ReactApexChart options={options} {...props} series={series} type="donut" />
                         </div>
-                        <div className="chart-labels">
+                        <div className="chart-labels" style={{ maxWidth: 'max-content' }}>
                             <DonutChartLabels
                                 className={type}
                                 isShowTrend={type === DONUT_CHART_TYPES.HORIZONTAL}
