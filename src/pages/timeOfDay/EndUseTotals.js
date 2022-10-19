@@ -23,12 +23,14 @@ const donutChartDataMock = [
 
 const EndUseTotals = ({ series, options, energyConsumption, isEndUsageChartLoading }) => {
     console.log(energyConsumption);
-    const donutChartData = energyConsumption.map(({ eu_name: label, consumption }) => {
-        let val = (consumption / 1000).toFixed(0);
+    const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
+        let val = (energy_consumption.now / 1000).toFixed(0);
         let value = parseFloat(val);
-        const trendValue = 0;
+        const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);;
         const trendType =
-                TRENDS_BADGE_TYPES.NEUTRAL_TREND;
+            energy_consumption.now <= energy_consumption.old
+                ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
+                : TRENDS_BADGE_TYPES.UPWARD_TREND;
 
         return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType};
     });
