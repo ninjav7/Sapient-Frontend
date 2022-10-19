@@ -8,7 +8,9 @@ import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
-import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Network';
+import { BaseUrl, builidingHourly, avgDailyUsageByHour, buildingAfterHours } from '../../services/Network';
+
+import EndUseTotals from './EndUseTotals';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -53,7 +55,7 @@ const TimeOfDay = () => {
                 enabled: false,
             },
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         colors: ['#5369f8', '#43d39e'],
@@ -232,7 +234,7 @@ const TimeOfDay = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         dataLabels: {
@@ -342,14 +344,23 @@ const TimeOfDay = () => {
     const [weekdaysSeries, setWeekdaysSeries] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = 235;
+    const weekdaysChartHeight = '100%';
+
+    const [energyConsumption, setEnergyConsumption] = useState([]);
+
+    const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
 
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
+            events: {
+                mounted: function (chartContext, config) {
+                    chartContext.toggleDataPointSelection(0, 1);
+                },
+            },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
@@ -381,7 +392,7 @@ const TimeOfDay = () => {
                         },
                         value: {
                             show: true,
-                            fontSize: '20px',
+                            fontSize: '15px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
                             color: 'red',
@@ -420,16 +431,16 @@ const TimeOfDay = () => {
                     chart: {
                         width: 300,
                     },
-                    legend: {
-                        show: true,
-                        showForSingleSeries: true,
-                        onItemHover: {
-                            highlightDataSeries: true,
-                        },
-                        onItemClick: {
-                            toggleDataSeries: true,
-                        },
-                    },
+                    // legend: {
+                    //     show: true,
+                    //     showForSingleSeries:true,
+                    //     onItemHover: {
+                    //         highlightDataSeries: true
+                    //     },
+                    //     onItemClick: {
+                    //         toggleDataSeries: true
+                    //     },
+                    // },
                 },
             },
         ],
@@ -441,7 +452,8 @@ const TimeOfDay = () => {
             x: { show: false },
         },
         legend: {
-            show: false,
+            show: true,
+            position: 'bottom',
         },
         stroke: {
             width: 0,
@@ -450,12 +462,9 @@ const TimeOfDay = () => {
         itemMargin: {
             horizontal: 10,
         },
-        dataLabels: {
-            enabled: false,
-        },
     });
 
-    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333, 5452]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -483,6 +492,44 @@ const TimeOfDay = () => {
         if (endDate === null) {
             return;
         }
+
+        const endUsesByOfHour = async () => {
+            try {
+                setIsEndUsageChartLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${buildingAfterHours}${params}`,
+                        {
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEnergyConsumption(res?.data);
+                        const energyData = res?.data;
+                        let newDonutData = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
+                            newDonutData.push(fixedConsumption);
+                        });
+                        setDonutChartData(newDonutData);
+
+                        //setDonutChartOpts();
+                        setIsEndUsageChartLoading(false);
+                    });
+            } catch (error) {
+                setIsEndUsageChartLoading(false);
+            }
+        };
+        
         const dailyUsageByHour = async () => {
             try {
                 setIsAvgUsageChartLoading(true);
@@ -1011,34 +1058,32 @@ const TimeOfDay = () => {
             }
         };
 
+        endUsesByOfHour();
         dailyUsageByHour();
         averageUsageByHourFetch();
     }, [startDate, endDate, bldgId]);
 
     return (
         <React.Fragment>
-            <div className="ml-2">
+            <div className="ml-2" >
                 <Header title="Time of Day" />
             </div>
 
-            <Row className="ml-2">
-                <Col xl={3}>
-                    <div className="card-body timeofday-content-style">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            After-Hours Energy
-                        </h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                        <div className="mt-2 ">
-                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={200} />
-                        </div>
-                    </div>
+            <Row className="ml-2 mb-2">
+                <Col xl={4}>
+                    
+                            <EndUseTotals
+                                series={donutChartData}
+                                options={donutChartOpts}
+                                energyConsumption={energyConsumption}
+                            />
                 </Col>
-                <Col xl={9}>
+                <Col xl={8}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Hourly Average Consumption
                         </h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour</h6>
+                        <h6 className="card-subtitle mb-3 custom-subtitle-style">Energy Usage By Hour</h6>
 
                         {isAvgHourlyChartLoading ? (
                             <div className="loader-center-style" style={{ height: '400px' }}>
@@ -1056,7 +1101,7 @@ const TimeOfDay = () => {
             </Row>
 
             <Row className="mt-2 ml-2">
-                <Col xl={11}>
+                <Col xl={12}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>
