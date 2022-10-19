@@ -6,7 +6,7 @@ import '../../sharedComponents/lineChartWidget/style.scss';
 
 const HeatMapChart = ({ options, series, height, className = '' }) => {
     return (
-        <div className={`line-chart-widget-wrapper ${className}`} style={{ minHeight: '0vh' }}>
+        <div className={`line-chart-widget-wrapper ${className}`} style={{ minHeight: '0vh', height: '85%', padding:'0.5rem', justifyContent:'center'}}>
             <Chart series={series} options={options} type="heatmap" height={height} className="line-chart-widget" />
         </div>
     );

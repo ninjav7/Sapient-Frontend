@@ -1,16 +1,25 @@
 export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+//export const BaseUrl = 'https://sapient-beta.azurewebsites.net';
 
-// new things
+// Auth
+export const signin = '/api/user_role/user/signin';
+export const signup = '/api/user_role/user/signup';
 
+// portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
 export const portfolioEndUser = '/api/energy/portfolio/end-user';
 
+// building overview
 export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
-export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const builidingEquipments = '/api/energy/building/equipment';
+
+// time of day
+export const builidingHourly = '/api/energy/time_of_day/hourly';
+export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
+export const buildingAfterHours = '/api/energy/time_of_day/after-hour-end-use';
 
 // utility bills
 export const generalUtilityBills = '/api/config/utility_bills';
@@ -23,9 +32,24 @@ export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
 export const generalBldgDelete = '/api/config/general/delete_building';
+
+//user roles
 export const updateAccount = '/api/user_role/user/update-user';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
+// user permission and roles
+export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
+export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
+export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
+export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
+export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
+export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
+export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
+export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';
+// Search
+export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
@@ -95,6 +119,7 @@ export const kasaLinkAccount = '/api/config/kasa/link_account';
 export const kasaUnLinkAccount = '/api/config/kasa/unlink_account';
 export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 
+// kasa accounts
 export const get_kasa_devices = '/api/config/kasa/get_devices';
 export const insert_kasa_devices = '/api/config/kasa/insert_device';
 export const addToSystem = '/api/config/kasa/add_to_system';
@@ -133,7 +158,6 @@ export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
 export const peakEquipType = '/api/energy/peak_demand/equipment_type';
 export const peakEquipUsage = '/api/energy/peak_demand/equipment';
-export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
@@ -145,27 +169,9 @@ export const createPlugRule = '/api/user_role/plug_rule/create-plug-rule';
 export const updatePlugRule = '/api/user_role/plug_rule/update-plug-rule';
 export const deletePlugRule = '/api/user_role/plug_rule/delete-plug-rule';
 
-// Auth
-export const signin = '/api/user_role/user/signin';
-export const signup = '/api/user_role/user/signup';
-
 export const listLinkSocketRules = '/api/user_role/plug_rule/list_link_socket';
 export const getListSensorsForBuildings = '/api/user_role/plug_rule/sensor-for-buildings';
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
 export const graphData = '/api/user_role/plug_rule/average-sensor-usage';
 
-// user permission and roles
-export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
-export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
-export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
-export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
-export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
-export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
-export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
-export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
-export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
-export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';
-
-// Search
-export const serachUser = '/api/user_role/user-permission-role/all-member-users';

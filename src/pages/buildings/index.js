@@ -1272,7 +1272,7 @@ const BuildingOverview = () => {
 
                     {/* Hourly Average Consumption */}
                     <Row>
-                        <div className="card-body">
+                        <div className="card-body" style={{padding:'0.5rem'}}>
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
