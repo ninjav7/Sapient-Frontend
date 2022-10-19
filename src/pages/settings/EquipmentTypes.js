@@ -345,9 +345,10 @@ const EquipmentTypes = () => {
                         accept: 'application/json',
                         Authorization: `Bearer ${userdata.token}`,
                     };
-                    let params = `?eqt_name=${txt}`;
-                    await axios.get(`${BaseUrl}${getEquipmentType}${params}`, { headers }).then((res) => {
-                        setGeneralEquipmentTypeData(res.data);
+                    let params = `?equipment_search=${txt}`;
+                    await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                        let response = res?.data?.data;
+                        setGeneralEquipmentTypeData(response);
                         setIsDeviceProcessing(false);
                     });
                 } catch (error) {
