@@ -364,7 +364,6 @@ const EquipChartModal = ({
                     if (activePage === 'equipment') {
                         setSelectedTab(1);
                     }
-                    handleDateRangeStore();
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
@@ -436,16 +435,6 @@ const EquipChartModal = ({
                 pathname: `/settings/passive-devices/single/${equipDeviceId}`,
             });
         }
-    };
-
-    const handleDateRangeStore = () => {
-        localStorage.setItem('startDate', startDate);
-        localStorage.setItem('endDate', endDate);
-
-        DateRangeStore.update((s) => {
-            s.startDate = startDate;
-            s.endDate = endDate;
-        });
     };
 
     useEffect(() => {
@@ -700,7 +689,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -752,7 +740,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -804,7 +791,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
