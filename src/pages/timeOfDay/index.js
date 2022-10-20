@@ -517,7 +517,7 @@ const TimeOfDay = () => {
                         const energyData = res?.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
+                            let fixedConsumption = parseInt(record.energy_consumption.now);
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);

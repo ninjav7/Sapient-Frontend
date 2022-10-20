@@ -22,9 +22,8 @@ const donutChartDataMock = [
 ];
 
 const EndUseTotals = ({ series, options, energyConsumption, isEndUsageChartLoading }) => {
-    console.log(energyConsumption);
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(0);
+        let val = (parseInt(energy_consumption.now));
         let value = parseFloat(val);
         const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);;
         const trendType =
