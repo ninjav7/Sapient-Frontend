@@ -929,8 +929,8 @@ const BuildingOverview = () => {
                                 consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
                                 infoText={
                                     startEndDayCount > 1
-                                        ? `Total energy consumption accross all your buildings for the past ${startEndDayCount} days.`
-                                        : `Total energy consumption accross all your buildings for the past ${startEndDayCount} day.`
+                                        ? `Total energy consumption across all your buildings for the past ${startEndDayCount} days.`
+                                        : `Total energy consumption across all your buildings for the past ${startEndDayCount} day.`
                                 }
                                 infoType={`total-bld-cnsmp`}
                             />
@@ -969,8 +969,8 @@ const BuildingOverview = () => {
                                 }
                                 infoText={
                                     startEndDayCount > 1
-                                        ? `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} days.`
-                                        : `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} day.`
+                                        ? `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} days.`
+                                        : `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} day.`
                                 }
                                 infoType={`avg-bld-dnty`}
                             />
@@ -1272,7 +1272,7 @@ const BuildingOverview = () => {
 
                     {/* Hourly Average Consumption */}
                     <Row>
-                        <div className="card-body">
+                        <div className="card-body" style={{padding:'0.5rem'}}>
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>

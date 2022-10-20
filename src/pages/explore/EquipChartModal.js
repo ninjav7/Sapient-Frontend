@@ -100,10 +100,6 @@ const EquipChartModal = ({
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
-
     const addEquimentType = () => {
         equipmentTypeData.map((item) => {
             setEquipmentTypeDataNow((el) => [
@@ -368,6 +364,7 @@ const EquipChartModal = ({
                     if (activePage === 'equipment') {
                         setSelectedTab(1);
                     }
+                    handleDateRangeStore();
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
@@ -439,6 +436,16 @@ const EquipChartModal = ({
                 pathname: `/settings/passive-devices/single/${equipDeviceId}`,
             });
         }
+    };
+
+    const handleDateRangeStore = () => {
+        localStorage.setItem('startDate', startDate);
+        localStorage.setItem('endDate', endDate);
+
+        DateRangeStore.update((s) => {
+            s.startDate = startDate;
+            s.endDate = endDate;
+        });
     };
 
     useEffect(() => {
@@ -593,9 +600,9 @@ const EquipChartModal = ({
         const fetchActiveDeviceSensorData = async () => {
             if (equipmentData !== null) {
                 if (
-                    equipmentData.device_type === 'passive' ||
-                    equipmentData.device_id === '' ||
-                    equipmentData.device_id === undefined
+                    equipmentData?.device_type === 'passive' ||
+                    equipmentData?.device_id === '' ||
+                    equipmentData?.device_id === undefined
                 ) {
                     return;
                 }
@@ -618,7 +625,7 @@ const EquipChartModal = ({
         };
 
         if (equipmentData !== null) {
-            if (equipmentData.device_type !== 'passive') {
+            if (equipmentData?.device_type !== 'passive') {
                 fetchActiveDeviceSensorData();
             }
         }
@@ -653,10 +660,6 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
-
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
 
     return (
         <Modal
@@ -697,6 +700,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -748,6 +752,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -799,6 +804,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -859,7 +865,9 @@ const EquipChartModal = ({
                                         ) : (
                                             <div className="ytd-flex">
                                                 <span className="mr-1 ytd-value">
-                                                    {formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)}
+                                                    {ytdData?.ytd?.ytd
+                                                        ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
+                                                        : 0}
                                                 </span>
                                                 <span className="ytd-unit">kWh</span>
                                             </div>
@@ -871,9 +879,23 @@ const EquipChartModal = ({
                                             <Skeleton count={1} />
                                         ) : (
                                             <div className="ytd-flex">
-                                                <span className="mr-1 ytd-value">
-                                                    {formatConsumptionValue(ytdData?.ytd_peak?.power / 1000000, 1)}
-                                                </span>
+                                                {equipmentData?.device_type === 'active' ? (
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd_peak?.power
+                                                            ? formatConsumptionValue(ytdData?.ytd_peak?.power / 1000, 1)
+                                                            : 0}
+                                                    </span>
+                                                ) : (
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd_peak?.power
+                                                            ? formatConsumptionValue(
+                                                                  ytdData?.ytd_peak?.power / 1000000,
+                                                                  1
+                                                              )
+                                                            : 0}
+                                                    </span>
+                                                )}
+
                                                 <span className="ytd-unit">
                                                     {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
                                                         'MM/DD  H:mm'
@@ -1897,7 +1919,7 @@ const EquipChartModal = ({
                                                             Device type
                                                         </h6>
                                                         <h6 className="card-title">
-                                                            {equipmentData !== null ? equipmentData.device_type : ''}
+                                                            {equipmentData !== null ? equipmentData?.device_type : ''}
                                                         </h6>
                                                     </div>
                                                 </FormGroup>

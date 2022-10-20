@@ -57,10 +57,12 @@ const IndividualPassiveDevice = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [currentRecord, setCurrentRecord] = useState({});
+    const [sensorObj, setSensorObj] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [equipmentId, setEquipmentId] = useState('');
+    const [breakerId, setBreakerId] = useState('');
     const [sensors, setSensors] = useState([]);
     const [sensorData, setSensorData] = useState([]);
 
@@ -456,6 +458,8 @@ const IndividualPassiveDevice = () => {
                                                                     setCurrentRecord(record);
                                                                     setCurrentIndex(index);
                                                                     setEquipmentId(record.equipment_id);
+                                                                    setSensorObj(record);
+                                                                    setBreakerId(record?.breaker_id);
                                                                 }}>
                                                                 Edit
                                                             </button>
@@ -503,8 +507,6 @@ const IndividualPassiveDevice = () => {
                 </div>
             </div>
 
-            {/* <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} /> */}
-
             <DeviceChartModel
                 showChart={showChart}
                 handleChartClose={handleChartClose}
@@ -531,13 +533,9 @@ const IndividualPassiveDevice = () => {
             <AddSensorPanelModel
                 showBreaker={showBreaker}
                 handleBreakerClose={handleBreakerClose}
-                sensors={sensors}
-                setSensors={setSensors}
-                currentRecord={currentRecord}
-                setCurrentRecord={setCurrentRecord}
-                currentIndex={currentIndex}
+                sensorObj={sensorObj}
                 bldgId={bldgId}
-                equipmentId={equipmentId}
+                breakerId={breakerId}
             />
 
             <EditSensorPanelModel
