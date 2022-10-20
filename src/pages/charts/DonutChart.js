@@ -7,8 +7,8 @@ import { Card, CardBody } from 'reactstrap';
 const DonutChart = ({ donutChartOpts, donutChartData, height, title }) => {
     return (
         <Card>
-            <CardBody>
-                {title && <h4 className="header-title mt-0 mb-3">{title}</h4>}
+            <CardBody style={{padding: "0rem"}}>
+                {title && <h4 className="header-title" >{title}</h4>}
                 <Chart
                     options={donutChartOpts}
                     series={donutChartData}

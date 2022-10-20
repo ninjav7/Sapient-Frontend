@@ -61,6 +61,8 @@ const EquipmentTable = ({
     setEquipmentFilter,
     handleChartOpen,
     setEquipmentIdData,
+    pageNo,
+    setPageNo,
 }) => {
     const [nameOrder, setNameOrder] = useState(false);
     const [equipTypeOrder, setEquipTypeOrder] = useState(false);
@@ -763,6 +765,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            console.log('Next/Previous ke API triggered!');
             let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
@@ -788,6 +791,10 @@ const Equipment = () => {
     };
 
     const nextPageData = async (path) => {
+        let page_size = path.split('page_size=')[1].split('&')[0];
+        let page_no = path.split('page_no=')[1].split('&')[0];
+        setPageSize(+page_size);
+        setPageNo(+page_no);
         try {
             setIsEquipDataFetched(true);
             if (path === null) {
@@ -873,6 +880,7 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
@@ -959,7 +967,7 @@ const Equipment = () => {
             } catch (error) {}
         };
 
-        //fetchEquipmentData();
+        fetchEquipmentData();
         fetchEndUseData();
         // fetchOnlineEquipData();
         // fetchOfflineEquipData();
@@ -1143,6 +1151,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            pageNo={pageNo}
+                            setPageNo={setPageNo}
                             setIsDelete={setIsDelete}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
@@ -1166,6 +1176,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            pageNo={pageNo}
+                            setPageNo={setPageNo}
                             setIsDelete={setIsDelete}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}
@@ -1189,6 +1201,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            pageNo={pageNo}
+                            setPageNo={setPageNo}
                             setIsDelete={setIsDelete}
                             setEquipmentFilter={setEquipmentFilter}
                             handleChartOpen={handleChartOpen}

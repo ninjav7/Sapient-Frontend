@@ -317,10 +317,7 @@ const ExploreEquipmentTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -332,10 +329,7 @@ const ExploreEquipmentTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -481,7 +475,7 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                        {/* <div className="page-button-style">
+                        <div className="page-button-style">
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold mt-4"
@@ -500,7 +494,13 @@ const ExploreEquipmentTable = ({
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold mt-4"
-                                disabled={true}
+                                disabled={
+                                    paginationData.pagination !== undefined
+                                        ? paginationData.pagination.next === null
+                                            ? true
+                                            : false
+                                        : false
+                                }
                                 onClick={() => {
                                     nextPageData(paginationData.pagination.next);
                                 }}>
@@ -520,7 +520,7 @@ const ExploreEquipmentTable = ({
                                     ))}
                                 </select>
                             </div>
-                        </div> */}
+                        </div>
                     </Col>
                 </CardBody>
             </Card>
@@ -550,10 +550,10 @@ const ExploreByEquipment = () => {
 
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
-
+    let entryPoint="";
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
-        { label: 'Change', value: 'change' },
+        { label: '% Change', value: 'change' },
         { label: 'Location', value: 'location' },
         { label: 'Space Type', value: 'location_type' },
         { label: 'Equipment Type', value: 'equip_type' },
@@ -786,6 +786,7 @@ const ExploreByEquipment = () => {
     });
 
     const [APIFlag, setAPIFlag] = useState(false);
+    const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [APILocFlag, setAPILocFlag] = useState(false);
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
@@ -826,6 +827,11 @@ const ExploreByEquipment = () => {
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLoc, setSelectedLoc] = useState({});
 
+    useEffect(()=>{
+        console.log("Empty", entryPoint);
+        entryPoint="entered";
+    },[bldgId])
+
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
         setOptionsData({ ...optionsData, xaxis: xaxisObj });
@@ -850,6 +856,15 @@ const ExploreByEquipment = () => {
         if (minConValue !== 0 && maxConValue !== topEnergyConsumption && !showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
+        }
+    };
+
+    const [showChangeDropdown, setShowChangeDropdown] = useState(false);
+    const setChangeDropdown = () => {
+        setShowChangeDropdown(!showChangeDropdown);
+        if (!showDropdown !== true) {
+            setAPIPerFlag(!APIPerFlag);
+            //setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
     };
 
@@ -1268,7 +1283,11 @@ const ExploreByEquipment = () => {
             setRemoveSpaceTyepDuplication([]);
         } else removeDuplicates();
     }, [removeDuplicateFlag]);
-
+    // useEffect(()=>{
+    //     console.log("Empty", entryPoint);
+    //     entryPoint="entered";
+    // },[])
+    
     // const bldgId = BuildingStore.useState((s) => s.BldgId);
     const exploreDataFetch = async (bodyVal) => {
         try {
@@ -1279,12 +1298,17 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?consumption=energy&building_id=${bldgId}`;
+            let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 if (responseData.data.length !== 0) {
+                    if(entryPoint==="entered"){
+                        totalEquipmentId.length=0;
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                    }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
@@ -1370,12 +1394,13 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-
+        console.log("Full ", entryPoint);
         exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
-    }, [startDate, endDate, bldgId]);
+    }, [startDate, endDate, bldgId, pageSize]);
+    
 
     const nextPageData = async (path) => {
         try {
@@ -1950,6 +1975,9 @@ const ExploreByEquipment = () => {
             };
             txt = 'consumption';
         }
+        if ( maxPerValue > 0){
+
+        }
         if (selectedLocation.length !== 0) {
             arr['location'] = selectedLocation;
         }
@@ -1964,7 +1992,7 @@ const ExploreByEquipment = () => {
             arr['space_type'] = selectedSpaceType;
         }
         exploreFilterDataFetch(arr, txt);
-    }, [APIFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
+    }, [APIFlag, APIPerFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
 
     const clearFilterData = () => {
         setSelectedLocation([]);
@@ -2375,7 +2403,8 @@ const ExploreByEquipment = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end">
+                                    <Dropdown className="" align="end"
+                                    onToggle={setChangeDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -2397,11 +2426,7 @@ const ExploreByEquipment = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a
-                                                        className="pop-text"
-                                                        onClick={(e) => {
-                                                            setAPIFlag(!APIFlag);
-                                                        }}>
+                                                    <a className="pop-text">
                                                         Change Threshold
                                                     </a>
                                                     <button
