@@ -276,7 +276,9 @@ const EndUseType = () => {
                     },
                     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                         const { labels } = w.globals;
-                        const timestamp = labels[dataPointIndex];
+                        const { seriesX } = w.globals;
+                        const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                        //const timestamp = labels[dataPointIndex];
 
                         return `<div class="line-chart-widget-tooltip">
                             <h6 class="line-chart-widget-tooltip-title">${endUseName} Consumption</h6>
@@ -472,11 +474,11 @@ const EndUseType = () => {
 
     return (
         <React.Fragment>
-            {endUseType === 'hvac' && <Header title="HVAC" />}
-            {endUseType === 'lighting' && <Header title="Lighting" />}
-            {endUseType === 'plug' && <Header title="Plug Load" />}
-            {endUseType === 'process' && <Header title="Process" />}
-            {endUseType === 'other' && <Header title="Other EndUses" />}
+            {endUseType === 'hvac' && <Header title="HVAC" type="page" />}
+            {endUseType === 'lighting' && <Header title="Lighting" type="page" />}
+            {endUseType === 'plug' && <Header title="Plug Load" type="page" />}
+            {endUseType === 'process' && <Header title="Process" type="page" />}
+            {endUseType === 'other' && <Header title="Other EndUses" type="page" />}
 
             {isEndUsesDataFetched ? (
                 <Row className="ml-3">

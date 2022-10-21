@@ -513,11 +513,11 @@ const TimeOfDay = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setEnergyConsumption(res?.data||[]);
+                        setEnergyConsumption(res?.data || []);
                         const energyData = res?.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
+                            let fixedConsumption = parseInt(record.energy_consumption.now);
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);
@@ -529,7 +529,7 @@ const TimeOfDay = () => {
                 setIsEndUsageChartLoading(false);
             }
         };
-        
+
         const dailyUsageByHour = async () => {
             try {
                 setIsAvgUsageChartLoading(true);
@@ -1065,18 +1065,17 @@ const TimeOfDay = () => {
 
     return (
         <React.Fragment>
-            <div className="ml-2" >
+            <div className="ml-2">
                 <Header title="Time of Day" />
             </div>
 
             <Row className="ml-2 mb-2">
                 <Col xl={4}>
-                    
-                            <EndUseTotals
-                                series={donutChartData}
-                                options={donutChartOpts}
-                                energyConsumption={energyConsumption}
-                            />
+                    <EndUseTotals
+                        series={donutChartData}
+                        options={donutChartOpts}
+                        energyConsumption={energyConsumption}
+                    />
                 </Col>
                 <Col xl={8}>
                     <div className="card-body timeofday-content-style">

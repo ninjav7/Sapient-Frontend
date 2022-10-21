@@ -85,7 +85,6 @@ export const selectedBuilding = atom('');
 export const totalSelectionBuildingId = atom([]);
 
 export const totalSeriesGraphData = atom([]);
-export const dateApplied = atom(false);
 export const allFloors = atom([]);
 
 export const toggleRecord = atom();
