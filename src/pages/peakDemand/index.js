@@ -565,7 +565,7 @@ const PeakDemand = () => {
 
     return (
         <React.Fragment>
-            <Header title="Peak Demand" />
+            <Header title="Peak Demand" type="page" />
 
             <Row>
                 {isPeakContentLoading ? (

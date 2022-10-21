@@ -30,7 +30,7 @@ export const xaxisFilters = (daysCount, timezone) => {
                     return `${moment.utc(timestamp).format('HH:00')}`;
                 },
             },
-            tickAmount: 9,
+            tickAmount: 8,
         };
         return xaxisObj;
     }
@@ -175,8 +175,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('DD/MMM')} ${moment.utc(timestamp)
-                        .format('LT')}`;
+                    return `${moment.utc(timestamp).format('DD/MMM')} ${moment.utc(timestamp).format('LT')}`;
                 },
             },
         };
