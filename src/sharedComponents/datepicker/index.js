@@ -80,6 +80,7 @@ const Datepicker = ({
                 noBorder={true}
                 readOnly
                 displayFormat="MMM D"
+                isOutsideRange={() => false}
                 startDateId="startDate" // PropTypes.string.isRequired,
                 endDateId="endDate" // PropTypes.string.isRequired,
                 startDate={startDate}

@@ -926,7 +926,7 @@ const EquipmentDeviceChartModel = ({
                                     </Input>
                                 </div> */}
 
-                                <ModalHeader />
+                                <ModalHeader type="modal" />
 
                                 <div className="mr-3 sensor-chart-options">
                                     <Dropdown>

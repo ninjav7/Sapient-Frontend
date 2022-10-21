@@ -28,18 +28,14 @@ import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
-import SingleBreakerLinked from '../../assets/images/equip-modal/Single_Breaker_Linked.svg';
-import DoubleBreakerLinked from '../../assets/images/equip-modal/Double_Breaker_Linked.svg';
-import TripleBreakerLinked from '../../assets/images/equip-modal/Triple_Breaker_Linked.svg';
 import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import ModalHeader from '../../components/ModalHeader';
+import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import './style.css';
-import { DivideSquare } from 'react-feather';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -110,7 +106,6 @@ const EquipChartModal = ({
     };
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
 
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
@@ -301,7 +296,6 @@ const EquipChartModal = ({
     const getCSVLinkData = () => {
         let arr = seriesData.length > 0 ? seriesData[0].data : [];
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
-        // streamData.unshift(['Timestamp', selectedConsumption])
         return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
 
@@ -364,7 +358,6 @@ const EquipChartModal = ({
                     if (activePage === 'equipment') {
                         setSelectedTab(1);
                     }
-                    handleDateRangeStore();
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
@@ -438,53 +431,41 @@ const EquipChartModal = ({
         }
     };
 
-    const handleDateRangeStore = () => {
-        localStorage.setItem('startDate', startDate);
-        localStorage.setItem('endDate', endDate);
+    const fetchEquipmentYTDUsageData = async (equipId) => {
+        try {
+            setIsYtdDataFetching(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
 
-        DateRangeStore.update((s) => {
-            s.startDate = startDate;
-            s.endDate = endDate;
-        });
+            let params = `?equipment_id=${equipId}&consumption=energy`;
+
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
+                    {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data.data;
+                    setYtdData(response[0]);
+                    setIsYtdDataFetching(false);
+                });
+        } catch (error) {
+            setIsYtdDataFetching(false);
+        }
     };
 
     useEffect(() => {
         if (!equipmentFilter?.equipment_id) {
             return;
         }
-
-        const fetchEquipmentYTDUsageData = async (equipId) => {
-            try {
-                setIsYtdDataFetching(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?equipment_id=${equipId}&consumption=energy`;
-
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data.data;
-                        setYtdData(response[0]);
-                        // setTopConsumption(data[0].ytd.ytd);
-                        // setPeak(data[0].ytd_peak.energy);
-                        setIsYtdDataFetching(false);
-                    });
-            } catch (error) {
-                setIsYtdDataFetching(false);
-            }
-        };
 
         const fetchEquipmentDetails = async (equipId) => {
             try {
@@ -647,7 +628,8 @@ const EquipChartModal = ({
             buildingAlertsData();
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-    }, [endDate, selectedConsumption]);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
@@ -700,7 +682,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -752,7 +733,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -804,7 +784,6 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleDateRangeStore();
                                                     handleChartClose();
                                                     setEquipResult({});
                                                     setEquipmentData({});
@@ -896,11 +875,15 @@ const EquipChartModal = ({
                                                     </span>
                                                 )}
 
-                                                <span className="ytd-unit">
-                                                    {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                        'MM/DD  H:mm'
-                                                    )}`}
-                                                </span>
+                                                {ytdData?.ytd_peak?.time_stamp ? (
+                                                    <span className="ytd-unit">
+                                                        {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
+                                                            'MM/DD  H:mm'
+                                                        )}`}
+                                                    </span>
+                                                ) : (
+                                                    <span className="ytd-unit">kW</span>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -1011,7 +994,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <ModalHeader />
+                                    <Header type="modal" />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>
@@ -1108,18 +1091,6 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    {/* <Select
-                                                    id="exampleSelect"
-                                                    placeholder="Select Type"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
-                                                    options={equipmentTypeDataNow}
-                                                    onChange={(e) => {
-                                                        handleChange('equipment_type', e.value);
-                                                    }}
-                                                    className="basic-single font-weight-bold"
-                                                /> */}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1222,18 +1193,18 @@ const EquipChartModal = ({
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
                                                 {/* <div className="modal-right-pic"></div> */}
-                                                {equipBreakerLink.length === 0 ? (
+                                                {equipBreakerLink?.length === 0 ? (
                                                     <div className="equip-breaker-style">
                                                         <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        {equipBreakerLink.length === 1 && (
+                                                        {equipBreakerLink?.length === 1 && (
                                                             <div className="breaker-container-style">
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div
                                                                         className={
                                                                             equipBreakerLink[1]?.sensor_id === ''
@@ -1251,7 +1222,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 2 && (
+                                                        {equipBreakerLink?.length === 2 && (
                                                             <div className="breaker-container-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1282,7 +1253,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 3 && (
+                                                        {equipBreakerLink?.length === 3 && (
                                                             <div className="breaker-container-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1351,11 +1322,11 @@ const EquipChartModal = ({
                                                                 Installed at
                                                             </div>
                                                             <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink.length === 1 &&
+                                                                {equipBreakerLink?.length === 1 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 2 &&
+                                                                {equipBreakerLink?.length === 2 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 3 &&
+                                                                {equipBreakerLink?.length === 3 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
                                                             </div>
                                                         </div>
@@ -1418,18 +1389,6 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    {/* <Select
-                                                    id="exampleSelect"
-                                                    placeholder="Select Type"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
-                                                    options={equipmentTypeDataNow}
-                                                    onChange={(e) => {
-                                                        handleChange('equipment_type', e.value);
-                                                    }}
-                                                    className="basic-single font-weight-bold"
-                                                /> */}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1463,7 +1422,6 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        // defaultValue={loc.length===0?"":loc.location_id}
                                                         onChange={(e) => {
                                                             handleChange('space_id', e.target.value);
                                                         }}
@@ -1532,18 +1490,31 @@ const EquipChartModal = ({
                                     <Col lg={4}>
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
-                                                {equipBreakerLink.length === 0 ? (
-                                                    <div className="equip-breaker-style">
-                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                {equipBreakerLink?.length === 0 ? (
+                                                    <div className="breaker-container-disabled-style">
+                                                        <div className="breaker-number-style">
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style-single">
+                                                            <div className="breaker-offline-style"></div>
+                                                        </div>
+                                                        <div className="breaker-voltage-style">
+                                                            <div></div>
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style">
+                                                            <div className="breaker-socket1-style-disbaled"></div>
+                                                            <div className="breaker-socket-single-style-disabled"></div>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        {equipBreakerLink.length === 1 && (
+                                                        {equipBreakerLink?.length === 1 && (
                                                             <div className="breaker-container-disabled-style">
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div
                                                                         className={
                                                                             equipBreakerLink[0]?.sensor_id === ''
@@ -1561,7 +1532,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 2 && (
+                                                        {equipBreakerLink?.length === 2 && (
                                                             <div className="breaker-container-disabled-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1592,7 +1563,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 3 && (
+                                                        {equipBreakerLink?.length === 3 && (
                                                             <div className="breaker-container-disabled-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1648,29 +1619,33 @@ const EquipChartModal = ({
                                                         View
                                                     </button>
                                                 </div>
-                                                <div className="equip-breaker-container">
-                                                    <div className="equip-breaker-detail">
-                                                        <div className="phase-style">
-                                                            <div className="equip-breaker-header mb-1">Phases</div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink[0]?.breaker_type}
+                                                {equipBreakerLink?.length === 0 ? (
+                                                    <></>
+                                                ) : (
+                                                    <div className="equip-breaker-container">
+                                                        <div className="equip-breaker-detail">
+                                                            <div className="phase-style">
+                                                                <div className="equip-breaker-header mb-1">Phases</div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink[0]?.breaker_type}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="installed-style">
-                                                            <div className="equip-breaker-header mb-1">
-                                                                Installed at
-                                                            </div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            <div className="installed-style">
+                                                                <div className="equip-breaker-header mb-1">
+                                                                    Installed at
+                                                                </div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink?.length === 1 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                    {equipBreakerLink?.length === 2 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                    {equipBreakerLink?.length === 3 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </Col>

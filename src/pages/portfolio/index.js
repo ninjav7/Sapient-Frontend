@@ -37,6 +37,7 @@ import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { getFormattedTimeIntervalObjectData } from '../../helpers/formattedChartData';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -504,7 +505,8 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(0),
                             });
                         });
-                        setEnergyConsumptionChart(newArray);
+                        const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
+                        setEnergyConsumptionChart(formattedData);
                         setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
@@ -606,7 +608,7 @@ const PortfolioOverview = () => {
 
     return (
         <>
-            <Header title="Portfolio Overview" />
+            <Header title="Portfolio Overview" type="page" />
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>

@@ -32,7 +32,7 @@ export const xaxisFilters = (daysCount, timezone) => {
                 offsetX: 0,
                 offsetY: 0,
             },
-            tickAmount: 9,
+            tickAmount: 8,
             tickPlacement: 'between',
         };
         return xaxisObj;
