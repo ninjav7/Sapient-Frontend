@@ -445,6 +445,24 @@
     color: #b8bfcc;
 }
 
+.breaker-number-style-single {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: stretch;
+    gap: 5px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+    color: #b8bfcc;
+}
+
 .breaker-online-style {
     width: 8px;
     height: 8px;
