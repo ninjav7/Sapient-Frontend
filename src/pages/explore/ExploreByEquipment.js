@@ -1669,21 +1669,21 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1];
+                            ab[sname] = el[1]===null?"-":el[1].toFixed(2);
                             coll.push(ab);
                         });
-
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
-                            const result = Enumerable.from(objectExplore)
-                                .fullOuterJoin(
-                                    Enumerable.from(coll),
-                                    (pk) => pk.timestamp,
-                                    (fk) => fk.timestamp,
-                                    (left, right) => ({ ...left, ...right })
-                                )
-                                .toArray();
+                            let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
+                            // const result = Enumerable.from(coll)
+                            //     .fullOuterJoin(
+                            //         Enumerable.from(objectExplore),
+                            //         (pk) => pk.timestamp,
+                            //         (fk) => fk.timestamp,
+                            //         (left, right) => ({ ...left, ...right })
+                            //     )
+                            //     .toArray();
                             setObjectExplore(result);
                             // var s = new Set();
                             // var result = [];
@@ -2137,7 +2137,7 @@ const ExploreByEquipment = () => {
                     if (val[i] === 'timestamp') {
                         acd.push(moment.utc(obj[val[i]]).format(`MMM D 'YY @ HH:mm A`));
                     } else {
-                        acd.push(obj[val[i]]?.toFixed(2));
+                        acd.push(obj[val[i]]);
                     }
                 }
                 abc.push(acd);
