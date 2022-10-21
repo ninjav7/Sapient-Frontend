@@ -6,6 +6,7 @@ import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 
 const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
     const history = useHistory();
+
     return (
         <div>
             <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
@@ -27,7 +28,7 @@ const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
                                 BuildingStore.update((s) => {
                                     s.BldgId = record.building_id;
                                     s.BldgName = record.building_name;
-                                    s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezonee;
+                                    s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezone;
                                 });
                                 history.push({
                                     pathname: `/explore-page/by-equipment/${record.building_id}`,

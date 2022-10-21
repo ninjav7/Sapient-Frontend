@@ -314,7 +314,7 @@ const EndUsesPage = () => {
 
     return (
         <React.Fragment>
-            <Header title="End Uses" />
+            <Header title="End Uses" type="page" />
 
             {isEndUsesDataFetched ? (
                 <Row className="ml-4">
