@@ -200,7 +200,7 @@ const ExploreBuildingsTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {(record?.consumption.now / 1000).toFixed(2)} kWh
+                                                        {parseInt(record?.consumption.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -359,7 +359,7 @@ const ExploreByBuildings = () => {
 
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
-        { label: 'Change', value: 'change' },
+        { label: '% Change', value: 'change' },
         { label: 'Square Footage', value: 'sq_ft' },
         { label: 'Building Type', value: 'building_type' },
     ];
@@ -587,6 +587,24 @@ const ExploreByBuildings = () => {
     const [sq_ftTxt, setSq_FtTxt] = useState('');
     const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
+    const [showDropdown, setShowDropdown] = useState(false);
+    const setDropdown = () => {
+        setShowDropdown(!showDropdown);
+        if (!showDropdown !== true) {
+            setAPIFlag(!APIFlag);
+            setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
+        }
+    };
+
+    const [showsqftDropdown, setsqftShowDropdown] = useState(false);
+    const setsqftDropdown = () => {
+        setsqftShowDropdown(!showsqftDropdown);
+        if (!showsqftDropdown !== true) {
+            setSq_FtFlag(!Sq_FtFlag);
+            setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);
+        }
+    };
+
     useEffect(() => {
         if (buildingIdSelection && totalBuildingId?.length >= 1) {
             let arr = [];
@@ -658,7 +676,7 @@ const ExploreByBuildings = () => {
                     setExploreTableData(responseData);
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
-                    set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                    set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                     setIsExploreDataLoading(false);
                 });
         } catch (error) {
@@ -699,6 +717,71 @@ const ExploreByBuildings = () => {
         }
     };
 
+
+    const handleCloseFilter = (e, val) => {
+        let arr = [];
+        arr = selectedOptions.filter(function (item) {
+            return item.value !== val;
+        });
+        setSelectedOptions(arr);
+        let txt = '';
+        let arr1 = {};
+        arr1['date_from'] = startDate;
+        arr1['date_to'] = endDate;
+        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        switch (val) {
+            case 'consumption':
+                if (maxSq_FtValue > 10) {
+                    arr['sq_ft_range'] = {
+                        gte: minSq_FtValue,
+                        lte: maxSq_FtValue,
+                    };
+                }
+                if (selectedBuildingOptions.length !== 0) {
+                    arr['building_type'] = selectedBuildingOptions;
+                }
+                txt = 'consumption';
+                set_minConValue(0.0);
+                set_maxConValue(topVal);
+                break;
+            case 'sq_ft':
+                if (maxConValue > 0.01) {
+                    arr['consumption_range'] = {
+                        gte: minConValue * 1000,
+                        lte: maxConValue * 1000 + 1000,
+                    };
+                }
+                if (selectedBuildingOptions.length !== 0) {
+                    arr['building_type'] = selectedBuildingOptions;
+                }
+                set_minSq_FtValue(0);
+                set_maxSq_FtValue(10);
+                break;
+            case 'building_type':
+                if (maxConValue > 0.01) {
+                    arr['consumption_range'] = {
+                        gte: minConValue * 1000,
+                        lte: maxConValue * 1000 + 1000,
+                    };
+                }
+                if (maxSq_FtValue > 10) {
+                    arr['sq_ft_range'] = {
+                        gte: minSq_FtValue,
+                        lte: maxSq_FtValue,
+                    };
+                }
+                break;
+        }
+        if(selectedOptions.length===1){
+            exploreDataFetch();
+        }
+        else
+        {        
+            exploreFilterDataFetch(arr1);
+        }
+    };
+
+    // add
     useEffect(() => {
         if (selectedBuildingId === '') {
             return;
@@ -869,7 +952,7 @@ const ExploreByBuildings = () => {
         if (maxConValue > 0.01) {
             arr['consumption_range'] = {
                 gte: minConValue * 1000,
-                lte: maxConValue * 1000,
+                lte: maxConValue * 1000 + 1000,
             };
         }
         if (maxSq_FtValue > 10) {
@@ -895,14 +978,6 @@ const ExploreByBuildings = () => {
         setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
     }, [daysCount]);
 
-    const handleCloseFilter = (e, val) => {
-        let arr = [];
-        arr = selectedOptions.filter(function (item) {
-            return item.value !== val;
-        });
-        setSelectedOptions(arr);
-    };
-
     const handleInput = (values) => {
         set_minConValue(values[0]);
         set_maxConValue(values[1]);
@@ -916,15 +991,6 @@ const ExploreByBuildings = () => {
     const handleSq_FtInput = (values) => {
         set_minSq_FtValue(values[0]);
         set_maxSq_FtValue(values[1]);
-    };
-
-    const clearFilterData = () => {
-        let arr = {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        };
-        exploreFilterDataFetch(arr);
     };
 
     const handleAllBuilgingType = (e) => {
@@ -1137,7 +1203,8 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end">
+                                    <Dropdown className="" align="end"
+                                    onToggle={setDropdown}>
                                         <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1158,14 +1225,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a
-                                                        className="pop-text"
-                                                        onClick={(e) => {
-                                                            setAPIFlag(!APIFlag);
-                                                            setConsumptionTxt(
-                                                                `${minConValue} - ${maxConValue} kWh Used`
-                                                            );
-                                                        }}>
+                                                    <a className="pop-text">
                                                         kWh Used
                                                     </a>
                                                 </div>
@@ -1244,7 +1304,8 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end">
+                                    <Dropdown className="" align="end"
+                                        onToggle={setsqftDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1264,14 +1325,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a
-                                                        className="pop-text"
-                                                        onClick={(e) => {
-                                                            setSq_FtFlag(!Sq_FtFlag);
-                                                            setSq_FtTxt(
-                                                                `${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`
-                                                            );
-                                                        }}>
+                                                    <a className="pop-text">
                                                         Square Footage
                                                     </a>
                                                 </div>

@@ -217,7 +217,7 @@ const ExploreEquipmentTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {(record?.consumption?.now / 1000).toFixed(2)} kWh
+                                                        {parseInt(record?.consumption?.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -311,7 +311,7 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     <td>
-                                                        {record?.consumption?.now <= record?.consumption?.old && (
+                                                        {record?.consumption?.change > 0 && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
@@ -323,7 +323,7 @@ const ExploreEquipmentTable = ({
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.now > record?.consumption?.old && (
+                                                        {record?.consumption?.change <= 0 && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
@@ -826,9 +826,9 @@ const ExploreByEquipment = () => {
     const [showSpace, setShowSpace] = useState(false);
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLoc, setSelectedLoc] = useState({});
+    const [filterObj,setFilterObj]= useState({});
 
     useEffect(()=>{
-        console.log("Empty", entryPoint);
         entryPoint="entered";
     },[bldgId])
 
@@ -853,7 +853,7 @@ const ExploreByEquipment = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (minConValue !== 0 && maxConValue !== topEnergyConsumption && !showDropdown !== true) {
+        if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -1201,7 +1201,7 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?consumption=energy&building_id=${bldgId}`;
+            let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
@@ -1283,12 +1283,6 @@ const ExploreByEquipment = () => {
             setRemoveSpaceTyepDuplication([]);
         } else removeDuplicates();
     }, [removeDuplicateFlag]);
-    // useEffect(()=>{
-    //     console.log("Empty", entryPoint);
-    //     entryPoint="entered";
-    // },[])
-    
-    // const bldgId = BuildingStore.useState((s) => s.BldgId);
     const exploreDataFetch = async (bodyVal) => {
         try {
             setIsExploreDataLoading(true);
@@ -1312,7 +1306,7 @@ const ExploreByEquipment = () => {
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
-                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
+                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1394,7 +1388,6 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-        console.log("Full ", entryPoint);
         exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
@@ -1405,6 +1398,7 @@ const ExploreByEquipment = () => {
     const nextPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
+            let arr={}
             if (path === null) {
                 return;
             }
@@ -1413,11 +1407,17 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let arr = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            if(Object.keys(filterObj).length === 0){
+                arr = {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+            }
+            else{
+                arr=filterObj;
+            }
+            
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
                 let responseData = res.data;
@@ -1425,10 +1425,10 @@ const ExploreByEquipment = () => {
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
                     setSeriesLineData([]);
-                    setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
-                    set_minConValue(0.0);
-                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
+                    // setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    // set_minConValue(0.0);
+                    // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1442,6 +1442,7 @@ const ExploreByEquipment = () => {
     const previousPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
+            let arr={}
             if (path === null) {
                 return;
             }
@@ -1450,11 +1451,16 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let arr = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            if(Object.keys(filterObj).length === 0){
+                arr = {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+            }
+            else{
+                arr=filterObj;
+            }
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
                 let responseData = res.data;
@@ -1462,10 +1468,10 @@ const ExploreByEquipment = () => {
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
                     setSeriesLineData([]);
-                    setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
-                    set_minConValue(0.0);
-                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
+                    // setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    // set_minConValue(0.0);
+                    // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1882,7 +1888,7 @@ const ExploreByEquipment = () => {
                 if (maxConValue > 0.01 && (maxConValue !== topVal || minConValue !== 0.0)) {
                     arr1['consumption_range'] = {
                         gte: minConValue * 1000,
-                        lte: maxConValue * 1000,
+                        lte: maxConValue * 1000+1000,
                     };
                 }
                 if (selectedEquipType.length !== 0) {
@@ -1951,7 +1957,21 @@ const ExploreByEquipment = () => {
                 }
                 break;
         }
-        exploreFilterDataFetch(arr1, txt);
+        if(selectedOptions.length===1){
+            let arr = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            Object.keys(filterObj).forEach(key => {
+                delete filterObj[key];
+              })
+            exploreDataFetch(arr);
+        }
+        else
+        {        
+            exploreFilterDataFetch(arr1, txt);
+        }
     };
 
     useEffect(() => {
@@ -1966,12 +1986,13 @@ const ExploreByEquipment = () => {
         }
         let arr = {};
         let txt = '';
-        arr['date_from'] = startDate;
-        arr['date_to'] = endDate;
+        arr['date_from'] = startDate.toLocaleDateString();
+        arr['date_to'] = endDate.toLocaleDateString();
+        arr['tz_info']= timeZone;
         if (maxConValue > 0.01) {
             arr['consumption_range'] = {
                 gte: minConValue * 1000,
-                lte: maxConValue * 1000,
+                lte: maxConValue * 1000+1000,
             };
             txt = 'consumption';
         }
@@ -1991,6 +2012,7 @@ const ExploreByEquipment = () => {
         if (selectedSpaceType.length !== 0) {
             arr['space_type'] = selectedSpaceType;
         }
+        setFilterObj(arr);
         exploreFilterDataFetch(arr, txt);
     }, [APIFlag, APIPerFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
 
@@ -2068,8 +2090,8 @@ const ExploreByEquipment = () => {
                     .then((res) => {
                         let responseData = res.data;
                         if (responseData.data.length !== 0) {
-                            setTopEnergyConsumption(responseData.data[0].consumption.now);
-                            setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                            // setTopEnergyConsumption(responseData.data[0].consumption.now);
+                            // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
                             set_minConValue(0.0);
                             set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
                         }
@@ -2308,18 +2330,13 @@ const ExploreByEquipment = () => {
                                 type="search"
                                 name="search"
                                 placeholder="Search..."
-                                // onCommit={() => {
-                                //     exploreDataFetch(arr);
-                                // }}
                                 onChange={(e) => {
                                     setEquipmentSearchTxt(e.target.value);
                                 }}
                             />
                             <button
                                 style={{ border: 'none', backgroundColor: '#fff' }}
-                                onClick={(e) => {
-                                    handleEquipmentSearch(e);
-                                }}>
+                                onClick={(e) => {handleEquipmentSearch(e);}}>
                                 <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                             </button>
                         </div>
@@ -2344,7 +2361,7 @@ const ExploreByEquipment = () => {
                                 ClearSelectedIcon={null}
                             />
                         </div>
-
+                        <Row>
                         {selectedOptions.map((el, index) => {
                             if (el.value !== 'consumption') {
                                 return;
@@ -2354,7 +2371,7 @@ const ExploreByEquipment = () => {
                                     <Dropdown
                                         className=""  align="end"
                                         onToggle={setDropdown}>
-                                        <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
+                                        <span className="" style={{ height: '30px', marginLeft: '2rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
@@ -2905,6 +2922,7 @@ const ExploreByEquipment = () => {
                                 </>
                             );
                         })}
+                        </Row>
                     </div>
                 </Col>
                 <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px" }}>

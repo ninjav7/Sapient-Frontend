@@ -765,7 +765,6 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            console.log('Next/Previous ke API triggered!');
             let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
