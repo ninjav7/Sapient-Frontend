@@ -436,43 +436,43 @@ const EquipChartModal = ({
         }
     };
 
+    const fetchEquipmentYTDUsageData = async (equipId) => {
+        try {
+            setIsYtdDataFetching(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?equipment_id=${equipId}&consumption=energy`;
+
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
+                    {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data.data;
+                    setYtdData(response[0]);
+                    // setTopConsumption(data[0].ytd.ytd);
+                    // setPeak(data[0].ytd_peak.energy);
+                    setIsYtdDataFetching(false);
+                });
+        } catch (error) {
+            setIsYtdDataFetching(false);
+        }
+    };
+
     useEffect(() => {
         if (!equipmentFilter?.equipment_id) {
             return;
         }
-
-        const fetchEquipmentYTDUsageData = async (equipId) => {
-            try {
-                setIsYtdDataFetching(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?equipment_id=${equipId}&consumption=energy`;
-
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data.data;
-                        setYtdData(response[0]);
-                        // setTopConsumption(data[0].ytd.ytd);
-                        // setPeak(data[0].ytd_peak.energy);
-                        setIsYtdDataFetching(false);
-                    });
-            } catch (error) {
-                setIsYtdDataFetching(false);
-            }
-        };
 
         const fetchEquipmentDetails = async (equipId) => {
             try {
@@ -635,6 +635,7 @@ const EquipChartModal = ({
             buildingAlertsData();
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
     }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
@@ -881,11 +882,15 @@ const EquipChartModal = ({
                                                     </span>
                                                 )}
 
-                                                <span className="ytd-unit">
-                                                    {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                        'MM/DD  H:mm'
-                                                    )}`}
-                                                </span>
+                                                {ytdData?.ytd_peak?.time_stamp ? (
+                                                    <span className="ytd-unit">
+                                                        {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
+                                                            'MM/DD  H:mm'
+                                                        )}`}
+                                                    </span>
+                                                ) : (
+                                                    <span className="ytd-unit">kW</span>
+                                                )}
                                             </div>
                                         )}
                                     </div>

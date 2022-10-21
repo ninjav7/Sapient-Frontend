@@ -111,11 +111,6 @@ const Header = (props) => {
         });
     }, [dateFilter]);
 
-    useEffect(() => {
-        console.log('Header startDate :>> ', startDate);
-        console.log('Header endDate :>> ', endDate);
-    });
-
     return (
         <React.Fragment>
             {props.type === 'modal' && (
