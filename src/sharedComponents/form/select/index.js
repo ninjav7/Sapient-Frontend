@@ -32,6 +32,7 @@ const Select = ({
                 type={type}
                 options={options}
                 defaultValue={selectedOption}
+                value={selectedOption}
                 components={{
                     ...Object.assign(
                         { DropdownIndicator, Control, Option, SingleValue },
