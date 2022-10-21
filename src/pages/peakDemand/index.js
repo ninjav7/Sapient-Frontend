@@ -685,7 +685,7 @@ const PeakDemand = () => {
                 </div>
             </Row>
 
-            <Row className="equip-peak-container ml-3 mt-0">
+            <Row className="equip-peak-container ml-3 mr-3 mt-0">
                 <Col xl={6}>
                     <EquipmentTypePeaks
                         equipTypeData={equipTypeData}
@@ -700,7 +700,7 @@ const PeakDemand = () => {
                 </Col>
             </Row>
 
-            <Row className="ml-1">
+            <Row className="ml-1" style={{marginRight:'6px'}}>
                 <Col xl={12}>
                     <div className="peak-content-style">
                         <div className="m-1">

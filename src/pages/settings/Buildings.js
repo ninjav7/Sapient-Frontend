@@ -206,7 +206,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </td>
-                                            <td className="font-weight-bold"> - </td>
+                                            <td className="font-weight-bold">{record.num_of_devices}</td>
                                         </tr>
                                     );
                                 })}
@@ -326,7 +326,7 @@ const Buildings = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        const { data } = await axios.get(`${BaseUrl}${getBuilding}`, { headers });
+        const { data } = await axios.get(`${BaseUrl}${generalBuilding}`, { headers });
         setBuildingsData(data);
         return data;
     };
