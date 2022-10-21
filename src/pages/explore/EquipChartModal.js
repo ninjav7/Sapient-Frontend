@@ -36,7 +36,7 @@ import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import ModalHeader from '../../components/ModalHeader';
+import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import './style.css';
 import { DivideSquare } from 'react-feather';
@@ -110,7 +110,6 @@ const EquipChartModal = ({
     };
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
 
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
@@ -636,7 +635,7 @@ const EquipChartModal = ({
             buildingAlertsData();
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-    }, [endDate, selectedConsumption]);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
@@ -997,7 +996,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <ModalHeader />
+                                    <Header type="modal" />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>

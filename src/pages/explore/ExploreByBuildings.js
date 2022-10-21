@@ -146,7 +146,6 @@ const ExploreBuildingsTable = ({
                                             <td>
                                                 <Skeleton count={10} />
                                             </td>
-                                            
                                         </tr>
                                     </SkeletonTheme>
                                 </tbody>
@@ -479,12 +478,14 @@ const ExploreByBuildings = () => {
                         .utc(seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
-                    if(isNaN(parseInt(series[i][dataPointIndex]))===false)
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(series[i][dataPointIndex])} kWh </td></tr>`;
+                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
+                        ch =
+                            ch +
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                                colors[i]
+                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
+                                series[i][dataPointIndex]
+                            )} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -730,7 +731,7 @@ const ExploreByBuildings = () => {
                             return item.building_id === selectedBuildingId;
                         });
                         let exploreData = [];
-                        const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
+                        const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                         let recordToInsert = {
                             name: arr[0].building_name,
                             data: formattedData,
@@ -761,8 +762,7 @@ const ExploreByBuildings = () => {
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedBuildingId('');
                     });
-            } catch (error) {
-            }
+            } catch (error) {}
         };
 
         fetchExploreChartData();
@@ -818,7 +818,7 @@ const ExploreByBuildings = () => {
                         return item.building_id === id;
                     });
                     let exploreData = [];
-                    const formattedData=getFormattedTimeIntervalData(data, startDate,endDate);
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
                         data: formattedData,
@@ -831,8 +831,7 @@ const ExploreByBuildings = () => {
                     }
                     setAllBuildingData(dataarr);
                 });
-        } catch (error) {
-        }
+        } catch (error) {}
     };
 
     useEffect(() => {
@@ -971,7 +970,6 @@ const ExploreByBuildings = () => {
     };
 
     const handleBuildingSearch = (e) => {
-
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -1053,7 +1051,7 @@ const ExploreByBuildings = () => {
     return (
         <>
             <Row className="ml-2 mt-2 mr-4 explore-filters-style">
-                <Header title="" />
+                <Header title="" type="page" />
             </Row>
 
             <Row>
@@ -1066,7 +1064,9 @@ const ExploreByBuildings = () => {
                         <>
                             <Row>
                                 <Col lg={11}></Col>
-                                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px" }}>
+                                <Col
+                                    lg={1}
+                                    style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
                                     <CSVLink
                                         style={{ color: 'black' }}
                                         className="btn btn-white d-inline btnHover font-weight-bold"
@@ -1143,16 +1143,20 @@ const ExploreByBuildings = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ backgroundColor: 'white', color: 'black', borderColor: 'black' }}>
+                                                style={{
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                    borderColor: 'black',
+                                                }}>
                                                 {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}{' '}
                                                 <button
-                                                style={{ border : 'none' ,backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setConsumptionTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setConsumptionTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
@@ -1201,16 +1205,20 @@ const ExploreByBuildings = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 All {el.label}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
@@ -1250,15 +1258,19 @@ const ExploreByBuildings = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {sq_ftTxt === '' ? `All ${el.label}` : sq_ftTxt}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
@@ -1307,17 +1319,21 @@ const ExploreByBuildings = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 {buildingTypeTxt === '' ? `All ${el.label}` : buildingTypeTxt}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setBuildingTypeTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setBuildingTypeTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
@@ -1383,7 +1399,7 @@ const ExploreByBuildings = () => {
                         })}
                     </div>
                 </Col>
-                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px"}}>
+                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
                     <CSVLink
                         style={{ color: 'black' }}
                         className="btn btn-white d-inline btnHover font-weight-bold"
@@ -1397,8 +1413,8 @@ const ExploreByBuildings = () => {
             </Row>
 
             <Row>
-                <div className="explore-table-style" >
-                    <Col lg={12} >
+                <div className="explore-table-style">
+                    <Col lg={12}>
                         <ExploreBuildingsTable
                             exploreTableData={exploreTableData}
                             isExploreDataLoading={isExploreDataLoading}

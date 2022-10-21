@@ -863,7 +863,7 @@ const CompareBuildings = () => {
 
     return (
         <React.Fragment>
-            <Header title="Compare Buildings" />
+            <Header title="Compare Buildings" type="page" />
 
             {/* <Row className="m-4">
                 <div>

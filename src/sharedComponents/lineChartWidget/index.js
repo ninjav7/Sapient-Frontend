@@ -46,7 +46,7 @@ const LineChartWidget = ({
             enabledOnSeries: [1],
         },
         animations: {
-            enabled: false,
+            enabled: true,
         },
         tooltip: {
             //@TODO NEED?

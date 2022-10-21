@@ -12,7 +12,7 @@ import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import ModalHeader from '../../components/ModalHeader';
+import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
@@ -394,7 +394,7 @@ const DeviceChartModel = ({
                     className="btn-group custom-button-group header-widget-styling"
                     role="group"
                     aria-label="Basic example">
-                    <ModalHeader />
+                    <Header type="modal" />
                 </div>
 
                 <div className="mr-3 sensor-chart-options">

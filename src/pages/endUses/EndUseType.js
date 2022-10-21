@@ -472,11 +472,11 @@ const EndUseType = () => {
 
     return (
         <React.Fragment>
-            {endUseType === 'hvac' && <Header title="HVAC" />}
-            {endUseType === 'lighting' && <Header title="Lighting" />}
-            {endUseType === 'plug' && <Header title="Plug Load" />}
-            {endUseType === 'process' && <Header title="Process" />}
-            {endUseType === 'other' && <Header title="Other EndUses" />}
+            {endUseType === 'hvac' && <Header title="HVAC" type="page" />}
+            {endUseType === 'lighting' && <Header title="Lighting" type="page" />}
+            {endUseType === 'plug' && <Header title="Plug Load" type="page" />}
+            {endUseType === 'process' && <Header title="Process" type="page" />}
+            {endUseType === 'other' && <Header title="Other EndUses" type="page" />}
 
             {isEndUsesDataFetched ? (
                 <Row className="ml-3">

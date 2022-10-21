@@ -606,7 +606,7 @@ const PortfolioOverview = () => {
 
     return (
         <>
-            <Header title="Portfolio Overview" />
+            <Header title="Portfolio Overview" type="page" />
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>

@@ -541,6 +541,7 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
@@ -2235,7 +2236,7 @@ const ExploreByEquipment = () => {
     return (
         <>
             <Row className="ml-2 mt-2 mr-4 explore-filters-style">
-                <Header title="" />
+                <Header title="" type="page" />
             </Row>
 
             <Row>
@@ -2248,7 +2249,9 @@ const ExploreByEquipment = () => {
                         <>
                             <Row>
                                 <Col lg={11}></Col>
-                                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px" }}>
+                                <Col
+                                    lg={1}
+                                    style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
                                     <CSVLink
                                         style={{ color: 'black' }}
                                         className="btn btn-white d-inline btnHover font-weight-bold"
@@ -2323,26 +2326,27 @@ const ExploreByEquipment = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown
-                                        className=""  align="end"
-                                        onToggle={setDropdown}>
+                                    <Dropdown className="" align="end" onToggle={setDropdown}>
                                         <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setConsumptionTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setConsumptionTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
@@ -2381,18 +2385,21 @@ const ExploreByEquipment = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 All {el.label}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
@@ -2447,19 +2454,26 @@ const ExploreByEquipment = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 {locationTxt === '' ? `All ${el.label}` : locationTxt}{' '}
                                                 <button
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', border:'none' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setLocationTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{
+                                                        borderColor: 'gray',
+                                                        backgroundColor: 'white',
+                                                        border: 'none',
+                                                    }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setLocationTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-xlg p-3">
                                             <div>
@@ -2631,19 +2645,22 @@ const ExploreByEquipment = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 {spaceTxt === '' ? `All ${el.label}` : spaceTxt}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setSpaceTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setSpaceTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div>
@@ -2720,19 +2737,22 @@ const ExploreByEquipment = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 {equipmentTxt === '' ? `All ${el.label}` : equipmentTxt}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setEquipmentTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setEquipmentTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div>
@@ -2806,19 +2826,22 @@ const ExploreByEquipment = () => {
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ borderColor: 'gray', backgroundColor: 'white', color: 'black' }}>
+                                                style={{
+                                                    borderColor: 'gray',
+                                                    backgroundColor: 'white',
+                                                    color: 'black',
+                                                }}>
                                                 {' '}
                                                 {endUseTxt === '' ? `All ${el.label}` : endUseTxt}{' '}
                                                 <button
-                                                style={{ border: 'none', backgroundColor: 'white' }}
-                                                onClick={(e) => {
-                                                    handleCloseFilter(e, el.value);
-                                                    setEndUseTxt('');
-                                                }}>
-                                                <i className="uil uil-multiply"></i>
-                                            </button>
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        handleCloseFilter(e, el.value);
+                                                        setEndUseTxt('');
+                                                    }}>
+                                                    <i className="uil uil-multiply"></i>
+                                                </button>
                                             </Dropdown.Toggle>
-                                            
                                         </span>
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div>
@@ -2882,7 +2905,7 @@ const ExploreByEquipment = () => {
                         })}
                     </div>
                 </Col>
-                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: "30px" }}>
+                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
                     {/* <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
                         {' '}
                         <FontAwesomeIcon icon={faTableColumns} size="md" />

@@ -912,7 +912,7 @@ const BuildingOverview = () => {
     return (
         <React.Fragment>
             <div className="ml-2">
-                <Header title="Building Overview" />
+                <Header title="Building Overview" type="page" />
             </div>
             <Row xl={12} className="mt-2">
                 <div className="energy-summary-alignment">
