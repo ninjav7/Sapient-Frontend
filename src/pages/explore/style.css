@@ -473,6 +473,15 @@
     border-radius: 5px;
 }
 
+.breaker-socket1-style-disbaled {
+    width: 57px;
+    height: 32px;
+    background: grey;
+    box-shadow: 1px 1px 20px rgba(255, 255, 255, 0.09), inset -2px 2px 2px #000000,
+        inset -6px 10px 10px rgba(0, 0, 0, 0.45);
+    border-radius: 5px;
+}
+
 .breaker-socket-triple-style {
     position: absolute;
     width: 13px;

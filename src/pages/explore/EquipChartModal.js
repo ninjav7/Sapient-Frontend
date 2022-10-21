@@ -1519,8 +1519,21 @@ const EquipChartModal = ({
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
                                                 {equipBreakerLink.length === 0 ? (
-                                                    <div className="equip-breaker-style">
-                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                    <div className="breaker-container-disabled-style">
+                                                        <div className="breaker-number-style">
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style">
+                                                            <div className="breaker-offline-style"></div>
+                                                        </div>
+                                                        <div className="breaker-voltage-style">
+                                                            <div></div>
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style">
+                                                            <div className="breaker-socket1-style-disbaled"></div>
+                                                            <div className="breaker-socket-single-style-disabled"></div>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <>
@@ -1634,29 +1647,33 @@ const EquipChartModal = ({
                                                         View
                                                     </button>
                                                 </div>
-                                                <div className="equip-breaker-container">
-                                                    <div className="equip-breaker-detail">
-                                                        <div className="phase-style">
-                                                            <div className="equip-breaker-header mb-1">Phases</div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink[0]?.breaker_type}
+                                                {equipBreakerLink.length === 0 ? (
+                                                    <></>
+                                                ) : (
+                                                    <div className="equip-breaker-container">
+                                                        <div className="equip-breaker-detail">
+                                                            <div className="phase-style">
+                                                                <div className="equip-breaker-header mb-1">Phases</div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink[0]?.breaker_type}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="installed-style">
-                                                            <div className="equip-breaker-header mb-1">
-                                                                Installed at
-                                                            </div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            <div className="installed-style">
+                                                                <div className="equip-breaker-header mb-1">
+                                                                    Installed at
+                                                                </div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink.length === 1 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                    {equipBreakerLink.length === 2 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                    {equipBreakerLink.length === 3 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </Col>
