@@ -276,7 +276,9 @@ const EndUseType = () => {
                     },
                     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                         const { labels } = w.globals;
-                        const timestamp = labels[dataPointIndex];
+                        const { seriesX } = w.globals;
+                        const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                        //const timestamp = labels[dataPointIndex];
 
                         return `<div class="line-chart-widget-tooltip">
                             <h6 class="line-chart-widget-tooltip-title">${endUseName} Consumption</h6>
