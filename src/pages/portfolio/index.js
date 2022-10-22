@@ -504,8 +504,10 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(0),
                             });
                         });
-                        const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
-                        setEnergyConsumptionChart(formattedData);
+                        // --- for PLT-125
+                        // const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
+                        // setEnergyConsumptionChart(formattedData);
+                        setEnergyConsumptionChart(newArray);
                         setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {

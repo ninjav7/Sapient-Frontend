@@ -11,9 +11,13 @@ import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
 
 const Header = (props) => {
-    const dateFilter = DateRangeStore.useState((s) => +s.dateFilter);
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
+    const customStartDate = DateRangeStore.useState((s) => s.startDate);
+    const customEndDate = DateRangeStore.useState((s) => s.endDate);
+
+    const [dateFilter, setDateFilter] = useState(dateValue);
+    const [startDate, setStartDate] = useState(customStartDate);
+    const [endDate, setEndDate] = useState(customEndDate);
 
     const customDaySelect = [
         {
@@ -45,16 +49,9 @@ const Header = (props) => {
     const handleEvent = (event, picker) => {
         let start = picker.startDate._d;
         let end = picker.endDate._d;
-
-        localStorage.setItem('startDate', start);
-        localStorage.setItem('endDate', end);
-        localStorage.setItem('dateFilter', -1);
-
-        DateRangeStore.update((s) => {
-            s.startDate = start;
-            s.endDate = end;
-            s.dateFilter = -1;
-        });
+        setStartDate(start);
+        setEndDate(end);
+        setDateFilter(-1);
     };
 
     const handleDateFilterChange = (value) => {
@@ -64,16 +61,9 @@ const Header = (props) => {
             end.setDate(end.getDate());
         }
         start.setDate(start.getDate() - value);
-
-        localStorage.setItem('startDate', start);
-        localStorage.setItem('endDate', end);
-        localStorage.setItem('dateFilter', value);
-
-        DateRangeStore.update((s) => {
-            s.startDate = start;
-            s.endDate = end;
-            s.dateFilter = value;
-        });
+        setStartDate(start);
+        setEndDate(end);
+        setDateFilter(value);
 
         localStorage.setItem('startDate', start);
         localStorage.setItem('endDate', end);
@@ -82,6 +72,7 @@ const Header = (props) => {
             s.startDate = start;
             s.endDate = end;
         });
+        // setDateFilter(value);
     };
 
     useEffect(() => {
