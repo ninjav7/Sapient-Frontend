@@ -35,6 +35,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import Button from '../../sharedComponents/button/Button';
 import './style.css';
 
 const EquipChartModal = ({
@@ -55,7 +56,6 @@ const EquipChartModal = ({
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
@@ -72,18 +72,12 @@ const EquipChartModal = ({
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
-    const [topConsumption, setTopConsumption] = useState('');
-    const [peak, setPeak] = useState('');
     const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
     const [ytdData, setYtdData] = useState({});
-
-    const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
-    const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
-    const [showTab, setShowTab] = useState('');
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
@@ -838,7 +832,11 @@ const EquipChartModal = ({
                             <Col lg={4}>
                                 <div className="ytd-container">
                                     <div>
-                                        <div className="ytd-heading">Total Consumption YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Total Consumption (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
@@ -853,7 +851,11 @@ const EquipChartModal = ({
                                         )}
                                     </div>
                                     <div>
-                                        <div className="ytd-heading">Peak kW YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Peak kW (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
@@ -1297,17 +1299,18 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                    />
                                                 </div>
                                                 <div className="equip-breaker-container">
                                                     <div className="equip-breaker-detail">
@@ -1607,17 +1610,18 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled
+                                                    />
                                                 </div>
                                                 {equipBreakerLink?.length === 0 ? (
                                                     <></>
@@ -1837,9 +1841,16 @@ const EquipChartModal = ({
                                             <div className="modal-right-card mt-2">
                                                 <span className="modal-right-card-title">Power Strip Socket 2</span>
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                <Button
+                                                    label="View Devices"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => {
+                                                        redirectToConfigDevicePage(
+                                                            equipmentData?.device_id,
+                                                            'active-device'
+                                                        );
+                                                    }}
                                                     disabled={
                                                         equipmentData !== null
                                                             ? equipmentData.device_id === ''
@@ -1847,14 +1858,7 @@ const EquipChartModal = ({
                                                                 : false
                                                             : true
                                                     }
-                                                    onClick={() => {
-                                                        redirectToConfigDevicePage(
-                                                            equipmentData?.device_id,
-                                                            'active-device'
-                                                        );
-                                                    }}>
-                                                    View Devices
-                                                </button>
+                                                />
                                             </div>
                                             <div>
                                                 {equipmentData !== null

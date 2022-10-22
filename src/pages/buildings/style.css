@@ -451,3 +451,12 @@
     margin-top: 3vh;
     gap: 2vw;
 }
+
+.container-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}

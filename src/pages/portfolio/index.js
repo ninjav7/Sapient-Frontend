@@ -490,14 +490,13 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
                         let newArray = [
                             {
                                 name: 'Energy',
                                 data: [],
                             },
                         ];
-                        response.forEach((record) => {
+                        res.data.forEach((record) => {
                             const d = new Date(record.x);
                             const milliseconds = d.getTime();
                             newArray[0].data.push({
@@ -631,6 +630,7 @@ const PortfolioOverview = () => {
                                 options={options}
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                                pageType="portfolio"
                             />
                         </Col>
                         <Col xl={6}>
