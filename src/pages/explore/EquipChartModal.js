@@ -35,6 +35,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import Button from '../../sharedComponents/button/Button';
 import './style.css';
 
 const EquipChartModal = ({
@@ -838,7 +839,11 @@ const EquipChartModal = ({
                             <Col lg={4}>
                                 <div className="ytd-container">
                                     <div>
-                                        <div className="ytd-heading">Total Consumption YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Total Consumption (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
@@ -853,7 +858,11 @@ const EquipChartModal = ({
                                         )}
                                     </div>
                                     <div>
-                                        <div className="ytd-heading">Peak kW YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Peak kW (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
@@ -1297,17 +1306,18 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                    />
                                                 </div>
                                                 <div className="equip-breaker-container">
                                                     <div className="equip-breaker-detail">
@@ -1607,17 +1617,18 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled
+                                                    />
                                                 </div>
                                                 {equipBreakerLink?.length === 0 ? (
                                                     <></>
@@ -1837,9 +1848,16 @@ const EquipChartModal = ({
                                             <div className="modal-right-card mt-2">
                                                 <span className="modal-right-card-title">Power Strip Socket 2</span>
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                <Button
+                                                    label="View Devices"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => {
+                                                        redirectToConfigDevicePage(
+                                                            equipmentData?.device_id,
+                                                            'active-device'
+                                                        );
+                                                    }}
                                                     disabled={
                                                         equipmentData !== null
                                                             ? equipmentData.device_id === ''
@@ -1847,14 +1865,7 @@ const EquipChartModal = ({
                                                                 : false
                                                             : true
                                                     }
-                                                    onClick={() => {
-                                                        redirectToConfigDevicePage(
-                                                            equipmentData?.device_id,
-                                                            'active-device'
-                                                        );
-                                                    }}>
-                                                    View Devices
-                                                </button>
+                                                />
                                             </div>
                                             <div>
                                                 {equipmentData !== null
