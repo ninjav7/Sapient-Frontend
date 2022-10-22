@@ -631,6 +631,7 @@ const PortfolioOverview = () => {
                                 options={options}
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                                pageType="portfolio"
                             />
                         </Col>
                         <Col xl={6}>
