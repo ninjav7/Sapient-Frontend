@@ -416,7 +416,10 @@ const EquipmentTable = ({
                                                         (record) => record.value === 'sensor_number'
                                                     ) && (
                                                         <td>
-                                                            {record.sensor_number === 0 ? '-' : record.sensor_number}
+                                                            {record?.sensor_number.length === 0
+                                                                ? '-'
+                                                                : `${record?.sensor_number.join(',')} /
+                                                                  ${record?.total_sensor}`}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'last_data') && (
