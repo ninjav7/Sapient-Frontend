@@ -504,9 +504,8 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(0),
                             });
                         });
-                        // const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
-                        // console.log('formattedData => ', formattedData);
-                        setEnergyConsumptionChart(newArray);
+                        const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
+                        setEnergyConsumptionChart(formattedData);
                         setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
