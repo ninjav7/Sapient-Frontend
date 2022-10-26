@@ -1274,7 +1274,6 @@ const ExploreByEquipment = () => {
     };
 
     useEffect(() => {
-        console.log(FilterDataList);
         if (FilterDataList.length === 0) {
             setRemoveEndUseDuplication([]);
             setRemoveEqupimentTypesDuplication([]);
@@ -2006,7 +2005,6 @@ const ExploreByEquipment = () => {
             await exploreDataFetch(arr);
 
         } else {
-            console.log("filtered block")
             exploreFilterDataFetch(arr1, txt);
         }
     };
@@ -2255,7 +2253,6 @@ const ExploreByEquipment = () => {
     };
     useEffect(() => {
         if (equipmentSearchTxt === '' && entryPoint !== "entered" && entryPoint === "searched") {
-            console.log("Entered in search Block")
             exploreDataFetch(arr);
         }
     }, [equipmentSearchTxt]);

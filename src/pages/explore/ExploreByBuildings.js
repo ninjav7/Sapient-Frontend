@@ -842,7 +842,6 @@ const ExploreByBuildings = () => {
                             ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
                             coll.push(ab);
                         });
-                        console.log("chart Data fetch ", formattedData);
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
@@ -868,13 +867,10 @@ const ExploreByBuildings = () => {
     }, [selectedBuildingId, buildingIdSelection]);
 
     useEffect(() => {
-        console.log(selectedAllBuildingId);
         if (selectedAllBuildingId.length === 1) {
-            console.log("single fetch")
             fetchExploreAllChartData(selectedAllBuildingId[0]);
         } else {
             selectedAllBuildingId.map((ele) => {
-                console.log("Multiple fetch")
                 fetchExploreAllChartData(ele);
             });
         }
@@ -926,13 +922,8 @@ const ExploreByBuildings = () => {
                         data: formattedData,
                         id: arr[0].building_id,
                     };
-                    console.log("All chart Data ", formattedData);
                     dataarr.push(recordToInsert);
-                    //console.log("total Building ", totalBuildingId);
-                    // setSeriesData([...seriesData, recordToInsert])
-                    // setSeriesLineData([...seriesLineData, recordToInsert])
                     if (selectedAllBuildingId.length === dataarr.length) {
-                        console.log("data assigned ", dataarr);
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
