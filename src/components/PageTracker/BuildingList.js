@@ -40,7 +40,7 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
     return (
         <div>
             {userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.energy_building_permission?.view ? (
+                userPermission?.permissions?.permissions?.energy_building_permission?.view ? (
                 <>
                     <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                     {buildingList.length === 0 && 'No Buildings found.'}
@@ -53,14 +53,14 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
 
                         return (
                             <div key={record.building_id}>
-                                {location.pathname === '/energy/portfolio/overview' ? (
+                                {location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings' ? (
                                     <Dropdown.Item
                                         onClick={() => {
                                             handleBldgSwitchFrmPortfolioPage(record);
                                         }}>
                                         <div className="filter-bld-style">
                                             <div className="portfolio-txt-style">{record.building_name}</div>
-                                            {location.pathname !== '/energy/portfolio/overview' &&
+                                            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings' &&
                                                 record.building_id === bldStoreId && <CheckIcon />}
                                         </div>
                                     </Dropdown.Item>
