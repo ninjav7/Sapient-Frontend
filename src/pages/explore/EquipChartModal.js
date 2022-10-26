@@ -287,8 +287,17 @@ const EquipChartModal = ({
     });
 
     const getCSVLinkData = () => {
+        let acd=[];
+        if(seriesData.length!==0)
+           {
+             seriesData[0].data.map((ele)=>{
+               
+                acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
+             })
+           }
         let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+
+        let streamData = seriesData.length > 0 ? acd : [];
         return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
 
