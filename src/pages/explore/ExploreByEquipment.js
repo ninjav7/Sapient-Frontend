@@ -1383,7 +1383,7 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-        exploreDataFetch(arr);
+        //exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();

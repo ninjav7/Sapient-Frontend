@@ -708,7 +708,7 @@ const ExploreByBuildings = () => {
         }
         let result = [];
 
-        exploreDataFetch();
+       // exploreDataFetch();
     }, [startDate, endDate]);
 
     const exploreFilterDataFetch = async (bodyVal) => {
