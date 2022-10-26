@@ -355,6 +355,7 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: false,
         },
+        // PLT-339: Peak Demand routing disbaled.
         // {
         //     path: '/energy/peak-demand/:bldgId',
         //     name: 'Peak Demand',
