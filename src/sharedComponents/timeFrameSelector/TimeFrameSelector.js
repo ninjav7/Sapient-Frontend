@@ -74,5 +74,3 @@ TimeFrameSelector.defaultProps = {
 };
 
 export default TimeFrameSelector;
-
-// start, end, onChage, optionsF
