@@ -17,6 +17,7 @@ import {
     getSpaces,
 } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -234,7 +235,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -247,7 +248,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -260,7 +261,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -273,7 +274,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -286,7 +287,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -299,7 +300,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -630,6 +631,7 @@ const ExploreByEquipment = () => {
         },
         markers: {
             size: 0,
+
         },
         tooltip: {
             //@TODO NEED?
@@ -674,8 +676,7 @@ const ExploreByEquipment = () => {
                     if (isNaN(parseInt(series[i][dataPointIndex])) === false)
                         ch =
                             ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                                colors[i]
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
                             };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
                                 series[i][dataPointIndex]
                             )} kWh </td></tr>`;
@@ -780,6 +781,7 @@ const ExploreByEquipment = () => {
         },
     });
 
+    const FilterDataList = ExploreFilterDataStore.useState((bs) => bs.items);
     const [APIFlag, setAPIFlag] = useState(false);
     const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [APILocFlag, setAPILocFlag] = useState(false);
@@ -792,6 +794,7 @@ const ExploreByEquipment = () => {
     const [allEquipmentData, setAllEquipmenData] = useState([]);
 
     const [exploreTableData, setExploreTableData] = useState([]);
+    const [exploreAllTableData, setExploreAllTableData] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
@@ -805,7 +808,7 @@ const ExploreByEquipment = () => {
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
     const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(100);
+    const [maxPerValue, set_maxPerValue] = useState(10);
     const [spaceType, setSpaceType] = useState([]);
     const [removeDuplicateFlag, setRemoveDuplicateFlag] = useState(false);
     const [equipmentSearchTxt, setEquipmentSearchTxt] = useState('');
@@ -857,7 +860,7 @@ const ExploreByEquipment = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (!showDropdown !== true) {
+        if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
             //setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -1227,7 +1230,7 @@ const ExploreByEquipment = () => {
     const [removeSpaceTypeDuplication, setRemoveSpaceTyepDuplication] = useState();
 
     const removeDuplicates = () => {
-        const uniqueEqupimentTypes = exploreTableData.filter((element) => {
+        const uniqueEqupimentTypes = FilterDataList.filter((element) => {
             const isDuplicate = uniqueIds.includes(element.equipments_type);
             if (!isDuplicate) {
                 uniqueIds.push(element.equipments_type);
@@ -1235,7 +1238,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueEndUse = exploreTableData.filter((element) => {
+        const uniqueEndUse = FilterDataList.filter((element) => {
             const isDuplicate = uniqueEndUseIds.includes(element?.end_user);
 
             if (!isDuplicate) {
@@ -1244,7 +1247,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueLocation = exploreTableData.filter((element) => {
+        const uniqueLocation = FilterDataList.filter((element) => {
             const isDuplicate = uniqueLocationIds.includes(element?.location);
 
             if (!isDuplicate) {
@@ -1253,7 +1256,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueSpaceType = exploreTableData.filter((element) => {
+        const uniqueSpaceType = FilterDataList.filter((element) => {
             const isDuplicate = uniqueSpaceTypeIds.includes(element?.location_type);
 
             if (!isDuplicate) {
@@ -1271,7 +1274,7 @@ const ExploreByEquipment = () => {
     };
 
     useEffect(() => {
-        if (exploreTableData.length === 0) {
+        if (FilterDataList.length === 0) {
             setRemoveEndUseDuplication([]);
             setRemoveEqupimentTypesDuplication([]);
             setRemoveLocationDuplication([]);
@@ -1304,7 +1307,7 @@ const ExploreByEquipment = () => {
                     set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
@@ -1317,7 +1320,32 @@ const ExploreByEquipment = () => {
         tz_info: timeZone,
     };
 
-    useEffect(() => {
+    const fetchAllExploredata = async (bodyVal) => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?consumption=energy&building_id=${bldgId}`;
+
+            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                setExploreAllTableData(responseData.data);
+                ExploreFilterDataStore.update((bs) => {
+                    bs.items = responseData.data;
+                });
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            setIsExploreDataLoading(false);
+        }
+    }
+    useEffect(async () => {
         if (startDate === null) {
             return;
         }
@@ -1363,7 +1391,7 @@ const ExploreByEquipment = () => {
                     }
                     setEquipOptions(equipData);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
         const fetchEndUseData = async () => {
             try {
@@ -1381,20 +1409,33 @@ const ExploreByEquipment = () => {
                     }
                     setEndUseOptions(equipData);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
-        exploreDataFetch(arr);
+
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
-    }, [startDate, endDate, bldgId, pageSize]);
+        if (entryPoint === "entered")
+            await fetchAllExploredata(arr);
+        await exploreDataFetch(arr);
+    }, [endDate, bldgId, pageSize]);
 
     const nextPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
+            entryPoint = "paginate";
             let arr = {};
             if (path === null) {
                 return;
+            }
+            if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+                let arr = [];
+                for (let i = 0; i < totalEquipmentId?.length; i++) {
+                    arr.push(totalEquipmentId[i]);
+                }
+                setSelectedAllEquipmentId(arr);
+            } else {
+                setSelectedEquipmentId('');
             }
             let headers = {
                 'Content-Type': 'application/json',
@@ -1424,7 +1465,7 @@ const ExploreByEquipment = () => {
                     // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
@@ -1435,6 +1476,7 @@ const ExploreByEquipment = () => {
     const previousPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
+            entryPoint = "paginate";
             let arr = {};
             if (path === null) {
                 return;
@@ -1466,7 +1508,7 @@ const ExploreByEquipment = () => {
                     // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
@@ -1669,7 +1711,7 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1]===null?"-":el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
@@ -1846,8 +1888,9 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
-    const handleCloseFilter = (e, val) => {
+    const handleCloseFilter = async (e, val) => {
         let arr = [];
+        entryPoint = "filtered";
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
@@ -1958,7 +2001,9 @@ const ExploreByEquipment = () => {
             Object.keys(filterObj).forEach((key) => {
                 delete filterObj[key];
             });
-            exploreDataFetch(arr);
+            await fetchAllExploredata(arr);
+            await exploreDataFetch(arr);
+
         } else {
             exploreFilterDataFetch(arr1, txt);
         }
@@ -1986,7 +2031,11 @@ const ExploreByEquipment = () => {
             };
             txt = 'consumption';
         }
-        if (maxPerValue > 0) {
+        if (maxPerValue > 10) {
+            arr['change'] = {
+                gte: minPerValue,
+                lte: maxPerValue,
+            };
         }
         if (selectedLocation.length !== 0) {
             arr['location'] = selectedLocation;
@@ -2001,6 +2050,7 @@ const ExploreByEquipment = () => {
         if (selectedSpaceType.length !== 0) {
             arr['space_type'] = selectedSpaceType;
         }
+        //entryPoint = "filtered";
         setFilterObj(arr);
         exploreFilterDataFetch(arr, txt);
     }, [APIFlag, APIPerFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
@@ -2057,6 +2107,7 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
+        entryPoint = "searched";
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -2085,7 +2136,7 @@ const ExploreByEquipment = () => {
                             set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
                         }
                         setExploreTableData(responseData.data);
-                        setRemoveDuplicateFlag(!removeDuplicateFlag);
+                        //setRemoveDuplicateFlag(!removeDuplicateFlag);
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -2149,7 +2200,7 @@ const ExploreByEquipment = () => {
         return [val, ...streamData];
     };
 
-    useEffect(() => {}, [showDropdown]);
+    useEffect(() => { }, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
@@ -2201,7 +2252,9 @@ const ExploreByEquipment = () => {
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
     useEffect(() => {
-        if (equipmentSearchTxt === '') exploreDataFetch(arr);
+        if (equipmentSearchTxt === '' && entryPoint !== "entered" && entryPoint === "searched") {
+            exploreDataFetch(arr);
+        }
     }, [equipmentSearchTxt]);
     const handleGetSpaceByLocation = (e, item) => {
         setSelectedLoc(item);
@@ -2476,7 +2529,7 @@ const ExploreByEquipment = () => {
                                                             STEP={1}
                                                             MIN={0}
                                                             range={[minPerValue, maxPerValue]}
-                                                            MAX={100}
+                                                            MAX={1000}
                                                             onSelectionChange={handleInputPer}
                                                         />
                                                     </div>

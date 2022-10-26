@@ -216,7 +216,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -229,7 +229,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -242,7 +242,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -255,7 +255,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -268,7 +268,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -281,7 +281,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -292,31 +292,25 @@ const ExploreBuildingsTable = ({
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        {record?.consumption?.now <= record?.consumption?.old && (
+                                                        {record?.consumption?.change >= 0 && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.now > record?.consumption?.old && (
+                                                        {record?.consumption?.change < 0 && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {percentageHandler(
-                                                                            record?.consumption?.now,
-                                                                            record?.consumption?.old
-                                                                        )}
+                                                                        {record?.consumption?.change}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -481,8 +475,7 @@ const ExploreByBuildings = () => {
                     if (isNaN(parseInt(series[i][dataPointIndex])) === false)
                         ch =
                             ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                                colors[i]
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
                             };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
                                 series[i][dataPointIndex]
                             )} kWh </td></tr>`;
@@ -573,7 +566,9 @@ const ExploreByBuildings = () => {
         },
     });
 
+    let entryPoint = '';
     const [APIFlag, setAPIFlag] = useState(false);
+    const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [Sq_FtFlag, setSq_FtFlag] = useState(false);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [minConValue, set_minConValue] = useState(0.0);
@@ -581,7 +576,7 @@ const ExploreByBuildings = () => {
     const [minSq_FtValue, set_minSq_FtValue] = useState(0);
     const [maxSq_FtValue, set_maxSq_FtValue] = useState(10);
     const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(100);
+    const [maxPerValue, set_maxPerValue] = useState(10);
     const [buildingSearchTxt, setBuildingSearchTxt] = useState('');
     const [buildingTypeTxt, setBuildingTypeTxt] = useState('');
     const [consumptionTxt, setConsumptionTxt] = useState('');
@@ -589,6 +584,19 @@ const ExploreByBuildings = () => {
     const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
     const [showDropdown, setShowDropdown] = useState(false);
+
+    useEffect(() => {
+        entryPoint = 'entered';
+    }, []);
+
+    const [showChangeDropdown, setShowChangeDropdown] = useState(false);
+    const setChangeDropdown = () => {
+        setShowChangeDropdown(!showChangeDropdown);
+        if (!showChangeDropdown !== true) {
+            setAPIPerFlag(!APIPerFlag);
+            //setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
+        }
+    };
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
         if (!showDropdown !== true) {
@@ -612,6 +620,8 @@ const ExploreByBuildings = () => {
             for (let i = 0; i < totalBuildingId?.length; i++) {
                 arr.push(totalBuildingId[i]);
             }
+            setSeriesData([]);
+            setSeriesLineData([]);
             setSelectedAllBuildingId(arr);
         } else {
             setSelectedBuildingId('');
@@ -644,13 +654,13 @@ const ExploreByBuildings = () => {
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
-        let arr = [
-            { label: 'Energy Consumption', value: 'consumption' },
-            { label: 'Change', value: 'change' },
-            // { label: 'Total % change', value: 'total_per' },
-            { label: 'Square Footage', value: 'sq_ft' },
-            { label: 'Building Type', value: 'load' },
-        ];
+        // let arr = [
+        //     { label: 'Energy Consumption', value: 'consumption' },
+        //     { label: 'Change', value: 'change' },
+        //     // { label: 'Total % change', value: 'total_per' },
+        //     { label: 'Square Footage', value: 'sq_ft' },
+        //     { label: 'Building Type', value: 'load' },
+        // ];
     }, []);
 
     const exploreDataFetch = async () => {
@@ -673,6 +683,11 @@ const ExploreByBuildings = () => {
                     { headers }
                 )
                 .then((res) => {
+                    if (entryPoint === 'entered') {
+                        totalBuildingId.length = 0;
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                    }
                     let responseData = res.data;
                     setExploreTableData(responseData);
                     setTopEnergyConsumption(responseData[0].consumption.now);
@@ -773,11 +788,10 @@ const ExploreByBuildings = () => {
                 }
                 break;
         }
-        if(selectedOptions.length===1){
+        if (selectedOptions.length === 1) {
             exploreDataFetch();
         }
-        else
-        {        
+        else {
             exploreFilterDataFetch(arr1);
         }
     };
@@ -825,7 +839,7 @@ const ExploreByBuildings = () => {
                         data.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] =el[1]===null?"-":el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
@@ -846,7 +860,7 @@ const ExploreByBuildings = () => {
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedBuildingId('');
                     });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         fetchExploreChartData();
@@ -854,10 +868,10 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         if (selectedAllBuildingId.length === 1) {
-            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllBuildingId[0]), 100000);
+            fetchExploreAllChartData(selectedAllBuildingId[0]);
         } else {
             selectedAllBuildingId.map((ele) => {
-                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+                fetchExploreAllChartData(ele);
             });
         }
     }, [selectedAllBuildingId]);
@@ -909,19 +923,21 @@ const ExploreByBuildings = () => {
                         id: arr[0].building_id,
                     };
                     dataarr.push(recordToInsert);
-                    if (totalBuildingId.length === dataarr.length) {
+                    if (selectedAllBuildingId.length === dataarr.length) {
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
                     setAllBuildingData(dataarr);
                 });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     useEffect(() => {
         if (buildingListArray.length === 0) {
             return;
         }
+        setSeriesData([]);
+        setSeriesLineData([]);
         for (var i = 0; i < buildingListArray.length; i++) {
             fetchExploreAllChartData(buildingListArray[i]);
         }
@@ -955,6 +971,12 @@ const ExploreByBuildings = () => {
                 lte: maxConValue * 1000 + 1000,
             };
         }
+        if (maxPerValue > 10) {
+            arr['change'] = {
+                gte: minPerValue,
+                lte: maxPerValue,
+            };
+        }
         if (maxSq_FtValue > 10) {
             arr['sq_ft_range'] = {
                 gte: minSq_FtValue,
@@ -970,7 +992,7 @@ const ExploreByBuildings = () => {
             arr['building_type'] = selectedBuildingOptions;
         }
         exploreFilterDataFetch(arr);
-    }, [APIFlag, Sq_FtFlag, selectedBuildingOptions]);
+    }, [APIFlag, APIPerFlag, Sq_FtFlag, selectedBuildingOptions]);
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
@@ -1205,7 +1227,7 @@ const ExploreByBuildings = () => {
                             return (
                                 <>
                                     <Dropdown className="" align="end"
-                                    onToggle={setDropdown}>
+                                        onToggle={setDropdown}>
                                         <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1260,7 +1282,7 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end">
+                                    <Dropdown className="" align="end" onToggle={setChangeDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1297,7 +1319,7 @@ const ExploreByBuildings = () => {
                                                         STEP={1}
                                                         MIN={0}
                                                         range={[minPerValue, maxPerValue]}
-                                                        MAX={100}
+                                                        MAX={1000}
                                                         onSelectionChange={handleInputPer}
                                                     />
                                                 </div>
