@@ -8,6 +8,7 @@ import '../pages/portfolio/style.scss';
 import TimeFrameSelector from '../sharedComponents/timeFrameSelector/TimeFrameSelector';
 
 const Header = (props) => {
+    const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
     const customStartDate = DateRangeStore.useState((s) => s.startDate);
     const customEndDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -15,11 +16,27 @@ const Header = (props) => {
     const [endDate, setEndDate] = useState(customEndDate);
     const [rangeDate, setRangeDate] = useState([moment(customStartDate), moment(customEndDate)]);
 
+    const customOptions = [
+        { label: 'Today', value: 'Today', moment: () => [moment().subtract(0, 'd'), moment()] },
+        { label: 'Last 7 Days', value: 'Last 7 Days', moment: () => [moment().subtract(6, 'd'), moment()] },
+        { label: 'Last 4 Weeks', value: 'Last 4 Weeks', moment: () => [moment().subtract(4, 'week'), moment()] },
+        { label: 'Last 3 Months', value: 'Last 3 Months', moment: () => [moment().subtract(3, 'month'), moment()] },
+        { label: 'Last 12 Months', value: 'Last 12 Months', moment: () => [moment().subtract(12, 'month'), moment()] },
+        { label: 'Month to Date', value: 'Month to Date', moment: () => [moment().startOf('month'), moment()] },
+        { label: 'Quarter to Date', value: 'Quarter to Date', moment: () => [moment().startOf('quarter'), moment()] },
+        { label: 'Year to Date', value: 'Year to Date', moment: () => [moment().startOf('year'), moment()] },
+        { label: 'Custom', value: 'Custom' },
+    ];
+
     // On Custom Date Change from Calender
     const onCustomDateChange = ({ startDate, endDate }) => {
         if (startDate === null || endDate === null) {
             return;
         }
+        localStorage.setItem('filterPeriod', 'Custom');
+        DateRangeStore.update((s) => {
+            s.filterPeriod = 'Custom';
+        });
         setStartDate(startDate);
         setEndDate(endDate);
     };
@@ -80,7 +97,8 @@ const Header = (props) => {
                                     onCustomDateChange={onCustomDateChange}
                                     onDateFilterChange={onDateFilterChange}
                                     rangeDate={rangeDate}
-                                    // period={period}
+                                    timeOptions={customOptions}
+                                    defaultValue={filterPeriod}
                                 />
                             </div>
                         </div>
@@ -98,6 +116,8 @@ const Header = (props) => {
                             onCustomDateChange={onCustomDateChange}
                             onDateFilterChange={onDateFilterChange}
                             rangeDate={rangeDate}
+                            timeOptions={customOptions}
+                            defaultValue={filterPeriod}
                         />
                     </div>
                 </div>

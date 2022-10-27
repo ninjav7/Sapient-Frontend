@@ -24,7 +24,6 @@ const Select = ({
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
-    // const selectedOption = options.find(({ value }) => value === props.value.value);
 
     return (
         <div className={`react-select-wrapper ${className}`}>
@@ -32,7 +31,7 @@ const Select = ({
                 {...props}
                 type={type}
                 options={options}
-                defaultValue={selectedOption}
+                defaultValue={props.defaultValue || selectedOption}
                 value={selectedOption}
                 components={{
                     ...Object.assign(
