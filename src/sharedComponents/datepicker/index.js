@@ -100,6 +100,7 @@ const Datepicker = ({
               endDate,
               onDatesChange: onDateChange,
               onFocusChange,
+              minimumNights: 0,
           };
 
     const DatePickerComponent = props.isSingleDay ? SingleDatePicker : DateRangePicker;
