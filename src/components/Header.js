@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../store/DateRangeStore';
-import Select from '../sharedComponents/form/select';
-import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
+import TimeFrameSelector from '../sharedComponents/timeFrameSelector/TimeFrameSelector';
 
 const Header = (props) => {
     const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
@@ -19,32 +15,10 @@ const Header = (props) => {
     const [startDate, setStartDate] = useState(customStartDate);
     const [endDate, setEndDate] = useState(customEndDate);
 
-    const customDaySelect = [
-        {
-            label: 'Today',
-            value: 0,
-        },
-        {
-            label: 'Last 7 Days',
-            value: 6,
-        },
-        {
-            label: 'Last 4 Weeks',
-            value: 27,
-        },
-        {
-            label: 'Last 3 Months',
-            value: 89,
-        },
-        {
-            label: 'Last 12 Months',
-            value: 364,
-        },
-        {
-            label: 'Custom',
-            value: -1,
-        },
-    ];
+    // const defaultDateRange = {
+    //     label: 'Last 7 Days',
+    //     value: 'Last 7 Days',
+    // };
 
     const handleEvent = (event, picker) => {
         let start = picker.startDate._d;
@@ -63,16 +37,31 @@ const Header = (props) => {
         start.setDate(start.getDate() - value);
         setStartDate(start);
         setEndDate(end);
-        setDateFilter(value);
 
+        localStorage.setItem('dateFilter', value);
         localStorage.setItem('startDate', start);
         localStorage.setItem('endDate', end);
 
         DateRangeStore.update((s) => {
+            s.dateFilter = value;
             s.startDate = start;
             s.endDate = end;
         });
-        // setDateFilter(value);
+        setDateFilter(value);
+    };
+
+    const onCustomDateChange = ({ startDate, endDate }) => {
+        if (startDate === null || endDate === null) {
+            return;
+        }
+        setStartDate(startDate);
+        setEndDate(endDate);
+    };
+
+    const onFilterChange = (rangeDate) => {
+        console.log('onFilterChange function triggered');
+        setStartDate(rangeDate[0]);
+        setEndDate(rangeDate[1]);
     };
 
     useEffect(() => {
@@ -119,29 +108,7 @@ const Header = (props) => {
                     role="group"
                     aria-label="Basic example">
                     <div>
-                        <Select
-                            className="header-datefilter-select font-weight-bold"
-                            options={customDaySelect}
-                            defaultValue={dateFilter}
-                            onChange={({ value }) => {
-                                if (value === -1) {
-                                    return;
-                                }
-                                handleDateFilterChange(value);
-                            }}
-                        />
-                    </div>
-                    <div className="mr-1">
-                        <DateRangePicker
-                            startDate={startDate}
-                            endDate={endDate}
-                            alwaysShowCalendars={false}
-                            onApply={handleEvent}>
-                            <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
-                                <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
-                                {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
-                            </button>
-                        </DateRangePicker>
+                        <TimeFrameSelector onCustomDateChange={onCustomDateChange} onFilterChange={onFilterChange} />
                     </div>
                 </div>
             )}
@@ -156,30 +123,11 @@ const Header = (props) => {
                             role="group"
                             aria-label="Basic example">
                             <div>
-                                <Select
-                                    className="header-datefilter-select font-weight-bold"
-                                    options={customDaySelect}
-                                    defaultValue={dateFilter}
-                                    onChange={({ value }) => {
-                                        if (value === -1) {
-                                            return;
-                                        }
-                                        handleDateFilterChange(value);
-                                    }}
+                                <TimeFrameSelector
+                                    onCustomDateChange={onCustomDateChange}
+                                    onFilterChange={onFilterChange}
+                                    // period={defaultDateRange}
                                 />
-                            </div>
-
-                            <div>
-                                <DateRangePicker
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    alwaysShowCalendars={false}
-                                    onApply={handleEvent}>
-                                    <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
-                                        <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
-                                        {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
-                                    </button>
-                                </DateRangePicker>
                             </div>
                         </div>
                     </Col>

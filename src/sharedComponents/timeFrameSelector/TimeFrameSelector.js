@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 
@@ -38,18 +38,27 @@ const TimeFrameSelector = (props) => {
         props.onChange && props.onChange({ period, rangeDate: [startDate, endDate] });
     };
 
+    useEffect(() => {
+        props.onFilterChange(rangeDate);
+    }, [rangeDate]);
+
     return (
         <div className="time-frame-selector-wrapper">
             <div className="btn-group custom-button-group header-widget-styling" role="group">
-                <Select value={period} options={props.timeOptions || selectOptions} onChange={handleChangeSelect} />
+                <Select
+                    value={period}
+                    options={props.timeOptions || selectOptions}
+                    onChange={handleChangeSelect}
+                    handleDateFilterChange={props.handleDateFilterChange}
+                />
                 <Datepicker
                     rangeDate={rangeDate}
                     onManuallyChangedDate={setCustomDate}
                     onChange={handleDatePickerChange}
-                    isSingleDay={props.isSingleDay}
                     onCancel={props.onCancel}
                     onApply={props.onApply}
                     withApplyButton={props.withApplyButton}
+                    onCustomDateChange={props.onCustomDateChange}
                 />
             </div>
         </div>
