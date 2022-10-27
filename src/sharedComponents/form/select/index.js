@@ -24,11 +24,7 @@ const Select = ({
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
-
-    useEffect(() => {
-        console.log('SSR options => ', options);
-        console.log('SSR selectedOption => ', selectedOption);
-    });
+    // const selectedOption = options.find(({ value }) => value === props.value.value);
 
     return (
         <div className={`react-select-wrapper ${className}`}>

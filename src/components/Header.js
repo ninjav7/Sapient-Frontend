@@ -1,55 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { Row, Col } from 'reactstrap';
-import 'react-datepicker/dist/react-datepicker.css';
 import { DateRangeStore } from '../store/DateRangeStore';
+import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
 import TimeFrameSelector from '../sharedComponents/timeFrameSelector/TimeFrameSelector';
 
 const Header = (props) => {
-    const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
     const customStartDate = DateRangeStore.useState((s) => s.startDate);
     const customEndDate = DateRangeStore.useState((s) => s.endDate);
 
-    const [dateFilter, setDateFilter] = useState(dateValue);
     const [startDate, setStartDate] = useState(customStartDate);
     const [endDate, setEndDate] = useState(customEndDate);
+    const [rangeDate, setRangeDate] = useState([moment(customStartDate), moment(customEndDate)]);
 
-    // const defaultDateRange = {
-    //     label: 'Last 7 Days',
-    //     value: 'Last 7 Days',
-    // };
-
-    const handleEvent = (event, picker) => {
-        let start = picker.startDate._d;
-        let end = picker.endDate._d;
-        setStartDate(start);
-        setEndDate(end);
-        setDateFilter(-1);
-    };
-
-    const handleDateFilterChange = (value) => {
-        let end = new Date();
-        let start = new Date();
-        if (value !== 0) {
-            end.setDate(end.getDate());
-        }
-        start.setDate(start.getDate() - value);
-        setStartDate(start);
-        setEndDate(end);
-
-        localStorage.setItem('dateFilter', value);
-        localStorage.setItem('startDate', start);
-        localStorage.setItem('endDate', end);
-
-        DateRangeStore.update((s) => {
-            s.dateFilter = value;
-            s.startDate = start;
-            s.endDate = end;
-        });
-        setDateFilter(value);
-    };
-
+    // On Custom Date Change from Calender
     const onCustomDateChange = ({ startDate, endDate }) => {
         if (startDate === null || endDate === null) {
             return;
@@ -58,10 +24,15 @@ const Header = (props) => {
         setEndDate(endDate);
     };
 
-    const onFilterChange = (rangeDate) => {
-        console.log('onFilterChange function triggered');
+    // On DateFilter Change
+    const onDateFilterChange = (rangeDate, period) => {
         setStartDate(rangeDate[0]);
         setEndDate(rangeDate[1]);
+
+        localStorage.setItem('filterPeriod', period?.value);
+        DateRangeStore.update((s) => {
+            s.filterPeriod = period?.value;
+        });
     };
 
     useEffect(() => {
@@ -69,6 +40,7 @@ const Header = (props) => {
             return;
         }
         const setCustomDate = (dates) => {
+            setRangeDate([moment(dates[0]), moment(dates[1])]);
             let startCustomDate = dates[0];
             let endCustomDate = dates[1];
 
@@ -92,27 +64,8 @@ const Header = (props) => {
         setCustomDate([startDate, endDate]);
     }, [startDate, endDate]);
 
-    useEffect(() => {
-        localStorage.setItem('dateFilter', +dateFilter);
-
-        DateRangeStore.update((s) => {
-            s.dateFilter = +dateFilter;
-        });
-    }, [dateFilter]);
-
     return (
         <React.Fragment>
-            {props.type === 'modal' && (
-                <div
-                    className="btn-group custom-button-group header-widget-styling"
-                    role="group"
-                    aria-label="Basic example">
-                    <div>
-                        <TimeFrameSelector onCustomDateChange={onCustomDateChange} onFilterChange={onFilterChange} />
-                    </div>
-                </div>
-            )}
-
             {props.type === 'page' && (
                 <Row className="page-title">
                     <Col className="header-container">
@@ -125,13 +78,29 @@ const Header = (props) => {
                             <div>
                                 <TimeFrameSelector
                                     onCustomDateChange={onCustomDateChange}
-                                    onFilterChange={onFilterChange}
-                                    // period={defaultDateRange}
+                                    onDateFilterChange={onDateFilterChange}
+                                    rangeDate={rangeDate}
+                                    // period={period}
                                 />
                             </div>
                         </div>
                     </Col>
                 </Row>
+            )}
+
+            {props.type === 'modal' && (
+                <div
+                    className="btn-group custom-button-group header-widget-styling"
+                    role="group"
+                    aria-label="Basic example">
+                    <div>
+                        <TimeFrameSelector
+                            onCustomDateChange={onCustomDateChange}
+                            onDateFilterChange={onDateFilterChange}
+                            rangeDate={rangeDate}
+                        />
+                    </div>
+                </div>
             )}
         </React.Fragment>
     );

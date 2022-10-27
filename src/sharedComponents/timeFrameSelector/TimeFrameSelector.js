@@ -8,8 +8,8 @@ import Datepicker from '../datepicker';
 import './TimeFrameSelector.scss';
 
 const selectOptions = [
-    { label: 'Today', value: 'Today', moment: () => [moment().subtract(1, 'd'), moment()] },
-    { label: 'Last 7 Days', value: 'Last 7 Days', moment: () => [moment().subtract(7, 'd'), moment()] },
+    { label: 'Today', value: 'Today', moment: () => [moment().subtract(0, 'd'), moment()] },
+    { label: 'Last 7 Days', value: 'Last 7 Days', moment: () => [moment().subtract(6, 'd'), moment()] },
     { label: 'Last 4 Weeks', value: 'Last 4 Weeks', moment: () => [moment().subtract(4, 'week'), moment()] },
     { label: 'Last 3 Months', value: 'Last 3 Months', moment: () => [moment().subtract(3, 'month'), moment()] },
     { label: 'Last 12 Months', value: 'Last 12 Months', moment: () => [moment().subtract(12, 'month'), moment()] },
@@ -25,6 +25,8 @@ const TimeFrameSelector = (props) => {
 
     const handleChangeSelect = (option) => {
         option.moment && setRangeDate(option.moment());
+
+        props.onDateFilterChange(option.moment(), option);
         setPeriod(option);
 
         props.onChange && props.onChange({ period: option, rangeDate: option.moment() });
@@ -39,8 +41,8 @@ const TimeFrameSelector = (props) => {
     };
 
     useEffect(() => {
-        props.onFilterChange(rangeDate);
-    }, [rangeDate]);
+        console.log('props.period :>> ', props.period);
+    });
 
     return (
         <div className="time-frame-selector-wrapper">
@@ -73,13 +75,15 @@ TimeFrameSelector.propTypes = {
     isSingleDay: PropTypes.bool,
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
+    onCustomDateChange: PropTypes.func,
+    onDateFilterChange: PropTypes.func,
     withApplyButton: PropTypes.bool,
 };
 
 TimeFrameSelector.options = selectOptions;
 
 TimeFrameSelector.defaultProps = {
-    rangeDate: [moment().subtract(1, 'd'), moment()],
+    rangeDate: [moment().subtract(6, 'd'), moment()],
 };
 
 export default TimeFrameSelector;
