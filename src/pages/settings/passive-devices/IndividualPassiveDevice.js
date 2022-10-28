@@ -98,12 +98,12 @@ const IndividualPassiveDevice = () => {
     const filtered = !searchSensor
         ? sensors
         : sensors.filter((sensor) => {
-            return (
-                sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
-            );
-        });
+              return (
+                  sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
+              );
+          });
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -135,7 +135,9 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps&building_id=${bldgId}`;
+            let params = `?sensor_id=${
+                id === sensorId ? sensorId : id
+            }&consumption=minCurrentMilliAmps&building_id=${bldgId}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -147,6 +149,8 @@ const IndividualPassiveDevice = () => {
                     { headers }
                 )
                 .then((res) => {
+                    setDeviceData([]);
+                    setSeriesData([]);
                     let response = res.data;
                     let data = response;
 
@@ -168,7 +172,7 @@ const IndividualPassiveDevice = () => {
                             }
                             return _data;
                         });
-                    } catch (error) { }
+                    } catch (error) {}
 
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -205,7 +209,7 @@ const IndividualPassiveDevice = () => {
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
                     });
-            } catch (error) { }
+            } catch (error) {}
         }
     };
 
@@ -224,7 +228,7 @@ const IndividualPassiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -320,7 +324,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                            activeLocationId === passiveData?.location_id
+                                        activeLocationId === passiveData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -386,7 +390,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="passive-device-value">
                                             {passiveData?.model &&
                                                 passiveData?.model.charAt(0).toUpperCase() +
-                                                passiveData?.model.slice(1)}
+                                                    passiveData?.model.slice(1)}
                                         </h6>
                                     </div>
                                 </div>
