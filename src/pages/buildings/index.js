@@ -1370,7 +1370,7 @@ const BuildingOverview = () => {
                 </div>
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
-                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                <div style={{ marginTop: '2rem', marginRight:"1rem", marginLeft: '23px' }}>
                     {/* {/* {/* <Row>
                         <div>
                             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
@@ -1467,7 +1467,7 @@ const BuildingOverview = () => {
                         </div>
                     </Row> */}
                     <Row>
-                        <div className="equip-table-container mt-1">
+                        <div className="equip-table-container">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
                             <table className="table table-borderless">
                                 <thead>
