@@ -36,10 +36,12 @@ import moment from 'moment';
 import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { Link, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
+import Button from '../../sharedComponents/button/Button';
+import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icons/arrow-right.svg';
 import './style.css';
 
 export function useHover() {
@@ -79,6 +81,7 @@ const BuildingOverview = () => {
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const history = useHistory();
 
     const [overview, setOverview] = useState({
         total_building: 0,
@@ -96,6 +99,10 @@ const BuildingOverview = () => {
             old: 0,
         },
     });
+
+    const ICON_SIZES = {
+        [Button.Sizes.lg]: 11,
+    };
 
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
@@ -912,7 +919,7 @@ const BuildingOverview = () => {
     return (
         <React.Fragment>
             <div className="ml-2">
-                <Header title="Building Overview" />
+                <Header title="Building Overview" type="page" />
             </div>
             <Row xl={12} className="mt-2">
                 <div className="energy-summary-alignment">
@@ -929,8 +936,8 @@ const BuildingOverview = () => {
                                 consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
                                 infoText={
                                     startEndDayCount > 1
-                                        ? `Total energy consumption accross all your buildings for the past ${startEndDayCount} days.`
-                                        : `Total energy consumption accross all your buildings for the past ${startEndDayCount} day.`
+                                        ? `Total energy consumption across all your buildings for the past ${startEndDayCount} days.`
+                                        : `Total energy consumption across all your buildings for the past ${startEndDayCount} day.`
                                 }
                                 infoType={`total-bld-cnsmp`}
                             />
@@ -969,8 +976,8 @@ const BuildingOverview = () => {
                                 }
                                 infoText={
                                     startEndDayCount > 1
-                                        ? `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} days.`
-                                        : `Average energy density (kWh / sq.ft.) accross all your buildings for the past ${startEndDayCount} day.`
+                                        ? `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} days.`
+                                        : `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} day.`
                                 }
                                 infoType={`avg-bld-dnty`}
                             />
@@ -1052,6 +1059,8 @@ const BuildingOverview = () => {
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
+                        bldgId={bldgId}
+                        pageType="building"
                     />
                     {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
@@ -1272,10 +1281,30 @@ const BuildingOverview = () => {
 
                     {/* Hourly Average Consumption */}
                     <Row>
-                        <div className="card-body">
+                        <div className="card-body" style={{ padding: '0.5rem' }}>
                             <div className="total-eng-consumtn">
-                                <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
+                                <div className="container-header mb-1">
+                                    <div>
+                                        <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
+                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                            Average by Hour (kWh)
+                                        </h6>
+                                    </div>
+                                    <div>
+                                        <Button
+                                            label="More Details"
+                                            size={Button.Sizes.lg}
+                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                            type={Button.Type.tertiary}
+                                            iconAlignment={Button.IconAlignment.right}
+                                            onClick={() => {
+                                                history.push({
+                                                    pathname: `/energy/time-of-day/${bldgId}`,
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                                 {isAvgConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
                                         <Spinner className="m-2" color={'primary'} />
@@ -1303,10 +1332,28 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                    Hourly Energy Consumption (kWh)
-                                </h6>
+                                <div className="container-header mb-1">
+                                    <div>
+                                        <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
+                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                            Hourly Energy Consumption (kWh)
+                                        </h6>
+                                    </div>
+                                    <div>
+                                        <Button
+                                            label="More Details"
+                                            size={Button.Sizes.lg}
+                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                            type={Button.Type.tertiary}
+                                            iconAlignment={Button.IconAlignment.right}
+                                            onClick={() => {
+                                                history.push({
+                                                    pathname: `/energy/end-uses/${bldgId}`,
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
                                 {isEnergyConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
                                         <Spinner className="m-2" color={'primary'} />

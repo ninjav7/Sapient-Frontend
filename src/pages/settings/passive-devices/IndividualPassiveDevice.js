@@ -57,10 +57,12 @@ const IndividualPassiveDevice = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [currentRecord, setCurrentRecord] = useState({});
+    const [sensorObj, setSensorObj] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [equipmentId, setEquipmentId] = useState('');
+    const [breakerId, setBreakerId] = useState('');
     const [sensors, setSensors] = useState([]);
     const [sensorData, setSensorData] = useState([]);
 
@@ -96,12 +98,12 @@ const IndividualPassiveDevice = () => {
     const filtered = !searchSensor
         ? sensors
         : sensors.filter((sensor) => {
-              return (
-                  sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                  sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                  sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
-              );
-          });
+            return (
+                sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
+            );
+        });
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -133,7 +135,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps&building_id=${bldgId}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -166,7 +168,7 @@ const IndividualPassiveDevice = () => {
                             }
                             return _data;
                         });
-                    } catch (error) {}
+                    } catch (error) { }
 
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -203,7 +205,7 @@ const IndividualPassiveDevice = () => {
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
                     });
-            } catch (error) {}
+            } catch (error) { }
         }
     };
 
@@ -222,7 +224,7 @@ const IndividualPassiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -318,7 +320,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                        activeLocationId === passiveData?.location_id
+                                            activeLocationId === passiveData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -384,7 +386,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="passive-device-value">
                                             {passiveData?.model &&
                                                 passiveData?.model.charAt(0).toUpperCase() +
-                                                    passiveData?.model.slice(1)}
+                                                passiveData?.model.slice(1)}
                                         </h6>
                                     </div>
                                 </div>
@@ -456,6 +458,8 @@ const IndividualPassiveDevice = () => {
                                                                     setCurrentRecord(record);
                                                                     setCurrentIndex(index);
                                                                     setEquipmentId(record.equipment_id);
+                                                                    setSensorObj(record);
+                                                                    setBreakerId(record?.breaker_id);
                                                                 }}>
                                                                 Edit
                                                             </button>
@@ -503,8 +507,6 @@ const IndividualPassiveDevice = () => {
                 </div>
             </div>
 
-            {/* <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} /> */}
-
             <DeviceChartModel
                 showChart={showChart}
                 handleChartClose={handleChartClose}
@@ -531,13 +533,9 @@ const IndividualPassiveDevice = () => {
             <AddSensorPanelModel
                 showBreaker={showBreaker}
                 handleBreakerClose={handleBreakerClose}
-                sensors={sensors}
-                setSensors={setSensors}
-                currentRecord={currentRecord}
-                setCurrentRecord={setCurrentRecord}
-                currentIndex={currentIndex}
+                sensorObj={sensorObj}
                 bldgId={bldgId}
-                equipmentId={equipmentId}
+                breakerId={breakerId}
             />
 
             <EditSensorPanelModel

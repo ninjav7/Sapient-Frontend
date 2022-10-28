@@ -18,6 +18,7 @@ import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
+import { BuildingStore } from '../../store/BuildingStore';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
@@ -62,54 +63,54 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
     //     }
     //     return sortConfig.key === name ? sortConfig.direction : undefined;
     // };
-    const columns = [
-        {
-            dataField: 'building_name',
-            text: 'Name',
-            sort: true,
-            style: { color: 'blue' },
-        },
-        {
-            dataField: 'energy_density',
-            text: 'Energy Density',
-            sort: true,
-        },
-        {
-            dataField: 'energy_per',
-            text: '% Change',
-            sort: true,
-        },
-        {
-            dataField: 'hvac_consumption',
-            text: 'HVAC Consumption',
-            sort: true,
-        },
-        {
-            dataField: 'hvac_per',
-            text: '% Change',
-            sort: true,
-        },
-        {
-            dataField: 'total_consumption',
-            text: 'Total Consumption',
-            sort: true,
-        },
-        {
-            dataField: 'total_per',
-            text: '% Change',
-            sort: true,
-        },
-        {
-            dataField: 'sq_ft',
-            text: 'Sq. Ft.',
-            sort: true,
-        },
-        {
-            dataField: 'buildingAccess',
-            text: 'Monitored Load',
-            sort: true,
-        },
-    ];
+    // const columns = [
+    //     {
+    //         dataField: 'building_id',
+    //         text: 'Name',
+    //         sort: true,
+    //         style: { color: 'blue' },
+    //     },
+    //     {
+    //         dataField: 'energy_density',
+    //         text: 'Energy Density',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'energy_per',
+    //         text: '% Change',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'hvac_consumption',
+    //         text: 'HVAC Consumption',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'hvac_per',
+    //         text: '% Change',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'total_consumption',
+    //         text: 'Total Consumption',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'total_per',
+    //         text: '% Change',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'sq_ft',
+    //         text: 'Sq. Ft.',
+    //         sort: true,
+    //     },
+    //     {
+    //         dataField: 'buildingAccess',
+    //         text: 'Monitored Load',
+    //         sort: true,
+    //     },
+    // ];
 
     const handleColumnSort = (order, columnName) => {
         if (columnName === 'building_name') {
@@ -142,8 +143,8 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
         }
         let topVal = buildingsData[0].energy_density;
         setTopEnergyDensity(topVal);
-        let hvacVal = buildingsData[0].hvac_consumption.now;
-        setTopHVACConsumption(hvacVal);
+        // let hvacVal = buildingsData[0].hvac_consumption.now;
+        // setTopHVACConsumption(hvacVal);
     }, [buildingsData]);
 
     return (
@@ -391,12 +392,25 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <tr key={record.building_id} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'name') && (
                                             <th scope="row">
-                                                <Link
-                                                    to={{
+                                                <Link to={{
                                                         pathname: `/energy/building/overview/${record.building_id}`,
                                                     }}>
-                                                    <a className="building-name">{record.building_name}</a>
-                                                </Link>
+                                                        <div
+                                                            className="buildings-name"
+                                                            onClick={() => {
+                                                                localStorage.setItem('building_Id', record.building_id);
+                                                                localStorage.setItem(
+                                                                    'building_Name',
+                                                                    record.building_name
+                                                                );
+                                                                BuildingStore.update((s) => {
+                                                                    s.BldgId = record.building_id;
+                                                                    s.BldgName = record.building_name;
+                                                                });
+                                                            }}>
+                                                            {record.building_name}
+                                                        </div>
+                                                    </Link>
                                                 <span className="badge badge-soft-secondary mr-2">Office</span>
                                             </th>
                                         )}
@@ -712,17 +726,17 @@ const CompareBuildings = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const tableColumnOptions = [
-        { label: 'Name', value: 'name' },
-        { label: 'Energy Density', value: 'density' },
-        { label: '% Change', value: 'per_change' },
-        { label: 'HVAC Consumption', value: 'hvac' },
-        { label: 'HVAC % change', value: 'hvac_per' },
-        { label: 'Total Consumption', value: 'total' },
-        { label: 'Total % change', value: 'total_per' },
-        { label: 'Sq. ft.', value: 'sq_ft' },
-        { label: 'Monitored Load', value: 'load' },
-    ];
+    // const tableColumnOptions = [
+    //     { label: 'Name', value: 'name' },
+    //     { label: 'Energy Density', value: 'density' },
+    //     { label: '% Change', value: 'per_change' },
+    //     { label: 'HVAC Consumption', value: 'hvac' },
+    //     { label: 'HVAC % change', value: 'hvac_per' },
+    //     { label: 'Total Consumption', value: 'total' },
+    //     { label: 'Total % change', value: 'total_per' },
+    //     { label: 'Sq. ft.', value: 'sq_ft' },
+    //     { label: 'Monitored Load', value: 'load' },
+    // ];
 
     const [isBuildingDataFetched, setIsBuildingDataFetched] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
@@ -739,11 +753,20 @@ const CompareBuildings = () => {
                 ];
                 bs.items = newList;
             });
-        };
         ComponentStore.update((s) => {
             s.parent = 'portfolio';
         });
+
+        localStorage.setItem('building_Id', 'portfolio');
+            localStorage.setItem('building_Name', 'Portfolio');
+
+            BuildingStore.update((s) => {
+                s.Building_Id = 'portfolio';
+                s.Building_Name = 'Portfolio';
+            });
+        };
         updateBreadcrumbStore();
+
         let arr = [
             { label: 'Name', value: 'name' },
             { label: 'Energy Density', value: 'density' },
@@ -863,7 +886,7 @@ const CompareBuildings = () => {
 
     return (
         <React.Fragment>
-            <Header title="Compare Buildings" />
+            <Header title="Compare Buildings" type="page" />
 
             {/* <Row className="m-4">
                 <div>

@@ -28,18 +28,15 @@ import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
-import SingleBreakerLinked from '../../assets/images/equip-modal/Single_Breaker_Linked.svg';
-import DoubleBreakerLinked from '../../assets/images/equip-modal/Double_Breaker_Linked.svg';
-import TripleBreakerLinked from '../../assets/images/equip-modal/Triple_Breaker_Linked.svg';
 import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import ModalHeader from '../../components/ModalHeader';
+import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import Button from '../../sharedComponents/button/Button';
 import './style.css';
-import { DivideSquare } from 'react-feather';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -59,7 +56,6 @@ const EquipChartModal = ({
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
@@ -76,18 +72,12 @@ const EquipChartModal = ({
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
-    const [topConsumption, setTopConsumption] = useState('');
-    const [peak, setPeak] = useState('');
     const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
     const [ytdData, setYtdData] = useState({});
-
-    const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
-    const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
-    const [showTab, setShowTab] = useState('');
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
@@ -100,10 +90,6 @@ const EquipChartModal = ({
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
-
     const addEquimentType = () => {
         equipmentTypeData.map((item) => {
             setEquipmentTypeDataNow((el) => [
@@ -114,7 +100,6 @@ const EquipChartModal = ({
     };
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
 
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
@@ -149,7 +134,7 @@ const EquipChartModal = ({
                 .then((res) => {
                     setBuildingAlerts(res.data);
                 });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const [options, setOptions] = useState({
@@ -230,15 +215,14 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${
-                            w.config.series[0].unit === 'kWh'
-                                ? series[seriesIndex][dataPointIndex].toFixed(0)
-                                : series[seriesIndex][dataPointIndex].toFixed(0)
-                        } 
+                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit === 'kWh'
+                        ? series[seriesIndex][dataPointIndex].toFixed(0)
+                        : series[seriesIndex][dataPointIndex].toFixed(0)
+                    } 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
-                            .utc(timestamp)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
+                        .utc(timestamp)
+                        .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -303,9 +287,17 @@ const EquipChartModal = ({
     });
 
     const getCSVLinkData = () => {
+        let acd=[];
+        if(seriesData.length!==0)
+           {
+             seriesData[0].data.map((ele)=>{
+               
+                acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
+             })
+           }
         let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
-        // streamData.unshift(['Timestamp', selectedConsumption])
+
+        let streamData = seriesData.length > 0 ? acd : [];
         return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
 
@@ -371,7 +363,7 @@ const EquipChartModal = ({
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const fetchEquipmentChart = async (equipId) => {
@@ -401,7 +393,7 @@ const EquipChartModal = ({
                         return _data;
                     });
 
-                    data.forEach((record) => {});
+                    data.forEach((record) => { });
                     let exploreData = [];
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
@@ -441,43 +433,41 @@ const EquipChartModal = ({
         }
     };
 
+    const fetchEquipmentYTDUsageData = async (equipId) => {
+        try {
+            setIsYtdDataFetching(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?equipment_id=${equipId}&consumption=energy`;
+
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
+                    {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data.data;
+                    setYtdData(response[0]);
+                    setIsYtdDataFetching(false);
+                });
+        } catch (error) {
+            setIsYtdDataFetching(false);
+        }
+    };
+
     useEffect(() => {
         if (!equipmentFilter?.equipment_id) {
             return;
         }
-
-        const fetchEquipmentYTDUsageData = async (equipId) => {
-            try {
-                setIsYtdDataFetching(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?equipment_id=${equipId}&consumption=energy`;
-
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data.data;
-                        setYtdData(response[0]);
-                        // setTopConsumption(data[0].ytd.ytd);
-                        // setPeak(data[0].ytd_peak.energy);
-                        setIsYtdDataFetching(false);
-                    });
-            } catch (error) {
-                setIsYtdDataFetching(false);
-            }
-        };
 
         const fetchEquipmentDetails = async (equipId) => {
             try {
@@ -497,7 +487,7 @@ const EquipChartModal = ({
                     setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchBuildingAlerts = async () => {
@@ -521,7 +511,7 @@ const EquipChartModal = ({
                     .then((res) => {
                         setBuildingAlerts(res.data);
                     });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchEndUseData = async () => {
@@ -534,7 +524,7 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     setEndUse(res.data);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchEquipTypeData = async () => {
@@ -552,7 +542,7 @@ const EquipChartModal = ({
                     });
                     setEquipmentTypeData(response);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchLocationData = async () => {
@@ -565,13 +555,13 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchBuildingAlerts();
+        //fetchBuildingAlerts();
         fetchEndUseData();
         fetchEquipTypeData();
         fetchLocationData();
@@ -593,9 +583,9 @@ const EquipChartModal = ({
         const fetchActiveDeviceSensorData = async () => {
             if (equipmentData !== null) {
                 if (
-                    equipmentData.device_type === 'passive' ||
-                    equipmentData.device_id === '' ||
-                    equipmentData.device_id === undefined
+                    equipmentData?.device_type === 'passive' ||
+                    equipmentData?.device_id === '' ||
+                    equipmentData?.device_id === undefined
                 ) {
                     return;
                 }
@@ -614,11 +604,11 @@ const EquipChartModal = ({
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         if (equipmentData !== null) {
-            if (equipmentData.device_type !== 'passive') {
+            if (equipmentData?.device_type !== 'passive') {
                 fetchActiveDeviceSensorData();
             }
         }
@@ -640,7 +630,8 @@ const EquipChartModal = ({
             buildingAlertsData();
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-    }, [endDate, selectedConsumption]);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
@@ -653,10 +644,6 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
-
-    useEffect(() => {
-        console.log('equipBreakerLink', equipBreakerLink);
-    });
 
     return (
         <Modal
@@ -853,32 +840,60 @@ const EquipChartModal = ({
                             <Col lg={4}>
                                 <div className="ytd-container">
                                     <div>
-                                        <div className="ytd-heading">Total Consumption YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Total Consumption (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
                                             <div className="ytd-flex">
                                                 <span className="mr-1 ytd-value">
-                                                    {formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)}
+                                                    {ytdData?.ytd?.ytd
+                                                        ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
+                                                        : 0}
                                                 </span>
                                                 <span className="ytd-unit">kWh</span>
                                             </div>
                                         )}
                                     </div>
                                     <div>
-                                        <div className="ytd-heading">Peak kW YTD</div>
+                                        <div className="ytd-heading">
+                                            {`Peak kW (${moment(startDate?.toLocaleDateString()).format(
+                                                'MMM D'
+                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                        </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
                                         ) : (
                                             <div className="ytd-flex">
-                                                <span className="mr-1 ytd-value">
-                                                    {formatConsumptionValue(ytdData?.ytd_peak?.power / 1000000, 1)}
-                                                </span>
-                                                <span className="ytd-unit">
-                                                    {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                        'MM/DD  H:mm'
-                                                    )}`}
-                                                </span>
+                                                {equipmentData?.device_type === 'active' ? (
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd_peak?.power
+                                                            ? formatConsumptionValue(ytdData?.ytd_peak?.power / 1000, 1)
+                                                            : 0}
+                                                    </span>
+                                                ) : (
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd_peak?.power
+                                                            ? formatConsumptionValue(
+                                                                ytdData?.ytd_peak?.power / 1000000,
+                                                                1
+                                                            )
+                                                            : 0}
+                                                    </span>
+                                                )}
+
+                                                {ytdData?.ytd_peak?.time_stamp ? (
+                                                    <span className="ytd-unit">
+                                                        {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
+                                                            'MM/DD  H:mm'
+                                                        )}`}
+                                                    </span>
+                                                ) : (
+                                                    <span className="ytd-unit">kW</span>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -989,7 +1004,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <ModalHeader />
+                                    <Header type="modal" />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>
@@ -1086,18 +1101,6 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    {/* <Select
-                                                    id="exampleSelect"
-                                                    placeholder="Select Type"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
-                                                    options={equipmentTypeDataNow}
-                                                    onChange={(e) => {
-                                                        handleChange('equipment_type', e.value);
-                                                    }}
-                                                    className="basic-single font-weight-bold"
-                                                /> */}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1200,18 +1203,18 @@ const EquipChartModal = ({
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
                                                 {/* <div className="modal-right-pic"></div> */}
-                                                {equipBreakerLink.length === 0 ? (
+                                                {equipBreakerLink?.length === 0 ? (
                                                     <div className="equip-breaker-style">
                                                         <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        {equipBreakerLink.length === 1 && (
+                                                        {equipBreakerLink?.length === 1 && (
                                                             <div className="breaker-container-style">
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div
                                                                         className={
                                                                             equipBreakerLink[1]?.sensor_id === ''
@@ -1229,7 +1232,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 2 && (
+                                                        {equipBreakerLink?.length === 2 && (
                                                             <div className="breaker-container-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1260,7 +1263,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 3 && (
+                                                        {equipBreakerLink?.length === 3 && (
                                                             <div className="breaker-container-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1304,17 +1307,18 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                    />
                                                 </div>
                                                 <div className="equip-breaker-container">
                                                     <div className="equip-breaker-detail">
@@ -1329,11 +1333,11 @@ const EquipChartModal = ({
                                                                 Installed at
                                                             </div>
                                                             <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink.length === 1 &&
+                                                                {equipBreakerLink?.length === 1 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 2 &&
+                                                                {equipBreakerLink?.length === 2 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 3 &&
+                                                                {equipBreakerLink?.length === 3 &&
                                                                     `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
                                                             </div>
                                                         </div>
@@ -1396,18 +1400,6 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    {/* <Select
-                                                    id="exampleSelect"
-                                                    placeholder="Select Type"
-                                                    name="select"
-                                                    isSearchable={true}
-                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
-                                                    options={equipmentTypeDataNow}
-                                                    onChange={(e) => {
-                                                        handleChange('equipment_type', e.value);
-                                                    }}
-                                                    className="basic-single font-weight-bold"
-                                                /> */}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1441,7 +1433,6 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
-                                                        // defaultValue={loc.length===0?"":loc.location_id}
                                                         onChange={(e) => {
                                                             handleChange('space_id', e.target.value);
                                                         }}
@@ -1510,18 +1501,31 @@ const EquipChartModal = ({
                                     <Col lg={4}>
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
-                                                {equipBreakerLink.length === 0 ? (
-                                                    <div className="equip-breaker-style">
-                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
+                                                {equipBreakerLink?.length === 0 ? (
+                                                    <div className="breaker-container-disabled-style">
+                                                        <div className="breaker-number-style">
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style-single">
+                                                            <div className="breaker-offline-style"></div>
+                                                        </div>
+                                                        <div className="breaker-voltage-style">
+                                                            <div></div>
+                                                            <div></div>
+                                                        </div>
+                                                        <div className="breaker-number-style">
+                                                            <div className="breaker-socket1-style-disbaled"></div>
+                                                            <div className="breaker-socket-single-style-disabled"></div>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        {equipBreakerLink.length === 1 && (
+                                                        {equipBreakerLink?.length === 1 && (
                                                             <div className="breaker-container-disabled-style">
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
                                                                 </div>
-                                                                <div className="breaker-number-style">
+                                                                <div className="breaker-number-style-single">
                                                                     <div
                                                                         className={
                                                                             equipBreakerLink[0]?.sensor_id === ''
@@ -1539,7 +1543,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 2 && (
+                                                        {equipBreakerLink?.length === 2 && (
                                                             <div className="breaker-container-disabled-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1570,7 +1574,7 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        {equipBreakerLink.length === 3 && (
+                                                        {equipBreakerLink?.length === 3 && (
                                                             <div className="breaker-container-disabled-style">
                                                                 <div className="breaker-number-style">
                                                                     <div>{equipBreakerLink[0]?.breaker_number}</div>
@@ -1614,41 +1618,46 @@ const EquipChartModal = ({
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                     <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    <Button
+                                                        label="View"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
                                                         onClick={() => {
                                                             redirectToConfigDevicePage(
                                                                 equipmentData?.device_id,
                                                                 'passive-device'
                                                             );
-                                                        }}>
-                                                        View
-                                                    </button>
+                                                        }}
+                                                        disabled
+                                                    />
                                                 </div>
-                                                <div className="equip-breaker-container">
-                                                    <div className="equip-breaker-detail">
-                                                        <div className="phase-style">
-                                                            <div className="equip-breaker-header mb-1">Phases</div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink[0]?.breaker_type}
+                                                {equipBreakerLink?.length === 0 ? (
+                                                    <></>
+                                                ) : (
+                                                    <div className="equip-breaker-container">
+                                                        <div className="equip-breaker-detail">
+                                                            <div className="phase-style">
+                                                                <div className="equip-breaker-header mb-1">Phases</div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink[0]?.breaker_type}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="installed-style">
-                                                            <div className="equip-breaker-header mb-1">
-                                                                Installed at
-                                                            </div>
-                                                            <div className="equip-breaker-value float-left">
-                                                                {equipBreakerLink.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            <div className="installed-style">
+                                                                <div className="equip-breaker-header mb-1">
+                                                                    Installed at
+                                                                </div>
+                                                                <div className="equip-breaker-value float-left">
+                                                                    {equipBreakerLink?.length === 1 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                    {equipBreakerLink?.length === 2 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                    {equipBreakerLink?.length === 3 &&
+                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </Col>
@@ -1840,9 +1849,16 @@ const EquipChartModal = ({
                                             <div className="modal-right-card mt-2">
                                                 <span className="modal-right-card-title">Power Strip Socket 2</span>
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                <Button
+                                                    label="View Devices"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => {
+                                                        redirectToConfigDevicePage(
+                                                            equipmentData?.device_id,
+                                                            'active-device'
+                                                        );
+                                                    }}
                                                     disabled={
                                                         equipmentData !== null
                                                             ? equipmentData.device_id === ''
@@ -1850,30 +1866,23 @@ const EquipChartModal = ({
                                                                 : false
                                                             : true
                                                     }
-                                                    onClick={() => {
-                                                        redirectToConfigDevicePage(
-                                                            equipmentData?.device_id,
-                                                            'active-device'
-                                                        );
-                                                    }}>
-                                                    View Devices
-                                                </button>
+                                                />
                                             </div>
                                             <div>
                                                 {equipmentData !== null
                                                     ? equipmentData.status === 'Online' && (
-                                                          <div className="icon-bg-pop-styling">
-                                                              ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                          </div>
-                                                      )
+                                                        <div className="icon-bg-pop-styling">
+                                                            ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )
                                                     : ''}
                                                 {equipmentData !== null
                                                     ? equipmentData.status === 'Offline' && (
-                                                          <div className="icon-bg-pop-styling-slash">
-                                                              OFFLINE{' '}
-                                                              <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                          </div>
-                                                      )
+                                                        <div className="icon-bg-pop-styling-slash">
+                                                            OFFLINE{' '}
+                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )
                                                     : ''}
                                             </div>
                                             <div className="mt-4 modal-right-group">
@@ -1897,7 +1906,7 @@ const EquipChartModal = ({
                                                             Device type
                                                         </h6>
                                                         <h6 className="card-title">
-                                                            {equipmentData !== null ? equipmentData.device_type : ''}
+                                                            {equipmentData !== null ? equipmentData?.device_type : ''}
                                                         </h6>
                                                     </div>
                                                 </FormGroup>

@@ -37,6 +37,7 @@ import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { getFormattedTimeIntervalObjectData } from '../../helpers/formattedChartData';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -489,14 +490,13 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
                         let newArray = [
                             {
                                 name: 'Energy',
                                 data: [],
                             },
                         ];
-                        response.forEach((record) => {
+                        res.data.forEach((record) => {
                             const d = new Date(record.x);
                             const milliseconds = d.getTime();
                             newArray[0].data.push({
@@ -504,6 +504,9 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(0),
                             });
                         });
+                        // --- for PLT-125
+                        // const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
+                        // setEnergyConsumptionChart(formattedData);
                         setEnergyConsumptionChart(newArray);
                         setIsConsumpHistoryLoading(false);
                     });
@@ -606,7 +609,7 @@ const PortfolioOverview = () => {
 
     return (
         <>
-            <Header title="Portfolio Overview" />
+            <Header title="Portfolio Overview" type="page" />
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>
@@ -629,6 +632,7 @@ const PortfolioOverview = () => {
                                 options={options}
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                                pageType="portfolio"
                             />
                         </Col>
                         <Col xl={6}>

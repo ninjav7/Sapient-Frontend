@@ -9,8 +9,6 @@ import Select from '../sharedComponents/form/select';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
-import { dateApplied } from '../store/globalState';
-import { useAtom } from 'jotai';
 
 const Header = (props) => {
     const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
@@ -20,9 +18,6 @@ const Header = (props) => {
     const [dateFilter, setDateFilter] = useState(dateValue);
     const [startDate, setStartDate] = useState(customStartDate);
     const [endDate, setEndDate] = useState(customEndDate);
-    // const [first, setfirst] = useState(second)
-
-    const [apply, setApply] = useAtom(dateApplied);
 
     const customDaySelect = [
         {
@@ -56,9 +51,7 @@ const Header = (props) => {
         let end = picker.endDate._d;
         setStartDate(start);
         setEndDate(end);
-        localStorage.setItem('dateFilter', -1);
         setDateFilter(-1);
-        setApply(true);
     };
 
     const handleDateFilterChange = (value) => {
@@ -70,17 +63,16 @@ const Header = (props) => {
         start.setDate(start.getDate() - value);
         setStartDate(start);
         setEndDate(end);
+        setDateFilter(value);
 
-        localStorage.setItem('dateFilter', value);
         localStorage.setItem('startDate', start);
         localStorage.setItem('endDate', end);
 
         DateRangeStore.update((s) => {
-            s.dateFilter = value;
             s.startDate = start;
             s.endDate = end;
         });
-        setDateFilter(value);
+        // setDateFilter(value);
     };
 
     useEffect(() => {
@@ -111,45 +103,88 @@ const Header = (props) => {
         setCustomDate([startDate, endDate]);
     }, [startDate, endDate]);
 
+    useEffect(() => {
+        localStorage.setItem('dateFilter', +dateFilter);
+
+        DateRangeStore.update((s) => {
+            s.dateFilter = +dateFilter;
+        });
+    }, [dateFilter]);
+
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style ml-2">{props.title}</span>
-
-                    <div
-                        className="btn-group custom-button-group header-widget-styling"
-                        role="group"
-                        aria-label="Basic example">
-                        <div>
-                            <Select
-                                className="header-datefilter-select font-weight-bold"
-                                options={customDaySelect}
-                                defaultValue={dateFilter}
-                                onChange={({ value }) => {
-                                    if (value === -1) {
-                                        return;
-                                    }
-                                    handleDateFilterChange(value);
-                                }}
-                            />
-                        </div>
-
-                        <div>
-                            <DateRangePicker
-                                startDate={startDate}
-                                endDate={endDate}
-                                alwaysShowCalendars={false}
-                                onApply={handleEvent}>
-                                <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
-                                    <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
-                                    {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
-                                </button>
-                            </DateRangePicker>
-                        </div>
+            {props.type === 'modal' && (
+                <div
+                    className="btn-group custom-button-group header-widget-styling"
+                    role="group"
+                    aria-label="Basic example">
+                    <div>
+                        <Select
+                            className="header-datefilter-select font-weight-bold"
+                            options={customDaySelect}
+                            defaultValue={dateFilter}
+                            onChange={({ value }) => {
+                                if (value === -1) {
+                                    return;
+                                }
+                                handleDateFilterChange(value);
+                            }}
+                        />
                     </div>
-                </Col>
-            </Row>
+                    <div className="mr-1">
+                        <DateRangePicker
+                            startDate={startDate}
+                            endDate={endDate}
+                            alwaysShowCalendars={false}
+                            onApply={handleEvent}>
+                            <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
+                                <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
+                                {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
+                            </button>
+                        </DateRangePicker>
+                    </div>
+                </div>
+            )}
+
+            {props.type === 'page' && (
+                <Row className="page-title">
+                    <Col className="header-container">
+                        <span className="heading-style ml-2">{props.title}</span>
+
+                        <div
+                            className="btn-group custom-button-group header-widget-styling"
+                            role="group"
+                            aria-label="Basic example">
+                            <div>
+                                <Select
+                                    className="header-datefilter-select font-weight-bold"
+                                    options={customDaySelect}
+                                    defaultValue={dateFilter}
+                                    onChange={({ value }) => {
+                                        if (value === -1) {
+                                            return;
+                                        }
+                                        handleDateFilterChange(value);
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <DateRangePicker
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    alwaysShowCalendars={false}
+                                    onApply={handleEvent}>
+                                    <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
+                                        <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
+                                        {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
+                                    </button>
+                                </DateRangePicker>
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+            )}
         </React.Fragment>
     );
 };

@@ -21,39 +21,30 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionTotals = ({
-    series,
-    options,
-    energyConsumption,
-    isEnergyConsumptionChartLoading,
-    pageType,
-    bldgId,
-}) => {
+const EndUseTotals = ({ series, options, energyConsumption, isEndUsageChartLoading }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(5);
+        let val = (parseInt(energy_consumption.now));
         let value = parseFloat(val);
-        const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
+        const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);;
         const trendType =
             energy_consumption.now <= energy_consumption.old
                 ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 : TRENDS_BADGE_TYPES.UPWARD_TREND;
 
-        return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType };
+        return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType};
     });
 
     return (
         <div>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
-                title="Energy Consumption by End Use"
+                title="After-Hours Energy"
                 subtitle="Energy Totals"
                 items={donutChartData}
-                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                pageType={pageType}
-                bldgId={bldgId}
+                isEndUsageChartLoading={isEndUsageChartLoading}
             />
         </div>
     );
 };
 
-export default EnergyConsumptionTotals;
+export default EndUseTotals;

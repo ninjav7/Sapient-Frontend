@@ -12,7 +12,8 @@ import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import ModalHeader from '../../components/ModalHeader';
+import { BuildingStore } from '../../store/BuildingStore';
+import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
@@ -45,7 +46,7 @@ const DeviceChartModel = ({
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
 
     const handleRefresh = () => {
@@ -140,11 +141,11 @@ const DeviceChartModel = ({
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} ${selectedUnit}</div>
+                    0
+                )} ${selectedUnit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
+                        .tz(timeZone)
+                        .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -263,7 +264,7 @@ const DeviceChartModel = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
@@ -292,7 +293,7 @@ const DeviceChartModel = ({
 
                                 return _data;
                             });
-                        } catch (error) {}
+                        } catch (error) { }
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
                         setSeriesData([
@@ -329,12 +330,12 @@ const DeviceChartModel = ({
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            0
-                        )} ${selectedUnit}</div>
+                    series[seriesIndex][dataPointIndex],
+                    0
+                )} ${selectedUnit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
+                        .tz(timeZone)
+                        .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         };
@@ -394,7 +395,7 @@ const DeviceChartModel = ({
                     className="btn-group custom-button-group header-widget-styling"
                     role="group"
                     aria-label="Basic example">
-                    <ModalHeader />
+                    <Header type="modal" />
                 </div>
 
                 <div className="mr-3 sensor-chart-options">

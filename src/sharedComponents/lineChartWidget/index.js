@@ -45,9 +45,6 @@ const LineChartWidget = ({
             enabled: true,
             enabledOnSeries: [1],
         },
-        animations: {
-            enabled: false,
-        },
         tooltip: {
             //@TODO NEED?
             // enabled: false,
@@ -65,13 +62,17 @@ const LineChartWidget = ({
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-
+                let ch = '';
+                if (isNaN(parseInt(series[seriesIndex][dataPointIndex])) === false) {
+                    ch = formatConsumptionValue(series[seriesIndex][dataPointIndex], 4);
+                } else {
+                    ch = '-';
+                }
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            4
-                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">
+                    
+                        ${ch} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
                             .tz(timeZone)
                             .format(`MMM D 'YY @ hh:mm A`)}</div>

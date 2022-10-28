@@ -8,7 +8,7 @@ const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, sta
             title="Energy Consumption History"
             subtitle="Totals by Hour (kWh)"
             series={series}
-            isConsumpHistoryLoading={isConsumpHistoryLoading}
+            //isConsumpHistoryLoading={isConsumpHistoryLoading}
             startEndDayCount={startEndDayCount}
         />
     );

@@ -314,7 +314,7 @@ const EndUsesPage = () => {
 
     return (
         <React.Fragment>
-            <Header title="End Uses" />
+            <Header title="End Uses" type="page" />
 
             {isEndUsesDataFetched ? (
                 <Row className="ml-4">
@@ -363,7 +363,7 @@ const EndUsesPage = () => {
                 </Row>
             )}
 
-            <Row style={{ marginLeft: '0.5px' }}>
+            <Row style={{ marginLeft: '0.5px' , marginRight:"0px", marginleft:'0px'}}>
                 <div className="card-body">
                     <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top End Uses by Usage
