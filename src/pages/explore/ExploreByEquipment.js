@@ -1391,7 +1391,7 @@ const ExploreByEquipment = () => {
             setIsExploreDataLoading(false);
         }
     }
-    useEffect(async () => {
+    useEffect(() => {
         if (startDate === null) {
             return;
         }
@@ -1462,9 +1462,12 @@ const ExploreByEquipment = () => {
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
-        if (entryPoint === "entered")
-            await fetchAllExploredata(arr);
-        await exploreDataFetch(arr);
+        const fetchAPI=async()=>{
+            if (entryPoint === "entered")
+                await fetchAllExploredata(arr);
+            await exploreDataFetch(arr);
+        }
+        fetchAPI();
        
     }, [endDate, bldgId, pageSize]);
 
