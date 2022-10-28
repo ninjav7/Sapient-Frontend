@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
-import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
+import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
@@ -22,7 +22,6 @@ const DeviceChartModel = ({
     showChart,
     handleChartClose,
     sensorData,
-    sensorLineData,
     seriesData,
     setSeriesData,
     deviceData,
@@ -30,7 +29,6 @@ const DeviceChartModel = ({
     CONVERSION_ALLOWED_UNITS,
     UNIT_DIVIDER,
     metric,
-    setMetric,
     selectedConsumption,
     setConsumption,
     getRequiredConsumptionLabel,
@@ -55,9 +53,6 @@ const DeviceChartModel = ({
         setSelectedUnit(metric[0].unit);
         setConsumption(metric[0].value);
     };
-
-    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    const fileExtension = '.xlsx';
 
     const [options, setOptions] = useState({
         chart: {

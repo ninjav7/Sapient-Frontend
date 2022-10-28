@@ -75,7 +75,6 @@ const IndividualPassiveDevice = () => {
     const [deviceData, setDeviceData] = useState([]);
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
@@ -165,7 +164,6 @@ const IndividualPassiveDevice = () => {
                         recordToInsert.data = recordToInsert.data.map((_data) => {
                             _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
                             _data[0] = new Date(_data[0]);
-                            // moment(_data[0]).tz(timeZone).format();
 
                             if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                 _data[1] = _data[1] / UNIT_DIVIDER;
@@ -427,8 +425,6 @@ const IndividualPassiveDevice = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* <div className="mt-2 socket-image-container"></div> */}
 
                             {isFetchingSensorData ? (
                                 <div className="mt-4">
