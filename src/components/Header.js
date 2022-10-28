@@ -1,78 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Row, Col } from 'reactstrap';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../store/DateRangeStore';
-import Select from '../sharedComponents/form/select';
-import DateRangePicker from 'react-bootstrap-daterangepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
+import TimeFrameSelector from '../sharedComponents/timeFrameSelector/TimeFrameSelector';
 
 const Header = (props) => {
-    const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
-    const customStartDate = DateRangeStore.useState((s) => s.startDate);
-    const customEndDate = DateRangeStore.useState((s) => s.endDate);
+    const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
-    const [dateFilter, setDateFilter] = useState(dateValue);
-    const [startDate, setStartDate] = useState(customStartDate);
-    const [endDate, setEndDate] = useState(customEndDate);
+    const [rangeDate, setRangeDate] = useState([moment(startDate), moment(endDate)]);
 
-    const customDaySelect = [
-        {
-            label: 'Today',
-            value: 0,
-        },
-        {
-            label: 'Last 7 Days',
-            value: 6,
-        },
-        {
-            label: 'Last 4 Weeks',
-            value: 27,
-        },
-        {
-            label: 'Last 3 Months',
-            value: 89,
-        },
-        {
-            label: 'Last 12 Months',
-            value: 364,
-        },
-        {
-            label: 'Custom',
-            value: -1,
-        },
+    const customOptions = [
+        { label: 'Today', value: 'Today', moment: () => [moment().subtract(0, 'd'), moment()] },
+        { label: 'Last 7 Days', value: 'Last 7 Days', moment: () => [moment().subtract(6, 'd'), moment()] },
+        { label: 'Last 4 Weeks', value: 'Last 4 Weeks', moment: () => [moment().subtract(4, 'week'), moment()] },
+        { label: 'Last 3 Months', value: 'Last 3 Months', moment: () => [moment().subtract(3, 'month'), moment()] },
+        { label: 'Last 12 Months', value: 'Last 12 Months', moment: () => [moment().subtract(12, 'month'), moment()] },
+        { label: 'Month to Date', value: 'Month to Date', moment: () => [moment().startOf('month'), moment()] },
+        { label: 'Quarter to Date', value: 'Quarter to Date', moment: () => [moment().startOf('quarter'), moment()] },
+        { label: 'Year to Date', value: 'Year to Date', moment: () => [moment().startOf('year'), moment()] },
+        { label: 'Custom', value: 'Custom' },
     ];
 
-    const handleEvent = (event, picker) => {
-        let start = picker.startDate._d;
-        let end = picker.endDate._d;
-        setStartDate(start);
-        setEndDate(end);
-        setDateFilter(-1);
-    };
-
-    const handleDateFilterChange = (value) => {
-        let end = new Date();
-        let start = new Date();
-        if (value !== 0) {
-            end.setDate(end.getDate());
+    // On Custom Date Change from Calender
+    const onCustomDateChange = ({ startDate, endDate }) => {
+        if (startDate === null || endDate === null) {
+            return;
         }
-        start.setDate(start.getDate() - value);
-        setStartDate(start);
-        setEndDate(end);
-        setDateFilter(value);
 
-        localStorage.setItem('startDate', start);
-        localStorage.setItem('endDate', end);
+        localStorage.setItem('filterPeriod', 'Custom');
+        localStorage.setItem('startDate', startDate);
+        localStorage.setItem('endDate', endDate);
 
         DateRangeStore.update((s) => {
-            s.startDate = start;
-            s.endDate = end;
+            s.filterPeriod = 'Custom';
+            s.startDate = startDate;
+            s.endDate = endDate;
         });
-        // setDateFilter(value);
+    };
+
+    // On DateFilter Change
+    const onDateFilterChange = (rangeDate, period) => {
+        localStorage.setItem('filterPeriod', period?.value);
+        localStorage.setItem('startDate', rangeDate[0]);
+        localStorage.setItem('endDate', rangeDate[1]);
+
+        DateRangeStore.update((s) => {
+            s.filterPeriod = period?.value;
+            s.startDate = rangeDate[0];
+            s.endDate = rangeDate[1];
+        });
     };
 
     useEffect(() => {
@@ -80,8 +61,7 @@ const Header = (props) => {
             return;
         }
         const setCustomDate = (dates) => {
-            let startCustomDate = dates[0];
-            let endCustomDate = dates[1];
+            setRangeDate([moment(dates[0]), moment(dates[1])]);
 
             let end = new Date(endDate);
             let start = new Date(startDate);
@@ -90,62 +70,17 @@ const Header = (props) => {
             let days_difference = time_difference / (1000 * 60 * 60 * 24);
             days_difference = parseInt(days_difference + 1);
 
-            localStorage.setItem('startDate', startCustomDate);
-            localStorage.setItem('endDate', endCustomDate);
             localStorage.setItem('daysCount', days_difference);
 
             DateRangeStore.update((s) => {
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
                 s.daysCount = days_difference;
             });
         };
         setCustomDate([startDate, endDate]);
     }, [startDate, endDate]);
 
-    useEffect(() => {
-        localStorage.setItem('dateFilter', +dateFilter);
-
-        DateRangeStore.update((s) => {
-            s.dateFilter = +dateFilter;
-        });
-    }, [dateFilter]);
-
     return (
         <React.Fragment>
-            {props.type === 'modal' && (
-                <div
-                    className="btn-group custom-button-group header-widget-styling"
-                    role="group"
-                    aria-label="Basic example">
-                    <div>
-                        <Select
-                            className="header-datefilter-select font-weight-bold"
-                            options={customDaySelect}
-                            defaultValue={dateFilter}
-                            onChange={({ value }) => {
-                                if (value === -1) {
-                                    return;
-                                }
-                                handleDateFilterChange(value);
-                            }}
-                        />
-                    </div>
-                    <div className="mr-1">
-                        <DateRangePicker
-                            startDate={startDate}
-                            endDate={endDate}
-                            alwaysShowCalendars={false}
-                            onApply={handleEvent}>
-                            <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
-                                <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
-                                {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
-                            </button>
-                        </DateRangePicker>
-                    </div>
-                </div>
-            )}
-
             {props.type === 'page' && (
                 <Row className="page-title">
                     <Col className="header-container">
@@ -156,34 +91,34 @@ const Header = (props) => {
                             role="group"
                             aria-label="Basic example">
                             <div>
-                                <Select
-                                    className="header-datefilter-select font-weight-bold"
-                                    options={customDaySelect}
-                                    defaultValue={dateFilter}
-                                    onChange={({ value }) => {
-                                        if (value === -1) {
-                                            return;
-                                        }
-                                        handleDateFilterChange(value);
-                                    }}
+                                <TimeFrameSelector
+                                    onCustomDateChange={onCustomDateChange}
+                                    onDateFilterChange={onDateFilterChange}
+                                    rangeDate={rangeDate}
+                                    timeOptions={customOptions}
+                                    defaultValue={filterPeriod}
                                 />
-                            </div>
-
-                            <div>
-                                <DateRangePicker
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    alwaysShowCalendars={false}
-                                    onApply={handleEvent}>
-                                    <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
-                                        <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
-                                        {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
-                                    </button>
-                                </DateRangePicker>
                             </div>
                         </div>
                     </Col>
                 </Row>
+            )}
+
+            {props.type === 'modal' && (
+                <div
+                    className="btn-group custom-button-group header-widget-styling"
+                    role="group"
+                    aria-label="Basic example">
+                    <div>
+                        <TimeFrameSelector
+                            onCustomDateChange={onCustomDateChange}
+                            onDateFilterChange={onDateFilterChange}
+                            rangeDate={rangeDate}
+                            timeOptions={customOptions}
+                            defaultValue={filterPeriod}
+                        />
+                    </div>
+                </div>
             )}
         </React.Fragment>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 
@@ -25,6 +25,8 @@ const TimeFrameSelector = (props) => {
 
     const handleChangeSelect = (option) => {
         option.moment && setRangeDate(option.moment());
+
+        props.onDateFilterChange(option.moment(), option);
         setPeriod(option);
 
         props.onChange && props.onChange({ period: option, rangeDate: option.moment() });
@@ -41,15 +43,20 @@ const TimeFrameSelector = (props) => {
     return (
         <div className="time-frame-selector-wrapper">
             <div className="btn-group custom-button-group header-widget-styling" role="group">
-                <Select value={period} options={props.timeOptions || selectOptions} onChange={handleChangeSelect} />
+                <Select
+                    value={period}
+                    options={props.timeOptions || selectOptions}
+                    onChange={handleChangeSelect}
+                    {...props}
+                />
                 <Datepicker
                     rangeDate={rangeDate}
                     onManuallyChangedDate={setCustomDate}
                     onChange={handleDatePickerChange}
-                    isSingleDay={props.isSingleDay}
                     onCancel={props.onCancel}
                     onApply={props.onApply}
                     withApplyButton={props.withApplyButton}
+                    {...props}
                 />
             </div>
         </div>
@@ -64,13 +71,15 @@ TimeFrameSelector.propTypes = {
     isSingleDay: PropTypes.bool,
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
+    onCustomDateChange: PropTypes.func,
+    onDateFilterChange: PropTypes.func,
     withApplyButton: PropTypes.bool,
 };
 
 TimeFrameSelector.options = selectOptions;
 
 TimeFrameSelector.defaultProps = {
-    rangeDate: [moment().subtract(1, 'd'), moment()],
+    rangeDate: [moment().subtract(6, 'd'), moment()],
 };
 
 export default TimeFrameSelector;
