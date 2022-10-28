@@ -9,12 +9,10 @@ import TimeFrameSelector from '../sharedComponents/timeFrameSelector/TimeFrameSe
 
 const Header = (props) => {
     const filterPeriod = DateRangeStore.useState((s) => s.filterPeriod);
-    const customStartDate = DateRangeStore.useState((s) => s.startDate);
-    const customEndDate = DateRangeStore.useState((s) => s.endDate);
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
-    const [startDate, setStartDate] = useState(customStartDate);
-    const [endDate, setEndDate] = useState(customEndDate);
-    const [rangeDate, setRangeDate] = useState([moment(customStartDate), moment(customEndDate)]);
+    const [rangeDate, setRangeDate] = useState([moment(startDate), moment(endDate)]);
 
     const customOptions = [
         { label: 'Today', value: 'Today', moment: () => [moment().subtract(0, 'd'), moment()] },
@@ -33,22 +31,28 @@ const Header = (props) => {
         if (startDate === null || endDate === null) {
             return;
         }
+
         localStorage.setItem('filterPeriod', 'Custom');
+        localStorage.setItem('startDate', startDate);
+        localStorage.setItem('endDate', endDate);
+
         DateRangeStore.update((s) => {
             s.filterPeriod = 'Custom';
+            s.startDate = startDate;
+            s.endDate = endDate;
         });
-        setStartDate(startDate);
-        setEndDate(endDate);
     };
 
     // On DateFilter Change
     const onDateFilterChange = (rangeDate, period) => {
-        setStartDate(rangeDate[0]);
-        setEndDate(rangeDate[1]);
-
         localStorage.setItem('filterPeriod', period?.value);
+        localStorage.setItem('startDate', rangeDate[0]);
+        localStorage.setItem('endDate', rangeDate[1]);
+
         DateRangeStore.update((s) => {
             s.filterPeriod = period?.value;
+            s.startDate = rangeDate[0];
+            s.endDate = rangeDate[1];
         });
     };
 
@@ -58,8 +62,6 @@ const Header = (props) => {
         }
         const setCustomDate = (dates) => {
             setRangeDate([moment(dates[0]), moment(dates[1])]);
-            let startCustomDate = dates[0];
-            let endCustomDate = dates[1];
 
             let end = new Date(endDate);
             let start = new Date(startDate);
@@ -68,13 +70,9 @@ const Header = (props) => {
             let days_difference = time_difference / (1000 * 60 * 60 * 24);
             days_difference = parseInt(days_difference + 1);
 
-            localStorage.setItem('startDate', startCustomDate);
-            localStorage.setItem('endDate', endCustomDate);
             localStorage.setItem('daysCount', days_difference);
 
             DateRangeStore.update((s) => {
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
                 s.daysCount = days_difference;
             });
         };
