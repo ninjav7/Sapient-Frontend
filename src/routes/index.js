@@ -355,14 +355,15 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: false,
         },
-        {
-            path: '/energy/peak-demand/:bldgId',
-            name: 'Peak Demand',
-            component: PeakDemand,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
+        // PLT-339: Peak Demand routing disbaled.
+        // {
+        //     path: '/energy/peak-demand/:bldgId',
+        //     name: 'Peak Demand',
+        //     component: PeakDemand,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'buildings',
+        // },
         {
             path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
@@ -616,7 +617,7 @@ const controlRoutes = {
             name: 'Plug Rule',
             component: PlugRule,
             route: PrivateRoute,
-            parent: "control",
+            parent: 'control',
             visibility: false,
         },
         {
@@ -627,7 +628,6 @@ const controlRoutes = {
             parent: 'control',
             visibility: true,
         },
-       
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],

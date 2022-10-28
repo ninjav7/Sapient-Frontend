@@ -44,7 +44,7 @@ const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
 
     return (
         <div>
-            {location.pathname === '/energy/portfolio/overview' && (
+            {location.pathname === '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings' && (
                 <Dropdown.Item
                     className="selected"
                     onClick={() => {
@@ -65,7 +65,7 @@ const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
                 </Dropdown.Item>
             )}
 
-            {location.pathname !== '/energy/portfolio/overview' && (
+            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings'  && (
                 <Dropdown.Item
                     onClick={() => {
                         handlePortfolioClick && handlePortfolioClick('Portfolio');

@@ -71,6 +71,7 @@ $text-colors: (
     'error-600': $error-600,
     'gray-550': $primary-gray-550,
     'gray-800': $primary-gray-800,
+    'gray-950': $primary-gray-950,
 );
 
 @each $color, $value in $text-colors {

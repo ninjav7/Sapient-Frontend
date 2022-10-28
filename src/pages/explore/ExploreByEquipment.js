@@ -1383,7 +1383,7 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-        exploreDataFetch(arr);
+        //exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
@@ -1669,7 +1669,7 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1]===null?"-":el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
