@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SingleDatePicker, DateRangePicker } from 'react-dates';
 import moment from 'moment';
 import cx from 'classnames';
@@ -32,7 +32,9 @@ const Datepicker = ({
     const [endDate, setEndDate] = useState(rangeDate[1]);
     const [focusedInput, setFocusedInput] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
-
+    
+    const refApi = useRef(null);
+    
     const onDateChangeSingle = (startDate) => {
         setStartDate(startDate);
     };
@@ -74,6 +76,14 @@ const Datepicker = ({
     };
 
     const handleClickDatepickerBtn = () => {
+        if(refApi.current) {
+            refApi.current = false;
+            setIsOpen(false);
+            return;
+        }
+
+        
+        refApi.current = !refApi.current
         setFocusedInput('startDate');
     };
 
@@ -188,7 +198,7 @@ const Datepicker = ({
                 size={Typography.Sizes.lg}
                 role="button"
                 onClick={handleClickDatepickerBtn}
-                className="datepicker-custom-dates">
+                className="datepicker-custom-dates flex-grow-1">
                 {props.isSingleDay ? (
                     <>{startDate && startDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}</>
                 ) : (
