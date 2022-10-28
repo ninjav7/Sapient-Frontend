@@ -195,7 +195,7 @@ const Datepicker = ({
                 size={Typography.Sizes.lg}
                 role="button"
                 onClick={handleClickDatepickerBtn}
-                className="datepicker-custom-dates">
+                className="datepicker-custom-dates flex-grow-1">
                 {props.isSingleDay ? (
                     <>{startDate && startDate.format(`MMM D ${!isTheSameYear ? 'YYYY' : ''}`)}</>
                 ) : (
