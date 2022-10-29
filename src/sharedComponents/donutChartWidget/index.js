@@ -68,7 +68,7 @@ const DonutChartWidget = ({
                                 <div>
                                     <Titles sizeBrick={1} {...{ title, subtitle }} />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <Button
                                         label="More Details"
                                         size={Button.Sizes.lg}
@@ -81,7 +81,7 @@ const DonutChartWidget = ({
                                             });
                                         }}
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         ) : (
                             <Titles sizeBrick={1} {...{ title, subtitle }} />
