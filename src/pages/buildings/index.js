@@ -1290,7 +1290,7 @@ const BuildingOverview = () => {
                                             Average by Hour (kWh)
                                         </h6>
                                     </div>
-                                    <div>
+                                    {/* <div>
                                         <Button
                                             label="More Details"
                                             size={Button.Sizes.lg}
@@ -1303,7 +1303,7 @@ const BuildingOverview = () => {
                                                 });
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
                                 </div>
                                 {isAvgConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
@@ -1339,7 +1339,7 @@ const BuildingOverview = () => {
                                             Hourly Energy Consumption (kWh)
                                         </h6>
                                     </div>
-                                    <div>
+                                    {/* <div>
                                         <Button
                                             label="More Details"
                                             size={Button.Sizes.lg}
@@ -1352,7 +1352,7 @@ const BuildingOverview = () => {
                                                 });
                                             }}
                                         />
-                                    </div>
+                                    </div> */}
                                 </div>
                                 {isEnergyConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
