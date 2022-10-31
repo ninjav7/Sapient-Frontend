@@ -143,9 +143,38 @@ const EquipChartModal = ({
             type: 'line',
             height: 180,
             toolbar: {
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Building_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Building_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Building_View"+new Date(),
+                  }
+                },
                 autoSelected: 'pan',
-
-                show: false,
             },
 
             animations: {
@@ -238,38 +267,7 @@ const EquipChartModal = ({
                 enabled: true,
             },
             toolbar: {
-                show: true,
-                offsetX: 0,
-                offsetY: 0,
-                tools: {
-                  download: true,
-                  selection: false,
-                  zoom: false,
-                  zoomin: false,
-                  zoomout: false,
-                  pan: false,
-                  reset: false ,
-                },
-                export: {
-                  csv: {
-                    filename: "Equipment_Chart_Modal"+new Date(),
-                    columnDelimiter: ',',
-                    headerCategory: 'Timestamp',
-                    headerValue: 'value',
-                    dateFormatter(timestamp) {
-                      return moment
-                      .utc(timestamp)
-                      .format(`MMM D 'YY @ hh:mm A`)
-                    }
-                  },
-                  svg: {
-                    filename: "Equipment_Chart_Modal"+new Date(),
-                  },
-                  png: {
-                    filename: "Equipment_Chart_Modal"+new Date(),
-                  }
-                },
-                autoSelected: 'zoom' 
+                show: false, 
               },
 
             selection: {
