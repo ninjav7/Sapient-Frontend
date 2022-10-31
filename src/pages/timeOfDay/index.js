@@ -1066,7 +1066,7 @@ const TimeOfDay = () => {
     return (
         <React.Fragment>
             <div className="ml-2">
-                <Header title="Time of Day" />
+                <Header title="Time of Day" type="page" />
             </div>
 
             <Row className="ml-2 mb-2">

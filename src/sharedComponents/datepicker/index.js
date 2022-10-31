@@ -89,6 +89,7 @@ const Datepicker = ({
 
     const formattedStartDate = rangeDate[0]?.format('MMM D') || '';
     const formattedEndDate = rangeDate[1]?.format('MMM D') || '';
+    const ANCHOR_RIGHT = 'right';
 
     useEffect(() => {
         setStartDate(rangeDate[0]);
@@ -145,6 +146,7 @@ const Datepicker = ({
                                 onClick={(event) => {
                                     props.onApply && props.onApply({ startDate, endDate, event });
                                     onDateChange({ startDate, endDate });
+                                    props.onCustomDateChange({ startDate, endDate });
                                     setFocusedInput(null);
                                     handleClose();
                                 }}
@@ -161,6 +163,7 @@ const Datepicker = ({
                 endDateId="endDate" // PropTypes.string.isRequired,
                 navPrev={<ArrowSVG className="Calendar--arrow-left" />}
                 navNext={<ArrowSVG className="Calendar--arrow-right" />}
+                anchorDirection={ANCHOR_RIGHT}
                 renderMonthElement={({ month }) => (
                     <Typography.Subheader size={Typography.Sizes.md}>{month.format('MMMM YYYY')}</Typography.Subheader>
                 )}
@@ -217,6 +220,7 @@ Datepicker.propTypes = {
     withApplyButton: PropTypes.bool,
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
+    onCustomDateChange: PropTypes.func,
 };
 
 export default Datepicker;
