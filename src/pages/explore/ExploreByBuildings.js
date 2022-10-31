@@ -213,11 +213,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -226,11 +226,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -239,11 +239,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -252,11 +252,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -265,11 +265,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -278,11 +278,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -298,7 +298,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                        {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -310,7 +310,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                    {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -386,8 +386,38 @@ const ExploreByBuildings = () => {
             type: 'line',
             height: '1000px',
             toolbar: {
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Building_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Building_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Building_View"+new Date(),
+                  }
+                },
                 autoSelected: 'pan',
-                show: false,
             },
 
             animations: {
@@ -571,6 +601,7 @@ const ExploreByBuildings = () => {
     const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [Sq_FtFlag, setSq_FtFlag] = useState(false);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
+    const [topPerChange, setTopPerChange] = useState(0);
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
     const [minSq_FtValue, set_minSq_FtValue] = useState(0);
@@ -580,6 +611,7 @@ const ExploreByBuildings = () => {
     const [buildingSearchTxt, setBuildingSearchTxt] = useState('');
     const [buildingTypeTxt, setBuildingTypeTxt] = useState('');
     const [consumptionTxt, setConsumptionTxt] = useState('');
+    const [changeTxt, setChangeTxt] = useState('');
     const [sq_ftTxt, setSq_FtTxt] = useState('');
     const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
@@ -594,7 +626,7 @@ const ExploreByBuildings = () => {
         setShowChangeDropdown(!showChangeDropdown);
         if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
-            //setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
+            setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
         }
     };
     const setDropdown = () => {
@@ -690,6 +722,14 @@ const ExploreByBuildings = () => {
                     }
                     let responseData = res.data;
                     setExploreTableData(responseData);
+                    let max=responseData[0].consumption.change;
+                    responseData.map((ele)=>{
+                        if(ele.consumption.change>=max)
+                            max=ele.consumption.change;
+                    })
+                    setTopPerChange(max)
+                    set_minPerValue(0.0)
+                    set_maxPerValue(max);
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
@@ -708,7 +748,7 @@ const ExploreByBuildings = () => {
         }
         let result = [];
 
-       // exploreDataFetch();
+       exploreDataFetch();
     }, [startDate, endDate]);
 
     const exploreFilterDataFetch = async (bodyVal) => {
@@ -744,7 +784,7 @@ const ExploreByBuildings = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = parseInt(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -759,6 +799,25 @@ const ExploreByBuildings = () => {
                 txt = 'consumption';
                 set_minConValue(0.0);
                 set_maxConValue(topVal);
+                break;
+            case 'change':
+                if (maxConValue > 0.01) {
+                    arr['consumption_range'] = {
+                        gte: minConValue * 1000,
+                        lte: maxConValue * 1000 + 1000,
+                    };
+                }
+                if (maxSq_FtValue > 10) {
+                    arr['sq_ft_range'] = {
+                        gte: minSq_FtValue,
+                        lte: maxSq_FtValue,
+                    };
+                }
+                if (selectedBuildingOptions.length !== 0) {
+                    arr['building_type'] = selectedBuildingOptions;
+                }
+                set_minPerValue(0.0);
+                set_maxPerValue(topPerChange);
                 break;
             case 'sq_ft':
                 if (maxConValue > 0.01) {
@@ -839,21 +898,13 @@ const ExploreByBuildings = () => {
                         data.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? "-" : parseInt(el[1]);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
                             let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                            // const result = Enumerable.from(objectExplore)
-                            //     .fullOuterJoin(
-                            //         Enumerable.from(coll),
-                            //         (pk) => pk.timestamp,
-                            //         (fk) => fk.timestamp,
-                            //         (left, right) => ({ ...left, ...right })
-                            //     )
-                            //     .toArray();
                             setObjectExplore(result);
                         }
                         setSeriesData([...seriesData, recordToInsert]);
@@ -1083,7 +1134,7 @@ const ExploreByBuildings = () => {
                         setExploreTableData(responseData);
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
-                        set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                        set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -1151,7 +1202,7 @@ const ExploreByBuildings = () => {
                         </div>
                     ) : (
                         <>
-                            <Row>
+                            {/* <Row>
                                 <Col lg={11}></Col>
                                 <Col
                                     lg={1}
@@ -1166,7 +1217,7 @@ const ExploreByBuildings = () => {
                                         <FontAwesomeIcon icon={faDownload} size="md" />
                                     </CSVLink>
                                 </Col>
-                            </Row>
+                            </Row> */}
                             <BrushChart
                                 seriesData={seriesData}
                                 optionsData={optionsData}
@@ -1266,7 +1317,7 @@ const ExploreByBuildings = () => {
                                                         STEP={0.01}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(3)}
+                                                        MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>
@@ -1294,11 +1345,12 @@ const ExploreByBuildings = () => {
                                                     color: 'black',
                                                 }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {changeTxt === '' ? `All ${el.label}` : changeTxt}{' '}
                                                 <button
                                                     style={{ border: 'none', backgroundColor: 'white' }}
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
+                                                        setChangeTxt('');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1319,7 +1371,7 @@ const ExploreByBuildings = () => {
                                                         STEP={1}
                                                         MIN={0}
                                                         range={[minPerValue, maxPerValue]}
-                                                        MAX={1000}
+                                                        MAX={topPerChange}
                                                         onSelectionChange={handleInputPer}
                                                     />
                                                 </div>

@@ -231,11 +231,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -244,11 +244,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -257,11 +257,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -270,11 +270,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -283,11 +283,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -296,11 +296,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -316,7 +316,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{parseInt(record?.consumption?.change)}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -325,7 +325,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -565,9 +565,39 @@ const ExploreByEquipment = () => {
             type: 'line',
             height: '1000px',
             toolbar: {
-                autoSelected: 'pan',
-                show: false,
-            },
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                  }
+                },
+                autoSelected: 'zoom' 
+              },
             animations: {
                 enabled: false,
             },
@@ -632,8 +662,6 @@ const ExploreByEquipment = () => {
             size: 0,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -642,20 +670,6 @@ const ExploreByEquipment = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value;
-            //     },
-            // },
             marker: {
                 show: false,
             },
@@ -692,11 +706,8 @@ const ExploreByEquipment = () => {
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MM HH:00');
-                    // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
-            // tickAmount: 24,
-            //tickPlacement: 'on',
         },
         yaxis: {
             labels: {
@@ -705,12 +716,6 @@ const ExploreByEquipment = () => {
                 },
             },
         },
-        // grid: {
-        //     padding: {
-        //       left: 10,
-        //       right: 60 // Also you may want to increase this (based on the length of your labels)
-        //     },
-        //   },
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
@@ -732,10 +737,6 @@ const ExploreByEquipment = () => {
             },
             selection: {
                 enabled: true,
-                // xaxis: {
-                //     min: new Date('01 June 2022').getTime(),
-                //     max: new Date('02 June 2022').getTime(),
-                // },
             },
         },
         legend: {
@@ -1278,6 +1279,7 @@ const ExploreByEquipment = () => {
             setRemoveSpaceTyepDuplication([]);
         } else removeDuplicates();
     }, [removeDuplicateFlag]);
+
     const exploreDataFetch = async (bodyVal) => {
         try {
             setIsExploreDataLoading(true);
@@ -1299,7 +1301,7 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
                 }
@@ -1383,7 +1385,7 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-        //exploreDataFetch(arr);
+        exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
@@ -1581,44 +1583,6 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
-    // const getFormattedTimeIntervalData=(data)=>{
-    //     let ee=startDate.toLocaleDateString()
-    //     let str=new Date(ee);
-    //     let a=str.getMonth()+1;
-    //     let b=str.getDate();
-    //     let mon=a<10?"0"+a:a;
-    //     let dt=b<10?"0"+b:b
-    //     let ss=str.getFullYear()+"-"+mon+"-"+dt+"T00:00:00.000Z"
-    //     let startTime=new Date(ss);
-    //     let st=startTime.getTime();
-
-    //     let ff=endDate.toLocaleDateString()
-    //     let stre=new Date(ff);
-    //     let ab=stre.getMonth()+1;
-    //     let ba=stre.getDate()+1;
-    //     let mone=ab<10?"0"+ab:ab;
-    //     let dte=ba<10?"0"+ba:ba
-    //     let sse=stre.getFullYear()+"-"+mone+"-"+dte+"T00:00:00.000Z"
-    //     let endTime=new Date(sse);
-    //     let et=endTime.getTime();
-    //     let newArr=[];
-    //     for(let i=st,j=1;i<=et;i+=900000){
-    //         let tt=new Date();
-    //         if(data[j]!==undefined)
-    //             tt=new Date(data[j][0]);
-    //         if(tt.getTime()===i){
-    //             let te=new Date(i);
-    //             newArr.push([te,data[j][1]])
-    //             j++;
-    //         }
-    //         else{
-    //             let te=new Date(i);
-    //             newArr.push([te,null])
-    //         }
-    //     }
-    //     return newArr;
-    // }
-
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1669,45 +1633,22 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? '-' : parseInt(el[1]);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
                             let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                            // const result = Enumerable.from(coll)
-                            //     .fullOuterJoin(
-                            //         Enumerable.from(objectExplore),
-                            //         (pk) => pk.timestamp,
-                            //         (fk) => fk.timestamp,
-                            //         (left, right) => ({ ...left, ...right })
-                            //     )
-                            //     .toArray();
                             setObjectExplore(result);
-                            // var s = new Set();
-                            // var result = [];
-                            // objectExplore.forEach(function (e) {
-                            //     result.push(Object.assign({}, e));
-                            //     s.add(e.timestamp);
-                            // });
-                            // coll.forEach(function (e) {
-                            //     if (!s.has(e.timestamp)) {
-                            //         var temp = Object.assign({}, e);
-                            //         temp[sname] = null;
-                            //         result.push(temp);
-                            //     }
-                            // });
                         }
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
                         setChartLoading(false);
-                        //setIsExploreDataLoading(false);
                     });
             } catch (error) {
-                //setIsExploreDataLoading(false);
             }
         };
         fetchExploreChartData();
@@ -1797,19 +1738,6 @@ const ExploreByEquipment = () => {
                             )
                             .toArray();
                         setObjectExplore(result);
-                        // var s = new Set();
-                        // var result = [];
-                        // objectExplore.forEach(function (e) {
-                        //     result.push(Object.assign({}, e));
-                        //     s.add(e.timestamp);
-                        // });
-                        // coll.forEach(function (e) {
-                        //     if (!s.has(e.timestamp)) {
-                        //         var temp = Object.assign({}, e);
-                        //         temp[sname] = null;
-                        //         result.push(temp);
-                        //     }
-                        // });
                     }
                     dataarr.push(recordToInsert);
                     if (totalEquipmentId.length === dataarr.length) {
@@ -1819,7 +1747,6 @@ const ExploreByEquipment = () => {
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
-            //setIsExploreDataLoading(false);
         }
     };
     useEffect(() => {
@@ -1856,7 +1783,7 @@ const ExploreByEquipment = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = (parseInt(topEnergyConsumption / 1000));
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -2201,7 +2128,7 @@ const ExploreByEquipment = () => {
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
     useEffect(() => {
-        if (equipmentSearchTxt === '') exploreDataFetch(arr);
+        if (equipmentSearchTxt === '' && entryPoint === 'entered' ) exploreDataFetch(arr);
     }, [equipmentSearchTxt]);
     const handleGetSpaceByLocation = (e, item) => {
         setSelectedLoc(item);
@@ -2285,7 +2212,7 @@ const ExploreByEquipment = () => {
                         </div>
                     ) : (
                         <>
-                            <Row>
+                            {/* <Row>
                                 <Col lg={11}></Col>
                                 <Col
                                     lg={1}
@@ -2300,7 +2227,7 @@ const ExploreByEquipment = () => {
                                         <FontAwesomeIcon icon={faDownload} size="md" />
                                     </CSVLink>
                                 </Col>
-                            </Row>
+                            </Row> */}
                             <BrushChart
                                 seriesData={seriesData}
                                 optionsData={optionsData}
@@ -2406,7 +2333,7 @@ const ExploreByEquipment = () => {
                                                             STEP={1}
                                                             MIN={0}
                                                             range={[minConValue, maxConValue]}
-                                                            MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(2)}
+                                                            MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                             onSelectionChange={handleInput}
                                                         />
                                                     </div>
