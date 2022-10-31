@@ -231,11 +231,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -244,11 +244,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -257,11 +257,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -270,11 +270,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -283,11 +283,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -296,11 +296,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -316,7 +316,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{parseInt(record?.consumption?.change)}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -325,7 +325,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -1301,7 +1301,7 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
                 }
@@ -1385,7 +1385,7 @@ const ExploreByEquipment = () => {
                 });
             } catch (error) {}
         };
-        //exploreDataFetch(arr);
+        exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
@@ -1633,7 +1633,7 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? '-' : parseInt(el[1]);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
@@ -1783,7 +1783,7 @@ const ExploreByEquipment = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = (parseInt(topEnergyConsumption / 1000));
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -2128,7 +2128,7 @@ const ExploreByEquipment = () => {
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
     useEffect(() => {
-        if (equipmentSearchTxt === '') exploreDataFetch(arr);
+        if (equipmentSearchTxt === '' && entryPoint === 'entered' ) exploreDataFetch(arr);
     }, [equipmentSearchTxt]);
     const handleGetSpaceByLocation = (e, item) => {
         setSelectedLoc(item);
@@ -2333,7 +2333,7 @@ const ExploreByEquipment = () => {
                                                             STEP={1}
                                                             MIN={0}
                                                             range={[minConValue, maxConValue]}
-                                                            MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(2)}
+                                                            MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                             onSelectionChange={handleInput}
                                                         />
                                                     </div>

@@ -213,11 +213,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -226,11 +226,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -239,11 +239,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -252,11 +252,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -265,11 +265,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -278,11 +278,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -298,7 +298,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                        {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -310,7 +310,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                    {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -722,13 +722,11 @@ const ExploreByBuildings = () => {
                     }
                     let responseData = res.data;
                     setExploreTableData(responseData);
-                    console.log(responseData);
                     let max=responseData[0].consumption.change;
                     responseData.map((ele)=>{
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                     })
-                    console.log(max);
                     setTopPerChange(max)
                     set_minPerValue(0.0)
                     set_maxPerValue(max);
@@ -786,7 +784,7 @@ const ExploreByBuildings = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = parseInt(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -900,7 +898,7 @@ const ExploreByBuildings = () => {
                         data.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? "-" : parseInt(el[1]);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
@@ -1136,7 +1134,7 @@ const ExploreByBuildings = () => {
                         setExploreTableData(responseData);
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
-                        set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                        set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -1319,7 +1317,7 @@ const ExploreByBuildings = () => {
                                                         STEP={0.01}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(3)}
+                                                        MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>
