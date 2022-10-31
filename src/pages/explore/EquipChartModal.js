@@ -302,7 +302,7 @@ const EquipChartModal = ({
             tickAmount: 2,
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return parseInt(val);
                 },
             },
         },
