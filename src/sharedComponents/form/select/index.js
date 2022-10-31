@@ -55,7 +55,7 @@ Select.Multi = MultiSelect;
 
 Select.propTypes = {
     selectClassName: PropTypes.string,
-    defaultValue: stringOrNumberPropTypes,
+    defaultValue: stringOrNumberPropTypes.isRequired,
     options: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string.isRequired,
