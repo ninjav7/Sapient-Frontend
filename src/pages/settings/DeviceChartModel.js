@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
-import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
+import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
@@ -22,7 +22,6 @@ const DeviceChartModel = ({
     showChart,
     handleChartClose,
     sensorData,
-    sensorLineData,
     seriesData,
     setSeriesData,
     deviceData,
@@ -30,7 +29,6 @@ const DeviceChartModel = ({
     CONVERSION_ALLOWED_UNITS,
     UNIT_DIVIDER,
     metric,
-    setMetric,
     selectedConsumption,
     setConsumption,
     getRequiredConsumptionLabel,
@@ -40,6 +38,7 @@ const DeviceChartModel = ({
     selectedUnit,
     setSelectedUnit,
     daysCount,
+    deviceType,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -50,17 +49,17 @@ const DeviceChartModel = ({
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
 
     const handleRefresh = () => {
-        // setDateFilter(dateValue);
-        // let endDate = new Date(); // today
-        // let startDate = new Date();
-        // startDate.setDate(startDate.getDate() - 7);
-        // setDateRange([startDate, endDate]);
         setDeviceData([]);
         setSeriesData([]);
+        if (deviceType === 'active') {
+            setSelectedUnit(metric[0].unit);
+            setConsumption(metric[0].value);
+        }
+        if (deviceType === 'passive') {
+            setSelectedUnit(metric[2].unit);
+            setConsumption(metric[2].value);
+        }
     };
-
-    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    const fileExtension = '.xlsx';
 
     const [options, setOptions] = useState({
         chart: {
@@ -141,11 +140,11 @@ const DeviceChartModel = ({
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                    0
-                )} ${selectedUnit}</div>
+                            0
+                        )} ${selectedUnit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                        .tz(timeZone)
-                        .format(`MMM D 'YY @ hh:mm A`)}</div>
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -258,6 +257,9 @@ const DeviceChartModel = ({
                 if (sensorData.id === undefined) {
                     return;
                 }
+                if (!showChart) {
+                    return;
+                }
                 setIsSensorChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
@@ -276,6 +278,8 @@ const DeviceChartModel = ({
                         { headers }
                     )
                     .then((res) => {
+                        setDeviceData([]);
+                        setSeriesData([]);
                         let response = res.data;
                         let data = response;
                         let exploreData = [];
@@ -293,7 +297,7 @@ const DeviceChartModel = ({
 
                                 return _data;
                             });
-                        } catch (error) { }
+                        } catch (error) {}
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
                         setSeriesData([
@@ -330,12 +334,12 @@ const DeviceChartModel = ({
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                    series[seriesIndex][dataPointIndex],
-                    0
-                )} ${selectedUnit}</div>
+                            series[seriesIndex][dataPointIndex],
+                            0
+                        )} ${selectedUnit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                        .tz(timeZone)
-                        .format(`MMM D 'YY @ hh:mm A`)}</div>
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         };
@@ -345,7 +349,7 @@ const DeviceChartModel = ({
     }, [selectedUnit]);
 
     return (
-        <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
+        <Modal show={showChart} size="xl" centered backdrop="static" keyboard={false}>
             <div className="chart-model-header">
                 <div>
                     <div className="model-sensor-date-time">{localStorage.getItem('identifier')}</div>
