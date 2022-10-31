@@ -51,7 +51,7 @@ const Track = ({ props, children, min, max, values }) => (
     </div>
 );
 
-const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, ...props }) => {
+const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGroup, withTrendsFilter, handleButtonClick, ...props }) => {
     const [values, setValues] = useState(props.range || []);
     const [from, setFrom] = useState(values[0] || 0);
     const [to, setTo] = useState(values[1] || 0);
@@ -128,10 +128,10 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, ...props 
         <div className="range-slider-wrapper">
             <Typography.Body size={Typography.Sizes.lg}>Threshold</Typography.Body>
             <Brick />
-            
-            
-            {props.buttonGroup && props.withTrendsFilter && <>
-                <ButtonGroup handleButtonClick={props.handleButtonClick} buttons={props.buttonGroup}/>
+
+
+            {buttonGroup && withTrendsFilter && <>
+                <ButtonGroup handleButtonClick={handleButtonClick} buttons={buttonGroup}/>
                 <Brick />
             </>}
 
@@ -178,7 +178,7 @@ RangeSlider.defaultProps = {
         {icon: <TrendDownSVG />},
         {icon: <TrendUpSVG />},
     ]
-} 
+}
 
 
 RangeSlider.propTypes = {
