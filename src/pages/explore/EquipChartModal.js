@@ -143,9 +143,38 @@ const EquipChartModal = ({
             type: 'line',
             height: 180,
             toolbar: {
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Building_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Building_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Building_View"+new Date(),
+                  }
+                },
                 autoSelected: 'pan',
-
-                show: false,
             },
 
             animations: {
@@ -238,8 +267,8 @@ const EquipChartModal = ({
                 enabled: true,
             },
             toolbar: {
-                show: false,
-            },
+                show: false, 
+              },
 
             selection: {
                 enabled: true,
@@ -248,49 +277,50 @@ const EquipChartModal = ({
                 enabled: false,
             },
         },
-
         colors: ['#008FFB'],
-
         fill: {
             type: 'gradient',
-
             gradient: {
                 opacityFrom: 0.91,
-
                 opacityTo: 0.1,
             },
         },
-
         xaxis: {
             type: 'datetime',
-
             tooltip: {
                 enabled: false,
             },
-
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },
-
         yaxis: {
             tickAmount: 2,
-
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return parseInt(val);
                 },
             },
         },
     });
 
-    const getCSVLinkData = () => {
-        let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
-        return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
-    };
+    // Commented for future Use
+    // const getCSVLinkData = () => {
+    //     let acd=[];
+    //     if(seriesData.length!==0)
+    //        {
+    //          seriesData[0].data.map((ele)=>{
+               
+    //             acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
+    //          })
+    //        }
+    //     let arr = seriesData.length > 0 ? seriesData[0].data : [];
+
+    //     let streamData = seriesData.length > 0 ? acd : [];
+    //     return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
+    // };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
@@ -1008,7 +1038,12 @@ const EquipChartModal = ({
                                                     <i className="uil uil-calendar-alt mr-2"></i>Configure Column
                                                 </Dropdown.Item>
 
-                                                <div className="mr-3">
+                                                <Dropdown.Item>
+                                                <i className="uil uil-download-alt mr-2"></i>
+                                                        Download CSV
+                                                </Dropdown.Item>
+                                                {/* Commented for future use */}
+                                                {/* <div className="mr-3">
                                                     <CSVLink
                                                         style={{ color: 'black', paddingLeft: '1.5rem' }}
                                                         filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
@@ -1017,7 +1052,7 @@ const EquipChartModal = ({
                                                         <i className="uil uil-download-alt mr-2"></i>
                                                         Download CSV
                                                     </CSVLink>
-                                                </div>
+                                                </div> */}
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>

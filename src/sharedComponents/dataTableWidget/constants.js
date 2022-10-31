@@ -11,6 +11,6 @@ const LOCAL_STORAGE = Object.freeze({
     ORDER_HEADERS: 'ORDER_HEADERS',
 });
 
-const SORT_TYPES = [null, 'ASC', 'DESC'];
+const SORT_TYPES = [null, 'ace', 'dce'];
 
 export { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES };

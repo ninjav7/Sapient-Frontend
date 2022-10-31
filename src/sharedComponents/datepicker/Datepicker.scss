@@ -79,7 +79,7 @@
         position: relative;
         z-index: 12;
 
-        & + .CalendarDay {
+        &:not(.CalendarDay__selected_end) + .CalendarDay {
             position: relative;
             &::before {
                 position: absolute;
@@ -134,6 +134,12 @@
                 color: $base-white;
                 border-top-right-radius: 1.25rem;
                 border-bottom-right-radius: 1.25rem;
+            }
+        }
+        
+        &.CalendarDay__selected_end.CalendarDay__selected_start {
+            &::before, &::after {
+                display: none;
             }
         }
     }

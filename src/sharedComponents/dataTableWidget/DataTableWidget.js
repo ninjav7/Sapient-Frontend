@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, memo, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
@@ -105,8 +105,8 @@ const DataTableWidget = (props) => {
     const [search, setSearch] = useState('');
     const [searchMode, setSearchMode] = useState(false);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
+    const [currentPage, setCurrentPage] = useState(props.currentPage || 0);
+    const [pageSize, setPageSize] = useState(props.pageSize || 20);
 
     const onSortEnd = ({ oldIndex, newIndex }) => {
         setHeaders((items) => arrayMoveImmutable(items, oldIndex, newIndex));
@@ -121,6 +121,7 @@ const DataTableWidget = (props) => {
         setSelectedFilters((oldState) => {
             return [...oldState.filter((filter) => filter.value !== value)];
         });
+        
     };
 
     const handleCheckboxChange = (event, id) => {
@@ -202,7 +203,7 @@ const DataTableWidget = (props) => {
 
     const HeadComponent = ({ onSort, name, accessor }) => {
         const [state, setState] = useState(0);
-
+        
         const cellProps = {
             onClick: onSort && (() => {
                       setState((prevState) => {
@@ -231,6 +232,12 @@ const DataTableWidget = (props) => {
             </Table.Cell>
         );
     };
+    
+    const memoizedHeaders = useMemo(() => {
+        return     filteredHeaders.map(({ name, onSort, accessor}, index) => (
+                <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
+            ))
+    }, []) 
 
     return (
         <DataTableWidgetContext.Provider
@@ -277,11 +284,9 @@ const DataTableWidget = (props) => {
                                     <Table.Cell>{props.customCheckAll(selectAll)}</Table.Cell>
                                 </>
                             )}
-
-                            {filteredHeaders.map(({ name, onSort, accessor}, index) => (
-                                <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
-                            ))}
-
+                            
+                            {memoizedHeaders}
+                            
                             {isActionsAvailable && (
                                 <Table.Cell>
                                     <Typography.Subheader size={Typography.Sizes.sm}>Actions</Typography.Subheader>
@@ -290,7 +295,7 @@ const DataTableWidget = (props) => {
                         </Table.THead>
                         <Table.TBody>
                             {currentRows.map((row) => (
-                                <Table.Row>
+                                <Table.Row key={row.id}>
                                     {props.onCheckboxRow &&
                                         //@ It is probably need to improve custom checkbox to make it generic
                                         (props.customCheckboxForCell ? (
@@ -305,13 +310,13 @@ const DataTableWidget = (props) => {
 
                                     {filteredHeaders.map(({ accessor, callbackValue }) => {
                                         return (
-                                            <Table.Cell>
+                                            <Table.Cell key={accessor}>
                                                 {accessor &&
                                                     (callbackValue
                                                         ? callbackValue(row, cellChildrenTemplate)
                                                         : cellChildrenTemplate(row[accessor] || '-'))}
 
-                                                {!accessor && callbackValue && callbackValue(row, cellChildrenTemplate)}
+                                                {!accessor && callbackValue && callbackValue(row, cellChildrenTemplate, accessor)}
                                             </Table.Cell>
                                         );
                                     })}
@@ -337,7 +342,7 @@ const DataTableWidget = (props) => {
                             {currentRows.length === 0 && (
                                 <>
                                     <Table.Row>
-                                        <Table.Cell colspan={10}>
+                                        <Table.Cell colSpan={10}>
                                             <Typography.Subheader
                                                 className="text-center p-3"
                                                 size={Typography.Sizes.md}>
@@ -379,12 +384,14 @@ DataTableWidget.propTypes = {
     onSearch: PropTypes.func,
     onDeleteRow: PropTypes.func,
     onEditRow: PropTypes.func,
-    onChangePage: PropTypes.func.isRequired,
-    totalPages: PropTypes.number.isRequired,
-    onPageSize: PropTypes.func.isRequired,
+    onChangePage: PropTypes.func,
+    totalPages: PropTypes.number,
+    currentPage: PropTypes.number,
+    pageSize: PropTypes.number,
+    onPageSize: PropTypes.func,
     //@TODO More generic func, now it is not important
-    onStatus: PropTypes.func.isRequired,
-    status: PropTypes.number.isRequired,
+    onStatus: PropTypes.func,
+    status: PropTypes.number,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
     filterOptions: PropTypes.array,
@@ -401,8 +408,8 @@ DataTableWidget.propTypes = {
     id: PropTypes.string,
     buttonGroupFilterOptions: PropTypes.array,
     customComponentForCells: PropTypes.node,
-    customCheckboxForCell: PropTypes.node,
-    customCheckAll: PropTypes.node,
+    customCheckboxForCell: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+    customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
 };
 
 export default DataTableWidget;

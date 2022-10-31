@@ -31,6 +31,7 @@ const Control = () => {
             return <Redirect to="/" />;
         } else {
             localStorage.removeItem('dateFilter');
+            localStorage.removeItem('filterPeriod');
             localStorage.removeItem('startDate');
             localStorage.removeItem('endDate');
 
