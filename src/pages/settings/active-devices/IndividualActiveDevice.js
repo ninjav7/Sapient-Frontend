@@ -672,6 +672,7 @@ const IndividualActiveDevice = () => {
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
                 daysCount={daysCount}
+                deviceType="active"
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
