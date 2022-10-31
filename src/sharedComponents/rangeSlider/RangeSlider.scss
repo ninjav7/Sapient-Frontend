@@ -5,7 +5,8 @@
     &-track-wrapper {
         height: 1.5rem;
         display: flex;
-        width: 100%;
+        width: calc(100% - 1.5rem);
+        margin: auto;
     }
     &-track-line {
         height: 0.5rem;
@@ -59,6 +60,26 @@
         .drop-down-button-menu {
             width: auto;
             overflow: auto;
+        }
+        
+        
+        .button-group-wrapper {
+            ul {
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                li {
+                    flex: 1 0;
+                    justify-content: center;
+                    svg {
+                        width: 1.25rem;
+                        height: 1.125rem;
+                    }
+                    &:not(.active) svg path {
+                        fill: $primary-gray-450;
+                    }
+                }
+            }
         }
     }
 }
