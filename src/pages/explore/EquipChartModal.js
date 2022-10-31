@@ -238,8 +238,39 @@ const EquipChartModal = ({
                 enabled: true,
             },
             toolbar: {
-                show: false,
-            },
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Equipment_Chart_Modal"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Equipment_Chart_Modal"+new Date(),
+                  },
+                  png: {
+                    filename: "Equipment_Chart_Modal"+new Date(),
+                  }
+                },
+                autoSelected: 'zoom' 
+              },
 
             selection: {
                 enabled: true,
@@ -1017,7 +1048,12 @@ const EquipChartModal = ({
                                                     <i className="uil uil-calendar-alt mr-2"></i>Configure Column
                                                 </Dropdown.Item>
 
-                                                <div className="mr-3">
+                                                <Dropdown.Item>
+                                                <i className="uil uil-download-alt mr-2"></i>
+                                                        Download CSV
+                                                </Dropdown.Item>
+                                                {/* Commented for future use */}
+                                                {/* <div className="mr-3">
                                                     <CSVLink
                                                         style={{ color: 'black', paddingLeft: '1.5rem' }}
                                                         filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
@@ -1026,7 +1062,7 @@ const EquipChartModal = ({
                                                         <i className="uil uil-download-alt mr-2"></i>
                                                         Download CSV
                                                     </CSVLink>
-                                                </div>
+                                                </div> */}
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
