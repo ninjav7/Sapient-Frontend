@@ -897,6 +897,7 @@ const PlugRule = () => {
         };
         fetchAllData();
     }, [linkedRuleData, unLinkedRuleData]);
+    console.log("currentData4324",currentData);
 
     return (
         <>
