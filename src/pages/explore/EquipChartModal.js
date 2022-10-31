@@ -279,36 +279,27 @@ const EquipChartModal = ({
                 enabled: false,
             },
         },
-
         colors: ['#008FFB'],
-
         fill: {
             type: 'gradient',
-
             gradient: {
                 opacityFrom: 0.91,
-
                 opacityTo: 0.1,
             },
         },
-
         xaxis: {
             type: 'datetime',
-
             tooltip: {
                 enabled: false,
             },
-
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },
-
         yaxis: {
             tickAmount: 2,
-
             labels: {
                 formatter: function (val) {
                     return val.toFixed(0);
@@ -317,20 +308,21 @@ const EquipChartModal = ({
         },
     });
 
-    const getCSVLinkData = () => {
-        let acd=[];
-        if(seriesData.length!==0)
-           {
-             seriesData[0].data.map((ele)=>{
+    // Commented for future Use
+    // const getCSVLinkData = () => {
+    //     let acd=[];
+    //     if(seriesData.length!==0)
+    //        {
+    //          seriesData[0].data.map((ele)=>{
                
-                acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
-             })
-           }
-        let arr = seriesData.length > 0 ? seriesData[0].data : [];
+    //             acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
+    //          })
+    //        }
+    //     let arr = seriesData.length > 0 ? seriesData[0].data : [];
 
-        let streamData = seriesData.length > 0 ? acd : [];
-        return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
-    };
+    //     let streamData = seriesData.length > 0 ? acd : [];
+    //     return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
+    // };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
