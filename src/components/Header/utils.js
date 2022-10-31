@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const customOptions = [
     { label: 'Today', value: 'Today', moment: () => [moment().subtract(0, 'd'), moment()] },
     { label: 'Last 7 Days', value: 'Last 7 Days', moment: () => [moment().subtract(6, 'd'), moment()] },
