@@ -5,8 +5,13 @@ import { getTrackBackground, Range } from 'react-range';
 import Typography from '../typography';
 import Brick from '../brick';
 import Input from '../form/input/Input';
+import { ButtonGroup } from '../buttonGroup';
+
+import {ReactComponent as TrendUpSVG} from '../assets/icons/arrow-trend-up.svg';
+import {ReactComponent as TrendDownSVG} from '../assets/icons/arrow-trend-down.svg';
 
 import './RangeSlider.scss';
+
 
 const DEFAULT_STEP = 1;
 const COLORS = ['#EAECF0', '#2955E7', '#EAECF0'];
@@ -46,7 +51,7 @@ const Track = ({ props, children, min, max, values }) => (
     </div>
 );
 
-const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, ...props }) => {
+const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGroup, withTrendsFilter, handleButtonClick, ...props }) => {
     const [values, setValues] = useState(props.range || []);
     const [from, setFrom] = useState(values[0] || 0);
     const [to, setTo] = useState(values[1] || 0);
@@ -124,6 +129,12 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, ...props 
             <Typography.Body size={Typography.Sizes.lg}>Threshold</Typography.Body>
             <Brick />
 
+
+            {buttonGroup && withTrendsFilter && <>
+                <ButtonGroup handleButtonClick={handleButtonClick} buttons={buttonGroup}/>
+                <Brick />
+            </>}
+
             <div className="range-slider-controls">
                 <Input
                     value={from}
@@ -161,12 +172,28 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, ...props 
     );
 };
 
+RangeSlider.defaultProps = {
+    buttonGroup: [
+        {label: 'All'},
+        {icon: <TrendDownSVG />},
+        {icon: <TrendUpSVG />},
+    ]
+}
+
+
 RangeSlider.propTypes = {
     step: PropTypes.number,
     min: PropTypes.number.isRequired,
     range: PropTypes.arrayOf(PropTypes.number).isRequired,
     max: PropTypes.number.isRequired,
     prefix: PropTypes.string,
+    buttonGroup: PropTypes.arrayOf(PropTypes.shape({
+        label: PropTypes.string,
+        icon: PropTypes.node,
+        disabled: PropTypes.bool,
+    })),
+    handleButtonClick: PropTypes.func,
+    withTrendsFilter: PropTypes.bool,
 };
 
 export default RangeSlider;
