@@ -38,6 +38,7 @@ const DeviceChartModel = ({
     selectedUnit,
     setSelectedUnit,
     daysCount,
+    deviceType,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -50,8 +51,14 @@ const DeviceChartModel = ({
     const handleRefresh = () => {
         setDeviceData([]);
         setSeriesData([]);
-        setSelectedUnit(metric[0].unit);
-        setConsumption(metric[0].value);
+        if (deviceType === 'active') {
+            setSelectedUnit(metric[0].unit);
+            setConsumption(metric[0].value);
+        }
+        if (deviceType === 'passive') {
+            setSelectedUnit(metric[2].unit);
+            setConsumption(metric[2].value);
+        }
     };
 
     const [options, setOptions] = useState({

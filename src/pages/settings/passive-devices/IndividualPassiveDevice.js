@@ -86,8 +86,8 @@ const IndividualPassiveDevice = () => {
         { value: 'power', label: 'Power (W)', unit: 'W' },
     ]);
 
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumption, setConsumption] = useState(metric[2].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -136,7 +136,7 @@ const IndividualPassiveDevice = () => {
             setIsSensorChartLoading(true);
             let params = `?sensor_id=${
                 id === sensorId ? sensorId : id
-            }&consumption=minCurrentMilliAmps&building_id=${bldgId}`;
+            }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -528,6 +528,7 @@ const IndividualPassiveDevice = () => {
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
                 daysCount={daysCount}
+                deviceType="passive"
             />
 
             <AddSensorPanelModel
