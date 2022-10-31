@@ -386,8 +386,38 @@ const ExploreByBuildings = () => {
             type: 'line',
             height: '1000px',
             toolbar: {
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Building_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Building_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Building_View"+new Date(),
+                  }
+                },
                 autoSelected: 'pan',
-                show: false,
             },
 
             animations: {
@@ -1174,7 +1204,7 @@ const ExploreByBuildings = () => {
                         </div>
                     ) : (
                         <>
-                            <Row>
+                            {/* <Row>
                                 <Col lg={11}></Col>
                                 <Col
                                     lg={1}
@@ -1189,7 +1219,7 @@ const ExploreByBuildings = () => {
                                         <FontAwesomeIcon icon={faDownload} size="md" />
                                     </CSVLink>
                                 </Col>
-                            </Row>
+                            </Row> */}
                             <BrushChart
                                 seriesData={seriesData}
                                 optionsData={optionsData}
