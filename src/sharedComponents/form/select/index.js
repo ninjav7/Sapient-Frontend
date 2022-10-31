@@ -31,7 +31,7 @@ const Select = ({
                 {...props}
                 type={type}
                 options={options}
-                defaultValue={selectedOption}
+                defaultValue={defaultValue || selectedOption}
                 value={selectedOption}
                 components={{
                     ...Object.assign(
