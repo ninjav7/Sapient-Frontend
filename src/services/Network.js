@@ -173,4 +173,3 @@ export const getListSensorsForBuildings = '/api/user_role/plug_rule/sensor-for-b
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
 export const graphData = '/api/user_role/plug_rule/average-sensor-usage';
-

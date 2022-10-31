@@ -490,14 +490,13 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
                         let newArray = [
                             {
                                 name: 'Energy',
                                 data: [],
                             },
                         ];
-                        response.forEach((record) => {
+                        res.data.forEach((record) => {
                             const d = new Date(record.x);
                             const milliseconds = d.getTime();
                             newArray[0].data.push({
@@ -505,8 +504,10 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(0),
                             });
                         });
-                        const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
-                        setEnergyConsumptionChart(formattedData);
+                        // --- for PLT-125
+                        // const formattedData = getFormattedTimeIntervalObjectData(newArray, startDate, endDate);
+                        // setEnergyConsumptionChart(formattedData);
+                        setEnergyConsumptionChart(newArray);
                         setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
@@ -631,6 +632,7 @@ const PortfolioOverview = () => {
                                 options={options}
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                                pageType="portfolio"
                             />
                         </Col>
                         <Col xl={6}>

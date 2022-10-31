@@ -194,7 +194,7 @@ const IndividualActiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -210,7 +210,7 @@ const IndividualActiveDevice = () => {
                     setSensors(response);
                     setIsFetchingSensorData(false);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
 
         const fetchLocationData = async () => {
@@ -289,7 +289,7 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -322,7 +322,7 @@ const IndividualActiveDevice = () => {
 
                             return _data;
                         });
-                    } catch (error) {}
+                    } catch (error) { }
 
                     exploreData.push(recordToInsert);
 
@@ -356,7 +356,7 @@ const IndividualActiveDevice = () => {
                 });
                 setEquipmentTypeDevices(response);
             });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
@@ -375,7 +375,7 @@ const IndividualActiveDevice = () => {
             await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
             });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const updateActiveDeviceData = async () => {
@@ -398,7 +398,7 @@ const IndividualActiveDevice = () => {
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
                     });
-            } catch (error) {}
+            } catch (error) { }
         }
     };
 
@@ -436,7 +436,7 @@ const IndividualActiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                        activeLocationId === activeData?.location_id
+                                            activeLocationId === activeData?.location_id
                                             ? true
                                             : false
                                     }>

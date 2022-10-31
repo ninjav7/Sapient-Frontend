@@ -41,11 +41,15 @@ const TimeFrameSelector = (props) => {
     return (
         <div className="time-frame-selector-wrapper">
             <div className="btn-group custom-button-group header-widget-styling" role="group">
-                <Select value={period} options={selectOptions} onChange={handleChangeSelect} />
+                <Select value={period} options={props.timeOptions || selectOptions} onChange={handleChangeSelect} />
                 <Datepicker
                     rangeDate={rangeDate}
                     onManuallyChangedDate={setCustomDate}
                     onChange={handleDatePickerChange}
+                    isSingleDay={props.isSingleDay}
+                    onCancel={props.onCancel}
+                    onApply={props.onApply}
+                    withApplyButton={props.withApplyButton}
                 />
             </div>
         </div>
@@ -56,6 +60,11 @@ TimeFrameSelector.propTypes = {
     rangeDate: PropTypes.arrayOf(PropTypes.object).isRequired,
     onChange: PropTypes.func.isRequired,
     selectedOption: PropTypes.string,
+    timeOptions: PropTypes.array,
+    isSingleDay: PropTypes.bool,
+    onCancel: PropTypes.func,
+    onApply: PropTypes.func,
+    withApplyButton: PropTypes.bool,
 };
 
 TimeFrameSelector.options = selectOptions;
