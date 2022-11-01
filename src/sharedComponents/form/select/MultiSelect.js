@@ -23,7 +23,10 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
     const [value, setValue] = useState(props.value);
     const ref = useRef(null);
 
-    useClickOutside(ref, ['click'], () => setIsOpen(false));
+    useClickOutside(ref, ['click'], (event) => {
+        setIsOpen(false);
+        isOpen && props.onMenuClose && props.onMenuClose(event, props);
+    });
 
     const options = props.isSelectAll ? [selectAllOption, ...props.options] : props.options;
 
@@ -54,8 +57,9 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
         setIsOpen(true);
     };
 
-    const handleBlur = () => {
+    const handleBlur = (event,) => {
         setIsOpen(false);
+        props.onMenuClose && props.onMenuClose(event, props);
     };
 
     useEffect(() => {
@@ -66,6 +70,7 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
         <div className={`react-select-wrapper ${className}`} ref={ref} onClick={handleClick} onBlur={handleBlur}>
             <ReactSelect
                 {...props}
+                onMenuClose={null}
                 type={type}
                 options={options}
                 value={value}

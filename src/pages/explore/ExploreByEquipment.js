@@ -567,9 +567,39 @@ const ExploreByEquipment = () => {
             type: 'line',
             height: '1000px',
             toolbar: {
-                autoSelected: 'pan',
-                show: false,
-            },
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Portfolio_View"+new Date(),
+                  }
+                },
+                autoSelected: 'zoom' 
+              },
             animations: {
                 enabled: false,
             },
@@ -635,8 +665,6 @@ const ExploreByEquipment = () => {
 
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -645,20 +673,6 @@ const ExploreByEquipment = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value;
-            //     },
-            // },
             marker: {
                 show: false,
             },
@@ -694,11 +708,8 @@ const ExploreByEquipment = () => {
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MM HH:00');
-                    // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
-            // tickAmount: 24,
-            //tickPlacement: 'on',
         },
         yaxis: {
             labels: {
@@ -707,12 +718,6 @@ const ExploreByEquipment = () => {
                 },
             },
         },
-        // grid: {
-        //     padding: {
-        //       left: 10,
-        //       right: 60 // Also you may want to increase this (based on the length of your labels)
-        //     },
-        //   },
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
@@ -734,10 +739,6 @@ const ExploreByEquipment = () => {
             },
             selection: {
                 enabled: true,
-                // xaxis: {
-                //     min: new Date('01 June 2022').getTime(),
-                //     max: new Date('02 June 2022').getTime(),
-                // },
             },
         },
         legend: {
@@ -2378,7 +2379,7 @@ const ExploreByEquipment = () => {
                         </div>
                     ) : (
                         <>
-                            <Row>
+                            {/* <Row>
                                 <Col lg={11}></Col>
                                 <Col
                                     lg={1}
@@ -2393,7 +2394,7 @@ const ExploreByEquipment = () => {
                                         <FontAwesomeIcon icon={faDownload} size="md" />
                                     </CSVLink>
                                 </Col>
-                            </Row>
+                            </Row> */}
                             <BrushChart
                                 seriesData={seriesData}
                                 optionsData={optionsData}
