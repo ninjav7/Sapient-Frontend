@@ -373,12 +373,11 @@ const EquipmentTable = ({
                                                     {selectedOptions.some((record) => record.value === 'status') && (
                                                         <td className="text-center">
                                                             <div>
-                                                                {record.status === 'Online' && (
+                                                                {record?.status ? (
                                                                     <div className="icon-bg-styling">
                                                                         <i className="uil uil-wifi mr-1 icon-styling"></i>
                                                                     </div>
-                                                                )}
-                                                                {record.status === 'Offline' && (
+                                                                ) : (
                                                                     <div className="icon-bg-styling-slash">
                                                                         <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
                                                                     </div>
@@ -776,10 +775,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -816,10 +815,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -853,10 +852,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -892,10 +891,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
