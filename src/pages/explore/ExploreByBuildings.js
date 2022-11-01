@@ -625,7 +625,6 @@ const ExploreByBuildings = () => {
 
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
-        console.log(closeTrigger);
         setShowChangeDropdown(!showChangeDropdown);
         if(closeTrigger==="change"){
             setShowChangeDropdown(true);

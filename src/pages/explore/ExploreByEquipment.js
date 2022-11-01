@@ -855,7 +855,6 @@ const ExploreByEquipment = () => {
         } else {
             setSelectedEquipmentId('');
         }
-        console.log(startDate);
     }, [startDate, endDate]);
 
     const [showDropdown, setShowDropdown] = useState(false);
@@ -873,7 +872,6 @@ const ExploreByEquipment = () => {
 
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
-        console.log(showChangeDropdown);
         setShowChangeDropdown(!showChangeDropdown);
         if(closeTrigger==="change"){
             setShowChangeDropdown(true);
@@ -1317,7 +1315,6 @@ const ExploreByEquipment = () => {
                 setPaginationData(res.data);
                 
                 if (responseData.data.length !== 0) {
-                    console.log(responseData)
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
                         setSeriesData([]);
@@ -1328,7 +1325,6 @@ const ExploreByEquipment = () => {
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));                
                 }
-                console.log(responseData.data)
                 setExploreTableData(responseData.data);
                 //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
@@ -1397,7 +1393,6 @@ const ExploreByEquipment = () => {
         if (endDate === null) {
             return;
         }
-        console.log(endDate);
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -1800,7 +1795,6 @@ const ExploreByEquipment = () => {
 
     const fetchExploreAllChartData = async (id) => {
         try {
-            console.log("All")
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
