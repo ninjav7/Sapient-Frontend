@@ -64,7 +64,7 @@ const DonutChartWidget = ({
                 {type === DONUT_CHART_TYPES.HORIZONTAL && (
                     <>
                         {props.pageType === 'building' ? (
-                            <div className="container-header mb-1">
+                            <div className="container-header">
                                 <div>
                                     <Titles sizeBrick={1} {...{ title, subtitle }} />
                                 </div>
@@ -90,7 +90,7 @@ const DonutChartWidget = ({
                 )}
                 <div
                     className={`donut-chart-widget-wrapper ${className} ${type}`}
-                    style={{ width: '100%', justifyContent: 'space-around' }}>
+                    style={{ width: '100%', justifyContent: 'center' }}>
                     {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
                     {/* {isEnergyConsumptionChartLoading ? (
                         <div className="loader-center-style">

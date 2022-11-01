@@ -32,6 +32,7 @@ import {
     portfolioEndUser,
     portfolioOverall,
 } from '../../services/Network';
+import { fetchOverallBldgData } from './services';
 import moment from 'moment';
 import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
@@ -43,6 +44,7 @@ import { Cookies } from 'react-cookie';
 import Button from '../../sharedComponents/button/Button';
 import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icons/arrow-right.svg';
 import './style.css';
+import BuildingKPIs from './BuildingKPIs';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -83,7 +85,7 @@ const BuildingOverview = () => {
     let userdata = cookies.get('user');
     const history = useHistory();
 
-    const [overview, setOverview] = useState({
+    const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
         total_consumption: {
@@ -592,6 +594,20 @@ const BuildingOverview = () => {
         if (endDate === null) {
             return;
         }
+
+        // const overAllBuildingData = async () => {
+        //     let payload = {
+        //         date_from: startDate.toLocaleDateString(),
+        //         date_to: endDate.toLocaleDateString(),
+        //         tz_info: timeZone,
+        //     };
+        //     await fetchOverallBldgData(bldgId, payload)
+        //         .then((res) => {
+        //             setOverview(res.data);
+        //         })
+        //         .catch((error) => {});
+        // };
+
         const buildingOverallData = async () => {
             try {
                 let headers = {
@@ -611,7 +627,7 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setOverview(res.data);
+                        setOverallBldgData(res.data);
                     });
             } catch (error) {}
         };
@@ -918,143 +934,14 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <div className="ml-2">
-                <Header title="Building Overview" type="page" />
-            </div>
-            <Row xl={12} className="mt-2">
-                <div className="energy-summary-alignment">
-                    <div className="card-box-style button-style">
-                        <div className="card-body text-center">
-                            <DetailedButton
-                                title="Total Consumption"
-                                description={parseInt(overview?.total_consumption.now / 1000)}
-                                unit="kWh"
-                                value={percentageHandler(
-                                    overview.total_consumption.now,
-                                    overview.total_consumption.old
-                                )}
-                                consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
-                                infoText={
-                                    startEndDayCount > 1
-                                        ? `Total energy consumption across all your buildings for the past ${startEndDayCount} days.`
-                                        : `Total energy consumption across all your buildings for the past ${startEndDayCount} day.`
-                                }
-                                infoType={`total-bld-cnsmp`}
-                            />
-                        </div>
-                    </div>
+            <Header title="Building Overview" type="page" />
 
-                    {/* {/* {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <h5 className="card-title subtitle-style">
-                                Portfolio Rank&nbsp;&nbsp;
-                                <div>
-                                    <FontAwesomeIcon icon={faCircleInfo} size="md" color="#D0D5DD" id="title" />
-                                    <UncontrolledTooltip placement="bottom" target="#title">
-                                        Portfolio Rank
-                                    </UncontrolledTooltip>
-                                </div>
-                            </h5>
-                            <p className="card-text card-content-style">
-                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
-                            </p>
-                        </div>
-                    </div> */}
-
-                    <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="Energy Density"
-                                description={(overview.average_energy_density.now / 1000).toFixed(2)}
-                                unit="kWh/sq.ft."
-                                value={percentageHandler(
-                                    overview.average_energy_density.now,
-                                    overview.average_energy_density.old
-                                )}
-                                consumptionNormal={
-                                    overview.average_energy_density.now >= overview.average_energy_density.old
-                                }
-                                infoText={
-                                    startEndDayCount > 1
-                                        ? `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} days.`
-                                        : `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} day.`
-                                }
-                                infoType={`avg-bld-dnty`}
-                            />
-                        </div>
-                    </div>
-                    {/* {/* {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="12 Mo. Electric EUI"
-                                description={overview.yearly_electric_eui.now / 1000}
-                                unit="kBtu/ft/yr"
-                                value={percentageHandler(
-                                    overview.yearly_electric_eui.now,
-                                    overview.yearly_electric_eui.old
-                                )}
-                                consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
-                                infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
-                                infoType={`total-bld-eui`}
-                            />
-                        </div>
-                    </div> */}
-                    {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
-                                Monitored Load&nbsp;&nbsp;
-                                <div>
-                                    <FontAwesomeIcon
-                                        icon={faCircleInfo}
-                                        size="md"
-                                        color="#D0D5DD"
-                                        id="tooltip-monitored-load"
-                                    />
-                                    <UncontrolledTooltip placement="bottom" target="tooltip-monitored-load">
-                                        Add Monitored Load Data
-                                    </UncontrolledTooltip>
-                                </div>
-                            </h5>
-                            {<Link
-                                to={{
-                                    pathname: `/settings/utility-bills`,
-                                }}>
-                                <button id="inner-button">Add Utility Bill</button>
-                            </Link>
-                        </div>
-                    </div> */}
-                </div>
+            <Row lg={12} className="ml-2">
+                <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
             </Row>
 
-            {/* <Row> */}
             <div className="bldg-page-grid-style">
-                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
-                    {/* Energy Consumption by End Use  */}
-                    {/* <div> */}
-                    {/* <div> */}
-                    {/* <div style={{ display: 'inline-block' }}>
-                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            </div> */}
-                    {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
-                                <Link
-                                    to={{
-                                        pathname: `/energy/end-uses/${bldgId}`,
-                                    }}>
-                                    <div
-                                        rel="noopener noreferrer"
-                                        className="link-primary mr-3"
-                                        style={{
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        More Details
-                                    </div>
-                                </Link>
-                            </div> */}
-                    {/* </div>
-                        <div className="custom-bld-enduse-style">
-                            <div> */}
+                <div>
                     <EnergyConsumptionTotals
                         series={donutChartData}
                         options={donutChartOpts}
@@ -1062,224 +949,7 @@ const BuildingOverview = () => {
                         bldgId={bldgId}
                         pageType="building"
                     />
-                    {/* <DonutChart
-                                    donutChartOpts={donutChartOpts}
-                                    donutChartData={donutChartData}
-                                    height={185}
-                                    id={Date.now()}
-                                /> */}
-                    {/* </div> */}
-                    {/* <div className="mt-3">
-                                {energyConsumption.map((record, index) => {
-                                    return (
-                                        <div>
-                                            <Link
-                                                to={{
-                                                    pathname: `/energy/${record.device.toLowerCase()}/${bldgId}`,
-                                                }}>
-                                                <div
-                                                    className="custom-bldg-table-style building-consumption-style m-2 p-1"
-                                                    onMouseOver={(e) => handleChange(e, record.device)}>
-                                                    <div className="ml-2">
-                                                        {record.device === 'HVAC' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3094B9',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Lighting' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#2C4A5E',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Plug' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#66D6BC',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Process' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3B8554',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Other' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3B8554',
-                                                                }}></div>
-                                                        )}
-                                                    </div>
-                                                    <div className="custom-bld-equip-style record-bld-style font-weight-bold">
-                                                        {record.device}
-                                                    </div>
-                                                    <div className="custom-bld-usage-style muted table-font-style">
-                                                        {(record.energy_consumption.now / 1000).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                maximumFractionDigits: 5,
-                                                            }
-                                                        )}
-                                                        kWh
-                                                    </div>
-                                                    <div className="mr-2">
-                                                        {record.energy_consumption.now <=
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-success text-success custom-bld-style">
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {record.energy_consumption.now >
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-danger text-danger custom-bld-style">
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
-                            </div> */}
-                    {/* </div> */}
-                    {/* </div> */}
 
-                    {/* Top 3 Peak Demand Periods  */}
-                    {/* {/* {/* <Row>
-                        <div className="card-body">
-                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Top 3 Peak Demand Periods
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/peak-demand/${bldgId}`,
-                                }}>
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary font-weight-bold mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                    }}>
-                                    More Details
-                                </a>
-                            </Link>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                Max power draw (15 minutes period)
-                            </h6>
-                            <div className="card-group mt-2 top-peak-demand-style">
-                                {topContributors.slice(0, 3).map((item, index) => (
-                                    <div className="card peak-demand-container mt-3" ref={hoverRef}>
-                                        <div className="card-body">
-                                            <h6
-                                                className="card-title text-muted peak-demand-card-style"
-                                                style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
-                                                {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
-                                                {new Date(item.timeRange.frm).toLocaleTimeString('en', {
-                                                    timeStyle: 'short',
-                                                    hour12: true,
-                                                    timeZone: 'UTC',
-                                                })}
-                                            </h6>
-                                            <h5 className="card-title ml-1">
-                                                <span style={{ color: 'black' }}>
-                                                    {(item.overall_energy_consumption / 1000).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            maximumFractionDigits: 2,
-                                                        }
-                                                    )}
-                                                </span>
-                                                kW
-                                            </h5>
-                                            <div style={{ height: '75%' }}>
-                                                {isHovered ? (
-                                                    <div
-                                                        style={{ display: 'flex', justifyContent: 'center' }}
-                                                        className="m-4">
-                                                        <Link
-                                                            to={{
-                                                                pathname: `/explore/by-building`,
-                                                            }}>
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
-                                                                <i className="uil uil-pen mr-1"></i>Explore
-                                                            </button>
-                                                        </Link>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <p className="card-text peak-card-label">Top Contributors</p>
-                                                        <table className="table table-borderless small peak-table-font">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td className="peak-table-content">
-                                                                        {item.top_contributors.slice(0, 3).map((el) => (
-                                                                            <tr>
-                                                                                <div className="font-weight-bold text-dark">
-                                                                                    {el.equipment_name}
-                                                                                </div>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </td>
-                                                                    <td className="peak-table-content-two">
-                                                                        {item.top_contributors.map((el2) => (
-                                                                            <tr
-                                                                                style={{
-                                                                                    fontSize: 12,
-                                                                                }}>
-                                                                                <div style={{ marginTop: '0.3vh' }}>
-                                                                                    {el2.energy_consumption.now.toLocaleString(
-                                                                                        undefined,
-                                                                                        {
-                                                                                            maximumFractionDigits: 2,
-                                                                                        }
-                                                                                    )}{' '}
-                                                                                    kW
-                                                                                </div>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </Row> */}
-
-                    {/* Hourly Average Consumption */}
                     <Row>
                         <div className="card-body" style={{ padding: '0.5rem' }}>
                             <div className="total-eng-consumtn">
@@ -1328,9 +998,8 @@ const BuildingOverview = () => {
                         </div>
                     </Row>
 
-                    {/* Total Energy Consumption  */}
                     <Row>
-                        <div className="card-body">
+                        <Col lg={12}>
                             <div className="total-eng-consumtn">
                                 <div className="container-header mb-1">
                                     <div>
@@ -1365,107 +1034,11 @@ const BuildingOverview = () => {
                                     />
                                 )}
                             </div>
-                        </div>
+                        </Col>
                     </Row>
                 </div>
 
-                {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
-                    {/* {/* {/* <Row>
-                        <div>
-                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Building Alerts
-                            </h6>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary mr-2"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}></a>
-                            <span
-                                className="float-right mr-0 font-weight-bold"
-                                style={{ color: 'blue' }}
-                                onClick={() => setBuildingAlerts([])}>
-                                Clear
-                            </span>
-
-                            <div className="mt-2 alert-container">
-                                {buildingAlert.map((record) => {
-                                    return (
-                                        <>
-                                            {record.type === 'building-add' && (
-                                                <div className="alert-card mb-2">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faMountain}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#B42318
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>New Building Peak</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">
-                                                            225.3 kW &nbsp; 3/3/22 @ 3:20 PM
-                                                        </span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Today</div>
-                                                </div>
-                                            )}
-                                            {record.type === 'energy-trend' && (
-                                                <div className="alert-card mb-2">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowTrendUp}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#DC6803"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>Energy Trend Upward</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">+25% from last 30 days</span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Yesterday</div>
-                                                </div>
-                                            )}
-                                            {record.type === 'notification' && (
-                                                <div className="alert-card">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faTriangleExclamation}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#DC6803"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>Service Due Soon (AHU 1)</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">
-                                                            40 Run Hours &nbsp; in 25 Days
-                                                        </span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Tuesday</div>
-                                                </div>
-                                            )}
-                                        </>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </Row> */}
                     <Row>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
@@ -1583,9 +1156,7 @@ const BuildingOverview = () => {
                         </div>
                     </Row>
                 </div>
-                {/* </Col> */}
             </div>
-            {/* </Row> */}
         </React.Fragment>
     );
 };
