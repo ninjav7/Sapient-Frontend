@@ -711,7 +711,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
@@ -769,7 +769,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData.data);
                 setDuplicateGeneralEquipmentData(responseData.data);
@@ -884,7 +884,7 @@ const Equipment = () => {
             };
 
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
