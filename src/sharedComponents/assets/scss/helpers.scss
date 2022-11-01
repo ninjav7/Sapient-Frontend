@@ -67,6 +67,10 @@
     padding: 0;
 }
 
+.square {
+    border-radius: 0 !important;
+}
+
 $text-colors: (
     'error-600': $error-600,
     'gray-550': $primary-gray-550,
