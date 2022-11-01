@@ -722,13 +722,11 @@ const ExploreByBuildings = () => {
                     }
                     let responseData = res.data;
                     setExploreTableData(responseData);
-                    console.log(responseData);
                     let max=responseData[0].consumption.change;
                     responseData.map((ele)=>{
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                     })
-                    console.log(max);
                     setTopPerChange(max)
                     set_minPerValue(0.0)
                     set_maxPerValue(max);
