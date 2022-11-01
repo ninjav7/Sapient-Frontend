@@ -68,6 +68,40 @@ const Default = (arg) => {
                 </div>
 
                 <div>
+                    <h5>icons/img for selected header</h5>
+                    <Select
+                        {...arg}
+                        type={Select.Types.Icon}
+                        options={[
+                            {
+                                label: 'Phoenix Baker',
+                                value: 0,
+                                iconForSelected: (
+                                    <div
+                                        style={{
+                                            width: '0.5rem',
+                                            height: '0.5rem',
+                                            background: '#12B76A',
+                                            borderRadius: 100,
+                                        }}
+                                    />
+                                ),
+                            },
+                            {
+                                label: 'Olivia Rhye',
+                                value: 1,
+                                iconForSelected: <img src={Avatar2Url} alt={''} />,
+                            },
+                            {
+                                label: 'Candice Wu',
+                                value: 3,
+                                iconForSelected: <img src={Avatar3Url} alt={''} />,
+                            },
+                        ]}
+                    />
+                </div>
+
+                <div>
                     <h5>With Supporting Text</h5>
                     <Select
                         {...arg}
