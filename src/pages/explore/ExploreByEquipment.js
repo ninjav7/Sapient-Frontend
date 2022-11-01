@@ -1322,34 +1322,10 @@ const ExploreByEquipment = () => {
                         setSeriesData([]);
                         setSeriesLineData([]);
                     }
-                    let max=responseData.data[0].consumption.change;
-                    let min=responseData.data[0].consumption.change;
-                    let maxPos=0.1;
-                    let minPos=0.1;
-                    responseData.data.map((ele)=>{
-                        if(ele.consumption.change>=max)
-                            max=ele.consumption.change;
-                        if(ele.consumption.change<=min)
-                            min=ele.consumption.change;
-                        if(ele.consumption.change>=1){
-                            if(ele.consumption.change>=maxPos)
-                                maxPos=ele.consumption.change;
-                            if(ele.consumption.change<=minPos)
-                                minPos=ele.consumption.change;
-                        }
-                        
-                    })
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
-                    setTopPerChange(max===0?max+1:max)
-                    setBottomPerChange(min)
-                    setTopPosPerChange(maxPos);
-                    setBottomPosPerChange(minPos);
-                    console.log(minPos ," ",maxPos);
-                    set_minPerValue(min)
-                    set_maxPerValue(max===0?max+1:max);
+                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));                
                 }
                 console.log(responseData.data)
                 setExploreTableData(responseData.data);
@@ -1384,6 +1360,28 @@ const ExploreByEquipment = () => {
                 ExploreFilterDataStore.update((bs) => {
                     bs.items = responseData.data;
                 });
+                let max=responseData.data[0].consumption.change;
+                    let min=responseData.data[0].consumption.change;
+                    let maxPos=0.1;
+                    let minPos=0.1;
+                    responseData.data.map((ele)=>{
+                        if(ele.consumption.change>=max)
+                            max=ele.consumption.change;
+                        if(ele.consumption.change<=min)
+                            min=ele.consumption.change;
+                        if(ele.consumption.change>=1){
+                            if(ele.consumption.change>=maxPos)
+                                maxPos=ele.consumption.change;
+                            if(ele.consumption.change<=minPos)
+                                minPos=ele.consumption.change;
+                        }    
+                    })
+                    setTopPerChange(parseInt(max===0?max+1:max))
+                    setBottomPerChange(parseInt(min))
+                    setTopPosPerChange(parseInt(maxPos));
+                    setBottomPosPerChange(parseInt(minPos));
+                    set_minPerValue(parseInt(min))
+                    set_maxPerValue(parseInt(max===0?max+1:max));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
@@ -2618,7 +2616,7 @@ const ExploreByEquipment = () => {
                                                         <RangeSlider
                                                             name="consumption"
                                                             STEP={0.1}
-                                                            MIN={0}
+                                                            MIN={minPerValue}
                                                             range={[minPerValue, maxPerValue]}
                                                             MAX={maxPerValue}
                                                             onSelectionChange={handleInputPer}
