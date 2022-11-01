@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import MultiSelect from './MultiSelect';
 import { Control, DropdownIndicator, MenuList, Option, SingleValue } from './customComponents';
@@ -31,7 +32,7 @@ const Select = ({
                 {...props}
                 type={type}
                 options={options}
-                defaultValue={defaultValue || selectedOption}
+                defaultValue={!_.isObject(defaultValue) ? selectedOption : defaultValue}
                 value={selectedOption}
                 components={{
                     ...Object.assign(
@@ -55,13 +56,14 @@ Select.Multi = MultiSelect;
 
 Select.propTypes = {
     selectClassName: PropTypes.string,
-    defaultValue: stringOrNumberPropTypes.isRequired,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]).isRequired,
     options: PropTypes.arrayOf(
         PropTypes.shape({
-            label: PropTypes.string.isRequired,
+            label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
             value: stringOrNumberPropTypes.isRequired,
             supportText: PropTypes.string,
             img: PropTypes.node,
+            iconForSelected: PropTypes.node,
             labelChart: PropTypes.string,
             percentLabel: stringOrNumberPropTypes,
             isSelected: PropTypes.bool,
