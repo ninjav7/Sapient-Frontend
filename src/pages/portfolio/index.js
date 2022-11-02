@@ -34,7 +34,7 @@ import './style.scss';
 import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
-import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { getFormattedTimeIntervalObjectData } from '../../helpers/formattedChartData';
@@ -636,12 +636,13 @@ const PortfolioOverview = () => {
                             />
                         </Col>
                         <Col lg={6}>
-                            <EnergyConsumptionHistory
-                                title="Energy Consumption History"
-                                subtitle="Totals by Hour (kWh)"
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
                                 series={energyConsumptionChart}
                                 isConsumpHistoryLoading={isConsumpHistoryLoading}
                                 startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
                             />
                         </Col>
                     </Row>

@@ -1,7 +1,15 @@
 import React from 'react';
-import BarChartWidget from '../../sharedComponents/barChartWidget';
+import BarChartWidget from '../barChartWidget';
 
-const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, startEndDayCount, title, subtitle }) => {
+const TotalEnergyConsumption = ({
+    series,
+    height,
+    isConsumpHistoryLoading,
+    startEndDayCount,
+    title,
+    subtitle,
+    timeZone,
+}) => {
     return (
         <BarChartWidget
             title={title}
@@ -10,8 +18,9 @@ const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, sta
             isConsumpHistoryLoading={isConsumpHistoryLoading}
             startEndDayCount={startEndDayCount}
             height={height}
+            timeZone={timeZone}
         />
     );
 };
 
-export default EnergyConsumptionHistory;
+export default TotalEnergyConsumption;

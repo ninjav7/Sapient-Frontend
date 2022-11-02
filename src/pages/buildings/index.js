@@ -45,6 +45,7 @@ import Button from '../../sharedComponents/button/Button';
 import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icons/arrow-right.svg';
 import './style.css';
 import BuildingKPIs from './BuildingKPIs';
+import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -1000,40 +1001,14 @@ const BuildingOverview = () => {
 
                     <Row>
                         <Col lg={12}>
-                            <div className="total-eng-consumtn">
-                                <div className="container-header mb-1">
-                                    <div>
-                                        <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
-                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                            Hourly Energy Consumption (kWh)
-                                        </h6>
-                                    </div>
-                                    <div>
-                                        <Button
-                                            label="More Details"
-                                            size={Button.Sizes.lg}
-                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                            type={Button.Type.tertiary}
-                                            iconAlignment={Button.IconAlignment.right}
-                                            onClick={() => {
-                                                history.push({
-                                                    pathname: `/energy/end-uses/${bldgId}`,
-                                                });
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                {isEnergyConsumptionDataLoading ? (
-                                    <div className="loader-center-style" style={{ height: '400px' }}>
-                                        <Spinner className="m-2" color={'primary'} />
-                                    </div>
-                                ) : (
-                                    <LineColumnChart
-                                        series={buildingConsumptionChartData}
-                                        options={buildingConsumptionChartOpts}
-                                    />
-                                )}
-                            </div>
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
+                                series={buildingConsumptionChartData}
+                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                            />
                         </Col>
                     </Row>
                 </div>
