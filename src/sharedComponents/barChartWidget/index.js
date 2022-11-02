@@ -28,25 +28,29 @@ const BarChartWidget = ({
 
     return (
         <div className={`bar-chart-widget-wrapper ${className}`}>
-            <Typography.Subheader
-                size={Typography.Sizes.md}
-                as="h5"
-                fontWeight={Typography.Types.Medium}
-                className="ml-3 mb-0 mt-3">
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6" className="ml-3 mt-1">
-                {subtitle}
-            </Typography.Body>
-            {isConsumpHistoryLoading ? (
-                <div className="loader-center-style">
-                    <Spinner className="m-2" color={'primary'} />
-                </div>
-            ) : (
-                <div className="m-4">
-                    <Bar series={series} options={configBarChartWidget} />
-                </div>
-            )}
+            <div className="ml-3 mt-3">
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    as="h5"
+                    fontWeight={Typography.Types.Medium}
+                    className="mb-1">
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
+            <div>
+                {isConsumpHistoryLoading ? (
+                    <div className="loader-center-style">
+                        <Spinner className="m-2" color={'primary'} />
+                    </div>
+                ) : (
+                    <div>
+                        <BarChart series={series} options={configBarChartWidget} />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

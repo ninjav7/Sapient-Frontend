@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { timeZone } from '../../utils/helper';
 import { formatConsumptionValue } from '../../helpers/helpers';
 
 export const configBarChartOpts = {

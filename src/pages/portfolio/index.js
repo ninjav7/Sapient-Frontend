@@ -626,7 +626,7 @@ const PortfolioOverview = () => {
 
                     {/* <div className="portfolio-consume-widget-wrapper mt-5 ml-2"> */}
                     <Row className="ml-0 mt-3">
-                        <Col xl={6}>
+                        <Col lg={6}>
                             <EnergyConsumptionTotals
                                 series={series}
                                 options={options}
@@ -635,8 +635,10 @@ const PortfolioOverview = () => {
                                 pageType="portfolio"
                             />
                         </Col>
-                        <Col xl={6}>
+                        <Col lg={6}>
                             <EnergyConsumptionHistory
+                                title="Energy Consumption History"
+                                subtitle="Totals by Hour (kWh)"
                                 series={energyConsumptionChart}
                                 isConsumpHistoryLoading={isConsumpHistoryLoading}
                                 startEndDayCount={startEndDayCount}

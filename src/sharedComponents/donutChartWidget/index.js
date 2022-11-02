@@ -26,13 +26,18 @@ const ICON_SIZES = {
 const Titles = ({ sizeBrick, title, subtitle }) => {
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
-                {subtitle}
-            </Typography.Body>
-            <Brick sizeInRem={sizeBrick} />
+            <div className="ml-3 mt-3">
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    as="h5"
+                    fontWeight={Typography.Types.Medium}
+                    className="mb-1">
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
         </>
     );
 };
@@ -60,14 +65,12 @@ const DonutChartWidget = ({
     };
     return (
         <>
-            <div className="donut-main-wrapper">
+            <div className={`donut-main-wrapper ${className}`}>
                 {type === DONUT_CHART_TYPES.HORIZONTAL && (
                     <>
                         {props.pageType === 'building' ? (
                             <div className="container-header">
-                                <div>
-                                    <Titles sizeBrick={1} {...{ title, subtitle }} />
-                                </div>
+                                <Titles {...{ title, subtitle }} />
                                 <div>
                                     <Button
                                         label="More Details"
@@ -84,7 +87,7 @@ const DonutChartWidget = ({
                                 </div>
                             </div>
                         ) : (
-                            <Titles sizeBrick={1} {...{ title, subtitle }} />
+                            <Titles {...{ title, subtitle }} />
                         )}
                     </>
                 )}
@@ -92,11 +95,6 @@ const DonutChartWidget = ({
                     className={`donut-chart-widget-wrapper ${className} ${type}`}
                     style={{ width: '100%', justifyContent: 'center' }}>
                     {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
-                    {/* {isEnergyConsumptionChartLoading ? (
-                        <div className="loader-center-style">
-                            <Spinner className="m-2" color={'primary'} />
-                        </div>
-                    ) : ( */}
                     <>
                         <div className={`chart-wrapper ${type}`}>
                             <ReactApexChart options={options} {...props} series={series} type="donut" />
@@ -110,7 +108,6 @@ const DonutChartWidget = ({
                             />
                         </div>
                     </>
-                    {/* )} */}
                 </div>
             </div>
         </>

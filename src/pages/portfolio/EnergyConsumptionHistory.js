@@ -1,15 +1,15 @@
 import React from 'react';
-import LineChartWidget from '../../sharedComponents/lineChartWidget';
+import BarChartWidget from '../../sharedComponents/barChartWidget';
 
-const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, startEndDayCount }) => {
+const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, startEndDayCount, title, subtitle }) => {
     return (
-        <LineChartWidget
-            height={height}
-            title="Energy Consumption History"
-            subtitle="Totals by Hour (kWh)"
+        <BarChartWidget
+            title={title}
+            subtitle={subtitle}
             series={series}
-            //isConsumpHistoryLoading={isConsumpHistoryLoading}
+            isConsumpHistoryLoading={isConsumpHistoryLoading}
             startEndDayCount={startEndDayCount}
+            height={height}
         />
     );
 };
