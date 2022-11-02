@@ -7,6 +7,7 @@ import { Spinner } from 'reactstrap';
 import { formatConsumptionValue } from '../../helpers/helpers';
 import { xaxisFilters } from '../../helpers/helpers';
 import HeatMapChart from '../../../src/pages/charts/HeatMapChart';
+import './style.scss';
 
 const HeatMapWidget = ({
     className = '',
@@ -67,12 +68,12 @@ const HeatMapWidget = ({
                 } else {
                     ch = '-';
                 }
-                return `<div class="bar-chart-widget-tooltip">
-                        <h6 class="bar-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="bar-chart-widget-tooltip-value">
+                return `<div class="heatmap-chart-widget-tooltip">
+                        <h6 class="heatmap-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="heatmap-chart-widget-tooltip-value">
                     
                         ${ch} kWh</div>
-                        <div class="bar-chart-widget-tooltip-time-period">${moment(timestamp)
+                        <div class="heatmap-chart-widget-tooltip-time-period">${moment(timestamp)
                             .tz(timeZone)
                             .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
@@ -131,7 +132,7 @@ const HeatMapWidget = ({
     }, [startEndDayCount]);
 
     return (
-        <div className={`bar-chart-widget-wrapper ${className}`}>
+        <div className={`heatmap-chart-widget-wrapper ${className}`}>
             <div className="ml-3 mt-3">
                 <Typography.Subheader
                     size={Typography.Sizes.md}
@@ -151,9 +152,8 @@ const HeatMapWidget = ({
                     </div>
                 ) : (
                     <div>
-                        <HeatMapChart options={weekDaysOptions} series={weekDaysSeries} height={height} />
-                        <span className="m-2"></span>
                         <HeatMapChart options={weekEndsOptions} series={weekEndsSeries} height={height} />
+                        <HeatMapChart options={weekDaysOptions} series={weekDaysSeries} height={height} />
                     </div>
                 )}
             </div>

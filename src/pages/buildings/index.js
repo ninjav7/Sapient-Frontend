@@ -74,7 +74,6 @@ export function useHover() {
 }
 
 const BuildingOverview = () => {
-    // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
@@ -342,26 +341,26 @@ const BuildingOverview = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         dataLabels: {
             enabled: false,
         },
-        title: {
-            text: 'Weekdays',
-            align: 'left',
-            margin: 1,
-            offsetX: 12,
-            offsetY: 20,
-            floating: false,
-            style: {
-                fontSize: '14px',
-                fontWeight: '600',
-                fontFamily: 'Inter',
-                color: '#98A2B3',
-            },
-        },
+        // title: {
+        //     text: 'Weekdays',
+        //     align: 'left',
+        //     margin: 1,
+        //     offsetX: 12,
+        //     offsetY: 20,
+        //     floating: false,
+        //     style: {
+        //         fontSize: '14px',
+        //         fontWeight: '600',
+        //         fontFamily: 'Inter',
+        //         color: '#98A2B3',
+        //     },
+        // },
         stroke: {
             width: 0.7,
         },
@@ -405,7 +404,9 @@ const BuildingOverview = () => {
         },
         yaxis: {
             labels: {
-                show: false,
+                show: true,
+                minWidth: 40,
+                maxWidth: 160,
             },
         },
         tooltip: {
@@ -466,33 +467,30 @@ const BuildingOverview = () => {
         },
     ]);
 
-    const weekdaysChartHeight = 125;
-    const weekendsChartHeight = 125;
-
     const [weekEndsOptions, setWeekEndsOptions] = useState({
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: true,
+                show: false,
             },
         },
         dataLabels: {
             enabled: false,
         },
-        title: {
-            text: 'Weekends',
-            align: 'left',
-            margin: 1,
-            offsetX: 12,
-            offsetY: 20,
-            floating: false,
-            style: {
-                fontSize: '14px',
-                fontWeight: '600',
-                fontFamily: 'Inter',
-                color: '#98A2B3',
-            },
-        },
+        // title: {
+        //     text: 'Weekends',
+        //     align: 'left',
+        //     margin: 1,
+        //     offsetX: 12,
+        //     offsetY: 20,
+        //     floating: false,
+        //     style: {
+        //         fontSize: '14px',
+        //         fontWeight: '600',
+        //         fontFamily: 'Inter',
+        //         color: '#98A2B3',
+        //     },
+        // },
         stroke: {
             width: 0.7,
         },
@@ -508,7 +506,9 @@ const BuildingOverview = () => {
         },
         yaxis: {
             labels: {
-                show: false,
+                show: true,
+                minWidth: 40,
+                maxWidth: 160,
             },
         },
         xaxis: {
@@ -966,52 +966,6 @@ const BuildingOverview = () => {
                         className="mt-4"
                     />
 
-                    {/* <div className="card-body" style={{ padding: '0.5rem' }}>
-                            <div className="total-eng-consumtn">
-                                <div className="container-header mb-1">
-                                    <div>
-                                        <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
-                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                            Average by Hour (kWh)
-                                        </h6>
-                                    </div>
-                                    <div>
-                                        <Button
-                                            label="More Details"
-                                            size={Button.Sizes.lg}
-                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                            type={Button.Type.tertiary}
-                                            iconAlignment={Button.IconAlignment.right}
-                                            onClick={() => {
-                                                history.push({
-                                                    pathname: `/energy/time-of-day/${bldgId}`,
-                                                });
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                                {isAvgConsumptionDataLoading ? (
-                                    <div className="loader-center-style" style={{ height: '400px' }}>
-                                        <Spinner className="m-2" color={'primary'} />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <HeatMapChart
-                                            options={weekDaysOptions}
-                                            series={weekDaysSeries}
-                                            height={weekdaysChartHeight}
-                                        />
-                                        <span className="m-2"></span>
-                                        <HeatMapChart
-                                            options={weekEndsOptions}
-                                            series={weekEndsSeries}
-                                            height={weekendsChartHeight}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div> */}
-
                     <TotalEnergyConsumption
                         title="Total Energy Consumption"
                         subtitle="Hourly Energy Consumption (kWh)"
@@ -1027,7 +981,7 @@ const BuildingOverview = () => {
                 {/* Top Equipment Consumption Table */}
                 <div>
                     <Row>
-                        <div className="equip-table-container mt-1">
+                        <div className="equip-table-container">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
                             <table className="table table-borderless">
                                 <thead>
