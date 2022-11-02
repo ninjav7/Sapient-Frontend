@@ -12,6 +12,7 @@ import { useHistory } from 'react-router-dom';
 import './style.scss';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { useEffect } from 'react';
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
@@ -63,6 +64,7 @@ const DonutChartWidget = ({
         colors,
         id,
     };
+
     return (
         <>
             <div className={`donut-main-wrapper ${className}`}>

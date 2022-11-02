@@ -33,7 +33,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.scss';
 import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
-import EnergyConsumptionTotals from './EnergyConsumptionTotals';
+import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -627,7 +627,9 @@ const PortfolioOverview = () => {
                     {/* <div className="portfolio-consume-widget-wrapper mt-5 ml-2"> */}
                     <Row className="ml-0 mt-3">
                         <Col lg={6}>
-                            <EnergyConsumptionTotals
+                            <EnergyConsumptionByEndUse
+                                title="Energy Consumption by End Use"
+                                subtitle="Totals in kWh"
                                 series={series}
                                 options={options}
                                 energyConsumption={energyConsumption}

@@ -4,7 +4,6 @@ import DonutChart from '../charts/DonutChart';
 import Header from '../../components/Header';
 import LineChart from '../charts/LineChart';
 import DetailedButton from './DetailedButton';
-import EnergyLineChart from './EnergyLineChart';
 import HeatMapChart from '../charts/HeatMapChart';
 import upGraph from '../../assets/icon/buildings/up-graph.svg';
 import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
@@ -13,7 +12,6 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
@@ -46,6 +44,7 @@ import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icon
 import './style.css';
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
+import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -656,7 +655,7 @@ const BuildingOverview = () => {
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
+                            let fixedConsumption = parseInt(record.energy_consumption.now);
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);
@@ -943,7 +942,9 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
-                    <EnergyConsumptionTotals
+                    <EnergyConsumptionByEndUse
+                        title="Energy Consumption by End Use"
+                        subtitle="Totals in kWh"
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
