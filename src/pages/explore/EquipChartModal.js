@@ -908,9 +908,11 @@ const EquipChartModal = ({
 
                                                 {ytdData?.ytd_peak?.time_stamp ? (
                                                     <span className="ytd-unit">
-                                                        {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                            'MM/DD  H:mm'
-                                                        )}`}
+                                                        {`kW @ ${moment
+                                                            .utc(ytdData?.ytd_peak?.time_stamp)
+                                                            .clone()
+                                                            .tz(timeZone)
+                                                            .format('MM/DD  H:mm')}`}
                                                     </span>
                                                 ) : (
                                                     <span className="ytd-unit">kW</span>
