@@ -1,5 +1,4 @@
 import React from 'react';
-import { Col } from 'reactstrap';
 import { percentageHandler } from '../../utils/helper';
 import DonutChartWidget from '../donutChartWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
@@ -21,7 +20,7 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionByEndUse = ({ series, options, energyConsumption, isEnergyConsumptionChartLoading }) => {
+const EnergyConsumptionByEndUse = ({ title, subtitle, energyConsumption, isEnergyConsumptionChartLoading }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         let val = (energy_consumption.now / 1000).toFixed(0);
         let value = parseFloat(val);
@@ -38,8 +37,8 @@ const EnergyConsumptionByEndUse = ({ series, options, energyConsumption, isEnerg
         <div style={{ border: 'black' }}>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
-                title="Energy Consumption by End Use"
-                subtitle="Totals in kWh"
+                title={title}
+                subtitle={subtitle}
                 items={donutChartData}
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
             />

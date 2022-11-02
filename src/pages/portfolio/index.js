@@ -448,13 +448,13 @@ const PortfolioOverview = () => {
                     .then((res) => {
                         let response = res?.data;
                         response.forEach((record) => {
-                            record.energy_consumption.now = parseInt(record.energy_consumption.now / 1000);
-                            record.energy_consumption.old = parseInt(record.energy_consumption.old / 1000);
+                            record.energy_consumption.now = parseInt(record.energy_consumption.now);
+                            record.energy_consumption.old = parseInt(record.energy_consumption.old);
                             record.after_hours_energy_consumption.now = parseInt(
-                                record.after_hours_energy_consumption.now / 1000
+                                record.after_hours_energy_consumption.now
                             );
                             record.after_hours_energy_consumption.old = parseInt(
-                                record.after_hours_energy_consumption.old / 1000
+                                record.after_hours_energy_consumption.old
                             );
                         });
                         setenergyConsumption(response);
@@ -630,8 +630,6 @@ const PortfolioOverview = () => {
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
                                 subtitle="Totals in kWh"
-                                series={series}
-                                options={options}
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
