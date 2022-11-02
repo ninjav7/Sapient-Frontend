@@ -20,7 +20,14 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionByEndUse = ({ title, subtitle, energyConsumption, isEnergyConsumptionChartLoading }) => {
+const EnergyConsumptionByEndUse = ({
+    title,
+    subtitle,
+    energyConsumption,
+    isEnergyConsumptionChartLoading,
+    pageType,
+    bldgId,
+}) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         let val = (energy_consumption.now / 1000).toFixed(0);
         let value = parseFloat(val);
@@ -41,6 +48,8 @@ const EnergyConsumptionByEndUse = ({ title, subtitle, energyConsumption, isEnerg
                 subtitle={subtitle}
                 items={donutChartData}
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                // pageType={pageType}
+                bldgId={bldgId}
             />
         </div>
     );

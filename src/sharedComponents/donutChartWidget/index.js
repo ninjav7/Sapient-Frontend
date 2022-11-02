@@ -73,7 +73,7 @@ const DonutChartWidget = ({
                         {props.pageType === 'building' ? (
                             <div className="container-header">
                                 <Titles {...{ title, subtitle }} />
-                                <div>
+                                <div className="mr-2">
                                     <Button
                                         label="More Details"
                                         size={Button.Sizes.lg}

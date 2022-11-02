@@ -45,6 +45,7 @@ import './style.css';
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
+import HourlyAvgConsumption from './HourlyAvgConsumption';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -936,12 +937,12 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
-            <Row lg={12} className="ml-2">
+            <Row lg={12} className="ml-2 mb-4">
                 <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
             </Row>
 
             <div className="bldg-page-grid-style">
-                <div>
+                <div className="ml-2">
                     <EnergyConsumptionByEndUse
                         title="Energy Consumption by End Use"
                         subtitle="Totals in kWh"
@@ -952,8 +953,20 @@ const BuildingOverview = () => {
                         pageType="building"
                     />
 
-                    <Row>
-                        <div className="card-body" style={{ padding: '0.5rem' }}>
+                    <HourlyAvgConsumption
+                        title="Hourly Average Consumption"
+                        subtitle="Average by Hour (kWh)"
+                        weekDaysOptions={weekDaysOptions}
+                        weekDaysSeries={weekDaysSeries}
+                        weekEndsOptions={weekEndsOptions}
+                        weekEndsSeries={weekEndsSeries}
+                        isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                        startEndDayCount={startEndDayCount}
+                        timeZone={timeZone}
+                        className="mt-4"
+                    />
+
+                    {/* <div className="card-body" style={{ padding: '0.5rem' }}>
                             <div className="total-eng-consumtn">
                                 <div className="container-header mb-1">
                                     <div>
@@ -997,24 +1010,22 @@ const BuildingOverview = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </Row>
+                        </div> */}
 
-                    <Row>
-                        <Col lg={12}>
-                            <TotalEnergyConsumption
-                                title="Total Energy Consumption"
-                                subtitle="Hourly Energy Consumption (kWh)"
-                                series={buildingConsumptionChartData}
-                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
-                                startEndDayCount={startEndDayCount}
-                                timeZone={timeZone}
-                            />
-                        </Col>
-                    </Row>
+                    <TotalEnergyConsumption
+                        title="Total Energy Consumption"
+                        subtitle="Hourly Energy Consumption (kWh)"
+                        series={buildingConsumptionChartData}
+                        isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                        startEndDayCount={startEndDayCount}
+                        timeZone={timeZone}
+                        pageType="building"
+                        className="mt-4"
+                    />
                 </div>
 
-                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                {/* Top Equipment Consumption Table */}
+                <div>
                     <Row>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>

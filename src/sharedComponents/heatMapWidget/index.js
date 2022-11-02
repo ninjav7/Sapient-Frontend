@@ -6,49 +6,21 @@ import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
 import { formatConsumptionValue } from '../../helpers/helpers';
 import { xaxisFilters } from '../../helpers/helpers';
-import BarChart from '../../../src/pages/charts/BarChart';
-import { useHistory } from 'react-router-dom';
-import Button from '../button/Button';
-import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
-import './style.scss';
+import HeatMapChart from '../../../src/pages/charts/HeatMapChart';
 
-const ICON_SIZES = {
-    [Button.Sizes.lg]: 11,
-};
-
-const Titles = ({ sizeBrick, title, subtitle }) => {
-    return (
-        <>
-            <div className="ml-3 mt-3">
-                <Typography.Subheader
-                    size={Typography.Sizes.md}
-                    as="h5"
-                    fontWeight={Typography.Types.Medium}
-                    className="mb-1">
-                    {title}
-                </Typography.Subheader>
-                <Typography.Body size={Typography.Sizes.xs} as="h6">
-                    {subtitle}
-                </Typography.Body>
-            </div>
-        </>
-    );
-};
-
-const BarChartWidget = ({
+const HeatMapWidget = ({
     className = '',
-    series,
     title,
     subtitle,
-    height = 259,
-    width,
-    isConsumpHistoryLoading,
+    height = 125,
+    isAvgConsumptionDataLoading,
+    weekDaysOptions,
+    weekDaysSeries,
+    weekEndsOptions,
+    weekEndsSeries,
     startEndDayCount,
     timeZone,
-    ...props
 }) => {
-    const history = useHistory();
-
     const [configBarChartWidget, setConfigBarChartWidget] = useState({
         chart: {
             type: 'bar',
@@ -160,31 +132,7 @@ const BarChartWidget = ({
 
     return (
         <div className={`bar-chart-widget-wrapper ${className}`}>
-            <>
-                {props.pageType === 'building' ? (
-                    <div className="container-header">
-                        <Titles {...{ title, subtitle }} />
-                        <div className="mr-2">
-                            <Button
-                                label="More Details"
-                                size={Button.Sizes.lg}
-                                icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                type={Button.Type.tertiary}
-                                iconAlignment={Button.IconAlignment.right}
-                                onClick={() => {
-                                    history.push({
-                                        pathname: `/energy/end-uses/${props.bldgId}`,
-                                    });
-                                }}
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    <Titles {...{ title, subtitle }} />
-                )}
-            </>
-
-            {/* <div className="ml-3 mt-3">
+            <div className="ml-3 mt-3">
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
@@ -195,15 +143,17 @@ const BarChartWidget = ({
                 <Typography.Body size={Typography.Sizes.xs} as="h6">
                     {subtitle}
                 </Typography.Body>
-            </div> */}
+            </div>
             <div>
-                {isConsumpHistoryLoading ? (
-                    <div className="loader-center-style">
+                {isAvgConsumptionDataLoading ? (
+                    <div className="loader-center-style" style={{ height: '400px' }}>
                         <Spinner className="m-2" color={'primary'} />
                     </div>
                 ) : (
                     <div>
-                        <BarChart series={series} options={configBarChartWidget} />
+                        <HeatMapChart options={weekDaysOptions} series={weekDaysSeries} height={height} />
+                        <span className="m-2"></span>
+                        <HeatMapChart options={weekEndsOptions} series={weekEndsSeries} height={height} />
                     </div>
                 )}
             </div>
@@ -211,7 +161,7 @@ const BarChartWidget = ({
     );
 };
 
-BarChartWidget.propTypes = {
+HeatMapWidget.propTypes = {
     title: PropTypes.string.isRequired,
     subtitle: PropTypes.string.isRequired,
     height: PropTypes.string,
@@ -230,4 +180,4 @@ BarChartWidget.propTypes = {
     ).isRequired,
 };
 
-export default BarChartWidget;
+export default HeatMapWidget;

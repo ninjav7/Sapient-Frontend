@@ -9,7 +9,7 @@ import '../portfolio/PortfolioKPIs.scss';
 
 const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
     return (
-        <div className="portfolioKPIs-wrapper">
+        <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
                 title="Total Consumption"
                 value={formatConsumptionValue(overalldata?.total_consumption.now / 1000, 0)}

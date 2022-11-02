@@ -643,6 +643,7 @@ const PortfolioOverview = () => {
                                 isConsumpHistoryLoading={isConsumpHistoryLoading}
                                 startEndDayCount={startEndDayCount}
                                 timeZone={timeZone}
+                                pageType="portfolio"
                             />
                         </Col>
                     </Row>

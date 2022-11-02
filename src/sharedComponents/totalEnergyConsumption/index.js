@@ -9,6 +9,8 @@ const TotalEnergyConsumption = ({
     title,
     subtitle,
     timeZone,
+    pageType,
+    className,
 }) => {
     return (
         <BarChartWidget
@@ -19,6 +21,8 @@ const TotalEnergyConsumption = ({
             startEndDayCount={startEndDayCount}
             height={height}
             timeZone={timeZone}
+            // pageType={pageType}
+            className={className}
         />
     );
 };

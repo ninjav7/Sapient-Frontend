@@ -1,6 +1,5 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
-import Brick from '../../sharedComponents/brick';
 import '../../sharedComponents/barChartWidget/style.scss';
 
 const BarChart = ({ options, series, className = '' }) => {
