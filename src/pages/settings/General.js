@@ -140,6 +140,22 @@ const General = () => {
             sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
             sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
         });
+        console.log({
+            monFrom: buildingOperatingHours?.operating_hours?.mon?.time_range?.frm,
+            monTo: buildingOperatingHours?.operating_hours?.mon?.time_range?.to,
+            tueFrom: buildingOperatingHours?.operating_hours?.tue?.time_range?.frm,
+            tueTo: buildingOperatingHours?.operating_hours?.tue?.time_range?.to,
+            wedFrom: buildingOperatingHours?.operating_hours?.wed?.time_range?.frm,
+            wedTo: buildingOperatingHours?.operating_hours?.wed?.time_range?.to,
+            thuFrom: buildingOperatingHours?.operating_hours?.thu?.time_range?.frm,
+            thuTo: buildingOperatingHours?.operating_hours?.thu?.time_range?.to,
+            friFrom: buildingOperatingHours?.operating_hours?.fri?.time_range?.frm,
+            friTo: buildingOperatingHours?.operating_hours?.fri?.time_range?.to,
+            satFrom: buildingOperatingHours?.operating_hours?.sat?.time_range?.frm,
+            satTo: buildingOperatingHours?.operating_hours?.sat?.time_range?.to,
+            sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
+            sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
+        })
     }, [buildingOperatingHours]);
 
     const operationTime = {
@@ -299,6 +315,7 @@ const General = () => {
                 let buildingOperatingHours = {
                     operating_hours: data.operating_hours,
                 };
+                console.log(buildingOperatingHours)
                 setBuildingOperatingHours(buildingOperatingHours);
                 setResponseBuildingOperatingHours(buildingOperatingHours);
 
@@ -608,7 +625,7 @@ const General = () => {
     };
 
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
-        const time1 = moment(date).format('HH:MM');
+        const time1 = moment(date).format('HH:00');
 
         const data = {
             [day]: {
@@ -1169,13 +1186,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            monFrom: moment(date)?.format('HH:MM'),
+                                                            monFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            monFrom: moment(date)?.format('h:mm a'),
+                                                            monFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1185,8 +1202,8 @@ const General = () => {
                                                 value={timeValue?.monFrom}
                                                 timeIntervals={60}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '24' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '24' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1218,13 +1235,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            monTo: moment(date)?.format('HH:MM'),
+                                                            monTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            monTo: moment(date)?.format('h:mm a'),
+                                                            monTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1234,8 +1251,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.monTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1269,13 +1286,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            tueFrom: moment(date)?.format('HH:MM'),
+                                                            tueFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            tueFrom: moment(date)?.format('h:mm a'),
+                                                            tueFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1285,8 +1302,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.tueFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1301,13 +1318,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            tueTo: moment(date)?.format('HH:MM'),
+                                                            tueTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            tueTo: moment(date)?.format('h:mm a'),
+                                                            tueTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1317,8 +1334,8 @@ const General = () => {
                                                 value={timeValue?.tueTo}
                                                 disabled={!weekToggle['tue']}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1352,13 +1369,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            wedFrom: moment(date)?.format('HH:MM'),
+                                                            wedFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            wedFrom: moment(date)?.format('h:mm a'),
+                                                            wedFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1368,8 +1385,8 @@ const General = () => {
                                                 disabled={!weekToggle['wed']}
                                                 value={timeValue?.wedFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1384,13 +1401,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            wedTo: moment(date)?.format('HH:MM'),
+                                                            wedTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            wedTo: moment(date)?.format('h:mm a'),
+                                                            wedTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1400,8 +1417,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.wedTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1435,13 +1452,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            thuFrom: moment(date)?.format('HH:MM'),
+                                                            thuFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            thuFrom: moment(date)?.format('h:mm a'),
+                                                            thuFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1451,8 +1468,8 @@ const General = () => {
                                                 disabled={!weekToggle['thu']}
                                                 value={timeValue?.thuFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1467,13 +1484,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            thuTo: moment(date)?.format('HH:MM'),
+                                                            thuTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            thuTo: moment(date)?.format('h:mm a'),
+                                                            thuTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1483,8 +1500,8 @@ const General = () => {
                                                 disabled={!weekToggle['thu']}
                                                 value={timeValue?.thuTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1518,13 +1535,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            friFrom: moment(date)?.format('HH:MM'),
+                                                            friFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            friFrom: moment(date)?.format('h:mm a'),
+                                                            friFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1534,8 +1551,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.friFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1550,13 +1567,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            friTo: moment(date)?.format('HH:MM'),
+                                                            friTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            friTo: moment(date)?.format('h:mm a'),
+                                                            friTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1566,8 +1583,8 @@ const General = () => {
                                                 disabled={!weekToggle['fri']}
                                                 value={timeValue?.friTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1601,13 +1618,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            satFrom: moment(date)?.format('HH:MM'),
+                                                            satFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            satFrom: moment(date)?.format('h:mm a'),
+                                                            satFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1617,8 +1634,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.satFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1633,13 +1650,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            satTo: moment(date)?.format('HH:MM'),
+                                                            satTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            satTo: moment(date)?.format('h:mm a'),
+                                                            satTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1649,8 +1666,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.satTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>
@@ -1684,13 +1701,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            sunFrom: moment(date)?.format('HH:MM'),
+                                                            sunFrom: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            sunFrom: moment(date)?.format('h:mm a'),
+                                                            sunFrom: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1700,8 +1717,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.sunFrom}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
 
@@ -1714,13 +1731,13 @@ const General = () => {
                                                     if (timeZone === '24') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            sunTo: moment(date)?.format('HH:MM'),
+                                                            sunTo: moment(date)?.format('HH:00'),
                                                         });
                                                     }
                                                     if (timeZone === '12') {
                                                         setTimeValue({
                                                             ...timeValue,
-                                                            sunTo: moment(date)?.format('h:mm a'),
+                                                            sunTo: moment(date)?.format('h:00 a'),
                                                         });
                                                     }
                                                 }}
@@ -1730,8 +1747,8 @@ const General = () => {
                                                 timeIntervals={60}
                                                 value={timeValue?.sunTo}
                                                 timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                dateFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
+                                                timeFormat={timeZone === '12' ? 'h:00 aa' : 'HH:00'}
                                                 className="time-picker-style"
                                             />
                                         </div>

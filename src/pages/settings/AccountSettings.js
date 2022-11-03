@@ -22,7 +22,12 @@ const AccountSettings = () => {
     const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
     const [userPermission] = useAtom(userPermissionData);
 
+    let entryPoint=""
+    useEffect(()=>{
+        entryPoint="entered"
+    },[])
     const updateAccountName = async () => {
+        localStorage.removeItem('accountName');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -35,7 +40,8 @@ const AccountSettings = () => {
 
         await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
             let response = res.data.data;
-            localStorage.setItem('accountId', response.account_id);
+            console.log(response.account_id)
+            localStorage.setItem('accountName', accoutnIdData);
             setAccoutnIdData(response.account_id);
             setInputValidation(false);
         });
@@ -61,14 +67,18 @@ const AccountSettings = () => {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('accountName', userdata.name);
+        if(entryPoint==="entered"){
+        console.log("User update");
+        let usr_acc=localStorage.getItem('accountName');
+        //localStorage.setItem('accountName', usr_acc);
         UserStore.update((s) => {
-            s.accountName = userdata.name;
+            s.accountName = usr_acc;
         });
+    }
     }, [userdata]);
 
     useEffect(() => {
-        setAccoutnIdData(localStorage.getItem('accountId'));
+        setAccoutnIdData(localStorage.getItem('accountName'));
     }, []);
 
     const [inputValidation, setInputValidation] = useState(false);
@@ -83,7 +93,7 @@ const AccountSettings = () => {
                         <div>
                             <button
                                 onClick={() => {
-                                    setAccoutnIdData(localStorage.getItem('accountId'));
+                                    setAccoutnIdData(localStorage.getItem('accountName'));
                                     setInputValidation(false);
                                 }}
                                 type="button"
