@@ -523,7 +523,42 @@ const ExploreEquipmentTable = ({
         </>
     );
 };
-
+const SliderAll=({bottom,top,handleChange,bottomPer, topPer})=> {
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
+const SliderPos=({bottom,top,handleChange,bottomPer, topPer})=> {
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
+const SliderNeg=({bottom,top,handleChange,bottomPer, topPer}) =>{
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
 
@@ -885,7 +920,12 @@ const ExploreByEquipment = () => {
         }
         else if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
-            setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            if(selectedTab===0)
+                setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            else if(selectedTab===1)
+                setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
+            else if(selectedTab===2)
+                setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
         }
     };
 
@@ -1395,16 +1435,19 @@ const ExploreByEquipment = () => {
                                 minNeg=ele.consumption.change;
                         }  
                     })
-                    setTopPerChange(parseInt(max===0?max+1:max))
+                    console.log("All Max "+max + " ALL Min"+ min);
+                    console.log("Pos Max "+maxPos + " Pos Min"+ minPos);
+                    console.log("Neg Max "+maxNeg + " Neg Min"+ minNeg);
+                    setTopPerChange(parseInt(max))
                     setBottomPerChange(parseInt(min))
                     setTopPosPerChange(parseInt(maxPos));
                     setBottomPosPerChange(parseInt(minPos));
                     setTopNegPerChange(parseInt(maxNeg));
                     setBottomNegPerChange(parseInt(minNeg));
                     set_minPerValue(parseInt(min))
-                    set_maxPerValue(parseInt(max===0?max+1:max));
+                    set_maxPerValue(parseInt(max));
                     set_minPerValuePos(parseInt(minPos))
-                    set_maxPerValuePos(parseInt(maxPos===0?maxPos+1:maxPos));
+                    set_maxPerValuePos(parseInt(maxPos));
                     set_minPerValueNeg(parseInt(minNeg))
                     set_maxPerValueNeg(parseInt(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1944,6 +1987,7 @@ const ExploreByEquipment = () => {
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
         let topVal = parseInt(topEnergyConsumption / 1000);
+        console.log("Value ", showChangeDropdown);
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -1958,13 +2002,31 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 txt = 'consumption';
                 set_minConValue(0.0);
                 set_maxConValue(topVal);
                 break;
-                case 'change':
+            case 'change':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
@@ -1981,8 +2043,13 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                set_minPerValue(0.0);
+                set_minPerValue(bottomPerChange);
                 set_maxPerValue(topPerChange);
+                set_minPerValuePos(bottomPosPerChange);
+                set_maxPerValuePos(topPosPerChange);
+                set_minPerValue(bottomPerChange);
+                set_maxPerValue(topPerChange);
+                setSelectedTab(0);
                 break;
             case 'location':
                 setSelectedLocation([]);
@@ -2000,6 +2067,24 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
+                }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
                 }
                 break;
             case 'equip_type':
@@ -2019,6 +2104,24 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 break;
             case 'endUse_category':
                 setSelectedEndUse([]);
@@ -2036,6 +2139,24 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
+                }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
                 }
                 txt = 'endUse';
                 break;
@@ -2056,8 +2177,27 @@ const ExploreByEquipment = () => {
                 if (selectedEndUse.length !== 0) {
                     arr1['end_use'] = selectedEndUse;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 break;
         }
+        console.log(selectedOptions);
         if (selectedOptions.length === 1) {
             let arr = {
                 date_from: startDate.toLocaleDateString(),
@@ -2097,10 +2237,22 @@ const ExploreByEquipment = () => {
             };
             txt = 'consumption';
         }
-        if (maxPerValue>=1) {
+        if (selectedTab===0 && showChangeDropdown===false) {
             arr['change'] = {
                 gte: minPerValue,
                 lte: maxPerValue,
+            };
+        }
+        if (selectedTab===1 && showChangeDropdown===false) {
+            arr['change'] = {
+                gte: minPerValuePos,
+                lte: maxPerValuePos,
+            };
+        }
+        if (selectedTab===2 && showChangeDropdown===false) {
+            arr['change'] = {
+                gte: minPerValueNeg,
+                lte: maxPerValueNeg,
             };
         }
         if (selectedLocation.length !== 0) {
@@ -2117,6 +2269,7 @@ const ExploreByEquipment = () => {
             arr['space_type'] = selectedSpaceType;
         }
         //entryPoint = "filtered";
+        console.log("Value ",showChangeDropdown);
         setFilterObj(arr);
         exploreFilterDataFetch(arr, txt);
     }, [APIFlag, APIPerFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
@@ -2386,6 +2539,9 @@ const ExploreByEquipment = () => {
             setSelectedLocation([]);
         }
     };
+useEffect(()=>{
+
+},[selectedTab])
 
     return (
         <>
@@ -2593,7 +2749,7 @@ const ExploreByEquipment = () => {
                                                                         : 'btn btn-white d-inline custom-inactive-btn'
                                                                 }
                                                                 style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(0); set_minPerValue(bottomPerChange);set_maxPerValue(topPerChange);
+                                                                onClick={() => {setSelectedTab(0);
                                                                 }}>
                                                                 All
                                                             </button>
@@ -2606,7 +2762,7 @@ const ExploreByEquipment = () => {
                                                                         : 'btn btn-white d-inline custom-inactive-btn'
                                                                 }
                                                                 style={{ borderRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(1); set_minPerValue(bottomPosPerChange);set_maxPerValue(topPosPerChange);}}>
+                                                                onClick={() => {setSelectedTab(1);}}>
                                                                 <i className="uil uil-chart-down"></i>
                                                             </button>
 
@@ -2618,55 +2774,88 @@ const ExploreByEquipment = () => {
                                                                         : 'btn btn-white d-inline custom-inactive-btn'
                                                                 }
                                                                 style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(2); set_minPerValue(bottomNegPerChange);set_maxPerValue(topNegPerChange);}}>
+                                                                onClick={() => {setSelectedTab(2);}}>
                                                                  <i className="uil uil-arrow-growth"></i>
                                                             </button>
                                                         </div>
                                                     </div>
+                                                    {selectedTab === 0?
                                                     <div className="pop-inputbox-wrapper">
                                                         <input
                                                             className="pop-inputbox"
                                                             type="text"
                                                             value={minPerValue}
                                                         />{' '}
+                                                    <input
+                                                        className="pop-inputbox"
+                                                        type="text"
+                                                        value={maxPerValue}
+                                                    />
+                                                      </div>
+                                                    :selectedTab === 1?
+                                                    <div className="pop-inputbox-wrapper">
                                                         <input
                                                             className="pop-inputbox"
                                                             type="text"
-                                                            value={maxPerValue}
+                                                            value={minPerValuePos}
+                                                        />{' '}
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={maxPerValuePos}
                                                         />
                                                     </div>
+                                                    : selectedTab === 2?
+                                                    <div className="pop-inputbox-wrapper">
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={minPerValueNeg}
+                                                        />{' '}
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={maxPerValueNeg}
+                                                        />
+                                                    </div>
+                                                    :""
+                                                    }
+                                               
                                                     { selectedTab === 0?
                                                     <div style={{ marginTop: '2rem' }}>
-                                                        <RangeSlider
-                                                            name="consumption"
+                                                        <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue}/>
+                                                        {/* <RangeSlider
+                                                            name="consumptionAll"
                                                             STEP={1}
                                                             MIN={bottomPerChange}
                                                             range={[bottomPerChange, topPerChange]}
                                                             MAX={topPerChange}
                                                             onSelectionChange={handleInputPer}
-                                                        />
+                                                        /> */}
                                                     </div>:
                                                      selectedTab === 1?
                                                      <div style={{ marginTop: '2rem' }}>
-                                                        <RangeSlider
+                                                        <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos}/>
+                                                        {/* <RangeSlider
                                                             name="consumptionPos"
                                                             STEP={1}
                                                             MIN={bottomPosPerChange}
                                                             range={[bottomPosPerChange, topPosPerChange]}
                                                             MAX={topPosPerChange}
                                                             onSelectionChange={handleInputPerPos}
-                                                        />
+                                                        /> */}
                                                     </div>
                                                      : selectedTab === 2?
                                                      <div style={{ marginTop: '2rem' }}>
-                                                        <RangeSlider
+                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg}/>
+                                                        {/* <RangeSlider
                                                             name="consumptionNeg"
                                                             STEP={1}
                                                             MIN={bottomNegPerChange}
                                                             range={[bottomNegPerChange, topNegPerChange]}
                                                             MAX={topNegPerChange}
                                                             onSelectionChange={handleInputPerNeg}
-                                                        />
+                                                        /> */}
                                                     </div>
                                                      :""}
                                                 </div>
