@@ -317,7 +317,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{parseInt(record?.consumption?.change)}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -326,7 +326,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{parseInt(record?.consumption?.change)}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -809,12 +809,18 @@ const ExploreByEquipment = () => {
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
+    const [minPerValuePos, set_minPerValuePos] = useState(0.0);
+    const [maxPerValuePos, set_maxPerValuePos] = useState(0.0);
+    const [minPerValueNeg, set_minPerValueNeg] = useState(0.0);
+    const [maxPerValueNeg, set_maxPerValueNeg] = useState(0.0);
     const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(10);
+    const [maxPerValue, set_maxPerValue] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
     const [bottomPerChange, setBottomPerChange] = useState(0);
     const [topPosPerChange, setTopPosPerChange] = useState(0);
     const [bottomPosPerChange, setBottomPosPerChange] = useState(0);
+    const [topNegPerChange, setTopNegPerChange] = useState(0);
+    const [bottomNegPerChange, setBottomNegPerChange] = useState(0);
     const [spaceType, setSpaceType] = useState([]);
     const [removeDuplicateFlag, setRemoveDuplicateFlag] = useState(false);
     const [equipmentSearchTxt, setEquipmentSearchTxt] = useState('');
@@ -1206,6 +1212,14 @@ const ExploreByEquipment = () => {
         set_minPerValue(values[0]);
         set_maxPerValue(values[1]);
     };
+    const handleInputPerPos = (values) => {
+        set_minPerValuePos(values[0]);
+        set_maxPerValuePos(values[1]);
+    };
+    const handleInputPerNeg = (values) => {
+        set_minPerValueNeg(values[0]);
+        set_maxPerValueNeg(values[1]);
+    };
 
     const exploreFilterDataFetch = async (bodyVal, txt) => {
         try {
@@ -1359,26 +1373,40 @@ const ExploreByEquipment = () => {
                 });
                 let max=responseData.data[0].consumption.change;
                     let min=responseData.data[0].consumption.change;
-                    let maxPos=0.1;
-                    let minPos=0.1;
+                    let maxPos=0;
+                    let minPos=0;
+                    let minNeg=0;
+                    let maxNeg=0;
                     responseData.data.map((ele)=>{
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                         if(ele.consumption.change<=min)
                             min=ele.consumption.change;
-                        if(ele.consumption.change>=1){
+                        if(ele.consumption.change>=0){
                             if(ele.consumption.change>=maxPos)
                                 maxPos=ele.consumption.change;
                             if(ele.consumption.change<=minPos)
                                 minPos=ele.consumption.change;
                         }    
+                        if(ele.consumption.change<0){
+                            if(ele.consumption.change>=maxNeg)
+                                maxNeg=ele.consumption.change;
+                            if(ele.consumption.change<=minNeg)
+                                minNeg=ele.consumption.change;
+                        }  
                     })
                     setTopPerChange(parseInt(max===0?max+1:max))
                     setBottomPerChange(parseInt(min))
                     setTopPosPerChange(parseInt(maxPos));
                     setBottomPosPerChange(parseInt(minPos));
+                    setTopNegPerChange(parseInt(maxNeg));
+                    setBottomNegPerChange(parseInt(minNeg));
                     set_minPerValue(parseInt(min))
                     set_maxPerValue(parseInt(max===0?max+1:max));
+                    set_minPerValuePos(parseInt(minPos))
+                    set_maxPerValuePos(parseInt(maxPos===0?maxPos+1:maxPos));
+                    set_minPerValueNeg(parseInt(minNeg))
+                    set_maxPerValueNeg(parseInt(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
@@ -2590,7 +2618,7 @@ const ExploreByEquipment = () => {
                                                                         : 'btn btn-white d-inline custom-inactive-btn'
                                                                 }
                                                                 style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px',width:"5rem" }}
-                                                                onClick={() => setSelectedTab(2)}>
+                                                                onClick={() => {setSelectedTab(2); set_minPerValue(bottomNegPerChange);set_maxPerValue(topNegPerChange);}}>
                                                                  <i className="uil uil-arrow-growth"></i>
                                                             </button>
                                                         </div>
@@ -2607,16 +2635,40 @@ const ExploreByEquipment = () => {
                                                             value={maxPerValue}
                                                         />
                                                     </div>
+                                                    { selectedTab === 0?
                                                     <div style={{ marginTop: '2rem' }}>
                                                         <RangeSlider
                                                             name="consumption"
-                                                            STEP={0.1}
-                                                            MIN={minPerValue}
-                                                            range={[minPerValue, maxPerValue]}
-                                                            MAX={maxPerValue}
+                                                            STEP={1}
+                                                            MIN={bottomPerChange}
+                                                            range={[bottomPerChange, topPerChange]}
+                                                            MAX={topPerChange}
                                                             onSelectionChange={handleInputPer}
                                                         />
+                                                    </div>:
+                                                     selectedTab === 1?
+                                                     <div style={{ marginTop: '2rem' }}>
+                                                        <RangeSlider
+                                                            name="consumptionPos"
+                                                            STEP={1}
+                                                            MIN={bottomPosPerChange}
+                                                            range={[bottomPosPerChange, topPosPerChange]}
+                                                            MAX={topPosPerChange}
+                                                            onSelectionChange={handleInputPerPos}
+                                                        />
                                                     </div>
+                                                     : selectedTab === 2?
+                                                     <div style={{ marginTop: '2rem' }}>
+                                                        <RangeSlider
+                                                            name="consumptionNeg"
+                                                            STEP={1}
+                                                            MIN={bottomNegPerChange}
+                                                            range={[bottomNegPerChange, topNegPerChange]}
+                                                            MAX={topNegPerChange}
+                                                            onSelectionChange={handleInputPerNeg}
+                                                        />
+                                                    </div>
+                                                     :""}
                                                 </div>
                                             </Dropdown.Menu>
                                         </Dropdown>
