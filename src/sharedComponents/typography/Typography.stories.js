@@ -13,6 +13,21 @@ export const Default = () => {
         <div>
             <div style={{ padding: '16px' }}>
                 <h2>Header</h2>
+                <Typography.Header size={Typography.Sizes.xxl}>
+                    The quick fox jumps over the dog. Size: XXL
+                </Typography.Header>
+                <Typography.Header size={Typography.Sizes.xl}>
+                    The quick fox jumps over the dog. Size: XL
+                </Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>
+                    The quick fox jumps over the dog. Size: LG
+                </Typography.Header>
+                <Typography.Header size={Typography.Sizes.md}>
+                    The quick fox jumps over the dog. Size: MD
+                </Typography.Header>
+                <Typography.Header size={Typography.Sizes.sm}>
+                    The quick fox jumps over the dog. Size: SM
+                </Typography.Header>
                 <Typography.Header size={Typography.Sizes.xs}>
                     The quick fox jumps over the dog. Size: XS
                 </Typography.Header>
@@ -26,9 +41,11 @@ export const Default = () => {
                 </Typography.Subheader>
                 <Brick />
                 <h2>Body</h2>
+                <Typography.Link size={Typography.Sizes.md} href="http://google.com">Custom link</Typography.Link>
                 <Typography.Body size={Typography.Sizes.md}>The quick fox jumps over the dog. Size: MD</Typography.Body>
                 <Typography.Body size={Typography.Sizes.sm}>The quick fox jumps over the dog. Size: SM</Typography.Body>
                 <Typography.Body size={Typography.Sizes.xs}>The quick fox jumps over the dog. Size: XS</Typography.Body>
+                <Typography.Body size={Typography.Sizes.xxs}>The quick fox jumps over the dog. Size: XS</Typography.Body>
             </div>
         </div>
     );
