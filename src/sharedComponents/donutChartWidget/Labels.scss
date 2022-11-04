@@ -77,6 +77,10 @@
         overflow: hidden;
     }
 
+    &-value:hover {
+        overflow: visible;
+    }
+
     .trends-badge {
         margin: 0;
         display: flex;
