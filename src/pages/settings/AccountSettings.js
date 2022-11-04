@@ -22,7 +22,12 @@ const AccountSettings = () => {
     const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
     const [userPermission] = useAtom(userPermissionData);
 
+    let entryPoint=""
+    useEffect(()=>{
+        entryPoint="entered"
+    },[])
     const updateAccountName = async () => {
+        localStorage.removeItem('accountName');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -35,7 +40,7 @@ const AccountSettings = () => {
 
         await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
             let response = res.data.data;
-            localStorage.setItem('accountId', response.account_id);
+            localStorage.setItem('accountName', accoutnIdData);
             setAccoutnIdData(response.account_id);
             setInputValidation(false);
         });
@@ -61,14 +66,16 @@ const AccountSettings = () => {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('accountName', userdata.name);
+        if(entryPoint==="entered"){
+        let usr_acc=localStorage.getItem('accountName');
         UserStore.update((s) => {
-            s.accountName = userdata.name;
+            s.accountName = usr_acc;
         });
+    }
     }, [userdata]);
 
     useEffect(() => {
-        setAccoutnIdData(localStorage.getItem('accountId'));
+        setAccoutnIdData(localStorage.getItem('accountName'));
     }, []);
 
     const [inputValidation, setInputValidation] = useState(false);
@@ -83,7 +90,7 @@ const AccountSettings = () => {
                         <div>
                             <button
                                 onClick={() => {
-                                    setAccoutnIdData(localStorage.getItem('accountId'));
+                                    setAccoutnIdData(localStorage.getItem('accountName'));
                                     setInputValidation(false);
                                 }}
                                 type="button"
@@ -165,42 +172,6 @@ const AccountSettings = () => {
                     </Card>
                 </Col>
             </Row>
-
-            {/* <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                Power Preferences
-                            </h5>
-                        </CardHeader>
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-3">
-                                    <FormGroup>
-                                        <div className="real-power-style">
-                                            <h6 className="card-title">Show Real Power</h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Switch
-                                            onChange={() => setChecked(!checked)}
-                                            checked={checked}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                            height={20}
-                                            width={44}
-                                        />
-                                    </FormGroup>
-                                </div>
-                            </Form>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row> */}
         </React.Fragment>
     );
 };
