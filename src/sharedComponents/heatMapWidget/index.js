@@ -13,12 +13,10 @@ const HeatMapWidget = ({
     className = '',
     title,
     subtitle,
-    height = 125,
+    heatMapChartHeight = 125,
     isAvgConsumptionDataLoading,
-    weekDaysOptions,
-    weekDaysSeries,
-    weekEndsOptions,
-    weekEndsSeries,
+    hourlyAvgConsumpOpts,
+    hourlyAvgConsumpData,
     startEndDayCount,
     timeZone,
 }) => {
@@ -146,16 +144,19 @@ const HeatMapWidget = ({
                 </Typography.Body>
             </div>
             <div>
-                {isAvgConsumptionDataLoading ? (
+                {/* {isAvgConsumptionDataLoading ? (
                     <div className="loader-center-style" style={{ height: '400px' }}>
                         <Spinner className="m-2" color={'primary'} />
                     </div>
-                ) : (
-                    <div>
-                        <HeatMapChart options={weekEndsOptions} series={weekEndsSeries} height={height} />
-                        <HeatMapChart options={weekDaysOptions} series={weekDaysSeries} height={height} />
-                    </div>
-                )}
+                ) : ( */}
+                <div>
+                    <HeatMapChart
+                        options={hourlyAvgConsumpOpts}
+                        series={hourlyAvgConsumpData}
+                        height={heatMapChartHeight}
+                    />
+                </div>
+                {/* )} */}
             </div>
         </div>
     );

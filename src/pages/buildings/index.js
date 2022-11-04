@@ -337,253 +337,250 @@ const BuildingOverview = () => {
 
     const [topContributors, setTopContributors] = useState([]);
 
-    const [weekDaysOptions, setWeekDaysOptions] = useState({
-        chart: {
-            type: 'heatmap',
-            toolbar: {
-                show: false,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        // title: {
-        //     text: 'Weekdays',
-        //     align: 'left',
-        //     margin: 1,
-        //     offsetX: 12,
-        //     offsetY: 20,
-        //     floating: false,
-        //     style: {
-        //         fontSize: '14px',
-        //         fontWeight: '600',
-        //         fontFamily: 'Inter',
-        //         color: '#98A2B3',
-        //     },
-        // },
-        stroke: {
-            width: 0.7,
-        },
-        colors: ['#87AADE', '#F87171'],
-        plotOptions: {
-            heatmap: {
-                shadeIntensity: 0.5,
-                enableShades: true,
-                distributed: true,
-                radius: 1,
-                useFillColorAsStroke: false,
-            },
-        },
-        xaxis: {
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
-        },
-        yaxis: {
-            labels: {
-                show: true,
-                minWidth: 40,
-                maxWidth: 160,
-            },
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesNames } = w.globals;
-                const day = seriesNames[seriesIndex];
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${w.globals.labels[dataPointIndex]}
-                        </div>
-                    </div>`;
-            },
-        },
-    });
-
-    const [weekDaysSeries, setWeekDaysSeries] = useState([
-        {
-            name: 'Weekdays',
-            data: [],
-        },
-    ]);
-
-    const [weekEndsSeries, setWeekEndsSeries] = useState([
-        {
-            name: 'Weekends',
-            data: [],
-        },
-    ]);
-
-    const [weekEndsOptions, setWeekEndsOptions] = useState({
-        chart: {
-            type: 'heatmap',
-            toolbar: {
-                show: false,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        // title: {
-        //     text: 'Weekends',
-        //     align: 'left',
-        //     margin: 1,
-        //     offsetX: 12,
-        //     offsetY: 20,
-        //     floating: false,
-        //     style: {
-        //         fontSize: '14px',
-        //         fontWeight: '600',
-        //         fontFamily: 'Inter',
-        //         color: '#98A2B3',
-        //     },
-        // },
-        stroke: {
-            width: 0.7,
-        },
-        colors: ['#87AADE', '#F87171'],
-        plotOptions: {
-            heatmap: {
-                shadeIntensity: 0.5,
-                enableShades: true,
-                distributed: true,
-                radius: 1,
-                useFillColorAsStroke: false,
-            },
-        },
-        yaxis: {
-            labels: {
-                show: true,
-                minWidth: 40,
-                maxWidth: 160,
-            },
-        },
-        xaxis: {
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesNames } = w.globals;
-                const day = seriesNames[seriesIndex];
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${w.globals.labels[dataPointIndex]}
-                        </div>
-                    </div>`;
-            },
-        },
-    });
-
     const [daysCount, setDaysCount] = useState(1);
+
+    const getAverageValue = (value, min, max) => {
+        let percentage = Math.round(((value - min) / (max - min)) * 100);
+        return parseInt(percentage);
+    };
+
+    const hourlyAvgConsumpOpts = {
+        chart: {
+            type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: 1,
+        },
+        legend: {
+            show: false,
+        },
+        plotOptions: {
+            heatmap: {
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
+                radius: 1,
+                useFillColorAsStroke: false,
+                colorScale: {
+                    ranges: [
+                        {
+                            from: 0,
+                            to: 3,
+                            color: '#F5F8FF',
+                        },
+                        {
+                            from: 4,
+                            to: 8,
+                            color: '#EDF3FF',
+                        },
+                        {
+                            from: 9,
+                            to: 12,
+                            color: '#E5EDFF',
+                        },
+                        {
+                            from: 13,
+                            to: 16,
+                            color: '#DDE8FE',
+                        },
+                        {
+                            from: 17,
+                            to: 21,
+                            color: '#D6E2FE',
+                        },
+                        {
+                            from: 22,
+                            to: 25,
+                            color: '#CEDDFE',
+                        },
+                        {
+                            from: 26,
+                            to: 29,
+                            color: '#C6D7FE',
+                        },
+                        {
+                            from: 30,
+                            to: 33,
+                            color: '#BED1FE',
+                        },
+                        {
+                            from: 34,
+                            to: 38,
+                            color: '#B6CCFE',
+                        },
+                        {
+                            from: 39,
+                            to: 42,
+                            color: '#AEC6FE',
+                        },
+                        {
+                            from: 43,
+                            to: 46,
+                            color: '#A6C0FD',
+                        },
+                        {
+                            from: 47,
+                            to: 51,
+                            color: '#9EBBFD',
+                        },
+                        {
+                            from: 52,
+                            to: 55,
+                            color: '#96B5FD',
+                        },
+                        {
+                            from: 56,
+                            to: 59,
+                            color: '#8EB0FD',
+                        },
+                        {
+                            from: 60,
+                            to: 64,
+                            color: '#86AAFD',
+                        },
+                        {
+                            from: 65,
+                            to: 68,
+                            color: '#7FA4FD',
+                        },
+                        {
+                            from: 69,
+                            to: 72,
+                            color: '#F8819D',
+                        },
+                        {
+                            from: 73,
+                            to: 76,
+                            color: '#F87795',
+                        },
+                        {
+                            from: 77,
+                            to: 81,
+                            color: '#F86D8E',
+                        },
+                        {
+                            from: 82,
+                            to: 85,
+                            color: '#F76486',
+                        },
+                        {
+                            from: 86,
+                            to: 89,
+                            color: '#F75A7F',
+                        },
+                        {
+                            from: 90,
+                            to: 94,
+                            color: '#F75077',
+                        },
+                        {
+                            from: 95,
+                            to: 98,
+                            color: '#F64770',
+                        },
+                        {
+                            from: 98,
+                            to: 100,
+                            color: '#F63D68',
+                        },
+                    ],
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                show: true,
+                minWidth: 40,
+                maxWidth: 160,
+            },
+            categories: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        },
+        xaxis: {
+            labels: {
+                show: true,
+                align: 'top',
+            },
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
+            position: 'bottom',
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                const energyVal = w.config.series[seriesIndex].data[dataPointIndex].z;
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${energyVal} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
+        },
+    };
+
+    const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
+
+    const heatMapChartHeight = 125;
 
     const [hoverRef, isHovered] = useHover();
     const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
@@ -750,7 +747,7 @@ const BuildingOverview = () => {
             }
         };
 
-        const builidingHourlyData = async () => {
+        const buildingHourlyData = async () => {
             try {
                 setIsAvgConsumptionDataLoading(true);
                 let headers = {
@@ -775,7 +772,11 @@ const BuildingOverview = () => {
                         let weekDaysResData = response[0]?.weekdays;
                         let weekEndResData = response[0]?.weekend;
 
+                        let weekEndList = [];
+                        let weekDaysList = [];
+
                         const weekDaysData = weekDaysResData.map((el) => {
+                            weekDaysList.push(parseInt(el.y / 1000));
                             return {
                                 x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
@@ -783,69 +784,84 @@ const BuildingOverview = () => {
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
+                            weekEndList.push(parseInt(el.y / 1000));
                             return {
                                 x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
 
-                        const newWeekdaysData = [
-                            {
-                                name: 'Weekdays',
-                                data: [],
-                            },
-                        ];
+                        let finalList = weekEndList.concat(weekDaysList);
+                        finalList.sort((a, b) => a - b);
 
-                        const newWeekendsData = [
-                            {
-                                name: 'Weekends',
-                                data: [],
-                            },
-                        ];
+                        let minVal = finalList[0];
+                        let maxVal = finalList[finalList.length - 1];
+
+                        let heatMapData = [];
+
+                        let newWeekdaysData = {
+                            name: 'Week days',
+                            data: [],
+                        };
+
+                        let newWeekendsData = {
+                            name: 'Weekends',
+                            data: [],
+                        };
 
                         for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekDaysData.find((record) => record.x === i);
 
                             if (matchedRecord) {
-                                newWeekdaysData[0].data.push(matchedRecord);
+                                matchedRecord.z = matchedRecord.y;
+                                matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                                newWeekdaysData.data.push(matchedRecord);
                             } else {
-                                newWeekdaysData[0].data.push({
+                                newWeekdaysData.data.push({
                                     x: i,
-                                    y: 0,
+                                    y: getAverageValue(i, minVal, maxVal),
+                                    z: 0,
                                 });
                             }
                         }
 
                         for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekendsData.find((record) => record.x === i);
+
                             if (matchedRecord) {
-                                matchedRecord.x = i;
-                                newWeekendsData[0].data.push(matchedRecord);
+                                // matchedRecord.x = i;
+                                matchedRecord.z = matchedRecord.y;
+                                matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                                newWeekendsData.data.push(matchedRecord);
                             } else {
-                                newWeekendsData[0].data.push({
+                                newWeekendsData.data.push({
                                     x: i,
-                                    y: 0,
+                                    y: getAverageValue(i, minVal, maxVal),
+                                    z: 0,
                                 });
                             }
                         }
                         for (let i = 0; i < 24; i++) {
                             if (i === 0) {
-                                newWeekdaysData[0].data[i].x = '12AM';
-                                newWeekendsData[0].data[i].x = '12AM';
+                                newWeekdaysData.data[i].x = '12AM';
+                                newWeekendsData.data[i].x = '12AM';
                             } else if (i === 12) {
-                                newWeekdaysData[0].data[i].x = '12PM';
-                                newWeekendsData[0].data[i].x = '12PM';
+                                newWeekdaysData.data[i].x = '12PM';
+                                newWeekendsData.data[i].x = '12PM';
                             } else if (i > 12) {
                                 let a = i % 12;
-                                newWeekdaysData[0].data[i].x = a + 'PM';
-                                newWeekendsData[0].data[i].x = a + 'PM';
+                                newWeekdaysData.data[i].x = a + 'PM';
+                                newWeekendsData.data[i].x = a + 'PM';
                             } else {
-                                newWeekdaysData[0].data[i].x = i + 'AM';
-                                newWeekendsData[0].data[i].x = i + 'AM';
+                                newWeekdaysData.data[i].x = i + 'AM';
+                                newWeekendsData.data[i].x = i + 'AM';
                             }
                         }
-                        setWeekDaysSeries(newWeekdaysData);
-                        setWeekEndsSeries(newWeekendsData);
+
+                        heatMapData.push(newWeekendsData);
+                        heatMapData.push(newWeekdaysData);
+
+                        setHourlyAvgConsumpData(heatMapData.reverse());
                         setIsAvgConsumptionDataLoading(false);
                     });
             } catch (error) {
@@ -905,7 +921,7 @@ const BuildingOverview = () => {
         buildingOverallData();
         buildingEndUserData();
         builidingEquipmentsData();
-        builidingHourlyData();
+        buildingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -956,12 +972,11 @@ const BuildingOverview = () => {
                     <HourlyAvgConsumption
                         title="Hourly Average Consumption"
                         subtitle="Average by Hour (kWh)"
-                        weekDaysOptions={weekDaysOptions}
-                        weekDaysSeries={weekDaysSeries}
-                        weekEndsOptions={weekEndsOptions}
-                        weekEndsSeries={weekEndsSeries}
                         isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
                         startEndDayCount={startEndDayCount}
+                        hourlyAvgConsumpOpts={hourlyAvgConsumpOpts}
+                        hourlyAvgConsumpData={hourlyAvgConsumpData}
+                        heatMapChartHeight={heatMapChartHeight}
                         timeZone={timeZone}
                         className="mt-4"
                     />
