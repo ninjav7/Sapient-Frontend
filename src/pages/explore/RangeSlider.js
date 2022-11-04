@@ -14,7 +14,6 @@ class RangeSlider extends React.Component {
     this.props.onSelectionChange(values);
   }
   componentDidMount(){
-    console.log(this.props);
   }
   render() {
     return (

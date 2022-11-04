@@ -1435,9 +1435,6 @@ const ExploreByEquipment = () => {
                                 minNeg=ele.consumption.change;
                         }  
                     })
-                    console.log("All Max "+max + " ALL Min"+ min);
-                    console.log("Pos Max "+maxPos + " Pos Min"+ minPos);
-                    console.log("Neg Max "+maxNeg + " Neg Min"+ minNeg);
                     setTopPerChange(parseInt(max))
                     setBottomPerChange(parseInt(min))
                     setTopPosPerChange(parseInt(maxPos));
@@ -1987,7 +1984,6 @@ const ExploreByEquipment = () => {
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
         let topVal = parseInt(topEnergyConsumption / 1000);
-        console.log("Value ", showChangeDropdown);
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -2197,7 +2193,6 @@ const ExploreByEquipment = () => {
                 }
                 break;
         }
-        console.log(selectedOptions);
         if (selectedOptions.length === 1) {
             let arr = {
                 date_from: startDate.toLocaleDateString(),
@@ -2268,8 +2263,6 @@ const ExploreByEquipment = () => {
         if (selectedSpaceType.length !== 0) {
             arr['space_type'] = selectedSpaceType;
         }
-        //entryPoint = "filtered";
-        console.log("Value ",showChangeDropdown);
         setFilterObj(arr);
         exploreFilterDataFetch(arr, txt);
     }, [APIFlag, APIPerFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);

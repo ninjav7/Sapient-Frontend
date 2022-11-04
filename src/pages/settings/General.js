@@ -140,22 +140,6 @@ const General = () => {
             sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
             sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
         });
-        console.log({
-            monFrom: buildingOperatingHours?.operating_hours?.mon?.time_range?.frm,
-            monTo: buildingOperatingHours?.operating_hours?.mon?.time_range?.to,
-            tueFrom: buildingOperatingHours?.operating_hours?.tue?.time_range?.frm,
-            tueTo: buildingOperatingHours?.operating_hours?.tue?.time_range?.to,
-            wedFrom: buildingOperatingHours?.operating_hours?.wed?.time_range?.frm,
-            wedTo: buildingOperatingHours?.operating_hours?.wed?.time_range?.to,
-            thuFrom: buildingOperatingHours?.operating_hours?.thu?.time_range?.frm,
-            thuTo: buildingOperatingHours?.operating_hours?.thu?.time_range?.to,
-            friFrom: buildingOperatingHours?.operating_hours?.fri?.time_range?.frm,
-            friTo: buildingOperatingHours?.operating_hours?.fri?.time_range?.to,
-            satFrom: buildingOperatingHours?.operating_hours?.sat?.time_range?.frm,
-            satTo: buildingOperatingHours?.operating_hours?.sat?.time_range?.to,
-            sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
-            sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
-        })
     }, [buildingOperatingHours]);
 
     const operationTime = {
@@ -315,7 +299,6 @@ const General = () => {
                 let buildingOperatingHours = {
                     operating_hours: data.operating_hours,
                 };
-                console.log(buildingOperatingHours)
                 setBuildingOperatingHours(buildingOperatingHours);
                 setResponseBuildingOperatingHours(buildingOperatingHours);
 

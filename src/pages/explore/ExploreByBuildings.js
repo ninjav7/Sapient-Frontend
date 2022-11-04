@@ -731,9 +731,9 @@ const ExploreByBuildings = () => {
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                     })
-                    setTopPerChange(max)
+                    setTopPerChange(parseInt(max))
                     set_minPerValue(0.0)
-                    set_maxPerValue(max);
+                    set_maxPerValue(parseInt(max));
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
