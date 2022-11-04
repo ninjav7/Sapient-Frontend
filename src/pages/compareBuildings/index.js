@@ -6,11 +6,10 @@ import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, compareBuildings } from '../../services/Network';
+import { fetchCompareBuildings } from '../compareBuildings/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
-import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
@@ -259,17 +258,6 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
-                                    {/* <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -651,29 +639,22 @@ const CompareBuildings = () => {
     }, []);
 
     const compareBuildingsData = async () => {
-        try {
             setIsBuildingDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let arr = {
+            let payload =  {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
-
-            let count = parseInt(localStorage.getItem('dateFilter'));
             let params = `?days=${daysCount}`;
-            await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
+            await fetchCompareBuildings(params, payload)
+            .then((res) => {
                 let response = res?.data;
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsBuildingDataFetched(false);
-        }
+        });
     };
 
     useEffect(() => {
@@ -681,33 +662,27 @@ const CompareBuildings = () => {
     }, [daysCount]);
 
     const buildingDataWithFilter = async (order, filterBy) => {
-        try {
             setIsBuildingDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let arr = {
+            let payload =  {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
-            let count = parseInt(localStorage.getItem('dateFilter'));
             let params = '';
             if (buildingInput.length > 1) {
                 params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
             } else {
                 params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
             }
-            await axios.post(`${BaseUrl}${compareBuildings}${params}`, arr, { headers }).then((res) => {
+            await fetchCompareBuildings(params, payload)
+            .then((res) => {
                 let response = res?.data;
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsBuildingDataFetched(false);
-        }
+        });
     };
 
     const [buildingInput, setBuildingInput] = useState('');
