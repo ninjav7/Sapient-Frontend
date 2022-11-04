@@ -1,18 +1,15 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import Typography from '../typography';
 import Brick from '../brick';
 import { configDonutChartWidget } from './config';
 import DonutChartLabels from './DonutChartLabels';
-import { formatConsumptionValue } from '../../helpers/helpers';
 import { useHistory } from 'react-router-dom';
 
 import './style.scss';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
-import { useEffect } from 'react';
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
@@ -24,10 +21,10 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle }) => {
+const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
         <>
-            <div className="ml-3 mt-3">
+            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
@@ -51,6 +48,8 @@ const DonutChartWidget = ({
     title,
     subtitle,
     isEnergyConsumptionChartLoading,
+    pageType,
+    bldgId,
     ...props
 }) => {
     const labels = items.map(({ label }) => label);
@@ -70,9 +69,9 @@ const DonutChartWidget = ({
             <div className={`donut-main-wrapper ${className}`}>
                 {type === DONUT_CHART_TYPES.HORIZONTAL && (
                     <>
-                        {props.pageType === 'building' ? (
+                        {pageType === 'building' ? (
                             <div className="container-header">
-                                <Titles {...{ title, subtitle }} />
+                                <Titles {...{ title, subtitle, pageType }} />
                                 <div className="mr-2">
                                     <Button
                                         label="More Details"
@@ -82,14 +81,14 @@ const DonutChartWidget = ({
                                         iconAlignment={Button.IconAlignment.right}
                                         onClick={() => {
                                             history.push({
-                                                pathname: `/energy/end-uses/${props.bldgId}`,
+                                                pathname: `/energy/end-uses/${bldgId}`,
                                             });
                                         }}
                                     />
                                 </div>
                             </div>
                         ) : (
-                            <Titles {...{ title, subtitle }} />
+                            <Titles {...{ title, subtitle, pageType }} />
                         )}
                     </>
                 )}

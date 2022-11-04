@@ -46,6 +46,9 @@ import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
+import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
+import { UNITS } from '../../constants/units';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -333,14 +336,20 @@ const BuildingOverview = () => {
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
-    const [topEnergyConsumption, setTopEnergyConsumption] = useState([]);
+    const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
     const [topContributors, setTopContributors] = useState([]);
 
     const [daysCount, setDaysCount] = useState(1);
 
     const getAverageValue = (value, min, max) => {
+        if (min == undefined || max === undefined) {
+            return 0;
+        }
         let percentage = Math.round(((value - min) / (max - min)) * 100);
+        console.log('getAverageValue percentage => ', percentage);
+        console.log('getAverageValue min => ', min);
+        console.log('getAverageValue max => ', max);
         return parseInt(percentage);
     };
 
@@ -578,6 +587,15 @@ const BuildingOverview = () => {
         },
     };
 
+    const fetchTrendBadgeType = (now, old) => {
+        if (now > old) {
+            return TRENDS_BADGE_TYPES.UPWARD_TREND;
+        }
+        if (now < old) {
+            return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
+        }
+    };
+
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
 
     const heatMapChartHeight = 125;
@@ -729,17 +747,26 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let data = res.data[0].top_contributors;
-                        // const dataset=[
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1216, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1561676, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 34561656, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 566167654, old: 0}},
-                        // ]
-                        let sortedData = data.sort((a, b) => {
-                            return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
+                        let response = res.data[0].top_contributors;
+                        let topEnergyData = [];
+                        response.forEach((record) => {
+                            let obj = {
+                                link: '#',
+                                label: record?.equipment_name,
+                                value: parseInt(record?.energy_consumption.now / 1000),
+                                unit: UNITS.KWH,
+                                badgePercentage: percentageHandler(
+                                    record?.energy_consumption.now,
+                                    record?.energy_consumption.old
+                                ),
+                                badgeType: fetchTrendBadgeType(
+                                    record?.energy_consumption.now,
+                                    record?.energy_consumption.old
+                                ),
+                            };
+                            topEnergyData.push(obj);
                         });
-                        setTopEnergyConsumption(sortedData);
+                        setTopEnergyConsumptionData(topEnergyData);
                         setIsEquipmentProcessing(false);
                     });
             } catch (error) {
@@ -949,6 +976,14 @@ const BuildingOverview = () => {
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
+    useEffect(() => {
+        console.log('SSR isAvgConsumptionDataLoading :>> ', isAvgConsumptionDataLoading);
+        console.log('SSR startEndDayCount :>> ', startEndDayCount);
+        console.log('SSR hourlyAvgConsumpOpts :>> ', hourlyAvgConsumpOpts);
+        console.log('SSR hourlyAvgConsumpData :>> ', hourlyAvgConsumpData);
+        console.log('SSR heatMapChartHeight :>> ', heatMapChartHeight);
+    });
+
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -979,6 +1014,8 @@ const BuildingOverview = () => {
                         heatMapChartHeight={heatMapChartHeight}
                         timeZone={timeZone}
                         className="mt-4"
+                        bldgId={bldgId}
+                        pageType="building"
                     />
 
                     <TotalEnergyConsumption
@@ -993,125 +1030,12 @@ const BuildingOverview = () => {
                     />
                 </div>
 
-                {/* Top Equipment Consumption Table */}
-                <div>
-                    <Row>
-                        <div className="equip-table-container">
-                            <h6 className="top-equip-title">Top Equipment Consumption</h6>
-                            <table className="table table-borderless">
-                                <thead>
-                                    <tr className="equip-table-heading">
-                                        <th>Equipment</th>
-                                        <th>Energy</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
-                                {isEquipmentProcessing ? (
-                                    <tbody>
-                                        <SkeletonTheme color="#202020" height={35}>
-                                            <tr>
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-                                            </tr>
-                                        </SkeletonTheme>
-                                    </tbody>
-                                ) : (
-                                    <tbody style={{ fontSize: '12px' }}>
-                                        {topEnergyConsumption.map((item, index) => (
-                                            <tr key={index}>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                            {item.equipment_name}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div>
-                                                            <span>
-                                                                {(item.energy_consumption.now / 1000).toLocaleString(
-                                                                    undefined,
-                                                                    {
-                                                                        maximumFractionDigits: 2,
-                                                                    }
-                                                                )}
-                                                            </span>
-                                                            <span className="equip-table-unit">&nbsp;kWh</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        <div>
-                                                            {item.energy_consumption.now <
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-success text-success equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-chart-down">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now >
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-danger text-danger equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now ===
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button text-muted equip-table-button"
-                                                                    style={{ width: 'auto', border: 'none' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                )}
-                            </table>
-                        </div>
-                    </Row>
-                </div>
+                <TopConsumptionWidget
+                    title="Top Equipment Consumption"
+                    heads={['Equipment', 'Energy', 'Change']}
+                    rows={topEnergyConsumptionData}
+                    className={'fit-container-style mt-0'}
+                />
             </div>
         </React.Fragment>
     );

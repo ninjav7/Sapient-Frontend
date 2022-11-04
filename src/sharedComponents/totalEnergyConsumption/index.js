@@ -21,7 +21,7 @@ const TotalEnergyConsumption = ({
             startEndDayCount={startEndDayCount}
             height={height}
             timeZone={timeZone}
-            // pageType={pageType}
+            pageType={pageType}
             className={className}
         />
     );

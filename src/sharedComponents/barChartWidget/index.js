@@ -16,10 +16,10 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle }) => {
+const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
         <>
-            <div className="ml-3 mt-3">
+            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
@@ -45,6 +45,7 @@ const BarChartWidget = ({
     isConsumpHistoryLoading,
     startEndDayCount,
     timeZone,
+    pageType,
     ...props
 }) => {
     const history = useHistory();
@@ -161,9 +162,9 @@ const BarChartWidget = ({
     return (
         <div className={`bar-chart-widget-wrapper ${className}`}>
             <>
-                {props.pageType === 'building' ? (
+                {pageType === 'building' ? (
                     <div className="container-header">
-                        <Titles {...{ title, subtitle }} />
+                        <Titles {...{ title, subtitle, pageType }} />
                         <div className="mr-2">
                             <Button
                                 label="More Details"
@@ -180,22 +181,9 @@ const BarChartWidget = ({
                         </div>
                     </div>
                 ) : (
-                    <Titles {...{ title, subtitle }} />
+                    <Titles {...{ title, subtitle, pageType }} />
                 )}
             </>
-
-            {/* <div className="ml-3 mt-3">
-                <Typography.Subheader
-                    size={Typography.Sizes.md}
-                    as="h5"
-                    fontWeight={Typography.Types.Medium}
-                    className="mb-1">
-                    {title}
-                </Typography.Subheader>
-                <Typography.Body size={Typography.Sizes.xs} as="h6">
-                    {subtitle}
-                </Typography.Body>
-            </div> */}
             <div>
                 {isConsumpHistoryLoading ? (
                     <div className="loader-center-style">

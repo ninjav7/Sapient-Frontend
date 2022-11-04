@@ -48,7 +48,7 @@ const EnergyConsumptionByEndUse = ({
                 subtitle={subtitle}
                 items={donutChartData}
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                // pageType={pageType}
+                pageType={pageType}
                 bldgId={bldgId}
             />
         </div>

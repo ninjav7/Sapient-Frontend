@@ -6,132 +6,20 @@ import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
 import { formatConsumptionValue } from '../../helpers/helpers';
 import { xaxisFilters } from '../../helpers/helpers';
+import Button from '../button/Button';
+import { useHistory } from 'react-router-dom';
+import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import HeatMapChart from '../../../src/pages/charts/HeatMapChart';
 import './style.scss';
 
-const HeatMapWidget = ({
-    className = '',
-    title,
-    subtitle,
-    heatMapChartHeight = 125,
-    isAvgConsumptionDataLoading,
-    hourlyAvgConsumpOpts,
-    hourlyAvgConsumpData,
-    startEndDayCount,
-    timeZone,
-}) => {
-    const [configBarChartWidget, setConfigBarChartWidget] = useState({
-        chart: {
-            type: 'bar',
-            height: 350,
-            toolbar: {
-                show: true,
-            },
-            zoom: {
-                enabled: false,
-            },
-            animations: {
-                enabled: false,
-            },
-        },
-        stroke: {
-            width: 0.2,
-            show: true,
-            curve: 'straight',
-        },
-        dataLabels: {
-            enabled: true,
-            enabledOnSeries: [1],
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = '';
-                if (isNaN(parseInt(series[seriesIndex][dataPointIndex])) === false) {
-                    ch = formatConsumptionValue(series[seriesIndex][dataPointIndex], 4);
-                } else {
-                    ch = '-';
-                }
-                return `<div class="heatmap-chart-widget-tooltip">
-                        <h6 class="heatmap-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="heatmap-chart-widget-tooltip-value">
-                    
-                        ${ch} kWh</div>
-                        <div class="heatmap-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        },
-        xaxis: {
-            labels: {
-                formatter: function (val) {
-                    return moment(val).tz(timeZone).format('MM/DD HH:00');
-                },
-                hideOverlappingLabels: Boolean,
-                rotate: 0,
-                trim: false,
-            },
-            tickAmount: 12,
-            axisTicks: {
-                show: true,
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 2,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = parseInt(val);
-                    return `${print}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
+const ICON_SIZES = {
+    [Button.Sizes.lg]: 11,
+};
 
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
-        setConfigBarChartWidget({ ...configBarChartWidget, xaxis: xaxisObj });
-    }, [startEndDayCount]);
-
+const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
-        <div className={`heatmap-chart-widget-wrapper ${className}`}>
-            <div className="ml-3 mt-3">
+        <>
+            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
@@ -143,21 +31,63 @@ const HeatMapWidget = ({
                     {subtitle}
                 </Typography.Body>
             </div>
-            <div>
-                {/* {isAvgConsumptionDataLoading ? (
+        </>
+    );
+};
+
+const HeatMapWidget = ({
+    className = '',
+    title,
+    subtitle,
+    heatMapChartHeight = 125,
+    isAvgConsumptionDataLoading,
+    hourlyAvgConsumpOpts,
+    hourlyAvgConsumpData,
+    pageType,
+    bldgId,
+}) => {
+    const history = useHistory();
+
+    return (
+        <div className={`heatmap-chart-widget-wrapper ${className}`}>
+            <>
+                {pageType === 'building' ? (
+                    <div className="container-header">
+                        <Titles {...{ title, subtitle, pageType }} />
+                        <div className="mr-2">
+                            <Button
+                                label="More Details"
+                                size={Button.Sizes.lg}
+                                icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                type={Button.Type.tertiary}
+                                iconAlignment={Button.IconAlignment.right}
+                                onClick={() => {
+                                    history.push({
+                                        pathname: `/energy/time-of-day/${bldgId}`,
+                                    });
+                                }}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <Titles {...{ title, subtitle, pageType }} />
+                )}
+            </>
+            {/* <div>
+                {isAvgConsumptionDataLoading ? (
                     <div className="loader-center-style" style={{ height: '400px' }}>
                         <Spinner className="m-2" color={'primary'} />
                     </div>
                 ) : ( */}
-                <div>
-                    <HeatMapChart
-                        options={hourlyAvgConsumpOpts}
-                        series={hourlyAvgConsumpData}
-                        height={heatMapChartHeight}
-                    />
-                </div>
-                {/* )} */}
+            <div>
+                <HeatMapChart
+                    options={hourlyAvgConsumpOpts}
+                    series={hourlyAvgConsumpData}
+                    height={heatMapChartHeight}
+                />
             </div>
+            {/* )} */}
+            {/* </div> */}
         </div>
     );
 };

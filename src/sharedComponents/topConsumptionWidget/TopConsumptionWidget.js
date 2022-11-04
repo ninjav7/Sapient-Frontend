@@ -14,7 +14,7 @@ import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
 const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], className = '', handleClick }) => {
     return (
         <div className={`TopConsumptionWidget-wrapper ${className}`}>
-            <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center justify-content-between mt-1">
                 <div>
                     {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
                     {subtitle && <Typography.Body size={Typography.Sizes.xs}>{subtitle}</Typography.Body>}
