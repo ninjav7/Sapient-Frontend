@@ -373,12 +373,11 @@ const EquipmentTable = ({
                                                     {selectedOptions.some((record) => record.value === 'status') && (
                                                         <td className="text-center">
                                                             <div>
-                                                                {record.status === 'Online' && (
+                                                                {record?.status ? (
                                                                     <div className="icon-bg-styling">
                                                                         <i className="uil uil-wifi mr-1 icon-styling"></i>
                                                                     </div>
-                                                                )}
-                                                                {record.status === 'Offline' && (
+                                                                ) : (
                                                                     <div className="icon-bg-styling-slash">
                                                                         <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
                                                                     </div>
@@ -711,7 +710,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
@@ -769,17 +768,17 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData.data);
                 setDuplicateGeneralEquipmentData(responseData.data);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -816,10 +815,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -853,10 +852,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
@@ -884,7 +883,7 @@ const Equipment = () => {
             };
 
             let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
@@ -892,10 +891,10 @@ const Equipment = () => {
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.data.forEach((record) => {
-                    if (record.status === 'Online') {
+                    if (record.status) {
                         onlineEquip.push(record);
                     }
-                    if (record.status === 'Offline') {
+                    if (!record.status) {
                         offlineEquip.push(record);
                     }
                 });
