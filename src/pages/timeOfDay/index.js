@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
-import DonutChart from '../charts/DonutChart';
-import LineChart from '../charts/LineChart';
 import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
 import { BaseUrl, builidingHourly, avgDailyUsageByHour, buildingAfterHours } from '../../services/Network';
-
+import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -78,7 +76,6 @@ const TimeOfDay = () => {
             borderColor: '#f1f3fa',
         },
         xaxis: {
-            // categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
             categories: [
                 '12AM',
                 '1AM',
@@ -494,25 +491,14 @@ const TimeOfDay = () => {
         }
 
         const endUsesByOfHour = async () => {
-            try {
                 setIsEndUsageChartLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${buildingAfterHours}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchBuildingAfterHours(bldgId, payload)
+                .then((res) => {
                         setEnergyConsumption(res?.data || []);
                         const energyData = res?.data;
                         let newDonutData = [];
@@ -521,35 +507,23 @@ const TimeOfDay = () => {
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);
-
                         //setDonutChartOpts();
                         setIsEndUsageChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsEndUsageChartLoading(false);
-            }
+            });
         };
 
         const dailyUsageByHour = async () => {
-            try {
                 setIsAvgUsageChartLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingHourly}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchBuilidingHourly(bldgId, payload)
+                .then((res) => {
                         let response = res?.data;
 
                         let weekDaysResData = response[0]?.weekdays;
@@ -602,32 +576,21 @@ const TimeOfDay = () => {
                         chartDataToDisplay.push(newWeekendsData);
                         setAreaChartData(chartDataToDisplay);
                         setIsAvgUsageChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsAvgUsageChartLoading(false);
-            }
+            });
         };
 
         const averageUsageByHourFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsAvgHourlyChartLoading(true);
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${avgDailyUsageByHour}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+                await fetchAvgDailyUsageByHour(bldgId, payload)
+                .then((res) => {
                         let response = res.data;
 
                         // default chart structure
@@ -1052,10 +1015,10 @@ const TimeOfDay = () => {
 
                         setWeekdaysSeries(heatMapData.reverse());
                         setIsAvgHourlyChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsAvgHourlyChartLoading(false);
-            }
+            });
         };
 
         endUsesByOfHour();
