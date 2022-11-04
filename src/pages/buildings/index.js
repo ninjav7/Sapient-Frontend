@@ -116,6 +116,9 @@ const BuildingOverview = () => {
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
+            toolbar: {
+                show: true,
+            },
             events: {
                 mounted: function (chartContext, config) {
                     chartContext.toggleDataPointSelection(0, 1);
@@ -357,7 +360,7 @@ const BuildingOverview = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {
@@ -975,14 +978,6 @@ const BuildingOverview = () => {
         let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
-
-    useEffect(() => {
-        console.log('SSR isAvgConsumptionDataLoading :>> ', isAvgConsumptionDataLoading);
-        console.log('SSR startEndDayCount :>> ', startEndDayCount);
-        console.log('SSR hourlyAvgConsumpOpts :>> ', hourlyAvgConsumpOpts);
-        console.log('SSR hourlyAvgConsumpData :>> ', hourlyAvgConsumpData);
-        console.log('SSR heatMapChartHeight :>> ', heatMapChartHeight);
-    });
 
     return (
         <React.Fragment>

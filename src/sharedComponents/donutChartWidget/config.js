@@ -8,6 +8,9 @@ export const configDonutChartWidget = (type) => {
     const options = {
         chart: {
             type: 'donut',
+            toolbar: {
+                show: false,
+            },
             events: {
                 mounted: function (chartContext, config) {
                     chartContext.toggleDataPointSelection(0, 0);
