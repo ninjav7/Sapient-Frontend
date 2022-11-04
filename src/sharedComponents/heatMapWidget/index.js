@@ -3,9 +3,6 @@ import moment from 'moment';
 import 'moment-timezone';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
-import { Spinner } from 'reactstrap';
-import { formatConsumptionValue } from '../../helpers/helpers';
-import { xaxisFilters } from '../../helpers/helpers';
 import Button from '../button/Button';
 import { useHistory } from 'react-router-dom';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
@@ -17,7 +14,7 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
+const Titles = ({ title, subtitle, pageType }) => {
     return (
         <>
             <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
@@ -41,7 +38,6 @@ const HeatMapWidget = ({
     title,
     subtitle,
     heatMapChartHeight = 125,
-    isAvgConsumptionDataLoading,
     hourlyAvgConsumpOpts,
     hourlyAvgConsumpData,
     pageType,
