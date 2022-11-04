@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import _ from 'lodash';
 
 import Input from '../../form/input/Input';
@@ -65,26 +65,31 @@ const mapFilters = {
     },
 
     [FILTER_TYPES.MULTISELECT]: (props) => {
+        // @TODO Not deleted, because it needs to be refactored
         const { selectedFiltersValues, setSelectedFiltersValues } = useContext(DataTableWidgetContext);
+        const [selectedOptions, setSelectedOptions] = useState([]);
+
+        //@TODO Delete saving selected values for filter in store
         let filterValue = { ...(selectedFiltersValues[FILTER_TYPES.MULTISELECT] || []) };
 
         const handleChange = (options) => {
-            setSelectedFiltersValues((oldState) => {
-                return { ...oldState, [FILTER_TYPES.MULTISELECT]: options };
-            });
+            //@TODO Delete saving selected values for filter in store
+            // setSelectedFiltersValues((oldState) => {
+            //     return { ...oldState, [FILTER_TYPES.MULTISELECT]: options };
+            // });
+            props.onChange && props.onChange(options);
+            setSelectedOptions(options);
         };
 
-        const selectedItems = Object.values(filterValue);
-
+        //@TODO Delete saving selected values for filter in store
+        const selectedItems = selectedOptions;// Object.values(filterValue);
+        
         return (
             <Select.Multi
-                options={[
-                    { label: 'Small Office', value: 'Small Office' },
-                    { label: 'Large Office', value: 'Large Office' },
-                    { label: 'Retail Office', value: 'Retail Office' },
-                ]}
+                options={props.filterOptions}
                 onChange={handleChange}
                 isSelectAll={true}
+                onMenuClose={() => props.onClose(selectedOptions)}
                 components={{
                     Control: (controlProps) => (
                         <div {...controlProps}>
@@ -94,7 +99,7 @@ const mapFilters = {
                                 buttonLabel={
                                     selectedItems.length > 1
                                         ? `${selectedItems.length} List items`
-                                        : filterValue[0]?.label
+                                        : selectedItems[0]?.label
                                 }
                                 onDeleteFilter={props.onDeleteFilter}
                             />
@@ -190,8 +195,8 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
                 options={filterOptions}
                 value={selectedFilters}
                 components={{
-                    Control: (p) => (
-                        <div {...p}>
+                    Control: (props) => (
+                        <div {...props}>
                             <Button
                                 label="Add Filter"
                                 type={Button.Type.secondaryGrey}
@@ -204,12 +209,18 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
             />}
 
             <StatusFilter />
-
-            {selectedFilters.map((filter) => {
+            
+            {selectedFilters.map((filter, key) => {
                 const Component = mapFilters[filter.filterType];
-
+                const handleDeleteFilter = (args) => {
+                    onDeleteFilter(args);
+                    console.log(filter);
+                    filter.onDelete && filter.onDelete(args);
+                }
+                
+                //@TODO Delete on change filter carefully
                 return (
-                    <Component {...filter} onDeleteFilter={onDeleteFilter} onChangeFilterValue={onChangeFilterValue} />
+                    <Component key={key} {...filter} onDeleteFilter={handleDeleteFilter} onChangeFilterValue={onChangeFilterValue} />
                 );
             })}
         </div>

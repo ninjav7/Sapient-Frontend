@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import Typography from '../typography';
 import Brick from '../brick';
 import { configDonutChartWidget } from './config';
 import DonutChartLabels from './DonutChartLabels';
-import { formatConsumptionValue } from '../../helpers/helpers';
 import { useHistory } from 'react-router-dom';
 
 import './style.scss';
@@ -23,16 +21,21 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle }) => {
+const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
-                {subtitle}
-            </Typography.Body>
-            <Brick sizeInRem={sizeBrick} />
+            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    as="h5"
+                    fontWeight={Typography.Types.Medium}
+                    className="mb-1">
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
         </>
     );
 };
@@ -45,6 +48,8 @@ const DonutChartWidget = ({
     title,
     subtitle,
     isEnergyConsumptionChartLoading,
+    pageType,
+    bldgId,
     ...props
 }) => {
     const labels = items.map(({ label }) => label);
@@ -58,17 +63,16 @@ const DonutChartWidget = ({
         colors,
         id,
     };
+
     return (
         <>
-            <div className="donut-main-wrapper">
+            <div className={`donut-main-wrapper ${className}`}>
                 {type === DONUT_CHART_TYPES.HORIZONTAL && (
                     <>
-                        {props.pageType === 'building' ? (
-                            <div className="container-header mb-1">
-                                <div>
-                                    <Titles sizeBrick={1} {...{ title, subtitle }} />
-                                </div>
-                                <div>
+                        {pageType === 'building' ? (
+                            <div className="container-header">
+                                <Titles {...{ title, subtitle, pageType }} />
+                                <div className="mr-2">
                                     <Button
                                         label="More Details"
                                         size={Button.Sizes.lg}
@@ -77,26 +81,21 @@ const DonutChartWidget = ({
                                         iconAlignment={Button.IconAlignment.right}
                                         onClick={() => {
                                             history.push({
-                                                pathname: `/energy/end-uses/${props.bldgId}`,
+                                                pathname: `/energy/end-uses/${bldgId}`,
                                             });
                                         }}
                                     />
                                 </div>
                             </div>
                         ) : (
-                            <Titles sizeBrick={1} {...{ title, subtitle }} />
+                            <Titles {...{ title, subtitle, pageType }} />
                         )}
                     </>
                 )}
                 <div
                     className={`donut-chart-widget-wrapper ${className} ${type}`}
-                    style={{ width: '100%', justifyContent: 'space-around' }}>
+                    style={{ width: '100%', justifyContent: 'center' }}>
                     {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
-                    {/* {isEnergyConsumptionChartLoading ? (
-                        <div className="loader-center-style">
-                            <Spinner className="m-2" color={'primary'} />
-                        </div>
-                    ) : ( */}
                     <>
                         <div className={`chart-wrapper ${type}`}>
                             <ReactApexChart options={options} {...props} series={series} type="donut" />
@@ -110,7 +109,6 @@ const DonutChartWidget = ({
                             />
                         </div>
                     </>
-                    {/* )} */}
                 </div>
             </div>
         </>

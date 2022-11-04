@@ -33,8 +33,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.scss';
 import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
-import EnergyConsumptionTotals from './EnergyConsumptionTotals';
-import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
+import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { getFormattedTimeIntervalObjectData } from '../../helpers/formattedChartData';
@@ -448,13 +448,13 @@ const PortfolioOverview = () => {
                     .then((res) => {
                         let response = res?.data;
                         response.forEach((record) => {
-                            record.energy_consumption.now = parseInt(record.energy_consumption.now / 1000);
-                            record.energy_consumption.old = parseInt(record.energy_consumption.old / 1000);
+                            record.energy_consumption.now = parseInt(record.energy_consumption.now);
+                            record.energy_consumption.old = parseInt(record.energy_consumption.old);
                             record.after_hours_energy_consumption.now = parseInt(
-                                record.after_hours_energy_consumption.now / 1000
+                                record.after_hours_energy_consumption.now
                             );
                             record.after_hours_energy_consumption.old = parseInt(
-                                record.after_hours_energy_consumption.old / 1000
+                                record.after_hours_energy_consumption.old
                             );
                         });
                         setenergyConsumption(response);
@@ -626,20 +626,24 @@ const PortfolioOverview = () => {
 
                     {/* <div className="portfolio-consume-widget-wrapper mt-5 ml-2"> */}
                     <Row className="ml-0 mt-3">
-                        <Col xl={6}>
-                            <EnergyConsumptionTotals
-                                series={series}
-                                options={options}
+                        <Col lg={6}>
+                            <EnergyConsumptionByEndUse
+                                title="Energy Consumption by End Use"
+                                subtitle="Totals in kWh"
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
                             />
                         </Col>
-                        <Col xl={6}>
-                            <EnergyConsumptionHistory
+                        <Col lg={6}>
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
                                 series={energyConsumptionChart}
                                 isConsumpHistoryLoading={isConsumpHistoryLoading}
                                 startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                                pageType="portfolio"
                             />
                         </Col>
                     </Row>
