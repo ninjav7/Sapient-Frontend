@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import HeatMapChart from '../../../src/pages/charts/HeatMapChart';
 import './style.scss';
+import Brick from '../brick';
 
 const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
@@ -73,6 +74,7 @@ const HeatMapWidget = ({
                     <Titles {...{ title, subtitle, pageType }} />
                 )}
             </>
+            <Brick sizeInRem={1} />
             {/* <div>
                 {isAvgConsumptionDataLoading ? (
                     <div className="loader-center-style" style={{ height: '400px' }}>

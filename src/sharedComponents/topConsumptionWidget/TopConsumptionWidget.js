@@ -10,6 +10,7 @@ import { UNITS } from '../../constants/units';
 import './TopConsumptionWidget.scss';
 import { Button } from '../button';
 import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], className = '', handleClick }) => {
     return (
@@ -54,7 +55,7 @@ const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], classNam
                                 className="d-inline mr-1"
                                 size={Typography.Sizes.md}
                                 fontWeight={Typography.Types.SemiBold}>
-                                {value}
+                                {formatConsumptionValue(value, 0)}
                             </Typography.Body>
                             <Typography.Body className="d-inline" size={Typography.Sizes.xxs}>
                                 {unit}

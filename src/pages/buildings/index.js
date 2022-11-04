@@ -991,7 +991,7 @@ const BuildingOverview = () => {
                 <div className="ml-2">
                     <EnergyConsumptionByEndUse
                         title="Energy Consumption by End Use"
-                        subtitle="Totals in kWh"
+                        subtitle="Energy Totals"
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
@@ -1026,7 +1026,7 @@ const BuildingOverview = () => {
                 </div>
 
                 <TopConsumptionWidget
-                    title="Top Equipment Consumption"
+                    title="Top Energy Consumers"
                     heads={['Equipment', 'Energy', 'Change']}
                     rows={topEnergyConsumptionData}
                     className={'fit-container-style mt-0'}
