@@ -5,12 +5,11 @@ import Header from '../../components/Header';
 import axios from 'axios';
 import moment from 'moment';
 import {
-    BaseUrl,
-    portfolioBuilidings,
-    portfolioEndUser,
-    portfolioOverall,
-    getEnergyConsumption,
-} from '../../services/Network';
+    fetchPortfolioBuilidings,
+    fetchPortfolioOverall,
+    fetchPortfolioEndUse,
+    fetchPortfolioEnergyConsumption
+} from '../portfolio/services';
 import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -67,51 +66,31 @@ const PortfolioOverview = () => {
         }
 
         const portfolioOverallData = async () => {
-            try {
                 setIsKPIsLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioOverall}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchPortfolioOverall(payload)
+                .then((res) =>{
                         setOveralldata(res.data);
                         setIsKPIsLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsKPIsLoading(false);
-            }
+            });
         };
 
         const portfolioEndUsesData = async () => {
-            try {
                 setIsEnergyConsumptionChartLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioEndUser}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchPortfolioEndUse(payload)
+                .then((res) =>{
                         let response = res?.data;
                         response.forEach((record) => {
                             record.energy_consumption.now = parseInt(record.energy_consumption.now);
@@ -125,31 +104,20 @@ const PortfolioOverview = () => {
                         });
                         setenergyConsumption(response);
                         setIsEnergyConsumptionChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsEnergyConsumptionChartLoading(false);
-            }
+            });
         };
 
         const energyConsumptionData = async () => {
-            try {
-                setIsConsumpHistoryLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${getEnergyConsumption}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchPortfolioEnergyConsumption(payload)
+            .then((res) =>{
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -166,30 +134,20 @@ const PortfolioOverview = () => {
                         });
                         setEnergyConsumptionChart(newArray);
                         setIsConsumpHistoryLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsConsumpHistoryLoading(false);
-            }
+            });
         };
 
         const portfolioBuilidingsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioBuilidings}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchPortfolioBuilidings(payload)
+            .then((res) =>{
                         let data = res.data;
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
@@ -206,8 +164,9 @@ const PortfolioOverview = () => {
                             { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
                         ];
                         setMarkers(markerArr);
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) {}
         };
 
         portfolioBuilidingsData();

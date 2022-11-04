@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
-import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../explore/explore';
-import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/explore';
+import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Spinner } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
@@ -29,7 +26,6 @@ import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { xaxisFilters } from '../../helpers/explorehelpers';
-import Enumerable from 'linq';
 import './Linq';
 
 const ExploreBuildingsTable = ({
@@ -701,13 +697,6 @@ const ExploreByBuildings = () => {
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
-        // let arr = [
-        //     { label: 'Energy Consumption', value: 'consumption' },
-        //     { label: 'Change', value: 'change' },
-        //     // { label: 'Total % change', value: 'total_per' },
-        //     { label: 'Square Footage', value: 'sq_ft' },
-        //     { label: 'Building Type', value: 'load' },
-        // ];
     }, []);
 
     const exploreDataFetch = async () => {
@@ -853,7 +842,6 @@ const ExploreByBuildings = () => {
         }
     };
 
-    // add
     useEffect(() => {
         if (selectedBuildingId === '') {
             return;

@@ -7,8 +7,7 @@ import UsageBarChart from './UsageBarChart';
 import HvacUsesCard from './HvacUsesCard';
 import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import axios from 'axios';
-import { BaseUrl, endUses, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
+import {fetchEndUsesType, fetchEndUsesEquipmentUsage, fetchEndUsesUsageChart } from '../endUses/services';
 import { percentageHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -334,56 +333,34 @@ const EndUseType = () => {
         let endUseTypeRequest = fetchEndUseType(endUseType);
 
         const endUsesDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsEndUsesDataFetched(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUses}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+                await fetchEndUsesType(bldgId,endUseTypeRequest,payload)
+                .then((res) => {
                         let response = res.data;
                         let requestEndUseType = fetchEndUseType(endUseType);
                         let data = response.find((element) => element.device === requestEndUseType);
                         setEndUsesData(data);
                         setIsEndUsesDataFetched(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsEndUsesDataFetched(false);
-            }
+            });
         };
 
         const equipmentUsageDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsEquipTypeChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUsesEquipmentUsage}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+                await fetchEndUsesEquipmentUsage(bldgId,endUseTypeRequest,payload)
+                .then((res) => {
                         let data = res.data;
                         let equipTypeName = [];
                         let equipTypeUsage = [];
@@ -414,32 +391,21 @@ const EndUseType = () => {
                         setEquipTypeChartData(equipTypeConsumption);
                         setHvacUsageData(data);
                         setIsEquipTypeChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsEquipTypeChartLoading(false);
-            }
+            });
         };
 
         const plugUsageDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUsesUsageChart}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                };
+                await fetchEndUsesUsageChart(bldgId,endUseTypeRequest,payload)
+                .then((res) => {
                         let data = res.data;
                         let energyData = [
                             {
@@ -456,10 +422,10 @@ const EndUseType = () => {
                         });
                         setEnergyChartData(energyData);
                         setIsPlugLoadChartLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsPlugLoadChartLoading(false);
-            }
+            });
         };
 
         endUsesDataFetch();
