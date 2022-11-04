@@ -5,16 +5,14 @@ import axios from 'axios';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
-import {
-    BaseUrl,
-    builidingEquipments,
-    builidingHourly,
-    getEnergyConsumption,
-    portfolioEndUser,
-    portfolioOverall,
-} from '../../services/Network';
 import moment from 'moment';
 import 'moment-timezone';
+import {fetchOverallBldgData,
+    fetchOverallEndUse,
+    fetchBuildingEquipments,
+    fetchBuilidingHourly,
+    fetchEnergyConsumption
+} from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -157,7 +155,6 @@ const BuildingOverview = () => {
     });
 
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
-
     const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
             type: 'bar',
@@ -545,24 +542,13 @@ const BuildingOverview = () => {
              };
 
         const buildingEndUserData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioEndUser}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchOverallEndUse(bldgId, payload)
+            .then((res) => {
                         setEnergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
@@ -571,29 +557,19 @@ const BuildingOverview = () => {
                             newDonutData.push(fixedConsumption);
                         });
                         setDonutChartData(newDonutData);
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) {}
         };
 
         const builidingEquipmentsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingEquipments}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchBuildingEquipments(bldgId, payload)
+            .then((res) => {
                         let response = res.data[0].top_contributors;
                         let topEnergyData = [];
                         response.forEach((record) => {
@@ -614,32 +590,21 @@ const BuildingOverview = () => {
                             topEnergyData.push(obj);
                         });
                         setTopEnergyConsumptionData(topEnergyData);
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) {}
         };
 
         const buildingHourlyData = async () => {
-            try {
-                setIsAvgConsumptionDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+            setIsAvgConsumptionDataLoading(true);
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingHourly}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchBuilidingHourly(bldgId, payload)
+                .then((res) => {
                         let response = res?.data;
-
                         let weekDaysResData = response[0]?.weekdays;
                         let weekEndResData = response[0]?.weekend;
 
@@ -733,32 +698,21 @@ const BuildingOverview = () => {
 
                         setHourlyAvgConsumpData(heatMapData.reverse());
                         setIsAvgConsumptionDataLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsAvgConsumptionDataLoading(false);
-            }
+            });
         };
 
         const buildingConsumptionChart = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getEnergyConsumption}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+            setIsEnergyConsumptionDataLoading(true);
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchEnergyConsumption(bldgId, payload)
+            .then((res) => {
                         let response = res?.data;
                         let newArray = [
                             {
@@ -774,10 +728,10 @@ const BuildingOverview = () => {
                         });
                         setBuildingConsumptionChartData(newArray);
                         setIsEnergyConsumptionDataLoading(false);
-                    });
-            } catch (error) {
-                setIsEnergyConsumptionDataLoading(false);
-            }
+                    })
+                    .catch((error) => {
+                        setIsEnergyConsumptionDataLoading(false);
+            });
         };
 
         const calculateDays = () => {
