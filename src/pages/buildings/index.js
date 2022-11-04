@@ -1,47 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
-import DonutChart from '../charts/DonutChart';
+import React, { useState, useEffect } from 'react';
+import { Row } from 'reactstrap';
 import Header from '../../components/Header';
-import LineChart from '../charts/LineChart';
-import DetailedButton from './DetailedButton';
-import HeatMapChart from '../charts/HeatMapChart';
-import upGraph from '../../assets/icon/buildings/up-graph.svg';
-import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
-import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { faMountain } from '@fortawesome/pro-solid-svg-icons';
-import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
-import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import LineColumnChart from '../charts/LineColumnChart';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
-import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
-    builidingAlerts,
     builidingEquipments,
     builidingHourly,
     getEnergyConsumption,
-    builidingPeak,
     portfolioEndUser,
     portfolioOverall,
 } from '../../services/Network';
-import { fetchOverallBldgData } from './services';
 import moment from 'moment';
 import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { useHistory } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
-import Button from '../../sharedComponents/button/Button';
-import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icons/arrow-right.svg';
-import './style.css';
+
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
@@ -49,32 +28,7 @@ import HourlyAvgConsumption from './HourlyAvgConsumption';
 import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-
-export function useHover() {
-    const [value, setValue] = useState(false);
-
-    const ref = useRef(null);
-
-    const handleMouseOver = () => setValue(true);
-    const handleMouseOut = () => setValue(false);
-
-    useEffect(
-        () => {
-            const node = ref.current;
-            if (node) {
-                node.addEventListener('mouseover', handleMouseOver);
-                node.addEventListener('mouseout', handleMouseOut);
-
-                return () => {
-                    node.removeEventListener('mouseover', handleMouseOver);
-                    node.removeEventListener('mouseout', handleMouseOut);
-                };
-            }
-        },
-        [ref.current] // Recall only if ref changes
-    );
-    return [ref, value];
-}
+import './style.css';
 
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -86,7 +40,6 @@ const BuildingOverview = () => {
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const history = useHistory();
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -104,10 +57,6 @@ const BuildingOverview = () => {
             old: 0,
         },
     });
-
-    const ICON_SIZES = {
-        [Button.Sizes.lg]: 11,
-    };
 
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
@@ -147,14 +96,6 @@ const BuildingOverview = () => {
                         show: true,
                         name: {
                             show: false,
-                            // fontSize: '22px',
-                            // fontFamily: 'Helvetica, Arial, sans-serif',
-                            // fontWeight: 600,
-                            // color: '#373d3f',
-                            // offsetY: -10,
-                            // formatter: function (val) {
-                            //     return val;
-                            // },
                         },
                         value: {
                             show: true,
@@ -162,7 +103,6 @@ const BuildingOverview = () => {
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
                             color: 'red',
-                            // offsetY: 16,
                             formatter: function (val) {
                                 return `${val} kWh`;
                             },
@@ -171,14 +111,8 @@ const BuildingOverview = () => {
                             show: true,
                             showAlways: false,
                             label: 'Total',
-                            // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
-                            // formatter: function (w) {
-                            //     return w.globals.seriesTotals.reduce((a, b) => {
-                            //         return a + b;
-                            //     }, 0);
-                            // },
                             formatter: function (w) {
                                 let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
@@ -197,16 +131,6 @@ const BuildingOverview = () => {
                     chart: {
                         width: 300,
                     },
-                    // legend: {
-                    //     show: true,
-                    //     showForSingleSeries:true,
-                    //     onItemHover: {
-                    //         highlightDataSeries: true
-                    //     },
-                    //     onItemClick: {
-                    //         toggleDataSeries: true
-                    //     },
-                    // },
                 },
             },
         ],
@@ -337,24 +261,15 @@ const BuildingOverview = () => {
         },
     });
 
+    const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
+
+    const heatMapChartHeight = 125;
+
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
-    const [topContributors, setTopContributors] = useState([]);
-
     const [daysCount, setDaysCount] = useState(1);
-
-    const getAverageValue = (value, min, max) => {
-        if (min == undefined || max === undefined) {
-            return 0;
-        }
-        let percentage = Math.round(((value - min) / (max - min)) * 100);
-        console.log('getAverageValue percentage => ', percentage);
-        console.log('getAverageValue min => ', min);
-        console.log('getAverageValue max => ', max);
-        return parseInt(percentage);
-    };
 
     const hourlyAvgConsumpOpts = {
         chart: {
@@ -599,12 +514,13 @@ const BuildingOverview = () => {
         }
     };
 
-    const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
-
-    const heatMapChartHeight = 125;
-
-    const [hoverRef, isHovered] = useHover();
-    const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
+    const getAverageValue = (value, min, max) => {
+        if (min == undefined || max === undefined) {
+            return 0;
+        }
+        let percentage = Math.round(((value - min) / (max - min)) * 100);
+        return parseInt(percentage);
+    };
 
     useEffect(() => {
         if (startDate === null) {
@@ -613,19 +529,6 @@ const BuildingOverview = () => {
         if (endDate === null) {
             return;
         }
-
-        // const overAllBuildingData = async () => {
-        //     let payload = {
-        //         date_from: startDate.toLocaleDateString(),
-        //         date_to: endDate.toLocaleDateString(),
-        //         tz_info: timeZone,
-        //     };
-        //     await fetchOverallBldgData(bldgId, payload)
-        //         .then((res) => {
-        //             setOverview(res.data);
-        //         })
-        //         .catch((error) => {});
-        // };
 
         const buildingOverallData = async () => {
                 let payload =  {
@@ -672,57 +575,8 @@ const BuildingOverview = () => {
             } catch (error) {}
         };
 
-        // const buildingAlertsData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             Authorization: `Bearer ${userdata.token}`,
-        //         };
-        //         let params = `?building_id=${1}`;
-        //         await axios
-        //             .post(
-        //                 `${BaseUrl}${builidingAlerts}${params}`,
-        //                 {
-        //                     date_from: dateFormatHandler(startDate),
-        //                     date_to: dateFormatHandler(endDate),
-        //                 },
-        //                 { headers }
-        //             )
-        //             .then((res) => {
-        //                 setBuildingAlerts(res.data);
-        //             });
-        //     } catch (error) {
-        //     }
-        // };
-
-        // const buildingPeaksData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             Authorization: `Bearer ${userdata.token}`,
-        //         };
-        //         let params = `?building_id=${bldgId}&limit=${2}`;
-        //         await axios
-        //             .post(
-        //                 `${BaseUrl}${builidingPeak}${params}`,
-        //                 {
-        //                     date_from: dateFormatHandler(startDate),
-        //                     date_to: dateFormatHandler(endDate),
-        //                 },
-        //                 { headers }
-        //             )
-        //             .then((res) => {
-        //                 setTopContributors(res.data);
-        //             });
-        //     } catch (error) {
-        //     }
-        // };
-
         const builidingEquipmentsData = async () => {
             try {
-                setIsEquipmentProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -760,11 +614,8 @@ const BuildingOverview = () => {
                             topEnergyData.push(obj);
                         });
                         setTopEnergyConsumptionData(topEnergyData);
-                        setIsEquipmentProcessing(false);
                     });
-            } catch (error) {
-                setIsEquipmentProcessing(false);
-            }
+            } catch (error) {}
         };
 
         const buildingHourlyData = async () => {
@@ -849,7 +700,6 @@ const BuildingOverview = () => {
                             let matchedRecord = weekendsData.find((record) => record.x === i);
 
                             if (matchedRecord) {
-                                // matchedRecord.x = i;
                                 matchedRecord.z = matchedRecord.y;
                                 matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
                                 newWeekendsData.data.push(matchedRecord);
