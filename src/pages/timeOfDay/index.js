@@ -5,8 +5,6 @@ import HeatMapChart from '../charts/HeatMapChart';
 import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import axios from 'axios';
-import { BaseUrl, builidingHourly, avgDailyUsageByHour, buildingAfterHours } from '../../services/Network';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
 import moment from 'moment';
