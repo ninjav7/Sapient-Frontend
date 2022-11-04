@@ -339,7 +339,7 @@ const TimeOfDay = () => {
     const [weekdaysSeries, setWeekdaysSeries] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = '100%';
+    const weekdaysChartHeight = '265px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
@@ -1031,14 +1031,14 @@ const TimeOfDay = () => {
             </div>
 
             <Row className="ml-2 mb-2">
-                <Col xl={4}>
+                <Col xl={5}>
                     <EndUseTotals
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
                     />
                 </Col>
-                <Col xl={8}>
+                <Col xl={7}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Hourly Average Consumption
