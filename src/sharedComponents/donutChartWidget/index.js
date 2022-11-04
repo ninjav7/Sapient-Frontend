@@ -6,10 +6,12 @@ import Brick from '../brick';
 import { configDonutChartWidget } from './config';
 import DonutChartLabels from './DonutChartLabels';
 import { useHistory } from 'react-router-dom';
-
-import './style.scss';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/pro-solid-svg-icons';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { getCSVDataExport } from './utils';
+import './style.scss';
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
@@ -24,7 +26,7 @@ const ICON_SIZES = {
 const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
         <>
-            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
+            <div className={`ml-3 mt-2`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
@@ -72,7 +74,13 @@ const DonutChartWidget = ({
                         {pageType === 'building' ? (
                             <div className="container-header">
                                 <Titles {...{ title, subtitle, pageType }} />
-                                <div className="mr-2">
+                                <div className="flex-space-between mr-2">
+                                    <FontAwesomeIcon
+                                        icon={faDownload}
+                                        size="md"
+                                        className="download-chart-btn mouse-pointer mr-3"
+                                        onClick={() => getCSVDataExport(labels, series, pageType)}
+                                    />
                                     <Button
                                         label="More Details"
                                         size={Button.Sizes.lg}
@@ -88,7 +96,15 @@ const DonutChartWidget = ({
                                 </div>
                             </div>
                         ) : (
-                            <Titles {...{ title, subtitle, pageType }} />
+                            <div className="flex-space-between">
+                                <Titles {...{ title, subtitle, pageType }} />
+                                <FontAwesomeIcon
+                                    icon={faDownload}
+                                    size="md"
+                                    className="download-chart-btn mouse-pointer mr-3 mt-3"
+                                    onClick={() => getCSVDataExport(labels, series, pageType)}
+                                />
+                            </div>
                         )}
                     </>
                 )}
