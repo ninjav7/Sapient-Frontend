@@ -628,28 +628,18 @@ const BuildingOverview = () => {
         // };
 
         const buildingOverallData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioOverall}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchOverallBldgData(bldgId, payload)
+                .then((res) => {
                         setOverallBldgData(res.data);
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) {}
-        };
+             };
 
         const buildingEndUserData = async () => {
             try {

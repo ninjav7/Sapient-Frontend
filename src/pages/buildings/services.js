@@ -12,5 +12,5 @@ import {
 
 export function fetchOverallBldgData(bldgId, payload) {
     let params = `?building_id=${bldgId}`;
-    return axiosInstance.post(`${portfolioOverall}${params}, ${payload}`).then((res) => res);
+    return axiosInstance.post(`${portfolioOverall}${params}`, payload).then((res) => res);
 }
