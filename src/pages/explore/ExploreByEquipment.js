@@ -7,8 +7,6 @@ import { xaxisFilters } from '../../helpers/explorehelpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import {
     BaseUrl,
-    getExploreEquipmentList,
-    getExploreEquipmentChart,
     getFloors,
     equipmentType,
     getEndUseId,
@@ -100,7 +98,7 @@ const ExploreEquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody>
+                <CardBody style={{marginBottom: "2rem"}}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
@@ -1043,17 +1041,10 @@ const ExploreByEquipment = () => {
     };
 
     const exploreFilterDataFetch = async (bodyVal, txt) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setSeriesData([]);
@@ -1064,10 +1055,10 @@ const ExploreByEquipment = () => {
                 setExploreTableData(responseData.data);
 
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+        })
+        .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     };
 
     const uniqueIds = [];
@@ -1135,17 +1126,10 @@ const ExploreByEquipment = () => {
     }, [removeDuplicateFlag]);
 
     const exploreDataFetch = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
 
@@ -1163,10 +1147,10 @@ const ExploreByEquipment = () => {
                 setExploreTableData(responseData.data);
                 //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     };
     let arr = {
         date_from: startDate.toLocaleDateString(),
@@ -1175,17 +1159,10 @@ const ExploreByEquipment = () => {
     };
 
     const fetchAllExploredata = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 ExploreFilterDataStore.update((bs) => {
@@ -1229,10 +1206,10 @@ const ExploreByEquipment = () => {
                 set_maxPerValueNeg(parseInt(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     }
     useEffect(() => {
         if (startDate === null) {
@@ -1529,24 +1506,14 @@ const ExploreByEquipment = () => {
         }
         const fetchExploreChartData = async () => {
             setChartLoading(true);
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
                 let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchExploreEquipmentChart(payload,params)
+                .then((res) => {
                         let responseData = res.data;
                         let data = responseData.data;
                         let arr = [];
@@ -1587,10 +1554,10 @@ const ExploreByEquipment = () => {
                         setSelectedEquipmentId('');
                         setChartLoading(false);
                         //setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 //setIsExploreDataLoading(false);
-            }
+            });
         };
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
@@ -1620,24 +1587,14 @@ const ExploreByEquipment = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+            await fetchExploreEquipmentChart(payload,params)
+            .then((res) => {
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
@@ -1679,10 +1636,10 @@ const ExploreByEquipment = () => {
                         setSeriesLineData(dataarr);
                     }
                     setAllEquipmenData(dataarr);
-                });
-        } catch (error) {
+                })
+                .catch((error) => {
             //setIsExploreDataLoading(false);
-        }
+        });
     };
 
     useEffect(() => {
@@ -2059,25 +2016,16 @@ const ExploreByEquipment = () => {
     const handleEquipmentSearch = (e) => {
         entryPoint = "searched";
         const exploreDataFetch = async () => {
-            try {
                 setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
                 let params = `?consumption=energy&search_by_name=${equipmentSearchTxt}&building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchExploreEquipmentList(payload, params)
+                .then((res) => {
                         let responseData = res.data;
                         if (responseData.data.length !== 0) {
                             set_minConValue(0.0);
@@ -2085,10 +2033,10 @@ const ExploreByEquipment = () => {
                         }
                         setExploreTableData(responseData.data);
                         setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsExploreDataLoading(false);
-            }
+            });
         };
         exploreDataFetch();
     };

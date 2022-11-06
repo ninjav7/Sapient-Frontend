@@ -94,7 +94,7 @@ const ExploreBuildingsTable = ({
     return (
         <>
             <Card>
-                <CardBody>
+                <CardBody style={{marginBottom: "6rem"}}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
