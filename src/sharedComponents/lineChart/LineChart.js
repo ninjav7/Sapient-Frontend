@@ -119,33 +119,6 @@ const LineChart = (props) => {
         series: [...preparedData],
         exporting: {
             enabled:true,
-            
-            // buttons: {
-            //     contextButton: {
-            //         menuItems: [
-            //             {
-            //                 textKey: 'downloadSVG',
-            //                 onclick: function () {
-            //                     this.exportChart({
-            //                         type: 'image/svg+xml',
-            //                     });
-            //                 },
-            //             },
-            //             {
-            //                 textKey: 'downloadPNG',
-            //                 onclick: function () {
-            //                     this.exportChart();
-            //                 },
-            //             },
-            //             {
-            //                 textKey: 'downloadCSV',
-            //                 onclick: function () {
-            //                     this.exportChart();
-            //                 },
-            //             },
-            //         ],
-            //     },
-            // },
         },
     };
 
