@@ -5,14 +5,7 @@ import BrushChart from '../charts/BrushChart';
 import { percentageHandler} from '../../utils/helper';
 import { xaxisFilters } from '../../helpers/explorehelpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
-import {
-    BaseUrl,
-    getFloors,
-    equipmentType,
-    getEndUseId,
-    getSpaceTypes,
-    getSpaces,
-} from '../../services/Network';
+import {BaseUrl,getFloors,equipmentType,getEndUseId,getSpaceTypes,getSpaces} from '../../services/Network';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter} from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
@@ -38,6 +31,7 @@ import { selectedEquipment, totalSelectionEquipmentId } from '../../store/global
 import { useAtom } from 'jotai';
 import './Linq';
 import { options, optionsLines } from './ChartOption';
+import {SliderAll, SliderPos, SliderNeg} from './Filter';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -517,42 +511,42 @@ const ExploreEquipmentTable = ({
     );
 };
 
-const SliderAll = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-    return (
-        <RangeSlider
-            name="consumptionAll"
-            STEP={1}
-            MIN={bottom}
-            range={[bottomPer, topPer]}
-            MAX={top}
-            onSelectionChange={handleChange}
-        />
-    )
-};
-const SliderPos = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-    return (
-        <RangeSlider
-            name="consumptionAll"
-            STEP={1}
-            MIN={bottom}
-            range={[bottomPer, topPer]}
-            MAX={top}
-            onSelectionChange={handleChange}
-        />
-    )
-};
-const SliderNeg = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-    return (
-        <RangeSlider
-            name="consumptionAll"
-            STEP={1}
-            MIN={bottom}
-            range={[bottomPer, topPer]}
-            MAX={top}
-            onSelectionChange={handleChange}
-        />
-    )
-};
+// const SliderAll = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
+// const SliderPos = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
+// const SliderNeg = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
