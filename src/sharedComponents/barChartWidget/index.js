@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
 import { formatConsumptionValue, xaxisFilters } from '../helpers/helper';
 import BarChart from './BarChart';
-import { useHistory } from 'react-router-dom';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import Brick from '../brick';
@@ -16,7 +15,7 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
+const Titles = ({ title, subtitle, pageType }) => {
     return (
         <>
             <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
@@ -50,8 +49,6 @@ const BarChartWidget = ({
     showRouteBtn,
     ...props
 }) => {
-    const history = useHistory();
-
     const [configBarChartWidget, setConfigBarChartWidget] = useState({
         chart: {
             type: 'bar',
