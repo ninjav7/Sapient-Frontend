@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Cookies } from 'react-cookie';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
-import axios from 'axios';
 import moment from 'moment';
 import {
     fetchPortfolioBuilidings,
     fetchPortfolioOverall,
     fetchPortfolioEndUse,
-    fetchPortfolioEnergyConsumption
+    fetchPortfolioEnergyConsumption,
 } from '../portfolio/services';
 import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -23,8 +21,6 @@ import { userPermissionData } from '../../store/globalState';
 import './style.scss';
 
 const PortfolioOverview = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
@@ -66,107 +62,102 @@ const PortfolioOverview = () => {
         }
 
         const portfolioOverallData = async () => {
-                setIsKPIsLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchPortfolioOverall(payload)
-                .then((res) =>{
-                        setOveralldata(res.data);
-                        setIsKPIsLoading(false);
-                    })
-                    .catch((error) => {
-                setIsKPIsLoading(false);
-            });
+            setIsKPIsLoading(true);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchPortfolioOverall(payload)
+                .then((res) => {
+                    setOveralldata(res.data);
+                    setIsKPIsLoading(false);
+                })
+                .catch((error) => {
+                    setIsKPIsLoading(false);
+                });
         };
 
         const portfolioEndUsesData = async () => {
-                setIsEnergyConsumptionChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchPortfolioEndUse(payload)
-                .then((res) =>{
-                        let response = res?.data;
-                        response.forEach((record) => {
-                            record.energy_consumption.now = parseInt(record.energy_consumption.now);
-                            record.energy_consumption.old = parseInt(record.energy_consumption.old);
-                            record.after_hours_energy_consumption.now = parseInt(
-                                record.after_hours_energy_consumption.now
-                            );
-                            record.after_hours_energy_consumption.old = parseInt(
-                                record.after_hours_energy_consumption.old
-                            );
-                        });
-                        setenergyConsumption(response);
-                        setIsEnergyConsumptionChartLoading(false);
-                    })
-                    .catch((error) => {
-                setIsEnergyConsumptionChartLoading(false);
-            });
+            setIsEnergyConsumptionChartLoading(true);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchPortfolioEndUse(payload)
+                .then((res) => {
+                    let response = res?.data;
+                    response.forEach((record) => {
+                        record.energy_consumption.now = parseInt(record.energy_consumption.now);
+                        record.energy_consumption.old = parseInt(record.energy_consumption.old);
+                        record.after_hours_energy_consumption.now = parseInt(record.after_hours_energy_consumption.now);
+                        record.after_hours_energy_consumption.old = parseInt(record.after_hours_energy_consumption.old);
+                    });
+                    setenergyConsumption(response);
+                    setIsEnergyConsumptionChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsEnergyConsumptionChartLoading(false);
+                });
         };
 
         const energyConsumptionData = async () => {
-            let payload =  {
+            let payload = {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
             await fetchPortfolioEnergyConsumption(payload)
-            .then((res) =>{
-                        let newArray = [
-                            {
-                                name: 'Energy',
-                                data: [],
-                            },
-                        ];
-                        res.data.forEach((record) => {
-                            const d = new Date(record.x);
-                            const milliseconds = d.getTime();
-                            newArray[0].data.push({
-                                x: milliseconds,
-                                y: (record.y / 1000).toFixed(0),
-                            });
+                .then((res) => {
+                    let newArray = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                        },
+                    ];
+                    res.data.forEach((record) => {
+                        const d = new Date(record.x);
+                        const milliseconds = d.getTime();
+                        newArray[0].data.push({
+                            x: milliseconds,
+                            y: (record.y / 1000).toFixed(0),
                         });
-                        setEnergyConsumptionChart(newArray);
-                        setIsConsumpHistoryLoading(false);
-                    })
-                    .catch((error) => {
-                setIsConsumpHistoryLoading(false);
-            });
+                    });
+                    setEnergyConsumptionChart(newArray);
+                    setIsConsumpHistoryLoading(false);
+                })
+                .catch((error) => {
+                    setIsConsumpHistoryLoading(false);
+                });
         };
 
         const portfolioBuilidingsData = async () => {
-            let payload =  {
+            let payload = {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
             await fetchPortfolioBuilidings(payload)
-            .then((res) =>{
-                        let data = res.data;
-                        setBuildingsEnergyConsume(data);
-                        let markerArray = [];
-                        data.map((record) => {
-                            let markerObj = {
-                                markerOffset: 25,
-                                name: record.buildingName,
-                                coordinates: [parseInt(record.lat), parseInt(record.long)],
-                            };
-                            markerArray.push(markerObj);
-                        });
-                        const markerArr = [
-                            { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
-                            { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
-                        ];
-                        setMarkers(markerArr);
-                    })
-                    .catch((error) => {
+                .then((res) => {
+                    let data = res.data;
+                    setBuildingsEnergyConsume(data);
+                    let markerArray = [];
+                    data.map((record) => {
+                        let markerObj = {
+                            markerOffset: 25,
+                            name: record.buildingName,
+                            coordinates: [parseInt(record.lat), parseInt(record.long)],
+                        };
+                        markerArray.push(markerObj);
                     });
+                    const markerArr = [
+                        { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
+                        { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
+                    ];
+                    setMarkers(markerArr);
+                })
+                .catch((error) => {});
         };
 
         portfolioBuilidingsData();
