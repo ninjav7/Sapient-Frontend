@@ -102,33 +102,6 @@ export function getFiltersForSensorsRequest(args) {
         });
 }
 
-/**
- * Request Last Used.
- * @param args = {sensor_search, equipment_types, mac_address, tags, floor_id, space_id, space_type_id, sensor_number};
- * @returns {Promise<AxiosResponse<any>>}
- */
-export function getLastUsedRequest(args) {
-    return axiosInstance
-        .get(`${getSensorLastUsed}`, {
-            params: _.pickBy(
-                {
-                    page_no: args.pageNo,
-                    page_size: args.pageSize,
-                    building_id: args.activeBuildingId,
-                    mac_address: args.macTypeFilterString,
-                    equipment_types: args.equpimentTypeFilterString,
-                    sensor_number: args.sensorTypeFilterString,
-                    floor_id: args.floorTypeFilterString,
-                    space_id: args.spaceTypeFilterString,
-                    space_type_id: args.spaceTypeTypeFilterString,
-                },
-                _.identity
-            ),
-        })
-        .then((res) => {
-            return res.data;
-        });
-}
 
 export function getUnlinkedSocketRules(
     pageSize,

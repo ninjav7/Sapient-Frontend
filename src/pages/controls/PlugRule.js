@@ -33,7 +33,6 @@ import {
     unlinkSocketRequest,
     getUnlinkedSocketRules,
     getFiltersForSensorsRequest,
-    getLastUsedRequest,
 } from '../../services/plugRules';
 import './style.scss';
 import { ceil } from 'lodash';
@@ -184,9 +183,7 @@ const PlugRule = () => {
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-
-    const [lastUsed, setLastUsed] = useState([]);
-
+    
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -959,13 +956,13 @@ const PlugRule = () => {
     };
 
     const renderTagCell = (row) => {
-        return (row.tag || []).join(', ');
+        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className='ml-1'/>);
     };
 
     const renderLastUsedCell = (row, childrenTemplate) => {
-        const { last_used_data } = lastUsed?.find((item) => row?.id === item.id);
+        const { last_used_data } = row;
 
-        return childrenTemplate(last_used_data ? moment(last_used_data).format('YYYY-MM-DD h:mm A') : '');
+        return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
 
     const renderAssignRule = useCallback(
@@ -1144,26 +1141,7 @@ const PlugRule = () => {
         };
 
         search && fetchAllData();
-
-        //fetch lastUsed
-        (async () => {
-            await getLastUsedRequest({
-                pageSize,
-                pageNo,
-                ruleId,
-                activeBuildingId,
-                equpimentTypeFilterString,
-                macTypeFilterString,
-                locationTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-                sensor_search: search,
-            }).then((res) => {
-                setLastUsed(res.data);
-            });
-        })();
+        
     }, [
         search,
         equpimentTypeFilterString,
