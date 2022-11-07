@@ -22,7 +22,7 @@ import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
-import TopEnergyConsumers from '../../sharedComponents/topEnergyConsumers/TopEnergyConsumers';
+import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import './style.css';
@@ -802,11 +802,12 @@ const BuildingOverview = () => {
                     />
                 </div>
 
-                <TopEnergyConsumers
+                <TopConsumptionWidget
                     title="Top Energy Consumers"
                     heads={['Equipment', 'Energy', 'Change']}
                     rows={topEnergyConsumptionData}
                     className={'fit-container-style'}
+                    widgetType="TopEnergyConsumersWidget"
                 />
             </div>
         </React.Fragment>
