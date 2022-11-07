@@ -31,7 +31,7 @@ const EnergyConsumptionByEndUse = ({
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         let val = (energy_consumption.now / 1000).toFixed(0);
         let value = parseFloat(val);
-        const trendValue = parseInt(percentageHandler(energy_consumption.now, energy_consumption.old));
+        const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
         const trendType =
             energy_consumption.now <= energy_consumption.old
                 ? TRENDS_BADGE_TYPES.DOWNWARD_TREND

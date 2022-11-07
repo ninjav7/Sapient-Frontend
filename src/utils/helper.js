@@ -17,7 +17,7 @@ export const percentageHandler = (now, old) => {
 
     percentage = ((now - old) / old) * 100;
     const value = Math.abs(percentage).toFixed(2) || 0;
-    return value;
+    return parseInt(value);
 };
 
 export const convert24hourTo12HourFormat = (time) => {
