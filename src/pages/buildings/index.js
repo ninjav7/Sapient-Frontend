@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Row } from 'reactstrap';
 import Header from '../../components/Header';
-import axios from 'axios';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
-import {fetchOverallBldgData,
+import {
+    fetchOverallBldgData,
     fetchOverallEndUse,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
-    fetchEnergyConsumption
+    fetchEnergyConsumption,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import { Cookies } from 'react-cookie';
 
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
@@ -35,9 +34,6 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
-
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -265,8 +261,6 @@ const BuildingOverview = () => {
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
-
-    const [daysCount, setDaysCount] = useState(1);
 
     const hourlyAvgConsumpOpts = {
         chart: {
@@ -528,220 +522,209 @@ const BuildingOverview = () => {
         }
 
         const buildingOverallData = async () => {
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchOverallBldgData(bldgId, payload)
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchOverallBldgData(bldgId, payload)
                 .then((res) => {
-                        setOverallBldgData(res.data);
-                    })
-                    .catch((error) => {
-                    });
-             };
+                    setOverallBldgData(res.data);
+                })
+                .catch((error) => {});
+        };
 
         const buildingEndUserData = async () => {
-            let payload =  {
+            let payload = {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
             await fetchOverallEndUse(bldgId, payload)
-            .then((res) => {
-                        setEnergyConsumption(res.data);
-                        const energyData = res.data;
-                        let newDonutData = [];
-                        energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now);
-                            newDonutData.push(fixedConsumption);
-                        });
-                        setDonutChartData(newDonutData);
-                    })
-                    .catch((error) => {
+                .then((res) => {
+                    setEnergyConsumption(res.data);
+                    const energyData = res.data;
+                    let newDonutData = [];
+                    energyData.forEach((record) => {
+                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        newDonutData.push(fixedConsumption);
                     });
+                    setDonutChartData(newDonutData);
+                })
+                .catch((error) => {});
         };
 
         const builidingEquipmentsData = async () => {
-            let payload =  {
+            let payload = {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
             await fetchBuildingEquipments(bldgId, payload)
-            .then((res) => {
-                        let response = res.data[0].top_contributors;
-                        let topEnergyData = [];
-                        response.forEach((record) => {
-                            let obj = {
-                                link: '#',
-                                label: record?.equipment_name,
-                                value: parseInt(record?.energy_consumption.now / 1000),
-                                unit: UNITS.KWH,
-                                badgePercentage: percentageHandler(
-                                    record?.energy_consumption.now,
-                                    record?.energy_consumption.old
-                                ),
-                                badgeType: fetchTrendBadgeType(
-                                    record?.energy_consumption.now,
-                                    record?.energy_consumption.old
-                                ),
-                            };
-                            topEnergyData.push(obj);
-                        });
-                        setTopEnergyConsumptionData(topEnergyData);
-                    })
-                    .catch((error) => {
+                .then((res) => {
+                    let response = res.data[0].top_contributors;
+                    let topEnergyData = [];
+                    response.forEach((record) => {
+                        let obj = {
+                            link: '#',
+                            label: record?.equipment_name,
+                            value: parseInt(record?.energy_consumption.now / 1000),
+                            unit: UNITS.KWH,
+                            badgePercentage: percentageHandler(
+                                record?.energy_consumption.now,
+                                record?.energy_consumption.old
+                            ),
+                            badgeType: fetchTrendBadgeType(
+                                record?.energy_consumption.now,
+                                record?.energy_consumption.old
+                            ),
+                        };
+                        topEnergyData.push(obj);
                     });
+                    setTopEnergyConsumptionData(topEnergyData);
+                })
+                .catch((error) => {});
         };
 
         const buildingHourlyData = async () => {
             setIsAvgConsumptionDataLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchBuilidingHourly(bldgId, payload)
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
-                        let response = res?.data;
-                        let weekDaysResData = response[0]?.weekdays;
-                        let weekEndResData = response[0]?.weekend;
+                    let response = res?.data;
+                    let weekDaysResData = response[0]?.weekdays;
+                    let weekEndResData = response[0]?.weekend;
 
-                        let weekEndList = [];
-                        let weekDaysList = [];
+                    let weekEndList = [];
+                    let weekDaysList = [];
 
-                        const weekDaysData = weekDaysResData.map((el) => {
-                            weekDaysList.push(parseInt(el.y / 1000));
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: parseInt(el.y / 1000),
-                            };
-                        });
-
-                        const weekendsData = weekEndResData.map((el) => {
-                            weekEndList.push(parseInt(el.y / 1000));
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: parseInt(el.y / 1000),
-                            };
-                        });
-
-                        let finalList = weekEndList.concat(weekDaysList);
-                        finalList.sort((a, b) => a - b);
-
-                        let minVal = finalList[0];
-                        let maxVal = finalList[finalList.length - 1];
-
-                        let heatMapData = [];
-
-                        let newWeekdaysData = {
-                            name: 'Week days',
-                            data: [],
+                    const weekDaysData = weekDaysResData.map((el) => {
+                        weekDaysList.push(parseInt(el.y / 1000));
+                        return {
+                            x: parseInt(moment.utc(el.x).format('HH')),
+                            y: parseInt(el.y / 1000),
                         };
+                    });
 
-                        let newWeekendsData = {
-                            name: 'Weekends',
-                            data: [],
+                    const weekendsData = weekEndResData.map((el) => {
+                        weekEndList.push(parseInt(el.y / 1000));
+                        return {
+                            x: parseInt(moment.utc(el.x).format('HH')),
+                            y: parseInt(el.y / 1000),
                         };
+                    });
 
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekDaysData.find((record) => record.x === i);
+                    let finalList = weekEndList.concat(weekDaysList);
+                    finalList.sort((a, b) => a - b);
 
-                            if (matchedRecord) {
-                                matchedRecord.z = matchedRecord.y;
-                                matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
-                                newWeekdaysData.data.push(matchedRecord);
-                            } else {
-                                newWeekdaysData.data.push({
-                                    x: i,
-                                    y: getAverageValue(i, minVal, maxVal),
-                                    z: 0,
-                                });
-                            }
+                    let minVal = finalList[0];
+                    let maxVal = finalList[finalList.length - 1];
+
+                    let heatMapData = [];
+
+                    let newWeekdaysData = {
+                        name: 'Week days',
+                        data: [],
+                    };
+
+                    let newWeekendsData = {
+                        name: 'Weekends',
+                        data: [],
+                    };
+
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekDaysData.find((record) => record.x === i);
+
+                        if (matchedRecord) {
+                            matchedRecord.z = matchedRecord.y;
+                            matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                            newWeekdaysData.data.push(matchedRecord);
+                        } else {
+                            newWeekdaysData.data.push({
+                                x: i,
+                                y: getAverageValue(i, minVal, maxVal),
+                                z: 0,
+                            });
                         }
+                    }
 
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x === i);
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekendsData.find((record) => record.x === i);
 
-                            if (matchedRecord) {
-                                matchedRecord.z = matchedRecord.y;
-                                matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
-                                newWeekendsData.data.push(matchedRecord);
-                            } else {
-                                newWeekendsData.data.push({
-                                    x: i,
-                                    y: getAverageValue(i, minVal, maxVal),
-                                    z: 0,
-                                });
-                            }
+                        if (matchedRecord) {
+                            matchedRecord.z = matchedRecord.y;
+                            matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                            newWeekendsData.data.push(matchedRecord);
+                        } else {
+                            newWeekendsData.data.push({
+                                x: i,
+                                y: getAverageValue(i, minVal, maxVal),
+                                z: 0,
+                            });
                         }
-                        for (let i = 0; i < 24; i++) {
-                            if (i === 0) {
-                                newWeekdaysData.data[i].x = '12AM';
-                                newWeekendsData.data[i].x = '12AM';
-                            } else if (i === 12) {
-                                newWeekdaysData.data[i].x = '12PM';
-                                newWeekendsData.data[i].x = '12PM';
-                            } else if (i > 12) {
-                                let a = i % 12;
-                                newWeekdaysData.data[i].x = a + 'PM';
-                                newWeekendsData.data[i].x = a + 'PM';
-                            } else {
-                                newWeekdaysData.data[i].x = i + 'AM';
-                                newWeekendsData.data[i].x = i + 'AM';
-                            }
+                    }
+                    for (let i = 0; i < 24; i++) {
+                        if (i === 0) {
+                            newWeekdaysData.data[i].x = '12AM';
+                            newWeekendsData.data[i].x = '12AM';
+                        } else if (i === 12) {
+                            newWeekdaysData.data[i].x = '12PM';
+                            newWeekendsData.data[i].x = '12PM';
+                        } else if (i > 12) {
+                            let a = i % 12;
+                            newWeekdaysData.data[i].x = a + 'PM';
+                            newWeekendsData.data[i].x = a + 'PM';
+                        } else {
+                            newWeekdaysData.data[i].x = i + 'AM';
+                            newWeekendsData.data[i].x = i + 'AM';
                         }
+                    }
 
-                        heatMapData.push(newWeekendsData);
-                        heatMapData.push(newWeekdaysData);
+                    heatMapData.push(newWeekendsData);
+                    heatMapData.push(newWeekdaysData);
 
-                        setHourlyAvgConsumpData(heatMapData.reverse());
-                        setIsAvgConsumptionDataLoading(false);
-                    })
-                    .catch((error) => {
-                setIsAvgConsumptionDataLoading(false);
-            });
+                    setHourlyAvgConsumpData(heatMapData.reverse());
+                    setIsAvgConsumptionDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsAvgConsumptionDataLoading(false);
+                });
         };
 
         const buildingConsumptionChart = async () => {
             setIsEnergyConsumptionDataLoading(true);
-            let payload =  {
+            let payload = {
                 date_from: startDate.toLocaleDateString(),
                 date_to: endDate.toLocaleDateString(),
                 tz_info: timeZone,
             };
             await fetchEnergyConsumption(bldgId, payload)
-            .then((res) => {
-                        let response = res?.data;
-                        let newArray = [
-                            {
-                                name: 'Energy',
-                                data: [],
-                            },
-                        ];
-                        response.forEach((record) => {
-                            newArray[0].data.push({
-                                x: record?.x,
-                                y: parseInt(record?.y / 1000),
-                            });
+                .then((res) => {
+                    let response = res?.data;
+                    let newArray = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                        },
+                    ];
+                    response.forEach((record) => {
+                        newArray[0].data.push({
+                            x: record?.x,
+                            y: parseInt(record?.y / 1000),
                         });
-                        setBuildingConsumptionChartData(newArray);
-                        setIsEnergyConsumptionDataLoading(false);
-                    })
-                    .catch((error) => {
-                        setIsEnergyConsumptionDataLoading(false);
-            });
+                    });
+                    setBuildingConsumptionChartData(newArray);
+                    setIsEnergyConsumptionDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsEnergyConsumptionDataLoading(false);
+                });
         };
 
-        const calculateDays = () => {
-            let time_difference = endDate.getTime() - startDate.getTime();
-            let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            days_difference = days_difference + 1;
-            setDaysCount(days_difference);
-        };
-
-        calculateDays();
         buildingOverallData();
         buildingEndUserData();
         builidingEquipmentsData();
