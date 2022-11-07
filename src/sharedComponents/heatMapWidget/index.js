@@ -40,6 +40,7 @@ const HeatMapWidget = ({
     hourlyAvgConsumpData,
     pageType,
     handleRouteChange,
+    showRouteBtn = false,
 }) => {
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
@@ -48,14 +49,18 @@ const HeatMapWidget = ({
                     <div className="container-header">
                         <Titles {...{ title, subtitle, pageType }} />
                         <div className="mr-2">
-                            <Button
-                                label="More Details"
-                                size={Button.Sizes.lg}
-                                icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                type={Button.Type.tertiary}
-                                iconAlignment={Button.IconAlignment.right}
-                                onClick={handleRouteChange}
-                            />
+                            {showRouteBtn ? (
+                                <Button
+                                    label="More Details"
+                                    size={Button.Sizes.lg}
+                                    icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                    type={Button.Type.tertiary}
+                                    iconAlignment={Button.IconAlignment.right}
+                                    onClick={handleRouteChange}
+                                />
+                            ) : (
+                                ''
+                            )}
                         </div>
                     </div>
                 ) : (

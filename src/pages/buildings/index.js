@@ -796,6 +796,7 @@ const BuildingOverview = () => {
                         className="mt-4"
                         pageType="building"
                         handleRouteChange={handleRouteChange}
+                        showRouteBtn={true}
                     />
 
                     <TotalEnergyConsumption
