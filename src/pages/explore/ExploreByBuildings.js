@@ -291,7 +291,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {parseInt(record?.consumption?.change)}
+                                                                        {Math.round(record?.consumption?.change)}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -303,7 +303,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {Math.abs(parseInt(record?.consumption?.change))}
+                                                                        {Math.abs(Math.round(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>

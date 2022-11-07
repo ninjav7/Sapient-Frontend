@@ -310,7 +310,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
+                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -319,7 +319,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
+                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
