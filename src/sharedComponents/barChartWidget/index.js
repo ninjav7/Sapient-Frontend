@@ -4,9 +4,8 @@ import 'moment-timezone';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
-import { formatConsumptionValue } from '../../helpers/helpers';
-import { xaxisFilters } from '../../helpers/helpers';
-import BarChart from '../../../src/pages/charts/BarChart';
+import { formatConsumptionValue, xaxisFilters } from '../helpers/helper';
+import BarChart from './BarChart';
 import { useHistory } from 'react-router-dom';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
@@ -42,10 +41,10 @@ const BarChartWidget = ({
     subtitle,
     height = 259,
     width,
-    isConsumpHistoryLoading,
+    isConsumpHistoryLoading = false,
     startEndDayCount,
     timeZone,
-    pageType,
+    pageType = '',
     ...props
 }) => {
     const history = useHistory();

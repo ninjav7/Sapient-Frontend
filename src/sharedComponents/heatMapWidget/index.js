@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import moment from 'moment';
+import React from 'react';
 import 'moment-timezone';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
 import Button from '../button/Button';
-import { useHistory } from 'react-router-dom';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
-import HeatMapChart from '../../../src/pages/charts/HeatMapChart';
+import HeatMapChart from './HeatMapChart';
 import './style.scss';
 import Brick from '../brick';
 
@@ -41,10 +39,8 @@ const HeatMapWidget = ({
     hourlyAvgConsumpOpts,
     hourlyAvgConsumpData,
     pageType,
-    bldgId,
+    handleRouteChange,
 }) => {
-    const history = useHistory();
-
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
             <>
@@ -58,11 +54,7 @@ const HeatMapWidget = ({
                                 icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
                                 type={Button.Type.tertiary}
                                 iconAlignment={Button.IconAlignment.right}
-                                onClick={() => {
-                                    history.push({
-                                        pathname: `/energy/time-of-day/${bldgId}`,
-                                    });
-                                }}
+                                onClick={handleRouteChange}
                             />
                         </div>
                     </div>
@@ -71,12 +63,6 @@ const HeatMapWidget = ({
                 )}
             </>
             <Brick sizeInRem={1} />
-            {/* <div>
-                {isAvgConsumptionDataLoading ? (
-                    <div className="loader-center-style" style={{ height: '400px' }}>
-                        <Spinner className="m-2" color={'primary'} />
-                    </div>
-                ) : ( */}
             <div>
                 <HeatMapChart
                     options={hourlyAvgConsumpOpts}
@@ -84,8 +70,6 @@ const HeatMapWidget = ({
                     height={heatMapChartHeight}
                 />
             </div>
-            {/* )} */}
-            {/* </div> */}
         </div>
     );
 };
