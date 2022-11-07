@@ -58,100 +58,6 @@ const BuildingOverview = () => {
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
-    const [donutChartOpts, setDonutChartOpts] = useState({
-        chart: {
-            type: 'donut',
-            toolbar: {
-                show: true,
-            },
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 1);
-                },
-            },
-        },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
-        series: [12553, 11553, 6503, 2333],
-        plotOptions: {
-            pie: {
-                startAngle: 0,
-                endAngle: 360,
-                expandOnClick: false,
-                offsetX: 0,
-                offsetY: 0,
-                customScale: 1,
-                dataLabels: {
-                    offset: 0,
-                    minAngleToShowLabel: 10,
-                },
-                donut: {
-                    size: '80%',
-                    background: 'grey',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 400,
-                            color: 'red',
-                            formatter: function (val) {
-                                return `${val} kWh`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            fontSize: '22px',
-                            fontWeight: 600,
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return a + b;
-                                }, 0);
-                                return `${sum} kWh`;
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 300,
-                    },
-                },
-            },
-        ],
-        dataLabels: {
-            enabled: false,
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        legend: {
-            show: false,
-        },
-        stroke: {
-            width: 0,
-        },
-
-        itemMargin: {
-            horizontal: 10,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-    });
-
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
     const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
@@ -515,9 +421,9 @@ const BuildingOverview = () => {
         return parseInt(percentage);
     };
 
-    const handleRouteChange = () => {
+    const handleRouteChange = (path) => {
         history.push({
-            pathname: `/energy/time-of-day/${bldgId}`,
+            pathname: `${path}/${bldgId}`,
         });
     };
 
@@ -778,10 +684,11 @@ const BuildingOverview = () => {
                         title="Energy Consumption by End Use"
                         subtitle="Energy Totals"
                         series={donutChartData}
-                        options={donutChartOpts}
                         energyConsumption={energyConsumption}
                         bldgId={bldgId}
                         pageType="building"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
                     />
 
                     <HourlyAvgConsumption
@@ -795,7 +702,7 @@ const BuildingOverview = () => {
                         timeZone={timeZone}
                         className="mt-4"
                         pageType="building"
-                        handleRouteChange={handleRouteChange}
+                        handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                         showRouteBtn={true}
                     />
 
@@ -808,6 +715,8 @@ const BuildingOverview = () => {
                         timeZone={timeZone}
                         pageType="building"
                         className="mt-4"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
                     />
                 </div>
 

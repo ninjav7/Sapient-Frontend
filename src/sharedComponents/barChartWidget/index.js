@@ -9,6 +9,7 @@ import BarChart from './BarChart';
 import { useHistory } from 'react-router-dom';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import Brick from '../brick';
 import './style.scss';
 
 const ICON_SIZES = {
@@ -45,6 +46,8 @@ const BarChartWidget = ({
     startEndDayCount,
     timeZone,
     pageType = '',
+    handleRouteChange,
+    showRouteBtn,
     ...props
 }) => {
     const history = useHistory();
@@ -171,11 +174,7 @@ const BarChartWidget = ({
                                 icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
                                 type={Button.Type.tertiary}
                                 iconAlignment={Button.IconAlignment.right}
-                                onClick={() => {
-                                    history.push({
-                                        pathname: `/energy/end-uses/${props.bldgId}`,
-                                    });
-                                }}
+                                onClick={handleRouteChange}
                             />
                         </div>
                     </div>
@@ -183,6 +182,7 @@ const BarChartWidget = ({
                     <Titles {...{ title, subtitle, pageType }} />
                 )}
             </>
+            <Brick sizeInRem={1} />
             <div>
                 {isConsumpHistoryLoading ? (
                     <div className="loader-center-style">

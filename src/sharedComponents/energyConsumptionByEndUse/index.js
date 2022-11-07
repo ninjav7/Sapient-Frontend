@@ -27,6 +27,7 @@ const EnergyConsumptionByEndUse = ({
     isEnergyConsumptionChartLoading,
     pageType,
     bldgId,
+    ...props
 }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         let val = (energy_consumption.now / 1000).toFixed(0);
@@ -50,6 +51,7 @@ const EnergyConsumptionByEndUse = ({
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                 pageType={pageType}
                 bldgId={bldgId}
+                {...props}
             />
         </div>
     );

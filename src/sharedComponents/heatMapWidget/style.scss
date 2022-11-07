@@ -1,7 +1,7 @@
 @import '../../assets/scss/colors';
 
 .heatmap-chart-widget-wrapper {
-    border: 1px solid #eaecf0;
+    border: .0625rem solid $primary-gray-200 !important;
     border-radius: 0.5rem;
 }
 
