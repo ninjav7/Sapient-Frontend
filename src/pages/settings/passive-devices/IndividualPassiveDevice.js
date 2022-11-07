@@ -75,7 +75,6 @@ const IndividualPassiveDevice = () => {
     const [deviceData, setDeviceData] = useState([]);
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
@@ -87,8 +86,8 @@ const IndividualPassiveDevice = () => {
         { value: 'power', label: 'Power (W)', unit: 'W' },
     ]);
 
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumption, setConsumption] = useState(metric[2].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -98,12 +97,12 @@ const IndividualPassiveDevice = () => {
     const filtered = !searchSensor
         ? sensors
         : sensors.filter((sensor) => {
-            return (
-                sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
-            );
-        });
+              return (
+                  sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
+              );
+          });
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -135,7 +134,9 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps&building_id=${bldgId}`;
+            let params = `?sensor_id=${
+                id === sensorId ? sensorId : id
+            }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -147,6 +148,8 @@ const IndividualPassiveDevice = () => {
                     { headers }
                 )
                 .then((res) => {
+                    setDeviceData([]);
+                    setSeriesData([]);
                     let response = res.data;
                     let data = response;
 
@@ -161,14 +164,13 @@ const IndividualPassiveDevice = () => {
                         recordToInsert.data = recordToInsert.data.map((_data) => {
                             _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
                             _data[0] = new Date(_data[0]);
-                            // moment(_data[0]).tz(timeZone).format();
 
                             if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                 _data[1] = _data[1] / UNIT_DIVIDER;
                             }
                             return _data;
                         });
-                    } catch (error) { }
+                    } catch (error) {}
 
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -205,7 +207,7 @@ const IndividualPassiveDevice = () => {
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
                     });
-            } catch (error) { }
+            } catch (error) {}
         }
     };
 
@@ -224,7 +226,7 @@ const IndividualPassiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -320,7 +322,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                            activeLocationId === passiveData?.location_id
+                                        activeLocationId === passiveData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -386,7 +388,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="passive-device-value">
                                             {passiveData?.model &&
                                                 passiveData?.model.charAt(0).toUpperCase() +
-                                                passiveData?.model.slice(1)}
+                                                    passiveData?.model.slice(1)}
                                         </h6>
                                     </div>
                                 </div>
@@ -423,8 +425,6 @@ const IndividualPassiveDevice = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* <div className="mt-2 socket-image-container"></div> */}
 
                             {isFetchingSensorData ? (
                                 <div className="mt-4">
@@ -528,6 +528,7 @@ const IndividualPassiveDevice = () => {
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
                 daysCount={daysCount}
+                deviceType="passive"
             />
 
             <AddSensorPanelModel

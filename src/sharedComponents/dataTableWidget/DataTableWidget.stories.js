@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DataTableWidget from './DataTableWidget';
 import '../assets/scss/stories.scss';
+import { FILTER_TYPES } from './constants';
 
 export default {
     title: 'Widgets/DataTableWidget',
@@ -24,6 +25,43 @@ export const Default = (props) => {
 };
 
 Default.args = {
+    filterOptions: [
+        {
+            label: 'Energy Consumption',
+            value: 'consumption',
+            placeholder: 'All Energy Consumption',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [
+                {label: 'Label 1', value: 1},
+                {label: 'Label 2', value: 2},
+                {label: 'Label 3', value: 3}
+            ]
+        },
+        {
+            label: 'Total Consumption',
+            value: 'totalConsumption',
+            placeholder: 'All Energy Consumption',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [
+                {label: 'Label 1', value: 12},
+                {label: 'Label 2', value: 21},
+                {label: 'Label 3', value: 31}
+            ],
+            onChange: (options) => alert('FilterChanged: onClick ' + JSON.stringify(options))
+        },
+        {
+            label: 'Test',
+            value: 'totalConsumptiontest',
+            placeholder: 'All tests',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: [
+                {label: 'Label 1', value: 12},
+                {label: 'Label 2', value: 21},
+                {label: 'Label 3', value: 31}
+            ],
+            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options))
+        }
+    ],
     onDownload: () => alert('Download file'),
     onSearch: (query) => alert(query),
     onDeleteRow: (event, id) => alert('Delete ' + id),
