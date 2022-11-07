@@ -30,7 +30,6 @@ const SIZES = Object.freeze({
 const Typography = ({
     children,
     variant,
-    href,
     size,
     fontWeight,
     className,
@@ -48,8 +47,6 @@ const Typography = ({
         className
     );
 
-    const htmlEl = variant == 'link' ? 'a' : 'div';
-
     const classNames = cx(
         {
             [`${fontWeight}`]: !!fontWeight,
@@ -57,9 +54,7 @@ const Typography = ({
         },
         elementClassNames
     );
-    const linkAttr = variant == 'link' ? { href: href, target: '_blank' } : null;
-
-    return React.createElement(htmlEl, { className: classNames, ref: innerRef, ...linkAttr, ...props }, children);
+    return React.createElement(as, { className: classNames, ref: innerRef, ...props }, children);
 };
 
 Typography.Types = FONT_WEIGHT_TYPES;

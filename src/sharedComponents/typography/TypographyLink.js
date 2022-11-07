@@ -1,9 +1,9 @@
 import React from 'react';
 import Typography from './Typography';
 
-export const TypographyLink = ({ children, size, href, ...props }) => {
+export const TypographyLink = ({ children, size,target, href, ...props }) => {
     return (
-        <Typography {...props} variant="link" size={size} href={href}>
+        <Typography {...props} variant="link" as='a' target={target} size={size} href={href}>
             {children}
         </Typography>
     );

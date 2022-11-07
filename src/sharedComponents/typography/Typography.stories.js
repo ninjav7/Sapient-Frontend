@@ -41,7 +41,7 @@ export const Default = () => {
                 </Typography.Subheader>
                 <Brick />
                 <h2>Body</h2>
-                <Typography.Link size={Typography.Sizes.md} href="http://google.com">Custom link</Typography.Link>
+                <Typography.Link size={Typography.Sizes.md} href="http://google.com" as="a" target="_blank">Custom link</Typography.Link>
                 <Typography.Body size={Typography.Sizes.md}>The quick fox jumps over the dog. Size: MD</Typography.Body>
                 <Typography.Body size={Typography.Sizes.sm}>The quick fox jumps over the dog. Size: SM</Typography.Body>
                 <Typography.Body size={Typography.Sizes.xs}>The quick fox jumps over the dog. Size: XS</Typography.Body>
