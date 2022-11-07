@@ -3,7 +3,8 @@ import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
+import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../explore/explore';
+import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/explore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
@@ -310,7 +311,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                    {Math.abs(parseInt(record?.consumption?.change))}
+                                                                        {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -379,6 +380,7 @@ const ExploreByBuildings = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
     const [objectExplore, setObjectExplore] = useState([]);
+    const [closeTrigger,setCloseTrigger] = useState("");
 
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -624,14 +626,23 @@ const ExploreByBuildings = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (!showChangeDropdown !== true) {
+        if(closeTrigger==="change"){
+            setShowChangeDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showChangeDropdown !== true) {
+            
             setAPIPerFlag(!APIPerFlag);
             setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
         }
     };
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (!showDropdown !== true) {
+        if(closeTrigger==="consumption"){
+            setShowDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -640,7 +651,11 @@ const ExploreByBuildings = () => {
     const [showsqftDropdown, setsqftShowDropdown] = useState(false);
     const setsqftDropdown = () => {
         setsqftShowDropdown(!showsqftDropdown);
-        if (!showsqftDropdown !== true) {
+        if(closeTrigger==="sq_ft"){
+            setsqftShowDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showsqftDropdown !== true) {
             setSq_FtFlag(!Sq_FtFlag);
             setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);
         }
@@ -696,25 +711,14 @@ const ExploreByBuildings = () => {
     }, []);
 
     const exploreDataFetch = async () => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreBuildingList}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+            let value =   {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            }
+            await fetchExploreBuildingList(value,"")
+            .then((res) => {
                     if (entryPoint === 'entered') {
                         totalBuildingId.length = 0;
                         setSeriesData([]);
@@ -727,17 +731,17 @@ const ExploreByBuildings = () => {
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                     })
-                    setTopPerChange(max)
+                    setTopPerChange(parseInt(max))
                     set_minPerValue(0.0)
-                    set_maxPerValue(max);
+                    set_maxPerValue(parseInt(max));
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                     setIsExploreDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsExploreDataLoading(false);
                 });
-        } catch (error) {
-            setIsExploreDataLoading(false);
-        }
     };
     useEffect(() => {
         if (startDate === null) {
@@ -752,25 +756,19 @@ const ExploreByBuildings = () => {
     }, [startDate, endDate]);
 
     const exploreFilterDataFetch = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy`;
-            await axios.post(`${BaseUrl}${getExploreBuildingList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreBuildingList(bodyVal,"")
+            .then((res) => {
                 let responseData = res.data;
                 setSeriesData([]);
                 setSeriesLineData([]);
                 setExploreTableData(responseData);
                 setTopEnergyConsumption(responseData[0].consumption.now);
                 setIsExploreDataLoading(false);
+            })
+            .catch((error) => {
+                setIsExploreDataLoading(false);
             });
-        } catch (error) {
-            setIsExploreDataLoading(false);
-        }
     };
 
 
@@ -784,7 +782,7 @@ const ExploreByBuildings = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = parseInt(topEnergyConsumption / 1000);
+        let topVal = (parseInt(topEnergyConsumption / 1000));
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -862,24 +860,15 @@ const ExploreByBuildings = () => {
         }
 
         const fetchExploreChartData = async (id) => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&building_id=${selectedBuildingId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}&divisible_by=1000`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+
+            let value =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            }
+            await fetchExploreBuildingChart(value,selectedBuildingId)
+            .then((res) => {
+            
                         let responseData = res.data;
                         let data = responseData.data;
                         let arr = [];
@@ -910,8 +899,10 @@ const ExploreByBuildings = () => {
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedBuildingId('');
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) { }
+                 
         };
 
         fetchExploreChartData();
@@ -942,31 +933,21 @@ const ExploreByBuildings = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy&building_id=${id}`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreBuildingChart}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+        
+        let value =  {
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
+        }
+        await fetchExploreBuildingChart(value,id)
+        .then((res) => {
+        
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.building_id === id;
                     });
-                    let exploreData = [];
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
@@ -979,8 +960,10 @@ const ExploreByBuildings = () => {
                         setSeriesLineData(dataarr);
                     }
                     setAllBuildingData(dataarr);
+                })
+                .catch((error) => {
                 });
-        } catch (error) { }
+             
     };
 
     useEffect(() => {
@@ -1111,35 +1094,25 @@ const ExploreByBuildings = () => {
 
     const handleBuildingSearch = (e) => {
         const exploreDataFetch = async () => {
-            try {
                 setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&search_by_name=${buildingSearchTxt}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let value={
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                }
+                await fetchExploreBuildingList(value,buildingSearchTxt)
+                .then((res) => {
+                
                         let responseData = res.data;
                         setExploreTableData(responseData);
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
                         set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                         setIsExploreDataLoading(false);
+                    })
+                    .catch((error) => {
+                        setIsExploreDataLoading(false);
                     });
-            } catch (error) {
-                setIsExploreDataLoading(false);
-            }
         };
         exploreDataFetch();
     };
@@ -1186,7 +1159,7 @@ const ExploreByBuildings = () => {
     };
 
     useEffect(() => {
-        if (buildingSearchTxt === '') exploreDataFetch();
+        if (buildingSearchTxt === '' && entryPoint!=="entered") exploreDataFetch();
     }, [buildingSearchTxt]);
     return (
         <>
@@ -1295,6 +1268,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setConsumptionTxt('');
+                                                        setCloseTrigger("consumption");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1351,6 +1325,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setChangeTxt('');
+                                                        setCloseTrigger("change");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1359,8 +1334,9 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">Change Threshold</a>
+                                                    <a className="pop-text">Threshold</a>
                                                 </div>
+                                                
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minPerValue} />{' '}
                                                     <input className="pop-inputbox" type="text" value={maxPerValue} />
@@ -1404,6 +1380,7 @@ const ExploreByBuildings = () => {
                                                     style={{ border: 'none', backgroundColor: 'white' }}
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
+                                                        setCloseTrigger("sq_ft");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
