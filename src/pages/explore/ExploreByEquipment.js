@@ -17,6 +17,7 @@ import {
     getSpaces,
 } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -231,11 +232,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -244,11 +245,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -257,11 +258,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -270,11 +271,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -283,11 +284,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -296,11 +297,11 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
-                                                                    ).toFixed(2)}
+                                                                        100
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -316,7 +317,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -325,7 +326,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{record?.consumption?.change}%</strong>
+                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -342,7 +343,8 @@ const ExploreEquipmentTable = ({
                                                     <td className="table-content-style font-weight-bold">
                                                         {record?.end_user}
                                                     </td>
-
+                                                    
+                                                    {/* Future Scope */}
                                                     {/* <td className="table-content-style font-weight-bold">
                                                         {(record?.peak_power?.now / 100000).toFixed(3)} kW
                                                         <br />
@@ -521,7 +523,42 @@ const ExploreEquipmentTable = ({
         </>
     );
 };
-
+const SliderAll=({bottom,top,handleChange,bottomPer, topPer})=> {
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
+const SliderPos=({bottom,top,handleChange,bottomPer, topPer})=> {
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
+const SliderNeg=({bottom,top,handleChange,bottomPer, topPer}) =>{
+    return(
+        <RangeSlider
+        name="consumptionAll"
+        STEP={1}
+        MIN={bottom}
+        range={[bottomPer, topPer]}
+        MAX={top}
+        onSelectionChange={handleChange}
+    />
+    )
+};
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
 
@@ -660,6 +697,7 @@ const ExploreByEquipment = () => {
         },
         markers: {
             size: 0,
+
         },
         tooltip: {
             shared: false,
@@ -688,8 +726,7 @@ const ExploreByEquipment = () => {
                     if (isNaN(parseInt(series[i][dataPointIndex])) === false)
                         ch =
                             ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                                colors[i]
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
                             };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
                                 series[i][dataPointIndex]
                             )} kWh </td></tr>`;
@@ -781,6 +818,7 @@ const ExploreByEquipment = () => {
         },
     });
 
+    const FilterDataList = ExploreFilterDataStore.useState((bs) => bs.items);
     const [APIFlag, setAPIFlag] = useState(false);
     const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [APILocFlag, setAPILocFlag] = useState(false);
@@ -793,6 +831,7 @@ const ExploreByEquipment = () => {
     const [allEquipmentData, setAllEquipmenData] = useState([]);
 
     const [exploreTableData, setExploreTableData] = useState([]);
+    const [exploreAllTableData, setExploreAllTableData] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
@@ -805,13 +844,24 @@ const ExploreByEquipment = () => {
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
+    const [minPerValuePos, set_minPerValuePos] = useState(0.0);
+    const [maxPerValuePos, set_maxPerValuePos] = useState(0.0);
+    const [minPerValueNeg, set_minPerValueNeg] = useState(0.0);
+    const [maxPerValueNeg, set_maxPerValueNeg] = useState(0.0);
     const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(100);
+    const [maxPerValue, set_maxPerValue] = useState(0);
+    const [topPerChange, setTopPerChange] = useState(0);
+    const [bottomPerChange, setBottomPerChange] = useState(0);
+    const [topPosPerChange, setTopPosPerChange] = useState(0);
+    const [bottomPosPerChange, setBottomPosPerChange] = useState(0);
+    const [topNegPerChange, setTopNegPerChange] = useState(0);
+    const [bottomNegPerChange, setBottomNegPerChange] = useState(0);
     const [spaceType, setSpaceType] = useState([]);
     const [removeDuplicateFlag, setRemoveDuplicateFlag] = useState(false);
     const [equipmentSearchTxt, setEquipmentSearchTxt] = useState('');
 
     const [consumptionTxt, setConsumptionTxt] = useState('');
+    const [changeTxt, setChangeTxt] = useState('');
     const [locationTxt, setLocationTxt] = useState('');
     const [spaceTxt, setSpaceTxt] = useState('');
     const [equipmentTxt, setEquipmentTxt] = useState('');
@@ -823,6 +873,8 @@ const ExploreByEquipment = () => {
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLoc, setSelectedLoc] = useState({});
     const [filterObj, setFilterObj] = useState({});
+    const [closeTrigger,setCloseTrigger] = useState("");
+    const [selectedTab,setSelectedTab] = useState(0);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -849,7 +901,11 @@ const ExploreByEquipment = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (!showDropdown !== true) {
+        if(closeTrigger==="consumption"){
+            setShowDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -858,9 +914,18 @@ const ExploreByEquipment = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (!showDropdown !== true) {
+        if(closeTrigger==="change"){
+            setShowChangeDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
-            //setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
+            if(selectedTab===0)
+                setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            else if(selectedTab===1)
+                setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
+            else if(selectedTab===2)
+                setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
         }
     };
 
@@ -1187,6 +1252,14 @@ const ExploreByEquipment = () => {
         set_minPerValue(values[0]);
         set_maxPerValue(values[1]);
     };
+    const handleInputPerPos = (values) => {
+        set_minPerValuePos(values[0]);
+        set_maxPerValuePos(values[1]);
+    };
+    const handleInputPerNeg = (values) => {
+        set_minPerValueNeg(values[0]);
+        set_maxPerValueNeg(values[1]);
+    };
 
     const exploreFilterDataFetch = async (bodyVal, txt) => {
         try {
@@ -1228,7 +1301,7 @@ const ExploreByEquipment = () => {
     const [removeSpaceTypeDuplication, setRemoveSpaceTyepDuplication] = useState();
 
     const removeDuplicates = () => {
-        const uniqueEqupimentTypes = exploreTableData.filter((element) => {
+        const uniqueEqupimentTypes = FilterDataList.filter((element) => {
             const isDuplicate = uniqueIds.includes(element.equipments_type);
             if (!isDuplicate) {
                 uniqueIds.push(element.equipments_type);
@@ -1236,7 +1309,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueEndUse = exploreTableData.filter((element) => {
+        const uniqueEndUse = FilterDataList.filter((element) => {
             const isDuplicate = uniqueEndUseIds.includes(element?.end_user);
 
             if (!isDuplicate) {
@@ -1245,7 +1318,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueLocation = exploreTableData.filter((element) => {
+        const uniqueLocation = FilterDataList.filter((element) => {
             const isDuplicate = uniqueLocationIds.includes(element?.location);
 
             if (!isDuplicate) {
@@ -1254,7 +1327,7 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        const uniqueSpaceType = exploreTableData.filter((element) => {
+        const uniqueSpaceType = FilterDataList.filter((element) => {
             const isDuplicate = uniqueSpaceTypeIds.includes(element?.location_type);
 
             if (!isDuplicate) {
@@ -1272,7 +1345,7 @@ const ExploreByEquipment = () => {
     };
 
     useEffect(() => {
-        if (exploreTableData.length === 0) {
+        if (FilterDataList.length === 0) {
             setRemoveEndUseDuplication([]);
             setRemoveEqupimentTypesDuplication([]);
             setRemoveLocationDuplication([]);
@@ -1294,6 +1367,7 @@ const ExploreByEquipment = () => {
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
+                
                 if (responseData.data.length !== 0) {
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
@@ -1301,12 +1375,12 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
+                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));                
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
         } catch (error) {
@@ -1319,6 +1393,67 @@ const ExploreByEquipment = () => {
         tz_info: timeZone,
     };
 
+    const fetchAllExploredata = async (bodyVal) => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?consumption=energy&building_id=${bldgId}`;
+
+            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                setExploreAllTableData(responseData.data);
+                ExploreFilterDataStore.update((bs) => {
+                    bs.items = responseData.data;
+                });
+                let max=responseData.data[0].consumption.change;
+                    let min=responseData.data[0].consumption.change;
+                    let maxPos=0;
+                    let minPos=0;
+                    let minNeg=0;
+                    let maxNeg=0;
+                    responseData.data.map((ele)=>{
+                        if(ele.consumption.change>=max)
+                            max=ele.consumption.change;
+                        if(ele.consumption.change<=min)
+                            min=ele.consumption.change;
+                        if(ele.consumption.change>=0){
+                            if(ele.consumption.change>=maxPos)
+                                maxPos=ele.consumption.change;
+                            if(ele.consumption.change<=minPos)
+                                minPos=ele.consumption.change;
+                        }    
+                        if(ele.consumption.change<0){
+                            if(ele.consumption.change>=maxNeg)
+                                maxNeg=ele.consumption.change;
+                            if(ele.consumption.change<=minNeg)
+                                minNeg=ele.consumption.change;
+                        }  
+                    })
+                    setTopPerChange(parseInt(max))
+                    setBottomPerChange(parseInt(min))
+                    setTopPosPerChange(parseInt(maxPos));
+                    setBottomPosPerChange(parseInt(minPos));
+                    setTopNegPerChange(parseInt(maxNeg));
+                    setBottomNegPerChange(parseInt(minNeg));
+                    set_minPerValue(parseInt(min))
+                    set_maxPerValue(parseInt(max));
+                    set_minPerValuePos(parseInt(minPos))
+                    set_maxPerValuePos(parseInt(maxPos));
+                    set_minPerValueNeg(parseInt(minNeg))
+                    set_maxPerValueNeg(parseInt(maxNeg));
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            setIsExploreDataLoading(false);
+        }
+    }
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1365,7 +1500,7 @@ const ExploreByEquipment = () => {
                     }
                     setEquipOptions(equipData);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
         const fetchEndUseData = async () => {
             try {
@@ -1383,21 +1518,31 @@ const ExploreByEquipment = () => {
                     }
                     setEndUseOptions(equipData);
                 });
-            } catch (error) {}
+            } catch (error) { }
         };
-        //exploreDataFetch(arr);
+
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
-    }, [startDate, endDate, bldgId, pageSize]);
+        const fetchAPI=async()=>{
+            if (entryPoint === "entered")
+                await fetchAllExploredata(arr);
+            await exploreDataFetch(arr);
+        }
+        fetchAPI();
+       
+    }, [endDate, bldgId, pageSize]);
 
     const nextPageData = async (path) => {
         try {
+           
             setIsExploreDataLoading(true);
+            entryPoint = "paginate";
             let arr = {};
             if (path === null) {
                 return;
             }
+          
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -1420,15 +1565,22 @@ const ExploreByEquipment = () => {
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
                     setSeriesLineData([]);
-                    // setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
-                    // set_minConValue(0.0);
-                    // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
+
+            if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+                
+                let arr = [];
+                for (let i = 0; i < totalEquipmentId?.length; i++) {
+                    arr.push(totalEquipmentId[i]);
+                }
+                setSelectedAllEquipmentId(arr);
+            } else {
+                setSelectedEquipmentId('');
+            }
+
         } catch (error) {
             setIsExploreDataLoading(false);
         }
@@ -1437,6 +1589,7 @@ const ExploreByEquipment = () => {
     const previousPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
+            entryPoint = "paginate";
             let arr = {};
             if (path === null) {
                 return;
@@ -1462,15 +1615,21 @@ const ExploreByEquipment = () => {
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
                     setSeriesLineData([]);
-                    // setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
-                    // set_minConValue(0.0);
-                    // set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
-                setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             });
+            if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+                
+                let arr = [];
+                for (let i = 0; i < totalEquipmentId?.length; i++) {
+                    arr.push(totalEquipmentId[i]);
+                }
+                setSelectedAllEquipmentId(arr);
+            } else {
+                setSelectedEquipmentId('');
+            }
+
         } catch (error) {
             setIsExploreDataLoading(false);
         }
@@ -1583,6 +1742,7 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
+
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1633,22 +1793,45 @@ const ExploreByEquipment = () => {
                         formattedData.map((el) => {
                             let ab = {};
                             ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
                             coll.push(ab);
                         });
                         if (objectExplore.length === 0) {
                             setObjectExplore(coll);
                         } else {
                             let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
+                            // const result = Enumerable.from(coll)
+                            //     .fullOuterJoin(
+                            //         Enumerable.from(objectExplore),
+                            //         (pk) => pk.timestamp,
+                            //         (fk) => fk.timestamp,
+                            //         (left, right) => ({ ...left, ...right })
+                            //     )
+                            //     .toArray();
                             setObjectExplore(result);
+                            // var s = new Set();
+                            // var result = [];
+                            // objectExplore.forEach(function (e) {
+                            //     result.push(Object.assign({}, e));
+                            //     s.add(e.timestamp);
+                            // });
+                            // coll.forEach(function (e) {
+                            //     if (!s.has(e.timestamp)) {
+                            //         var temp = Object.assign({}, e);
+                            //         temp[sname] = null;
+                            //         result.push(temp);
+                            //     }
+                            // });
                         }
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
                         setChartLoading(false);
+                        //setIsExploreDataLoading(false);
                     });
             } catch (error) {
+                //setIsExploreDataLoading(false);
             }
         };
         fetchExploreChartData();
@@ -1700,7 +1883,7 @@ const ExploreByEquipment = () => {
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
-                    arr = exploreTableData.filter(function (item) {
+                    arr = FilterDataList.filter(function (item) {
                         return item.equipment_id === id;
                     });
                     let exploreData = [];
@@ -1729,24 +1912,40 @@ const ExploreByEquipment = () => {
                     if (objectExplore.length === 0) {
                         setObjectExplore(coll);
                     } else {
-                        const result = Enumerable.from(objectExplore)
-                            .fullOuterJoin(
-                                Enumerable.from(coll),
-                                (pk) => pk.timestamp,
-                                (fk) => fk.timestamp,
-                                (left, right) => ({ ...left, ...right })
-                            )
-                            .toArray();
-                        setObjectExplore(result);
+                        // const result = Enumerable.from(objectExplore)
+                        //     .fullOuterJoin(
+                        //         Enumerable.from(coll),
+                        //         (pk) => pk.timestamp,
+                        //         (fk) => fk.timestamp,
+                        //         (left, right) => ({ ...left, ...right })
+                        //     )
+                        //     .toArray();
+                        //setObjectExplore(result);
+                        // var s = new Set();
+                        // var result = [];
+                        // objectExplore.forEach(function (e) {
+                        //     result.push(Object.assign({}, e));
+                        //     s.add(e.timestamp);
+                        // });
+                        // coll.forEach(function (e) {
+                        //     if (!s.has(e.timestamp)) {
+                        //         var temp = Object.assign({}, e);
+                        //         temp[sname] = null;
+                        //         result.push(temp);
+                        //     }
+                        // });
                     }
                     dataarr.push(recordToInsert);
+                   
                     if (totalEquipmentId.length === dataarr.length) {
+                     
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
+            //setIsExploreDataLoading(false);
         }
     };
     useEffect(() => {
@@ -1773,8 +1972,9 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
-    const handleCloseFilter = (e, val) => {
+    const handleCloseFilter = async (e, val) => {
         let arr = [];
+        entryPoint = "filtered";
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
@@ -1783,7 +1983,7 @@ const ExploreByEquipment = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = parseInt(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -1798,9 +1998,54 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 txt = 'consumption';
                 set_minConValue(0.0);
                 set_maxConValue(topVal);
+                break;
+            case 'change':
+                if (maxConValue > 0.01) {
+                    arr1['consumption_range'] = {
+                        gte: minConValue * 1000,
+                        lte: maxConValue * 1000 + 1000,
+                    };
+                }
+                if (selectedLocation.length !== 0) {
+                    arr1['location'] = selectedLocation;
+                }
+                if (selectedEquipType.length !== 0) {
+                    arr1['equipment_types'] = selectedEquipType;
+                }
+                if (selectedEndUse.length !== 0) {
+                    arr1['end_use'] = selectedEndUse;
+                }
+                if (selectedSpaceType.length !== 0) {
+                    arr1['space_type'] = selectedSpaceType;
+                }
+                set_minPerValue(bottomPerChange);
+                set_maxPerValue(topPerChange);
+                set_minPerValuePos(bottomPosPerChange);
+                set_maxPerValuePos(topPosPerChange);
+                set_minPerValue(bottomPerChange);
+                set_maxPerValue(topPerChange);
+                setSelectedTab(0);
                 break;
             case 'location':
                 setSelectedLocation([]);
@@ -1818,6 +2063,24 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
+                }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
                 }
                 break;
             case 'equip_type':
@@ -1837,6 +2100,24 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 break;
             case 'endUse_category':
                 setSelectedEndUse([]);
@@ -1854,6 +2135,24 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
+                }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
                 }
                 txt = 'endUse';
                 break;
@@ -1874,6 +2173,24 @@ const ExploreByEquipment = () => {
                 if (selectedEndUse.length !== 0) {
                     arr1['end_use'] = selectedEndUse;
                 }
+                if(selectedTab===0){
+                    arr1['change'] = {
+                        gte: minPerValue,
+                        lte: maxPerValue,
+                    };
+                }
+                if(selectedTab===1){
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos,
+                    };
+                }
+                if(selectedTab===2){
+                    arr1['change'] = {
+                        gte: minPerValueNeg,
+                        lte: maxPerValueNeg,
+                    };
+                }
                 break;
         }
         if (selectedOptions.length === 1) {
@@ -1885,7 +2202,9 @@ const ExploreByEquipment = () => {
             Object.keys(filterObj).forEach((key) => {
                 delete filterObj[key];
             });
-            exploreDataFetch(arr);
+            await fetchAllExploredata(arr);
+            await exploreDataFetch(arr);
+
         } else {
             exploreFilterDataFetch(arr1, txt);
         }
@@ -1913,7 +2232,23 @@ const ExploreByEquipment = () => {
             };
             txt = 'consumption';
         }
-        if (maxPerValue > 0) {
+        if (selectedTab===0 && showChangeDropdown===false) {
+            arr['change'] = {
+                gte: minPerValue,
+                lte: maxPerValue,
+            };
+        }
+        if (selectedTab===1 && showChangeDropdown===false) {
+            arr['change'] = {
+                gte: minPerValuePos,
+                lte: maxPerValuePos,
+            };
+        }
+        if (selectedTab===2 && showChangeDropdown===false) {
+            arr['change'] = {
+                gte: minPerValueNeg,
+                lte: maxPerValueNeg,
+            };
         }
         if (selectedLocation.length !== 0) {
             arr['location'] = selectedLocation;
@@ -1984,6 +2319,7 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
+        entryPoint = "searched";
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -2006,13 +2342,10 @@ const ExploreByEquipment = () => {
                     .then((res) => {
                         let responseData = res.data;
                         if (responseData.data.length !== 0) {
-                            // setTopEnergyConsumption(responseData.data[0].consumption.now);
-                            // setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
                             set_minConValue(0.0);
-                            set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                            set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
                         }
                         setExploreTableData(responseData.data);
-                        setRemoveDuplicateFlag(!removeDuplicateFlag);
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -2076,7 +2409,7 @@ const ExploreByEquipment = () => {
         return [val, ...streamData];
     };
 
-    useEffect(() => {}, [showDropdown]);
+    useEffect(() => { }, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
@@ -2128,7 +2461,9 @@ const ExploreByEquipment = () => {
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
     useEffect(() => {
-        if (equipmentSearchTxt === '') exploreDataFetch(arr);
+        if (equipmentSearchTxt === '' && entryPoint !== "entered" && entryPoint === "searched") {
+            exploreDataFetch(arr);
+        }
     }, [equipmentSearchTxt]);
     const handleGetSpaceByLocation = (e, item) => {
         setSelectedLoc(item);
@@ -2197,6 +2532,9 @@ const ExploreByEquipment = () => {
             setSelectedLocation([]);
         }
     };
+useEffect(()=>{
+
+},[selectedTab])
 
     return (
         <>
@@ -2281,7 +2619,22 @@ const ExploreByEquipment = () => {
                                 ClearSelectedIcon={null}
                             />
                         </div>
-                        <Row>
+                    </div>
+                </Col>
+                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
+                    <CSVLink
+                        style={{ color: 'black' }}
+                        className="btn btn-white d-inline btnHover font-weight-bold"
+                        filename={`explore-building-list-${new Date().toUTCString()}.csv`}
+                        target="_blank"
+                        data={getCSVLinkData()}>
+                        {' '}
+                        <FontAwesomeIcon icon={faDownload} size="md" />
+                    </CSVLink>
+                </Col>
+            </Row>
+
+            <Row className="mt-3 mb-1 ml-1 mr-3">
                             {selectedOptions.map((el, index) => {
                                 if (el.value !== 'consumption') {
                                     return;
@@ -2305,6 +2658,7 @@ const ExploreByEquipment = () => {
                                                         onClick={(e) => {
                                                             handleCloseFilter(e, el.value);
                                                             setConsumptionTxt('');
+                                                            setCloseTrigger("consumption");
                                                         }}>
                                                         <i className="uil uil-multiply"></i>
                                                     </button>
@@ -2333,7 +2687,7 @@ const ExploreByEquipment = () => {
                                                             STEP={1}
                                                             MIN={0}
                                                             range={[minConValue, maxConValue]}
-                                                            MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(2)}
+                                                            MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                             onSelectionChange={handleInput}
                                                         />
                                                     </div>
@@ -2361,11 +2715,13 @@ const ExploreByEquipment = () => {
                                                         color: 'black',
                                                     }}>
                                                     {' '}
-                                                    All {el.label}{' '}
+                                                    {changeTxt === '' ? `All ${el.label}` : changeTxt}{' '}
                                                     <button
                                                         style={{ border: 'none', backgroundColor: 'white' }}
                                                         onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
+                                                            handleCloseFilter(e, el.value); 
+                                                            setChangeTxt('');
+                                                            setCloseTrigger("change");
                                                         }}>
                                                         <i className="uil uil-multiply"></i>
                                                     </button>
@@ -2374,39 +2730,127 @@ const ExploreByEquipment = () => {
                                             <Dropdown.Menu className="dropdown-lg p-3">
                                                 <div style={{ margin: '1rem' }}>
                                                     <div>
-                                                        <a className="pop-text">Change Threshold</a>
-                                                        <button
-                                                            style={{
-                                                                border: 'none',
-                                                                backgroundColor: 'white',
-                                                                marginLeft: '5rem',
-                                                            }}
-                                                            onClick={exploreFilterDataFetch}>
-                                                            <i className="uil uil-multiply"></i>
-                                                        </button>
+                                                        <a className="pop-text">Threshold</a>
                                                     </div>
+                                                    <div className="btn-group ml-2 mt-2 mb-2" role="group" aria-label="Basic example">
+                                                        <div>
+                                                            <button
+                                                                type="button"
+                                                                className={
+                                                                    selectedTab === 0
+                                                                        ? 'btn btn-primary d-offline custom-active-btn'
+                                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                                }
+                                                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px',width:"5rem" }}
+                                                                onClick={() => {setSelectedTab(0);
+                                                                }}>
+                                                                All
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                className={
+                                                                    selectedTab === 1
+                                                                        ? 'btn btn-primary d-offline custom-active-btn'
+                                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                                }
+                                                                style={{ borderRadius: '0px',width:"5rem" }}
+                                                                onClick={() => {setSelectedTab(1);}}>
+                                                                <i className="uil uil-chart-down"></i>
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                className={
+                                                                    selectedTab === 2
+                                                                        ? 'btn btn-primary d-offline custom-active-btn'
+                                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                                }
+                                                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px',width:"5rem" }}
+                                                                onClick={() => {setSelectedTab(2);}}>
+                                                                 <i className="uil uil-arrow-growth"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {selectedTab === 0?
                                                     <div className="pop-inputbox-wrapper">
                                                         <input
                                                             className="pop-inputbox"
                                                             type="text"
                                                             value={minPerValue}
                                                         />{' '}
+                                                    <input
+                                                        className="pop-inputbox"
+                                                        type="text"
+                                                        value={maxPerValue}
+                                                    />
+                                                      </div>
+                                                    :selectedTab === 1?
+                                                    <div className="pop-inputbox-wrapper">
                                                         <input
                                                             className="pop-inputbox"
                                                             type="text"
-                                                            value={maxPerValue}
+                                                            value={minPerValuePos}
+                                                        />{' '}
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={maxPerValuePos}
                                                         />
                                                     </div>
+                                                    : selectedTab === 2?
+                                                    <div className="pop-inputbox-wrapper">
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={minPerValueNeg}
+                                                        />{' '}
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={maxPerValueNeg}
+                                                        />
+                                                    </div>
+                                                    :""
+                                                    }
+                                               
+                                                    { selectedTab === 0?
                                                     <div style={{ marginTop: '2rem' }}>
-                                                        <RangeSlider
-                                                            name="consumption"
+                                                        <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue}/>
+                                                        {/* <RangeSlider
+                                                            name="consumptionAll"
                                                             STEP={1}
-                                                            MIN={0}
-                                                            range={[minPerValue, maxPerValue]}
-                                                            MAX={100}
+                                                            MIN={bottomPerChange}
+                                                            range={[bottomPerChange, topPerChange]}
+                                                            MAX={topPerChange}
                                                             onSelectionChange={handleInputPer}
-                                                        />
+                                                        /> */}
+                                                    </div>:
+                                                     selectedTab === 1?
+                                                     <div style={{ marginTop: '2rem' }}>
+                                                        <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos}/>
+                                                        {/* <RangeSlider
+                                                            name="consumptionPos"
+                                                            STEP={1}
+                                                            MIN={bottomPosPerChange}
+                                                            range={[bottomPosPerChange, topPosPerChange]}
+                                                            MAX={topPosPerChange}
+                                                            onSelectionChange={handleInputPerPos}
+                                                        /> */}
                                                     </div>
+                                                     : selectedTab === 2?
+                                                     <div style={{ marginTop: '2rem' }}>
+                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg}/>
+                                                        {/* <RangeSlider
+                                                            name="consumptionNeg"
+                                                            STEP={1}
+                                                            MIN={bottomNegPerChange}
+                                                            range={[bottomNegPerChange, topNegPerChange]}
+                                                            MAX={topNegPerChange}
+                                                            onSelectionChange={handleInputPerNeg}
+                                                        /> */}
+                                                    </div>
+                                                     :""}
                                                 </div>
                                             </Dropdown.Menu>
                                         </Dropdown>
@@ -2886,24 +3330,6 @@ const ExploreByEquipment = () => {
                                     </>
                                 );
                             })}
-                        </Row>
-                    </div>
-                </Col>
-                <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '30px' }}>
-                    {/* <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
-                        {' '}
-                        <FontAwesomeIcon icon={faTableColumns} size="md" />
-                    </button> */}
-                    <CSVLink
-                        style={{ color: 'black' }}
-                        className="btn btn-white d-inline btnHover font-weight-bold"
-                        filename={`explore-building-list-${new Date().toUTCString()}.csv`}
-                        target="_blank"
-                        data={getCSVLinkData()}>
-                        {' '}
-                        <FontAwesomeIcon icon={faDownload} size="md" />
-                    </CSVLink>
-                </Col>
             </Row>
 
             <Row>

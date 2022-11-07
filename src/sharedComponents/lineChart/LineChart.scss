@@ -1,0 +1,22 @@
+@import '../assets/scss/stories.scss';
+
+.line-chart-wrapper{
+    border: 1px solid #EAECF0;
+    padding: 16px;
+    border-radius:8px;
+    .chart-header{
+        padding-left: 10px;
+    }
+    .more-details-wrapper{
+        display: flex;
+        justify-content: flex-end;
+        margin: 10px 0px;
+    }
+    .highcharts-menu{
+        background-color: red;
+        border-radius: 5px;
+        border-color: #EAECF0;
+        // font-family: "Inter", sans-serif !important;
+    }
+    
+}
