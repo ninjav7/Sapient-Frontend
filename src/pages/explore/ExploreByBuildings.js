@@ -192,7 +192,7 @@ const ExploreBuildingsTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {parseInt(record?.consumption.now / 1000)} kWh
+                                                        {Math.round(record?.consumption.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -206,7 +206,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -219,7 +219,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -232,7 +232,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -245,7 +245,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -258,7 +258,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -271,7 +271,7 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -506,12 +506,12 @@ const ExploreByBuildings = () => {
                     if (ele.consumption.change >= max)
                         max = ele.consumption.change;
                 })
-                setTopPerChange(parseInt(max))
+                setTopPerChange(Math.round(max))
                 set_minPerValue(0.0)
-                set_maxPerValue(parseInt(max));
+                set_maxPerValue(Math.round(max));
                 setTopEnergyConsumption(responseData[0].consumption.now);
                 set_minConValue(0.0);
-                set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
+                set_maxConValue(Math.round(responseData[0].consumption.now / 1000));
                 setIsExploreDataLoading(false);
             })
             .catch((error) => {
@@ -558,7 +558,7 @@ const ExploreByBuildings = () => {
         arr1['date_from'] = startDate.toLocaleDateString();
         arr1['date_to'] = endDate.toLocaleDateString();
         arr1['tz_info'] = timeZone;
-        let topVal = (parseInt(topEnergyConsumption / 1000));
+        let topVal = (Math.round(topEnergyConsumption / 1000));
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -882,7 +882,7 @@ const ExploreByBuildings = () => {
                     setExploreTableData(responseData);
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
+                    set_maxConValue(Math.round(responseData[0].consumption.now / 1000));
                     setIsExploreDataLoading(false);
                 })
                 .catch((error) => {
@@ -1066,7 +1066,7 @@ const ExploreByBuildings = () => {
                                                         STEP={0.01}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
+                                                        MAX={Math.round(topEnergyConsumption / 1000 + 0.5)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>

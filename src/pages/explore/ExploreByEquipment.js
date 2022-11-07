@@ -211,7 +211,7 @@ const ExploreEquipmentTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {parseInt(record?.consumption?.now / 1000)} kWh
+                                                        {Math.round(record?.consumption?.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -225,7 +225,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -238,7 +238,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -251,7 +251,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -264,7 +264,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -277,7 +277,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -290,7 +290,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -500,7 +500,7 @@ const ExploreEquipmentTable = ({
                                     value={pageSize}
                                     className="btn btn-md btn-light font-weight-bold mt-4"
                                     onChange={(e) => {
-                                        setPageSize(parseInt(e.target.value));
+                                        setPageSize(Math.round(e.target.value));
                                     }}>
                                     {[20, 50, 100].map((pageSize) => (
                                         <option key={pageSize} value={pageSize} className="align-options-center">
@@ -1140,9 +1140,9 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
+                    setTopPeakConsumption(Math.round(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
+                    set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
                 //setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1192,18 +1192,18 @@ const ExploreByEquipment = () => {
                             minNeg = ele.consumption.change;
                     }
                 })
-                setTopPerChange(parseInt(max === min ? max + 1 : max))
-                setBottomPerChange(parseInt(min))
-                setTopPosPerChange(parseInt(maxPos === minPos ? maxPos + 1 : maxPos));
-                setBottomPosPerChange(parseInt(minPos));
-                setTopNegPerChange(parseInt(maxNeg === minNeg ? maxNeg + 1 : maxNeg));
-                setBottomNegPerChange(parseInt(minNeg));
-                set_minPerValue(parseInt(min))
-                set_maxPerValue(parseInt(max));
-                set_minPerValuePos(parseInt(minPos))
-                set_maxPerValuePos(parseInt(maxPos));
-                set_minPerValueNeg(parseInt(minNeg))
-                set_maxPerValueNeg(parseInt(maxNeg));
+                setTopPerChange(Math.round(max === min ? max + 1 : max))
+                setBottomPerChange(Math.round(min))
+                setTopPosPerChange(Math.round(maxPos === minPos ? maxPos + 1 : maxPos));
+                setBottomPosPerChange(Math.round(minPos));
+                setTopNegPerChange(Math.round(maxNeg === minNeg ? maxNeg + 1 : maxNeg));
+                setBottomNegPerChange(Math.round(minNeg));
+                set_minPerValue(Math.round(min))
+                set_maxPerValue(Math.round(max));
+                set_minPerValuePos(Math.round(minPos))
+                set_maxPerValuePos(Math.round(maxPos));
+                set_minPerValueNeg(Math.round(minNeg))
+                set_maxPerValueNeg(Math.round(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             })
@@ -1678,7 +1678,7 @@ const ExploreByEquipment = () => {
         arr1['date_from'] = startDate.toLocaleDateString();
         arr1['date_to'] = endDate.toLocaleDateString();
         arr1['tz_info'] = timeZone;
-        let topVal = parseInt(topEnergyConsumption / 1000);
+        let topVal = Math.round(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -2029,7 +2029,7 @@ const ExploreByEquipment = () => {
                         let responseData = res.data;
                         if (responseData.data.length !== 0) {
                             set_minConValue(0.0);
-                            set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
+                            set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                         }
                         setExploreTableData(responseData.data);
                         setIsExploreDataLoading(false);
@@ -2373,7 +2373,7 @@ const ExploreByEquipment = () => {
                                                 STEP={1}
                                                 MIN={0}
                                                 range={[minConValue, maxConValue]}
-                                                MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
+                                                MAX={Math.round(topEnergyConsumption / 1000 + 0.5)}
                                                 onSelectionChange={handleInput}
                                             />
                                         </div>
