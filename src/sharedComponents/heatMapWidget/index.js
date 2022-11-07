@@ -3,7 +3,6 @@ import 'moment-timezone';
 import Typography from '../typography';
 import PropTypes from 'prop-types';
 import Button from '../button/Button';
-import { useHistory } from 'react-router-dom';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import HeatMapChart from './HeatMapChart';
 import './style.scss';
@@ -40,10 +39,8 @@ const HeatMapWidget = ({
     hourlyAvgConsumpOpts,
     hourlyAvgConsumpData,
     pageType,
-    bldgId,
+    handleRouteChange,
 }) => {
-    const history = useHistory();
-
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
             <>
@@ -57,11 +54,7 @@ const HeatMapWidget = ({
                                 icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
                                 type={Button.Type.tertiary}
                                 iconAlignment={Button.IconAlignment.right}
-                                onClick={() => {
-                                    history.push({
-                                        pathname: `/energy/time-of-day/${bldgId}`,
-                                    });
-                                }}
+                                onClick={handleRouteChange}
                             />
                         </div>
                     </div>

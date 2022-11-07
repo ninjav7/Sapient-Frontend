@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import Chart from 'react-apexcharts';
-import '../../sharedComponents/heatMapWidget/style.scss';
+import './style.scss';
 
 const HeatMapChart = ({ options, series = [], height, className = '' }) => {
     return (

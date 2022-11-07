@@ -6,6 +6,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
+import { useHistory } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchOverallEndUse,
@@ -30,6 +31,7 @@ import './style.css';
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const history = useHistory();
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -513,6 +515,12 @@ const BuildingOverview = () => {
         return parseInt(percentage);
     };
 
+    const handleRouteChange = () => {
+        history.push({
+            pathname: `/energy/time-of-day/${bldgId}`,
+        });
+    };
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -786,8 +794,8 @@ const BuildingOverview = () => {
                         heatMapChartHeight={heatMapChartHeight}
                         timeZone={timeZone}
                         className="mt-4"
-                        bldgId={bldgId}
                         pageType="building"
+                        handleRouteChange={handleRouteChange}
                     />
 
                     <TotalEnergyConsumption
