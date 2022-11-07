@@ -164,15 +164,16 @@ export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 export const listSensor = '/api/config/sensor/list_sensor';
 
 // plug rules
-export const listPlugRules = '/api/user_role/plug_rule/all-plug-rules';
-export const plugRuleDetails = '/api/user_role/plug_rule/plug-rule-details';
-export const createPlugRule = '/api/user_role/plug_rule/create-plug-rule';
-export const updatePlugRule = '/api/user_role/plug_rule/update-plug-rule';
-export const deletePlugRule = '/api/user_role/plug_rule/delete-plug-rule';
+export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';
+export const plugRuleDetails = '/api/energy/plug_rule/plug-rule-details';
+export const createPlugRule = '/api/energy/plug_rule/create-plug-rule';
+export const updatePlugRule = '/api/energy/plug_rule/update-plug-rule';
+export const deletePlugRule = '/api/energy/plug_rule/delete-plug-rule';
 
-export const listLinkSocketRules = '/api/user_role/plug_rule/list_link_socket';
-export const getListSensorsForBuildings = '/api/user_role/plug_rule/sensor-for-buildings';
-export const linkSocket = '/api/user_role/plug_rule/link_socket';
-export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
-export const graphData = '/api/user_role/plug_rule/average-sensor-usage';
-
+export const listLinkSocketRules = '/api/energy/plug_rule/list-link-socket';
+export const getListSensorsForBuildings = '/api/energy/plug_rule/sensor-for-buildings';
+export const getFiltersForSensors = '/api/energy/plug_rule/sensor-for-buildings-filter';
+export const assignSensorsToRule = '/api/energy/plug_rule/assign-sensor-rule';
+export const unLinkSocket = '/api/energy/plug_rule/unlink-socket';
+export const graphData = '/api/energy/plug_rule/average-sensor-usage';
+export const getSensorLastUsed = '/api/energy/plug_rule/sensor-last-used';
