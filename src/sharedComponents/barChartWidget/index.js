@@ -41,10 +41,10 @@ const BarChartWidget = ({
     subtitle,
     height = 259,
     width,
-    isConsumpHistoryLoading,
+    isConsumpHistoryLoading = false,
     startEndDayCount,
     timeZone,
-    pageType,
+    pageType = '',
     ...props
 }) => {
     const history = useHistory();

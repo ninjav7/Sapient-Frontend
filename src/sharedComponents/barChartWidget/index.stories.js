@@ -35,5 +35,5 @@ const barChartMock = [
 ];
 
 export const Default = () => {
-    return <LineChartWidget subtitle="Subtitle" series={barChartMock} title="Title" />;
+    return <BarChartWidget subtitle="Subtitle" series={barChartMock} title="Title" />;
 };

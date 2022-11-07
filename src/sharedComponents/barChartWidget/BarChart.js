@@ -1,6 +1,6 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
-import '../../sharedComponents/barChartWidget/style.scss';
+import './style.scss';
 
 const BarChart = ({ options, series, className = '', height = 285 }) => {
     return (

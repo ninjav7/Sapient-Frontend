@@ -1,5 +1,4 @@
 @import '../../assets/scss/colors';
-@import '../../assets/scss/variables';
 
 .donut-main-wrapper {
     padding: 0rem;
@@ -77,7 +76,6 @@
     background: base-white;
     border: .0625rem solid $primary-gray-450;
     border-radius: .375rem;
-    box-shadow: $box-shadow-lg;
 }
 
 .flex-space-between {
