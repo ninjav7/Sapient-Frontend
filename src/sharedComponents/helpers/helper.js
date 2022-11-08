@@ -69,6 +69,15 @@ const getStatesForSelectAllCheckbox = (values, options) => {
     };
 };
 
+const removeProps = (propsObj, ...properties) => {
+    let propsMap = Object.entries(propsObj).filter(([key]) => !properties.includes(key));
+
+    return propsMap.reduce((newProps, [key, val]) => {
+        newProps[key] = val;
+        return newProps;
+    }, {});
+};
+
 export {
     generateID,
     kFormatter,
@@ -77,4 +86,5 @@ export {
     arrayMoveImmutable,
     stringOrNumberPropTypes,
     getStatesForSelectAllCheckbox,
+    removeProps,
 };

@@ -16,13 +16,26 @@ import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.sv
 import { ReactComponent as CloseSVG } from '../../assets/icons/close-button.svg';
 import SearchURL from '../../assets/icons/search.svg';
 
-const OptionIcon = ({ type, icon, img }) =>
-    type === DROPDOWN_INPUT_TYPES.Icon && (
-        <>
-            {icon && React.cloneElement(icon, { className: 'react-select-option-icon icon' })}
-            {img && React.cloneElement(img, { className: 'react-select-option-icon img' })}
-        </>
+const OptionIcon = ({ type, icon, img, iconForSelected, isSingleValueComponent }) => {
+    if (iconForSelected && isSingleValueComponent) {
+        return React.cloneElement(iconForSelected, {
+            className: 'react-select-option-icon p-0 square icon flex-shrink-0',
+        });
+    }
+
+    return (
+        type === DROPDOWN_INPUT_TYPES.Icon && (
+            <>
+                {icon &&
+                    React.cloneElement(icon, {
+                        ...icon.props,
+                        className: cx('react-select-option-icon icon', icon.props.className),
+                    })}
+                {img && React.cloneElement(img, { className: 'react-select-option-icon img' })}
+            </>
+        )
     );
+};
 
 const OptionTypo = ({ isOptionComponent, children, supportText }) => (
     <>
@@ -36,13 +49,15 @@ const OptionTypo = ({ isOptionComponent, children, supportText }) => (
 const OptionChartAndCheck = ({ percentChart, labelChart, isSelected, isOptionComponent, hideTick }) => {
     const className = cx('react-select-icon-chart-wrapper', { hideTick: hideTick });
 
+    const isShownChart = percentChart && labelChart && isOptionComponent;
+
+    if (!isShownChart && !isSelected) {
+        return null;
+    }
+
     return (
         <div className={className}>
-            <div>
-                {percentChart && labelChart && isOptionComponent && (
-                    <TinyPieChart percent={percentChart} label={labelChart} />
-                )}
-            </div>
+            <div>{isShownChart && <TinyPieChart percent={percentChart} label={labelChart} />}</div>
             {isSelected && !hideTick && <CheckedSVG />}
         </div>
     );
@@ -54,10 +69,11 @@ const CustomOptionContent = ({ component: Component, className, ...props }) => {
     const { type, customOption } = props.selectProps;
 
     const isOptionComponent = Object.is(Component, components.Option);
+    const isSingleValueComponent = Object.is(Component, components.SingleValue);
 
     const children = !!customOption ? React.cloneElement(customOption, { className }, props.children) : props.children;
 
-    const IconProps = { ...props.selectProps, ...props.data };
+    const IconProps = { ...props.selectProps, ...props.data, isSingleValueComponent };
     const TypoProps = { ...props, ...props.selectProps, ...{ children, isOptionComponent, supportText } };
     const ChartAndIconProps = {
         ...props,
@@ -231,6 +247,7 @@ export const MenuList = ({ selectProps: { onMenuInputFocus }, ...props }) => {
         setValue(event.target.value);
     };
 
+    //@TODO Implement search if options are grouped
     const filteredChildren = React.Children.toArray(props.children).filter(({ props }) =>
         props.data.label.toLowerCase().includes(value.toLowerCase())
     );

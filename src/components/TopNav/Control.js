@@ -30,9 +30,7 @@ const Control = () => {
         if (isAuthTokenValid) {
             return <Redirect to="/" />;
         } else {
-            localStorage.removeItem('dateFilter');
-            localStorage.removeItem('startDate');
-            localStorage.removeItem('endDate');
+            localStorage.clear();
 
             history.push('/account/login');
             window.location.reload();

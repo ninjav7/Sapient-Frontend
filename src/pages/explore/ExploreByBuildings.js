@@ -3,7 +3,8 @@ import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
+import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../explore/explore';
+import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/explore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
@@ -213,11 +214,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#D14065`}
@@ -226,11 +227,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#DF5775`}
@@ -239,11 +240,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -252,11 +253,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#EB6E87`}
@@ -265,11 +266,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FC9EAC`}
@@ -278,11 +279,11 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseFloat(
+                                                                    percent={parseInt(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
-                                                                    ).toFixed(2)}
+                                                                    )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
                                                                     strokeColor={`#FFCFD6`}
@@ -298,7 +299,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                        {parseInt(record?.consumption?.change)}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -310,7 +311,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {record?.consumption?.change}
+                                                                        {Math.abs(parseInt(record?.consumption?.change))}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -379,6 +380,7 @@ const ExploreByBuildings = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
     const [objectExplore, setObjectExplore] = useState([]);
+    const [closeTrigger,setCloseTrigger] = useState("");
 
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -386,8 +388,38 @@ const ExploreByBuildings = () => {
             type: 'line',
             height: '1000px',
             toolbar: {
+                show: true,
+                offsetX: 0,
+                offsetY: 0,
+                tools: {
+                  download: true,
+                  selection: false,
+                  zoom: false,
+                  zoomin: false,
+                  zoomout: false,
+                  pan: false,
+                  reset: false ,
+                },
+                export: {
+                  csv: {
+                    filename: "Explore_Building_View"+new Date(),
+                    columnDelimiter: ',',
+                    headerCategory: 'Timestamp',
+                    headerValue: 'value',
+                    dateFormatter(timestamp) {
+                      return moment
+                      .utc(timestamp)
+                      .format(`MMM D 'YY @ hh:mm A`)
+                    }
+                  },
+                  svg: {
+                    filename: "Explore_Building_View"+new Date(),
+                  },
+                  png: {
+                    filename: "Explore_Building_View"+new Date(),
+                  }
+                },
                 autoSelected: 'pan',
-                show: false,
             },
 
             animations: {
@@ -594,14 +626,23 @@ const ExploreByBuildings = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (!showChangeDropdown !== true) {
+        if(closeTrigger==="change"){
+            setShowChangeDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showChangeDropdown !== true) {
+            
             setAPIPerFlag(!APIPerFlag);
             setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
         }
     };
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (!showDropdown !== true) {
+        if(closeTrigger==="consumption"){
+            setShowDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -610,7 +651,11 @@ const ExploreByBuildings = () => {
     const [showsqftDropdown, setsqftShowDropdown] = useState(false);
     const setsqftDropdown = () => {
         setsqftShowDropdown(!showsqftDropdown);
-        if (!showsqftDropdown !== true) {
+        if(closeTrigger==="sq_ft"){
+            setsqftShowDropdown(true);
+            setCloseTrigger("");
+        }
+        else if (!showsqftDropdown !== true) {
             setSq_FtFlag(!Sq_FtFlag);
             setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);
         }
@@ -666,25 +711,14 @@ const ExploreByBuildings = () => {
     }, []);
 
     const exploreDataFetch = async () => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreBuildingList}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+            let value =   {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            }
+            await fetchExploreBuildingList(value,"")
+            .then((res) => {
                     if (entryPoint === 'entered') {
                         totalBuildingId.length = 0;
                         setSeriesData([]);
@@ -692,24 +726,22 @@ const ExploreByBuildings = () => {
                     }
                     let responseData = res.data;
                     setExploreTableData(responseData);
-                    console.log(responseData);
                     let max=responseData[0].consumption.change;
                     responseData.map((ele)=>{
                         if(ele.consumption.change>=max)
                             max=ele.consumption.change;
                     })
-                    console.log(max);
-                    setTopPerChange(max)
+                    setTopPerChange(parseInt(max))
                     set_minPerValue(0.0)
-                    set_maxPerValue(max);
+                    set_maxPerValue(parseInt(max));
                     setTopEnergyConsumption(responseData[0].consumption.now);
                     set_minConValue(0.0);
                     set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
                     setIsExploreDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsExploreDataLoading(false);
                 });
-        } catch (error) {
-            setIsExploreDataLoading(false);
-        }
     };
     useEffect(() => {
         if (startDate === null) {
@@ -724,25 +756,19 @@ const ExploreByBuildings = () => {
     }, [startDate, endDate]);
 
     const exploreFilterDataFetch = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy`;
-            await axios.post(`${BaseUrl}${getExploreBuildingList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreBuildingList(bodyVal,"")
+            .then((res) => {
                 let responseData = res.data;
                 setSeriesData([]);
                 setSeriesLineData([]);
                 setExploreTableData(responseData);
                 setTopEnergyConsumption(responseData[0].consumption.now);
                 setIsExploreDataLoading(false);
+            })
+            .catch((error) => {
+                setIsExploreDataLoading(false);
             });
-        } catch (error) {
-            setIsExploreDataLoading(false);
-        }
     };
 
 
@@ -756,7 +782,7 @@ const ExploreByBuildings = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (topEnergyConsumption / 1000).toFixed(3);
+        let topVal = (parseInt(topEnergyConsumption / 1000));
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -834,24 +860,15 @@ const ExploreByBuildings = () => {
         }
 
         const fetchExploreChartData = async (id) => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&building_id=${selectedBuildingId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}&divisible_by=1000`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+
+            let value =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            }
+            await fetchExploreBuildingChart(value,selectedBuildingId)
+            .then((res) => {
+            
                         let responseData = res.data;
                         let data = responseData.data;
                         let arr = [];
@@ -882,8 +899,10 @@ const ExploreByBuildings = () => {
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedBuildingId('');
+                    })
+                    .catch((error) => {
                     });
-            } catch (error) { }
+                 
         };
 
         fetchExploreChartData();
@@ -914,31 +933,21 @@ const ExploreByBuildings = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?consumption=energy&building_id=${id}`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreBuildingChart}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+        
+        let value =  {
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
+        }
+        await fetchExploreBuildingChart(value,id)
+        .then((res) => {
+        
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.building_id === id;
                     });
-                    let exploreData = [];
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
@@ -951,8 +960,10 @@ const ExploreByBuildings = () => {
                         setSeriesLineData(dataarr);
                     }
                     setAllBuildingData(dataarr);
+                })
+                .catch((error) => {
                 });
-        } catch (error) { }
+             
     };
 
     useEffect(() => {
@@ -1083,35 +1094,25 @@ const ExploreByBuildings = () => {
 
     const handleBuildingSearch = (e) => {
         const exploreDataFetch = async () => {
-            try {
                 setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&search_by_name=${buildingSearchTxt}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                let value={
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
+                }
+                await fetchExploreBuildingList(value,buildingSearchTxt)
+                .then((res) => {
+                
                         let responseData = res.data;
                         setExploreTableData(responseData);
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
-                        set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                        set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
+                        setIsExploreDataLoading(false);
+                    })
+                    .catch((error) => {
                         setIsExploreDataLoading(false);
                     });
-            } catch (error) {
-                setIsExploreDataLoading(false);
-            }
         };
         exploreDataFetch();
     };
@@ -1158,7 +1159,7 @@ const ExploreByBuildings = () => {
     };
 
     useEffect(() => {
-        if (buildingSearchTxt === '') exploreDataFetch();
+        if (buildingSearchTxt === '' && entryPoint!=="entered") exploreDataFetch();
     }, [buildingSearchTxt]);
     return (
         <>
@@ -1174,7 +1175,7 @@ const ExploreByBuildings = () => {
                         </div>
                     ) : (
                         <>
-                            <Row>
+                            {/* <Row>
                                 <Col lg={11}></Col>
                                 <Col
                                     lg={1}
@@ -1189,7 +1190,7 @@ const ExploreByBuildings = () => {
                                         <FontAwesomeIcon icon={faDownload} size="md" />
                                     </CSVLink>
                                 </Col>
-                            </Row>
+                            </Row> */}
                             <BrushChart
                                 seriesData={seriesData}
                                 optionsData={optionsData}
@@ -1267,6 +1268,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setConsumptionTxt('');
+                                                        setCloseTrigger("consumption");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1289,7 +1291,7 @@ const ExploreByBuildings = () => {
                                                         STEP={0.01}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(3)}
+                                                        MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>
@@ -1323,6 +1325,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setChangeTxt('');
+                                                        setCloseTrigger("change");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1331,8 +1334,9 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">Change Threshold</a>
+                                                    <a className="pop-text">Threshold</a>
                                                 </div>
+                                                
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minPerValue} />{' '}
                                                     <input className="pop-inputbox" type="text" value={maxPerValue} />
@@ -1376,6 +1380,7 @@ const ExploreByBuildings = () => {
                                                     style={{ border: 'none', backgroundColor: 'white' }}
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
+                                                        setCloseTrigger("sq_ft");
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
