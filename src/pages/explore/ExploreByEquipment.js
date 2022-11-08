@@ -30,7 +30,7 @@ import Header from '../../components/Header';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import './Linq';
-import { options, optionsLines } from './ChartOption';
+import { options, optionsLines } from '../../helpers/ChartOption';
 import {SliderAll, SliderPos, SliderNeg} from './Filter';
 
 const ExploreEquipmentTable = ({
@@ -510,43 +510,6 @@ const ExploreEquipmentTable = ({
         </>
     );
 };
-
-// const SliderAll = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
-// const SliderPos = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
-// const SliderNeg = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
