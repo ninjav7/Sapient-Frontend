@@ -5,6 +5,7 @@
     &-wrapper {
         .typography-wrapper {
             overflow: hidden;
+            text-overflow: ellipsis;
             * {
                 text-overflow: ellipsis;
                 overflow: hidden;

@@ -57,7 +57,7 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
         setIsOpen(true);
     };
 
-    const handleBlur = (event,) => {
+    const handleBlur = (event) => {
         setIsOpen(false);
         props.onMenuClose && props.onMenuClose(event, props);
     };
