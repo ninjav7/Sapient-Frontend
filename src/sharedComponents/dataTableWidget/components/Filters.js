@@ -216,7 +216,6 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
                 const Component = mapFilters[filter.filterType];
                 const handleDeleteFilter = (args) => {
                     onDeleteFilter(args);
-                    console.log(filter);
                     filter.onDelete && filter.onDelete(args);
                 };
 

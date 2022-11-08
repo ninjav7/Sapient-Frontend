@@ -240,7 +240,7 @@ const PlugRules = () => {
                 rule_search: search,
             },
         };
-        console.log(activeBuildingId);
+        
         await fetchPlugRules(activeBuildingId, params).then((res) => {
             if (res.status) {
                 setSkeletonLoading(false);

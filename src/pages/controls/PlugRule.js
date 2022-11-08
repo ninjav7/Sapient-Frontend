@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { MultiSelect } from 'react-multi-select-component';
-import Form from 'react-bootstrap/Form';
-import { Table } from 'reactstrap';
 import Input from '../../sharedComponents/form/input/Input';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
@@ -21,7 +18,7 @@ import _ from 'lodash';
 import { timePicker15MinutesIntervalOption } from '../../constants/time';
 
 import moment from 'moment';
-import { Cookies } from 'react-cookie';
+
 import {
     updatePlugRuleRequest,
     fetchPlugRuleDetails,
