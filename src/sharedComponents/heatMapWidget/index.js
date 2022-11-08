@@ -96,6 +96,8 @@ HeatMapWidget.propTypes = {
             ),
         })
     ).isRequired,
+    showRouteBtn: PropTypes.bool,
+    handleRouteChange: PropTypes.func,
 };
 
 export default HeatMapWidget;

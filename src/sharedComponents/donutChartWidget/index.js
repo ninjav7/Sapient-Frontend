@@ -57,7 +57,7 @@ const DonutChartWidget = ({
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
-    const series = items.map(({ value }) => parseInt(value));
+    const series = items.map(({ value }) => Math.round(value));
 
     const options = {
         ...configDonutChartWidget(type),

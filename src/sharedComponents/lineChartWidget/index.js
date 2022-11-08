@@ -63,7 +63,7 @@ const LineChartWidget = ({
                 const { seriesX } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
                 let ch = '';
-                if (isNaN(parseInt(series[seriesIndex][dataPointIndex])) === false) {
+                if (isNaN(Math.round(series[seriesIndex][dataPointIndex])) === false) {
                     ch = formatConsumptionValue(series[seriesIndex][dataPointIndex], 4);
                 } else {
                     ch = '-';
@@ -112,7 +112,7 @@ const LineChartWidget = ({
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = parseInt(val);
+                    let print = Math.round(val);
                     return `${print}`;
                 },
             },
