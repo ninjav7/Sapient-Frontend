@@ -148,7 +148,7 @@ const BuildingOverview = () => {
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = parseInt(val);
+                    let print = Math.round(val);
                     return `${print}`;
                 },
             },
@@ -418,7 +418,7 @@ const BuildingOverview = () => {
             return 0;
         }
         let percentage = Math.round(((value - min) / (max - min)) * 100);
-        return parseInt(percentage);
+        return Math.round(percentage);
     };
 
     const handleRouteChange = (path) => {
@@ -460,7 +460,7 @@ const BuildingOverview = () => {
                     const energyData = res.data;
                     let newDonutData = [];
                     energyData.forEach((record) => {
-                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        let fixedConsumption = Math.round(record.energy_consumption.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
@@ -482,7 +482,7 @@ const BuildingOverview = () => {
                         let obj = {
                             link: '#',
                             label: record?.equipment_name,
-                            value: parseInt(record?.energy_consumption.now / 1000),
+                            value: Math.round(record?.energy_consumption.now / 1000),
                             unit: UNITS.KWH,
                             badgePercentage: percentageHandler(
                                 record?.energy_consumption.now,
@@ -517,18 +517,18 @@ const BuildingOverview = () => {
                     let weekDaysList = [];
 
                     const weekDaysData = weekDaysResData.map((el) => {
-                        weekDaysList.push(parseInt(el.y / 1000));
+                        weekDaysList.push(Math.round(el.y / 1000));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: parseInt(el.y / 1000),
+                            y: Math.round(el.y / 1000),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
-                        weekEndList.push(parseInt(el.y / 1000));
+                        weekEndList.push(Math.round(el.y / 1000));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: parseInt(el.y / 1000),
+                            y: Math.round(el.y / 1000),
                         };
                     });
 
@@ -628,7 +628,7 @@ const BuildingOverview = () => {
                     response.forEach((record) => {
                         newArray[0].data.push({
                             x: record?.x,
-                            y: parseInt(record?.y / 1000),
+                            y: Math.round(record?.y / 1000),
                         });
                     });
                     setBuildingConsumptionChartData(newArray);

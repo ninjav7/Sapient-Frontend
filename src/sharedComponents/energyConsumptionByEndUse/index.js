@@ -42,7 +42,7 @@ const EnergyConsumptionByEndUse = ({
     });
 
     return (
-        <div style={{ border: 'black' }}>
+        <div>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
                 title={title}

@@ -139,7 +139,7 @@ const BarChartWidget = ({
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = parseInt(val);
+                    let print = Math.round(val);
                     return `${print}`;
                 },
             },
