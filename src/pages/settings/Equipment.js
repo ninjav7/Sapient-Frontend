@@ -39,7 +39,7 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
-import EquipChartModal from '../explore/EquipChartModal';
+import EquipChartModal from '../../pages/chartModal/EquipChartModal';
 import './style.css';
 
 const EquipmentTable = ({

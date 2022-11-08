@@ -19,7 +19,7 @@ import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
-import EquipChartModal from './EquipChartModal';
+import EquipChartModal from '../chartModal/EquipChartModal';
 import Dropdown from 'react-bootstrap/Dropdown';
 import './style.css';
 import RangeSlider from './RangeSlider';
