@@ -90,8 +90,7 @@ const DonutChartWidget = ({
                                         iconAlignment={Button.IconAlignment.right}
                                         onClick={handleRouteChange}
                                     />
-                                </div>{' '}
-                                */}
+                                </div>
                             </div>
                         ) : (
                             <div className="d-flex justify-content-between">
