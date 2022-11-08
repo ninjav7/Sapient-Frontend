@@ -557,39 +557,6 @@ const EquipmentTable = ({
                     )}
                 </CardBody>
             </Card>
-
-            {/* {userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.building_equipment_permission?.edit ? (
-                <div>
-                    <EquipmentDeviceChartModel
-                        showChart={modal1}
-                        handleChartClose={Close1}
-                        equipData={equipData}
-                        equipmentTypeData={equipmentTypeData}
-                        endUse={endUse}
-                        fetchEquipmentData={fetchEquipmentData}
-                        showWindow={'configure'}
-                        deviceType={'active'}
-                        // formValidation={formValidation}
-                        // setFormValidation={setFormValidation}
-                    />
-                    <EquipmentDeviceChartModel
-                        showChart={modal2}
-                        handleChartClose={Close2}
-                        equipData={equipData}
-                        equipmentTypeData={equipmentTypeData}
-                        endUse={endUse}
-                        fetchEquipmentData={fetchEquipmentData}
-                        showWindow={'configure'}
-                        deviceType={'passive'}
-                        locationData={locationData}
-                        // formValidation={formValidation}
-                        // setFormValidation={setFormValidation}
-                    />
-                </div>
-            ) : (
-                <></>
-            )} */}
         </>
     );
 };
@@ -968,7 +935,7 @@ const Equipment = () => {
             } catch (error) {}
         };
 
-        //fetchEquipmentData();
+        fetchEquipmentData();
         fetchEndUseData();
         // fetchOnlineEquipData();
         // fetchOfflineEquipData();
