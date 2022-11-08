@@ -2,7 +2,7 @@ import React from 'react';
 import BarChartWidget from './index';
 
 export default {
-    title: 'Components/BarChart Widget',
+    title: 'Widgets/BarChartWidget',
     component: BarChartWidget,
 };
 

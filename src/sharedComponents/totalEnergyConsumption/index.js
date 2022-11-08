@@ -11,6 +11,7 @@ const TotalEnergyConsumption = ({
     timeZone,
     pageType,
     className,
+    handleRouteChange,
 }) => {
     return (
         <BarChartWidget
@@ -23,6 +24,7 @@ const TotalEnergyConsumption = ({
             timeZone={timeZone}
             pageType={pageType}
             className={className}
+            handleRouteChange={handleRouteChange}
         />
     );
 };

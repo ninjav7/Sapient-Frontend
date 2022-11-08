@@ -6,16 +6,16 @@ import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
 import { formatConsumptionValue, xaxisFilters } from '../helpers/helper';
 import BarChart from './BarChart';
-import { useHistory } from 'react-router-dom';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import Brick from '../brick';
 import './style.scss';
 
 const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
+const Titles = ({ title, subtitle, pageType }) => {
     return (
         <>
             <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
@@ -45,10 +45,10 @@ const BarChartWidget = ({
     startEndDayCount,
     timeZone,
     pageType = '',
+    handleRouteChange,
+    showRouteBtn,
     ...props
 }) => {
-    const history = useHistory();
-
     const [configBarChartWidget, setConfigBarChartWidget] = useState({
         chart: {
             type: 'bar',
@@ -171,11 +171,7 @@ const BarChartWidget = ({
                                 icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
                                 type={Button.Type.tertiary}
                                 iconAlignment={Button.IconAlignment.right}
-                                onClick={() => {
-                                    history.push({
-                                        pathname: `/energy/end-uses/${props.bldgId}`,
-                                    });
-                                }}
+                                onClick={handleRouteChange}
                             />
                         </div>
                     </div>
@@ -183,6 +179,7 @@ const BarChartWidget = ({
                     <Titles {...{ title, subtitle, pageType }} />
                 )}
             </>
+            <Brick sizeInRem={1} />
             <div>
                 {isConsumpHistoryLoading ? (
                     <div className="loader-center-style">

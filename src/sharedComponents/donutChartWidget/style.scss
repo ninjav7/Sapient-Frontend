@@ -73,16 +73,7 @@
     gap: .5rem;
     width: 1.25rem;
     height: 1.25rem;
-    background: base-white;
+    background: $base-white;
     border: .0625rem solid $primary-gray-450;
     border-radius: .375rem;
-}
-
-.flex-space-between {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: stretch;
-    align-content: stretch;
 }
