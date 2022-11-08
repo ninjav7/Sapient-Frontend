@@ -1,89 +1,43 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
-import DonutChart from '../charts/DonutChart';
+import React, { useState, useEffect } from 'react';
+import { Row } from 'reactstrap';
 import Header from '../../components/Header';
-import LineChart from '../charts/LineChart';
-import DetailedButton from './DetailedButton';
-import EnergyLineChart from './EnergyLineChart';
-import HeatMapChart from '../charts/HeatMapChart';
-import upGraph from '../../assets/icon/buildings/up-graph.svg';
-import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
-import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
-import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import EnergyConsumptionTotals from './EnergyConsumptionTotals';
-import { faMountain } from '@fortawesome/pro-solid-svg-icons';
-import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
-import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import LineColumnChart from '../charts/LineColumnChart';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
-import { Spinner } from 'reactstrap';
-import {
-    BaseUrl,
-    builidingAlerts,
-    builidingEquipments,
-    builidingHourly,
-    getEnergyConsumption,
-    builidingPeak,
-    portfolioEndUser,
-    portfolioOverall,
-} from '../../services/Network';
 import moment from 'moment';
 import 'moment-timezone';
+import { useHistory } from 'react-router-dom';
+import {
+    fetchOverallBldgData,
+    fetchOverallEndUse,
+    fetchBuildingEquipments,
+    fetchBuilidingHourly,
+    fetchEnergyConsumption,
+} from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { useHistory } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import { Cookies } from 'react-cookie';
-import Button from '../../sharedComponents/button/Button';
-import { ReactComponent as ArrowRight } from '../../sharedComponents/assets/icons/arrow-right.svg';
+
+import BuildingKPIs from './BuildingKPIs';
+import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
+import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
+import HourlyAvgConsumption from './HourlyAvgConsumption';
+import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
+import { UNITS } from '../../constants/units';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import './style.css';
 
-export function useHover() {
-    const [value, setValue] = useState(false);
-
-    const ref = useRef(null);
-
-    const handleMouseOver = () => setValue(true);
-    const handleMouseOut = () => setValue(false);
-
-    useEffect(
-        () => {
-            const node = ref.current;
-            if (node) {
-                node.addEventListener('mouseover', handleMouseOver);
-                node.addEventListener('mouseout', handleMouseOut);
-
-                return () => {
-                    node.removeEventListener('mouseover', handleMouseOver);
-                    node.removeEventListener('mouseout', handleMouseOut);
-                };
-            }
-        },
-        [ref.current] // Recall only if ref changes
-    );
-    return [ref, value];
-}
-
 const BuildingOverview = () => {
-    // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const history = useHistory();
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
 
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-    const history = useHistory();
-
-    const [overview, setOverview] = useState({
+    const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
         total_consumption: {
@@ -100,132 +54,11 @@ const BuildingOverview = () => {
         },
     });
 
-    const ICON_SIZES = {
-        [Button.Sizes.lg]: 11,
-    };
-
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
-    const [donutChartOpts, setDonutChartOpts] = useState({
-        chart: {
-            type: 'donut',
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 1);
-                },
-            },
-        },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
-        series: [12553, 11553, 6503, 2333],
-        plotOptions: {
-            pie: {
-                startAngle: 0,
-                endAngle: 360,
-                expandOnClick: false,
-                offsetX: 0,
-                offsetY: 0,
-                customScale: 1,
-                dataLabels: {
-                    offset: 0,
-                    minAngleToShowLabel: 10,
-                },
-                donut: {
-                    size: '80%',
-                    background: 'grey',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                            // fontSize: '22px',
-                            // fontFamily: 'Helvetica, Arial, sans-serif',
-                            // fontWeight: 600,
-                            // color: '#373d3f',
-                            // offsetY: -10,
-                            // formatter: function (val) {
-                            //     return val;
-                            // },
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 400,
-                            color: 'red',
-                            // offsetY: 16,
-                            formatter: function (val) {
-                                return `${val} kWh`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            // color: '#373d3f',
-                            fontSize: '22px',
-                            fontWeight: 600,
-                            // formatter: function (w) {
-                            //     return w.globals.seriesTotals.reduce((a, b) => {
-                            //         return a + b;
-                            //     }, 0);
-                            // },
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return a + b;
-                                }, 0);
-                                return `${sum} kWh`;
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 300,
-                    },
-                    // legend: {
-                    //     show: true,
-                    //     showForSingleSeries:true,
-                    //     onItemHover: {
-                    //         highlightDataSeries: true
-                    //     },
-                    //     onItemClick: {
-                    //         toggleDataSeries: true
-                    //     },
-                    // },
-                },
-            },
-        ],
-        dataLabels: {
-            enabled: false,
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        legend: {
-            show: false,
-        },
-        stroke: {
-            width: 0,
-        },
-
-        itemMargin: {
-            horizontal: 10,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-    });
-
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
-
     const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
             type: 'bar',
@@ -315,7 +148,7 @@ const BuildingOverview = () => {
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = parseInt(val);
+                    let print = Math.round(val);
                     return `${print}`;
                 },
             },
@@ -329,13 +162,15 @@ const BuildingOverview = () => {
         },
     });
 
+    const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
+
+    const heatMapChartHeight = 125;
+
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
-    const [topEnergyConsumption, setTopEnergyConsumption] = useState([]);
+    const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
-    const [topContributors, setTopContributors] = useState([]);
-
-    const [weekDaysOptions, setWeekDaysOptions] = useState({
+    const hourlyAvgConsumpOpts = {
         chart: {
             type: 'heatmap',
             toolbar: {
@@ -345,24 +180,12 @@ const BuildingOverview = () => {
         dataLabels: {
             enabled: false,
         },
-        title: {
-            text: 'Weekdays',
-            align: 'left',
-            margin: 1,
-            offsetX: 12,
-            offsetY: 20,
-            floating: false,
-            style: {
-                fontSize: '14px',
-                fontWeight: '600',
-                fontFamily: 'Inter',
-                color: '#98A2B3',
-            },
-        },
         stroke: {
-            width: 0.7,
+            width: 1,
         },
-        colors: ['#87AADE', '#F87171'],
+        legend: {
+            show: false,
+        },
         plotOptions: {
             heatmap: {
                 shadeIntensity: 0.5,
@@ -370,9 +193,145 @@ const BuildingOverview = () => {
                 distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
+                colorScale: {
+                    ranges: [
+                        {
+                            from: 0,
+                            to: 3,
+                            color: '#F5F8FF',
+                        },
+                        {
+                            from: 4,
+                            to: 8,
+                            color: '#EDF3FF',
+                        },
+                        {
+                            from: 9,
+                            to: 12,
+                            color: '#E5EDFF',
+                        },
+                        {
+                            from: 13,
+                            to: 16,
+                            color: '#DDE8FE',
+                        },
+                        {
+                            from: 17,
+                            to: 21,
+                            color: '#D6E2FE',
+                        },
+                        {
+                            from: 22,
+                            to: 25,
+                            color: '#CEDDFE',
+                        },
+                        {
+                            from: 26,
+                            to: 29,
+                            color: '#C6D7FE',
+                        },
+                        {
+                            from: 30,
+                            to: 33,
+                            color: '#BED1FE',
+                        },
+                        {
+                            from: 34,
+                            to: 38,
+                            color: '#B6CCFE',
+                        },
+                        {
+                            from: 39,
+                            to: 42,
+                            color: '#AEC6FE',
+                        },
+                        {
+                            from: 43,
+                            to: 46,
+                            color: '#A6C0FD',
+                        },
+                        {
+                            from: 47,
+                            to: 51,
+                            color: '#9EBBFD',
+                        },
+                        {
+                            from: 52,
+                            to: 55,
+                            color: '#96B5FD',
+                        },
+                        {
+                            from: 56,
+                            to: 59,
+                            color: '#8EB0FD',
+                        },
+                        {
+                            from: 60,
+                            to: 64,
+                            color: '#86AAFD',
+                        },
+                        {
+                            from: 65,
+                            to: 68,
+                            color: '#7FA4FD',
+                        },
+                        {
+                            from: 69,
+                            to: 72,
+                            color: '#F8819D',
+                        },
+                        {
+                            from: 73,
+                            to: 76,
+                            color: '#F87795',
+                        },
+                        {
+                            from: 77,
+                            to: 81,
+                            color: '#F86D8E',
+                        },
+                        {
+                            from: 82,
+                            to: 85,
+                            color: '#F76486',
+                        },
+                        {
+                            from: 86,
+                            to: 89,
+                            color: '#F75A7F',
+                        },
+                        {
+                            from: 90,
+                            to: 94,
+                            color: '#F75077',
+                        },
+                        {
+                            from: 95,
+                            to: 98,
+                            color: '#F64770',
+                        },
+                        {
+                            from: 98,
+                            to: 100,
+                            color: '#F63D68',
+                        },
+                    ],
+                },
             },
         },
+        yaxis: {
+            labels: {
+                show: true,
+                minWidth: 40,
+                maxWidth: 160,
+            },
+            categories: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        },
         xaxis: {
+            labels: {
+                show: true,
+                align: 'top',
+            },
             categories: [
                 '12AM',
                 '1AM',
@@ -399,11 +358,7 @@ const BuildingOverview = () => {
                 '10PM',
                 '11PM',
             ],
-        },
-        yaxis: {
-            labels: {
-                show: false,
-            },
+            position: 'bottom',
         },
         tooltip: {
             //@TODO NEED?
@@ -436,154 +391,41 @@ const BuildingOverview = () => {
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesNames } = w.globals;
                 const day = seriesNames[seriesIndex];
+                const energyVal = w.config.series[seriesIndex].data[dataPointIndex].z;
+
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${energyVal} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">
                         ${day}, ${w.globals.labels[dataPointIndex]}
                         </div>
                     </div>`;
             },
         },
-    });
+    };
 
-    const [weekDaysSeries, setWeekDaysSeries] = useState([
-        {
-            name: 'Weekdays',
-            data: [],
-        },
-    ]);
+    const fetchTrendBadgeType = (now, old) => {
+        if (now > old) {
+            return TRENDS_BADGE_TYPES.UPWARD_TREND;
+        }
+        if (now < old) {
+            return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
+        }
+    };
 
-    const [weekEndsSeries, setWeekEndsSeries] = useState([
-        {
-            name: 'Weekends',
-            data: [],
-        },
-    ]);
+    const getAverageValue = (value, min, max) => {
+        if (min == undefined || max === undefined) {
+            return 0;
+        }
+        let percentage = Math.round(((value - min) / (max - min)) * 100);
+        return Math.round(percentage);
+    };
 
-    const weekdaysChartHeight = 125;
-    const weekendsChartHeight = 125;
-
-    const [weekEndsOptions, setWeekEndsOptions] = useState({
-        chart: {
-            type: 'heatmap',
-            toolbar: {
-                show: true,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        title: {
-            text: 'Weekends',
-            align: 'left',
-            margin: 1,
-            offsetX: 12,
-            offsetY: 20,
-            floating: false,
-            style: {
-                fontSize: '14px',
-                fontWeight: '600',
-                fontFamily: 'Inter',
-                color: '#98A2B3',
-            },
-        },
-        stroke: {
-            width: 0.7,
-        },
-        colors: ['#87AADE', '#F87171'],
-        plotOptions: {
-            heatmap: {
-                shadeIntensity: 0.5,
-                enableShades: true,
-                distributed: true,
-                radius: 1,
-                useFillColorAsStroke: false,
-            },
-        },
-        yaxis: {
-            labels: {
-                show: false,
-            },
-        },
-        xaxis: {
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesNames } = w.globals;
-                const day = seriesNames[seriesIndex];
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${w.globals.labels[dataPointIndex]}
-                        </div>
-                    </div>`;
-            },
-        },
-    });
-
-    const [daysCount, setDaysCount] = useState(1);
-
-    const [hoverRef, isHovered] = useHover();
-    const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
+    const handleRouteChange = (path) => {
+        history.push({
+            pathname: `${path}/${bldgId}`,
+        });
+    };
 
     useEffect(() => {
         if (startDate === null) {
@@ -592,303 +434,215 @@ const BuildingOverview = () => {
         if (endDate === null) {
             return;
         }
+
         const buildingOverallData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioOverall}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setOverview(res.data);
-                    });
-            } catch (error) {}
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchOverallBldgData(bldgId, payload)
+                .then((res) => {
+                    setOverallBldgData(res.data);
+                })
+                .catch((error) => {});
         };
 
         const buildingEndUserData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioEndUser}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setEnergyConsumption(res.data);
-                        const energyData = res.data;
-                        let newDonutData = [];
-                        energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now / 1000);
-                            newDonutData.push(fixedConsumption);
-                        });
-                        setDonutChartData(newDonutData);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchOverallEndUse(bldgId, payload)
+                .then((res) => {
+                    setEnergyConsumption(res.data);
+                    const energyData = res.data;
+                    let newDonutData = [];
+                    energyData.forEach((record) => {
+                        let fixedConsumption = Math.round(record.energy_consumption.now);
+                        newDonutData.push(fixedConsumption);
                     });
-            } catch (error) {}
+                    setDonutChartData(newDonutData);
+                })
+                .catch((error) => {});
         };
-
-        // const buildingAlertsData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             Authorization: `Bearer ${userdata.token}`,
-        //         };
-        //         let params = `?building_id=${1}`;
-        //         await axios
-        //             .post(
-        //                 `${BaseUrl}${builidingAlerts}${params}`,
-        //                 {
-        //                     date_from: dateFormatHandler(startDate),
-        //                     date_to: dateFormatHandler(endDate),
-        //                 },
-        //                 { headers }
-        //             )
-        //             .then((res) => {
-        //                 setBuildingAlerts(res.data);
-        //             });
-        //     } catch (error) {
-        //     }
-        // };
-
-        // const buildingPeaksData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             Authorization: `Bearer ${userdata.token}`,
-        //         };
-        //         let params = `?building_id=${bldgId}&limit=${2}`;
-        //         await axios
-        //             .post(
-        //                 `${BaseUrl}${builidingPeak}${params}`,
-        //                 {
-        //                     date_from: dateFormatHandler(startDate),
-        //                     date_to: dateFormatHandler(endDate),
-        //                 },
-        //                 { headers }
-        //             )
-        //             .then((res) => {
-        //                 setTopContributors(res.data);
-        //             });
-        //     } catch (error) {
-        //     }
-        // };
 
         const builidingEquipmentsData = async () => {
-            try {
-                setIsEquipmentProcessing(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingEquipments}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let data = res.data[0].top_contributors;
-                        // const dataset=[
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1216, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1561676, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 34561656, old: 0}},
-                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 566167654, old: 0}},
-                        // ]
-                        let sortedData = data.sort((a, b) => {
-                            return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
-                        });
-                        setTopEnergyConsumption(sortedData);
-                        setIsEquipmentProcessing(false);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchBuildingEquipments(bldgId, payload)
+                .then((res) => {
+                    let response = res.data[0].top_contributors;
+                    let topEnergyData = [];
+                    response.forEach((record) => {
+                        let obj = {
+                            link: '#',
+                            label: record?.equipment_name,
+                            value: Math.round(record?.energy_consumption.now / 1000),
+                            unit: UNITS.KWH,
+                            badgePercentage: percentageHandler(
+                                record?.energy_consumption.now,
+                                record?.energy_consumption.old
+                            ),
+                            badgeType: fetchTrendBadgeType(
+                                record?.energy_consumption.now,
+                                record?.energy_consumption.old
+                            ),
+                        };
+                        topEnergyData.push(obj);
                     });
-            } catch (error) {
-                setIsEquipmentProcessing(false);
-            }
+                    setTopEnergyConsumptionData(topEnergyData);
+                })
+                .catch((error) => {});
         };
 
-        const builidingHourlyData = async () => {
-            try {
-                setIsAvgConsumptionDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingHourly}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res?.data;
+        const buildingHourlyData = async () => {
+            setIsAvgConsumptionDataLoading(true);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchBuilidingHourly(bldgId, payload)
+                .then((res) => {
+                    let response = res?.data;
+                    let weekDaysResData = response[0]?.weekdays;
+                    let weekEndResData = response[0]?.weekend;
 
-                        let weekDaysResData = response[0]?.weekdays;
-                        let weekEndResData = response[0]?.weekend;
+                    let weekEndList = [];
+                    let weekDaysList = [];
 
-                        const weekDaysData = weekDaysResData.map((el) => {
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: parseInt(el.y / 1000),
-                            };
-                        });
-
-                        const weekendsData = weekEndResData.map((el) => {
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: parseInt(el.y / 1000),
-                            };
-                        });
-
-                        const newWeekdaysData = [
-                            {
-                                name: 'Weekdays',
-                                data: [],
-                            },
-                        ];
-
-                        const newWeekendsData = [
-                            {
-                                name: 'Weekends',
-                                data: [],
-                            },
-                        ];
-
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekDaysData.find((record) => record.x === i);
-
-                            if (matchedRecord) {
-                                newWeekdaysData[0].data.push(matchedRecord);
-                            } else {
-                                newWeekdaysData[0].data.push({
-                                    x: i,
-                                    y: 0,
-                                });
-                            }
-                        }
-
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x === i);
-                            if (matchedRecord) {
-                                matchedRecord.x = i;
-                                newWeekendsData[0].data.push(matchedRecord);
-                            } else {
-                                newWeekendsData[0].data.push({
-                                    x: i,
-                                    y: 0,
-                                });
-                            }
-                        }
-                        for (let i = 0; i < 24; i++) {
-                            if (i === 0) {
-                                newWeekdaysData[0].data[i].x = '12AM';
-                                newWeekendsData[0].data[i].x = '12AM';
-                            } else if (i === 12) {
-                                newWeekdaysData[0].data[i].x = '12PM';
-                                newWeekendsData[0].data[i].x = '12PM';
-                            } else if (i > 12) {
-                                let a = i % 12;
-                                newWeekdaysData[0].data[i].x = a + 'PM';
-                                newWeekendsData[0].data[i].x = a + 'PM';
-                            } else {
-                                newWeekdaysData[0].data[i].x = i + 'AM';
-                                newWeekendsData[0].data[i].x = i + 'AM';
-                            }
-                        }
-                        setWeekDaysSeries(newWeekdaysData);
-                        setWeekEndsSeries(newWeekendsData);
-                        setIsAvgConsumptionDataLoading(false);
+                    const weekDaysData = weekDaysResData.map((el) => {
+                        weekDaysList.push(Math.round(el.y / 1000));
+                        return {
+                            x: parseInt(moment.utc(el.x).format('HH')),
+                            y: Math.round(el.y / 1000),
+                        };
                     });
-            } catch (error) {
-                setIsAvgConsumptionDataLoading(false);
-            }
+
+                    const weekendsData = weekEndResData.map((el) => {
+                        weekEndList.push(Math.round(el.y / 1000));
+                        return {
+                            x: parseInt(moment.utc(el.x).format('HH')),
+                            y: Math.round(el.y / 1000),
+                        };
+                    });
+
+                    let finalList = weekEndList.concat(weekDaysList);
+                    finalList.sort((a, b) => a - b);
+
+                    let minVal = finalList[0];
+                    let maxVal = finalList[finalList.length - 1];
+
+                    let heatMapData = [];
+
+                    let newWeekdaysData = {
+                        name: 'Week days',
+                        data: [],
+                    };
+
+                    let newWeekendsData = {
+                        name: 'Weekends',
+                        data: [],
+                    };
+
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekDaysData.find((record) => record.x === i);
+
+                        if (matchedRecord) {
+                            matchedRecord.z = matchedRecord.y;
+                            matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                            newWeekdaysData.data.push(matchedRecord);
+                        } else {
+                            newWeekdaysData.data.push({
+                                x: i,
+                                y: getAverageValue(i, minVal, maxVal),
+                                z: 0,
+                            });
+                        }
+                    }
+
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekendsData.find((record) => record.x === i);
+
+                        if (matchedRecord) {
+                            matchedRecord.z = matchedRecord.y;
+                            matchedRecord.y = getAverageValue(matchedRecord.y, minVal, maxVal);
+                            newWeekendsData.data.push(matchedRecord);
+                        } else {
+                            newWeekendsData.data.push({
+                                x: i,
+                                y: getAverageValue(i, minVal, maxVal),
+                                z: 0,
+                            });
+                        }
+                    }
+                    for (let i = 0; i < 24; i++) {
+                        if (i === 0) {
+                            newWeekdaysData.data[i].x = '12AM';
+                            newWeekendsData.data[i].x = '12AM';
+                        } else if (i === 12) {
+                            newWeekdaysData.data[i].x = '12PM';
+                            newWeekendsData.data[i].x = '12PM';
+                        } else if (i > 12) {
+                            let a = i % 12;
+                            newWeekdaysData.data[i].x = a + 'PM';
+                            newWeekendsData.data[i].x = a + 'PM';
+                        } else {
+                            newWeekdaysData.data[i].x = i + 'AM';
+                            newWeekendsData.data[i].x = i + 'AM';
+                        }
+                    }
+
+                    heatMapData.push(newWeekendsData);
+                    heatMapData.push(newWeekdaysData);
+
+                    setHourlyAvgConsumpData(heatMapData.reverse());
+                    setIsAvgConsumptionDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsAvgConsumptionDataLoading(false);
+                });
         };
 
         const buildingConsumptionChart = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getEnergyConsumption}${params}`,
+            setIsEnergyConsumptionDataLoading(true);
+            let payload = {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
+            };
+            await fetchEnergyConsumption(bldgId, payload)
+                .then((res) => {
+                    let response = res?.data;
+                    let newArray = [
                         {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
+                            name: 'Energy',
+                            data: [],
                         },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res?.data;
-                        let newArray = [
-                            {
-                                name: 'Energy',
-                                data: [],
-                            },
-                        ];
-                        response.forEach((record) => {
-                            newArray[0].data.push({
-                                x: record?.x,
-                                y: parseInt(record?.y / 1000),
-                            });
+                    ];
+                    response.forEach((record) => {
+                        newArray[0].data.push({
+                            x: record?.x,
+                            y: Math.round(record?.y / 1000),
                         });
-                        setBuildingConsumptionChartData(newArray);
-                        setIsEnergyConsumptionDataLoading(false);
                     });
-            } catch (error) {
-                setIsEnergyConsumptionDataLoading(false);
-            }
+                    setBuildingConsumptionChartData(newArray);
+                    setIsEnergyConsumptionDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsEnergyConsumptionDataLoading(false);
+                });
         };
 
-        const calculateDays = () => {
-            let time_difference = endDate.getTime() - startDate.getTime();
-            let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            days_difference = days_difference + 1;
-            setDaysCount(days_difference);
-        };
-
-        calculateDays();
         buildingOverallData();
         buildingEndUserData();
         builidingEquipmentsData();
-        builidingHourlyData();
+        buildingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -918,674 +672,62 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <div className="ml-2">
-                <Header title="Building Overview" type="page" />
-            </div>
-            <Row xl={12} className="mt-2">
-                <div className="energy-summary-alignment">
-                    <div className="card-box-style button-style">
-                        <div className="card-body text-center">
-                            <DetailedButton
-                                title="Total Consumption"
-                                description={parseInt(overview?.total_consumption.now / 1000)}
-                                unit="kWh"
-                                value={percentageHandler(
-                                    overview.total_consumption.now,
-                                    overview.total_consumption.old
-                                )}
-                                consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
-                                infoText={
-                                    startEndDayCount > 1
-                                        ? `Total energy consumption across all your buildings for the past ${startEndDayCount} days.`
-                                        : `Total energy consumption across all your buildings for the past ${startEndDayCount} day.`
-                                }
-                                infoType={`total-bld-cnsmp`}
-                            />
-                        </div>
-                    </div>
+            <Header title="Building Overview" type="page" />
 
-                    {/* {/* {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <h5 className="card-title subtitle-style">
-                                Portfolio Rank&nbsp;&nbsp;
-                                <div>
-                                    <FontAwesomeIcon icon={faCircleInfo} size="md" color="#D0D5DD" id="title" />
-                                    <UncontrolledTooltip placement="bottom" target="#title">
-                                        Portfolio Rank
-                                    </UncontrolledTooltip>
-                                </div>
-                            </h5>
-                            <p className="card-text card-content-style">
-                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
-                            </p>
-                        </div>
-                    </div> */}
-
-                    <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="Energy Density"
-                                description={(overview.average_energy_density.now / 1000).toFixed(2)}
-                                unit="kWh/sq.ft."
-                                value={percentageHandler(
-                                    overview.average_energy_density.now,
-                                    overview.average_energy_density.old
-                                )}
-                                consumptionNormal={
-                                    overview.average_energy_density.now >= overview.average_energy_density.old
-                                }
-                                infoText={
-                                    startEndDayCount > 1
-                                        ? `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} days.`
-                                        : `Average energy density (kWh / sq. ft.) across all your buildings for the past ${startEndDayCount} day.`
-                                }
-                                infoType={`avg-bld-dnty`}
-                            />
-                        </div>
-                    </div>
-                    {/* {/* {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="12 Mo. Electric EUI"
-                                description={overview.yearly_electric_eui.now / 1000}
-                                unit="kBtu/ft/yr"
-                                value={percentageHandler(
-                                    overview.yearly_electric_eui.now,
-                                    overview.yearly_electric_eui.old
-                                )}
-                                consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
-                                infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
-                                infoType={`total-bld-eui`}
-                            />
-                        </div>
-                    </div> */}
-                    {/* <div className="card-box-style button-style">
-                        <div className="card-body">
-                            <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
-                                Monitored Load&nbsp;&nbsp;
-                                <div>
-                                    <FontAwesomeIcon
-                                        icon={faCircleInfo}
-                                        size="md"
-                                        color="#D0D5DD"
-                                        id="tooltip-monitored-load"
-                                    />
-                                    <UncontrolledTooltip placement="bottom" target="tooltip-monitored-load">
-                                        Add Monitored Load Data
-                                    </UncontrolledTooltip>
-                                </div>
-                            </h5>
-                            {<Link
-                                to={{
-                                    pathname: `/settings/utility-bills`,
-                                }}>
-                                <button id="inner-button">Add Utility Bill</button>
-                            </Link>
-                        </div>
-                    </div> */}
-                </div>
+            <Row lg={12} className="ml-2 mb-4">
+                <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
             </Row>
 
-            {/* <Row> */}
             <div className="bldg-page-grid-style">
-                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
-                    {/* Energy Consumption by End Use  */}
-                    {/* <div> */}
-                    {/* <div> */}
-                    {/* <div style={{ display: 'inline-block' }}>
-                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            </div> */}
-                    {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
-                                <Link
-                                    to={{
-                                        pathname: `/energy/end-uses/${bldgId}`,
-                                    }}>
-                                    <div
-                                        rel="noopener noreferrer"
-                                        className="link-primary mr-3"
-                                        style={{
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        More Details
-                                    </div>
-                                </Link>
-                            </div> */}
-                    {/* </div>
-                        <div className="custom-bld-enduse-style">
-                            <div> */}
-                    <EnergyConsumptionTotals
+                <div className="ml-2">
+                    <EnergyConsumptionByEndUse
+                        title="Energy Consumption by End Use"
+                        subtitle="Energy Totals"
                         series={donutChartData}
-                        options={donutChartOpts}
                         energyConsumption={energyConsumption}
                         bldgId={bldgId}
                         pageType="building"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
                     />
-                    {/* <DonutChart
-                                    donutChartOpts={donutChartOpts}
-                                    donutChartData={donutChartData}
-                                    height={185}
-                                    id={Date.now()}
-                                /> */}
-                    {/* </div> */}
-                    {/* <div className="mt-3">
-                                {energyConsumption.map((record, index) => {
-                                    return (
-                                        <div>
-                                            <Link
-                                                to={{
-                                                    pathname: `/energy/${record.device.toLowerCase()}/${bldgId}`,
-                                                }}>
-                                                <div
-                                                    className="custom-bldg-table-style building-consumption-style m-2 p-1"
-                                                    onMouseOver={(e) => handleChange(e, record.device)}>
-                                                    <div className="ml-2">
-                                                        {record.device === 'HVAC' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3094B9',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Lighting' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#2C4A5E',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Plug' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#66D6BC',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Process' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3B8554',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Other' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3B8554',
-                                                                }}></div>
-                                                        )}
-                                                    </div>
-                                                    <div className="custom-bld-equip-style record-bld-style font-weight-bold">
-                                                        {record.device}
-                                                    </div>
-                                                    <div className="custom-bld-usage-style muted table-font-style">
-                                                        {(record.energy_consumption.now / 1000).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                maximumFractionDigits: 5,
-                                                            }
-                                                        )}
-                                                        kWh
-                                                    </div>
-                                                    <div className="mr-2">
-                                                        {record.energy_consumption.now <=
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-success text-success custom-bld-style">
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {record.energy_consumption.now >
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-danger text-danger custom-bld-style">
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    );
-                                })}
-                            </div> */}
-                    {/* </div> */}
-                    {/* </div> */}
 
-                    {/* Top 3 Peak Demand Periods  */}
-                    {/* {/* {/* <Row>
-                        <div className="card-body">
-                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Top 3 Peak Demand Periods
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/peak-demand/${bldgId}`,
-                                }}>
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary font-weight-bold mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                    }}>
-                                    More Details
-                                </a>
-                            </Link>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                Max power draw (15 minutes period)
-                            </h6>
-                            <div className="card-group mt-2 top-peak-demand-style">
-                                {topContributors.slice(0, 3).map((item, index) => (
-                                    <div className="card peak-demand-container mt-3" ref={hoverRef}>
-                                        <div className="card-body">
-                                            <h6
-                                                className="card-title text-muted peak-demand-card-style"
-                                                style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
-                                                {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
-                                                {new Date(item.timeRange.frm).toLocaleTimeString('en', {
-                                                    timeStyle: 'short',
-                                                    hour12: true,
-                                                    timeZone: 'UTC',
-                                                })}
-                                            </h6>
-                                            <h5 className="card-title ml-1">
-                                                <span style={{ color: 'black' }}>
-                                                    {(item.overall_energy_consumption / 1000).toLocaleString(
-                                                        undefined,
-                                                        {
-                                                            maximumFractionDigits: 2,
-                                                        }
-                                                    )}
-                                                </span>
-                                                kW
-                                            </h5>
-                                            <div style={{ height: '75%' }}>
-                                                {isHovered ? (
-                                                    <div
-                                                        style={{ display: 'flex', justifyContent: 'center' }}
-                                                        className="m-4">
-                                                        <Link
-                                                            to={{
-                                                                pathname: `/explore/by-building`,
-                                                            }}>
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
-                                                                <i className="uil uil-pen mr-1"></i>Explore
-                                                            </button>
-                                                        </Link>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <p className="card-text peak-card-label">Top Contributors</p>
-                                                        <table className="table table-borderless small peak-table-font">
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td className="peak-table-content">
-                                                                        {item.top_contributors.slice(0, 3).map((el) => (
-                                                                            <tr>
-                                                                                <div className="font-weight-bold text-dark">
-                                                                                    {el.equipment_name}
-                                                                                </div>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </td>
-                                                                    <td className="peak-table-content-two">
-                                                                        {item.top_contributors.map((el2) => (
-                                                                            <tr
-                                                                                style={{
-                                                                                    fontSize: 12,
-                                                                                }}>
-                                                                                <div style={{ marginTop: '0.3vh' }}>
-                                                                                    {el2.energy_consumption.now.toLocaleString(
-                                                                                        undefined,
-                                                                                        {
-                                                                                            maximumFractionDigits: 2,
-                                                                                        }
-                                                                                    )}{' '}
-                                                                                    kW
-                                                                                </div>
-                                                                            </tr>
-                                                                        ))}
-                                                                    </td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </Row> */}
+                    <HourlyAvgConsumption
+                        title="Hourly Average Consumption"
+                        subtitle="Average by Hour (kWh)"
+                        isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                        startEndDayCount={startEndDayCount}
+                        hourlyAvgConsumpOpts={hourlyAvgConsumpOpts}
+                        hourlyAvgConsumpData={hourlyAvgConsumpData}
+                        heatMapChartHeight={heatMapChartHeight}
+                        timeZone={timeZone}
+                        className="mt-4"
+                        pageType="building"
+                        handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                        showRouteBtn={true}
+                    />
 
-                    {/* Hourly Average Consumption */}
-                    <Row>
-                        <div className="card-body" style={{ padding: '0.5rem' }}>
-                            <div className="total-eng-consumtn">
-                                <div className="container-header mb-1">
-                                    <div>
-                                        <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
-                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                            Average by Hour (kWh)
-                                        </h6>
-                                    </div>
-                                    {/* <div>
-                                        <Button
-                                            label="More Details"
-                                            size={Button.Sizes.lg}
-                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                            type={Button.Type.tertiary}
-                                            iconAlignment={Button.IconAlignment.right}
-                                            onClick={() => {
-                                                history.push({
-                                                    pathname: `/energy/time-of-day/${bldgId}`,
-                                                });
-                                            }}
-                                        />
-                                    </div> */}
-                                </div>
-                                {isAvgConsumptionDataLoading ? (
-                                    <div className="loader-center-style" style={{ height: '400px' }}>
-                                        <Spinner className="m-2" color={'primary'} />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <HeatMapChart
-                                            options={weekDaysOptions}
-                                            series={weekDaysSeries}
-                                            height={weekdaysChartHeight}
-                                        />
-                                        <span className="m-2"></span>
-                                        <HeatMapChart
-                                            options={weekEndsOptions}
-                                            series={weekEndsSeries}
-                                            height={weekendsChartHeight}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </Row>
-
-                    {/* Total Energy Consumption  */}
-                    <Row>
-                        <div className="card-body">
-                            <div className="total-eng-consumtn">
-                                <div className="container-header mb-1">
-                                    <div>
-                                        <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
-                                        <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                                            Hourly Energy Consumption (kWh)
-                                        </h6>
-                                    </div>
-                                    {/* <div>
-                                        <Button
-                                            label="More Details"
-                                            size={Button.Sizes.lg}
-                                            icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                            type={Button.Type.tertiary}
-                                            iconAlignment={Button.IconAlignment.right}
-                                            onClick={() => {
-                                                history.push({
-                                                    pathname: `/energy/end-uses/${bldgId}`,
-                                                });
-                                            }}
-                                        />
-                                    </div> */}
-                                </div>
-                                {isEnergyConsumptionDataLoading ? (
-                                    <div className="loader-center-style" style={{ height: '400px' }}>
-                                        <Spinner className="m-2" color={'primary'} />
-                                    </div>
-                                ) : (
-                                    <LineColumnChart
-                                        series={buildingConsumptionChartData}
-                                        options={buildingConsumptionChartOpts}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </Row>
+                    <TotalEnergyConsumption
+                        title="Total Energy Consumption"
+                        subtitle="Hourly Energy Consumption (kWh)"
+                        series={buildingConsumptionChartData}
+                        isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                        startEndDayCount={startEndDayCount}
+                        timeZone={timeZone}
+                        pageType="building"
+                        className="mt-4"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
+                    />
                 </div>
 
-                {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
-                <div style={{ marginTop: '2rem', marginRight:"1rem", marginLeft: '23px' }}>
-                    {/* {/* {/* <Row>
-                        <div>
-                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Building Alerts
-                            </h6>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary mr-2"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}></a>
-                            <span
-                                className="float-right mr-0 font-weight-bold"
-                                style={{ color: 'blue' }}
-                                onClick={() => setBuildingAlerts([])}>
-                                Clear
-                            </span>
-
-                            <div className="mt-2 alert-container">
-                                {buildingAlert.map((record) => {
-                                    return (
-                                        <>
-                                            {record.type === 'building-add' && (
-                                                <div className="alert-card mb-2">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faMountain}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#B42318
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>New Building Peak</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">
-                                                            225.3 kW &nbsp; 3/3/22 @ 3:20 PM
-                                                        </span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Today</div>
-                                                </div>
-                                            )}
-                                            {record.type === 'energy-trend' && (
-                                                <div className="alert-card mb-2">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowTrendUp}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#DC6803"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>Energy Trend Upward</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">+25% from last 30 days</span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Yesterday</div>
-                                                </div>
-                                            )}
-                                            {record.type === 'notification' && (
-                                                <div className="alert-card">
-                                                    <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faTriangleExclamation}
-                                                            size="lg"
-                                                            className="ml-2"
-                                                            color="#DC6803"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <span className="alert-heading">
-                                                            <b>Service Due Soon (AHU 1)</b>
-                                                        </span>
-                                                        <br />
-                                                        <span className="alert-content">
-                                                            40 Run Hours &nbsp; in 25 Days
-                                                        </span>
-                                                    </div>
-                                                    <div className="float-right ml-4 alert-weekday">Tuesday</div>
-                                                </div>
-                                            )}
-                                        </>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </Row> */}
-                    <Row>
-                        <div className="equip-table-container">
-                            <h6 className="top-equip-title">Top Equipment Consumption</h6>
-                            <table className="table table-borderless">
-                                <thead>
-                                    <tr className="equip-table-heading">
-                                        <th>Equipment</th>
-                                        <th>Energy</th>
-                                        <th>Change</th>
-                                    </tr>
-                                </thead>
-                                {isEquipmentProcessing ? (
-                                    <tbody>
-                                        <SkeletonTheme color="#202020" height={35}>
-                                            <tr>
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={5} />
-                                                </td>
-                                            </tr>
-                                        </SkeletonTheme>
-                                    </tbody>
-                                ) : (
-                                    <tbody style={{ fontSize: '12px' }}>
-                                        {topEnergyConsumption.map((item, index) => (
-                                            <tr key={index}>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                            {item.equipment_name}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div>
-                                                            <span>
-                                                                {(item.energy_consumption.now / 1000).toLocaleString(
-                                                                    undefined,
-                                                                    {
-                                                                        maximumFractionDigits: 2,
-                                                                    }
-                                                                )}
-                                                            </span>
-                                                            <span className="equip-table-unit">&nbsp;kWh</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        <div>
-                                                            {item.energy_consumption.now <
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-success text-success equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-chart-down">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now >
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-danger text-danger equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now ===
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button text-muted equip-table-button"
-                                                                    style={{ width: 'auto', border: 'none' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                )}
-                            </table>
-                        </div>
-                    </Row>
-                </div>
-                {/* </Col> */}
+                <TopConsumptionWidget
+                    title="Top Energy Consumers"
+                    heads={['Equipment', 'Energy', 'Change']}
+                    rows={topEnergyConsumptionData}
+                    className={'fit-container-style'}
+                    widgetType="TopEnergyConsumersWidget"
+                />
             </div>
-            {/* </Row> */}
         </React.Fragment>
     );
 };
