@@ -48,7 +48,7 @@ export const configDonutChartWidget = (type) => {
                             fontWeight: 500,
                             lineHeight: '1rem',
                             formatter: function (val) {
-                                let value = parseInt(val);
+                                let value = Math.round(val);
                                 let consumption = formatConsumptionValue(value, 0);
                                 return `${consumption} ${UNITS.KWH}`;
                             },
