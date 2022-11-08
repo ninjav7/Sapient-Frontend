@@ -6,6 +6,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
+import { useHistory } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchOverallEndUse,
@@ -30,6 +31,7 @@ import './style.css';
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const history = useHistory();
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -55,100 +57,6 @@ const BuildingOverview = () => {
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
-
-    const [donutChartOpts, setDonutChartOpts] = useState({
-        chart: {
-            type: 'donut',
-            toolbar: {
-                show: true,
-            },
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 1);
-                },
-            },
-        },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
-        series: [12553, 11553, 6503, 2333],
-        plotOptions: {
-            pie: {
-                startAngle: 0,
-                endAngle: 360,
-                expandOnClick: false,
-                offsetX: 0,
-                offsetY: 0,
-                customScale: 1,
-                dataLabels: {
-                    offset: 0,
-                    minAngleToShowLabel: 10,
-                },
-                donut: {
-                    size: '80%',
-                    background: 'grey',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 400,
-                            color: 'red',
-                            formatter: function (val) {
-                                return `${val} kWh`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            fontSize: '22px',
-                            fontWeight: 600,
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return a + b;
-                                }, 0);
-                                return `${sum} kWh`;
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 300,
-                    },
-                },
-            },
-        ],
-        dataLabels: {
-            enabled: false,
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        legend: {
-            show: false,
-        },
-        stroke: {
-            width: 0,
-        },
-
-        itemMargin: {
-            horizontal: 10,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-    });
 
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
     const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
@@ -240,7 +148,7 @@ const BuildingOverview = () => {
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = parseInt(val);
+                    let print = Math.round(val);
                     return `${print}`;
                 },
             },
@@ -510,7 +418,13 @@ const BuildingOverview = () => {
             return 0;
         }
         let percentage = Math.round(((value - min) / (max - min)) * 100);
-        return parseInt(percentage);
+        return Math.round(percentage);
+    };
+
+    const handleRouteChange = (path) => {
+        history.push({
+            pathname: `${path}/${bldgId}`,
+        });
     };
 
     useEffect(() => {
@@ -546,7 +460,7 @@ const BuildingOverview = () => {
                     const energyData = res.data;
                     let newDonutData = [];
                     energyData.forEach((record) => {
-                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        let fixedConsumption = Math.round(record.energy_consumption.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
@@ -568,7 +482,7 @@ const BuildingOverview = () => {
                         let obj = {
                             link: '#',
                             label: record?.equipment_name,
-                            value: parseInt(record?.energy_consumption.now / 1000),
+                            value: Math.round(record?.energy_consumption.now / 1000),
                             unit: UNITS.KWH,
                             badgePercentage: percentageHandler(
                                 record?.energy_consumption.now,
@@ -603,18 +517,18 @@ const BuildingOverview = () => {
                     let weekDaysList = [];
 
                     const weekDaysData = weekDaysResData.map((el) => {
-                        weekDaysList.push(parseInt(el.y / 1000));
+                        weekDaysList.push(Math.round(el.y / 1000));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: parseInt(el.y / 1000),
+                            y: Math.round(el.y / 1000),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
-                        weekEndList.push(parseInt(el.y / 1000));
+                        weekEndList.push(Math.round(el.y / 1000));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: parseInt(el.y / 1000),
+                            y: Math.round(el.y / 1000),
                         };
                     });
 
@@ -714,7 +628,7 @@ const BuildingOverview = () => {
                     response.forEach((record) => {
                         newArray[0].data.push({
                             x: record?.x,
-                            y: parseInt(record?.y / 1000),
+                            y: Math.round(record?.y / 1000),
                         });
                     });
                     setBuildingConsumptionChartData(newArray);
@@ -770,10 +684,11 @@ const BuildingOverview = () => {
                         title="Energy Consumption by End Use"
                         subtitle="Energy Totals"
                         series={donutChartData}
-                        options={donutChartOpts}
                         energyConsumption={energyConsumption}
                         bldgId={bldgId}
                         pageType="building"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
                     />
 
                     <HourlyAvgConsumption
@@ -786,8 +701,9 @@ const BuildingOverview = () => {
                         heatMapChartHeight={heatMapChartHeight}
                         timeZone={timeZone}
                         className="mt-4"
-                        bldgId={bldgId}
                         pageType="building"
+                        handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                        showRouteBtn={true}
                     />
 
                     <TotalEnergyConsumption
@@ -799,6 +715,8 @@ const BuildingOverview = () => {
                         timeZone={timeZone}
                         pageType="building"
                         className="mt-4"
+                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                        showRouteBtn={true}
                     />
                 </div>
 
@@ -806,7 +724,8 @@ const BuildingOverview = () => {
                     title="Top Energy Consumers"
                     heads={['Equipment', 'Energy', 'Change']}
                     rows={topEnergyConsumptionData}
-                    className={'fit-container-style mt-0'}
+                    className={'fit-container-style'}
+                    widgetType="TopEnergyConsumersWidget"
                 />
             </div>
         </React.Fragment>

@@ -12,9 +12,17 @@ import { Button } from '../button';
 import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
 import { formatConsumptionValue } from '../../helpers/helpers';
 
-const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], className = '', handleClick }) => {
+const TopConsumptionWidget = ({
+    subtitle,
+    title,
+    heads = [],
+    rows = [],
+    className = '',
+    handleClick,
+    widgetType = 'TopConsumptionWidget',
+}) => {
     return (
-        <div className={`TopConsumptionWidget-wrapper ${className}`}>
+        <div className={`${widgetType}-wrapper ${className}`}>
             <div className="d-flex align-items-center justify-content-between mt-1">
                 <div>
                     {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
@@ -34,17 +42,17 @@ const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], classNam
             </div>
 
             <Brick sizeInRem={1.5} />
-            <div className="TopConsumptionWidget-table">
-                <div className="TopConsumptionWidget-table-row">
+            <div className={`${widgetType}-table`}>
+                <div className={`${widgetType}-table-row`}>
                     {heads.map((head, index) => (
-                        <div className="TopConsumptionWidget-table-head-cell" key={index}>
+                        <div className={`${widgetType}-table-head-cell`} key={index}>
                             <Typography.Body size={Typography.Sizes.sm}>{head}</Typography.Body>
                         </div>
                     ))}
                 </div>
 
                 {rows.map(({ link, label, value, unit, badgePercentage, badgeType }, index) => (
-                    <div className="TopConsumptionWidget-table-row" key={index}>
+                    <div className={`${widgetType}-table-row`} key={index}>
                         <div>
                             <Link className="typography-wrapper link" to={link}>
                                 {label}
