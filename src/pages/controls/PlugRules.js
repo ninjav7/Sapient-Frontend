@@ -256,11 +256,7 @@ const PlugRules = () => {
             setOfflinePlugRuleData(offlineData);
         });
     };
-
-    // useEffect(() => {
-    //     fetchPlugRuleData();
-    // }, [pageRefresh]);
-
+    
     useEffect(() => {
         fetchPlugRuleData();
     }, [activeBuildingId, search]);

@@ -1762,34 +1762,28 @@ const PlugRule = () => {
                                 name: 'Location',
                                 accessor: 'equipment_link_location',
                                 callbackValue: renderLocation,
-                                // onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'MAC Address',
                                 accessor: 'device_link',
-                                // onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Sensors',
                                 accessor: 'sensor_count',
-                                // onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Assigned Rule',
                                 accessor: 'assigned_rule',
                                 callbackValue: renderAssignRule,
-                                // onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Tags',
                                 accessor: 'tags',
                                 callbackValue: renderTagCell,
-                                // onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Last Data',
                                 accessor: 'last_data',
-                                // onSort: (method, name) => setSortBy({ method, name }),
                                 callbackValue: renderLastUsedCell,
                             },
                         ]}
@@ -1812,8 +1806,8 @@ const PlugRule = () => {
                                 type="checkbox"
                                 id="socket_rule"
                                 name="socket_rule"
-                                checked={selectedIds.includes(record?.id) || checkedAll} //record.linked_rule
-                                value={selectedIds.includes(record?.id) || checkedAll ? true : false} //record.linked_rule
+                                checked={selectedIds.includes(record?.id) || checkedAll}
+                                value={selectedIds.includes(record?.id) || checkedAll ? true : false}
                                 onChange={(e) => {
                                     setSensorIdNow(record?.id);
                                     handleRuleStateChange(e.target.value, record);
