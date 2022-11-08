@@ -1,5 +1,3 @@
-//export const BaseUrl = 'https://sapient.azurewebsites.net';
-//export const BaseUrl = 'https://sapient-beta.azurewebsites.net';
 export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
 
 // Auth
@@ -38,6 +36,7 @@ export const generalBldgDelete = '/api/config/general/delete_building';
 export const updateAccount = '/api/user_role/user/update-user';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
+
 // user permission and roles
 export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
 export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
@@ -49,6 +48,7 @@ export const getSingleUserDetail = '/api/user_role/user-permission-role/member-u
 export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
 export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
 export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';
+
 // Search
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 

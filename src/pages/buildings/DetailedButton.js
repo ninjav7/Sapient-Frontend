@@ -10,7 +10,6 @@ const DetailedButton = (props) => {
                 {props.title}&nbsp;&nbsp;
                 <div>
                     <FontAwesomeIcon icon={faCircleInfo} size="md" color="#D0D5DD" id={'tooltip-' + props.infoType} />
-                    {/* <i className="uil uil-info-circle avatar-xs rounded-circle" id={'tooltip-' + props.infoType} /> */}
 
                     <UncontrolledTooltip placement="bottom" target={'tooltip-' + props.infoType}>
                         {props.infoText}

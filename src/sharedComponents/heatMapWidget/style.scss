@@ -1,0 +1,72 @@
+@import '../../assets/scss/colors';
+
+.heatmap-chart-widget-wrapper {
+    border: .0625rem solid $primary-gray-200 !important;
+    border-radius: 0.5rem;
+}
+
+.heatmap-chart-widget {
+    &-titles {
+        padding: 1rem 1.5rem 0 1.5rem;
+    }
+
+    padding-right: 1rem;
+    margin-bottom: .3125rem;
+
+    &-wrapper {
+        .apexcharts-xaxis-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            fill: $primary-gray-550 !important;
+        }
+        .apexcharts-yaxis-label {
+            font-size: 0.625rem;
+            font-weight: 500;
+            fill: $primary-gray-550 !important;
+        }
+        .apexcharts-gridline {
+            stroke: $primary-gray-200 !important;
+        }
+        .apexcharts-xaxistooltip-bottom {
+            display: none !important;
+        }
+        .apexcharts-tooltip,
+        .apexcharts-tooltip.apexcharts-theme-light {
+            padding: 0.625rem 1rem 0.75rem 0.875rem;
+            box-shadow: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.01),
+                0 0.25rem 0.375rem -0.125rem rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem;
+            border: 0.0625rem solid $primary-gray-700;
+        }
+        .apexcharts-xaxis-tick {
+            display: none;
+        }
+    }
+    &-tooltip {
+        opacity: 1;
+        &-title {
+            margin: 0;
+            margin-bottom: 0.375rem;
+            font-style: normal;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.375rem;
+            color: $primary-gray-500;
+        }
+        &-value {
+            font-style: normal;
+            font-weight: 500;
+            font-size: 1.125rem;
+            line-height: 120%;
+            color: $primary-gray-800;
+        }
+
+        &-time-period {
+            font-style: normal;
+            font-weight: 500;
+            font-size: 0.75rem;
+            line-height: 1.0625rem;
+            color: $primary-gray-500;
+        }
+    }
+}
