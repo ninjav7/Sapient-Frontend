@@ -5,3 +5,7 @@ export const setProcessing = (value) => {
         s.isLoading = value;
     });
 };
+
+export const breakerLinkingAlerts = (numberOne, numberTwo) => {
+    alert(`Breaker ${numberOne} & Breaker ${numberTwo} cannot be linked!`);
+};

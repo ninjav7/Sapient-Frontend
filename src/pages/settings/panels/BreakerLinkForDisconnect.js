@@ -8,7 +8,7 @@ import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { LoadingStore } from '../../../store/LoadingStore';
-import { setProcessing } from './utils';
+import { setProcessing, breakerLinkingAlerts } from './utils';
 import './panel-style.css';
 
 const foreignObjectSize = 30;
@@ -191,9 +191,7 @@ export default function CustomEdge({
     const linkBreakers = () => {
         // breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3
         if (sourceBreakerObj?.data?.breakerType === 3 || targetBreakerObj?.data?.breakerType === 3) {
-            alert(
-                `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-            );
+            breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
             return;
         }
 
@@ -206,22 +204,25 @@ export default function CustomEdge({
                     );
 
                     if (sourceBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
 
                     if (targetBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
 
                     if (thirdBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
@@ -263,22 +264,25 @@ export default function CustomEdge({
                     );
 
                     if (sourceBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
 
                     if (targetBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
 
                     if (parentBreakerObj?.data?.breakerType === 3) {
-                        alert(
-                            `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                        breakerLinkingAlerts(
+                            sourceBreakerObj?.data?.breaker_number,
+                            targetBreakerObj?.data?.breaker_number
                         );
                         return;
                     }
@@ -340,18 +344,14 @@ export default function CustomEdge({
 
         // breakerLink= 2:2
         if (sourceBreakerObj?.data?.breakerType === 2 && targetBreakerObj?.data?.breakerType === 2) {
-            alert(
-                `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-            );
+            breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
             return;
         }
 
         // breakerLink= 1:2 && breakerLink= 2:1
         if (sourceBreakerObj?.data?.breakerType === 2 || targetBreakerObj?.data?.breakerType === 2) {
             if (panelData?.voltage === '120/240') {
-                alert(
-                    `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-                );
+                breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
                 return;
             }
             if (sourceBreakerObj?.data?.breakerType === 2) {
