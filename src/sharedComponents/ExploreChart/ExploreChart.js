@@ -28,7 +28,7 @@ const ExploreChart = (props) => {
     const options = {
         chart: {
             type: 'line',
-            alignTicks:false,
+            alignTicks: false,
             animation: {
                 duration: 1000,
             },
@@ -54,17 +54,20 @@ const ExploreChart = (props) => {
                 textTransform: 'capitalize',
             },
         },
+        rangeSelector: {
+            enabled: false,
+        },
         navigator: {
             enabled: true,
-            adaptToUpdatedData:true,
+            adaptToUpdatedData: true,
         },
         exporting: {
             enabled: false,
         },
         plotOptions: {
             series: {
-              showInNavigator: true,
-              gapSize: 6,
+                showInNavigator: true,
+                gapSize: 6,
             },
         },
         tooltip: {
@@ -83,7 +86,7 @@ const ExploreChart = (props) => {
             shared: true,
         },
         rangeSelector: {
-            selected: 1,
+            enabled: false,
         },
 
         scrollbar: {
@@ -167,7 +170,7 @@ const ExploreChart = (props) => {
                             },
                             {
                                 name: 'downloadCSV',
-                                label: 'DOWNLOAD CSV',
+                                label: 'Download CSV',
                             },
                         ]}
                         label={null}

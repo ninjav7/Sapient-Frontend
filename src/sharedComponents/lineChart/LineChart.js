@@ -31,7 +31,7 @@ const LineChart = (props) => {
                 linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
                 stops: [
                     [0, colorPalette[index]],
-                    [1, 'rgba(255,255,255,.25)'],
+                    [1, 'rgba(255,255,255,.01)'],
                 ],
             },
         };
@@ -94,7 +94,7 @@ const LineChart = (props) => {
                 threshold: null,
             },
         },
-        exporting: {
+        credits: {
             enabled: false,
         },
         scrollbar: {
@@ -164,7 +164,7 @@ const LineChart = (props) => {
                     <Typography size={Typography.Sizes.sm} fontWeight={Typography.Types.SemiBold}>
                         {title}
                     </Typography>
-                    <Typography>{subTitle}</Typography>
+                    <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
                 <div>
                     <DropDownIcon

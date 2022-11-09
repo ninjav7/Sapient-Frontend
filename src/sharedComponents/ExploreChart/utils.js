@@ -37,7 +37,7 @@ export const mockedData = [
     },
     {
         x: new Date('2022-10-5').getTime(),
-        y: 20000,
+        y: 34000,
     },
     {
         x: new Date('2022-10-6').getTime(),
@@ -49,7 +49,7 @@ export const mockedData = [
     },
     {
         x: new Date('2022-10-8').getTime(),
-        y: 20000,
+        y: 10000,
     },
     {
         x: new Date('2022-10-9').getTime(),
@@ -64,11 +64,11 @@ export const mockedData2 = [
     },
     {
         x: new Date('2022-10-2').getTime(),
-        y: 23000,
+        y: 50000,
     },
     {
         x: new Date('2022-10-3').getTime(),
-        y: 28500,
+        y: 10500,
     },
     {
         x: new Date('2022-10-4').getTime(),
@@ -80,7 +80,7 @@ export const mockedData2 = [
     },
     {
         x: new Date('2022-10-6').getTime(),
-        y: 25000,
+        y: 65000,
     },
     {
         x: new Date('2022-10-7').getTime(),

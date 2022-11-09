@@ -25,4 +25,12 @@
             margin-right: 10px;
         }
     }
+    .highcharts-exporting-group{
+        display: none;
+    }
+    .highcharts-axis-labels text{
+        color: #626B7F!important;
+        font-weight: 600;
+        font-size: 12px!important;
+    }
 }
