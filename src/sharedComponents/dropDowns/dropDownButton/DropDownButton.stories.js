@@ -59,7 +59,7 @@ export const Default = (props) => {
 
 Default.args = {
     label: 'Account',
-    links: [
+    options: [
         {
             link: '#',
             label: 'View profile',

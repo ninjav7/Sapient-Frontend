@@ -7,5 +7,10 @@
 
     .chart-header {
         padding-left: 10px;
+        display: flex;
+        justify-content: space-between;
+        .button-wrapper button{
+            padding: 0.75rem;
+        }
     }
 }
