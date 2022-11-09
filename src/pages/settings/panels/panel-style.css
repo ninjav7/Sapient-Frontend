@@ -54,8 +54,9 @@
     grid-template-columns: 1fr 1fr;
     justify-content: center;
     align-items: center;
-    margin-left: 350px;
-    margin-bottom: 50px;
+    margin-left: 21.875rem;
+    margin-bottom: 3.125rem;
+    height: 15rem;
 }
 
 .panel-first-row-style {
@@ -360,7 +361,7 @@
 }
 .dropdownScrollaleDisable::-webkit-scrollbar {
     display: none;
-  } 
+}
 .unlink-breaker-style {
     display: flex !important;
     flex-direction: row !important;

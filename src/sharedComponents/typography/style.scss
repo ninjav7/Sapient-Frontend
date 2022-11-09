@@ -13,7 +13,13 @@ $text-colors: (
             font-weight: 500;
             font-size: 1rem;
             line-height: 1.5rem;
-            color: $primary-gray-700;
+            color: $primary-gray-800;
+        }
+        &.sm {
+            font-weight: 500;
+            font-size: 1.125rem;
+            line-height: 1.625rem;
+            color: $primary-gray-800;
         }
 
         &.md {
@@ -31,17 +37,25 @@ $text-colors: (
             line-height: 2rem;
             color: $primary-gray-800;
         }
-        &.sm {
-            font-weight: 500;
-            font-size: 1.125rem;
-            line-height: 1.625rem;
+        &.xl {
+            font-family: $second-font;
+            font-weight: 700;
+            font-size: 1.875rem;
+            line-height: 2.375rem;
             color: $primary-gray-800;
+        }
+        &.xxl {
+            font-family: $second-font;
+            font-weight: 500;
+            font-size: 3rem;
+            line-height: 3.75rem;
+            color: $primary-gray-900;
         }
     }
 
     &.subheader {
         &.md {
-            font-weight: 500;
+            font-weight: 600;
             font-style: normal;
             font-size: 0.875rem;
             line-height: 1.25rem;
@@ -62,7 +76,7 @@ $text-colors: (
             font-weight: 500;
             font-size: 0.625rem;
             line-height: 1rem;
-            color: $primary-gray-800;
+            color: $primary-gray-950;
         }
 
         &.xs {
@@ -104,6 +118,7 @@ $text-colors: (
         border-bottom: 0.0625rem solid;
         color: $primary-indigo-600;
         text-decoration: none;
+        display: inline-block;
     }
 
     &.Light {
