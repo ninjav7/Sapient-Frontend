@@ -1,50 +1,37 @@
 import React, { useState, useEffect } from 'react';
-//import DatePicker from 'react-datepicker';
-import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler} from '../../utils/helper';
 import { xaxisFilters } from '../../helpers/explorehelpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
-import {
-    BaseUrl,
-    getExploreEquipmentList,
-    getExploreEquipmentChart,
-    getFloors,
-    equipmentType,
-    getEndUseId,
-    getSpaceTypes,
-    getSpaces,
-} from '../../services/Network';
+import {BaseUrl,getFloors,equipmentType,getEndUseId,getSpaceTypes,getSpaces} from '../../services/Network';
+import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter} from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { MultiSelect } from 'react-multi-select-component';
-import { Spinner } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
 import Dropdown from 'react-bootstrap/Dropdown';
-//import ApexCharts from 'apexcharts';
 import './style.css';
-//import { forEach, remove } from 'lodash';
 import RangeSlider from './RangeSlider';
-//import { FilterList, FilterListSharp } from '@mui/icons-material';
 import moment from 'moment';
 import 'moment-timezone';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import Enumerable from 'linq';
 import './Linq';
+import { options, optionsLines } from './ChartOption';
+import {SliderAll, SliderPos, SliderNeg} from './Filter';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -105,7 +92,7 @@ const ExploreEquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody>
+                <CardBody style={{marginBottom: "2rem"}}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
@@ -218,7 +205,7 @@ const ExploreEquipmentTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {parseInt(record?.consumption?.now / 1000)} kWh
+                                                        {Math.round(record?.consumption?.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -232,7 +219,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -245,7 +232,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -258,7 +245,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -271,7 +258,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -284,7 +271,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -297,7 +284,7 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                         100
@@ -317,7 +304,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
+                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -326,7 +313,7 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{Math.abs(parseInt(record?.consumption?.change))}%</strong>
+                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -343,7 +330,7 @@ const ExploreEquipmentTable = ({
                                                     <td className="table-content-style font-weight-bold">
                                                         {record?.end_user}
                                                     </td>
-                                                    
+
                                                     {/* Future Scope */}
                                                     {/* <td className="table-content-style font-weight-bold">
                                                         {(record?.peak_power?.now / 100000).toFixed(3)} kW
@@ -507,7 +494,7 @@ const ExploreEquipmentTable = ({
                                     value={pageSize}
                                     className="btn btn-md btn-light font-weight-bold mt-4"
                                     onChange={(e) => {
-                                        setPageSize(parseInt(e.target.value));
+                                        setPageSize(Math.round(e.target.value));
                                     }}>
                                     {[20, 50, 100].map((pageSize) => (
                                         <option key={pageSize} value={pageSize} className="align-options-center">
@@ -523,42 +510,44 @@ const ExploreEquipmentTable = ({
         </>
     );
 };
-const SliderAll=({bottom,top,handleChange,bottomPer, topPer})=> {
-    return(
-        <RangeSlider
-        name="consumptionAll"
-        STEP={1}
-        MIN={bottom}
-        range={[bottomPer, topPer]}
-        MAX={top}
-        onSelectionChange={handleChange}
-    />
-    )
-};
-const SliderPos=({bottom,top,handleChange,bottomPer, topPer})=> {
-    return(
-        <RangeSlider
-        name="consumptionAll"
-        STEP={1}
-        MIN={bottom}
-        range={[bottomPer, topPer]}
-        MAX={top}
-        onSelectionChange={handleChange}
-    />
-    )
-};
-const SliderNeg=({bottom,top,handleChange,bottomPer, topPer}) =>{
-    return(
-        <RangeSlider
-        name="consumptionAll"
-        STEP={1}
-        MIN={bottom}
-        range={[bottomPer, topPer]}
-        MAX={top}
-        onSelectionChange={handleChange}
-    />
-    )
-};
+
+// const SliderAll = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
+// const SliderPos = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
+// const SliderNeg = ({ bottom, top, handleChange, bottomPer, topPer }) => {
+//     return (
+//         <RangeSlider
+//             name="consumptionAll"
+//             STEP={1}
+//             MIN={bottom}
+//             range={[bottomPer, topPer]}
+//             MAX={top}
+//             onSelectionChange={handleChange}
+//         />
+//     )
+// };
+
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
 
@@ -583,6 +572,7 @@ const ExploreByEquipment = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
     let entryPoint = '';
+
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
         { label: '% Change', value: 'change' },
@@ -591,232 +581,16 @@ const ExploreByEquipment = () => {
         { label: 'Equipment Type', value: 'equip_type' },
         { label: 'End Use Category', value: 'endUse_category' },
     ];
+
     const [equipOptions, setEquipOptions] = useState([]);
     const [endUseOptions, setEndUseOptions] = useState([]);
     const [paginationData, setPaginationData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const [optionsData, setOptionsData] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: '1000px',
-            toolbar: {
-                show: true,
-                offsetX: 0,
-                offsetY: 0,
-                tools: {
-                  download: true,
-                  selection: false,
-                  zoom: false,
-                  zoomin: false,
-                  zoomout: false,
-                  pan: false,
-                  reset: false ,
-                },
-                export: {
-                  csv: {
-                    filename: "Explore_Portfolio_View"+new Date(),
-                    columnDelimiter: ',',
-                    headerCategory: 'Timestamp',
-                    headerValue: 'value',
-                    dateFormatter(timestamp) {
-                      return moment
-                      .utc(timestamp)
-                      .format(`MMM D 'YY @ hh:mm A`)
-                    }
-                  },
-                  svg: {
-                    filename: "Explore_Portfolio_View"+new Date(),
-                  },
-                  png: {
-                    filename: "Explore_Portfolio_View"+new Date(),
-                  }
-                },
-                autoSelected: 'zoom' 
-              },
-            animations: {
-                enabled: false,
-            },
-            zoom: {
-                type: 'x',
-                enabled: true,
-                autoScaleYaxis: true,
-            },
-        },
-        dataLabels: {
-            enabled: true,
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-            showForSingleSeries: true,
-            showForNullSeries: false,
-            showForZeroSeries: true,
-            fontSize: '18px',
-            fontFamily: 'Helvetica, Arial',
-            fontWeight: 600,
-            itemMargin: {
-                horizontal: 30,
-                vertical: 20,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: [
-            '#3C6DF5',
-            '#12B76A',
-            '#DC6803',
-            '#088AB2',
-            '#EF4444',
-            '#800000',
-            '#FFA500',
-            '#0AFFFF',
-            '#033E3E',
-            '#E2F516',
-        ],
-        fill: {
-            opacity: 1,
-            colors: [
-                '#3C6DF5',
-                '#12B76A',
-                '#DC6803',
-                '#088AB2',
-                '#EF4444',
-                '#800000',
-                '#FFA500',
-                '#0AFFFF',
-                '#033E3E',
-                '#E2F516',
-            ],
-        },
-        markers: {
-            size: 0,
-
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                        .utc(seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
-                        ch =
-                            ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
-                                series[i][dataPointIndex]
-                            )} kWh </td></tr>`;
-                }
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MM HH:00');
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return parseInt(value);
-                },
-            },
-        },
-    });
+    const [optionsData, setOptionsData] = useState(options);
 
     const [seriesLineData, setSeriesLineData] = useState([]);
-    const [optionsLineData, setOptionsLineData] = useState({
-        chart: {
-            id: 'chart1',
-            height: '500px',
-            toolbar: {
-                show: false,
-            },
-
-            animations: {
-                enabled: false,
-            },
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            selection: {
-                enabled: true,
-            },
-        },
-        legend: {
-            show: false,
-        },
-        colors: [
-            '#3C6DF5',
-            '#12B76A',
-            '#DC6803',
-            '#088AB2',
-            '#EF4444',
-            '#800000',
-            '#FFA500',
-            '#0AFFFF',
-            '#033E3E',
-            '#E2F516',
-        ],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.91,
-                opacityTo: 0.1,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MM');
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return parseInt(value);
-                },
-            },
-        },
-        legend: {
-            show: false,
-        },
-    });
+    const [optionsLineData, setOptionsLineData] = useState(optionsLines);
 
     const FilterDataList = ExploreFilterDataStore.useState((bs) => bs.items);
     const [APIFlag, setAPIFlag] = useState(false);
@@ -831,7 +605,6 @@ const ExploreByEquipment = () => {
     const [allEquipmentData, setAllEquipmenData] = useState([]);
 
     const [exploreTableData, setExploreTableData] = useState([]);
-    const [exploreAllTableData, setExploreAllTableData] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
@@ -873,8 +646,8 @@ const ExploreByEquipment = () => {
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLoc, setSelectedLoc] = useState({});
     const [filterObj, setFilterObj] = useState({});
-    const [closeTrigger,setCloseTrigger] = useState("");
-    const [selectedTab,setSelectedTab] = useState(0);
+    const [closeTrigger, setCloseTrigger] = useState("");
+    const [selectedTab, setSelectedTab] = useState(0);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -901,7 +674,7 @@ const ExploreByEquipment = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if(closeTrigger==="consumption"){
+        if (closeTrigger === "consumption") {
             setShowDropdown(true);
             setCloseTrigger("");
         }
@@ -914,17 +687,17 @@ const ExploreByEquipment = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if(closeTrigger==="change"){
+        if (closeTrigger === "change") {
             setShowChangeDropdown(true);
             setCloseTrigger("");
         }
         else if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
-            if(selectedTab===0)
+            if (selectedTab === 0)
                 setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
-            else if(selectedTab===1)
+            else if (selectedTab === 1)
                 setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
-            else if(selectedTab===2)
+            else if (selectedTab === 2)
                 setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
         }
     };
@@ -1262,17 +1035,10 @@ const ExploreByEquipment = () => {
     };
 
     const exploreFilterDataFetch = async (bodyVal, txt) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setSeriesData([]);
@@ -1283,10 +1049,10 @@ const ExploreByEquipment = () => {
                 setExploreTableData(responseData.data);
 
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+        })
+        .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     };
 
     const uniqueIds = [];
@@ -1354,20 +1120,13 @@ const ExploreByEquipment = () => {
     }, [removeDuplicateFlag]);
 
     const exploreDataFetch = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
-                
+
                 if (responseData.data.length !== 0) {
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
@@ -1375,17 +1134,17 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption(parseInt(responseData.data[0].peak_power.now / 100000));
+                    setTopPeakConsumption(Math.round(responseData.data[0].peak_power.now / 100000));
                     set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));                
+                    set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
                 //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     };
     let arr = {
         date_from: startDate.toLocaleDateString(),
@@ -1394,65 +1153,57 @@ const ExploreByEquipment = () => {
     };
 
     const fetchAllExploredata = async (bodyVal) => {
-        try {
             setIsExploreDataLoading(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
             let params = `?consumption=energy&building_id=${bldgId}`;
-
-            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+            await fetchExploreEquipmentList(bodyVal,params)
+            .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
-                setExploreAllTableData(responseData.data);
                 ExploreFilterDataStore.update((bs) => {
                     bs.items = responseData.data;
                 });
-                let max=responseData.data[0].consumption.change;
-                    let min=responseData.data[0].consumption.change;
-                    let maxPos=0;
-                    let minPos=0;
-                    let minNeg=0;
-                    let maxNeg=0;
-                    responseData.data.map((ele)=>{
-                        if(ele.consumption.change>=max)
-                            max=ele.consumption.change;
-                        if(ele.consumption.change<=min)
-                            min=ele.consumption.change;
-                        if(ele.consumption.change>=0){
-                            if(ele.consumption.change>=maxPos)
-                                maxPos=ele.consumption.change;
-                            if(ele.consumption.change<=minPos)
-                                minPos=ele.consumption.change;
-                        }    
-                        if(ele.consumption.change<0){
-                            if(ele.consumption.change>=maxNeg)
-                                maxNeg=ele.consumption.change;
-                            if(ele.consumption.change<=minNeg)
-                                minNeg=ele.consumption.change;
-                        }  
-                    })
-                    setTopPerChange(parseInt(max))
-                    setBottomPerChange(parseInt(min))
-                    setTopPosPerChange(parseInt(maxPos));
-                    setBottomPosPerChange(parseInt(minPos));
-                    setTopNegPerChange(parseInt(maxNeg));
-                    setBottomNegPerChange(parseInt(minNeg));
-                    set_minPerValue(parseInt(min))
-                    set_maxPerValue(parseInt(max));
-                    set_minPerValuePos(parseInt(minPos))
-                    set_maxPerValuePos(parseInt(maxPos));
-                    set_minPerValueNeg(parseInt(minNeg))
-                    set_maxPerValueNeg(parseInt(maxNeg));
+                let max = responseData.data[0].consumption.change;
+                let min = responseData.data[0].consumption.change;
+                let maxPos = 0;
+                let minPos = 0;
+                let minNeg = 0;
+                let maxNeg = 0;
+                responseData.data.map((ele) => {
+                    if (ele.consumption.change >= max)
+                        max = ele.consumption.change;
+                    if (ele.consumption.change <= min)
+                        min = ele.consumption.change;
+                    if (ele.consumption.change >= 0) {
+                        if (ele.consumption.change >= maxPos)
+                            maxPos = ele.consumption.change;
+                        if (ele.consumption.change <= minPos)
+                            minPos = ele.consumption.change;
+                    }
+                    if (ele.consumption.change < 0) {
+                        if (ele.consumption.change >= maxNeg)
+                            maxNeg = ele.consumption.change;
+                        if (ele.consumption.change <= minNeg)
+                            minNeg = ele.consumption.change;
+                    }
+                })
+                setTopPerChange(Math.round(max === min ? max + 1 : max))
+                setBottomPerChange(Math.round(min))
+                setTopPosPerChange(Math.round(maxPos === minPos ? maxPos + 1 : maxPos));
+                setBottomPosPerChange(Math.round(minPos));
+                setTopNegPerChange(Math.round(maxNeg === minNeg ? maxNeg + 1 : maxNeg));
+                setBottomNegPerChange(Math.round(minNeg));
+                set_minPerValue(Math.round(min))
+                set_maxPerValue(Math.round(max));
+                set_minPerValuePos(Math.round(minPos))
+                set_maxPerValuePos(Math.round(maxPos));
+                set_minPerValueNeg(Math.round(minNeg))
+                set_maxPerValueNeg(Math.round(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
-            });
-        } catch (error) {
+            })
+            .catch((error) => {
             setIsExploreDataLoading(false);
-        }
+        });
     }
     useEffect(() => {
         if (startDate === null) {
@@ -1524,25 +1275,25 @@ const ExploreByEquipment = () => {
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
-        const fetchAPI=async()=>{
+        const fetchAPI = async () => {
             if (entryPoint === "entered")
                 await fetchAllExploredata(arr);
             await exploreDataFetch(arr);
         }
         fetchAPI();
-       
+
     }, [endDate, bldgId, pageSize]);
 
     const nextPageData = async (path) => {
         try {
-           
+
             setIsExploreDataLoading(true);
             entryPoint = "paginate";
             let arr = {};
             if (path === null) {
                 return;
             }
-          
+
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -1571,7 +1322,7 @@ const ExploreByEquipment = () => {
             });
 
             if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
-                
+
                 let arr = [];
                 for (let i = 0; i < totalEquipmentId?.length; i++) {
                     arr.push(totalEquipmentId[i]);
@@ -1620,7 +1371,7 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
             if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
-                
+
                 let arr = [];
                 for (let i = 0; i < totalEquipmentId?.length; i++) {
                     arr.push(totalEquipmentId[i]);
@@ -1749,24 +1500,14 @@ const ExploreByEquipment = () => {
         }
         const fetchExploreChartData = async () => {
             setChartLoading(true);
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
                 let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchExploreEquipmentChart(payload,params)
+                .then((res) => {
                         let responseData = res.data;
                         let data = responseData.data;
                         let arr = [];
@@ -1800,39 +1541,17 @@ const ExploreByEquipment = () => {
                             setObjectExplore(coll);
                         } else {
                             let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                            // const result = Enumerable.from(coll)
-                            //     .fullOuterJoin(
-                            //         Enumerable.from(objectExplore),
-                            //         (pk) => pk.timestamp,
-                            //         (fk) => fk.timestamp,
-                            //         (left, right) => ({ ...left, ...right })
-                            //     )
-                            //     .toArray();
                             setObjectExplore(result);
-                            // var s = new Set();
-                            // var result = [];
-                            // objectExplore.forEach(function (e) {
-                            //     result.push(Object.assign({}, e));
-                            //     s.add(e.timestamp);
-                            // });
-                            // coll.forEach(function (e) {
-                            //     if (!s.has(e.timestamp)) {
-                            //         var temp = Object.assign({}, e);
-                            //         temp[sname] = null;
-                            //         result.push(temp);
-                            //     }
-                            // });
                         }
-
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
                         setChartLoading(false);
                         //setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 //setIsExploreDataLoading(false);
-            }
+            });
         };
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
@@ -1862,24 +1581,14 @@ const ExploreByEquipment = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
+            let payload =  {
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
-                .then((res) => {
+            await fetchExploreEquipmentChart(payload,params)
+            .then((res) => {
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
@@ -1912,42 +1621,21 @@ const ExploreByEquipment = () => {
                     if (objectExplore.length === 0) {
                         setObjectExplore(coll);
                     } else {
-                        // const result = Enumerable.from(objectExplore)
-                        //     .fullOuterJoin(
-                        //         Enumerable.from(coll),
-                        //         (pk) => pk.timestamp,
-                        //         (fk) => fk.timestamp,
-                        //         (left, right) => ({ ...left, ...right })
-                        //     )
-                        //     .toArray();
-                        //setObjectExplore(result);
-                        // var s = new Set();
-                        // var result = [];
-                        // objectExplore.forEach(function (e) {
-                        //     result.push(Object.assign({}, e));
-                        //     s.add(e.timestamp);
-                        // });
-                        // coll.forEach(function (e) {
-                        //     if (!s.has(e.timestamp)) {
-                        //         var temp = Object.assign({}, e);
-                        //         temp[sname] = null;
-                        //         result.push(temp);
-                        //     }
-                        // });
                     }
                     dataarr.push(recordToInsert);
-                   
+
                     if (totalEquipmentId.length === dataarr.length) {
-                     
+
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
                     setAllEquipmenData(dataarr);
-                });
-        } catch (error) {
+                })
+                .catch((error) => {
             //setIsExploreDataLoading(false);
-        }
+        });
     };
+
     useEffect(() => {
         if (equipmentListArray.length === 0) {
             return;
@@ -1981,9 +1669,10 @@ const ExploreByEquipment = () => {
         setSelectedOptions(arr);
         let txt = '';
         let arr1 = {};
-        arr1['date_from'] = startDate;
-        arr1['date_to'] = endDate;
-        let topVal = parseInt(topEnergyConsumption / 1000);
+        arr1['date_from'] = startDate.toLocaleDateString();
+        arr1['date_to'] = endDate.toLocaleDateString();
+        arr1['tz_info'] = timeZone;
+        let topVal = Math.round(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (selectedLocation.length !== 0) {
@@ -1998,19 +1687,19 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                if(selectedTab===0){
+                if (selectedTab === 0) {
                     arr1['change'] = {
                         gte: minPerValue,
                         lte: maxPerValue,
                     };
                 }
-                if(selectedTab===1){
+                if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
                         lte: maxPerValuePos,
                     };
                 }
-                if(selectedTab===2){
+                if (selectedTab === 2) {
                     arr1['change'] = {
                         gte: minPerValueNeg,
                         lte: maxPerValueNeg,
@@ -2064,19 +1753,19 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                if(selectedTab===0){
+                if (selectedTab === 0) {
                     arr1['change'] = {
                         gte: minPerValue,
                         lte: maxPerValue,
                     };
                 }
-                if(selectedTab===1){
+                if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
                         lte: maxPerValuePos,
                     };
                 }
-                if(selectedTab===2){
+                if (selectedTab === 2) {
                     arr1['change'] = {
                         gte: minPerValueNeg,
                         lte: maxPerValueNeg,
@@ -2100,19 +1789,19 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                if(selectedTab===0){
+                if (selectedTab === 0) {
                     arr1['change'] = {
                         gte: minPerValue,
                         lte: maxPerValue,
                     };
                 }
-                if(selectedTab===1){
+                if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
                         lte: maxPerValuePos,
                     };
                 }
-                if(selectedTab===2){
+                if (selectedTab === 2) {
                     arr1['change'] = {
                         gte: minPerValueNeg,
                         lte: maxPerValueNeg,
@@ -2136,19 +1825,19 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                if(selectedTab===0){
+                if (selectedTab === 0) {
                     arr1['change'] = {
                         gte: minPerValue,
                         lte: maxPerValue,
                     };
                 }
-                if(selectedTab===1){
+                if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
                         lte: maxPerValuePos,
                     };
                 }
-                if(selectedTab===2){
+                if (selectedTab === 2) {
                     arr1['change'] = {
                         gte: minPerValueNeg,
                         lte: maxPerValueNeg,
@@ -2173,19 +1862,19 @@ const ExploreByEquipment = () => {
                 if (selectedEndUse.length !== 0) {
                     arr1['end_use'] = selectedEndUse;
                 }
-                if(selectedTab===0){
+                if (selectedTab === 0) {
                     arr1['change'] = {
                         gte: minPerValue,
                         lte: maxPerValue,
                     };
                 }
-                if(selectedTab===1){
+                if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
                         lte: maxPerValuePos,
                     };
                 }
-                if(selectedTab===2){
+                if (selectedTab === 2) {
                     arr1['change'] = {
                         gte: minPerValueNeg,
                         lte: maxPerValueNeg,
@@ -2232,19 +1921,19 @@ const ExploreByEquipment = () => {
             };
             txt = 'consumption';
         }
-        if (selectedTab===0 && showChangeDropdown===false) {
+        if (selectedTab === 0 && showChangeDropdown === false) {
             arr['change'] = {
                 gte: minPerValue,
                 lte: maxPerValue,
             };
         }
-        if (selectedTab===1 && showChangeDropdown===false) {
+        if (selectedTab === 1 && showChangeDropdown === false) {
             arr['change'] = {
                 gte: minPerValuePos,
                 lte: maxPerValuePos,
             };
         }
-        if (selectedTab===2 && showChangeDropdown===false) {
+        if (selectedTab === 2 && showChangeDropdown === false) {
             arr['change'] = {
                 gte: minPerValueNeg,
                 lte: maxPerValueNeg,
@@ -2321,36 +2010,27 @@ const ExploreByEquipment = () => {
     const handleEquipmentSearch = (e) => {
         entryPoint = "searched";
         const exploreDataFetch = async () => {
-            try {
                 setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
+                
+                let payload =  {
+                    date_from: startDate.toLocaleDateString(),
+                    date_to: endDate.toLocaleDateString(),
+                    tz_info: timeZone,
                 };
                 let params = `?consumption=energy&search_by_name=${equipmentSearchTxt}&building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
+                await fetchExploreEquipmentList(payload, params)
+                .then((res) => {
                         let responseData = res.data;
                         if (responseData.data.length !== 0) {
                             set_minConValue(0.0);
-                            set_maxConValue(parseInt(responseData.data[0].consumption.now / 1000));
+                            set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                         }
                         setExploreTableData(responseData.data);
                         setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
+                    })
+                    .catch((error) => {
                 setIsExploreDataLoading(false);
-            }
+            });
         };
         exploreDataFetch();
     };
@@ -2532,9 +2212,9 @@ const ExploreByEquipment = () => {
             setSelectedLocation([]);
         }
     };
-useEffect(()=>{
+    useEffect(() => {
 
-},[selectedTab])
+    }, [selectedTab])
 
     return (
         <>
@@ -2635,170 +2315,171 @@ useEffect(()=>{
             </Row>
 
             <Row className="mt-3 mb-1 ml-1 mr-3">
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'consumption') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end" onToggle={setDropdown}>
-                                            <span className="" style={{ height: '30px', marginLeft: '2rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'consumption') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end" onToggle={setDropdown}>
+                                <span className="" style={{ height: '30px', marginLeft: '2rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}
+                                        <button
+                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setConsumptionTxt('');
+                                                setCloseTrigger("consumption");
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div style={{ margin: '1rem' }}>
+                                        <div>
+                                            <a className="pop-text">kWh Used</a>
+                                        </div>
+                                        <div className="pop-inputbox-wrapper">
+                                            <input
+                                                className="pop-inputbox"
+                                                type="text"
+                                                value={minConValue}
+                                            />{' '}
+                                            <input
+                                                className="pop-inputbox"
+                                                type="text"
+                                                value={maxConValue}
+                                            />
+                                        </div>
+                                        <div style={{ marginTop: '2rem' }}>
+                                            <RangeSlider
+                                                name="consumption"
+                                                STEP={1}
+                                                MIN={0}
+                                                range={[minConValue, maxConValue]}
+                                                MAX={Math.round(topEnergyConsumption / 1000 + 0.5)}
+                                                onSelectionChange={handleInput}
+                                            />
+                                        </div>
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'change') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end" onToggle={setChangeDropdown}>
+                                <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {' '}
+                                        {changeTxt === '' ? `All ${el.label}` : changeTxt}{' '}
+                                        <button
+                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setChangeTxt('');
+                                                setCloseTrigger("change");
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div style={{ margin: '1rem' }}>
+                                        <div>
+                                            <a className="pop-text">Threshold</a>
+                                        </div>
+                                        <div className="btn-group ml-2 mt-2 mb-2" role="group" aria-label="Basic example">
+                                            <div>
+                                                <button
                                                     type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
+                                                    className={
+                                                        selectedTab === 0
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px', width: "5rem" }}
+                                                    onClick={() => {
+                                                        setSelectedTab(0);
                                                     }}>
-                                                    {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}
-                                                    <button
-                                                        style={{ border: 'none', backgroundColor: 'white' }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
-                                                            setConsumptionTxt('');
-                                                            setCloseTrigger("consumption");
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
-                                            </span>
-                                            <Dropdown.Menu className="dropdown-lg p-3">
-                                                <div style={{ margin: '1rem' }}>
-                                                    <div>
-                                                        <a className="pop-text">kWh Used</a>
-                                                    </div>
-                                                    <div className="pop-inputbox-wrapper">
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={minConValue}
-                                                        />{' '}
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={maxConValue}
-                                                        />
-                                                    </div>
-                                                    <div style={{ marginTop: '2rem' }}>
-                                                        <RangeSlider
-                                                            name="consumption"
-                                                            STEP={1}
-                                                            MIN={0}
-                                                            range={[minConValue, maxConValue]}
-                                                            MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
-                                                            onSelectionChange={handleInput}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'change') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end" onToggle={setChangeDropdown}>
-                                            <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
+                                                    All
+                                                </button>
+
+                                                <button
                                                     type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
-                                                    }}>
-                                                    {' '}
-                                                    {changeTxt === '' ? `All ${el.label}` : changeTxt}{' '}
-                                                    <button
-                                                        style={{ border: 'none', backgroundColor: 'white' }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value); 
-                                                            setChangeTxt('');
-                                                            setCloseTrigger("change");
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
-                                            </span>
-                                            <Dropdown.Menu className="dropdown-lg p-3">
-                                                <div style={{ margin: '1rem' }}>
-                                                    <div>
-                                                        <a className="pop-text">Threshold</a>
-                                                    </div>
-                                                    <div className="btn-group ml-2 mt-2 mb-2" role="group" aria-label="Basic example">
-                                                        <div>
-                                                            <button
-                                                                type="button"
-                                                                className={
-                                                                    selectedTab === 0
-                                                                        ? 'btn btn-primary d-offline custom-active-btn'
-                                                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                                                }
-                                                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(0);
-                                                                }}>
-                                                                All
-                                                            </button>
+                                                    className={
+                                                        selectedTab === 1
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderRadius: '0px', width: "5rem" }}
+                                                    onClick={() => { setSelectedTab(1); }}>
+                                                    <i className="uil uil-chart-down"></i>
+                                                </button>
 
-                                                            <button
-                                                                type="button"
-                                                                className={
-                                                                    selectedTab === 1
-                                                                        ? 'btn btn-primary d-offline custom-active-btn'
-                                                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                                                }
-                                                                style={{ borderRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(1);}}>
-                                                                <i className="uil uil-chart-down"></i>
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                className={
-                                                                    selectedTab === 2
-                                                                        ? 'btn btn-primary d-offline custom-active-btn'
-                                                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                                                }
-                                                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px',width:"5rem" }}
-                                                                onClick={() => {setSelectedTab(2);}}>
-                                                                 <i className="uil uil-arrow-growth"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {selectedTab === 0?
-                                                    <div className="pop-inputbox-wrapper">
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={minPerValue}
-                                                        />{' '}
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        selectedTab === 2
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px', width: "5rem" }}
+                                                    onClick={() => { setSelectedTab(2); }}>
+                                                    <i className="uil uil-arrow-growth"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {selectedTab === 0 ?
+                                            <div className="pop-inputbox-wrapper">
+                                                <input
+                                                    className="pop-inputbox"
+                                                    type="text"
+                                                    value={minPerValue}
+                                                />{' '}
+                                                <input
+                                                    className="pop-inputbox"
+                                                    type="text"
+                                                    value={maxPerValue}
+                                                />
+                                            </div>
+                                            : selectedTab === 1 ?
+                                                <div className="pop-inputbox-wrapper">
                                                     <input
                                                         className="pop-inputbox"
                                                         type="text"
-                                                        value={maxPerValue}
+                                                        value={minPerValuePos}
+                                                    />{' '}
+                                                    <input
+                                                        className="pop-inputbox"
+                                                        type="text"
+                                                        value={maxPerValuePos}
                                                     />
-                                                      </div>
-                                                    :selectedTab === 1?
-                                                    <div className="pop-inputbox-wrapper">
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={minPerValuePos}
-                                                        />{' '}
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={maxPerValuePos}
-                                                        />
-                                                    </div>
-                                                    : selectedTab === 2?
+                                                </div>
+                                                : selectedTab === 2 ?
                                                     <div className="pop-inputbox-wrapper">
                                                         <input
                                                             className="pop-inputbox"
@@ -2811,525 +2492,501 @@ useEffect(()=>{
                                                             value={maxPerValueNeg}
                                                         />
                                                     </div>
-                                                    :""
-                                                    }
-                                               
-                                                    { selectedTab === 0?
+                                                    : ""
+                                        }
+
+                                        {selectedTab === 0 ?
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue} />
+                                            </div> :
+                                            selectedTab === 1 ?
+                                                <div style={{ marginTop: '2rem' }}>
+                                                    <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos} />
+                                                </div>
+                                                : selectedTab === 2 ?
                                                     <div style={{ marginTop: '2rem' }}>
-                                                        <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue}/>
-                                                        {/* <RangeSlider
-                                                            name="consumptionAll"
-                                                            STEP={1}
-                                                            MIN={bottomPerChange}
-                                                            range={[bottomPerChange, topPerChange]}
-                                                            MAX={topPerChange}
-                                                            onSelectionChange={handleInputPer}
-                                                        /> */}
-                                                    </div>:
-                                                     selectedTab === 1?
-                                                     <div style={{ marginTop: '2rem' }}>
-                                                        <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos}/>
-                                                        {/* <RangeSlider
-                                                            name="consumptionPos"
-                                                            STEP={1}
-                                                            MIN={bottomPosPerChange}
-                                                            range={[bottomPosPerChange, topPosPerChange]}
-                                                            MAX={topPosPerChange}
-                                                            onSelectionChange={handleInputPerPos}
-                                                        /> */}
+                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg} />
                                                     </div>
-                                                     : selectedTab === 2?
-                                                     <div style={{ marginTop: '2rem' }}>
-                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg}/>
-                                                        {/* <RangeSlider
-                                                            name="consumptionNeg"
-                                                            STEP={1}
-                                                            MIN={bottomNegPerChange}
-                                                            range={[bottomNegPerChange, topNegPerChange]}
-                                                            MAX={topNegPerChange}
-                                                            onSelectionChange={handleInputPerNeg}
-                                                        /> */}
-                                                    </div>
-                                                     :""}
-                                                </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
+                                                    : ""}
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
 
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'location') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end">
-                                            <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
-                                                    type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'location') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end">
+                                <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {' '}
+                                        {locationTxt === '' ? `All ${el.label}` : locationTxt}{' '}
+                                        <button
+                                            style={{
+                                                borderColor: 'gray',
+                                                backgroundColor: 'white',
+                                                border: 'none',
+                                            }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setLocationTxt('');
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-xlg p-3">
+                                    <div>
+                                        <div className="pop-inputbox-wrapper">
+                                            <div className="explore-search mr-2">
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <input
+                                                    className="search-box ml-2"
+                                                    type="search"
+                                                    name="search"
+                                                    placeholder="Search Locations (floor, area,room)"
+                                                    onChange={(e) => {
+                                                        handleLocationSearch(e);
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                className="btn btn-white d-inline"
+                                                onClick={clearFilterData}>
+                                                Cancel
+                                            </button>
+                                            <button
+                                                className="btn btn-primary d-inline ml-2"
+                                                onClick={(e) => {
+                                                    setAPILocFlag(!APILocFlag);
+                                                }}>
+                                                Save
+                                            </button>
+                                        </div>
+                                        <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
+                                            <span className="pop-text">
+                                                <button
+                                                    style={{ border: 'none', backgroundColor: 'white' }}
+                                                    onClick={(e) => {
+                                                        setShowSpace(false);
                                                     }}>
-                                                    {' '}
-                                                    {locationTxt === '' ? `All ${el.label}` : locationTxt}{' '}
-                                                    <button
-                                                        style={{
-                                                            borderColor: 'gray',
-                                                            backgroundColor: 'white',
-                                                            border: 'none',
-                                                        }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
-                                                            setLocationTxt('');
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
+                                                    {localStorage.getItem('buildingName')}
+                                                </button>{' '}
+                                                {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ''}
                                             </span>
-                                            <Dropdown.Menu className="dropdown-xlg p-3">
-                                                <div>
-                                                    <div className="pop-inputbox-wrapper">
-                                                        <div className="explore-search mr-2">
-                                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                                            <input
-                                                                className="search-box ml-2"
-                                                                type="search"
-                                                                name="search"
-                                                                placeholder="Search Locations (floor, area,room)"
-                                                                onChange={(e) => {
-                                                                    handleLocationSearch(e);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <button
-                                                            className="btn btn-white d-inline"
-                                                            onClick={clearFilterData}>
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-primary d-inline ml-2"
+                                        </div>
+                                        {showSpace === false ? (
+                                            <div
+                                                className={
+                                                    floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`
+                                                }>
+                                                <div className="floor-box">
+                                                    <div>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2"
+                                                            id="allLocation"
                                                             onClick={(e) => {
-                                                                setAPILocFlag(!APILocFlag);
-                                                            }}>
-                                                            Save
-                                                        </button>
+                                                                handleAllLocation(e);
+                                                            }}
+                                                        />
+                                                        <span>Select All</span>
                                                     </div>
-                                                    <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
-                                                        <span className="pop-text">
-                                                            <button
-                                                                style={{ border: 'none', backgroundColor: 'white' }}
+                                                </div>
+                                                {filteredLocationOptions.map((record) => {
+                                                    return (
+                                                        <div className="floor-box">
+                                                            <div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="mr-2"
+                                                                    id={record.floor_id}
+                                                                    value={record.floor_id}
+                                                                    onClick={(e) => {
+                                                                        handleSelectedLocation(
+                                                                            e,
+                                                                            record.name
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <button
+                                                                    style={{
+                                                                        backgroundColor: 'white',
+                                                                        border: 'none',
+                                                                    }}
+                                                                    onClick={(e) => {
+                                                                        handleGetSpaceByLocation(e, record);
+                                                                    }}>
+                                                                    {record.name}
+                                                                </button>
+                                                            </div>
+                                                            <div style={{ display: 'flex' }}>
+                                                                <button
+                                                                    style={{
+                                                                        border: 'none',
+                                                                        backgroundColor: 'white',
+                                                                    }}
+                                                                    onClick={(e) => {
+                                                                        handleGetSpaceByLocation(e, record);
+                                                                    }}>
+                                                                    <i className="uil uil-angle-right"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div
+                                                    className={
+                                                        spaceListAPI.length > 4
+                                                            ? `hScroll`
+                                                            : `hHundredPercent`
+                                                    }>
+                                                    <div className="floor-box">
+                                                        <div>
+                                                            <input
+                                                                type="checkbox"
+                                                                className="mr-2"
+                                                                id="allSpaces"
                                                                 onClick={(e) => {
-                                                                    setShowSpace(false);
-                                                                }}>
-                                                                {localStorage.getItem('buildingName')}
-                                                            </button>{' '}
-                                                            {showSpace ? <>&nbsp;&gt;&nbsp;{selectedLoc?.name}</> : ''}
-                                                        </span>
+                                                                    handleAllSelectedSpaces(e);
+                                                                }}
+                                                            />
+                                                            <span>Select All</span>
+                                                        </div>
                                                     </div>
-                                                    {showSpace === false ? (
-                                                        <div
-                                                            className={
-                                                                floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`
-                                                            }>
+                                                    {spaceListAPI.map((record) => {
+                                                        return (
                                                             <div className="floor-box">
                                                                 <div>
                                                                     <input
                                                                         type="checkbox"
                                                                         className="mr-2"
-                                                                        id="allLocation"
+                                                                        id={record._id}
+                                                                        value={record._id}
                                                                         onClick={(e) => {
-                                                                            handleAllLocation(e);
+                                                                            handleSelectedSpaces(
+                                                                                e,
+                                                                                record.name
+                                                                            );
                                                                         }}
                                                                     />
-                                                                    <span>Select All</span>
+                                                                    <span>{record.name}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex' }}>
+                                                                    <button
+                                                                        style={{
+                                                                            border: 'none',
+                                                                            backgroundColor: 'white',
+                                                                        }}>
+                                                                        <i className="uil uil-angle-right"></i>
+                                                                    </button>
                                                                 </div>
                                                             </div>
-                                                            {filteredLocationOptions.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={record.floor_id}
-                                                                                value={record.floor_id}
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedLocation(
-                                                                                        e,
-                                                                                        record.name
-                                                                                    );
-                                                                                }}
-                                                                            />
-                                                                            <button
-                                                                                style={{
-                                                                                    backgroundColor: 'white',
-                                                                                    border: 'none',
-                                                                                }}
-                                                                                onClick={(e) => {
-                                                                                    handleGetSpaceByLocation(e, record);
-                                                                                }}>
-                                                                                {record.name}
-                                                                            </button>
-                                                                        </div>
-                                                                        <div style={{ display: 'flex' }}>
-                                                                            <button
-                                                                                style={{
-                                                                                    border: 'none',
-                                                                                    backgroundColor: 'white',
-                                                                                }}
-                                                                                onClick={(e) => {
-                                                                                    handleGetSpaceByLocation(e, record);
-                                                                                }}>
-                                                                                <i className="uil uil-angle-right"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div
-                                                                className={
-                                                                    spaceListAPI.length > 4
-                                                                        ? `hScroll`
-                                                                        : `hHundredPercent`
-                                                                }>
-                                                                <div className="floor-box">
-                                                                    <div>
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            className="mr-2"
-                                                                            id="allSpaces"
-                                                                            onClick={(e) => {
-                                                                                handleAllSelectedSpaces(e);
-                                                                            }}
-                                                                        />
-                                                                        <span>Select All</span>
-                                                                    </div>
-                                                                </div>
-                                                                {spaceListAPI.map((record) => {
-                                                                    return (
-                                                                        <div className="floor-box">
-                                                                            <div>
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    className="mr-2"
-                                                                                    id={record._id}
-                                                                                    value={record._id}
-                                                                                    onClick={(e) => {
-                                                                                        handleSelectedSpaces(
-                                                                                            e,
-                                                                                            record.name
-                                                                                        );
-                                                                                    }}
-                                                                                />
-                                                                                <span>{record.name}</span>
-                                                                            </div>
-                                                                            <div style={{ display: 'flex' }}>
-                                                                                <button
-                                                                                    style={{
-                                                                                        border: 'none',
-                                                                                        backgroundColor: 'white',
-                                                                                    }}>
-                                                                                    <i className="uil uil-angle-right"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                    <div></div>
+                                                        );
+                                                    })}
                                                 </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
+                                            </>
+                                        )}
+                                        <div></div>
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
 
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'location_type') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end">
-                                            <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
-                                                    type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
-                                                    }}>
-                                                    {' '}
-                                                    {spaceTxt === '' ? `All ${el.label}` : spaceTxt}{' '}
-                                                    <button
-                                                        style={{ border: 'none', backgroundColor: 'white' }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
-                                                            setSpaceTxt('');
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
-                                            </span>
-                                            <Dropdown.Menu className="dropdown-lg p-3">
-                                                <div>
-                                                    <div className="m-1">
-                                                        <div className="explore-search mr-2">
-                                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                                            <input
-                                                                className="search-box ml-2"
-                                                                type="search"
-                                                                name="search"
-                                                                placeholder="Search"
-                                                                onChange={(e) => {
-                                                                    handleSpaceTypeSearch(e);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div
-                                                            className={
-                                                                filteredSpaceTypeOptions.length > 4
-                                                                    ? `hScroll`
-                                                                    : `hHundredPercent`
-                                                            }>
-                                                            <div className="floor-box">
-                                                                <div>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        className="mr-2"
-                                                                        id="allSpaceType"
-                                                                        onClick={(e) => {
-                                                                            handleAllSpaceType(e);
-                                                                        }}
-                                                                    />
-                                                                    <span>Select All</span>
-                                                                </div>
-                                                            </div>
-                                                            {filteredSpaceTypeOptions.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={record.value}
-                                                                                value={record.value}
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedSpaceType(
-                                                                                        e,
-                                                                                        record.label
-                                                                                    );
-                                                                                }}
-                                                                            />
-                                                                            <span>{record.label}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'location_type') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end">
+                                <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {' '}
+                                        {spaceTxt === '' ? `All ${el.label}` : spaceTxt}{' '}
+                                        <button
+                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setSpaceTxt('');
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div>
+                                        <div className="m-1">
+                                            <div className="explore-search mr-2">
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <input
+                                                    className="search-box ml-2"
+                                                    type="search"
+                                                    name="search"
+                                                    placeholder="Search"
+                                                    onChange={(e) => {
+                                                        handleSpaceTypeSearch(e);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div
+                                                className={
+                                                    filteredSpaceTypeOptions.length > 4
+                                                        ? `hScroll`
+                                                        : `hHundredPercent`
+                                                }>
+                                                <div className="floor-box">
+                                                    <div>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2"
+                                                            id="allSpaceType"
+                                                            onClick={(e) => {
+                                                                handleAllSpaceType(e);
+                                                            }}
+                                                        />
+                                                        <span>Select All</span>
                                                     </div>
                                                 </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'equip_type') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end">
-                                            <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
-                                                    type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
-                                                    }}>
-                                                    {' '}
-                                                    {equipmentTxt === '' ? `All ${el.label}` : equipmentTxt}{' '}
-                                                    <button
-                                                        style={{ border: 'none', backgroundColor: 'white' }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
-                                                            setEquipmentTxt('');
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
-                                            </span>
-                                            <Dropdown.Menu className="dropdown-lg p-3">
-                                                <div>
-                                                    <div className="m-1">
-                                                        <div className="explore-search mr-2">
-                                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                                            <input
-                                                                className="search-box ml-2"
-                                                                type="search"
-                                                                name="search"
-                                                                placeholder="Search"
-                                                                onChange={(e) => {
-                                                                    handleEquipTypeSearch(e);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div
-                                                            className={
-                                                                filteredEquipOptions.length > 4
-                                                                    ? `hScroll`
-                                                                    : `hHundredPercent`
-                                                            }>
-                                                            <div className="floor-box">
-                                                                <div>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        className="mr-2"
-                                                                        id="allEquipType"
-                                                                        onClick={(e) => {
-                                                                            handleAllEquip(e);
-                                                                        }}
-                                                                    />
-                                                                    <span>Select All</span>
-                                                                </div>
+                                                {filteredSpaceTypeOptions.map((record) => {
+                                                    return (
+                                                        <div className="floor-box">
+                                                            <div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="mr-2"
+                                                                    id={record.value}
+                                                                    value={record.value}
+                                                                    onClick={(e) => {
+                                                                        handleSelectedSpaceType(
+                                                                            e,
+                                                                            record.label
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <span>{record.label}</span>
                                                             </div>
-                                                            {filteredEquipOptions.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={record.value}
-                                                                                value={record.value}
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedEquip(
-                                                                                        e,
-                                                                                        record.label
-                                                                                    );
-                                                                                }}
-                                                                            />
-                                                                            <span>{record.label}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
                                                         </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'equip_type') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end">
+                                <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {' '}
+                                        {equipmentTxt === '' ? `All ${el.label}` : equipmentTxt}{' '}
+                                        <button
+                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setEquipmentTxt('');
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div>
+                                        <div className="m-1">
+                                            <div className="explore-search mr-2">
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <input
+                                                    className="search-box ml-2"
+                                                    type="search"
+                                                    name="search"
+                                                    placeholder="Search"
+                                                    onChange={(e) => {
+                                                        handleEquipTypeSearch(e);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div
+                                                className={
+                                                    filteredEquipOptions.length > 4
+                                                        ? `hScroll`
+                                                        : `hHundredPercent`
+                                                }>
+                                                <div className="floor-box">
+                                                    <div>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2"
+                                                            id="allEquipType"
+                                                            onClick={(e) => {
+                                                                handleAllEquip(e);
+                                                            }}
+                                                        />
+                                                        <span>Select All</span>
                                                     </div>
                                                 </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
-                            {selectedOptions.map((el, index) => {
-                                if (el.value !== 'endUse_category') {
-                                    return;
-                                }
-                                return (
-                                    <>
-                                        <Dropdown className="" align="end">
-                                            <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
-                                                <Dropdown.Toggle
-                                                    className="font-weight-bold"
-                                                    id="PopoverClick"
-                                                    type="button"
-                                                    style={{
-                                                        borderColor: 'gray',
-                                                        backgroundColor: 'white',
-                                                        color: 'black',
-                                                    }}>
-                                                    {' '}
-                                                    {endUseTxt === '' ? `All ${el.label}` : endUseTxt}{' '}
-                                                    <button
-                                                        style={{ border: 'none', backgroundColor: 'white' }}
-                                                        onClick={(e) => {
-                                                            handleCloseFilter(e, el.value);
-                                                            setEndUseTxt('');
-                                                        }}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button>
-                                                </Dropdown.Toggle>
-                                            </span>
-                                            <Dropdown.Menu className="dropdown-lg p-3">
-                                                <div>
-                                                    <div className="m-1">
-                                                        <div className="explore-search mr-2">
-                                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                                            <input
-                                                                className="search-box ml-2"
-                                                                type="search"
-                                                                name="search"
-                                                                placeholder="Search"
-                                                                onChange={(e) => {
-                                                                    handleEndUseSearch(e);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <div
-                                                            className={
-                                                                filteredEndUseOptions.length > 4
-                                                                    ? `hScroll`
-                                                                    : `hHundredPercent`
-                                                            }>
-                                                            <div className="floor-box">
-                                                                <div>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        className="mr-2"
-                                                                        id="allEndUse"
-                                                                        onClick={(e) => {
-                                                                            handleAllEndUse(e);
-                                                                        }}
-                                                                    />
-                                                                    <span>Select All</span>
-                                                                </div>
+                                                {filteredEquipOptions.map((record) => {
+                                                    return (
+                                                        <div className="floor-box">
+                                                            <div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="mr-2"
+                                                                    id={record.value}
+                                                                    value={record.value}
+                                                                    onClick={(e) => {
+                                                                        handleSelectedEquip(
+                                                                            e,
+                                                                            record.label
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <span>{record.label}</span>
                                                             </div>
-                                                            {filteredEndUseOptions.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={record.value}
-                                                                                value={record.value}
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedEndUse(
-                                                                                        e,
-                                                                                        record.label
-                                                                                    );
-                                                                                }}
-                                                                            />
-                                                                            <span>{record.label}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
                                                         </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
+                {selectedOptions.map((el, index) => {
+                    if (el.value !== 'endUse_category') {
+                        return;
+                    }
+                    return (
+                        <>
+                            <Dropdown className="" align="end">
+                                <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
+                                    <Dropdown.Toggle
+                                        className="font-weight-bold"
+                                        id="PopoverClick"
+                                        type="button"
+                                        style={{
+                                            borderColor: 'gray',
+                                            backgroundColor: 'white',
+                                            color: 'black',
+                                        }}>
+                                        {' '}
+                                        {endUseTxt === '' ? `All ${el.label}` : endUseTxt}{' '}
+                                        <button
+                                            style={{ border: 'none', backgroundColor: 'white' }}
+                                            onClick={(e) => {
+                                                handleCloseFilter(e, el.value);
+                                                setEndUseTxt('');
+                                            }}>
+                                            <i className="uil uil-multiply"></i>
+                                        </button>
+                                    </Dropdown.Toggle>
+                                </span>
+                                <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div>
+                                        <div className="m-1">
+                                            <div className="explore-search mr-2">
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <input
+                                                    className="search-box ml-2"
+                                                    type="search"
+                                                    name="search"
+                                                    placeholder="Search"
+                                                    onChange={(e) => {
+                                                        handleEndUseSearch(e);
+                                                    }}
+                                                />
+                                            </div>
+                                            <div
+                                                className={
+                                                    filteredEndUseOptions.length > 4
+                                                        ? `hScroll`
+                                                        : `hHundredPercent`
+                                                }>
+                                                <div className="floor-box">
+                                                    <div>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-2"
+                                                            id="allEndUse"
+                                                            onClick={(e) => {
+                                                                handleAllEndUse(e);
+                                                            }}
+                                                        />
+                                                        <span>Select All</span>
                                                     </div>
                                                 </div>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </>
-                                );
-                            })}
+                                                {filteredEndUseOptions.map((record) => {
+                                                    return (
+                                                        <div className="floor-box">
+                                                            <div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="mr-2"
+                                                                    id={record.value}
+                                                                    value={record.value}
+                                                                    onClick={(e) => {
+                                                                        handleSelectedEndUse(
+                                                                            e,
+                                                                            record.label
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <span>{record.label}</span>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </>
+                    );
+                })}
             </Row>
 
             <Row>

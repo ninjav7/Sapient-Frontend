@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, memo, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import _, { filter } from 'lodash';
 
 import { Table } from '../table';
 import { DropDownIcon } from '../dropDowns/dropDownButton';
@@ -18,7 +18,7 @@ import { MenuListPerRow } from './components/TableComponents/MenuListPerRow';
 
 import useDebounce from '../hooks/useDebounce';
 import useLocalStorage from '../hooks/useLocalStorage/useLocalStorage';
-import { arrayMoveImmutable, getStatesForSelectAllCheckbox } from '../helpers/helper';
+import { arrayMoveImmutable, generateID, getStatesForSelectAllCheckbox } from '../helpers/helper';
 
 import { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES } from './constants';
 
@@ -121,7 +121,6 @@ const DataTableWidget = (props) => {
         setSelectedFilters((oldState) => {
             return [...oldState.filter((filter) => filter.value !== value)];
         });
-        
     };
 
     const handleCheckboxChange = (event, id) => {
@@ -157,6 +156,10 @@ const DataTableWidget = (props) => {
     const debouncedSearch = useDebounce(search, 500);
 
     useEffect(() => {
+        setCurrentPage(props.currentPage || 0);
+    }, [props.currentPage]);
+
+    useEffect(() => {
         const isEmptySearch = _.isEmpty(debouncedSearch);
 
         setSearchMode(!isEmptySearch);
@@ -178,6 +181,18 @@ const DataTableWidget = (props) => {
     useEffect(() => {
         setRows(props.rows);
     }, [props.rows]);
+
+    // Probably we need just hide all filters by default and show them then use props directly without save them in state, it will be like
+    // link to object, but in this case to props (props.filterOptions) object, by this way we will avoid recalclation and therefore
+    // we won't need this useEffect.
+    useEffect(() => {
+        setSelectedFilters((prevState) => {
+            return prevState?.map((filter) => {
+                const newFilter = props.filterOptions.find(({ value }) => value === filter.value);
+                return newFilter ? newFilter : filter;
+            });
+        });
+    }, [JSON.stringify(props.filterOptions)]);
 
     const cellChildrenTemplate = useCallback((children) => {
         return React.isValidElement(props.customComponentForCells) ? (
@@ -203,24 +218,22 @@ const DataTableWidget = (props) => {
 
     const HeadComponent = ({ onSort, name, accessor }) => {
         const [state, setState] = useState(0);
-        
+
         const cellProps = {
-            onClick: onSort && (() => {
-                      setState((prevState) => {
-                          if (state === 2) {
-                              onSort(SORT_TYPES[0], accessor, name);
-                              return 0;
-                          }
-                          onSort(SORT_TYPES[prevState + 1], accessor, name);
-                          return prevState + 1;
-                      });
-                  }),
+            onClick:
+                onSort &&
+                (() => {
+                    setState((prevState) => {
+                        if (state === 2) {
+                            onSort(SORT_TYPES[0], accessor, name);
+                            return 0;
+                        }
+                        onSort(SORT_TYPES[prevState + 1], accessor, name);
+                        return prevState + 1;
+                    });
+                }),
             role: onSort && 'button',
-            className: cx(
-                SORT_TYPES[state],
-                SORT_TYPES[state] !== null && 'sort-type-selected',
-                onSort && 'on-sort'
-            ),
+            className: cx(SORT_TYPES[state], SORT_TYPES[state] !== null && 'sort-type-selected', onSort && 'on-sort'),
         };
 
         return (
@@ -232,12 +245,12 @@ const DataTableWidget = (props) => {
             </Table.Cell>
         );
     };
-    
+
     const memoizedHeaders = useMemo(() => {
-        return     filteredHeaders.map(({ name, onSort, accessor}, index) => (
-                <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
-            ))
-    }, []) 
+        return filteredHeaders.map(({ name, onSort, accessor }, index) => (
+            <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
+        ));
+    }, [JSON.stringify(filteredHeaders)]);
 
     return (
         <DataTableWidgetContext.Provider
@@ -284,9 +297,9 @@ const DataTableWidget = (props) => {
                                     <Table.Cell>{props.customCheckAll(selectAll)}</Table.Cell>
                                 </>
                             )}
-                            
+
                             {memoizedHeaders}
-                            
+
                             {isActionsAvailable && (
                                 <Table.Cell>
                                     <Typography.Subheader size={Typography.Sizes.sm}>Actions</Typography.Subheader>
@@ -294,52 +307,59 @@ const DataTableWidget = (props) => {
                             )}
                         </Table.THead>
                         <Table.TBody>
-                            {currentRows.map((row) => (
-                                <Table.Row key={row.id}>
-                                    {props.onCheckboxRow &&
-                                        //@ It is probably need to improve custom checkbox to make it generic
-                                        (props.customCheckboxForCell ? (
+                            {props.isLoading &&
+                                props.isLoadingComponent &&
+                                React.cloneElement(props.isLoadingComponent, { ...props.isLoadingComponent.props })}
+
+                            {!props.isLoading &&
+                                currentRows.map((row) => (
+                                    <Table.Row key={generateID()}>
+                                        {props.onCheckboxRow &&
+                                            //@ It is probably need to improve custom checkbox to make it generic
+                                            (props.customCheckboxForCell ? (
+                                                <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
+                                            ) : (
+                                                cellCheckboxTemplate(row.id)
+                                            ))}
+
+                                        {!props.onCheckboxRow && props.customCheckboxForCell && (
                                             <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                        ) : (
-                                            cellCheckboxTemplate(row.id)
-                                        ))}
+                                        )}
 
-                                    {!props.onCheckboxRow && props.customCheckboxForCell && (
-                                        <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                    )}
+                                        {filteredHeaders.map(({ accessor, callbackValue }) => {
+                                            return (
+                                                <Table.Cell key={accessor}>
+                                                    {accessor &&
+                                                        (callbackValue
+                                                            ? callbackValue(row, cellChildrenTemplate)
+                                                            : cellChildrenTemplate(row[accessor] || '-'))}
 
-                                    {filteredHeaders.map(({ accessor, callbackValue }) => {
-                                        return (
-                                            <Table.Cell key={accessor}>
-                                                {accessor &&
-                                                    (callbackValue
-                                                        ? callbackValue(row, cellChildrenTemplate)
-                                                        : cellChildrenTemplate(row[accessor] || '-'))}
+                                                    {!accessor &&
+                                                        callbackValue &&
+                                                        callbackValue(row, cellChildrenTemplate, accessor)}
+                                                </Table.Cell>
+                                            );
+                                        })}
 
-                                                {!accessor && callbackValue && callbackValue(row, cellChildrenTemplate, accessor)}
+                                        {isActionsAvailable && (
+                                            <Table.Cell align="center" width={36}>
+                                                <div className="d-flex justify-content-center">
+                                                    <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                        <MenuListPerRow
+                                                            onEditRow={(event) =>
+                                                                props.onEditRow(event, row.id, row, props)
+                                                            }
+                                                            onDeleteRow={(event) =>
+                                                                props.onDeleteRow(event, row.id, row, props)
+                                                            }
+                                                        />
+                                                    </DropDownIcon>
+                                                </div>
                                             </Table.Cell>
-                                        );
-                                    })}
-
-                                    {isActionsAvailable && (
-                                        <Table.Cell align="center" width={36}>
-                                            <div className="d-flex justify-content-center">
-                                                <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
-                                                    <MenuListPerRow
-                                                        onEditRow={(event) =>
-                                                            props.onEditRow(event, row.id, row, props)
-                                                        }
-                                                        onDeleteRow={(event) =>
-                                                            props.onDeleteRow(event, row.id, row, props)
-                                                        }
-                                                    />
-                                                </DropDownIcon>
-                                            </div>
-                                        </Table.Cell>
-                                    )}
-                                </Table.Row>
-                            ))}
-                            {currentRows.length === 0 && (
+                                        )}
+                                    </Table.Row>
+                                ))}
+                            {!props.isLoading && currentRows.length === 0 && (
                                 <>
                                     <Table.Row>
                                         <Table.Cell colSpan={10}>
@@ -366,7 +386,7 @@ const DataTableWidget = (props) => {
                     <Pagination
                         className="pagination-bar"
                         currentPage={currentPage}
-                        totalCount={props.totalPages}
+                        totalCount={props.totalCount}
                         pageSize={pageSize}
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
@@ -385,7 +405,7 @@ DataTableWidget.propTypes = {
     onDeleteRow: PropTypes.func,
     onEditRow: PropTypes.func,
     onChangePage: PropTypes.func,
-    totalPages: PropTypes.number,
+    totalCount: PropTypes.number,
     currentPage: PropTypes.number,
     pageSize: PropTypes.number,
     onPageSize: PropTypes.func,
@@ -410,6 +430,8 @@ DataTableWidget.propTypes = {
     customComponentForCells: PropTypes.node,
     customCheckboxForCell: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+    isLoadingComponent: PropTypes.node.isRequired,
+    isLoading: PropTypes.bool.isRequired,
 };
 
 export default DataTableWidget;

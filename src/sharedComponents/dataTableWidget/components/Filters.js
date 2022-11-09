@@ -82,8 +82,8 @@ const mapFilters = {
         };
 
         //@TODO Delete saving selected values for filter in store
-        const selectedItems = selectedOptions;// Object.values(filterValue);
-        
+        const selectedItems = selectedOptions; // Object.values(filterValue);
+
         return (
             <Select.Multi
                 options={props.filterOptions}
@@ -188,39 +188,45 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
 
     return (
         <div className="data-table-widget-filters">
-            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeHolder='Search' />}
-           
-            {filterOptions && <Select.Multi
-                onChange={onChange}
-                options={filterOptions}
-                value={selectedFilters}
-                components={{
-                    Control: (props) => (
-                        <div {...props}>
-                            <Button
-                                label="Add Filter"
-                                type={Button.Type.secondaryGrey}
-                                size={Button.Sizes.md}
-                                icon={<PlusSVG />}
-                            />
-                        </div>
-                    ),
-                }}
-            />}
+            {widgetProps.onSearch && <Input iconUrl={SearchSVG} onChange={handleSearchChange} placeHolder="Search" />}
+
+            {filterOptions && (
+                <Select.Multi
+                    onChange={onChange}
+                    options={filterOptions}
+                    value={selectedFilters}
+                    components={{
+                        Control: (props) => (
+                            <div {...props}>
+                                <Button
+                                    label="Add Filter"
+                                    type={Button.Type.secondaryGrey}
+                                    size={Button.Sizes.md}
+                                    icon={<PlusSVG />}
+                                />
+                            </div>
+                        ),
+                    }}
+                />
+            )}
 
             <StatusFilter />
-            
+
             {selectedFilters.map((filter, key) => {
                 const Component = mapFilters[filter.filterType];
                 const handleDeleteFilter = (args) => {
                     onDeleteFilter(args);
-                    console.log(filter);
                     filter.onDelete && filter.onDelete(args);
-                }
-                
+                };
+
                 //@TODO Delete on change filter carefully
                 return (
-                    <Component key={key} {...filter} onDeleteFilter={handleDeleteFilter} onChangeFilterValue={onChangeFilterValue} />
+                    <Component
+                        key={key}
+                        {...filter}
+                        onDeleteFilter={handleDeleteFilter}
+                        onChangeFilterValue={onChangeFilterValue}
+                    />
                 );
             })}
         </div>
