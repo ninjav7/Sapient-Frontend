@@ -482,8 +482,8 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_type=active&building_id=${bldgId}&mac=${search}`;
-                await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                let params = `?device_type=active&building_id=${bldgId}&mac=${search.trimStart()}`;
+                await axios.post(`${BaseUrl}${searchDevices}${params}`, {}, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(res.data);
                 });
