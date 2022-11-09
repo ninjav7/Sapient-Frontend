@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import './ExploreChart.scss';
 import { colorPalette } from './utils';
 import Highcharts from 'highcharts/highstock';
@@ -27,7 +27,8 @@ const ExploreChart = (props) => {
 
     const options = {
         chart: {
-            type: 'spline',
+            type: 'line',
+            alignTicks:false,
             animation: {
                 duration: 1000,
             },
@@ -55,17 +56,15 @@ const ExploreChart = (props) => {
         },
         navigator: {
             enabled: true,
+            adaptToUpdatedData:true,
         },
         exporting: {
             enabled: false,
         },
         plotOptions: {
             series: {
-                marker: {
-                    symbol: 'circle',
-                    lineWidth: 1,
-                },
-                shadow: true,
+              showInNavigator: true,
+              gapSize: 6,
             },
         },
         tooltip: {
@@ -139,12 +138,13 @@ const ExploreChart = (props) => {
     };
 
     const downloadPNG = () => {
-        chartComponentRef.current.chart.exportChart({type: 'image/png'});
+        chartComponentRef.current.chart.exportChart({ type: 'image/png' });
     };
 
     const downloadSVG = () => {
         chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
     };
+
     return (
         <div className="explore-chart-wrapper">
             <div className="chart-header">
@@ -152,7 +152,7 @@ const ExploreChart = (props) => {
                     <Typography size={Typography.Sizes.sm} fontWeight={Typography.Types.SemiBold}>
                         {title}
                     </Typography>
-                    <Typography size={Typography.Sizes.xs}>{subTitle}</Typography>
+                    <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
                 <div>
                     <DropDownIcon
@@ -171,7 +171,7 @@ const ExploreChart = (props) => {
                             },
                         ]}
                         label={null}
-                        triggerButtonIcon={<BurgerIcon/>}
+                        triggerButtonIcon={<BurgerIcon />}
                         handleClick={(name) => {
                             handleDropDownOptionClicked(name);
                         }}

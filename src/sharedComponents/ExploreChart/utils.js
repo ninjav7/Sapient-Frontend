@@ -14,14 +14,18 @@ export const colorPalette = [
     '#45E6D9',
     '#E55B5B',
 ];
+const prepareDataWithDateRange = (startDate,endDate,data)=>{
+
+
+}
 export const mockedData = [
     {
         x: new Date('2022-10-1').getTime(),
-        y: 22000,
+        y: 0,
     },
     {
         x: new Date('2022-10-2').getTime(),
-        y: 25000,
+        y: 0,
     },
     {
         x: new Date('2022-10-3').getTime(),

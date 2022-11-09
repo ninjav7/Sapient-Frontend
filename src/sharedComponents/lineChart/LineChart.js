@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import './LineChart.scss';
 import { colorPalette } from './utils';
 import Highcharts from 'highcharts/highstock';
@@ -7,9 +7,15 @@ import HighchartsReact from 'highcharts-react-official';
 import Button from '../button/Button';
 import Typography from '../typography';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
+import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
+import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 
 require('highcharts/modules/exporting')(Highcharts);
+require('highcharts/modules/export-data')(Highcharts);
+
 const LineChart = (props) => {
+    const chartComponentRef = useRef(null);
+
     const { data, title, subTitle, handleClick } = props;
 
     const preparedData = data.map((el, index) => {
@@ -43,9 +49,7 @@ const LineChart = (props) => {
         navigator: {
             enabled: false,
         },
-        exporting: {
-            enable: true,
-        },
+       
         tooltip: {
             style: {
                 fontWeight: 'normal',
@@ -90,6 +94,9 @@ const LineChart = (props) => {
                 threshold: null,
             },
         },
+        exporting: {
+            enabled: false,
+        },
         scrollbar: {
             enabled: false,
         },
@@ -118,19 +125,77 @@ const LineChart = (props) => {
         },
         series: [...preparedData],
         exporting: {
-            enabled:true,
+            enabled: true,
         },
+    };
+
+    const handleDropDownOptionClicked = (name) => {
+        switch (name) {
+            case 'downloadSVG':
+                downloadSVG();
+                break;
+            case 'downloadPNG':
+                downloadPNG();
+                break;
+            case 'downloadCSV':
+                downloadCSV();
+                break;
+            default:
+                break;
+        }
+    };
+
+    const downloadCSV = () => {
+        chartComponentRef.current.chart.downloadCSV();
+    };
+
+    const downloadPNG = () => {
+        chartComponentRef.current.chart.exportChart({ type: 'image/png' });
+    };
+
+    const downloadSVG = () => {
+        chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
     };
 
     return (
         <div className="line-chart-wrapper">
             <div className="chart-header">
-                <Typography size={Typography.Sizes.sm} fontWeight={Typography.Types.SemiBold}>
-                    {title}
-                </Typography>
-                <Typography>{subTitle}</Typography>
+                <div>
+                    <Typography size={Typography.Sizes.sm} fontWeight={Typography.Types.SemiBold}>
+                        {title}
+                    </Typography>
+                    <Typography>{subTitle}</Typography>
+                </div>
+                <div>
+                    <DropDownIcon
+                        options={[
+                            {
+                                name: 'downloadSVG',
+                                label: 'Download SVG',
+                            },
+                            {
+                                name: 'downloadPNG',
+                                label: 'Download PNG',
+                            },
+                            {
+                                name: 'downloadCSV',
+                                label: 'DOWNLOAD CSV',
+                            },
+                        ]}
+                        label={null}
+                        triggerButtonIcon={<BurgerIcon />}
+                        handleClick={(name) => {
+                            handleDropDownOptionClicked(name);
+                        }}
+                    />
+                </div>
             </div>
-            <HighchartsReact highcharts={Highcharts} constructorType={'stockChart'} options={options} />
+            <HighchartsReact
+                highcharts={Highcharts}
+                constructorType={'stockChart'}
+                options={options}
+                ref={chartComponentRef}
+            />
             <div className="more-details-wrapper">
                 <Button
                     onClick={handleClick}
