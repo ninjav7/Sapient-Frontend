@@ -26,7 +26,9 @@
             color: $base-white;
             outline: none;
             box-shadow: none !important;
-
+            [class*="-placeholder"] {
+                color: $base-white !important;  
+            }
             & > .typography-wrapper,
             .single-value-custom .typography-wrapper {
                 color: $base-white !important;

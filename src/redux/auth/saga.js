@@ -22,7 +22,10 @@ import {
  */
 const setSession = (user) => {
     let cookies = new Cookies();
-    if (user) cookies.set('user', JSON.stringify(user), { path: '/' });
+    if (user){
+        localStorage.setItem("accountName", user?.account_id);
+        cookies.set('user', JSON.stringify(user), { path: '/' });
+    } 
     else cookies.remove('user', { path: '/' });
 };
 /**

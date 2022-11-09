@@ -11,17 +11,11 @@
 
 .energy-blg-container-three {
     width: 20vw;
-    /* margin-right: 3vw; */
 }
 
 .card-box-style {
     height: fit-content;
     background: #f9fafb;
-    /* border: 1px solid #f3f4f6; */
-    /* box-sizing: border-box; */
-    /* box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06); */
-    /* border-radius: 10px; */
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .dot {
@@ -31,15 +25,6 @@
     border-radius: 20px;
     margin-top: 6px;
 }
-
-/* .card-box-style:hover {
-    height: 90px;
-    background: rgb(224, 222, 222);
-    border: 1px solid #f3f4f6;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
-} */
 
 .card-box-style1:active {
     height: 90px;
@@ -171,11 +156,6 @@
     display: flex;
     flex-direction: column;
 }
-/* .right-side-container {
-    display: grid;
-    grid-template-rows: 1fr;
-    gap: 4px;
-} */
 
 .custom-usage-style {
     font-family: 'Inter';
@@ -207,9 +187,7 @@
 .equip-table-button {
     background: #fef3f2;
     border-radius: 6px;
-    /* width: 54px; */
     height: 20px;
-    /* padding: 1px 4px; */
     padding: 0px;
     display: flex;
     flex-direction: row;
@@ -225,7 +203,7 @@
     box-sizing: border-box;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 8px;
-    width: 314px;
+    width: max-content;
     min-height: 354px;
 }
 
@@ -346,20 +324,9 @@
     grid-template-columns: 0.8fr 1fr;
 }
 
-/* .energy-blg-container-two {
-    width: 100%;
-} */
-
 .energy-chart-style {
     width: 250px;
 }
-
-/* .bldg-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 20px;
-    margin-top: 6px;
-} */
 
 .custom-title {
     font-family: 'Inter';
@@ -393,6 +360,7 @@
 .bldg-page-grid-style {
     display: grid;
     grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
 }
 
 .custom-bldg-table-style {
@@ -424,15 +392,12 @@
     white-space: nowrap;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
-    /* overflow-x: auto; */
     text-size-adjust: auto;
 }
 
 .record-bld-style {
     width: 5vw !important;
     text-align: left !important;
-    /* background: red; */
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .custom-bld-style {
@@ -459,4 +424,8 @@
     justify-content: space-between;
     align-items: center;
     align-content: stretch;
+}
+
+.fit-container-style {
+    height: fit-content;
 }

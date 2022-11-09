@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FormGroup } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
@@ -25,7 +24,7 @@ import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import Skeleton from 'react-loading-skeleton';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
@@ -55,9 +54,7 @@ const IndividualActiveDevice = () => {
     // Edit states
     const [showEdit, setShowEdit] = useState(false);
     const handleEditClose = () => setShowEdit(false);
-    const handleEditShow = () => setShowEdit(true);
 
-    const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
@@ -121,12 +118,9 @@ const IndividualActiveDevice = () => {
         }
     }, [equipmentTypeDevices]);
 
-    // *********************************************************************************** //
-
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
 
-    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
@@ -155,8 +149,6 @@ const IndividualActiveDevice = () => {
 
         return label;
     };
-
-    // *********************************************************************************** //
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updatedSensorData);
@@ -194,7 +186,7 @@ const IndividualActiveDevice = () => {
                     setActiveLocationId(response.location_id);
                     localStorage.setItem('identifier', response.identifier);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchActiveDeviceSensorData = async () => {
@@ -210,7 +202,7 @@ const IndividualActiveDevice = () => {
                     setSensors(response);
                     setIsFetchingSensorData(false);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -301,6 +293,9 @@ const IndividualActiveDevice = () => {
                     { headers }
                 )
                 .then((res) => {
+                    setDeviceData([]);
+                    setSeriesData([]);
+
                     let response = res.data;
 
                     let data = response;
@@ -322,7 +317,7 @@ const IndividualActiveDevice = () => {
 
                             return _data;
                         });
-                    } catch (error) { }
+                    } catch (error) {}
 
                     exploreData.push(recordToInsert);
 
@@ -356,7 +351,7 @@ const IndividualActiveDevice = () => {
                 });
                 setEquipmentTypeDevices(response);
             });
-        } catch (error) { }
+        } catch (error) {}
     };
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
@@ -375,7 +370,7 @@ const IndividualActiveDevice = () => {
             await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
             });
-        } catch (error) { }
+        } catch (error) {}
     };
 
     const updateActiveDeviceData = async () => {
@@ -398,7 +393,7 @@ const IndividualActiveDevice = () => {
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
                     });
-            } catch (error) { }
+            } catch (error) {}
         }
     };
 
@@ -436,7 +431,7 @@ const IndividualActiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                            activeLocationId === activeData?.location_id
+                                        activeLocationId === activeData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -480,19 +475,6 @@ const IndividualActiveDevice = () => {
                                                     );
                                                 })}
                                             </Input>
-                                            // locationDataNow
-                                            // <Select
-                                            //     id="exampleSelect"
-                                            //     placeholder="Select Location"
-                                            //     name="select"
-                                            //     isSearchable={true}
-                                            //     defaultValue={'Select Location'}
-                                            //     options={locationDataNow}
-                                            //     onChange={(e) => {
-                                            //         setActiveLocationId(e.value);
-                                            //     }}
-                                            //     className="basic-single font-weight-bold"
-                                            // />
                                         )}
 
                                         <Form.Label className="device-sub-label-style mt-1">
@@ -547,56 +529,6 @@ const IndividualActiveDevice = () => {
                                             placeholder="Search..."
                                         />
                                     </div>
-
-                                    {/* <div>
-                                        <button
-                                            type="button"
-                                            className={
-                                                selectedTab === 0
-                                                    ? 'btn btn-light d-offline custom-active-btn'
-                                                    : 'btn btn-white d-inline custom-inactive-btn'
-                                            }
-                                            style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
-                                            onClick={() => setSelectedTab(0)}>
-                                            All Statuses
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                selectedTab === 1
-                                                    ? 'btn btn-light d-offline custom-active-btn'
-                                                    : 'btn btn-white d-inline custom-inactive-btn'
-                                            }
-                                            style={{ borderRadius: '0px' }}
-                                            onClick={() => setSelectedTab(1)}>
-                                            Healthy
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                selectedTab === 2
-                                                    ? 'btn btn-light d-offline custom-active-btn'
-                                                    : 'btn btn-white d-inline custom-inactive-btn'
-                                            }
-                                            style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
-                                            onClick={() => setSelectedTab(2)}>
-                                            Partials
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className={
-                                                selectedTab === 3
-                                                    ? 'btn btn-light d-offline custom-active-btn'
-                                                    : 'btn btn-white d-inline custom-inactive-btn'
-                                            }
-                                            style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
-                                            onClick={() => setSelectedTab(3)}>
-                                            No Data
-                                        </button>
-                                    </div> */}
                                 </div>
                             </div>
 
@@ -740,6 +672,7 @@ const IndividualActiveDevice = () => {
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
                 daysCount={daysCount}
+                deviceType="active"
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
@@ -801,27 +734,11 @@ const IndividualActiveDevice = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    setNewEquipTypeID(e.target.value);
-                                }}
-                                value={newEquipTypeID}>
-                                <option selected>Select Equipment Type</option>
-                                {equipmentTypeDevices.map((record) => {
-                                    return <option value={record.equipment_id}>{record.equipment_type}</option>;
-                                })}
-                            </Input> */}
-                            {/* equipmentTypeDataNow */}
                             <Select
                                 id="exampleSelect"
                                 placeholder="Select Equipment Type"
                                 name="select"
                                 isSearchable={true}
-                                // defaultValue={'Select Equipment Type'}
                                 options={equipmentTypeDataNow}
                                 defaultValue={newEquipTypeValue}
                                 onChange={(e) => {

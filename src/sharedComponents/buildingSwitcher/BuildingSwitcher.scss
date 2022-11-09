@@ -1,0 +1,57 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.building-switcher {
+    &-wrapper {
+        .typography-wrapper {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            * {
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+        }
+        .react-select-wrapper [class*='-menu'] {
+            margin: 0;
+            min-width: 300px;
+        }
+
+        //@TDOD Probably should be in React Select
+        [class*='-Group'] {
+            padding-bottom: 0.5rem;
+        }
+        [class*='-group'] {
+            margin-bottom: 0.4375rem;
+            padding-left: 7px;
+            & > div {
+                font-weight: 500;
+                font-size: 0.625rem;
+                line-height: 0.9375rem;
+                text-transform: uppercase;
+                color: $primary-gray-550;
+            }
+        }
+        .react-select-wrapper [class*='-option'] {
+            padding-left: 8px;
+            padding-right: 8px;
+            border-radius: 6px;
+        }
+        [class*='-MenuList'] {
+            padding: 0 1rem;
+        }
+        .react-select-wrapper [class*='-control'],
+        .react-select-wrapper [class*='-control'].is-open {
+            border: 0;
+            box-shadow: none;
+            cursor: pointer;
+            outline: none;
+
+            &:hover,
+            &.is-open {
+                border: 0;
+
+                background: $primary-gray-50;
+            }
+        }
+    }
+}

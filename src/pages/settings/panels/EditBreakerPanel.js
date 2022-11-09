@@ -525,7 +525,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let equipArray = [];
                     responseData.forEach((record) => {
@@ -624,7 +624,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let equipArray = [];
                     responseData.forEach((record) => {

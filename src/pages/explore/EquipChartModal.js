@@ -37,6 +37,7 @@ import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
+import { equipOptions, equipOptionsLines } from './ChartOption';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -137,160 +138,25 @@ const EquipChartModal = ({
         } catch (error) { }
     };
 
-    const [options, setOptions] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: 180,
-            toolbar: {
-                autoSelected: 'pan',
+    const [options, setOptions] = useState(equipOptions);
 
-                show: false,
-            },
+    const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
-            animations: {
-                enabled: false,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#10B981', '#2955E7'],
-        fill: {
-            opacity: 1,
-        },
-        markers: {
-            size: 0,
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    return val.toFixed(0);
-                },
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+    // Commented for future Use
+    // const getCSVLinkData = () => {
+    //     let acd=[];
+    //     if(seriesData.length!==0)
+    //        {
+    //          seriesData[0].data.map((ele)=>{
+               
+    //             acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
+    //          })
+    //        }
+    //     let arr = seriesData.length > 0 ? seriesData[0].data : [];
 
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit === 'kWh'
-                        ? series[seriesIndex][dataPointIndex].toFixed(0)
-                        : series[seriesIndex][dataPointIndex].toFixed(0)
-                    } 
-                         ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment
-                        .utc(timestamp)
-                        .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        },
-    });
-
-    const [optionsLine, setOptionsLine] = useState({
-        chart: {
-            id: 'chart1',
-            height: 90,
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            toolbar: {
-                show: false,
-            },
-
-            selection: {
-                enabled: true,
-            },
-            animations: {
-                enabled: false,
-            },
-        },
-
-        colors: ['#008FFB'],
-
-        fill: {
-            type: 'gradient',
-
-            gradient: {
-                opacityFrom: 0.91,
-
-                opacityTo: 0.1,
-            },
-        },
-
-        xaxis: {
-            type: 'datetime',
-
-            tooltip: {
-                enabled: false,
-            },
-
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MMM');
-                },
-            },
-        },
-
-        yaxis: {
-            tickAmount: 2,
-
-            labels: {
-                formatter: function (val) {
-                    return val.toFixed(0);
-                },
-            },
-        },
-    });
-
-    const getCSVLinkData = () => {
-        let arr = seriesData.length > 0 ? seriesData[0].data : [];
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
-        return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
-    };
+    //     let streamData = seriesData.length > 0 ? acd : [];
+    //     return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
+    // };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
@@ -878,9 +744,11 @@ const EquipChartModal = ({
 
                                                 {ytdData?.ytd_peak?.time_stamp ? (
                                                     <span className="ytd-unit">
-                                                        {`kW @ ${moment(ytdData?.ytd_peak?.time_stamp).format(
-                                                            'MM/DD  H:mm'
-                                                        )}`}
+                                                        {`kW @ ${moment
+                                                            .utc(ytdData?.ytd_peak?.time_stamp)
+                                                            .clone()
+                                                            .tz(timeZone)
+                                                            .format('MM/DD  H:mm')}`}
                                                     </span>
                                                 ) : (
                                                     <span className="ytd-unit">kW</span>
@@ -1008,7 +876,12 @@ const EquipChartModal = ({
                                                     <i className="uil uil-calendar-alt mr-2"></i>Configure Column
                                                 </Dropdown.Item>
 
-                                                <div className="mr-3">
+                                                <Dropdown.Item>
+                                                <i className="uil uil-download-alt mr-2"></i>
+                                                        Download CSV
+                                                </Dropdown.Item>
+                                                {/* Commented for future use */}
+                                                {/* <div className="mr-3">
                                                     <CSVLink
                                                         style={{ color: 'black', paddingLeft: '1.5rem' }}
                                                         filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
@@ -1017,7 +890,7 @@ const EquipChartModal = ({
                                                         <i className="uil uil-download-alt mr-2"></i>
                                                         Download CSV
                                                     </CSVLink>
-                                                </div>
+                                                </div> */}
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>

@@ -1,17 +1,16 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import Typography from '../typography';
-import Brick from '../brick';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { configDonutChartWidget } from './config';
 import DonutChartLabels from './DonutChartLabels';
-import { formatConsumptionValue } from '../../helpers/helpers';
-import { useHistory } from 'react-router-dom';
-
-import './style.scss';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { ReactComponent as Download } from '../assets/icons/download.svg';
+import { getCSVDataExport } from './utils';
+import './style.scss';
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
@@ -23,16 +22,21 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle }) => {
+const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
-                {subtitle}
-            </Typography.Body>
-            <Brick sizeInRem={sizeBrick} />
+            <div className={`ml-3 mt-2`}>
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    as="h5"
+                    fontWeight={Typography.Types.Medium}
+                    className="mb-1">
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
         </>
     );
 };
@@ -45,12 +49,15 @@ const DonutChartWidget = ({
     title,
     subtitle,
     isEnergyConsumptionChartLoading,
+    pageType,
+    bldgId,
+    handleRouteChange,
+    showRouteBtn,
     ...props
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
-    const series = items.map(({ value }) => parseInt(value));
-    const history = useHistory();
+    const series = items.map(({ value }) => Math.round(value));
 
     const options = {
         ...configDonutChartWidget(type),
@@ -58,45 +65,48 @@ const DonutChartWidget = ({
         colors,
         id,
     };
+
     return (
         <>
-            <div className="donut-main-wrapper">
+            <div className={`donut-main-wrapper ${className}`}>
                 {type === DONUT_CHART_TYPES.HORIZONTAL && (
                     <>
-                        {props.pageType === 'building' ? (
-                            <div className="container-header mb-1">
-                                <div>
-                                    <Titles sizeBrick={1} {...{ title, subtitle }} />
-                                </div>
-                                {/* <div>
+                        {pageType === 'building' ? (
+                            <div className="container-header">
+                                <Titles {...{ title, subtitle, pageType }} />
+                                <div className="d-flex justify-content-between mr-2">
+                                    <Button
+                                        size={Button.Sizes.sm}
+                                        icon={<Download />}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={() => getCSVDataExport(labels, series, pageType)}
+                                        className="mr-4"
+                                    />
                                     <Button
                                         label="More Details"
                                         size={Button.Sizes.lg}
                                         icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
                                         type={Button.Type.tertiary}
                                         iconAlignment={Button.IconAlignment.right}
-                                        onClick={() => {
-                                            history.push({
-                                                pathname: `/energy/end-uses/${props.bldgId}`,
-                                            });
-                                        }}
+                                        onClick={handleRouteChange}
                                     />
-                                </div> */}
+                                </div>
                             </div>
                         ) : (
-                            <Titles sizeBrick={1} {...{ title, subtitle }} />
+                            <div className="d-flex justify-content-between">
+                                <Titles {...{ title, subtitle, pageType }} />
+                                <FontAwesomeIcon
+                                    icon={faDownload}
+                                    size="md"
+                                    className="download-chart-btn mouse-pointer mr-3 mt-3"
+                                    onClick={() => getCSVDataExport(labels, series, pageType)}
+                                />
+                            </div>
                         )}
                     </>
                 )}
-                <div
-                    className={`donut-chart-widget-wrapper ${className} ${type}`}
-                    style={{ width: '100%', justifyContent: 'space-around' }}>
+                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
                     {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
-                    {/* {isEnergyConsumptionChartLoading ? (
-                        <div className="loader-center-style">
-                            <Spinner className="m-2" color={'primary'} />
-                        </div>
-                    ) : ( */}
                     <>
                         <div className={`chart-wrapper ${type}`}>
                             <ReactApexChart options={options} {...props} series={series} type="donut" />
@@ -110,7 +120,6 @@ const DonutChartWidget = ({
                             />
                         </div>
                     </>
-                    {/* )} */}
                 </div>
             </div>
         </>
@@ -130,6 +139,10 @@ DonutChartWidget.propTypes = {
             link: PropTypes.string,
         }).isRequired
     ).isRequired,
+    pageType: PropTypes.string,
+    bldgId: PropTypes.string,
+    handleRouteChange: PropTypes.func,
+    showRouteBtn: PropTypes.bool,
 };
 
 export default DonutChartWidget;

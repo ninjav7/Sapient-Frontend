@@ -16,7 +16,7 @@
         &.secondary-grey {
             color: $primary-gray-800;
             background: $base-white;
-            border: 1px solid $primary-gray-250;
+            border: 1px solid $primary-gray-450;
             box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
 
             &:hover {
@@ -26,6 +26,7 @@
             &:focus,
             &:active {
                 outline: none;
+                border: 1px solid $primary-indigo-600;
                 @extend .box-shadow-xs;
             }
             &[disabled] {

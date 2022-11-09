@@ -266,12 +266,11 @@ const ActiveDevicesTable = ({
                                     <tr key={index} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'status') && (
                                             <td scope="row" className="text-center">
-                                                {record.status === 'Online' && (
+                                                {record.status ? (
                                                     <div className="icon-bg-styling">
                                                         <i className="uil uil-wifi mr-1 icon-styling"></i>
                                                     </div>
-                                                )}
-                                                {record.status === 'Offline' && (
+                                                ) : (
                                                     <div className="icon-bg-styling-slash">
                                                         <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
                                                     </div>
@@ -455,7 +454,7 @@ const ActiveDevices = () => {
                 let offlineData = [];
 
                 response.data.forEach((record) => {
-                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    record.status ? onlineData.push(record) : offlineData.push(record);
                 });
 
                 setOnlineDeviceData(onlineData);
@@ -519,7 +518,7 @@ const ActiveDevices = () => {
                 let offlineData = [];
 
                 response.data.forEach((record) => {
-                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    record.status ? onlineData.push(record) : offlineData.push(record);
                 });
 
                 setOnlineDeviceData(onlineData);
@@ -553,7 +552,7 @@ const ActiveDevices = () => {
                 let offlineData = [];
 
                 response.data.forEach((record) => {
-                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    record.status ? onlineData.push(record) : offlineData.push(record);
                 });
 
                 setOnlineDeviceData(onlineData);
@@ -589,7 +588,7 @@ const ActiveDevices = () => {
                     let offlineData = [];
 
                     response.data.forEach((record) => {
-                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                        record.status ? onlineData.push(record) : offlineData.push(record);
                     });
 
                     setOnlineDeviceData(onlineData);
