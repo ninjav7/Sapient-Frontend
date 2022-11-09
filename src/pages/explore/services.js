@@ -4,13 +4,11 @@ import {
     getExploreBuildingChart, 
     getExploreEquipmentList,
     getExploreEquipmentChart,
-    getFloors,
-    equipmentType,
-    getEndUseId,
-    getSpaceTypes,
-    getSpaces,
+    getExploreFilter
 } from '../../services/Network';
 
+
+//Explore By Building
 export function fetchExploreBuildingList(currentData,buildingSearchTxt) {
     let params = `?consumption=energy&search_by_name=${buildingSearchTxt}`;
     return axiosInstance.post(`${getExploreBuildingList}${params}`, currentData).then((res) => {
@@ -24,3 +22,23 @@ return axiosInstance.post(`${getExploreBuildingChart}${params}`, currentData).th
     return res;
 });
 }
+
+//Explore By Equipment
+export function fetchExploreEquipmentList(payload,params) {
+    return axiosInstance.post(`${getExploreEquipmentList}${params}`, payload).then((res) => {
+        return res;
+    });
+}
+
+export function fetchExploreEquipmentChart(payload, params) {
+return axiosInstance.post(`${getExploreEquipmentChart}${params}`, payload).then((res) => {
+    return res;
+    });
+}
+
+export function fetchExploreFilter(payload, params) {
+    return axiosInstance.post(`${getExploreFilter}${params}`, payload).then((res) => {
+        return res;
+    });
+}
+

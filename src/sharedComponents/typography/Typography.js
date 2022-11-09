@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { TypographyHeader } from './TypographyHeader';
 import TypographySubheader from './TypographySubheader';
 import { TypographyBody } from './TypographyBody';
+import { TypographyLink } from './TypographyLink';
 
 import './style.scss';
 
@@ -26,7 +27,17 @@ const SIZES = Object.freeze({
     xxs: 'xxs',
 });
 
-const Typography = ({ children, variant, size, fontWeight, className, noPadding, as = 'div', innerRef, ...props }) => {
+const Typography = ({
+    children,
+    variant,
+    size,
+    fontWeight,
+    className,
+    noPadding,
+    as = 'div',
+    innerRef,
+    ...props
+}) => {
     const elementClassNames = cx(
         'typography-wrapper',
         variant,
@@ -43,7 +54,6 @@ const Typography = ({ children, variant, size, fontWeight, className, noPadding,
         },
         elementClassNames
     );
-
     return React.createElement(as, { className: classNames, ref: innerRef, ...props }, children);
 };
 
@@ -53,9 +63,11 @@ Typography.Sizes = SIZES;
 Typography.Header = TypographyHeader;
 Typography.Subheader = TypographySubheader;
 Typography.Body = TypographyBody;
+Typography.Link = TypographyLink;
 
 Typography.propTypes = {
     variant: PropTypes.string.isRequired,
+    href: PropTypes.string,
     size: PropTypes.oneOf(Object.values(SIZES)),
     fontWeight: PropTypes.oneOf(Object.values(FONT_WEIGHT_TYPES)),
     as: PropTypes.string,

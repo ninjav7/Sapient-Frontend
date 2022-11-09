@@ -158,9 +158,7 @@ export default function CustomEdge({
                 .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
                 .then((res) => {
                     let response = res?.data;
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
+                    triggerBreakerAPI();
                 });
         } catch (error) {}
     };
@@ -180,9 +178,7 @@ export default function CustomEdge({
                 })
                 .then((res) => {
                     let response = res?.data;
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
+                    triggerBreakerAPI();
                 });
         } catch (error) {}
     };
