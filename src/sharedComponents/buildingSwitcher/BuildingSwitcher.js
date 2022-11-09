@@ -58,7 +58,11 @@ BuildingSwitcher.propTypes = {
             ),
         })
     ).isRequired,
-    defaultValue: PropTypes.number.isRequired,
+    defaultValue: PropTypes.shape({
+        icon: PropTypes.node,
+        label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
+        value: stringOrNumberPropTypes.isRequired,
+    }).isRequired,
 };
 
 export default BuildingSwitcher;

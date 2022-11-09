@@ -1,6 +1,5 @@
 .card-title-style {
     font-style: normal;
-    /* font-family: 'Inter', sans-serif; */
     font-weight: 700;
     font-size: 14px;
     line-height: 15px;
@@ -19,7 +18,6 @@
     width: auto;
 }
 
-
 .custom-date-picker-props {
     border: none;
     font-weight: 600;
@@ -34,7 +32,6 @@
     display: flex;
     align-items: center;
     text-align: right;
-    /* font-family: 'Inter', sans-serif; */
     color: #1f2937;
 }
 
@@ -46,17 +43,11 @@
     align-items: center;
     text-align: right;
     color: #4b5563;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .card-box-style {
     height: fit-content;
     background: #f9fafb;
-    /* border: 1px solid #f3f4f6; */
-    /* box-sizing: border-box; */
-    /* box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06); */
-    /* border-radius: 10px; */
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .custom-loading-style {
@@ -64,15 +55,6 @@
     align-items: center !important;
     margin-left: 30vw;
 }
-
-/* .card-box-style:hover {
-    height: 90px;
-    background: rgb(224, 222, 222);
-    border: 1px solid #f3f4f6;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
-} */
 
 .donet-style {
     position: static;
@@ -85,25 +67,13 @@
     box-sizing: border-box;
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .custom-buttons {
     border: 1px solid #e5e7eb;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 4px;
-    /* font-family: 'Inter', sans-serif; */
 }
-
-/* .custom-title {
-    font-style: normal;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 17px;
-    display: flex;
-    align-items: center;
-    color: #1f2937;
-} */
 
 .custom-subtitle {
     font-style: normal;
@@ -114,7 +84,6 @@
     align-items: center;
     letter-spacing: 0.25px;
     color: #798190;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .portfolio-map-widget {
@@ -137,20 +106,12 @@
     box-sizing: border-box;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 3px;
-    /* font-family: 'Inter', sans-serif; */
 }
-
-/* .progress-bar-container {
-    height: 44px;
-} */
 
 .progress-title:hover,
 .progress-bar-container:hover {
-    /* box-shadow: 0px 0px 5px rgb(172, 171, 171); */
-    /* background: rgb(224, 222, 222); */
     border-radius: 6px;
     text-decoration: underline;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .progress-bar-container:hover {
@@ -167,7 +128,6 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 17px;
-    /* font-family: 'Inter', sans-serif; */
     display: flex;
     align-items: center;
     color: #9ca3af;
@@ -197,7 +157,6 @@
 
 .store-name-style {
     font-style: normal;
-    /* font-family: 'Inter', sans-serif; */
     font-weight: 600;
     font-size: 14px;
     line-height: 17px;
@@ -209,7 +168,6 @@
 
 .store-value-style {
     font-style: normal;
-    /* font-family: 'Inter', sans-serif; */
     font-weight: 400;
     font-size: 14px;
     line-height: 15px;
@@ -238,7 +196,6 @@
     font-size: 12px;
     line-height: 22px;
     color: #ffffff !important;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .custom-equip-style {
@@ -265,7 +222,6 @@
     white-space: nowrap;
     -ms-overflow-style: none; /* for Internet Explorer, Edge */
     scrollbar-width: none; /* for Firefox */
-    /* overflow-x: auto; */
     text-size-adjust: auto;
 }
 
@@ -277,7 +233,6 @@
     top: 8px;
     background: #fef2f2;
     border-radius: 6px;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .button-style {
@@ -299,7 +254,6 @@
     box-sizing: border-box;
     border-radius: 6px 0px 0px 6px;
     display: inline-block;
-    /* height: 40px; */
 }
 
 .header-container {
@@ -309,12 +263,10 @@
 
 .progress-title {
     font-size: small;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .card-title {
     font-weight: bold;
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .table-font-style {
@@ -325,8 +277,6 @@
 .record-style {
     width: 5vw !important;
     text-align: left !important;
-    /* background: red; */
-    /* font-family: 'Inter', sans-serif; */
 }
 
 .consumption-style {
@@ -360,18 +310,6 @@
     color: #1d2939;
     margin-bottom: 0px;
 }
-
-/* .donut-container-style {
-    background: red;
-}
-
-.donut-content-style {
-    background: white;
-    width: fit-content;
-    position: absolute;
-    bottom: 40%;
-    left: 40%;
-} */
 
 .custom-subtitle-style {
     font-family: 'Inter';
@@ -451,7 +389,7 @@
     }
 }
 
-.datefilter-styling{
+.datefilter-styling {
     height: 90% !important;
 }
 
