@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import { MultiSelect } from 'react-multi-select-component';
+import Form from 'react-bootstrap/Form';
+import { Table } from 'reactstrap';
 import Input from '../../sharedComponents/form/input/Input';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
@@ -13,77 +16,28 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 
-import _ from 'lodash';
-
 import { timePicker15MinutesIntervalOption } from '../../constants/time';
 
 import moment from 'moment';
-
+import { Cookies } from 'react-cookie';
 import {
     updatePlugRuleRequest,
     fetchPlugRuleDetails,
     deletePlugRuleRequest,
     getGraphDataRequest,
     getListSensorsForBuildingsRequest,
-    linkSensorsToRuleRequest,
+    linkSocketRequest,
     listLinkSocketRulesRequest,
     unlinkSocketRequest,
     getUnlinkedSocketRules,
-    getFiltersForSensorsRequest,
 } from '../../services/plugRules';
 import './style.scss';
 import { ceil } from 'lodash';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { Badge } from '../../sharedComponents/badge';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import { Checkbox } from '../../sharedComponents/form/checkbox';
-import { generateID } from '../../sharedComponents/helpers/helper';
-
-const SkeletonLoading = () => (
-    <SkeletonTheme color="#202020" height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
-    </SkeletonTheme>
-);
 
 const PlugRule = () => {
-    const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
-    const searchTouchedRef = useRef(false);
-    const [search, setSearch] = useState('');
+
     const [rulesToUnLink, setRulesToUnLink] = useState({
         rule_id: '',
         sensor_id: [],
@@ -114,7 +68,6 @@ const PlugRule = () => {
 
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
-    const [allSensors, setAllSensors] = useState([]);
     const [allUnlinkedRuleAdded, setAllUnlinkedRuleAdded] = useState([]);
     const [isDeletting, setIsDeletting] = useState(false);
     const [allData, setAllData] = useState([]);
@@ -173,14 +126,6 @@ const PlugRule = () => {
     ]);
     const [hoursNew, setHoursNew] = useState([]);
 
-    const [selectedIds, setSelectedIds] = useState([]);
-    const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
-    const [sortBy, setSortBy] = useState({});
-
-    const [allSearchData, setAllSearchData] = useState([]);
-    const [totalItems, setTotalItems] = useState(0);
-    const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -241,7 +186,7 @@ const PlugRule = () => {
         });
     };
     const getGraphData = async () => {
-        await getGraphDataRequest(activeBuildingId, sensorsIdNow, currentData.id).then((res) => {
+        await getGraphDataRequest(activeBuildingId, sensorsIdNow).then((res) => {
             if (res.status) {
                 let response = res.data;
                 setTotalGraphData(response);
@@ -517,28 +462,21 @@ const PlugRule = () => {
         ]);
     }, [hoursNew]);
 
-    useEffect(() => {
-        totalGraphData?.length > 0 &&
-            setLineChartData([
-                {
-                    data: totalGraphData.map(({ x, y }) => ({ x: moment(x).format('ddd h a'), y })),
-                },
-            ]);
-    }, [totalGraphData]);
-
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
+    const [selectedOptionLocation, setSelectedOptionLocation] = useState([]);
+    const [selectedOptionSensor, setSelectedOptionSensor] = useState([]);
 
+    const [selectedEqupimentOption, setSelectedEqupimentOption] = useState([]);
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
 
+    const [selectedMacOption, setSelectedMacOption] = useState([]);
     const [macTypeFilterString, setMacTypeFilterString] = useState('');
 
+    const [selectedLocationOption, setSelectedLocationOption] = useState([]);
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
 
-    const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
-    const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
-    const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
-
+    const [selectedSensorOption, setSelectedSensorOption] = useState([]);
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
@@ -550,6 +488,82 @@ const PlugRule = () => {
             getGraphData();
         }
     }, [sensorsIdNow]);
+
+    const handleEqupimentTypeFilter = () => {
+        return selectedOption?.map((item) => {
+            setSelectedEqupimentOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleMacFilter = () => {
+        return selectedOptionMac?.map((item) => {
+            setSelectedMacOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleLocationFilter = () => {
+        return selectedOptionLocation?.map((item) => {
+            setSelectedLocationOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleSensorFilter = () => {
+        return selectedOptionSensor?.map((item) => {
+            setSelectedSensorOption((el) => [...el, item?.value]);
+        });
+    };
+
+    useEffect(() => {
+        setSelectedEqupimentOption([]);
+        handleEqupimentTypeFilter();
+    }, [selectedOption]);
+
+    useEffect(() => {
+        setSelectedMacOption([]);
+        handleMacFilter();
+    }, [selectedOptionMac]);
+
+    useEffect(() => {
+        setSelectedLocationOption([]);
+        handleLocationFilter();
+    }, [selectedOptionLocation]);
+
+    useEffect(() => {
+        setSelectedSensorOption([]);
+        handleSensorFilter();
+    }, [selectedOptionSensor]);
+
+    const equpimentTypeFilterStringFunc = () => {
+        return setEqupimentTypeFilterString(selectedEqupimentOption?.join('%2B'));
+    };
+
+    const macFilterStringFunc = () => {
+        return setMacTypeFilterString(selectedMacOption?.join('%2B'));
+    };
+
+    const locationFilterStringFunc = () => {
+        return setLocationTypeFilterString(selectedLocationOption?.join('%2B'));
+    };
+
+    const sensorFilterStringFunc = () => {
+        return setSensorTypeFilterString(selectedSensorOption?.join('%2B'));
+    };
+
+    useEffect(() => {
+        equpimentTypeFilterStringFunc();
+    }, [selectedEqupimentOption]);
+
+    useEffect(() => {
+        macFilterStringFunc();
+    }, [selectedMacOption]);
+
+    useEffect(() => {
+        locationFilterStringFunc();
+    }, [selectedLocationOption]);
+
+    useEffect(() => {
+        sensorFilterStringFunc();
+    }, [selectedSensorOption]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -604,11 +618,8 @@ const PlugRule = () => {
             return;
         }
         setIsProcessing(true);
-        await linkSensorsToRuleRequest({
-            ...rulesToLink,
-            sensor_id: rulesToLink.sensor_id.filter((sensor) => !fetchedSelectedIds.includes(sensor.id)),
-            building_id: activeBuildingId,
-        }).then((res) => {});
+
+        await linkSocketRequest(rulesToLink).then((res) => {});
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
@@ -626,10 +637,6 @@ const PlugRule = () => {
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
-
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
     };
 
     const handleSchedularConditionChange = (key, value, condition_id) => {
@@ -688,8 +695,6 @@ const PlugRule = () => {
             let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
             recordToLink.sensor_id = newRecordToLink;
             setRulesToLink(recordToLink);
-
-            setTotalSocket((totalCount) => --totalCount);
         }
 
         if (value === 'false') {
@@ -704,23 +709,13 @@ const PlugRule = () => {
             let recordToLink = rulesToLink;
             recordToLink.rule_id = currentData.id;
             recordToLink.sensor_id.push(rule.id);
-
             setRulesToLink(recordToLink);
 
             let recordToUnLink = rulesToUnLink;
             let newRecordToUnLink = recordToUnLink.sensor_id.filter((el) => el !== rule.id);
             recordToUnLink.sensor_id = newRecordToUnLink;
-
             setRulesToUnLink(recordToUnLink);
-
-            setTotalSocket((totalCount) => ++totalCount);
         }
-
-        const isAdding = value === 'false';
-
-        setSelectedIds((prevState) => {
-            return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
-        });
     };
 
     const updatePlugRuleData = async () => {
@@ -735,11 +730,39 @@ const PlugRule = () => {
             });
     };
 
+    const nextPageData = async (path) => {
+        setPageNo(pageNo + 1);
+
+        await getListSensorsForBuildingsRequest(totalSocket, pageNo, ruleId, activeBuildingId).then((res) => {
+            let response = res.data;
+            let unLinkedData = [];
+            response.data.forEach((record) => {
+                record.linked_rule = false;
+                unLinkedData.push(record);
+            });
+            setUnLinkedRuleData(unLinkedData);
+        });
+    };
+
+    const previousPageData = async (path) => {
+        setPageNo(pageNo - 1);
+
+        await getListSensorsForBuildingsRequest(totalSocket, pageNo, ruleId, activeBuildingId).then((res) => {
+            let response = res.data;
+            let unLinkedData = [];
+            response.data.forEach((record) => {
+                record.linked_rule = false;
+                unLinkedData.push(record);
+            });
+            setUnLinkedRuleData(unLinkedData);
+        });
+    };
+
     const addOptions = () => {
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
-                setOptions((el) => [...el, { value: record?.equipment_type_id, label: record?.name }]);
+                setOptions((el) => [...el, { value: record?.equipment_type, label: record?.name }]);
                 setEqupimentTypeAdded((el) => [...el, record?.equipment_type]);
                 setMacOptions((el) => [...el, { value: record?.device_link, label: record?.device_link }]);
                 if (record?.equipment_link_location) {
@@ -761,13 +784,23 @@ const PlugRule = () => {
         }
     }, [allData]);
 
+    const uniqueIds = [];
     const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
 
     const uniqueMacIds = [];
     const [removeMacDuplication, setRemoveMacDuplication] = useState();
 
     const removeDuplicates = () => {
-        setRemoveEqupimentTypesDuplication(_.uniqBy(options, 'label'));
+        const uniqueEqupimentTypes = options.filter((element) => {
+            const isDuplicate = uniqueIds.includes(element.id);
+            if (!isDuplicate) {
+                uniqueIds.push(element.id);
+                return true;
+            }
+            return false;
+        });
+
+        setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
     };
 
     const removeMacDuplicates = () => {
@@ -793,14 +826,6 @@ const PlugRule = () => {
     }, [macOptions]);
 
     const fetchUnLinkedSocketRules = async () => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-
-        isLoadingRef.current = true;
-
         await getUnlinkedSocketRules(
             pageSize,
             pageNo,
@@ -809,98 +834,44 @@ const PlugRule = () => {
             equpimentTypeFilterString,
             macTypeFilterString,
             locationTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
-            {
-                ...sorting,
-            }
+            sensorTypeFilterString
         ).then((res) => {
-            isLoadingRef.current = false;
-
-            let response = res.data.data;
-
-            setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
-
             setUnlinkedSocketRuleSuccess(res.status);
-
+            let response = res.data.data;
+            setTotalSocket(parseInt(response.total_data));
             let unLinkedData = [];
-            _.uniqBy(response.data, 'id').forEach((record) => {
+            response.data.forEach((record) => {
                 record.linked_rule = false;
                 unLinkedData.push(record);
             });
-
             setUnLinkedRuleData(unLinkedData);
             setAllUnlinkedRuleAdded((el) => [...el, '1']);
-            setTotalItems(response.total_data);
         });
     };
 
     const fetchLinkedSocketRules = async () => {
-        await listLinkSocketRulesRequest(ruleId, activeBuildingId, sortBy)
+        await listLinkSocketRulesRequest(ruleId, activeBuildingId)
             .then((res) => {
                 let response = res.data;
                 let linkedData = [];
-
-                if (res.statusText === 'OK') {
-                    Array.isArray(res.data.data.sensor_id) && setTotalSocket(res.data.data.sensor_id.length);
-                }
-
-                setSelectedIds(response.data.sensor_id || []);
-                setFetchedSelectedIds(response.data.sensor_id || []);
-
                 response.data.sensor_id.forEach((record) => {
                     record.linked_rule = true;
                     linkedData.push(record);
                 });
-
                 setLinkedRuleData(linkedData);
             })
             .catch((error) => {});
     };
 
     useEffect(() => {
-        fetchLinkedSocketRules();
-    }, []);
-
-    useEffect(() => {
-        const selectedSensors = selectedIds
-            .map((id) => allSensors.find((sensor) => sensor.id === id))
-            .map((sensor) => ({ ...sensor, linked_rule: true }));
-
-        setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
-
-        setLinkedRuleData(selectedSensors);
-    }, [allData.length, selectedIds, allSensors.length]);
-
-    useEffect(() => {
-        unLinkedRuleData.length > 0 &&
-            setUnLinkedRuleData((olState) => olState.filter((sensor) => !selectedIds.includes(sensor.id)));
-    }, [selectedIds.length, selectedIds.length, unLinkedRuleData.length]);
-
-    useEffect(() => {
         if (ruleId === null) {
             return;
         }
 
+        fetchLinkedSocketRules();
         fetchUnLinkedSocketRules();
-    }, [
-        ruleId,
-        equpimentTypeFilterString,
-        macTypeFilterString,
-        locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
-    ]);
+    }, [ruleId, equpimentTypeFilterString, macTypeFilterString, locationTypeFilterString, sensorTypeFilterString]);
 
-    // INITIAL TABLE
     useEffect(() => {
         let arr1 = [];
         let arr2 = [];
@@ -909,250 +880,21 @@ const PlugRule = () => {
         arr2 = unLinkedRuleData;
 
         const allRuleData = arr1.concat(arr2);
-
-        // INITIAL TABLE
         setAllLinkedRuleData(allRuleData);
-    }, [linkedRuleData, unLinkedRuleData]);
-
-    const currentRow = () => {
-        if (selectedRuleFilter === 0) {
-            return allSensors;
-        }
-        if (selectedRuleFilter === 1) {
-            //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-            // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedSensor = allSensors.find((sensor) => sensor.id === id);
-                if (foundSelectedSensor) {
-                    acc.push(foundSelectedSensor);
-                }
-                return acc;
-            }, []);
-        }
-
-        return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
-    };
-
-    const currentRowSearched = () => {
-        if (selectedRuleFilter === 0) {
-            return allSearchData;
-        }
-        if (selectedRuleFilter === 1) {
-            //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-            // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedSensor = allSearchData.find((sensor) => sensor.id === id);
-                if (foundSelectedSensor) {
-                    acc.push(foundSelectedSensor);
-                }
-                return acc;
-            }, []);
-        }
-
-        return allSearchData.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
-    };
-
-    const renderTagCell = (row) => {
-        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className='ml-1'/>);
-    };
-
-    const renderLastUsedCell = (row, childrenTemplate) => {
-        const { last_used_data } = row;
-
-        return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
-    };
-
-    const renderAssignRule = useCallback(
-        (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
-        []
-    );
-
-    const renderEquipType = useCallback((row) => {
-        return <Badge text={<span className="gray-950">{row.equipment_type_name}</span>} />;
-    }, []);
-
-    const renderLocation = useCallback((row, childrenTemplate) => {
-        const location = [row.installed_floor, row.installed_space];
-
-        return childrenTemplate(location.join(' - '));
-    }, []);
-
-    const [filterOptions, setFilterOptions] = useState([]);
-
-    const filterHandler = (setter, options) => {
-        setter(options.map(({ value }) => value).join('+'));
-        setPageNo(1);
-    };
-
-    useEffect(() => {
-        (async () => {
-            isLoadingRef.current = true;
-            const filters = await getFiltersForSensorsRequest({
-                activeBuildingId,
-                macTypeFilterString,
-                equpimentTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-            });
-
-            filters.data.forEach((filterOptions) => {
-                const filterOptionsFetched = [
-                    {
-                        label: 'MAC Address',
-                        value: 'macAddresses',
-                        placeholder: 'All Mac addresses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOptionMac([]);
-                            setMacTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipmentType',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOption([]);
-                            setEqupimentTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Sensors',
-                        value: 'sensors',
-                        placeholder: 'All Sensors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                        onDelete: setSensorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Floor',
-                        value: 'floor',
-                        placeholder: 'All Floors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                            value: filterItem.floor_id,
-                            label: filterItem.floor_name,
-                        })),
-                        onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                        onDelete: () => setFloorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space',
-                        value: 'space',
-                        placeholder: 'All Spaces',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                            value: filterItem.space_id,
-                            label: filterItem.space_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                        onDelete: () => setSpaceTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'spaceType',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                            value: filterItem.space_type_id,
-                            label: filterItem.space_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                        onDelete: () => setSpaceTypeTypeFilterString(''),
-                    },
-                ];
-
-                setFilterOptions(filterOptionsFetched);
-            });
-
-            isLoadingRef.current = false;
-        })();
-    }, [
-        activeBuildingId,
-        macTypeFilterString,
-        equpimentTypeFilterString,
-        sensorTypeFilterString,
-        locationTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-    ]);
-
-    useEffect(() => {
-        setAllSearchData([]);
-
         const fetchAllData = async () => {
-            const sorting = sortBy.method &&
-                sortBy.name && {
-                    order_by: sortBy.name,
-                    sort_by: sortBy.method,
-                };
-
-            isLoadingRef.current = true;
-            await getUnlinkedSocketRules(
-                pageSize,
-                pageNo,
-                ruleId,
-                activeBuildingId,
-                equpimentTypeFilterString,
-                macTypeFilterString,
-                locationTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-                {
-                    sensor_search: search,
-                    ...sorting,
-                }
-            ).then((res) => {
-                isLoadingRef.current = false;
-
-                setUnlinkedSocketRuleSuccess(res.status);
-                let response = res.data.data;
+            await getListSensorsForBuildingsRequest(totalSocket, pageNo, ruleId, activeBuildingId).then((res) => {
+                let response = res.data;
                 let unLinkedData = [];
-                response.data.forEach((record) => {
+                response.data.data.forEach((record) => {
                     record.linked_rule = false;
                     unLinkedData.push(record);
                 });
-                setAllSearchData(unLinkedData);
-                setTotalItemsSearched(response.total_data);
+                setAllData(unLinkedData);
+                setAllUnlinkedRuleAdded((el) => [...el, '2']);
             });
         };
-
-        search && fetchAllData();
-        
-    }, [
-        search,
-        equpimentTypeFilterString,
-        macTypeFilterString,
-        locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
-    ]);
+        fetchAllData();
+    }, [linkedRuleData, unLinkedRuleData]);
 
     return (
         <>
@@ -1201,14 +943,11 @@ const PlugRule = () => {
                                 type="button"
                                 className="btn btn-primary plug-rule-save ml-2"
                                 onClick={() => {
-                                    Promise.allSettled([
-                                        updatePlugRuleData(),
-                                        updateSocketLink(),
-                                        updateSocketUnlink(),
-                                    ]).then((value) => {
-                                        history.push({
-                                            pathname: `/control/plug-rules`,
-                                        });
+                                    updatePlugRuleData();
+                                    updateSocketLink();
+                                    updateSocketUnlink();
+                                    history.push({
+                                        pathname: `/control/plug-rules`,
                                     });
                                 }}>
                                 Save
@@ -1659,7 +1398,6 @@ const PlugRule = () => {
 
                                                         <div>
                                                             <Button
-                                                                label=""
                                                                 onClick={() => {
                                                                     showOptionToDelete(record.condition_id);
                                                                     setCurrentScheduleIdToDelete(record.condition_id);
@@ -1730,102 +1468,472 @@ const PlugRule = () => {
 
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    <DataTableWidget
-                        isLoading={isLoadingRef.current}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="sockets-plug-rules"
-                        onSearch={(query) => {
-                            setPageNo(1);
-                            setSearch(query);
-                        }}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Selected' }, { label: 'Unselected' }]}
-                        onStatus={setSelectedRuleFilter}
-                        rows={currentRow()}
-                        searchResultRows={currentRowSearched()}
-                        filterOptions={filterOptions}
-                        headers={[
-                            {
-                                name: 'Equipment Type',
-                                accessor: 'equipment_type_name',
-                                callbackValue: renderEquipType,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Location',
-                                accessor: 'equipment_link_location',
-                                callbackValue: renderLocation,
-                            },
-                            {
-                                name: 'MAC Address',
-                                accessor: 'device_link',
-                            },
-                            {
-                                name: 'Sensors',
-                                accessor: 'sensor_count',
-                            },
-                            {
-                                name: 'Assigned Rule',
-                                accessor: 'assigned_rule',
-                                callbackValue: renderAssignRule,
-                            },
-                            {
-                                name: 'Tags',
-                                accessor: 'tags',
-                                callbackValue: renderTagCell,
-                            },
-                            {
-                                name: 'Last Data',
-                                accessor: 'last_data',
-                                callbackValue: renderLastUsedCell,
-                            },
-                        ]}
-                        onCheckboxRow={alert}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="vehicle1"
-                                name="vehicle1"
-                                checked={checkedAll}
-                                onChange={() => {
-                                    setCheckedAll(!checkedAll);
-                                }}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="socket_rule"
-                                name="socket_rule"
-                                checked={selectedIds.includes(record?.id) || checkedAll}
-                                value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                onChange={(e) => {
-                                    setSensorIdNow(record?.id);
-                                    handleRuleStateChange(e.target.value, record);
-                                }}
-                            />
-                        )}
-                        onPageSize={setPageSize}
-                        onChangePage={setPageNo}
-                        pageSize={pageSize}
-                        currentPage={pageNo}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
-                            if (selectedRuleFilter === 0) {
-                                return totalItems;
-                            }
+                    <div className="row">
+                        <div className="socket-filters-flex">
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title ml-2">
+                                        Show
+                                    </Form.Label>
+                                    <br />
+                                    <div className="btn-group ml-2" role="group" aria-label="Basic example">
+                                        <div>
+                                            <button
+                                                type="button"
+                                                className={
+                                                    selectedRuleFilter === 0
+                                                        ? 'btn btn-light d-offline custom-active-btn'
+                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                }
+                                                style={{
+                                                    borderTopRightRadius: '0px',
+                                                    borderBottomRightRadius: '0px',
+                                                }}
+                                                onClick={() => setSelectedRuleFilter(0)}>
+                                                All
+                                            </button>
 
-                            return 0;
-                        })()}
-                    />
+                                            <button
+                                                type="button"
+                                                className={
+                                                    selectedRuleFilter === 1
+                                                        ? 'btn btn-light d-offline custom-active-btn'
+                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                }
+                                                style={{ borderRadius: '0px' }}
+                                                onClick={() => setSelectedRuleFilter(1)}>
+                                                Selected
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className={
+                                                    selectedRuleFilter === 2
+                                                        ? 'btn btn-light d-offline custom-active-btn'
+                                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                                }
+                                                style={{
+                                                    borderTopLeftRadius: '0px',
+                                                    borderBottomLeftRadius: '0px',
+                                                }}
+                                                onClick={() => setSelectedRuleFilter(2)}>
+                                                Unselected
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Form.Group>
+                            </div>
+
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title">
+                                        Equipment Type
+                                    </Form.Label>
+
+                                    <MultiSelect
+                                        options={removeEqupimentTypesDuplication}
+                                        value={selectedOption}
+                                        onChange={setSelectedOption}
+                                        labelledBy="Columns"
+                                        className="column-filter-styling"
+                                        valueRenderer={() => {
+                                            return 'Columns';
+                                        }}
+                                        ClearSelectedIcon={null}
+                                    />
+                                </Form.Group>
+                            </div>
+
+                            {/* MAC Address */}
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title">
+                                        MAC Address
+                                    </Form.Label>
+
+                                    <MultiSelect
+                                        options={macOptions}
+                                        value={selectedOptionMac}
+                                        onChange={setSelectedOptionMac}
+                                        labelledBy="MAC..."
+                                        className="column-filter-styling"
+                                        valueRenderer={() => {
+                                            return 'MAC';
+                                        }}
+                                        ClearSelectedIcon={null}
+                                    />
+                                </Form.Group>
+                            </div>
+                            {/* Sensor */}
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title">
+                                        Sensors
+                                    </Form.Label>
+
+                                    <MultiSelect
+                                        options={sensorOptions}
+                                        value={selectedOptionSensor}
+                                        onChange={setSelectedOptionSensor}
+                                        labelledBy="Sensors"
+                                        className="column-filter-styling"
+                                        valueRenderer={() => {
+                                            return 'Sensors';
+                                        }}
+                                        ClearSelectedIcon={null}
+                                    />
+                                </Form.Group>
+                            </div>
+
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title">
+                                        Location
+                                    </Form.Label>
+                                    <MultiSelect
+                                        options={locationOptions}
+                                        value={selectedOptionLocation}
+                                        onChange={setSelectedOptionLocation}
+                                        labelledBy="Location"
+                                        className="column-filter-styling"
+                                        valueRenderer={() => {
+                                            return 'Location';
+                                        }}
+                                        ClearSelectedIcon={null}
+                                    />
+                                </Form.Group>
+                            </div>
+
+                            <div>
+                                <Form.Group>
+                                    <Form.Label for="userState" className="card-title">
+                                        Tags
+                                    </Form.Label>
+                                </Form.Group>
+                            </div>
+
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div className="row mt-4">
+                        <Table className="mb-0 bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            id="vehicle1"
+                                            name="vehicle1"
+                                            checked={checkedAll}
+                                            onChange={() => {
+                                                setCheckedAll(!checkedAll);
+                                            }}
+                                        />
+                                    </th>
+                                    <th>Equipment Type</th>
+                                    <th>Location</th>
+                                    <th>MAC Address</th>
+                                    <th>Sensor</th>
+                                    <th>Assigned Rule</th>
+                                    <th>Tags</th>
+                                    <th>Last Data</th>
+                                </tr>
+                            </thead>
+                            {selectedRuleFilter === 0 && (
+                                <>
+                                    {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                        <tbody>
+                                            {allLinkedRuleData.map((record, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="checkbox"
+                                                                id="socket_rule"
+                                                                name="socket_rule"
+                                                                checked={record.linked_rule || checkedAll}
+                                                                value={record.linked_rule || checkedAll ? true : false}
+                                                                onChange={(e) => {
+                                                                    setSensorIdNow(record?.id);
+                                                                    handleRuleStateChange(e.target.value, record);
+                                                                }}
+                                                            />
+                                                        </td>
+                                                        {record.equipment_link_type === '' ? (
+                                                            <td className="font-weight-bold panel-name">-</td>
+                                                        ) : (
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type}`}
+                                                                </div>
+                                                            </td>
+                                                        )}
+
+                                                        <td className="font-weight-bold">
+                                                            {record.equipment_link_location}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.device_link}</td>
+
+                                                        <td className="font-weight-bold">{record?.sensor_number_2}</td>
+
+                                                        <td className="font-weight-bold">
+                                                            {record.assigned_rules.length === 0
+                                                                ? 'None'
+                                                                : record.assigned_rules}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.tag?.[0]}</td>
+
+                                                        <td className="font-weight-bold">{record.last_data}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    ) : (
+                                        <tbody>
+                                            <SkeletonTheme color="#202020" height={35}>
+                                                <tr>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                </tr>
+                                            </SkeletonTheme>
+                                        </tbody>
+                                    )}
+                                </>
+                            )}
+
+                            {selectedRuleFilter === 1 && (
+                                <>
+                                    {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                        <tbody>
+                                            {linkedRuleData.map((record, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="checkbox"
+                                                                id="socket_rule"
+                                                                name="socket_rule"
+                                                                checked={record.linked_rule || checkedAll}
+                                                                value={record.linked_rule || checkedAll ? true : false}
+                                                                onChange={(e) => {
+                                                                    handleRuleStateChange(e.target.value, record);
+                                                                }}
+                                                            />
+                                                        </td>
+
+                                                        {record.equipment_link_type === '' ? (
+                                                            <td className="font-weight-bold panel-name">-</td>
+                                                        ) : (
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type}`}
+                                                                </div>
+                                                            </td>
+                                                        )}
+
+                                                        <td className="font-weight-bold">
+                                                            {record.equipment_link_location}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.device_link}</td>
+
+                                                        <td className="font-weight-bold">-</td>
+
+                                                        <td className="font-weight-bold">
+                                                            {record.assigned_rules.length === 0
+                                                                ? 'None'
+                                                                : record.assigned_rules}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.tag}</td>
+
+                                                        <td className="font-weight-bold">{record.last_data}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    ) : (
+                                        <tbody>
+                                            <SkeletonTheme color="#202020" height={35}>
+                                                <tr>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                </tr>
+                                            </SkeletonTheme>
+                                        </tbody>
+                                    )}
+                                </>
+                            )}
+
+                            {selectedRuleFilter === 2 && (
+                                <>
+                                    {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                        <tbody>
+                                            {unLinkedRuleData.map((record, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="checkbox"
+                                                                id="socket_rule"
+                                                                name="socket_rule"
+                                                                checked={record.linked_rule || checkedAll}
+                                                                value={record.linked_rule || checkedAll ? true : false}
+                                                                onChange={(e) => {
+                                                                    handleRuleStateChange(e.target.value, record);
+                                                                }}
+                                                            />
+                                                        </td>
+
+                                                        {record.equipment_link_type === '' ? (
+                                                            <td className="font-weight-bold panel-name">-</td>
+                                                        ) : (
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type}`}
+                                                                </div>
+                                                            </td>
+                                                        )}
+
+                                                        <td className="font-weight-bold">
+                                                            {record.equipment_link_location}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.device_link}</td>
+
+                                                        <td className="font-weight-bold">-</td>
+
+                                                        <td className="font-weight-bold">
+                                                            {record.assigned_rules.length === 0
+                                                                ? 'None'
+                                                                : record.assigned_rules}
+                                                        </td>
+
+                                                        <td className="font-weight-bold">{record.tag}</td>
+
+                                                        <td className="font-weight-bold">{record.last_data}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    ) : (
+                                        <tbody>
+                                            <SkeletonTheme color="#202020" height={35}>
+                                                <tr>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                    <th>
+                                                        <Skeleton count={5} />
+                                                    </th>
+                                                </tr>
+                                            </SkeletonTheme>
+                                        </tbody>
+                                    )}
+                                </>
+                            )}
+                        </Table>
+                        <div className="page-button-style">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                disabled={pageNo <= 1}
+                                onClick={() => {
+                                    previousPageData();
+                                }}>
+                                Previous
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                disabled={pageNo >= ceil(totalSocket / pageSize)}
+                                onClick={() => {
+                                    nextPageData();
+                                }}>
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
             <Modal
