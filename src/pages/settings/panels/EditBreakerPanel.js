@@ -13,9 +13,7 @@ import {
     generalPassiveDevices,
     getBreakers,
     updatePanel,
-    createBreaker,
     generalEquipments,
-    listSensor,
     resetBreakers,
     deletePanel,
 } from '../../../services/Network';
@@ -494,7 +492,9 @@ const EditBreakerPanel = () => {
         const fetchBreakersData = async () => {
             try {
                 setBreakerDataFetched(true);
-
+                LoadingStore.update((s) => {
+                    s.isLoading = true;
+                });
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -509,8 +509,6 @@ const EditBreakerPanel = () => {
                     setBreakerDataFetched(false);
                     LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
-                    });
-                    LoadingStore.update((s) => {
                         s.isLoading = false;
                     });
                 });
@@ -518,8 +516,6 @@ const EditBreakerPanel = () => {
                 setBreakerDataFetched(false);
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
-                });
-                LoadingStore.update((s) => {
                     s.isLoading = false;
                 });
             }
@@ -586,7 +582,9 @@ const EditBreakerPanel = () => {
         const fetchBreakersData = async () => {
             try {
                 setBreakerDataFetched(true);
-
+                LoadingStore.update((s) => {
+                    s.isLoading = true;
+                });
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -601,10 +599,15 @@ const EditBreakerPanel = () => {
                     setBreakerDataFetched(false);
                     LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
+                        s.isLoading = false;
                     });
                 });
             } catch (error) {
                 setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
             }
         };
 
