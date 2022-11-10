@@ -106,7 +106,7 @@ const ExploreChart = (props) => {
             series: [...preparedData],
             gridLineWidth: 1,
             lineWidth: 1,
-
+            opposite: false,
             accessibility: {
                 enabled: true,
             },
