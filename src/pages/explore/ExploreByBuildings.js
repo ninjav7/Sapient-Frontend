@@ -588,7 +588,6 @@ const ExploreByBuildings = () => {
 
     const handleCloseFilter = (e, val) => {
         let arr = [];
-        console.log(val)
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });

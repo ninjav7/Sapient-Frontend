@@ -679,7 +679,6 @@ const TimeOfDay = () => {
                     sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
 
                     finalList.sort((a, b) => a - b);
-                    console.log('SSR Final List => ', finalList);
 
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
