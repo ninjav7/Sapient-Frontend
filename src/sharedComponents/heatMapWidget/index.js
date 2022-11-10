@@ -32,15 +32,15 @@ const Titles = ({ title, subtitle, pageType }) => {
 };
 
 const HeatMapWidget = ({
-    className = '',
     title,
     subtitle,
-    heatMapChartHeight = 125,
-    hourlyAvgConsumpOpts,
-    hourlyAvgConsumpData,
-    pageType,
+    options,
+    series,
+    height = 125,
+    pageType = '',
     handleRouteChange,
     showRouteBtn = false,
+    className = '',
 }) => {
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
@@ -69,11 +69,7 @@ const HeatMapWidget = ({
             </>
             <Brick sizeInRem={1} />
             <div>
-                <HeatMapChart
-                    options={hourlyAvgConsumpOpts}
-                    series={hourlyAvgConsumpData}
-                    height={heatMapChartHeight}
-                />
+                <HeatMapChart options={options} series={series} height={height} />
             </div>
         </div>
     );
@@ -82,21 +78,22 @@ const HeatMapWidget = ({
 HeatMapWidget.propTypes = {
     title: PropTypes.string.isRequired,
     subtitle: PropTypes.string.isRequired,
-    height: PropTypes.string,
-    width: PropTypes.string,
-    startEndDayCount: PropTypes.number,
+    options: PropTypes.object,
     series: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,
             data: PropTypes.arrayOf(
                 PropTypes.shape({
-                    x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+                    x: PropTypes.oneOfType([PropTypes.string, PropTypes.string]),
                     y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+                    z: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
                 }).isRequired
             ),
         })
     ).isRequired,
+    height: PropTypes.number,
     showRouteBtn: PropTypes.bool,
+    pageType: PropTypes.string,
     handleRouteChange: PropTypes.func,
 };
 
