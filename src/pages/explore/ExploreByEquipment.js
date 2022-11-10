@@ -299,7 +299,7 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     <td>
-                                                        {record?.consumption?.change > 0 && (
+                                                        {record?.consumption?.now < record?.consumption?.old && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
@@ -308,7 +308,7 @@ const ExploreEquipmentTable = ({
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.change <= 0 && (
+                                                        {record?.consumption?.now > record?.consumption?.old && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
