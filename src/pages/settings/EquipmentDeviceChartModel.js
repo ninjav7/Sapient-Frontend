@@ -59,6 +59,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 import ModalHeader from '../../components/ModalHeader';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const EquipmentDeviceChartModel = ({
     showChart,
@@ -163,15 +164,9 @@ const EquipmentDeviceChartModel = ({
             };
             let params = `?equipment_id=${equipData.equipments_id}&consumption=${selectedConsumption}`;
             await axios
-                .post(
-                    `${BaseUrl}${equipmentGraphData}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     let response = res.data;
                     let data = response.data;
@@ -214,15 +209,9 @@ const EquipmentDeviceChartModel = ({
             };
             let params = `?building_id=${1}`;
             await axios
-                .post(
-                    `${BaseUrl}${builidingAlerts}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     setBuildingAlerts(res.data);
                 });

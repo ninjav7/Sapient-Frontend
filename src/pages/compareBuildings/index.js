@@ -16,7 +16,7 @@ import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
 import { BuildingStore } from '../../store/BuildingStore';
-
+import { apiRequestBody } from '../../helpers/helpers';
 
 const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter, isBuildingDataFetched }) => {
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
@@ -268,25 +268,23 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <tr key={record.building_id} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'name') && (
                                             <th scope="row">
-                                                <Link to={{
+                                                <Link
+                                                    to={{
                                                         pathname: `/energy/building/overview/${record.building_id}`,
                                                     }}>
-                                                        <div
-                                                            className="buildings-name"
-                                                            onClick={() => {
-                                                                localStorage.setItem('building_Id', record.building_id);
-                                                                localStorage.setItem(
-                                                                    'building_Name',
-                                                                    record.building_name
-                                                                );
-                                                                BuildingStore.update((s) => {
-                                                                    s.BldgId = record.building_id;
-                                                                    s.BldgName = record.building_name;
-                                                                });
-                                                            }}>
-                                                            {record.building_name}
-                                                        </div>
-                                                    </Link>
+                                                    <div
+                                                        className="buildings-name"
+                                                        onClick={() => {
+                                                            localStorage.setItem('building_Id', record.building_id);
+                                                            localStorage.setItem('building_Name', record.building_name);
+                                                            BuildingStore.update((s) => {
+                                                                s.BldgId = record.building_id;
+                                                                s.BldgName = record.building_name;
+                                                            });
+                                                        }}>
+                                                        {record.building_name}
+                                                    </div>
+                                                </Link>
                                                 <span className="badge badge-soft-secondary mr-2">Office</span>
                                             </th>
                                         )}
@@ -408,8 +406,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'hvac') && (
                                             <td className="table-content-style">
-                                                {parseInt(record.hvac_consumption.now)} kWh / sq. ft.sq.
-                                                ft.
+                                                {parseInt(record.hvac_consumption.now)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.hvac_consumption.now === 0 && (
@@ -423,10 +420,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 0 && record.hvac_consumption.now > 0 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#D14065`}
@@ -435,10 +433,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 1 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#DF5775`}
@@ -447,10 +446,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 2 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -459,10 +459,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 3 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -471,10 +472,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 4 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FC9EAC`}
@@ -483,10 +485,11 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                     )}
                                                     {index === 5 && (
                                                         <Line
-                                                            percent={(parseInt
-                                                                (record.hvac_consumption.now / topHVACConsumption) *
-                                                                100
-                                                            )}
+                                                            percent={
+                                                                parseInt(
+                                                                    record.hvac_consumption.now / topHVACConsumption
+                                                                ) * 100
+                                                            }
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FFCFD6`}
@@ -570,7 +573,9 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'sq_ft') && (
                                             <td className="value-style">
-                                                {record.square_footage?.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                {record.square_footage?.toLocaleString(undefined, {
+                                                    maximumFractionDigits: 2,
+                                                })}
                                             </td>
                                         )}
                                     </tr>
@@ -594,10 +599,10 @@ const CompareBuildings = () => {
 
     const [isBuildingDataFetched, setIsBuildingDataFetched] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
-    let entryPoint=""
-    useEffect(()=>{
-        entryPoint="entered";
-    },[])
+    let entryPoint = '';
+    useEffect(() => {
+        entryPoint = 'entered';
+    }, []);
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -610,11 +615,11 @@ const CompareBuildings = () => {
                 ];
                 bs.items = newList;
             });
-        ComponentStore.update((s) => {
-            s.parent = 'portfolio';
-        });
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
+            });
 
-        localStorage.setItem('building_Id', 'portfolio');
+            localStorage.setItem('building_Id', 'portfolio');
             localStorage.setItem('building_Name', 'Portfolio');
 
             BuildingStore.update((s) => {
@@ -639,22 +644,18 @@ const CompareBuildings = () => {
     }, []);
 
     const compareBuildingsData = async () => {
-            setIsBuildingDataFetched(true);
-            let payload =  {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
-            let params = `?days=${daysCount}`;
-            await fetchCompareBuildings(params, payload)
+        setIsBuildingDataFetched(true);
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?days=${daysCount}`;
+        await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
             })
             .catch((error) => {
-            setIsBuildingDataFetched(false);
-        });
+                setIsBuildingDataFetched(false);
+            });
     };
 
     useEffect(() => {
@@ -662,33 +663,29 @@ const CompareBuildings = () => {
     }, [daysCount]);
 
     const buildingDataWithFilter = async (order, filterBy) => {
-            setIsBuildingDataFetched(true);
-            let payload =  {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
-            let params = '';
-            if (buildingInput.length > 1) {
-                params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
-            } else {
-                params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
-            }
-            await fetchCompareBuildings(params, payload)
+        setIsBuildingDataFetched(true);
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = '';
+        if (buildingInput.length > 1) {
+            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
+        } else {
+            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
+        }
+        await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
                 setBuildingsData(response?.data);
                 setIsBuildingDataFetched(false);
             })
             .catch((error) => {
-            setIsBuildingDataFetched(false);
-        });
+                setIsBuildingDataFetched(false);
+            });
     };
 
     const [buildingInput, setBuildingInput] = useState('');
 
     useEffect(() => {
-        if (buildingInput === '' && entryPoint!=="entered") compareBuildingsData();
+        if (buildingInput === '' && entryPoint !== 'entered') compareBuildingsData();
     }, [buildingInput]);
 
     return (
