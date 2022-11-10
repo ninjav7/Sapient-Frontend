@@ -287,18 +287,18 @@ const ExploreBuildingsTable = ({
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        {record?.consumption?.change >= 0 && (
+                                                        {record?.consumption?.now < record?.consumption?.old && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {Math.round(record?.consumption?.change)}%
+                                                                        {Math.abs(Math.round(record?.consumption?.change))}%
                                                                     </strong>
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.change < 0 && (
+                                                        {record?.consumption?.now > record?.consumption?.old && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
@@ -795,16 +795,29 @@ const ExploreByBuildings = () => {
         let arr = {};
         arr['date_from'] = startDate;
         arr['date_to'] = endDate;
+        arr['tz_info'] = timeZone;
         if (maxConValue > 0.01) {
             arr['consumption_range'] = {
                 gte: minConValue * 1000,
                 lte: maxConValue * 1000 + 1000,
             };
         }
-        if (maxPerValue > 10) {
+        if (selectedTab === 0 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValue,
-                lte: maxPerValue,
+                gte: minPerValue-1,
+                lte: maxPerValue+1,
+            };
+        }
+        if (selectedTab === 1 && showChangeDropdown === false) {
+            arr['change'] = {
+                gte: minPerValuePos,
+                lte: maxPerValuePos+1,
+            };
+        }
+        if (selectedTab === 2 && showChangeDropdown === false) {
+            arr['change'] = {
+                gte: minPerValueNeg-1,
+                lte: maxPerValueNeg+1,
             };
         }
         if (maxSq_FtValue > 10) {
