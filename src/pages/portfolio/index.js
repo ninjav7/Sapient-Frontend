@@ -19,6 +19,7 @@ import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumptio
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import './style.scss';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -63,11 +64,7 @@ const PortfolioOverview = () => {
 
         const portfolioOverallData = async () => {
             setIsKPIsLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioOverall(payload)
                 .then((res) => {
                     setOveralldata(res.data);
@@ -80,11 +77,7 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioEndUse(payload)
                 .then((res) => {
                     let response = res?.data;
@@ -107,11 +100,7 @@ const PortfolioOverview = () => {
         };
 
         const energyConsumptionData = async () => {
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioEnergyConsumption(payload)
                 .then((res) => {
                     let newArray = [
@@ -137,11 +126,7 @@ const PortfolioOverview = () => {
         };
 
         const portfolioBuilidingsData = async () => {
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioBuilidings(payload)
                 .then((res) => {
                     let data = res.data;
