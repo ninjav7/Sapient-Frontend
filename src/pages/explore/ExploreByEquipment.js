@@ -1856,20 +1856,20 @@ const ExploreByEquipment = () => {
         }
         if (selectedTab === 0 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValue,
-                lte: maxPerValue,
+                gte: minPerValue-1,
+                lte: maxPerValue+1,
             };
         }
         if (selectedTab === 1 && showChangeDropdown === false) {
             arr['change'] = {
                 gte: minPerValuePos,
-                lte: maxPerValuePos,
+                lte: maxPerValuePos+1,
             };
         }
         if (selectedTab === 2 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValueNeg,
-                lte: maxPerValueNeg,
+                gte: minPerValueNeg-1,
+                lte: maxPerValueNeg+1,
             };
         }
         if (selectedLocation.length !== 0) {
