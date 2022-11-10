@@ -14,7 +14,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
-import { xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -207,62 +207,54 @@ const EndUsesPage = () => {
 
         const endUsesDataFetch = async () => {
             setIsEndUsesDataFetched(true);
-            let payload =  {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUses(bldgId, payload)
-            .then((res) => {
-                        let response = res.data;
-                        let data = [];
-                        response.forEach((record, index) => {
-                            if (index === 0) {
-                                record.color = '#66A4CE';
-                            }
-                            if (index === 1) {
-                                record.color = '#FBE384';
-                            }
-                            if (index === 2) {
-                                record.color = '#59BAA4';
-                            }
-                            if (index === 3) {
-                                record.color = '#80E1D9';
-                            }
-                            if (index === 4) {
-                                record.color = '#847CB5';
-                            }
-                            data.push(record);
-                        });
-                        setEndUsesData(data);
-                        setIsEndUsesDataFetched(false);
-                    })
-                    .catch((error) => {
-                setIsEndUsesDataFetched(false);
-            });
+                .then((res) => {
+                    let response = res.data;
+                    let data = [];
+                    response.forEach((record, index) => {
+                        if (index === 0) {
+                            record.color = '#66A4CE';
+                        }
+                        if (index === 1) {
+                            record.color = '#FBE384';
+                        }
+                        if (index === 2) {
+                            record.color = '#59BAA4';
+                        }
+                        if (index === 3) {
+                            record.color = '#80E1D9';
+                        }
+                        if (index === 4) {
+                            record.color = '#847CB5';
+                        }
+                        data.push(record);
+                    });
+                    setEndUsesData(data);
+                    setIsEndUsesDataFetched(false);
+                })
+                .catch((error) => {
+                    setIsEndUsesDataFetched(false);
+                });
         };
 
         const endUsesChartDataFetch = async () => {
-                setIsEndUsesChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchEndUsesChart(bldgId, payload)
+            setIsEndUsesChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUsesChart(bldgId, payload)
                 .then((res) => {
-                        let responseData = res?.data;
-                        responseData.forEach((endUse) => {
-                            endUse.data.forEach((record) => {
-                                record.y = parseInt(record.y / 1000);
-                            });
+                    let responseData = res?.data;
+                    responseData.forEach((endUse) => {
+                        endUse.data.forEach((record) => {
+                            record.y = parseInt(record.y / 1000);
                         });
-                        setBarChartData(responseData);
-                        setIsEndUsesChartLoading(false);
-                    })
-                    .catch((error) => {
-                setIsEndUsesChartLoading(false);
-            });
+                    });
+                    setBarChartData(responseData);
+                    setIsEndUsesChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsEndUsesChartLoading(false);
+                });
         };
 
         endUsesDataFetch();
@@ -325,7 +317,7 @@ const EndUsesPage = () => {
                 </Row>
             )}
 
-            <Row style={{ marginLeft: '0.5px' , marginRight:"0px", marginleft:'0px'}}>
+            <Row style={{ marginLeft: '0.5px', marginRight: '0px', marginleft: '0px' }}>
                 <div className="card-body">
                     <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top End Uses by Usage

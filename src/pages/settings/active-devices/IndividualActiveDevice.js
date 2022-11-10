@@ -29,6 +29,7 @@ import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import Select from 'react-select';
+import { apiRequestBody } from '../../../helpers/helpers';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -283,15 +284,9 @@ const IndividualActiveDevice = () => {
             setIsSensorChartLoading(true);
             let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
             await axios
-                .post(
-                    `${BaseUrl}${sensorGraphData}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     setDeviceData([]);
                     setSeriesData([]);

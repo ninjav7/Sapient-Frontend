@@ -29,6 +29,7 @@ import { xaxisFilters } from '../../helpers/explorehelpers';
 import './Linq';
 import { options, optionsLines } from '../../helpers/ChartOption';
 import {SliderAll, SliderPos, SliderNeg} from './Filter';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -95,7 +96,7 @@ const ExploreBuildingsTable = ({
     return (
         <>
             <Card>
-                <CardBody style={{marginBottom: "6rem"}}>
+                <CardBody style={{ marginBottom: '6rem' }}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
@@ -210,7 +211,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -223,7 +224,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -236,7 +237,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -249,7 +250,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -262,7 +263,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -275,7 +276,7 @@ const ExploreBuildingsTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -292,8 +293,7 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {Math.round(record?.consumption?.change)}
-                                                                        %
+                                                                        {Math.round(record?.consumption?.change)}%
                                                                     </strong>
                                                                 </i>
                                                             </button>
@@ -304,7 +304,9 @@ const ExploreBuildingsTable = ({
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {Math.abs(Math.round(record?.consumption?.change))}
+                                                                        {Math.abs(
+                                                                            Math.round(record?.consumption?.change)
+                                                                        )}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -373,7 +375,7 @@ const ExploreByBuildings = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
     const [objectExplore, setObjectExplore] = useState([]);
-    const [closeTrigger, setCloseTrigger] = useState("");
+    const [closeTrigger, setCloseTrigger] = useState('');
 
     const [optionsData, setOptionsData] = useState(options);
 
@@ -419,7 +421,7 @@ const ExploreByBuildings = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (closeTrigger === "change") {
+        if (closeTrigger === 'change') {
             setShowChangeDropdown(true);
             setCloseTrigger("");
         }
@@ -435,11 +437,10 @@ const ExploreByBuildings = () => {
     };
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (closeTrigger === "consumption") {
+        if (closeTrigger === 'consumption') {
             setShowDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -448,11 +449,10 @@ const ExploreByBuildings = () => {
     const [showsqftDropdown, setsqftShowDropdown] = useState(false);
     const setsqftDropdown = () => {
         setsqftShowDropdown(!showsqftDropdown);
-        if (closeTrigger === "sq_ft") {
+        if (closeTrigger === 'sq_ft') {
             setsqftShowDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showsqftDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showsqftDropdown !== true) {
             setSq_FtFlag(!Sq_FtFlag);
             setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);
         }
@@ -502,12 +502,8 @@ const ExploreByBuildings = () => {
 
     const exploreDataFetch = async () => {
         setIsExploreDataLoading(true);
-        let value = {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        }
-        await fetchExploreBuildingList(value, "")
+        let value = apiRequestBody(startDate, endDate, timeZone);
+        await fetchExploreBuildingList(value, '')
             .then((res) => {
                 if (entryPoint === 'entered') {
                     totalBuildingId.length = 0;
@@ -575,7 +571,7 @@ const ExploreByBuildings = () => {
 
     const exploreFilterDataFetch = async (bodyVal) => {
         setIsExploreDataLoading(true);
-        await fetchExploreBuildingList(bodyVal, "")
+        await fetchExploreBuildingList(bodyVal, '')
             .then((res) => {
                 let responseData = res.data;
                 setSeriesData([]);
@@ -589,7 +585,6 @@ const ExploreByBuildings = () => {
             });
     };
 
-
     const handleCloseFilter = (e, val) => {
         let arr = [];
         arr = selectedOptions.filter(function (item) {
@@ -598,10 +593,10 @@ const ExploreByBuildings = () => {
         setSelectedOptions(arr);
         let txt = '';
         let arr1 = {};
-        arr1['date_from'] = startDate.toLocaleDateString();
-        arr1['date_to'] = endDate.toLocaleDateString();
+        arr1['date_from'] = startDate;
+        arr1['date_to'] = endDate;
         arr1['tz_info'] = timeZone;
-        let topVal = (Math.round(topEnergyConsumption / 1000));
+        let topVal = Math.round(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
@@ -666,8 +661,7 @@ const ExploreByBuildings = () => {
         }
         if (selectedOptions.length === 1) {
             exploreDataFetch();
-        }
-        else {
+        } else {
             exploreFilterDataFetch(arr1);
         }
     };
@@ -678,15 +672,9 @@ const ExploreByBuildings = () => {
         }
 
         const fetchExploreChartData = async (id) => {
-
-            let value = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            }
+            let value = apiRequestBody(startDate, endDate, timeZone);
             await fetchExploreBuildingChart(value, selectedBuildingId)
                 .then((res) => {
-
                     let responseData = res.data;
                     let data = responseData.data;
                     let arr = [];
@@ -705,7 +693,7 @@ const ExploreByBuildings = () => {
                     data.map((el) => {
                         let ab = {};
                         ab['timestamp'] = el[0];
-                        ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
+                        ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
                         coll.push(ab);
                     });
                     if (objectExplore.length === 0) {
@@ -718,9 +706,7 @@ const ExploreByBuildings = () => {
                     setSeriesLineData([...seriesLineData, recordToInsert]);
                     setSelectedBuildingId('');
                 })
-                .catch((error) => {
-                });
-
+                .catch((error) => {});
         };
 
         fetchExploreChartData();
@@ -751,15 +737,9 @@ const ExploreByBuildings = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-
-        let value = {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        }
+        let value = apiRequestBody(startDate, endDate, timeZone);
         await fetchExploreBuildingChart(value, id)
             .then((res) => {
-
                 let responseData = res.data;
                 let data = responseData.data;
                 let arr = [];
@@ -779,9 +759,7 @@ const ExploreByBuildings = () => {
                 }
                 setAllBuildingData(dataarr);
             })
-            .catch((error) => {
-            });
-
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -921,14 +899,9 @@ const ExploreByBuildings = () => {
     const handleBuildingSearch = (e) => {
         const exploreDataFetch = async () => {
             setIsExploreDataLoading(true);
-            let value = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            }
+            let value = apiRequestBody(startDate, endDate, timeZone);
             await fetchExploreBuildingList(value, buildingSearchTxt)
                 .then((res) => {
-
                     let responseData = res.data;
                     setExploreTableData(responseData);
                     setTopEnergyConsumption(responseData[0].consumption.now);
@@ -985,7 +958,7 @@ const ExploreByBuildings = () => {
     };
 
     useEffect(() => {
-        if (buildingSearchTxt === '' && entryPoint !== "entered") exploreDataFetch();
+        if (buildingSearchTxt === '' && entryPoint !== 'entered') exploreDataFetch();
     }, [buildingSearchTxt]);
     return (
         <>
@@ -1076,8 +1049,7 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end"
-                                        onToggle={setDropdown}>
+                                    <Dropdown className="" align="end" onToggle={setDropdown}>
                                         <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1094,7 +1066,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setConsumptionTxt('');
-                                                        setCloseTrigger("consumption");
+                                                        setCloseTrigger('consumption');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1103,9 +1075,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">
-                                                        kWh Used
-                                                    </a>
+                                                    <a className="pop-text">kWh Used</a>
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minConValue} />{' '}
@@ -1151,7 +1121,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setChangeTxt('');
-                                                        setCloseTrigger("change");
+                                                        setCloseTrigger('change');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1292,8 +1262,7 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end"
-                                        onToggle={setsqftDropdown}>
+                                    <Dropdown className="" align="end" onToggle={setsqftDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1309,7 +1278,7 @@ const ExploreByBuildings = () => {
                                                     style={{ border: 'none', backgroundColor: 'white' }}
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
-                                                        setCloseTrigger("sq_ft");
+                                                        setCloseTrigger('sq_ft');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1318,9 +1287,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">
-                                                        Square Footage
-                                                    </a>
+                                                    <a className="pop-text">Square Footage</a>
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minSq_FtValue} />{' '}

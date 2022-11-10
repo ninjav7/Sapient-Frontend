@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
-import { percentageHandler} from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { xaxisFilters } from '../../helpers/explorehelpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
-import {BaseUrl,getFloors,equipmentType,getEndUseId,getSpaceTypes,getSpaces} from '../../services/Network';
-import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter} from '../explore/services';
+import { BaseUrl, getFloors, equipmentType, getEndUseId, getSpaceTypes, getSpaces } from '../../services/Network';
+import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -31,7 +31,8 @@ import { selectedEquipment, totalSelectionEquipmentId } from '../../store/global
 import { useAtom } from 'jotai';
 import './Linq';
 import { options, optionsLines } from '../../helpers/ChartOption';
-import {SliderAll, SliderPos, SliderNeg} from './Filter';
+import { SliderAll, SliderPos, SliderNeg } from './Filter';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -92,7 +93,7 @@ const ExploreEquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody style={{marginBottom: "2rem"}}>
+                <CardBody style={{ marginBottom: '2rem' }}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
@@ -222,7 +223,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -235,7 +236,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -248,7 +249,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -261,7 +262,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -274,7 +275,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -287,7 +288,7 @@ const ExploreEquipmentTable = ({
                                                                     percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -304,7 +305,12 @@ const ExploreEquipmentTable = ({
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
-                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
+                                                                    <strong>
+                                                                        {Math.abs(
+                                                                            Math.round(record?.consumption?.change)
+                                                                        )}
+                                                                        %
+                                                                    </strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -313,7 +319,12 @@ const ExploreEquipmentTable = ({
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
-                                                                    <strong>{Math.abs(Math.round(record?.consumption?.change))}%</strong>
+                                                                    <strong>
+                                                                        {Math.abs(
+                                                                            Math.round(record?.consumption?.change)
+                                                                        )}
+                                                                        %
+                                                                    </strong>
                                                                 </i>
                                                             </button>
                                                         )}
@@ -609,7 +620,7 @@ const ExploreByEquipment = () => {
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLoc, setSelectedLoc] = useState({});
     const [filterObj, setFilterObj] = useState({});
-    const [closeTrigger, setCloseTrigger] = useState("");
+    const [closeTrigger, setCloseTrigger] = useState('');
     const [selectedTab, setSelectedTab] = useState(0);
 
     useEffect(() => {
@@ -637,11 +648,10 @@ const ExploreByEquipment = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if (closeTrigger === "consumption") {
+        if (closeTrigger === 'consumption') {
             setShowDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -650,18 +660,14 @@ const ExploreByEquipment = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if (closeTrigger === "change") {
+        if (closeTrigger === 'change') {
             setShowChangeDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showChangeDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showChangeDropdown !== true) {
             setAPIPerFlag(!APIPerFlag);
-            if (selectedTab === 0)
-                setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
-            else if (selectedTab === 1)
-                setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
-            else if (selectedTab === 2)
-                setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
+            if (selectedTab === 0) setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            else if (selectedTab === 1) setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
+            else if (selectedTab === 2) setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
         }
     };
 
@@ -998,9 +1004,9 @@ const ExploreByEquipment = () => {
     };
 
     const exploreFilterDataFetch = async (bodyVal, txt) => {
-            setIsExploreDataLoading(true);
-            let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-            await fetchExploreEquipmentList(bodyVal,params)
+        setIsExploreDataLoading(true);
+        let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
+        await fetchExploreEquipmentList(bodyVal, params)
             .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1012,10 +1018,10 @@ const ExploreByEquipment = () => {
                 setExploreTableData(responseData.data);
 
                 setIsExploreDataLoading(false);
-        })
-        .catch((error) => {
-            setIsExploreDataLoading(false);
-        });
+            })
+            .catch((error) => {
+                setIsExploreDataLoading(false);
+            });
     };
 
     const uniqueIds = [];
@@ -1083,9 +1089,9 @@ const ExploreByEquipment = () => {
     }, [removeDuplicateFlag]);
 
     const exploreDataFetch = async (bodyVal) => {
-            setIsExploreDataLoading(true);
-            let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-            await fetchExploreEquipmentList(bodyVal,params)
+        setIsExploreDataLoading(true);
+        let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
+        await fetchExploreEquipmentList(bodyVal, params)
             .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1106,19 +1112,15 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             })
             .catch((error) => {
-            setIsExploreDataLoading(false);
-        });
+                setIsExploreDataLoading(false);
+            });
     };
-    let arr = {
-        date_from: startDate.toLocaleDateString(),
-        date_to: endDate.toLocaleDateString(),
-        tz_info: timeZone,
-    };
+    let arr = apiRequestBody(startDate, endDate, timeZone);
 
     const fetchAllExploredata = async (bodyVal) => {
-            setIsExploreDataLoading(true);
-            let params = `?consumption=energy&building_id=${bldgId}`;
-            await fetchExploreEquipmentList(bodyVal,params)
+        setIsExploreDataLoading(true);
+        let params = `?consumption=energy&building_id=${bldgId}`;
+        await fetchExploreEquipmentList(bodyVal, params)
             .then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1132,42 +1134,36 @@ const ExploreByEquipment = () => {
                 let minNeg = 0;
                 let maxNeg = 0;
                 responseData.data.map((ele) => {
-                    if (ele.consumption.change >= max)
-                        max = ele.consumption.change;
-                    if (ele.consumption.change <= min)
-                        min = ele.consumption.change;
+                    if (ele.consumption.change >= max) max = ele.consumption.change;
+                    if (ele.consumption.change <= min) min = ele.consumption.change;
                     if (ele.consumption.change >= 0) {
-                        if (ele.consumption.change >= maxPos)
-                            maxPos = ele.consumption.change;
-                        if (ele.consumption.change <= minPos)
-                            minPos = ele.consumption.change;
+                        if (ele.consumption.change >= maxPos) maxPos = ele.consumption.change;
+                        if (ele.consumption.change <= minPos) minPos = ele.consumption.change;
                     }
                     if (ele.consumption.change < 0) {
-                        if (ele.consumption.change >= maxNeg)
-                            maxNeg = ele.consumption.change;
-                        if (ele.consumption.change <= minNeg)
-                            minNeg = ele.consumption.change;
+                        if (ele.consumption.change >= maxNeg) maxNeg = ele.consumption.change;
+                        if (ele.consumption.change <= minNeg) minNeg = ele.consumption.change;
                     }
-                })
-                setTopPerChange(Math.round(max === min ? max + 1 : max))
-                setBottomPerChange(Math.round(min))
+                });
+                setTopPerChange(Math.round(max === min ? max + 1 : max));
+                setBottomPerChange(Math.round(min));
                 setTopPosPerChange(Math.round(maxPos === minPos ? maxPos + 1 : maxPos));
                 setBottomPosPerChange(Math.round(minPos));
                 setTopNegPerChange(Math.round(maxNeg === minNeg ? maxNeg + 1 : maxNeg));
                 setBottomNegPerChange(Math.round(minNeg));
-                set_minPerValue(Math.round(min))
+                set_minPerValue(Math.round(min));
                 set_maxPerValue(Math.round(max));
-                set_minPerValuePos(Math.round(minPos))
+                set_minPerValuePos(Math.round(minPos));
                 set_maxPerValuePos(Math.round(maxPos));
-                set_minPerValueNeg(Math.round(minNeg))
+                set_minPerValueNeg(Math.round(minNeg));
                 set_maxPerValueNeg(Math.round(maxNeg));
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             })
             .catch((error) => {
-            setIsExploreDataLoading(false);
-        });
-    }
+                setIsExploreDataLoading(false);
+            });
+    };
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1214,7 +1210,7 @@ const ExploreByEquipment = () => {
                     }
                     setEquipOptions(equipData);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
         const fetchEndUseData = async () => {
             try {
@@ -1232,26 +1228,23 @@ const ExploreByEquipment = () => {
                     }
                     setEndUseOptions(equipData);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         fetchEquipTypeData();
         fetchEndUseData();
         fetchSpacetypes();
         const fetchAPI = async () => {
-            if (entryPoint === "entered")
-                await fetchAllExploredata(arr);
+            if (entryPoint === 'entered') await fetchAllExploredata(arr);
             await exploreDataFetch(arr);
-        }
+        };
         fetchAPI();
-
     }, [endDate, bldgId, pageSize]);
 
     const nextPageData = async (path) => {
         try {
-
             setIsExploreDataLoading(true);
-            entryPoint = "paginate";
+            entryPoint = 'paginate';
             let arr = {};
             if (path === null) {
                 return;
@@ -1263,11 +1256,7 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             if (Object.keys(filterObj).length === 0) {
-                arr = {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
+                arr = apiRequestBody(startDate, endDate, timeZone);
             } else {
                 arr = filterObj;
             }
@@ -1285,7 +1274,6 @@ const ExploreByEquipment = () => {
             });
 
             if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
-
                 let arr = [];
                 for (let i = 0; i < totalEquipmentId?.length; i++) {
                     arr.push(totalEquipmentId[i]);
@@ -1294,7 +1282,6 @@ const ExploreByEquipment = () => {
             } else {
                 setSelectedEquipmentId('');
             }
-
         } catch (error) {
             setIsExploreDataLoading(false);
         }
@@ -1303,7 +1290,7 @@ const ExploreByEquipment = () => {
     const previousPageData = async (path) => {
         try {
             setIsExploreDataLoading(true);
-            entryPoint = "paginate";
+            entryPoint = 'paginate';
             let arr = {};
             if (path === null) {
                 return;
@@ -1314,11 +1301,7 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             if (Object.keys(filterObj).length === 0) {
-                arr = {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
+                arr = apiRequestBody(startDate, endDate, timeZone);
             } else {
                 arr = filterObj;
             }
@@ -1334,7 +1317,6 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             });
             if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
-
                 let arr = [];
                 for (let i = 0; i < totalEquipmentId?.length; i++) {
                     arr.push(totalEquipmentId[i]);
@@ -1343,7 +1325,6 @@ const ExploreByEquipment = () => {
             } else {
                 setSelectedEquipmentId('');
             }
-
         } catch (error) {
             setIsExploreDataLoading(false);
         }
@@ -1456,65 +1437,60 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
-
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
         }
         const fetchExploreChartData = async () => {
             setChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
-                await fetchExploreEquipmentChart(payload,params)
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
+            await fetchExploreEquipmentChart(payload, params)
                 .then((res) => {
-                        let responseData = res.data;
-                        let data = responseData.data;
-                        let arr = [];
-                        arr = exploreTableData.filter(function (item) {
-                            return item.equipment_id === selectedEquipmentId;
-                        });
-                        let exploreData = [];
-                        let sg = '';
-                        let legendName = '';
-                        sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                        if (sg === '') {
-                            legendName = arr[0].equipment_name;
-                        } else {
-                            legendName = arr[0].equipment_name + ' - ' + sg;
-                        }
-                        const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                        let recordToInsert = {
-                            name: legendName,
-                            data: formattedData,
-                            id: arr[0].equipment_id,
-                        };
-                        let coll = [];
-                        let sname = arr[0].equipment_name;
-                        formattedData.map((el) => {
-                            let ab = {};
-                            ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
-                            coll.push(ab);
-                        });
-                        if (objectExplore.length === 0) {
-                            setObjectExplore(coll);
-                        } else {
-                            let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                            setObjectExplore(result);
-                        }
-                        setSeriesData([...seriesData, recordToInsert]);
-                        setSeriesLineData([...seriesLineData, recordToInsert]);
-                        setSelectedEquipmentId('');
-                        setChartLoading(false);
-                        //setIsExploreDataLoading(false);
-                    })
-                    .catch((error) => {
-                //setIsExploreDataLoading(false);
-            });
+                    let responseData = res.data;
+                    let data = responseData.data;
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.equipment_id === selectedEquipmentId;
+                    });
+                    let exploreData = [];
+                    let sg = '';
+                    let legendName = '';
+                    sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                    if (sg === '') {
+                        legendName = arr[0].equipment_name;
+                    } else {
+                        legendName = arr[0].equipment_name + ' - ' + sg;
+                    }
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    let recordToInsert = {
+                        name: legendName,
+                        data: formattedData,
+                        id: arr[0].equipment_id,
+                    };
+                    let coll = [];
+                    let sname = arr[0].equipment_name;
+                    formattedData.map((el) => {
+                        let ab = {};
+                        ab['timestamp'] = el[0];
+                        ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                        coll.push(ab);
+                    });
+                    if (objectExplore.length === 0) {
+                        setObjectExplore(coll);
+                    } else {
+                        let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
+                        setObjectExplore(result);
+                    }
+                    setSeriesData([...seriesData, recordToInsert]);
+                    setSeriesLineData([...seriesLineData, recordToInsert]);
+                    setSelectedEquipmentId('');
+                    setChartLoading(false);
+                    //setIsExploreDataLoading(false);
+                })
+                .catch((error) => {
+                    //setIsExploreDataLoading(false);
+                });
         };
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
@@ -1544,59 +1520,54 @@ const ExploreByEquipment = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-            let payload =  {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
-            let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
-            await fetchExploreEquipmentChart(payload,params)
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
+        await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
-                    let responseData = res.data;
-                    let data = responseData.data;
-                    let arr = [];
-                    arr = FilterDataList.filter(function (item) {
-                        return item.equipment_id === id;
-                    });
-                    let exploreData = [];
-                    let sg = '';
-                    let legendName = '';
-                    sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                    if (sg === '') {
-                        legendName = arr[0].equipment_name;
-                    } else {
-                        legendName = arr[0].equipment_name + ' - ' + sg;
-                    }
-                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                    let recordToInsert = {
-                        name: legendName,
-                        data: formattedData,
-                        id: arr[0].equipment_id,
-                    };
-                    let coll = [];
-                    let sname = arr[0].equipment_name;
-                    formattedData.map((el) => {
-                        let ab = {};
-                        ab['timestamp'] = el[0];
-                        ab[sname] = el[1];
-                        coll.push(ab);
-                    });
-                    if (objectExplore.length === 0) {
-                        setObjectExplore(coll);
-                    } else {
-                    }
-                    dataarr.push(recordToInsert);
+                let responseData = res.data;
+                let data = responseData.data;
+                let arr = [];
+                arr = FilterDataList.filter(function (item) {
+                    return item.equipment_id === id;
+                });
+                let exploreData = [];
+                let sg = '';
+                let legendName = '';
+                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                if (sg === '') {
+                    legendName = arr[0].equipment_name;
+                } else {
+                    legendName = arr[0].equipment_name + ' - ' + sg;
+                }
+                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                let recordToInsert = {
+                    name: legendName,
+                    data: formattedData,
+                    id: arr[0].equipment_id,
+                };
+                let coll = [];
+                let sname = arr[0].equipment_name;
+                formattedData.map((el) => {
+                    let ab = {};
+                    ab['timestamp'] = el[0];
+                    ab[sname] = el[1];
+                    coll.push(ab);
+                });
+                if (objectExplore.length === 0) {
+                    setObjectExplore(coll);
+                } else {
+                }
+                dataarr.push(recordToInsert);
 
-                    if (totalEquipmentId.length === dataarr.length) {
-
-                        setSeriesData(dataarr);
-                        setSeriesLineData(dataarr);
-                    }
-                    setAllEquipmenData(dataarr);
-                })
-                .catch((error) => {
-            //setIsExploreDataLoading(false);
-        });
+                if (totalEquipmentId.length === dataarr.length) {
+                    setSeriesData(dataarr);
+                    setSeriesLineData(dataarr);
+                }
+                setAllEquipmenData(dataarr);
+            })
+            .catch((error) => {
+                //setIsExploreDataLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -1625,15 +1596,15 @@ const ExploreByEquipment = () => {
 
     const handleCloseFilter = async (e, val) => {
         let arr = [];
-        entryPoint = "filtered";
+        entryPoint = 'filtered';
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
         setSelectedOptions(arr);
         let txt = '';
         let arr1 = {};
-        arr1['date_from'] = startDate.toLocaleDateString();
-        arr1['date_to'] = endDate.toLocaleDateString();
+        arr1['date_from'] = startDate;
+        arr1['date_to'] = endDate;
         arr1['tz_info'] = timeZone;
         let topVal = Math.round(topEnergyConsumption / 1000);
         switch (val) {
@@ -1847,8 +1818,8 @@ const ExploreByEquipment = () => {
         }
         if (selectedOptions.length === 1) {
             let arr = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
+                date_from: startDate,
+                date_to: endDate,
                 tz_info: timeZone,
             };
             Object.keys(filterObj).forEach((key) => {
@@ -1856,7 +1827,6 @@ const ExploreByEquipment = () => {
             });
             await fetchAllExploredata(arr);
             await exploreDataFetch(arr);
-
         } else {
             exploreFilterDataFetch(arr1, txt);
         }
@@ -1874,8 +1844,8 @@ const ExploreByEquipment = () => {
         }
         let arr = {};
         let txt = '';
-        arr['date_from'] = startDate.toLocaleDateString();
-        arr['date_to'] = endDate.toLocaleDateString();
+        arr['date_from'] = startDate;
+        arr['date_to'] = endDate;
         arr['tz_info'] = timeZone;
         if (maxConValue > 0.01) {
             arr['consumption_range'] = {
@@ -1921,11 +1891,7 @@ const ExploreByEquipment = () => {
 
     const clearFilterData = () => {
         setSelectedLocation([]);
-        let arr = {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        };
+        let arr = apiRequestBody(startDate, endDate, timeZone);
         exploreDataFetch(arr);
     };
     const handleEndUseSearch = (e) => {
@@ -1971,29 +1937,25 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
-        entryPoint = "searched";
+        entryPoint = 'searched';
         const exploreDataFetch = async () => {
-                setIsExploreDataLoading(true);
-                
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                let params = `?consumption=energy&search_by_name=${equipmentSearchTxt}&building_id=${bldgId}`;
-                await fetchExploreEquipmentList(payload, params)
+            setIsExploreDataLoading(true);
+
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let params = `?consumption=energy&search_by_name=${equipmentSearchTxt}&building_id=${bldgId}`;
+            await fetchExploreEquipmentList(payload, params)
                 .then((res) => {
-                        let responseData = res.data;
-                        if (responseData.data.length !== 0) {
-                            set_minConValue(0.0);
-                            set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
-                        }
-                        setExploreTableData(responseData.data);
-                        setIsExploreDataLoading(false);
-                    })
-                    .catch((error) => {
-                setIsExploreDataLoading(false);
-            });
+                    let responseData = res.data;
+                    if (responseData.data.length !== 0) {
+                        set_minConValue(0.0);
+                        set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
+                    }
+                    setExploreTableData(responseData.data);
+                    setIsExploreDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsExploreDataLoading(false);
+                });
         };
         exploreDataFetch();
     };
@@ -2052,7 +2014,7 @@ const ExploreByEquipment = () => {
         return [val, ...streamData];
     };
 
-    useEffect(() => { }, [showDropdown]);
+    useEffect(() => {}, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
@@ -2104,7 +2066,7 @@ const ExploreByEquipment = () => {
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
     useEffect(() => {
-        if (equipmentSearchTxt === '' && entryPoint !== "entered" && entryPoint === "searched") {
+        if (equipmentSearchTxt === '' && entryPoint !== 'entered' && entryPoint === 'searched') {
             exploreDataFetch(arr);
         }
     }, [equipmentSearchTxt]);
@@ -2175,9 +2137,7 @@ const ExploreByEquipment = () => {
             setSelectedLocation([]);
         }
     };
-    useEffect(() => {
-
-    }, [selectedTab])
+    useEffect(() => {}, [selectedTab]);
 
     return (
         <>
@@ -2301,7 +2261,7 @@ const ExploreByEquipment = () => {
                                             onClick={(e) => {
                                                 handleCloseFilter(e, el.value);
                                                 setConsumptionTxt('');
-                                                setCloseTrigger("consumption");
+                                                setCloseTrigger('consumption');
                                             }}>
                                             <i className="uil uil-multiply"></i>
                                         </button>
@@ -2313,16 +2273,8 @@ const ExploreByEquipment = () => {
                                             <a className="pop-text">kWh Used</a>
                                         </div>
                                         <div className="pop-inputbox-wrapper">
-                                            <input
-                                                className="pop-inputbox"
-                                                type="text"
-                                                value={minConValue}
-                                            />{' '}
-                                            <input
-                                                className="pop-inputbox"
-                                                type="text"
-                                                value={maxConValue}
-                                            />
+                                            <input className="pop-inputbox" type="text" value={minConValue} />{' '}
+                                            <input className="pop-inputbox" type="text" value={maxConValue} />
                                         </div>
                                         <div style={{ marginTop: '2rem' }}>
                                             <RangeSlider
@@ -2364,7 +2316,7 @@ const ExploreByEquipment = () => {
                                             onClick={(e) => {
                                                 handleCloseFilter(e, el.value);
                                                 setChangeTxt('');
-                                                setCloseTrigger("change");
+                                                setCloseTrigger('change');
                                             }}>
                                             <i className="uil uil-multiply"></i>
                                         </button>
@@ -2375,7 +2327,10 @@ const ExploreByEquipment = () => {
                                         <div>
                                             <a className="pop-text">Threshold</a>
                                         </div>
-                                        <div className="btn-group ml-2 mt-2 mb-2" role="group" aria-label="Basic example">
+                                        <div
+                                            className="btn-group ml-2 mt-2 mb-2"
+                                            role="group"
+                                            aria-label="Basic example">
                                             <div>
                                                 <button
                                                     type="button"
@@ -2384,7 +2339,11 @@ const ExploreByEquipment = () => {
                                                             ? 'btn btn-primary d-offline custom-active-btn'
                                                             : 'btn btn-white d-inline custom-inactive-btn'
                                                     }
-                                                    style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px', width: "5rem" }}
+                                                    style={{
+                                                        borderTopRightRadius: '0px',
+                                                        borderBottomRightRadius: '0px',
+                                                        width: '5rem',
+                                                    }}
                                                     onClick={() => {
                                                         setSelectedTab(0);
                                                     }}>
@@ -2398,8 +2357,10 @@ const ExploreByEquipment = () => {
                                                             ? 'btn btn-primary d-offline custom-active-btn'
                                                             : 'btn btn-white d-inline custom-inactive-btn'
                                                     }
-                                                    style={{ borderRadius: '0px', width: "5rem" }}
-                                                    onClick={() => { setSelectedTab(1); }}>
+                                                    style={{ borderRadius: '0px', width: '5rem' }}
+                                                    onClick={() => {
+                                                        setSelectedTab(1);
+                                                    }}>
                                                     <i className="uil uil-chart-down"></i>
                                                 </button>
 
@@ -2410,67 +2371,70 @@ const ExploreByEquipment = () => {
                                                             ? 'btn btn-primary d-offline custom-active-btn'
                                                             : 'btn btn-white d-inline custom-inactive-btn'
                                                     }
-                                                    style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px', width: "5rem" }}
-                                                    onClick={() => { setSelectedTab(2); }}>
+                                                    style={{
+                                                        borderTopLeftRadius: '0px',
+                                                        borderBottomLeftRadius: '0px',
+                                                        width: '5rem',
+                                                    }}
+                                                    onClick={() => {
+                                                        setSelectedTab(2);
+                                                    }}>
                                                     <i className="uil uil-arrow-growth"></i>
                                                 </button>
                                             </div>
                                         </div>
-                                        {selectedTab === 0 ?
+                                        {selectedTab === 0 ? (
                                             <div className="pop-inputbox-wrapper">
-                                                <input
-                                                    className="pop-inputbox"
-                                                    type="text"
-                                                    value={minPerValue}
-                                                />{' '}
-                                                <input
-                                                    className="pop-inputbox"
-                                                    type="text"
-                                                    value={maxPerValue}
+                                                <input className="pop-inputbox" type="text" value={minPerValue} />{' '}
+                                                <input className="pop-inputbox" type="text" value={maxPerValue} />
+                                            </div>
+                                        ) : selectedTab === 1 ? (
+                                            <div className="pop-inputbox-wrapper">
+                                                <input className="pop-inputbox" type="text" value={minPerValuePos} />{' '}
+                                                <input className="pop-inputbox" type="text" value={maxPerValuePos} />
+                                            </div>
+                                        ) : selectedTab === 2 ? (
+                                            <div className="pop-inputbox-wrapper">
+                                                <input className="pop-inputbox" type="text" value={minPerValueNeg} />{' '}
+                                                <input className="pop-inputbox" type="text" value={maxPerValueNeg} />
+                                            </div>
+                                        ) : (
+                                            ''
+                                        )}
+
+                                        {selectedTab === 0 ? (
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <SliderAll
+                                                    bottom={bottomPerChange}
+                                                    top={topPerChange}
+                                                    handleChange={handleInputPer}
+                                                    bottomPer={minPerValue}
+                                                    topPer={maxPerValue}
                                                 />
                                             </div>
-                                            : selectedTab === 1 ?
-                                                <div className="pop-inputbox-wrapper">
-                                                    <input
-                                                        className="pop-inputbox"
-                                                        type="text"
-                                                        value={minPerValuePos}
-                                                    />{' '}
-                                                    <input
-                                                        className="pop-inputbox"
-                                                        type="text"
-                                                        value={maxPerValuePos}
-                                                    />
-                                                </div>
-                                                : selectedTab === 2 ?
-                                                    <div className="pop-inputbox-wrapper">
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={minPerValueNeg}
-                                                        />{' '}
-                                                        <input
-                                                            className="pop-inputbox"
-                                                            type="text"
-                                                            value={maxPerValueNeg}
-                                                        />
-                                                    </div>
-                                                    : ""
-                                        }
-
-                                        {selectedTab === 0 ?
+                                        ) : selectedTab === 1 ? (
                                             <div style={{ marginTop: '2rem' }}>
-                                                <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue} />
-                                            </div> :
-                                            selectedTab === 1 ?
-                                                <div style={{ marginTop: '2rem' }}>
-                                                    <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos} />
-                                                </div>
-                                                : selectedTab === 2 ?
-                                                    <div style={{ marginTop: '2rem' }}>
-                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg} />
-                                                    </div>
-                                                    : ""}
+                                                <SliderPos
+                                                    bottom={bottomPosPerChange}
+                                                    top={topPosPerChange}
+                                                    handleChange={handleInputPerPos}
+                                                    bottomPer={minPerValuePos}
+                                                    topPer={maxPerValuePos}
+                                                />
+                                            </div>
+                                        ) : selectedTab === 2 ? (
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <SliderNeg
+                                                    bottom={bottomNegPerChange}
+                                                    top={topNegPerChange}
+                                                    handleChange={handleInputPerNeg}
+                                                    bottomPer={minPerValueNeg}
+                                                    topPer={maxPerValueNeg}
+                                                />
+                                            </div>
+                                        ) : (
+                                            ''
+                                        )}
                                     </div>
                                 </Dropdown.Menu>
                             </Dropdown>
@@ -2526,9 +2490,7 @@ const ExploreByEquipment = () => {
                                                     }}
                                                 />
                                             </div>
-                                            <button
-                                                className="btn btn-white d-inline"
-                                                onClick={clearFilterData}>
+                                            <button className="btn btn-white d-inline" onClick={clearFilterData}>
                                                 Cancel
                                             </button>
                                             <button
@@ -2552,10 +2514,7 @@ const ExploreByEquipment = () => {
                                             </span>
                                         </div>
                                         {showSpace === false ? (
-                                            <div
-                                                className={
-                                                    floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`
-                                                }>
+                                            <div className={floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
                                                 <div className="floor-box">
                                                     <div>
                                                         <input
@@ -2579,10 +2538,7 @@ const ExploreByEquipment = () => {
                                                                     id={record.floor_id}
                                                                     value={record.floor_id}
                                                                     onClick={(e) => {
-                                                                        handleSelectedLocation(
-                                                                            e,
-                                                                            record.name
-                                                                        );
+                                                                        handleSelectedLocation(e, record.name);
                                                                     }}
                                                                 />
                                                                 <button
@@ -2615,11 +2571,7 @@ const ExploreByEquipment = () => {
                                         ) : (
                                             <>
                                                 <div
-                                                    className={
-                                                        spaceListAPI.length > 4
-                                                            ? `hScroll`
-                                                            : `hHundredPercent`
-                                                    }>
+                                                    className={spaceListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
                                                     <div className="floor-box">
                                                         <div>
                                                             <input
@@ -2643,10 +2595,7 @@ const ExploreByEquipment = () => {
                                                                         id={record._id}
                                                                         value={record._id}
                                                                         onClick={(e) => {
-                                                                            handleSelectedSpaces(
-                                                                                e,
-                                                                                record.name
-                                                                            );
+                                                                            handleSelectedSpaces(e, record.name);
                                                                         }}
                                                                     />
                                                                     <span>{record.name}</span>
@@ -2720,9 +2669,7 @@ const ExploreByEquipment = () => {
                                             </div>
                                             <div
                                                 className={
-                                                    filteredSpaceTypeOptions.length > 4
-                                                        ? `hScroll`
-                                                        : `hHundredPercent`
+                                                    filteredSpaceTypeOptions.length > 4 ? `hScroll` : `hHundredPercent`
                                                 }>
                                                 <div className="floor-box">
                                                     <div>
@@ -2747,10 +2694,7 @@ const ExploreByEquipment = () => {
                                                                     id={record.value}
                                                                     value={record.value}
                                                                     onClick={(e) => {
-                                                                        handleSelectedSpaceType(
-                                                                            e,
-                                                                            record.label
-                                                                        );
+                                                                        handleSelectedSpaceType(e, record.label);
                                                                     }}
                                                                 />
                                                                 <span>{record.label}</span>
@@ -2812,9 +2756,7 @@ const ExploreByEquipment = () => {
                                             </div>
                                             <div
                                                 className={
-                                                    filteredEquipOptions.length > 4
-                                                        ? `hScroll`
-                                                        : `hHundredPercent`
+                                                    filteredEquipOptions.length > 4 ? `hScroll` : `hHundredPercent`
                                                 }>
                                                 <div className="floor-box">
                                                     <div>
@@ -2839,10 +2781,7 @@ const ExploreByEquipment = () => {
                                                                     id={record.value}
                                                                     value={record.value}
                                                                     onClick={(e) => {
-                                                                        handleSelectedEquip(
-                                                                            e,
-                                                                            record.label
-                                                                        );
+                                                                        handleSelectedEquip(e, record.label);
                                                                     }}
                                                                 />
                                                                 <span>{record.label}</span>
@@ -2904,9 +2843,7 @@ const ExploreByEquipment = () => {
                                             </div>
                                             <div
                                                 className={
-                                                    filteredEndUseOptions.length > 4
-                                                        ? `hScroll`
-                                                        : `hHundredPercent`
+                                                    filteredEndUseOptions.length > 4 ? `hScroll` : `hHundredPercent`
                                                 }>
                                                 <div className="floor-box">
                                                     <div>
@@ -2931,10 +2868,7 @@ const ExploreByEquipment = () => {
                                                                     id={record.value}
                                                                     value={record.value}
                                                                     onClick={(e) => {
-                                                                        handleSelectedEndUse(
-                                                                            e,
-                                                                            record.label
-                                                                        );
+                                                                        handleSelectedEndUse(e, record.label);
                                                                     }}
                                                                 />
                                                                 <span>{record.label}</span>

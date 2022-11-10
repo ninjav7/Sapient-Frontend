@@ -14,7 +14,7 @@ import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
 
@@ -268,15 +268,9 @@ const DeviceChartModel = ({
                 };
                 let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&building_id=${bldgId}`;
                 await axios
-                    .post(
-                        `${BaseUrl}${sensorGraphData}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         setDeviceData([]);
                         setSeriesData([]);
