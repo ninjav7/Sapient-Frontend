@@ -1623,20 +1623,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 txt = 'consumption';
@@ -1689,20 +1689,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -1725,20 +1725,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -1761,20 +1761,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 txt = 'endUse';
@@ -1798,20 +1798,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -2165,7 +2165,7 @@ const ExploreByEquipment = () => {
                                         target="_blank"
                                         data={getCSVLinkChartData()}>
                                         {' '}
-                                        <FontAwesomeIcon icon={faDownload} size="md" />
+                                        <FontAwesomeIcon icon={faDownload} size="sm" />
                                     </CSVLink>
                                 </Col>
                             </Row> */}
@@ -2198,7 +2198,7 @@ const ExploreByEquipment = () => {
                                 onClick={(e) => {
                                     handleEquipmentSearch(e);
                                 }}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                             </button>
                         </div>
                         <div>
@@ -2232,7 +2232,7 @@ const ExploreByEquipment = () => {
                         target="_blank"
                         data={getCSVLinkData()}>
                         {' '}
-                        <FontAwesomeIcon icon={faDownload} size="md" />
+                        <FontAwesomeIcon icon={faDownload} size="sm" />
                     </CSVLink>
                 </Col>
             </Row>
@@ -2479,7 +2479,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="pop-inputbox-wrapper">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2656,7 +2656,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2743,7 +2743,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2830,7 +2830,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"

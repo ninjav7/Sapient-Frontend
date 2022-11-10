@@ -178,6 +178,7 @@ const ExploreBuildingsTable = ({
                                                                         );
                                                                     }
                                                                 }}
+                                                                onChange={()=>{}}
                                                             />
                                                             <a
                                                                 className="building-name"
@@ -587,6 +588,7 @@ const ExploreByBuildings = () => {
 
     const handleCloseFilter = (e, val) => {
         let arr = [];
+        console.log(val)
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
@@ -600,13 +602,31 @@ const ExploreByBuildings = () => {
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
                 txt = 'consumption';
                 set_minConValue(0.0);
@@ -614,45 +634,86 @@ const ExploreByBuildings = () => {
                 break;
             case 'change':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
                 }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
-                set_minPerValue(0.0);
+                set_minPerValue(bottomPerChange);
                 set_maxPerValue(topPerChange);
+                set_minPerValuePos(bottomPosPerChange);
+                set_maxPerValuePos(topPosPerChange);
+                set_minPerValue(bottomPerChange);
+                set_maxPerValue(topPerChange);
+                setSelectedTab(0);
                 break;
             case 'sq_ft':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
                 set_minSq_FtValue(0);
                 set_maxSq_FtValue(10);
                 break;
             case 'building_type':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
@@ -999,7 +1060,7 @@ const ExploreByBuildings = () => {
                                         target="_blank"
                                         data={getCSVLinkChartData()}>
                                         {' '}
-                                        <FontAwesomeIcon icon={faDownload} size="md" />
+                                        <FontAwesomeIcon icon={faDownload} size="sm" />
                                     </CSVLink>
                                 </Col>
                             </Row> */}
@@ -1032,7 +1093,7 @@ const ExploreByBuildings = () => {
                                 onClick={(e) => {
                                     handleBuildingSearch(e);
                                 }}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                             </button>
                         </div>
                         <div>
@@ -1040,6 +1101,7 @@ const ExploreByBuildings = () => {
                                 options={tableColumnOptions}
                                 value={selectedOptions}
                                 onChange={setSelectedOptions}
+                                disabled={isExploreDataLoading}
                                 labelledBy="Columns"
                                 className="column-filter-styling"
                                 valueRenderer={() => {
@@ -1355,7 +1417,7 @@ const ExploreByBuildings = () => {
                                             <div>
                                                 <div className="m-1">
                                                     <div className="explore-search mr-2">
-                                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                         <input
                                                             className="search-box ml-2"
                                                             type="search"
@@ -1422,7 +1484,7 @@ const ExploreByBuildings = () => {
                         target="_blank"
                         data={getCSVLinkData()}>
                         {' '}
-                        <FontAwesomeIcon icon={faDownload} size="md" />
+                        <FontAwesomeIcon icon={faDownload} size="sm" />
                     </CSVLink>
                 </Col>
             </Row>
