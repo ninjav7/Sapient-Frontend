@@ -421,7 +421,7 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
-            <Row lg={12} className="ml-2 mb-4">
+            <Row lg={12} className="mb-4 bldg-kpi-style">
                 <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
             </Row>
 
