@@ -3,7 +3,7 @@ import { Row } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
@@ -203,11 +203,7 @@ const BuildingOverview = () => {
         }
 
         const buildingOverallData = async () => {
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchOverallBldgData(bldgId, payload)
                 .then((res) => {
                     setOverallBldgData(res.data);
@@ -216,11 +212,7 @@ const BuildingOverview = () => {
         };
 
         const buildingEndUserData = async () => {
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchOverallEndUse(bldgId, payload)
                 .then((res) => {
                     setEnergyConsumption(res.data);
@@ -236,11 +228,7 @@ const BuildingOverview = () => {
         };
 
         const builidingEquipmentsData = async () => {
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuildingEquipments(bldgId, payload)
                 .then((res) => {
                     let response = res.data[0].top_contributors;
@@ -269,11 +257,7 @@ const BuildingOverview = () => {
 
         const buildingHourlyData = async () => {
             setIsAvgConsumptionDataLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -282,7 +266,7 @@ const BuildingOverview = () => {
 
                     let weekEndList = [];
                     let weekDaysList = [];
-                    
+
                     const weekDaysData = weekDaysResData.map((el) => {
                         weekDaysList.push(Math.round(el.y / 1000));
                         return {
@@ -378,11 +362,7 @@ const BuildingOverview = () => {
 
         const buildingConsumptionChart = async () => {
             setIsEnergyConsumptionDataLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEnergyConsumption(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -441,7 +421,7 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
-            <Row lg={12} className="ml-2 mb-4">
+            <Row lg={12} className="mb-4 bldg-kpi-style">
                 <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
             </Row>
 

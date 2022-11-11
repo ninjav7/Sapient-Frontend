@@ -23,7 +23,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -393,15 +393,7 @@ const PeakDemand = () => {
                 setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
-                    .post(
-                        `${BaseUrl}${peakDemand}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${peakDemand}${params}`, apiRequestBody(startDate, endDate, timeZone), { headers })
                     .then((res) => {
                         let responseData = res?.data;
                         setEquipTypeToFetch(responseData[0]?.timestamp);
@@ -418,15 +410,9 @@ const PeakDemand = () => {
                 setIsPeakTrendChartLoading(true);
                 let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
-                    .post(
-                        `${BaseUrl}${peakDemandTrendChart}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${peakDemandTrendChart}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         let responseData = res?.data;
                         let newArray = [
@@ -454,15 +440,9 @@ const PeakDemand = () => {
                 setIsPeakContentLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
-                    .post(
-                        `${BaseUrl}${peakDemandYearlyPeak}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${peakDemandYearlyPeak}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         let responseData = res.data;
                         setYearlyPeakData(responseData);
@@ -700,7 +680,7 @@ const PeakDemand = () => {
                 </Col>
             </Row>
 
-            <Row className="ml-1" style={{marginRight:'6px'}}>
+            <Row className="ml-1" style={{ marginRight: '6px' }}>
                 <Col xl={12}>
                     <div className="peak-content-style">
                         <div className="m-1">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
-import DeviceChartModel from '../DeviceChartModel';
+import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import moment from 'moment';
 import axios from 'axios';
@@ -24,6 +24,7 @@ import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
+import { apiRequestBody } from '../../../helpers/helpers';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
@@ -138,15 +139,9 @@ const IndividualPassiveDevice = () => {
                 id === sensorId ? sensorId : id
             }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
             await axios
-                .post(
-                    `${BaseUrl}${sensorGraphData}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     setDeviceData([]);
                     setSeriesData([]);

@@ -7,7 +7,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
-import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
@@ -15,7 +14,7 @@ import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { heatMapOptions } from './utils';
-import { convertDateTime } from '../../helpers/helpers';
+import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -390,11 +389,7 @@ const TimeOfDay = () => {
 
         const endUsesByOfHour = async () => {
             setIsEndUsageChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuildingAfterHours(bldgId, payload)
                 .then((res) => {
                     setEnergyConsumption(res?.data || []);
@@ -415,11 +410,7 @@ const TimeOfDay = () => {
 
         const dailyUsageByHour = async () => {
             setIsAvgUsageChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -482,11 +473,7 @@ const TimeOfDay = () => {
 
         const averageUsageByHourFetch = async () => {
             setIsAvgHourlyChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
