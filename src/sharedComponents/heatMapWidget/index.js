@@ -4,9 +4,13 @@ import Typography from '../typography';
 import PropTypes from 'prop-types';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { ReactComponent as Download } from '../assets/icons/download.svg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/pro-regular-svg-icons';
 import HeatMapChart from './HeatMapChart';
-import './style.scss';
+import { getCSVDataExport } from './utils';
 import Brick from '../brick';
+import './style.scss';
 
 const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
@@ -45,26 +49,54 @@ const HeatMapWidget = ({
     return (
         <div className={`heatmap-chart-widget-wrapper ${className}`}>
             <>
-                {pageType === 'building' ? (
+                {showRouteBtn ? (
                     <div className="container-header">
                         <Titles {...{ title, subtitle, pageType }} />
+
                         <div className="mr-2">
                             {showRouteBtn ? (
-                                <Button
-                                    label="More Details"
-                                    size={Button.Sizes.lg}
-                                    icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                    type={Button.Type.tertiary}
-                                    iconAlignment={Button.IconAlignment.right}
-                                    onClick={handleRouteChange}
-                                />
+                                <div className="d-flex justify-content-between mr-2">
+                                    <Button
+                                        size={Button.Sizes.sm}
+                                        icon={<Download />}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={() =>
+                                            getCSVDataExport(
+                                                hourlyAvgConsumpData,
+                                                hourlyAvgConsumpOpts?.xaxis?.categories
+                                            )
+                                        }
+                                        className="mr-4"
+                                    />
+                                    <Button
+                                        label="More Details"
+                                        size={Button.Sizes.lg}
+                                        icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                        type={Button.Type.tertiary}
+                                        iconAlignment={Button.IconAlignment.right}
+                                        onClick={handleRouteChange}
+                                    />
+                                </div>
                             ) : (
                                 ''
                             )}
                         </div>
                     </div>
                 ) : (
-                    <Titles {...{ title, subtitle, pageType }} />
+                    <div className="d-flex justify-content-between">
+                        <Titles {...{ title, subtitle, pageType }} />
+                        <FontAwesomeIcon
+                            icon={faDownload}
+                            size="md"
+                            className="download-chart-btn mouse-pointer mr-3 mt-3"
+                            onClick={() =>
+                                getCSVDataExport(
+                                    hourlyAvgConsumpData.reverse(),
+                                    hourlyAvgConsumpOpts?.xaxis?.categories
+                                )
+                            }
+                        />
+                    </div>
                 )}
             </>
             <Brick sizeInRem={1} />
