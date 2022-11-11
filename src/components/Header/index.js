@@ -72,7 +72,7 @@ const Header = ({ type, title }) => {
             {type === 'page' && (
                 <Row className="page-title">
                     <Col className="header-container">
-                        <span className="heading-style ml-2">{title}</span>
+                        <span className="heading-style">{title}</span>
 
                         <div
                             className="btn-group custom-button-group header-widget-styling"

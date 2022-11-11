@@ -361,6 +361,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1.5rem;
+    margin-left: 0.3125rem;
 }
 
 .custom-bldg-table-style {
@@ -428,4 +429,8 @@
 
 .fit-container-style {
     height: fit-content;
+}
+
+.bldg-kpi-style {
+    margin-left: 0.75rem;
 }

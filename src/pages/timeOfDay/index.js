@@ -15,6 +15,7 @@ import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { heatMapOptions } from './utils';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -389,11 +390,7 @@ const TimeOfDay = () => {
 
         const endUsesByOfHour = async () => {
             setIsEndUsageChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuildingAfterHours(bldgId, payload)
                 .then((res) => {
                     setEnergyConsumption(res?.data || []);
@@ -414,11 +411,7 @@ const TimeOfDay = () => {
 
         const dailyUsageByHour = async () => {
             setIsAvgUsageChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -481,11 +474,7 @@ const TimeOfDay = () => {
 
         const averageUsageByHourFetch = async () => {
             setIsAvgHourlyChartLoading(true);
-            let payload = {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            };
+            let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
@@ -690,7 +679,6 @@ const TimeOfDay = () => {
                     sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
 
                     finalList.sort((a, b) => a - b);
-                    console.log('SSR Final List => ', finalList);
 
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
