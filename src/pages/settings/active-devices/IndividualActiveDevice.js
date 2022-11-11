@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
-import DeviceChartModel from '../DeviceChartModel';
+import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import {

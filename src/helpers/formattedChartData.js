@@ -44,7 +44,7 @@ export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
     let endTime = new Date(ned);
     let et = endTime.getTime();
     let newArr = [];
-    for (let i = st, j = 1; i <= et; i += 900000) {
+    for (let i = st, j = 0; i <= et; i += 900000) {
         let tsd = new Date();
         if (data[j] !== undefined) tsd = new Date(data[j][0]);
         if (tsd.getTime() === i) {

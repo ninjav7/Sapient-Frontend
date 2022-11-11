@@ -37,7 +37,7 @@ import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
-import { equipOptions, equipOptionsLines } from './ChartOption';
+import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
 import { apiRequestBody } from '../../helpers/helpers';
 
 const EquipChartModal = ({

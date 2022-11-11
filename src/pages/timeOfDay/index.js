@@ -7,7 +7,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
-import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
@@ -15,7 +14,7 @@ import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { heatMapOptions } from './utils';
-import { apiRequestBody } from '../../helpers/helpers';
+import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -421,14 +420,14 @@ const TimeOfDay = () => {
 
                     const weekDaysData = weekDaysResData.map((el) => {
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
@@ -679,7 +678,6 @@ const TimeOfDay = () => {
                     sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
 
                     finalList.sort((a, b) => a - b);
-                    console.log('SSR Final List => ', finalList);
 
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];

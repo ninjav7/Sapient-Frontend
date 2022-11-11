@@ -19,7 +19,7 @@ import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
-import EquipChartModal from './EquipChartModal';
+import EquipChartModal from '../chartModal/EquipChartModal';
 import Dropdown from 'react-bootstrap/Dropdown';
 import './style.css';
 import RangeSlider from './RangeSlider';
@@ -30,7 +30,7 @@ import Header from '../../components/Header';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import './Linq';
-import { options, optionsLines } from './ChartOption';
+import { options, optionsLines } from '../../helpers/ChartOption';
 import { SliderAll, SliderPos, SliderNeg } from './Filter';
 import { apiRequestBody } from '../../helpers/helpers';
 
@@ -300,7 +300,7 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     <td>
-                                                        {record?.consumption?.change > 0 && (
+                                                        {record?.consumption?.now < record?.consumption?.old && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
@@ -314,7 +314,7 @@ const ExploreEquipmentTable = ({
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.change <= 0 && (
+                                                        {record?.consumption?.now > record?.consumption?.old && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
@@ -521,43 +521,6 @@ const ExploreEquipmentTable = ({
         </>
     );
 };
-
-// const SliderAll = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
-// const SliderPos = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
-// const SliderNeg = ({ bottom, top, handleChange, bottomPer, topPer }) => {
-//     return (
-//         <RangeSlider
-//             name="consumptionAll"
-//             STEP={1}
-//             MIN={bottom}
-//             range={[bottomPer, topPer]}
-//             MAX={top}
-//             onSelectionChange={handleChange}
-//         />
-//     )
-// };
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
@@ -836,7 +799,6 @@ const ExploreByEquipment = () => {
         if (slt.checked === true) {
             let selectLoc = [];
             for (let i = 0; i < filteredLocationOptions.length; i++) {
-                //selectLoc.push(filteredLocationOptions[i].floor_id);
                 let check = document.getElementById(filteredLocationOptions[i].floor_id);
                 check.checked = slt.checked;
                 const headers = {
@@ -870,13 +832,6 @@ const ExploreByEquipment = () => {
             rvmsp.map((el) => {
                 sp.push(el?._id);
             });
-            // if (filteredLocationOptions.length === 1) {
-            //     setLocationTxt(`${filteredLocationOptions[0].name}`);
-            // } else if (filteredLocationOptions.length === 0) {
-            //     setLocationTxt('');
-            // } else {
-            //     setLocationTxt(`${floorListAPI.length} Locations`);
-            // }
             setSelectedLocation(sp);
         } else {
             setSelectedLocation([]);
@@ -893,12 +848,6 @@ const ExploreByEquipment = () => {
         let sp = [];
         let selection = document.getElementById(e.target.value);
         if (selection.checked === true) {
-            // if (selectedLocation.length === 0) {
-            //     setLocationTxt(`${locName}`);
-            // } else {
-            //     setLocationTxt(`${selectedLocation.length + 1} Locations`);
-            // }
-
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -929,20 +878,6 @@ const ExploreByEquipment = () => {
             });
             setSelectedLocation(sp);
         } else {
-            // if (selectedLocation.length === 1) {
-            //     setLocationTxt('');
-            // } else if (selectedLocation.length === 2) {
-            // let arr = selectedLocation.filter(function (item) {
-            //     return item !== e.target.value;
-            // });
-            // let arr1 = floorListAPI.filter(function (item) {
-            //     return item.floor_id === arr[0];
-            // });
-
-            //     setLocationTxt(`${arr1[0].name}`);
-            // } else {
-            //     setLocationTxt(`${selectedLocation.length - 1} Locations`);
-            // }
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -1145,7 +1080,6 @@ const ExploreByEquipment = () => {
                     set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
-                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             })
             .catch((error) => {
@@ -1523,10 +1457,8 @@ const ExploreByEquipment = () => {
                     setSeriesLineData([...seriesLineData, recordToInsert]);
                     setSelectedEquipmentId('');
                     setChartLoading(false);
-                    //setIsExploreDataLoading(false);
                 })
                 .catch((error) => {
-                    //setIsExploreDataLoading(false);
                 });
         };
         fetchExploreChartData();
@@ -1603,7 +1535,6 @@ const ExploreByEquipment = () => {
                 setAllEquipmenData(dataarr);
             })
             .catch((error) => {
-                //setIsExploreDataLoading(false);
             });
     };
 
@@ -1660,20 +1591,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 txt = 'consumption';
@@ -1726,20 +1657,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -1762,20 +1693,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -1798,20 +1729,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 txt = 'endUse';
@@ -1835,20 +1766,20 @@ const ExploreByEquipment = () => {
                 }
                 if (selectedTab === 0) {
                     arr1['change'] = {
-                        gte: minPerValue,
-                        lte: maxPerValue,
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
                     };
                 }
                 if (selectedTab === 1) {
                     arr1['change'] = {
                         gte: minPerValuePos,
-                        lte: maxPerValuePos,
+                        lte: maxPerValuePos+1,
                     };
                 }
                 if (selectedTab === 2) {
                     arr1['change'] = {
-                        gte: minPerValueNeg,
-                        lte: maxPerValueNeg,
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
                     };
                 }
                 break;
@@ -1893,20 +1824,20 @@ const ExploreByEquipment = () => {
         }
         if (selectedTab === 0 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValue,
-                lte: maxPerValue,
+                gte: minPerValue-1,
+                lte: maxPerValue+1,
             };
         }
         if (selectedTab === 1 && showChangeDropdown === false) {
             arr['change'] = {
                 gte: minPerValuePos,
-                lte: maxPerValuePos,
+                lte: maxPerValuePos+1,
             };
         }
         if (selectedTab === 2 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValueNeg,
-                lte: maxPerValueNeg,
+                gte: minPerValueNeg-1,
+                lte: maxPerValueNeg+1,
             };
         }
         if (selectedLocation.length !== 0) {
@@ -2202,7 +2133,7 @@ const ExploreByEquipment = () => {
                                         target="_blank"
                                         data={getCSVLinkChartData()}>
                                         {' '}
-                                        <FontAwesomeIcon icon={faDownload} size="md" />
+                                        <FontAwesomeIcon icon={faDownload} size="sm" />
                                     </CSVLink>
                                 </Col>
                             </Row> */}
@@ -2235,7 +2166,7 @@ const ExploreByEquipment = () => {
                                 onClick={(e) => {
                                     handleEquipmentSearch(e);
                                 }}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                             </button>
                         </div>
                         <div>
@@ -2269,7 +2200,7 @@ const ExploreByEquipment = () => {
                         target="_blank"
                         data={getCSVLinkData()}>
                         {' '}
-                        <FontAwesomeIcon icon={faDownload} size="md" />
+                        <FontAwesomeIcon icon={faDownload} size="sm" />
                     </CSVLink>
                 </Col>
             </Row>
@@ -2516,7 +2447,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="pop-inputbox-wrapper">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2693,7 +2624,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2780,7 +2711,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"
@@ -2867,7 +2798,7 @@ const ExploreByEquipment = () => {
                                     <div>
                                         <div className="m-1">
                                             <div className="explore-search mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"

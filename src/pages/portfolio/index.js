@@ -188,7 +188,7 @@ const PortfolioOverview = () => {
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>
                     <Row className="mt-1 mb-2">
-                        <div className="col">
+                        <div className="col kpi-style">
                             <PortfolioKPIs
                                 daysCount={daysCount}
                                 totalBuilding={buildingsEnergyConsume.length}
