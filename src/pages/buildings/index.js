@@ -3,7 +3,7 @@ import { Row } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';

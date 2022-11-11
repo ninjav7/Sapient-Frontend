@@ -198,7 +198,8 @@ export const xaxisFilters = (daysCount, timezone) => {
 
 export const convertDateTime = (timestamp, timeZone) => {
     return moment.utc(timestamp).clone().tz(timeZone);
-    
+};
+
 export const apiRequestBody = (start_date, end_date, time_zone) => {
     return {
         date_from: start_date,
