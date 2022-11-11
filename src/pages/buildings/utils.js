@@ -1,5 +1,6 @@
 import moment from 'moment';
 import 'moment-timezone';
+import colors from '../../assets/scss/_colors.scss';
 
 export const hourlyAvgConsumpOpts = {
     chart: {
@@ -144,7 +145,7 @@ export const hourlyAvgConsumpOpts = {
                     {
                         from: 98,
                         to: 100,
-                        color: '#F63D68',
+                        color: `${colors.datavizRed500}`,
                     },
                 ],
             },

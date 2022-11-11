@@ -47,8 +47,10 @@ $primary-gray-950: #070C17;
 $dataviz-blue-50: #eff5ff;
 $dataviz-blue-100: #dbe8fe;
 $dataviz-blue-600: #2955e7;
+$dataviz-red-500: #F63D68;
 
 :export {
   primaryIndigo50: $primary-indigo-50;
   primaryIndigo400: $primary-indigo-400;
+  datavizRed500: $dataviz-red-500;
 }
