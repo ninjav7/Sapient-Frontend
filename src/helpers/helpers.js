@@ -195,3 +195,7 @@ export const xaxisFilters = (daysCount, timezone) => {
         return xaxisObj;
     }
 };
+
+export const convertDateTime = (timestamp, timeZone) => {
+    return moment.utc(timestamp).clone().tz(timeZone);
+};

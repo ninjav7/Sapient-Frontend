@@ -3,7 +3,7 @@ import { Row } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
@@ -282,11 +282,11 @@ const BuildingOverview = () => {
 
                     let weekEndList = [];
                     let weekDaysList = [];
-
+                    
                     const weekDaysData = weekDaysResData.map((el) => {
                         weekDaysList.push(Math.round(el.y / 1000));
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: Math.round(el.y / 1000),
                         };
                     });
@@ -294,7 +294,7 @@ const BuildingOverview = () => {
                     const weekendsData = weekEndResData.map((el) => {
                         weekEndList.push(Math.round(el.y / 1000));
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: Math.round(el.y / 1000),
                         };
                     });

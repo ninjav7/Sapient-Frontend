@@ -15,6 +15,7 @@ import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { heatMapOptions } from './utils';
+import { convertDateTime } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -428,14 +429,14 @@ const TimeOfDay = () => {
 
                     const weekDaysData = weekDaysResData.map((el) => {
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
                         return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
