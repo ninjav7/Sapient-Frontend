@@ -799,7 +799,6 @@ const ExploreByEquipment = () => {
         if (slt.checked === true) {
             let selectLoc = [];
             for (let i = 0; i < filteredLocationOptions.length; i++) {
-                //selectLoc.push(filteredLocationOptions[i].floor_id);
                 let check = document.getElementById(filteredLocationOptions[i].floor_id);
                 check.checked = slt.checked;
                 const headers = {
@@ -833,13 +832,6 @@ const ExploreByEquipment = () => {
             rvmsp.map((el) => {
                 sp.push(el?._id);
             });
-            // if (filteredLocationOptions.length === 1) {
-            //     setLocationTxt(`${filteredLocationOptions[0].name}`);
-            // } else if (filteredLocationOptions.length === 0) {
-            //     setLocationTxt('');
-            // } else {
-            //     setLocationTxt(`${floorListAPI.length} Locations`);
-            // }
             setSelectedLocation(sp);
         } else {
             setSelectedLocation([]);
@@ -856,12 +848,6 @@ const ExploreByEquipment = () => {
         let sp = [];
         let selection = document.getElementById(e.target.value);
         if (selection.checked === true) {
-            // if (selectedLocation.length === 0) {
-            //     setLocationTxt(`${locName}`);
-            // } else {
-            //     setLocationTxt(`${selectedLocation.length + 1} Locations`);
-            // }
-
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -892,20 +878,6 @@ const ExploreByEquipment = () => {
             });
             setSelectedLocation(sp);
         } else {
-            // if (selectedLocation.length === 1) {
-            //     setLocationTxt('');
-            // } else if (selectedLocation.length === 2) {
-            // let arr = selectedLocation.filter(function (item) {
-            //     return item !== e.target.value;
-            // });
-            // let arr1 = floorListAPI.filter(function (item) {
-            //     return item.floor_id === arr[0];
-            // });
-
-            //     setLocationTxt(`${arr1[0].name}`);
-            // } else {
-            //     setLocationTxt(`${selectedLocation.length - 1} Locations`);
-            // }
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -1108,7 +1080,6 @@ const ExploreByEquipment = () => {
                     set_maxConValue(Math.round(responseData.data[0].consumption.now / 1000));
                 }
                 setExploreTableData(responseData.data);
-                //setRemoveDuplicateFlag(!removeDuplicateFlag);
                 setIsExploreDataLoading(false);
             })
             .catch((error) => {
@@ -1486,10 +1457,8 @@ const ExploreByEquipment = () => {
                     setSeriesLineData([...seriesLineData, recordToInsert]);
                     setSelectedEquipmentId('');
                     setChartLoading(false);
-                    //setIsExploreDataLoading(false);
                 })
                 .catch((error) => {
-                    //setIsExploreDataLoading(false);
                 });
         };
         fetchExploreChartData();
@@ -1566,7 +1535,6 @@ const ExploreByEquipment = () => {
                 setAllEquipmenData(dataarr);
             })
             .catch((error) => {
-                //setIsExploreDataLoading(false);
             });
     };
 
