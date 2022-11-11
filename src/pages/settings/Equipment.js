@@ -1257,7 +1257,7 @@ const Equipment = () => {
                             <Form.Label>End Use Category</Form.Label>
                             <Select
                                 id="endUseSelect"
-                                placeholder="Selected End Use"
+                                placeholder="Select End Use"
                                 name="select"
                                 isSearchable={true}
                                 defaultValue={'Selected End Use'}
@@ -1267,7 +1267,6 @@ const Equipment = () => {
                                     handleChange('end_use', e.value);
                                 }}
                                 className="basic-single font-weight-bold"
-                                isDisabled
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
