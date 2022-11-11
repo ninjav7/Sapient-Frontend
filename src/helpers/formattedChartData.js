@@ -24,7 +24,7 @@ export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
     // tsd = Timestampdata
     // ntsd = New Timestampdata
 
-    let sd = startDate.toLocaleDateString();
+    let sd = startDate;
     let sdf = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
     let m1 = sdf.getMonth() + 1;
     let d1 = sdf.getDate();
@@ -33,7 +33,7 @@ export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
     let nsd = sdf.getFullYear() + '-' + mon1 + '-' + dt1 + 'T00:00:00.000Z';
     let startTime = new Date(nsd);
     let st = startTime.getTime();
-    let ed = endDate.toLocaleDateString();
+    let ed = endDate;
     let edf = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
     let OneAdd = new Date(edf.getTime() + 86400000);
     let m2 = OneAdd.getMonth() + 1;
