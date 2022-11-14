@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import moment from 'moment';
 
 const generateID = () => Math.random().toString(36).substring(2, 9);
 
@@ -78,6 +79,184 @@ const removeProps = (propsObj, ...properties) => {
     }, {});
 };
 
+const xaxisFilters = (daysCount, timezone) => {
+    // Up to and including 1 day
+    if (daysCount === 1) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('HH:00')}`;
+                },
+                offsetX: 0,
+                offsetY: 0,
+            },
+            tickAmount: 8,
+            tickPlacement: 'between',
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 3 days
+    else if (daysCount >= 2 && daysCount <= 3) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
+                },
+                offsetX: 0,
+                offsetY: 0,
+            },
+            tickAmount: daysCount * 4,
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 7 days
+    else if (daysCount >= 4 && daysCount <= 7) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
+                },
+                offsetX: 0,
+                offsetY: 0,
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: daysCount * 2,
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 14 days
+    else if (daysCount >= 8 && daysCount <= 14) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
+                },
+                offsetX: 0,
+                offsetY: 0,
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: daysCount,
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 30 days
+    else if (daysCount >= 15 && daysCount <= 30) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
+                },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+                offsetX: 0,
+                offsetY: 0,
+            },
+            tickAmount: (daysCount / 3).toFixed(0),
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 3 Months
+    else if (daysCount >= 31 && daysCount <= 90) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
+                },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: (daysCount / 6).toFixed(0),
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // Up to and including 6 Months
+    else if (daysCount >= 91 && daysCount <= 181) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
+                },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: (daysCount / 6).toFixed(0),
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // >6 Months
+    else if (daysCount >= 182) {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('MMM')}`;
+                },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: (daysCount / 30).toFixed(0),
+            axisTicks: {
+                show: true,
+            },
+        };
+        return xaxisObj;
+    }
+
+    // Default if not any
+    else {
+        let xaxisObj = {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return `${moment(timestamp).tz(timezone).format('DD/MMM')} ${moment(timestamp)
+                        .tz(timezone)
+                        .format('LT')}`;
+                },
+            },
+        };
+        return xaxisObj;
+    }
+};
+
+const formatConsumptionValue = (value, fixed) => value.toLocaleString(undefined, { maximumFractionDigits: fixed });
+
 export {
     generateID,
     kFormatter,
@@ -87,4 +266,6 @@ export {
     stringOrNumberPropTypes,
     getStatesForSelectAllCheckbox,
     removeProps,
+    xaxisFilters,
+    formatConsumptionValue,
 };

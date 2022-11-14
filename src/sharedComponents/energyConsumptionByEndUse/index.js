@@ -1,10 +1,9 @@
 import React from 'react';
-import { Col } from 'reactstrap';
 import { percentageHandler } from '../../utils/helper';
-import DonutChartWidget from '../../sharedComponents/donutChartWidget';
+import DonutChartWidget from '../donutChartWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import { UNITS } from '../../constants/units';
-import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+import { TRENDS_BADGE_TYPES } from '../trendsBadge';
 
 // MOCK
 const donutChartDataMock = [
@@ -21,16 +20,17 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionTotals = ({
-    series,
-    options,
+const EnergyConsumptionByEndUse = ({
+    title,
+    subtitle,
     energyConsumption,
     isEnergyConsumptionChartLoading,
     pageType,
     bldgId,
+    ...props
 }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(5);
+        let val = (energy_consumption.now / 1000).toFixed(0);
         let value = parseFloat(val);
         const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
         const trendType =
@@ -45,15 +45,16 @@ const EnergyConsumptionTotals = ({
         <div>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
-                title="Energy Consumption by End Use"
-                subtitle="Energy Totals"
+                title={title}
+                subtitle={subtitle}
                 items={donutChartData}
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                 pageType={pageType}
                 bldgId={bldgId}
+                {...props}
             />
         </div>
     );
 };
 
-export default EnergyConsumptionTotals;
+export default EnergyConsumptionByEndUse;

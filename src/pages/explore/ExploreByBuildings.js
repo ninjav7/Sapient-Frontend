@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
-import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../explore/explore';
-import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/explore';
+import { fetchExploreBuildingList, fetchExploreBuildingChart } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Spinner } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
@@ -29,20 +26,17 @@ import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { xaxisFilters } from '../../helpers/explorehelpers';
-import Enumerable from 'linq';
 import './Linq';
+import { options, optionsLines } from '../../helpers/ChartOption';
+import {SliderAll, SliderPos, SliderNeg} from './Filter';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
     isExploreDataLoading,
     topEnergyConsumption,
-    selectedBuildingId,
     setSelectedBuildingId,
-    removeBuildingId,
     setRemovedBuildingId,
-    buildingListArray,
-    setBuildingListArray,
-    selectedOptions,
 }) => {
     const [buildingIdSelection, setBuildingIdSelection] = useAtom(selectedBuilding);
     const [totalBuildingId, setTotalBuildingId] = useAtom(totalSelectionBuildingId);
@@ -102,7 +96,7 @@ const ExploreBuildingsTable = ({
     return (
         <>
             <Card>
-                <CardBody>
+                <CardBody style={{ marginBottom: '6rem' }}>
                     <Col md={12}>
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
@@ -184,6 +178,7 @@ const ExploreBuildingsTable = ({
                                                                         );
                                                                     }
                                                                 }}
+                                                                onChange={()=>{}}
                                                             />
                                                             <a
                                                                 className="building-name"
@@ -200,7 +195,7 @@ const ExploreBuildingsTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {parseInt(record?.consumption.now / 1000)} kWh
+                                                        {Math.round(record?.consumption.now / 1000)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.consumption?.now === 0 && (
@@ -214,10 +209,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -227,10 +222,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 1 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -240,10 +235,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 2 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -253,10 +248,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 3 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -266,10 +261,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 4 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -279,10 +274,10 @@ const ExploreBuildingsTable = ({
                                                             )}
                                                             {index === 5 && (
                                                                 <Line
-                                                                    percent={parseInt(
+                                                                    percent={Math.round(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     )}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -293,25 +288,26 @@ const ExploreBuildingsTable = ({
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        {record?.consumption?.change >= 0 && (
+                                                        {record?.consumption?.now < record?.consumption?.old && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
-                                                                        {parseInt(record?.consumption?.change)}
-                                                                        %
+                                                                        {Math.abs(Math.round(record?.consumption?.change))}%
                                                                     </strong>
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.consumption?.change < 0 && (
+                                                        {record?.consumption?.now > record?.consumption?.old && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
-                                                                        {Math.abs(parseInt(record?.consumption?.change))}
+                                                                        {Math.abs(
+                                                                            Math.round(record?.consumption?.change)
+                                                                        )}
                                                                         %
                                                                     </strong>
                                                                 </i>
@@ -380,236 +376,35 @@ const ExploreByBuildings = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
     const [objectExplore, setObjectExplore] = useState([]);
-    const [closeTrigger,setCloseTrigger] = useState("");
+    const [closeTrigger, setCloseTrigger] = useState('');
 
-    const [optionsData, setOptionsData] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: '1000px',
-            toolbar: {
-                show: true,
-                offsetX: 0,
-                offsetY: 0,
-                tools: {
-                  download: true,
-                  selection: false,
-                  zoom: false,
-                  zoomin: false,
-                  zoomout: false,
-                  pan: false,
-                  reset: false ,
-                },
-                export: {
-                  csv: {
-                    filename: "Explore_Building_View"+new Date(),
-                    columnDelimiter: ',',
-                    headerCategory: 'Timestamp',
-                    headerValue: 'value',
-                    dateFormatter(timestamp) {
-                      return moment
-                      .utc(timestamp)
-                      .format(`MMM D 'YY @ hh:mm A`)
-                    }
-                  },
-                  svg: {
-                    filename: "Explore_Building_View"+new Date(),
-                  },
-                  png: {
-                    filename: "Explore_Building_View"+new Date(),
-                  }
-                },
-                autoSelected: 'pan',
-            },
-
-            animations: {
-                enabled: false,
-            },
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-            showForSingleSeries: true,
-            showForNullSeries: false,
-            showForZeroSeries: true,
-            fontSize: '18px',
-            fontFamily: 'Helvetica, Arial',
-            fontWeight: 600,
-            itemMargin: {
-                horizontal: 30,
-                vertical: 20,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: [
-            '#3C6DF5',
-            '#12B76A',
-            '#DC6803',
-            '#088AB2',
-            '#EF4444',
-            '#800000',
-            '#FFA500',
-            '#0AFFFF',
-            '#033E3E',
-            '#E2F516',
-        ],
-        fill: {
-            opacity: 1,
-            colors: [
-                '#3C6DF5',
-                '#12B76A',
-                '#DC6803',
-                '#088AB2',
-                '#EF4444',
-                '#800000',
-                '#FFA500',
-                '#0AFFFF',
-                '#033E3E',
-                '#E2F516',
-            ],
-        },
-        markers: {
-            size: 0,
-        },
-        animations: {
-            enabled: false,
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                        .utc(seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
-                        ch =
-                            ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
-                                series[i][dataPointIndex]
-                            )} kWh </td></tr>`;
-                }
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MM - HH:00');
-                },
-            },
-            tickAmount: 24,
-            tickPlacement: 'between',
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return parseInt(value);
-                },
-            },
-        },
-    });
+    const [optionsData, setOptionsData] = useState(options);
 
     const [seriesLineData, setSeriesLineData] = useState([]);
 
-    const [optionsLineData, setOptionsLineData] = useState({
-        chart: {
-            id: 'chart1',
-            height: '500px',
-            toolbar: {
-                show: false,
-            },
-            animations: {
-                enabled: false,
-            },
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            selection: {
-                enabled: true,
-            },
-        },
-        legend: {
-            show: false,
-        },
-        colors: [
-            '#3C6DF5',
-            '#12B76A',
-            '#DC6803',
-            '#088AB2',
-            '#EF4444',
-            '#800000',
-            '#FFA500',
-            '#0AFFFF',
-            '#033E3E',
-            '#E2F516',
-        ],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.91,
-                opacityTo: 0.1,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MM - HH:mm');
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return parseInt(value);
-                },
-            },
-        },
-    });
+    const [optionsLineData, setOptionsLineData] = useState(optionsLines);
 
     let entryPoint = '';
     const [APIFlag, setAPIFlag] = useState(false);
     const [APIPerFlag, setAPIPerFlag] = useState(false);
     const [Sq_FtFlag, setSq_FtFlag] = useState(false);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
-    const [topPerChange, setTopPerChange] = useState(0);
     const [minConValue, set_minConValue] = useState(0.0);
     const [maxConValue, set_maxConValue] = useState(0.0);
     const [minSq_FtValue, set_minSq_FtValue] = useState(0);
     const [maxSq_FtValue, set_maxSq_FtValue] = useState(10);
+    const [minPerValuePos, set_minPerValuePos] = useState(0.0);
+    const [maxPerValuePos, set_maxPerValuePos] = useState(0.0);
+    const [minPerValueNeg, set_minPerValueNeg] = useState(0.0);
+    const [maxPerValueNeg, set_maxPerValueNeg] = useState(0.0);
     const [minPerValue, set_minPerValue] = useState(0);
-    const [maxPerValue, set_maxPerValue] = useState(10);
+    const [maxPerValue, set_maxPerValue] = useState(0);
+    const [topPerChange, setTopPerChange] = useState(0);
+    const [bottomPerChange, setBottomPerChange] = useState(0);
+    const [topPosPerChange, setTopPosPerChange] = useState(0);
+    const [bottomPosPerChange, setBottomPosPerChange] = useState(0);
+    const [topNegPerChange, setTopNegPerChange] = useState(0);
+    const [bottomNegPerChange, setBottomNegPerChange] = useState(0);
     const [buildingSearchTxt, setBuildingSearchTxt] = useState('');
     const [buildingTypeTxt, setBuildingTypeTxt] = useState('');
     const [consumptionTxt, setConsumptionTxt] = useState('');
@@ -618,6 +413,7 @@ const ExploreByBuildings = () => {
     const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
     const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(0);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -626,23 +422,26 @@ const ExploreByBuildings = () => {
     const [showChangeDropdown, setShowChangeDropdown] = useState(false);
     const setChangeDropdown = () => {
         setShowChangeDropdown(!showChangeDropdown);
-        if(closeTrigger==="change"){
+        if (closeTrigger === 'change') {
             setShowChangeDropdown(true);
             setCloseTrigger("");
         }
         else if (!showChangeDropdown !== true) {
-            
             setAPIPerFlag(!APIPerFlag);
-            setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            if (selectedTab === 0)
+                setChangeTxt(`${minPerValue} - ${maxPerValue} %`);
+            else if (selectedTab === 1)
+                setChangeTxt(`${minPerValuePos} - ${maxPerValuePos} %`);
+            else if (selectedTab === 2)
+                setChangeTxt(`${minPerValueNeg} - ${maxPerValueNeg} %`);
         }
     };
     const setDropdown = () => {
         setShowDropdown(!showDropdown);
-        if(closeTrigger==="consumption"){
+        if (closeTrigger === 'consumption') {
             setShowDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showDropdown !== true) {
             setAPIFlag(!APIFlag);
             setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
@@ -651,11 +450,10 @@ const ExploreByBuildings = () => {
     const [showsqftDropdown, setsqftShowDropdown] = useState(false);
     const setsqftDropdown = () => {
         setsqftShowDropdown(!showsqftDropdown);
-        if(closeTrigger==="sq_ft"){
+        if (closeTrigger === 'sq_ft') {
             setsqftShowDropdown(true);
-            setCloseTrigger("");
-        }
-        else if (!showsqftDropdown !== true) {
+            setCloseTrigger('');
+        } else if (!showsqftDropdown !== true) {
             setSq_FtFlag(!Sq_FtFlag);
             setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);
         }
@@ -701,47 +499,64 @@ const ExploreByBuildings = () => {
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
-        // let arr = [
-        //     { label: 'Energy Consumption', value: 'consumption' },
-        //     { label: 'Change', value: 'change' },
-        //     // { label: 'Total % change', value: 'total_per' },
-        //     { label: 'Square Footage', value: 'sq_ft' },
-        //     { label: 'Building Type', value: 'load' },
-        // ];
     }, []);
 
     const exploreDataFetch = async () => {
-            setIsExploreDataLoading(true);
-            let value =   {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            }
-            await fetchExploreBuildingList(value,"")
+        setIsExploreDataLoading(true);
+        let value = apiRequestBody(startDate, endDate, timeZone);
+        await fetchExploreBuildingList(value, '')
             .then((res) => {
-                    if (entryPoint === 'entered') {
-                        totalBuildingId.length = 0;
-                        setSeriesData([]);
-                        setSeriesLineData([]);
+                if (entryPoint === 'entered') {
+                    totalBuildingId.length = 0;
+                    setSeriesData([]);
+                    setSeriesLineData([]);
+                }
+                let responseData = res.data;
+                let max = responseData[0].consumption.change;
+                let min = responseData[0].consumption.change;
+                let maxPos = 0;
+                let minPos = 0;
+                let minNeg = 0;
+                let maxNeg = 0;
+                responseData.map((ele) => {
+                    if (ele.consumption.change >= max)
+                        max = ele.consumption.change;
+                    if (ele.consumption.change <= min)
+                        min = ele.consumption.change;
+                    if (ele.consumption.change >= 0) {
+                        if (ele.consumption.change >= maxPos)
+                            maxPos = ele.consumption.change;
+                        if (ele.consumption.change <= minPos)
+                            minPos = ele.consumption.change;
                     }
-                    let responseData = res.data;
-                    setExploreTableData(responseData);
-                    let max=responseData[0].consumption.change;
-                    responseData.map((ele)=>{
-                        if(ele.consumption.change>=max)
-                            max=ele.consumption.change;
-                    })
-                    setTopPerChange(parseInt(max))
-                    set_minPerValue(0.0)
-                    set_maxPerValue(parseInt(max));
-                    setTopEnergyConsumption(responseData[0].consumption.now);
-                    set_minConValue(0.0);
-                    set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
-                    setIsExploreDataLoading(false);
+                    if (ele.consumption.change < 0) {
+                        if (ele.consumption.change >= maxNeg)
+                            maxNeg = ele.consumption.change;
+                        if (ele.consumption.change <= minNeg)
+                            minNeg = ele.consumption.change;
+                    }
                 })
-                .catch((error) => {
-                    setIsExploreDataLoading(false);
-                });
+                setTopPerChange(Math.round(max === min ? max + 1 : max))
+                setBottomPerChange(Math.round(min))
+                setTopPosPerChange(Math.round(maxPos === minPos ? maxPos + 1 : maxPos));
+                setBottomPosPerChange(Math.round(minPos));
+                setTopNegPerChange(Math.round(maxNeg === minNeg ? maxNeg + 1 : maxNeg));
+                setBottomNegPerChange(Math.round(minNeg));
+                set_minPerValue(Math.round(min))
+                set_maxPerValue(Math.round(max));
+                set_minPerValuePos(Math.round(minPos))
+                set_maxPerValuePos(Math.round(maxPos));
+                set_minPerValueNeg(Math.round(minNeg))
+                set_maxPerValueNeg(Math.round(maxNeg));
+                setExploreTableData(responseData);
+                setTopEnergyConsumption(responseData[0].consumption.now);
+                set_minConValue(0.0);
+                set_maxConValue(Math.round(responseData[0].consumption.now / 1000));
+                setIsExploreDataLoading(false);
+            })
+            .catch((error) => {
+                setIsExploreDataLoading(false);
+            });
     };
     useEffect(() => {
         if (startDate === null) {
@@ -752,12 +567,12 @@ const ExploreByBuildings = () => {
         }
         let result = [];
 
-       exploreDataFetch();
+        exploreDataFetch();
     }, [startDate, endDate]);
 
     const exploreFilterDataFetch = async (bodyVal) => {
-            setIsExploreDataLoading(true);
-            await fetchExploreBuildingList(bodyVal,"")
+        setIsExploreDataLoading(true);
+        await fetchExploreBuildingList(bodyVal, '')
             .then((res) => {
                 let responseData = res.data;
                 setSeriesData([]);
@@ -771,7 +586,6 @@ const ExploreByBuildings = () => {
             });
     };
 
-
     const handleCloseFilter = (e, val) => {
         let arr = [];
         arr = selectedOptions.filter(function (item) {
@@ -782,17 +596,36 @@ const ExploreByBuildings = () => {
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
-        let topVal = (parseInt(topEnergyConsumption / 1000));
+        arr1['tz_info'] = timeZone;
+        let topVal = Math.round(topEnergyConsumption / 1000);
         switch (val) {
             case 'consumption':
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
                 txt = 'consumption';
                 set_minConValue(0.0);
@@ -800,45 +633,86 @@ const ExploreByBuildings = () => {
                 break;
             case 'change':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
                 }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
-                set_minPerValue(0.0);
+                set_minPerValue(bottomPerChange);
                 set_maxPerValue(topPerChange);
+                set_minPerValuePos(bottomPosPerChange);
+                set_maxPerValuePos(topPosPerChange);
+                set_minPerValue(bottomPerChange);
+                set_maxPerValue(topPerChange);
+                setSelectedTab(0);
                 break;
             case 'sq_ft':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (selectedBuildingOptions.length !== 0) {
-                    arr['building_type'] = selectedBuildingOptions;
+                    arr1['building_type'] = selectedBuildingOptions;
                 }
                 set_minSq_FtValue(0);
                 set_maxSq_FtValue(10);
                 break;
             case 'building_type':
                 if (maxConValue > 0.01) {
-                    arr['consumption_range'] = {
+                    arr1['consumption_range'] = {
                         gte: minConValue * 1000,
                         lte: maxConValue * 1000 + 1000,
                     };
                 }
+                if (selectedTab === 0) {
+                    arr1['change'] = {
+                        gte: minPerValue-1,
+                        lte: maxPerValue+1,
+                    };
+                }
+                if (selectedTab === 1) {
+                    arr1['change'] = {
+                        gte: minPerValuePos,
+                        lte: maxPerValuePos+1,
+                    };
+                }
+                if (selectedTab === 2) {
+                    arr1['change'] = {
+                        gte: minPerValueNeg-1,
+                        lte: maxPerValueNeg+1,
+                    };
+                }
                 if (maxSq_FtValue > 10) {
-                    arr['sq_ft_range'] = {
+                    arr1['sq_ft_range'] = {
                         gte: minSq_FtValue,
                         lte: maxSq_FtValue,
                     };
@@ -847,62 +721,52 @@ const ExploreByBuildings = () => {
         }
         if (selectedOptions.length === 1) {
             exploreDataFetch();
-        }
-        else {
+        } else {
             exploreFilterDataFetch(arr1);
         }
     };
 
-    // add
     useEffect(() => {
         if (selectedBuildingId === '') {
             return;
         }
 
         const fetchExploreChartData = async (id) => {
-
-            let value =  {
-                date_from: startDate.toLocaleDateString(),
-                date_to: endDate.toLocaleDateString(),
-                tz_info: timeZone,
-            }
-            await fetchExploreBuildingChart(value,selectedBuildingId)
-            .then((res) => {
-            
-                        let responseData = res.data;
-                        let data = responseData.data;
-                        let arr = [];
-                        arr = exploreTableData.filter(function (item) {
-                            return item.building_id === selectedBuildingId;
-                        });
-                        let exploreData = [];
-                        const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                        let recordToInsert = {
-                            name: arr[0].building_name,
-                            data: formattedData,
-                            id: arr[0].building_id,
-                        };
-                        let coll = [];
-                        let sname = arr[0].building_name;
-                        data.map((el) => {
-                            let ab = {};
-                            ab['timestamp'] = el[0];
-                            ab[sname] = el[1] === null ? "-" : el[1].toFixed(2);
-                            coll.push(ab);
-                        });
-                        if (objectExplore.length === 0) {
-                            setObjectExplore(coll);
-                        } else {
-                            let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                            setObjectExplore(result);
-                        }
-                        setSeriesData([...seriesData, recordToInsert]);
-                        setSeriesLineData([...seriesLineData, recordToInsert]);
-                        setSelectedBuildingId('');
-                    })
-                    .catch((error) => {
+            let value = apiRequestBody(startDate, endDate, timeZone);
+            await fetchExploreBuildingChart(value, selectedBuildingId)
+                .then((res) => {
+                    let responseData = res.data;
+                    let data = responseData.data;
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.building_id === selectedBuildingId;
                     });
-                 
+                    let exploreData = [];
+                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    let recordToInsert = {
+                        name: arr[0].building_name,
+                        data: formattedData,
+                        id: arr[0].building_id,
+                    };
+                    let coll = [];
+                    let sname = arr[0].building_name;
+                    data.map((el) => {
+                        let ab = {};
+                        ab['timestamp'] = el[0];
+                        ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                        coll.push(ab);
+                    });
+                    if (objectExplore.length === 0) {
+                        setObjectExplore(coll);
+                    } else {
+                        let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
+                        setObjectExplore(result);
+                    }
+                    setSeriesData([...seriesData, recordToInsert]);
+                    setSeriesLineData([...seriesLineData, recordToInsert]);
+                    setSelectedBuildingId('');
+                })
+                .catch((error) => {});
         };
 
         fetchExploreChartData();
@@ -933,37 +797,29 @@ const ExploreByBuildings = () => {
     const dataarr = [];
 
     const fetchExploreAllChartData = async (id) => {
-        
-        let value =  {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        }
-        await fetchExploreBuildingChart(value,id)
-        .then((res) => {
-        
-                    let responseData = res.data;
-                    let data = responseData.data;
-                    let arr = [];
-                    arr = exploreTableData.filter(function (item) {
-                        return item.building_id === id;
-                    });
-                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                    let recordToInsert = {
-                        name: arr[0].building_name,
-                        data: formattedData,
-                        id: arr[0].building_id,
-                    };
-                    dataarr.push(recordToInsert);
-                    if (selectedAllBuildingId.length === dataarr.length) {
-                        setSeriesData(dataarr);
-                        setSeriesLineData(dataarr);
-                    }
-                    setAllBuildingData(dataarr);
-                })
-                .catch((error) => {
+        let value = apiRequestBody(startDate, endDate, timeZone);
+        await fetchExploreBuildingChart(value, id)
+            .then((res) => {
+                let responseData = res.data;
+                let data = responseData.data;
+                let arr = [];
+                arr = exploreTableData.filter(function (item) {
+                    return item.building_id === id;
                 });
-             
+                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                let recordToInsert = {
+                    name: arr[0].building_name,
+                    data: formattedData,
+                    id: arr[0].building_id,
+                };
+                dataarr.push(recordToInsert);
+                if (selectedAllBuildingId.length === dataarr.length) {
+                    setSeriesData(dataarr);
+                    setSeriesLineData(dataarr);
+                }
+                setAllBuildingData(dataarr);
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -999,16 +855,29 @@ const ExploreByBuildings = () => {
         let arr = {};
         arr['date_from'] = startDate;
         arr['date_to'] = endDate;
+        arr['tz_info'] = timeZone;
         if (maxConValue > 0.01) {
             arr['consumption_range'] = {
                 gte: minConValue * 1000,
                 lte: maxConValue * 1000 + 1000,
             };
         }
-        if (maxPerValue > 10) {
+        if (selectedTab === 0 && showChangeDropdown === false) {
             arr['change'] = {
-                gte: minPerValue,
-                lte: maxPerValue,
+                gte: minPerValue-1,
+                lte: maxPerValue+1,
+            };
+        }
+        if (selectedTab === 1 && showChangeDropdown === false) {
+            arr['change'] = {
+                gte: minPerValuePos,
+                lte: maxPerValuePos+1,
+            };
+        }
+        if (selectedTab === 2 && showChangeDropdown === false) {
+            arr['change'] = {
+                gte: minPerValueNeg-1,
+                lte: maxPerValueNeg+1,
             };
         }
         if (maxSq_FtValue > 10) {
@@ -1042,6 +911,14 @@ const ExploreByBuildings = () => {
     const handleInputPer = (values) => {
         set_minPerValue(values[0]);
         set_maxPerValue(values[1]);
+    };
+    const handleInputPerPos = (values) => {
+        set_minPerValuePos(values[0]);
+        set_maxPerValuePos(values[1]);
+    };
+    const handleInputPerNeg = (values) => {
+        set_minPerValueNeg(values[0]);
+        set_maxPerValueNeg(values[1]);
     };
 
     const handleSq_FtInput = (values) => {
@@ -1094,25 +971,20 @@ const ExploreByBuildings = () => {
 
     const handleBuildingSearch = (e) => {
         const exploreDataFetch = async () => {
-                setIsExploreDataLoading(true);
-                let value={
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                }
-                await fetchExploreBuildingList(value,buildingSearchTxt)
+            setIsExploreDataLoading(true);
+            let value = apiRequestBody(startDate, endDate, timeZone);
+            await fetchExploreBuildingList(value, buildingSearchTxt)
                 .then((res) => {
-                
-                        let responseData = res.data;
-                        setExploreTableData(responseData);
-                        setTopEnergyConsumption(responseData[0].consumption.now);
-                        set_minConValue(0.0);
-                        set_maxConValue(parseInt(responseData[0].consumption.now / 1000));
-                        setIsExploreDataLoading(false);
-                    })
-                    .catch((error) => {
-                        setIsExploreDataLoading(false);
-                    });
+                    let responseData = res.data;
+                    setExploreTableData(responseData);
+                    setTopEnergyConsumption(responseData[0].consumption.now);
+                    set_minConValue(0.0);
+                    set_maxConValue(Math.round(responseData[0].consumption.now / 1000));
+                    setIsExploreDataLoading(false);
+                })
+                .catch((error) => {
+                    setIsExploreDataLoading(false);
+                });
         };
         exploreDataFetch();
     };
@@ -1159,7 +1031,7 @@ const ExploreByBuildings = () => {
     };
 
     useEffect(() => {
-        if (buildingSearchTxt === '' && entryPoint!=="entered") exploreDataFetch();
+        if (buildingSearchTxt === '' && entryPoint !== 'entered') exploreDataFetch();
     }, [buildingSearchTxt]);
     return (
         <>
@@ -1187,7 +1059,7 @@ const ExploreByBuildings = () => {
                                         target="_blank"
                                         data={getCSVLinkChartData()}>
                                         {' '}
-                                        <FontAwesomeIcon icon={faDownload} size="md" />
+                                        <FontAwesomeIcon icon={faDownload} size="sm" />
                                     </CSVLink>
                                 </Col>
                             </Row> */}
@@ -1220,7 +1092,7 @@ const ExploreByBuildings = () => {
                                 onClick={(e) => {
                                     handleBuildingSearch(e);
                                 }}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                             </button>
                         </div>
                         <div>
@@ -1228,6 +1100,7 @@ const ExploreByBuildings = () => {
                                 options={tableColumnOptions}
                                 value={selectedOptions}
                                 onChange={setSelectedOptions}
+                                disabled={isExploreDataLoading}
                                 labelledBy="Columns"
                                 className="column-filter-styling"
                                 valueRenderer={() => {
@@ -1250,8 +1123,7 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end"
-                                        onToggle={setDropdown}>
+                                    <Dropdown className="" align="end" onToggle={setDropdown}>
                                         <span className="" style={{ height: '30px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1268,7 +1140,7 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setConsumptionTxt('');
-                                                        setCloseTrigger("consumption");
+                                                        setCloseTrigger('consumption');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1277,9 +1149,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">
-                                                        kWh Used
-                                                    </a>
+                                                    <a className="pop-text">kWh Used</a>
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minConValue} />{' '}
@@ -1291,7 +1161,7 @@ const ExploreByBuildings = () => {
                                                         STEP={0.01}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={parseInt(topEnergyConsumption / 1000 + 0.5)}
+                                                        MAX={Math.round(topEnergyConsumption / 1000 + 0.5)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>
@@ -1325,18 +1195,18 @@ const ExploreByBuildings = () => {
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
                                                         setChangeTxt('');
-                                                        setCloseTrigger("change");
+                                                        setCloseTrigger('change');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
                                             </Dropdown.Toggle>
                                         </span>
-                                        <Dropdown.Menu className="dropdown-lg p-3">
+                                        {/* <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
                                                     <a className="pop-text">Threshold</a>
                                                 </div>
-                                                
+
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minPerValue} />{' '}
                                                     <input className="pop-inputbox" type="text" value={maxPerValue} />
@@ -1352,7 +1222,110 @@ const ExploreByBuildings = () => {
                                                     />
                                                 </div>
                                             </div>
-                                        </Dropdown.Menu>
+                                        </Dropdown.Menu> */}
+                                        <Dropdown.Menu className="dropdown-lg p-3">
+                                    <div style={{ margin: '1rem' }}>
+                                        <div>
+                                            <a className="pop-text">Threshold</a>
+                                        </div>
+                                        <div className="btn-group ml-2 mt-2 mb-2" role="group" aria-label="Basic example">
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        selectedTab === 0
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px', width: "5rem" }}
+                                                    onClick={() => {
+                                                        setSelectedTab(0);
+                                                    }}>
+                                                    All
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        selectedTab === 1
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderRadius: '0px', width: "5rem" }}
+                                                    onClick={() => { setSelectedTab(1); }}>
+                                                    <i className="uil uil-chart-down"></i>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        selectedTab === 2
+                                                            ? 'btn btn-primary d-offline custom-active-btn'
+                                                            : 'btn btn-white d-inline custom-inactive-btn'
+                                                    }
+                                                    style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px', width: "5rem" }}
+                                                    onClick={() => { setSelectedTab(2); }}>
+                                                    <i className="uil uil-arrow-growth"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {selectedTab === 0 ?
+                                            <div className="pop-inputbox-wrapper">
+                                                <input
+                                                    className="pop-inputbox"
+                                                    type="text"
+                                                    value={minPerValue}
+                                                />{' '}
+                                                <input
+                                                    className="pop-inputbox"
+                                                    type="text"
+                                                    value={maxPerValue}
+                                                />
+                                            </div>
+                                            : selectedTab === 1 ?
+                                                <div className="pop-inputbox-wrapper">
+                                                    <input
+                                                        className="pop-inputbox"
+                                                        type="text"
+                                                        value={minPerValuePos}
+                                                    />{' '}
+                                                    <input
+                                                        className="pop-inputbox"
+                                                        type="text"
+                                                        value={maxPerValuePos}
+                                                    />
+                                                </div>
+                                                : selectedTab === 2 ?
+                                                    <div className="pop-inputbox-wrapper">
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={minPerValueNeg}
+                                                        />{' '}
+                                                        <input
+                                                            className="pop-inputbox"
+                                                            type="text"
+                                                            value={maxPerValueNeg}
+                                                        />
+                                                    </div>
+                                                    : ""
+                                        }
+
+                                        {selectedTab === 0 ?
+                                            <div style={{ marginTop: '2rem' }}>
+                                                <SliderAll bottom={bottomPerChange} top={topPerChange} handleChange={handleInputPer} bottomPer={minPerValue} topPer={maxPerValue} />
+                                            </div> :
+                                            selectedTab === 1 ?
+                                                <div style={{ marginTop: '2rem' }}>
+                                                    <SliderPos bottom={bottomPosPerChange} top={topPosPerChange} handleChange={handleInputPerPos} bottomPer={minPerValuePos} topPer={maxPerValuePos} />
+                                                </div>
+                                                : selectedTab === 2 ?
+                                                    <div style={{ marginTop: '2rem' }}>
+                                                        <SliderNeg bottom={bottomNegPerChange} top={topNegPerChange} handleChange={handleInputPerNeg} bottomPer={minPerValueNeg} topPer={maxPerValueNeg} />
+                                                    </div>
+                                                    : ""}
+                                    </div>
+                                </Dropdown.Menu>
                                     </Dropdown>
                                 </>
                             );
@@ -1363,8 +1336,7 @@ const ExploreByBuildings = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="" align="end"
-                                        onToggle={setsqftDropdown}>
+                                    <Dropdown className="" align="end" onToggle={setsqftDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
@@ -1380,7 +1352,7 @@ const ExploreByBuildings = () => {
                                                     style={{ border: 'none', backgroundColor: 'white' }}
                                                     onClick={(e) => {
                                                         handleCloseFilter(e, el.value);
-                                                        setCloseTrigger("sq_ft");
+                                                        setCloseTrigger('sq_ft');
                                                     }}>
                                                     <i className="uil uil-multiply"></i>
                                                 </button>
@@ -1389,9 +1361,7 @@ const ExploreByBuildings = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a className="pop-text">
-                                                        Square Footage
-                                                    </a>
+                                                    <a className="pop-text">Square Footage</a>
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minSq_FtValue} />{' '}
@@ -1446,7 +1416,7 @@ const ExploreByBuildings = () => {
                                             <div>
                                                 <div className="m-1">
                                                     <div className="explore-search mr-2">
-                                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="sm" />
                                                         <input
                                                             className="search-box ml-2"
                                                             type="search"
@@ -1513,7 +1483,7 @@ const ExploreByBuildings = () => {
                         target="_blank"
                         data={getCSVLinkData()}>
                         {' '}
-                        <FontAwesomeIcon icon={faDownload} size="md" />
+                        <FontAwesomeIcon icon={faDownload} size="sm" />
                     </CSVLink>
                 </Col>
             </Row>

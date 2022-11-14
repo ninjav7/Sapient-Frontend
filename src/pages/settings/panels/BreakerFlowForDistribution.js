@@ -385,9 +385,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
             let params = `?building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${updateBreakers}${params}`, [breakerObj], { headers }).then((res) => {
                 setIsProcessing(false);
-                setTimeout(() => {
-                    triggerBreakerAPI();
-                }, 1000);
+                triggerBreakerAPI();
                 handleEditBreakerClose();
             });
         } catch (error) {
@@ -462,9 +460,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
                 .then((res) => {
                     setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
+                    triggerBreakerAPI();
                     handleEditBreakerClose();
                 });
         } catch (error) {
@@ -564,9 +560,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 })
                 .then((res) => {
                     setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
+                    triggerBreakerAPI();
                     handleEditBreakerClose();
                 });
         } catch (error) {

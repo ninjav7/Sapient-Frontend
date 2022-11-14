@@ -7,8 +7,7 @@ import UsageBarChart from './UsageBarChart';
 import HvacUsesCard from './HvacUsesCard';
 import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import axios from 'axios';
-import { BaseUrl, endUses, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
+import { fetchEndUsesType, fetchEndUsesEquipmentUsage, fetchEndUsesUsageChart } from '../endUses/services';
 import { percentageHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -17,7 +16,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUseType = () => {
@@ -334,132 +333,87 @@ const EndUseType = () => {
         let endUseTypeRequest = fetchEndUseType(endUseType);
 
         const endUsesDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setIsEndUsesDataFetched(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUses}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data;
-                        let requestEndUseType = fetchEndUseType(endUseType);
-                        let data = response.find((element) => element.device === requestEndUseType);
-                        setEndUsesData(data);
-                        setIsEndUsesDataFetched(false);
-                    });
-            } catch (error) {
-                setIsEndUsesDataFetched(false);
-            }
+            setIsEndUsesDataFetched(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
+                .then((res) => {
+                    let response = res.data;
+                    let requestEndUseType = fetchEndUseType(endUseType);
+                    let data = response.find((element) => element.device === requestEndUseType);
+                    setEndUsesData(data);
+                    setIsEndUsesDataFetched(false);
+                })
+                .catch((error) => {
+                    setIsEndUsesDataFetched(false);
+                });
         };
 
         const equipmentUsageDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setIsEquipTypeChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUsesEquipmentUsage}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let data = res.data;
-                        let equipTypeName = [];
-                        let equipTypeUsage = [];
+            setIsEquipTypeChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUsesEquipmentUsage(bldgId, endUseTypeRequest, payload)
+                .then((res) => {
+                    let data = res.data;
+                    let equipTypeName = [];
+                    let equipTypeUsage = [];
 
-                        data.map((record, index) => {
-                            equipTypeName.push(record.name);
-                            equipTypeUsage.push((record.consumption.now / 1000).toFixed(2));
-                        });
-
-                        let equipTypeConsumption = [
-                            {
-                                name: 'Usage by Equipment Type',
-                                data: equipTypeUsage,
-                            },
-                        ];
-
-                        let xaxisData = {
-                            categories: equipTypeName,
-                            axisBorder: {
-                                color: '#d6ddea',
-                            },
-                            axisTicks: {
-                                color: '#d6ddea',
-                            },
-                        };
-
-                        setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
-                        setEquipTypeChartData(equipTypeConsumption);
-                        setHvacUsageData(data);
-                        setIsEquipTypeChartLoading(false);
+                    data.map((record, index) => {
+                        equipTypeName.push(record.name);
+                        equipTypeUsage.push((record.consumption.now / 1000).toFixed(2));
                     });
-            } catch (error) {
-                setIsEquipTypeChartLoading(false);
-            }
+
+                    let equipTypeConsumption = [
+                        {
+                            name: 'Usage by Equipment Type',
+                            data: equipTypeUsage,
+                        },
+                    ];
+
+                    let xaxisData = {
+                        categories: equipTypeName,
+                        axisBorder: {
+                            color: '#d6ddea',
+                        },
+                        axisTicks: {
+                            color: '#d6ddea',
+                        },
+                    };
+
+                    setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
+                    setEquipTypeChartData(equipTypeConsumption);
+                    setHvacUsageData(data);
+                    setIsEquipTypeChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsEquipTypeChartLoading(false);
+                });
         };
 
         const plugUsageDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${endUsesUsageChart}${params}`,
+            setIsPlugLoadChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
+                .then((res) => {
+                    let data = res.data;
+                    let energyData = [
                         {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
+                            name: 'CONSUMPTION',
+                            data: [],
                         },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let data = res.data;
-                        let energyData = [
-                            {
-                                name: 'CONSUMPTION',
-                                data: [],
-                            },
-                        ];
-                        data.map((record) => {
-                            let obj = {
-                                x: record.date,
-                                y: parseInt(record.energy_consumption / 1000),
-                            };
-                            energyData[0].data.push(obj);
-                        });
-                        setEnergyChartData(energyData);
-                        setIsPlugLoadChartLoading(false);
+                    ];
+                    data.map((record) => {
+                        let obj = {
+                            x: record.date,
+                            y: parseInt(record.energy_consumption / 1000),
+                        };
+                        energyData[0].data.push(obj);
                     });
-            } catch (error) {
-                setIsPlugLoadChartLoading(false);
-            }
+                    setEnergyChartData(energyData);
+                    setIsPlugLoadChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsPlugLoadChartLoading(false);
+                });
         };
 
         endUsesDataFetch();

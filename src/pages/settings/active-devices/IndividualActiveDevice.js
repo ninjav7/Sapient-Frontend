@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
-import DeviceChartModel from '../DeviceChartModel';
+import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -29,6 +29,7 @@ import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import Select from 'react-select';
+import { apiRequestBody } from '../../../helpers/helpers';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -283,15 +284,9 @@ const IndividualActiveDevice = () => {
             setIsSensorChartLoading(true);
             let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
             await axios
-                .post(
-                    `${BaseUrl}${sensorGraphData}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     setDeviceData([]);
                     setSeriesData([]);

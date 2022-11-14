@@ -18,6 +18,7 @@ import { BaseUrl, builidingAlerts } from '../../services/Network';
 import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const BuildingPeakTable = () => {
     const records = [
@@ -390,15 +391,9 @@ const SelectPeakTable = () => {
                 };
                 let params = `?building_id=${1}`;
                 await axios
-                    .post(
-                        `${BaseUrl}${builidingAlerts}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         setBuildingAlerts(res.data);
                     });

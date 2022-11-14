@@ -39,7 +39,7 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
-import EquipChartModal from '../explore/EquipChartModal';
+import EquipChartModal from '../../pages/chartModal/EquipChartModal';
 import './style.css';
 
 const EquipmentTable = ({
@@ -774,7 +774,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}${params}`, {},{ headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
@@ -811,7 +811,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}${params}`,{}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
