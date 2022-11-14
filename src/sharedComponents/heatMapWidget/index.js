@@ -55,7 +55,7 @@ const HeatMapWidget = ({
 
                         <div className="mr-2">
                             {showRouteBtn ? (
-                                <div className="d-flex justify-content-between mr-2">
+                                <div className="d-flex justify-content-between mr-1">
                                     <Button
                                         size={Button.Sizes.sm}
                                         icon={<Download />}
