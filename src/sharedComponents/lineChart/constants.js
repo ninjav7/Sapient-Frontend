@@ -26,6 +26,7 @@ export const options = ({ data, dateRange, Highcharts }) => {
         chart: {
             type: 'line',
             zoomType: 'x',
+            marginBottom: 100,
 
             animation: {
                 duration: 1000,
@@ -37,7 +38,7 @@ export const options = ({ data, dateRange, Highcharts }) => {
         legend: {
             enabled: true,
             align: 'left',
-            bottom:40,
+            bottom: 0,
             useHTML: true,
             labelFormatter: function () {
                 let color = hexToRgb(this.color);
