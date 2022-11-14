@@ -18,7 +18,9 @@ import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
-import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import { useHistory } from 'react-router-dom';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 
 const EndUsesPage = () => {
     const cookies = new Cookies();
@@ -182,6 +184,19 @@ const EndUsesPage = () => {
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
 
+    const history = useHistory();
+
+    const fetchTrendType = (now, old) => {
+        return now >= old ? TRENDS_BADGE_TYPES.UPWARD_TREND : TRENDS_BADGE_TYPES.DOWNWARD_TREND;
+    };
+
+    const redirectToEndUse = (endUseType) => {
+        let endUse = endUseType.toLowerCase();
+        history.push({
+            pathname: `/energy/end-uses/${endUse}/${bldgId}`,
+        });
+    };
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -214,64 +229,96 @@ const EndUsesPage = () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUses(bldgId, payload)
                 .then((res) => {
-                    let response = res.data;
-                    // let data = [];
-                    // response.forEach((record, index) => {
-                    //     if (index === 0) {
-                    //         record.color = '#66A4CE';
-                    //     }
-                    //     if (index === 1) {
-                    //         record.color = '#FBE384';
-                    //     }
-                    //     if (index === 2) {
-                    //         record.color = '#59BAA4';
-                    //     }
-                    //     if (index === 3) {
-                    //         record.color = '#80E1D9';
-                    //     }
-                    //     if (index === 4) {
-                    //         record.color = '#847CB5';
-                    //     }
-                    //     data.push(record);
-                    // });
-                    // setEndUsesData(data);
+                    let response = res?.data;
+                    let data = [];
+                    response.forEach((record, index) => {
+                        if (index === 0) {
+                            record.color = '#66A4CE';
+                        }
+                        if (index === 1) {
+                            record.color = '#FBE384';
+                        }
+                        if (index === 2) {
+                            record.color = '#59BAA4';
+                        }
+                        if (index === 3) {
+                            record.color = '#80E1D9';
+                        }
+                        if (index === 4) {
+                            record.color = '#847CB5';
+                        }
+                        data.push(record);
+                    });
+                    setEndUsesData(data);
 
                     let endUsesList = [];
                     response.forEach((record, index) => {
                         let obj = {
                             title: record?.device,
-                            viewHandler: alert,
+                            viewHandler: () => {
+                                redirectToEndUse(record?.device);
+                            },
                             items: [
                                 {
                                     title: 'Total Consumption',
-                                    value: Math.round(record?.energy_consumption?.now / 1000),
+                                    value: formatConsumptionValue(
+                                        Math.round(record?.energy_consumption?.now / 1000),
+                                        0
+                                    ),
                                     unit: UNITS.KWH,
                                     trends: [
                                         {
-                                            trendValue: 22,
-                                            trendType: TrendsBadge.Type.DOWNWARD_TREND,
+                                            trendValue: percentageHandler(
+                                                record?.energy_consumption?.now,
+                                                record?.energy_consumption?.old
+                                            ),
+                                            trendType: fetchTrendType(
+                                                record?.energy_consumption?.now,
+                                                record?.energy_consumption?.old
+                                            ),
                                             text: 'since last period',
                                         },
                                         {
-                                            trendValue: 6,
-                                            trendType: TrendsBadge.Type.UPWARD_TREND,
+                                            trendValue: percentageHandler(
+                                                record?.energy_consumption?.now,
+                                                record?.energy_consumption?.yearly
+                                            ),
+                                            trendType: fetchTrendType(
+                                                record?.energy_consumption?.now,
+                                                record?.energy_consumption?.yearly
+                                            ),
                                             text: 'from same period last year',
                                         },
                                     ],
                                 },
                                 {
                                     title: 'After-Hours Consumption',
-                                    value: Math.round(record?.after_hours_energy_consumption?.now / 1000),
+                                    value: formatConsumptionValue(
+                                        Math.round(record?.after_hours_energy_consumption?.now / 1000),
+                                        0
+                                    ),
                                     unit: UNITS.KWH,
                                     trends: [
                                         {
-                                            trendValue: 33,
-                                            trendType: TrendsBadge.Type.DOWNWARD_TREND,
+                                            trendValue: percentageHandler(
+                                                record?.after_hours_energy_consumption?.now,
+                                                record?.after_hours_energy_consumption?.old
+                                            ),
+                                            trendType: fetchTrendType(
+                                                record?.after_hours_energy_consumption?.now,
+                                                record?.after_hours_energy_consumption?.old
+                                            ),
                                             text: 'since last period',
                                         },
                                         {
-                                            trendValue: 26,
-                                            trendType: TrendsBadge.Type.UPWARD_TREND,
+                                            trendValue: percentageHandler(
+                                                record?.after_hours_energy_consumption?.now,
+                                                record?.after_hours_energy_consumption?.yearly
+                                            ),
+                                            trendType: fetchTrendType(
+                                                record?.after_hours_energy_consumption?.now,
+                                                record?.after_hours_energy_consumption?.yearly
+                                            ),
                                             text: 'from same period last year',
                                         },
                                     ],
@@ -280,7 +327,6 @@ const EndUsesPage = () => {
                         };
                         endUsesList.push(obj);
                     });
-                    console.log('SSR response => ', endUsesList);
                     setTopEndUsesData(endUsesList);
                     setIsEndUsesDataFetched(false);
                 })
@@ -375,66 +421,6 @@ const EndUsesPage = () => {
                     data={topEndUsesData}
                 />
             </Row>
-
-            {/* <Row style={{ marginLeft: '0.5px', marginRight: '0px', marginleft: '0px' }}>
-                <div className="card-body">
-                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                        Top End Uses by Usage
-                    </h6>
-                    <h6 className="card-subtitle mb-2 custom-subtitle-style">
-                        Click explore to see more energy usage details.
-                    </h6>
-
-                    {isEndUsesDataFetched ? (
-                        <Row className="mt-4 energy-container-loader ml-1">
-                            <Skeleton count={3} color="#f9fafb" height={100} />
-                        </Row>
-                    ) : (
-                        <Row className="mt-4 energy-container">
-                            {endUsesData?.slice(0, 5).map((usage, index) => {
-                                return (
-                                    <div className="usage-card">
-                                        <EndUsesCard
-                                            bldgId={bldgId}
-                                            usage={usage}
-                                            lastPeriodPerTotalHrs={percentageHandler(
-                                                usage?.energy_consumption?.now,
-                                                usage?.energy_consumption?.old
-                                            )}
-                                            lastPeriodPerTotalHrsNormal={
-                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.old
-                                            }
-                                            lastYearPerTotalHrs={percentageHandler(
-                                                usage?.energy_consumption?.now,
-                                                usage?.energy_consumption?.yearly
-                                            )}
-                                            lastYearPerTotalHrsNormal={
-                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.yearly
-                                            }
-                                            lastPeriodPerAfterHrs={percentageHandler(
-                                                usage?.after_hours_energy_consumption?.now,
-                                                usage?.after_hours_energy_consumption?.old
-                                            )}
-                                            lastPeriodPerAfterHrsNormal={
-                                                usage?.after_hours_energy_consumption?.now >=
-                                                usage?.after_hours_energy_consumption?.old
-                                            }
-                                            lastYearPerAfterHrs={percentageHandler(
-                                                usage?.after_hours_energy_consumption?.now,
-                                                usage?.after_hours_energy_consumption?.yearly
-                                            )}
-                                            lastYearPerAfterHrsNormal={
-                                                usage?.after_hours_energy_consumption?.now >=
-                                                usage?.after_hours_energy_consumption?.yearly
-                                            }
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </Row>
-                    )}
-                </div>
-            </Row> */}
         </React.Fragment>
     );
 };
