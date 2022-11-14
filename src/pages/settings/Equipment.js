@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import {
     BaseUrl,
@@ -24,10 +24,43 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MultiSelect } from 'react-multi-select-component';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
+import Input from '../../sharedComponents/form/input/Input';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+import Switch from 'react-switch';
+import LineChart from '../charts/LineChart';
+import Button from '../../sharedComponents/button/Button';
+import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
+
+import 'react-datepicker/dist/react-datepicker.css';
+import { useHistory, useParams } from 'react-router-dom';
+import Select from '../../sharedComponents/form/select';
+
+import _ from 'lodash';
+
+import { timePicker15MinutesIntervalOption } from '../../constants/time';
+
+import {
+    updatePlugRuleRequest,
+    fetchPlugRuleDetails,
+    deletePlugRuleRequest,
+    getGraphDataRequest,
+    getListSensorsForBuildingsRequest,
+    linkSensorsToRuleRequest,
+    listLinkSocketRulesRequest,
+    unlinkSocketRequest,
+    getUnlinkedSocketRules,
+    getFiltersForSensorsRequest,
+} from '../../services/plugRules';
+import { ceil } from 'lodash';
+import { Badge } from '../../sharedComponents/badge';
+import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+
 import {
     allEquipmentDataGlobal,
     equipmentData,
@@ -37,10 +70,49 @@ import {
 } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
 import EquipChartModal from '../../pages/chartModal/EquipChartModal';
 import './style.css';
+import { getEqupmentWithSearch, deleteEquipmentRequest } from '../../services/equipment';
+
+const SkeletonLoading = () => (
+    <SkeletonTheme color="#202020" height={35}>
+        <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+        </tr>
+    </SkeletonTheme>
+);
 
 const EquipmentTable = ({
     equipmentData,
@@ -125,14 +197,6 @@ const EquipmentTable = ({
             setLastDataOrder(false);
             setNameOrder(false);
         }
-        // if (columnName === 'hardware_version') {
-        //     setEquipTypeOrder(false);
-        //     setLocationOrder(false);
-        //     setTagsOrder(false);
-        //     setSensorOrder(false);
-        //     setLastDataOrder(false);
-        //     setDeviceIdOrder(false);
-        // }
         equipmentDataWithFilter(order, columnName);
     };
 
@@ -668,23 +732,20 @@ const Equipment = () => {
         }
     }, [locationData]);
 
+    const isLoadingRef = useRef(false);
+
     const handleSearch = async () => {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
+        setIsEquipDataFetched(true);
+        await getEqupmentWithSearch(bldgId, equipSearch, pageSize, pageNo)
+            .then((res) => {
                 let response = res.data;
+                console.log('MYRESPINSE', res);
                 setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
             });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
     };
 
     const handleChange = (key, value) => {
@@ -774,7 +835,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}${params}`, {},{ headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
@@ -811,7 +872,7 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}${params}`,{}, { headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentData(responseData.data);
@@ -835,11 +896,184 @@ const Equipment = () => {
             setIsEquipDataFetched(false);
         }
     };
+    const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
+    const [selectedIds, setSelectedIds] = useState([]);
+
+    const renderLocation = useCallback((row, childrenTemplate) => {
+        const location = [row.installed_floor, row.installed_space];
+
+        return childrenTemplate(location.join(' - '));
+    }, []);
+
+    const [skeletonLoading, setSkeletonLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [checkedAll, setCheckedAll] = useState(false);
+    const [sortBy, setSortBy] = useState({});
+    const [totalItems, setTotalItems] = useState(0);
+    const [totalItemsSearched, setTotalItemsSearched] = useState(0);
+    const [sensorsIdNow, setSensorIdNow] = useState('');
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
     const [allEqupimentDataNow, setAllEqupimentDataNow] = useAtom(allEquipmentDataGlobal);
     const [searchText, setSearchText] = useState('');
 
+    // useEffect(() => {
+    //     (async () => {
+    //         isLoadingRef.current = true;
+    //         const filters = await getFiltersForSensorsRequest({
+    //             activeBuildingId,
+    //             macTypeFilterString,
+    //             equpimentTypeFilterString,
+    //             sensorTypeFilterString,
+    //             floorTypeFilterString,
+    //             spaceTypeFilterString,
+    //             spaceTypeTypeFilterString,
+    //         });
+
+    //         filters.data.forEach((filterOptions) => {
+    //             const filterOptionsFetched = [
+    //                 {
+    //                     label: 'MAC Address',
+    //                     value: 'macAddresses',
+    //                     placeholder: 'All Mac addresses',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.mac_address.map((filterItem) => ({
+    //                         value: filterItem,
+    //                         label: filterItem,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setMacTypeFilterString, options),
+    //                     onDelete: () => {
+    //                         setSelectedOptionMac([]);
+    //                         setMacTypeFilterString('');
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Equipment Type',
+    //                     value: 'equipmentType',
+    //                     placeholder: 'All Equipment Types',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.equipment_type.map((filterItem) => ({
+    //                         value: filterItem.equipment_type_id,
+    //                         label: filterItem.equipment_type_name,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+    //                     onDelete: () => {
+    //                         setSelectedOption([]);
+    //                         setEqupimentTypeFilterString('');
+    //                     },
+    //                 },
+    //                 {
+    //                     label: 'Sensors',
+    //                     value: 'sensors',
+    //                     placeholder: 'All Sensors',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+    //                         value: filterItem,
+    //                         label: filterItem,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+    //                     onDelete: setSensorTypeFilterString(''),
+    //                 },
+    //                 {
+    //                     label: 'Floor',
+    //                     value: 'floor',
+    //                     placeholder: 'All Floors',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.installed_floor.map((filterItem) => ({
+    //                         value: filterItem.floor_id,
+    //                         label: filterItem.floor_name,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+    //                     onDelete: () => setFloorTypeFilterString(''),
+    //                 },
+    //                 {
+    //                     label: 'Space',
+    //                     value: 'space',
+    //                     placeholder: 'All Spaces',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.installed_space.map((filterItem) => ({
+    //                         value: filterItem.space_id,
+    //                         label: filterItem.space_name,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+    //                     onDelete: () => setSpaceTypeFilterString(''),
+    //                 },
+    //                 {
+    //                     label: 'Space Type',
+    //                     value: 'spaceType',
+    //                     placeholder: 'All Space Types',
+    //                     filterType: FILTER_TYPES.MULTISELECT,
+    //                     filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
+    //                         value: filterItem.space_type_id,
+    //                         label: filterItem.space_type_name,
+    //                     })),
+    //                     onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+    //                     onDelete: () => setSpaceTypeTypeFilterString(''),
+    //                 },
+    //             ];
+
+    //             setFilterOptions(filterOptionsFetched);
+    //         });
+
+    //         isLoadingRef.current = false;
+    //     })();
+    // }, [
+    //     activeBuildingId,
+    //     macTypeFilterString,
+    //     equpimentTypeFilterString,
+    //     sensorTypeFilterString,
+    //     locationTypeFilterString,
+    //     floorTypeFilterString,
+    //     spaceTypeFilterString,
+    //     spaceTypeTypeFilterString,
+    // ]);
+
+    const currentRowSearched = () => {
+        // if (selectedRuleFilter === 0) {
+        //     return allSearchData;
+        // }
+        // if (selectedRuleFilter === 1) {
+        //     //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
+        //     // and show when user selected but switched page
+        //     return selectedIds.reduce((acc, id) => {
+        //         const foundSelectedSensor = allSearchData.find((sensor) => sensor.id === id);
+        //         if (foundSelectedSensor) {
+        //             acc.push(foundSelectedSensor);
+        //         }
+        //         return acc;
+        //     }, []);
+        // }
+        // return allSearchData.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+    };
+    const currentRow = () => {
+        // if (selectedRuleFilter === 0) {
+        //     return allSensors;
+        // }
+        // if (selectedRuleFilter === 1) {
+        //     //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
+        //     // and show when user selected but switched page
+        //     return selectedIds.reduce((acc, id) => {
+        //         const foundSelectedSensor = allSensors.find((sensor) => sensor.id === id);
+        //         if (foundSelectedSensor) {
+        //             acc.push(foundSelectedSensor);
+        //         }
+        //         return acc;
+        //     }, []);
+        // }
+        // return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+    };
+
+    const renderEquipType = useCallback((row) => {
+        return <Badge text={<span className="gray-950">{row.status}</span>} />;
+    }, []);
+
+    const renderAssignRule = useCallback(
+        (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
+        []
+    );
+
+    const handleRuleStateChange = (value, rule) => {};
     const fetchEquipmentData = async () => {
         try {
             setIsEquipDataFetched(true);
@@ -978,19 +1212,26 @@ const Equipment = () => {
     const [processdelete, setProcessdelete] = useState(false);
     const [equipmentIdData, setEquipmentIdData] = useState('');
 
+    const renderTagCell = (row) => {
+        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
+    };
+
+    const renderLastUsedCell = (row, childrenTemplate) => {
+        const { last_used_data } = row;
+
+        return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
+    };
     const deleteEquipmentFunc = async () => {
         setProcessdelete(true);
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        let params = `?equipment_id=${equipmentIdData}&building_id=${bldgId}`;
-        await axios.delete(`${BaseUrl}${deleteEquipment}${params}`, { headers }).then(() => {
-            setProcessdelete(false);
-            fetchEquipmentData();
-            setIsDelete(false);
-        });
+        await deleteEquipmentRequest(bldgId, equipmentIdData)
+            .then((res) => {
+                setProcessdelete(false);
+                fetchEquipmentData();
+                setIsDelete(false);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
     };
 
     return (
@@ -1101,32 +1342,112 @@ const Equipment = () => {
                     </div>
                 </Col>
             </Row>
-
+            {console.log('generalEquipmentData534534', generalEquipmentData)}
             <Row>
                 <Col lg={12}>
                     {selectedTab === 0 && (
-                        <EquipmentTable
-                            equipmentData={generalEquipmentData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                            selectedOptions={selectedOptions}
-                            equipmentDataWithFilter={equipmentDataWithFilter}
-                            locationData={locationData}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
+                        <DataTableWidget
+                            isLoading={isLoadingRef.current}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="sockets-plug-rules"
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
+                            buttonGroupFilterOptions={[
+                                { label: 'All' },
+                                { label: 'Selected' },
+                                { label: 'Unselected' },
+                            ]}
+                            onStatus={setSelectedRuleFilter}
+                            rows={generalEquipmentData}
+                            searchResultRows={currentRowSearched()}
+                            filterOptions={filterOptions}
+                            onDeleteRow={(event, id) => alert('Delete ' + id)}
+                            onEditRow={(record, id) => {
+                                setEquipmentFilter({
+                                    equipment_id: record?.equipments_id,
+                                    equipment_name: record?.equipments_name,
+                                });
+                                handleChartOpen();
+                            }}
+                            headers={[
+                                {
+                                    name: 'Status',
+                                    accessor: 'status',
+                                    callbackValue: renderEquipType,
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'Name',
+                                    accessor: 'equipments_name',
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'Equipment Type',
+                                    accessor: 'equipments_type',
+                                },
+                                {
+                                    name: 'Location',
+                                    accessor: 'location',
+                                    // callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Sensors',
+                                    accessor: 'sensor_count',
+                                },
+                                {
+                                    name: 'Last Data',
+                                    accessor: 'last_data',
+                                    // callbackValue: renderAssignRule,
+                                },
+                                {
+                                    name: 'Device ID',
+                                    accessor: 'device_id',
+                                    // callbackValue: renderTagCell,
+                                },
+                            ]}
+                            onCheckboxRow={alert}
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="vehicle1"
+                                    name="vehicle1"
+                                    checked={checkedAll}
+                                    onChange={() => {
+                                        setCheckedAll(!checkedAll);
+                                    }}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="socket_rule"
+                                    name="socket_rule"
+                                    checked={selectedIds.includes(record?.id) || checkedAll}
+                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
+                                    onChange={(e) => {
+                                        setSensorIdNow(record?.id);
+                                        handleRuleStateChange(e.target.value, record);
+                                    }}
+                                />
+                            )}
+                            onPageSize={setPageSize}
+                            onChangePage={setPageNo}
                             pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            pageNo={pageNo}
-                            setPageNo={setPageNo}
-                            setIsDelete={setIsDelete}
-                            setEquipmentFilter={setEquipmentFilter}
-                            handleChartOpen={handleChartOpen}
-                            setEquipmentIdData={setEquipmentIdData}
-                            // formValidation={formValidation}
-                            // setFormValidation={setFormValidation}
+                            currentPage={pageNo}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
+                                if (selectedRuleFilter === 0) {
+                                    return totalItems;
+                                }
+
+                                return 0;
+                            })()}
                         />
                     )}
                     {selectedTab === 1 && (
