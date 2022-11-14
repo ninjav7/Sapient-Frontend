@@ -54,66 +54,57 @@ const DropDownBase = ({
         isOpen: isOpen,
     });
 
-    const triggerButtonEL = typeof triggerButton === 'function' ? triggerButton({ isOpen }) : triggerButton;
-
-    const dropdownData = isLink
-        ? options
-              .filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(({ link, label, active, className, icon, key }) => {
-                  return (
-                      <Link
-                          key={_.uniqueId('drop-down-button-link')}
-                          to={link}
-                          className={cx('drop-down-button-list-item', {
-                              active,
-                              [className]: !!className,
-                          })}>
-                          {icon &&
-                              React.cloneElement(icon, {
-                                  ...icon.props,
-                                  className: `${icon.props.className} drop-down-button-list-item-icon`,
-                              })}
-                          <Typography.Body size={Typography.Sizes.lg}>{label}</Typography.Body>
-                          {key && (
-                              <Typography.Body className="ml-auto mr-0 flex-shrink-0" size={Typography.Sizes.xs}>
-                                  {key}
-                              </Typography.Body>
-                          )}
-                      </Link>
-                  );
-              })
-        : options
-              .filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map(({ name, label, active, className, icon, key }) => {
-                  return (
-                      <div
-                          key={_.uniqueId('drop-down-button-link')}
-                          className={cx('drop-down-button-list-item', {
-                              active,
-                              [className]: !!className,
-                          })}
-                          onClick={() => handleClick(name)}>
-                          {icon &&
-                              React.cloneElement(icon, {
-                                  ...icon.props,
-                                  className: `${icon.props.className} drop-down-button-list-item-icon`,
-                              })}
-                          <Typography.Body size={Typography.Sizes.lg}>{label}</Typography.Body>
-                          {key && (
-                              <Typography.Body className="ml-auto mr-0 flex-shrink-0" size={Typography.Sizes.xs}>
-                                  {key}
-                              </Typography.Body>
-                          )}
-                      </div>
-                  );
-              });
+    const dropdownItems = options
+        .filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase()))
+        .map(({ link, name, label, active, className, icon, key }) => {
+            const dropdownItemContent = (
+                <>
+                    {icon &&
+                        React.cloneElement(icon, {
+                            ...icon.props,
+                            className: `${icon.props.className} drop-down-button-list-item-icon`,
+                        })}
+                    <Typography.Body size={Typography.Sizes.lg}>{label}</Typography.Body>
+                    {key && (
+                        <Typography.Body className="ml-auto mr-0 flex-shrink-0" size={Typography.Sizes.xs}>
+                            {key}
+                        </Typography.Body>
+                    )}
+                </>
+            );
+            return (
+                <>
+                    {isLink ? (
+                        <Link
+                            key={_.uniqueId('drop-down-button-link')}
+                            to={link}
+                            className={cx('drop-down-button-list-item', {
+                                active,
+                                [className]: !!className,
+                            })}>
+                            {dropdownItemContent}
+                        </Link>
+                    ) : (
+                        <div
+                            key={_.uniqueId('drop-down-button-link')}
+                            className={cx('drop-down-button-list-item', {
+                                active,
+                                [className]: !!className,
+                            })}
+                            onClick={() => handleClick(name)}>
+                            {dropdownItemContent}
+                        </div>
+                    )}
+                </>
+            );
+        });
 
     return (
         <div className={dropDownClasses}>
             <DropDown
                 placement={placement}
                 isOpen={isOpen}
-                triggerButton={React.cloneElement(triggerButtonEL, { ...triggerButtonEL.props })}
+                triggerButton={React.cloneElement(triggerButton, { ...triggerButton.props })}
                 onOpen={setOpen}
                 onClose={setClose}>
                 <div className={cx('drop-down-button-menu', classNameMenu)}>
@@ -124,8 +115,8 @@ const DropDownBase = ({
                     )}
                     {withSearch && <SearchField onChange={handleSearchChange} value={searchQuery} />}
                     <nav>
-                        {dropdownData.length ? (
-                            dropdownData
+                        {dropdownItems.length ? (
+                            dropdownItems
                         ) : children ? (
                             children
                         ) : (

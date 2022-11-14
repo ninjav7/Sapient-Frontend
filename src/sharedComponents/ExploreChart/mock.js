@@ -1,23 +1,3 @@
-export const colorPalette = [
-    '#B863CF',
-    '#5E94E4',
-    '#66A4CE',
-    '#FBE384',
-    '#59BAA4',
-    '#59F0FA',
-    '#BAB7DB',
-    '#44B87F',
-    '#E2AD5B',
-    '#E858A6',
-    '#FC9337',
-    '#8277CA',
-    '#45E6D9',
-    '#E55B5B',
-];
-const prepareDataWithDateRange = (startDate,endDate,data)=>{
-
-
-}
 export const mockedData = [
     {
         x: new Date('2022-10-1').getTime(),
@@ -55,7 +35,7 @@ export const mockedData = [
         x: new Date('2022-10-9').getTime(),
         y: 20000,
     },
-]
+];
 
 export const mockedData2 = [
     {

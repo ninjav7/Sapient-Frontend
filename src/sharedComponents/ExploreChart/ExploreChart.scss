@@ -1,22 +1,46 @@
 @import '../assets/scss/stories.scss';
+@import '../../assets/scss/colors';
 
 .explore-chart-wrapper {
-    border: 1px solid #eaecf0;
-    padding: 16px;
-    border-radius: 8px;
+    border: 1px solid $primary-gray-200;
+    padding: 1rem;
+    border-radius: 0.5rem;
 
     .chart-header {
-        padding-left: 10px;
+        padding-left: 0.625rem;
         display: flex;
         justify-content: space-between;
         .button-wrapper button {
-            padding: 0.75rem;
-            margin-right: 10px;
+            padding: 0.625rem 0.5625rem;
+            margin-right: 0.625rem;
         }
     }
-    .highcharts-axis-labels text{
-        color: #626B7F!important;
+    .highcharts-axis-labels text {
+        color: $primary-gray-550 !important;
         font-weight: 600;
-        font-size: 12px!important;
+        font-size: 0.75rem !important;
+    }
+    .legend-text text tspan {
+        cursor: pointer;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        text-transform: capitalize;
+    }
+    .chart-legend-wrapper {
+        display: flex;
+        color: $primary-gray-550 !important;
+        fill: $primary-gray-550 !important;
+        align-items: center;
+        justify-content: center;
+        .chart-legend-symbol {
+            width: 0.5rem;
+            height: 0.5rem;
+            display: flex;
+            border-radius: 50%;
+            margin-right: 0.25rem;
+        }
+    }
+    .highcharts-legend g path {
+        display: none;
     }
 }

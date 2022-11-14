@@ -7,7 +7,6 @@ import DropDownBase from './DropDownBase';
 import { ReactComponent as MoreVerticalSVG } from '../../assets/icons/more-vertical.svg';
 
 const TriggerButton = forwardRef((props, ref) => {
-    console.log("PROPS",props);
     return(
         <Button
             iconAlignment={Button.IconAlignment.right}

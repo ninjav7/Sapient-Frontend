@@ -152,7 +152,6 @@ const BarChartWidget = ({
             },
         },
     });
-    console.log('DATA423',series);
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(startEndDayCount, timeZone);

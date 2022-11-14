@@ -1,134 +1,33 @@
 import React, { useRef } from 'react';
 import './ExploreChart.scss';
-import { colorPalette } from './utils';
 import Highcharts from 'highcharts/highstock';
 
 import HighchartsReact from 'highcharts-react-official';
 import Typography from '../typography';
-import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
+import { options } from './constants';
+import { downloadOptions } from '../constants';
+import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
-require('highcharts/modules/exporting')(Highcharts);
-require('highcharts/modules/export-data')(Highcharts);
+import HighchartsExporting from 'highcharts/modules/exporting';
+import HighchartsData from 'highcharts/modules/export-data';
+
+HighchartsExporting(Highcharts);
+HighchartsData(Highcharts);
 
 const ExploreChart = (props) => {
     const chartComponentRef = useRef(null);
 
-    const { data, title, subTitle } = props;
-
-    const preparedData = data.map((el, index) => {
-        return {
-            type: 'line',
-            color: colorPalette[index],
-            data: el,
-            lineWidth: 2,
-            showInLegend: true,
-        };
-    });
-
-    const options = {
-        chart: {
-            type: 'line',
-            alignTicks: false,
-            animation: {
-                duration: 1000,
-            },
-        },
-        credits: {
-            enabled: false,
-        },
-        legend: {
-            enabled: true,
-            floating: true,
-            align: 'right',
-            verticalAlign: 'top',
-            y: 0,
-            x: 0,
-            labelFormat: '<span style="color:{color}">{name}</span><br/>',
-            borderWidth: 0,
-            itemStyle: {
-                color: '#333333',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 'normal',
-                textOverflow: 'ellipsis',
-                textTransform: 'capitalize',
-            },
-        },
-        rangeSelector: {
-            enabled: false,
-        },
-        navigator: {
-            enabled: true,
-            adaptToUpdatedData: true,
-        },
-        exporting: {
-            enabled: false,
-        },
-        plotOptions: {
-            series: {
-                showInNavigator: true,
-                gapSize: 6,
-            },
-        },
-        tooltip: {
-            style: {
-                fontWeight: 'normal',
-            },
-            snap: 0,
-            backgroundColor: 'white',
-            borderRadius: 8,
-            borderColor: '#8098F9',
-            useHTML: true,
-            padding: 10,
-            border: 1,
-            animation: true,
-            split: false,
-            shared: true,
-        },
-        rangeSelector: {
-            enabled: false,
-        },
-
-        scrollbar: {
-            enabled: false,
-        },
-
-        xAxis: {
-            lineWidth: 1,
-            gridLineWidth: 1,
-            alternateGridColor: '#F2F4F7',
-            type: 'datetime',
-            labels: {
-                format: '{value: %e %b %Y}',
-            },
-        },
-        yAxis: {
-            series: [...preparedData],
-            gridLineWidth: 1,
-            lineWidth: 1,
-            opposite: false,
-            accessibility: {
-                enabled: true,
-            },
-            labels: {
-                format: '{value}',
-            },
-        },
-        time: {
-            useUTC: false,
-        },
-        series: [...preparedData],
-    };
+    const { data, title, subTitle, dateRange } = props;
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
-            case 'downloadSVG':
+            case downloadOptions.downloadSVG:
                 downloadSVG();
                 break;
-            case 'downloadPNG':
+            case downloadOptions.downloadPNG:
                 downloadPNG();
                 break;
-            case 'downloadCSV':
+            case downloadOptions.downloadCSV:
                 downloadCSV();
                 break;
             default:
@@ -152,29 +51,27 @@ const ExploreChart = (props) => {
         <div className="explore-chart-wrapper">
             <div className="chart-header">
                 <div>
-                    <Typography size={Typography.Sizes.sm} fontWeight={Typography.Types.SemiBold}>
-                        {title}
-                    </Typography>
+                    <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
                 <div>
                     <DropDownIcon
                         options={[
                             {
-                                name: 'downloadSVG',
+                                name: downloadOptions.downloadSVG,
                                 label: 'Download SVG',
                             },
                             {
-                                name: 'downloadPNG',
+                                name: downloadOptions.downloadPNG,
                                 label: 'Download PNG',
                             },
                             {
-                                name: 'downloadCSV',
+                                name: downloadOptions.downloadCSV,
                                 label: 'Download CSV',
                             },
                         ]}
                         label={null}
-                        triggerButtonIcon={<BurgerIcon />}
+                        triggerButtonIcon={<BurgerSVG />}
                         handleClick={(name) => {
                             handleDropDownOptionClicked(name);
                         }}
@@ -184,7 +81,7 @@ const ExploreChart = (props) => {
             <HighchartsReact
                 highcharts={Highcharts}
                 constructorType={'stockChart'}
-                options={options}
+                options={options({ data, dateRange })}
                 ref={chartComponentRef}
             />
         </div>

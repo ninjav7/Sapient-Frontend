@@ -11,7 +11,7 @@ const TriggerButton = forwardRef((props, ref) => (
         label={props.label}
         type={Button.Type.secondaryGrey}
         size={Button.Sizes.md}
-        // icon={props.icon}
+        icon={<CaretDownIcon className="caret-down" />}
         buttonRef={ref}
         {...props}
     />
