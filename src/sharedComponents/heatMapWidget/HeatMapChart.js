@@ -3,9 +3,9 @@ import Chart from 'react-apexcharts';
 import PropTypes from 'prop-types';
 import './style.scss';
 
-const HeatMapChart = ({ options, series = [], height = 150, className = '' }) => {
+const HeatMapChart = ({ options, series = [], height = 150 }) => {
     return (
-        <div className={`${className}`}>
+        <div>
             <Chart series={series} options={options} type="heatmap" height={height} className="heatmap-chart-widget" />
         </div>
     );

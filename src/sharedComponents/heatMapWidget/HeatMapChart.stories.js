@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import HeatMapWidget from './index';
-import { HeatMapChartOpts, HeatMapSeriesData, heatMapChartHeight } from './utils';
+import { HeatMapSeriesData, heatMapChartHeight, heatMapChartCategories } from './mocks';
 
 export default {
     title: 'Widgets/HeatMapChartWidget',
@@ -14,9 +14,12 @@ export const Default = () => {
             <HeatMapWidget
                 title={'Chart title'}
                 subtitle={'Chart subtitle'}
-                options={HeatMapChartOpts}
                 series={HeatMapSeriesData}
                 height={heatMapChartHeight}
+                className=""
+                labelsPosition={'bottom'}
+                toolTipUnit={'kWh'}
+                toolTipTitle={'Energy Usage by Hour'}
             />
         </BrowserRouter>
     );
@@ -25,6 +28,9 @@ export const Default = () => {
 Default.args = {
     title: 'Chart title',
     subtitle: 'Chart subtitle',
-    options: HeatMapChartOpts,
     series: HeatMapSeriesData,
+    height: 125,
+    labelsPosition: 'bottom',
+    toolTipUnit: 'kWh',
+    toolTipTitle: 'Energy Usage by Hou',
 };
