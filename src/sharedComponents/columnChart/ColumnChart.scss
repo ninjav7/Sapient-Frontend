@@ -1,0 +1,67 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.сolumn-сhart {
+    &-wrapper {
+        @extend .borders-base;
+        overflow: hidden;
+        padding: 1rem 1rem 5px 1rem;
+        position: relative;
+    }
+    &-download-button {
+        padding: 0 !important;
+        height: 36px;
+        width: 36px;
+        justify-content: center;
+        &.button svg path {
+            fill: $primary-gray-800;
+        }
+    }
+
+    &-more-detail {
+        position: absolute;
+        bottom: 1rem;
+        right: 0.5rem;
+    }
+}
+
+// #container {
+//   height: 400px;
+//   max-width: 800px;
+//   margin: 0 auto;
+// }
+
+// .highcharts-tooltip-box {
+//   fill: black;
+//   fill-opacity: 0.6;
+//   stroke-width: 0;
+// }
+
+// .highcharts-tooltip text {
+//   fill: white;
+//   text-shadow: 0 0 3px black;
+// }
+
+.сhart-tooltip {
+    @extend .box-shadow-lg;
+    padding: 7px 13px;
+    background: $base-white;
+    /* Gray/450 (light text) */
+
+    border-radius: 4px;
+    overflow: hidden;
+
+    border: 0.0625rem solid $primary-gray-450;
+
+    td + td {
+        padding-left: 1rem !important;
+    }
+}
+
+.highcharts-legend-item {
+    margin-top: -4px;
+    .highcharts-point {
+        width: 8px;
+        height: 8px;
+    }
+}
