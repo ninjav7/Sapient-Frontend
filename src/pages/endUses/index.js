@@ -16,6 +16,9 @@ import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
 import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
+import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
+import { UNITS } from '../../constants/units';
+import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 
 const EndUsesPage = () => {
     const cookies = new Cookies();
@@ -177,6 +180,7 @@ const EndUsesPage = () => {
 
     const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
+    const [topEndUsesData, setTopEndUsesData] = useState([]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -211,26 +215,73 @@ const EndUsesPage = () => {
             await fetchEndUses(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
-                    let data = [];
+                    // let data = [];
+                    // response.forEach((record, index) => {
+                    //     if (index === 0) {
+                    //         record.color = '#66A4CE';
+                    //     }
+                    //     if (index === 1) {
+                    //         record.color = '#FBE384';
+                    //     }
+                    //     if (index === 2) {
+                    //         record.color = '#59BAA4';
+                    //     }
+                    //     if (index === 3) {
+                    //         record.color = '#80E1D9';
+                    //     }
+                    //     if (index === 4) {
+                    //         record.color = '#847CB5';
+                    //     }
+                    //     data.push(record);
+                    // });
+                    // setEndUsesData(data);
+
+                    let endUsesList = [];
                     response.forEach((record, index) => {
-                        if (index === 0) {
-                            record.color = '#66A4CE';
-                        }
-                        if (index === 1) {
-                            record.color = '#FBE384';
-                        }
-                        if (index === 2) {
-                            record.color = '#59BAA4';
-                        }
-                        if (index === 3) {
-                            record.color = '#80E1D9';
-                        }
-                        if (index === 4) {
-                            record.color = '#847CB5';
-                        }
-                        data.push(record);
+                        let obj = {
+                            title: record?.device,
+                            viewHandler: alert,
+                            items: [
+                                {
+                                    title: 'Total Consumption',
+                                    value: Math.round(record?.energy_consumption?.now / 1000),
+                                    unit: UNITS.KWH,
+                                    trends: [
+                                        {
+                                            trendValue: 22,
+                                            trendType: TrendsBadge.Type.DOWNWARD_TREND,
+                                            text: 'since last period',
+                                        },
+                                        {
+                                            trendValue: 6,
+                                            trendType: TrendsBadge.Type.UPWARD_TREND,
+                                            text: 'from same period last year',
+                                        },
+                                    ],
+                                },
+                                {
+                                    title: 'After-Hours Consumption',
+                                    value: Math.round(record?.after_hours_energy_consumption?.now / 1000),
+                                    unit: UNITS.KWH,
+                                    trends: [
+                                        {
+                                            trendValue: 33,
+                                            trendType: TrendsBadge.Type.DOWNWARD_TREND,
+                                            text: 'since last period',
+                                        },
+                                        {
+                                            trendValue: 26,
+                                            trendType: TrendsBadge.Type.UPWARD_TREND,
+                                            text: 'from same period last year',
+                                        },
+                                    ],
+                                },
+                            ],
+                        };
+                        endUsesList.push(obj);
                     });
-                    setEndUsesData(data);
+                    console.log('SSR response => ', endUsesList);
+                    setTopEndUsesData(endUsesList);
                     setIsEndUsesDataFetched(false);
                 })
                 .catch((error) => {
@@ -271,11 +322,11 @@ const EndUsesPage = () => {
             <Header title="End Uses" type="page" />
 
             {isEndUsesDataFetched ? (
-                <Row className="ml-4">
+                <Row className="ml-2">
                     <Skeleton count={1} color="#f9fafb" height={120} width={650} />
                 </Row>
             ) : (
-                <Row className="ml-4">
+                <Row className="ml-2">
                     <div className="card-group button-style mt-1 mb-0">
                         {endUsesData?.map((record, index) => {
                             return (
@@ -310,14 +361,22 @@ const EndUsesPage = () => {
                     </Col>
                 </Row>
             ) : (
-                <Row className="ml-2 mt-4">
+                <Row className="ml-1 mt-4">
                     <Col xl={12}>
                         <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
                     </Col>
                 </Row>
             )}
 
-            <Row style={{ marginLeft: '0.5px', marginRight: '0px', marginleft: '0px' }}>
+            <Row className="ml-4 mt-4">
+                <TopEndUsesWidget
+                    title="Top Systems by Usage"
+                    subtitle="Click explore to see more energy usage details."
+                    data={topEndUsesData}
+                />
+            </Row>
+
+            {/* <Row style={{ marginLeft: '0.5px', marginRight: '0px', marginleft: '0px' }}>
                 <div className="card-body">
                     <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top End Uses by Usage
@@ -375,7 +434,7 @@ const EndUsesPage = () => {
                         </Row>
                     )}
                 </div>
-            </Row>
+            </Row> */}
         </React.Fragment>
     );
 };
