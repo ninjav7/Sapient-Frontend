@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import HeatMapWidget from './index';
-import { HeatMapSeriesData, heatMapChartHeight, heatMapChartCategories } from './mocks';
+import { HeatMapSeriesData, heatMapChartHeight } from './mocks';
 
 export default {
-    title: 'Widgets/HeatMapChartWidget',
+    title: 'Widgets/HeatMapWidget (Shoud be refactored)',
     component: HeatMapWidget,
 };
 
