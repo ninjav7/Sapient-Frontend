@@ -8,7 +8,7 @@ import { ReactComponent as Download } from '../assets/icons/download.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload } from '@fortawesome/pro-regular-svg-icons';
 import HeatMapChart from './HeatMapChart';
-import { getCSVDataExport } from './utils';
+import { getHeatMapCSVExport } from '../helpers/chartsExport';
 import Brick from '../brick';
 import './style.scss';
 
@@ -61,7 +61,7 @@ const HeatMapWidget = ({
                                         icon={<Download />}
                                         type={Button.Type.secondaryGrey}
                                         onClick={() =>
-                                            getCSVDataExport(
+                                            getHeatMapCSVExport(
                                                 hourlyAvgConsumpData,
                                                 hourlyAvgConsumpOpts?.xaxis?.categories
                                             )
@@ -90,7 +90,7 @@ const HeatMapWidget = ({
                             size="md"
                             className="download-chart-btn mouse-pointer mr-3 mt-3"
                             onClick={() =>
-                                getCSVDataExport(
+                                getHeatMapCSVExport(
                                     hourlyAvgConsumpData.reverse(),
                                     hourlyAvgConsumpOpts?.xaxis?.categories
                                 )
