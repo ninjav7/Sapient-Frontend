@@ -654,7 +654,7 @@ const ExploreByBuildings = () => {
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
-                        data: formattedData,
+                        data: data,
                         id: arr[0].building_id,
                     };
                     let coll = [];
@@ -726,7 +726,7 @@ const ExploreByBuildings = () => {
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
-                    data: formattedData,
+                    data: data,
                     id: arr[0].building_id,
                 };
                 dataarr.push(recordToInsert);

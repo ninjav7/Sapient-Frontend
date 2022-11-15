@@ -254,7 +254,7 @@ const EquipChartModal = ({
                     let exploreData = [];
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
-                        data: formattedData,
+                        data: data,
                         name: 'AHUs',
                         unit: selectedUnit,
                     };
