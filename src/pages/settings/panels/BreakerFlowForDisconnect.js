@@ -767,7 +767,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             Authorization: `Bearer ${userdata.token}`,
         };
 
-        let params = `?device_type=passive&building_id=${bldgId}&mac=${inputValue}`;
+        let searchTxt = encodeURIComponent(inputValue.trim());
+        let params = `?device_type=passive&building_id=${bldgId}&mac=${searchTxt}`;
 
         return axios.post(`${BaseUrl}${searchDevices}${params}`, {}, { headers }).then((res) => {
             let response = res?.data;
