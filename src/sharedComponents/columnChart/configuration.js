@@ -1,8 +1,4 @@
 import React from 'react';
-
-import Typography from '../typography';
-
-import { assignMeasureUnit, renderComponents } from './helper';
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 
 export const options = (props) => ({

@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import Typography from '../typography';
 import Button from '../button/Button';
 import Brick from '../brick';
+import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
-import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { options } from './configuration';
 
