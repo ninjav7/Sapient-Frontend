@@ -27,7 +27,6 @@ import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/To
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import './style.css';
-import { hourlyAvgConsumpOpts } from './utils';
 
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -443,9 +442,8 @@ const BuildingOverview = () => {
                         subtitle="Average by Hour (kWh)"
                         isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
                         startEndDayCount={startEndDayCount}
-                        hourlyAvgConsumpOpts={hourlyAvgConsumpOpts}
-                        hourlyAvgConsumpData={hourlyAvgConsumpData}
-                        heatMapChartHeight={heatMapChartHeight}
+                        series={hourlyAvgConsumpData}
+                        height={heatMapChartHeight}
                         timeZone={timeZone}
                         className="mt-4"
                         pageType="building"
