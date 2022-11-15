@@ -14,18 +14,15 @@ import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { options } from './configuration';
+import { DOWNLOAD_TYPES } from './constants';
 
 import './ColumnChart.scss';
+
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
 highchartsAccessibility(Highcharts);
 
-const DOWNLOAD_TYPES = Object.freeze({
-    DOWNLOAD_SVG: 'downloadSVG',
-    DOWNLOAD_PNG: 'downloadPNG',
-    DOWNLOAD_CSV: 'downloadCSV',
-});
 
 const ColumnChart = (props) => {
     const chartComponentRef = useRef(null);
