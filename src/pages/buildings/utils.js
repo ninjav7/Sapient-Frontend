@@ -6,7 +6,7 @@ export const hourlyAvgConsumpOpts = {
     chart: {
         type: 'heatmap',
         toolbar: {
-            show: true,
+            show: false,
         },
     },
     dataLabels: {

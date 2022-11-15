@@ -88,7 +88,6 @@ const EquipChartModal = ({
 
     const [location, setLocation] = useState('');
     const [equipType, setEquipType] = useState('');
-    const [endUses, setEndUses] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
@@ -155,6 +154,7 @@ const EquipChartModal = ({
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
+        let equipObj = Object.assign({}, equipmentData);
         obj[key] = value;
         if (key === 'space_id') {
             setLocation(value);
@@ -162,16 +162,22 @@ const EquipChartModal = ({
         if (key === 'equipment_type') {
             setEquipType(value);
         }
+        if (key === 'end_use') {
+            equipObj['end_use_id'] = value;
+            setEquipmentData(equipObj);
+        }
         setUpdateEqipmentData(obj);
     };
 
     const handleEquipTypeChange = (key, value, deviceType) => {
         let obj = Object.assign({}, updateEqipmentData);
+        let equipObj = Object.assign({}, equipmentData);
 
         if (deviceType === 'passive') {
             let data = equipmentTypeData.find((record) => record?.equipment_id === value);
             obj['end_use'] = data?.end_use_id;
-            setEndUses(data?.end_use_id);
+            equipObj['end_use_id'] = data?.end_use_id;
+            setEquipmentData(equipObj);
             setEquipType(value);
         }
 
@@ -321,7 +327,7 @@ const EquipChartModal = ({
                     let response = res.data.data;
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
-                    setEndUses(response?.end_use_id);
+                    // setEndUses(response?.end_use_id);
                     setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
                 });
@@ -950,8 +956,10 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="endUsePop"
                                                         className="font-weight-bold"
-                                                        value={endUses}
-                                                        disabled>
+                                                        onChange={(e) => {
+                                                            handleChange('end_use', e.target.value);
+                                                        }}
+                                                        value={equipmentData?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1248,9 +1256,11 @@ const EquipChartModal = ({
                                                         type="select"
                                                         name="select"
                                                         id="endUsePop"
-                                                        className="font-weight-bold disabled"
-                                                        value={endUses}
-                                                        disabled>
+                                                        className="font-weight-bold"
+                                                        onChange={(e) => {
+                                                            handleChange('end_use', e.target.value);
+                                                        }}
+                                                        value={equipmentData?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
