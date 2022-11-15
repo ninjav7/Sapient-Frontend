@@ -10,7 +10,7 @@ import Typography from '../typography';
 import Button from '../button/Button';
 import Brick from '../brick';
 
-// import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
+import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { options } from './configuration';
@@ -29,9 +29,7 @@ const DOWNLOAD_TYPES = Object.freeze({
 
 const ColumnChart = (props) => {
     const chartComponentRef = useRef(null);
-
-    const BurgerIcon = () => <div />;
-
+    
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
             case DOWNLOAD_TYPES.DOWNLOAD_SVG:
@@ -77,7 +75,7 @@ const ColumnChart = (props) => {
                 />
             </div>
             <Brick sizeInRem={1.5} />
-            <HighchartsReact highcharts={Highcharts} options={options({ props })} ref={chartComponentRef} />
+            <HighchartsReact highcharts={Highcharts} options={options(props)} ref={chartComponentRef} />
 
             {props.onMoreDetail && (
                 <Button
