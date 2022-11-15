@@ -834,7 +834,7 @@ const DistributedBreakerComponent = ({ data, id }) => {
 
         let params = `?device_type=passive&building_id=${bldgId}&mac=${inputValue}`;
 
-        return axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+        return axios.post(`${BaseUrl}${searchDevices}${params}`, {}, { headers }).then((res) => {
             let response = res?.data;
             let results = [];
             response.forEach((record) => {
