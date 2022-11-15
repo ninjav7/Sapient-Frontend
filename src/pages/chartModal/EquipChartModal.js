@@ -37,7 +37,8 @@ import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
-import { equipOptions, equipOptionsLines } from './ChartOption';
+import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
+import { apiRequestBody } from '../../helpers/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -87,7 +88,6 @@ const EquipChartModal = ({
 
     const [location, setLocation] = useState('');
     const [equipType, setEquipType] = useState('');
-    const [endUses, setEndUses] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
@@ -123,19 +123,13 @@ const EquipChartModal = ({
             };
             let params = `?building_id=${1}`;
             await axios
-                .post(
-                    `${BaseUrl}${builidingAlerts}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     setBuildingAlerts(res.data);
                 });
-        } catch (error) { }
+        } catch (error) {}
     };
 
     const [options, setOptions] = useState(equipOptions);
@@ -148,7 +142,7 @@ const EquipChartModal = ({
     //     if(seriesData.length!==0)
     //        {
     //          seriesData[0].data.map((ele)=>{
-               
+
     //             acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
     //          })
     //        }
@@ -160,6 +154,7 @@ const EquipChartModal = ({
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
+        let equipObj = Object.assign({}, equipmentData);
         obj[key] = value;
         if (key === 'space_id') {
             setLocation(value);
@@ -167,16 +162,22 @@ const EquipChartModal = ({
         if (key === 'equipment_type') {
             setEquipType(value);
         }
+        if (key === 'end_use') {
+            equipObj['end_use_id'] = value;
+            setEquipmentData(equipObj);
+        }
         setUpdateEqipmentData(obj);
     };
 
     const handleEquipTypeChange = (key, value, deviceType) => {
         let obj = Object.assign({}, updateEqipmentData);
+        let equipObj = Object.assign({}, equipmentData);
 
         if (deviceType === 'passive') {
             let data = equipmentTypeData.find((record) => record?.equipment_id === value);
             obj['end_use'] = data?.end_use_id;
-            setEndUses(data?.end_use_id);
+            equipObj['end_use_id'] = data?.end_use_id;
+            setEquipmentData(equipObj);
             setEquipType(value);
         }
 
@@ -203,11 +204,7 @@ const EquipChartModal = ({
                     headers: header,
                 })
                 .then((res) => {
-                    let arr = {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    };
+                    let arr = apiRequestBody(startDate, endDate, timeZone);
                     setSelectedTab(0);
                     setEquipResult({});
                     setEquipmentData({});
@@ -220,7 +217,7 @@ const EquipChartModal = ({
                     handleChartClose();
                     fetchEquipmentData(arr);
                 });
-        } catch (error) { }
+        } catch (error) {}
     };
 
     const fetchEquipmentChart = async (equipId) => {
@@ -233,15 +230,9 @@ const EquipChartModal = ({
             };
             let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
-                .post(
-                    `${BaseUrl}${equipmentGraphData}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
-                    { headers }
-                )
+                .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                    headers,
+                })
                 .then((res) => {
                     let response = res.data;
 
@@ -250,7 +241,7 @@ const EquipChartModal = ({
                         return _data;
                     });
 
-                    data.forEach((record) => { });
+                    data.forEach((record) => {});
                     let exploreData = [];
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
@@ -304,11 +295,7 @@ const EquipChartModal = ({
             await axios
                 .post(
                     `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                    {
-                        date_from: startDate.toLocaleDateString(),
-                        date_to: endDate.toLocaleDateString(),
-                        tz_info: timeZone,
-                    },
+                    apiRequestBody(startDate, endDate, timeZone),
                     { headers }
                 )
                 .then((res) => {
@@ -340,11 +327,11 @@ const EquipChartModal = ({
                     let response = res.data.data;
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
-                    setEndUses(response?.end_use_id);
+                    // setEndUses(response?.end_use_id);
                     setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchBuildingAlerts = async () => {
@@ -356,19 +343,13 @@ const EquipChartModal = ({
                 };
                 let params = `?building_id=${1}`;
                 await axios
-                    .post(
-                        `${BaseUrl}${builidingAlerts}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
+                    .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
+                        headers,
+                    })
                     .then((res) => {
                         setBuildingAlerts(res.data);
                     });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchEndUseData = async () => {
@@ -381,7 +362,7 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     setEndUse(res.data);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchEquipTypeData = async () => {
@@ -399,7 +380,7 @@ const EquipChartModal = ({
                     });
                     setEquipmentTypeData(response);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         const fetchLocationData = async () => {
@@ -412,7 +393,7 @@ const EquipChartModal = ({
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
@@ -461,7 +442,7 @@ const EquipChartModal = ({
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
                 });
-            } catch (error) { }
+            } catch (error) {}
         };
 
         if (equipmentData !== null) {
@@ -698,9 +679,9 @@ const EquipChartModal = ({
                                 <div className="ytd-container">
                                     <div>
                                         <div className="ytd-heading">
-                                            {`Total Consumption (${moment(startDate?.toLocaleDateString()).format(
-                                                'MMM D'
-                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                            {`Total Consumption (${moment(startDate).format('MMM D')} to ${moment(
+                                                endDate
+                                            ).format('MMM D')})`}
                                         </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
@@ -717,9 +698,9 @@ const EquipChartModal = ({
                                     </div>
                                     <div>
                                         <div className="ytd-heading">
-                                            {`Peak kW (${moment(startDate?.toLocaleDateString()).format(
+                                            {`Peak kW (${moment(startDate).format('MMM D')} to ${moment(endDate).format(
                                                 'MMM D'
-                                            )} to ${moment(endDate?.toLocaleDateString()).format('MMM D')})`}
+                                            )})`}
                                         </div>
                                         {isYtdDataFetching ? (
                                             <Skeleton count={1} />
@@ -735,9 +716,9 @@ const EquipChartModal = ({
                                                     <span className="mr-1 ytd-value">
                                                         {ytdData?.ytd_peak?.power
                                                             ? formatConsumptionValue(
-                                                                ytdData?.ytd_peak?.power / 1000000,
-                                                                1
-                                                            )
+                                                                  ytdData?.ytd_peak?.power / 1000000,
+                                                                  1
+                                                              )
                                                             : 0}
                                                     </span>
                                                 )}
@@ -877,8 +858,8 @@ const EquipChartModal = ({
                                                 </Dropdown.Item>
 
                                                 <Dropdown.Item>
-                                                <i className="uil uil-download-alt mr-2"></i>
-                                                        Download CSV
+                                                    <i className="uil uil-download-alt mr-2"></i>
+                                                    Download CSV
                                                 </Dropdown.Item>
                                                 {/* Commented for future use */}
                                                 {/* <div className="mr-3">
@@ -975,8 +956,10 @@ const EquipChartModal = ({
                                                         name="select"
                                                         id="endUsePop"
                                                         className="font-weight-bold"
-                                                        value={endUses}
-                                                        disabled>
+                                                        onChange={(e) => {
+                                                            handleChange('end_use', e.target.value);
+                                                        }}
+                                                        value={equipmentData?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1273,9 +1256,11 @@ const EquipChartModal = ({
                                                         type="select"
                                                         name="select"
                                                         id="endUsePop"
-                                                        className="font-weight-bold disabled"
-                                                        value={endUses}
-                                                        disabled>
+                                                        className="font-weight-bold"
+                                                        onChange={(e) => {
+                                                            handleChange('end_use', e.target.value);
+                                                        }}
+                                                        value={equipmentData?.end_use_id}>
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
@@ -1735,18 +1720,18 @@ const EquipChartModal = ({
                                             <div>
                                                 {equipmentData !== null
                                                     ? equipmentData.status === 'Online' && (
-                                                        <div className="icon-bg-pop-styling">
-                                                            ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )
+                                                          <div className="icon-bg-pop-styling">
+                                                              ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                          </div>
+                                                      )
                                                     : ''}
                                                 {equipmentData !== null
                                                     ? equipmentData.status === 'Offline' && (
-                                                        <div className="icon-bg-pop-styling-slash">
-                                                            OFFLINE{' '}
-                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )
+                                                          <div className="icon-bg-pop-styling-slash">
+                                                              OFFLINE{' '}
+                                                              <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                          </div>
+                                                      )
                                                     : ''}
                                             </div>
                                             <div className="mt-4 modal-right-group">

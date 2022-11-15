@@ -7,12 +7,14 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
-import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
+import HeatMapWidget from '../../sharedComponents/heatMapWidget';
+import { heatMapOptions } from './utils';
+import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -225,118 +227,7 @@ const TimeOfDay = () => {
     const [areaChartData, setAreaChartData] = useState([]);
     const [isAvgUsageChartLoading, setIsAvgUsageChartLoading] = useState(false);
 
-    const weekdaysOptions = {
-        chart: {
-            type: 'heatmap',
-            toolbar: {
-                show: false,
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            width: 1,
-        },
-        legend: {
-            show: false,
-        },
-        plotOptions: {
-            heatmap: {
-                shadeIntensity: 0.5,
-                enableShades: true,
-                distributed: true,
-                radius: 1,
-                useFillColorAsStroke: false,
-            },
-        },
-        colors: ['#87AADE'],
-        yaxis: {
-            labels: {
-                show: true,
-                minWidth: 40,
-                maxWidth: 160,
-            },
-            categories: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        },
-        xaxis: {
-            labels: {
-                show: true,
-                align: 'top',
-            },
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
-            position: 'top',
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesNames } = w.globals;
-                const day = seriesNames[seriesIndex];
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${w.globals.labels[dataPointIndex]}
-                        </div>
-                    </div>`;
-            },
-        },
-    };
-
-    const [weekdaysSeries, setWeekdaysSeries] = useState([]);
+    const [heatMapChartData, setHeatMapChartData] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
     const weekdaysChartHeight = '265px';
@@ -459,6 +350,14 @@ const TimeOfDay = () => {
         },
     });
 
+    const getAverageValue = (value, min, max) => {
+        if (min == undefined || max === undefined) {
+            return 0;
+        }
+        let percentage = Math.round(((value - min) / (max - min)) * 100);
+        return Math.round(percentage);
+    };
+
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333, 5452]);
 
     useEffect(() => {
@@ -489,534 +388,602 @@ const TimeOfDay = () => {
         }
 
         const endUsesByOfHour = async () => {
-                setIsEndUsageChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchBuildingAfterHours(bldgId, payload)
+            setIsEndUsageChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchBuildingAfterHours(bldgId, payload)
                 .then((res) => {
-                        setEnergyConsumption(res?.data || []);
-                        const energyData = res?.data;
-                        let newDonutData = [];
-                        energyData.forEach((record) => {
-                            let fixedConsumption = parseInt(record.energy_consumption.now);
-                            newDonutData.push(fixedConsumption);
-                        });
-                        setDonutChartData(newDonutData);
-                        //setDonutChartOpts();
-                        setIsEndUsageChartLoading(false);
-                    })
-                    .catch((error) => {
-                setIsEndUsageChartLoading(false);
-            });
+                    setEnergyConsumption(res?.data || []);
+                    const energyData = res?.data;
+                    let newDonutData = [];
+                    energyData.forEach((record) => {
+                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        newDonutData.push(fixedConsumption);
+                    });
+                    setDonutChartData(newDonutData);
+                    //setDonutChartOpts();
+                    setIsEndUsageChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsEndUsageChartLoading(false);
+                });
         };
 
         const dailyUsageByHour = async () => {
-                setIsAvgUsageChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchBuilidingHourly(bldgId, payload)
+            setIsAvgUsageChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
-                        let response = res?.data;
+                    let response = res?.data;
 
-                        let weekDaysResData = response[0]?.weekdays;
-                        let weekEndResData = response[0]?.weekend;
+                    let weekDaysResData = response[0]?.weekdays;
+                    let weekEndResData = response[0]?.weekend;
 
-                        const weekDaysData = weekDaysResData.map((el) => {
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: el.y.toFixed(0),
-                            };
-                        });
-
-                        const weekendsData = weekEndResData.map((el) => {
-                            return {
-                                x: parseInt(moment.utc(el.x).format('HH')),
-                                y: el.y.toFixed(0),
-                            };
-                        });
-
-                        const newWeekdaysData = {
-                            name: 'Weekdays',
-                            data: [],
+                    const weekDaysData = weekDaysResData.map((el) => {
+                        return {
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            y: el.y.toFixed(0),
                         };
-                        const newWeekendsData = {
-                            name: 'Weekends',
-                            data: [],
+                    });
+
+                    const weekendsData = weekEndResData.map((el) => {
+                        return {
+                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            y: el.y.toFixed(0),
                         };
+                    });
 
-                        const chartDataToDisplay = [];
+                    const newWeekdaysData = {
+                        name: 'Weekdays',
+                        data: [],
+                    };
+                    const newWeekendsData = {
+                        name: 'Weekends',
+                        data: [],
+                    };
 
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekDaysData.find((record) => record.x === i);
-                            if (matchedRecord) {
-                                newWeekdaysData.data.push(parseInt(matchedRecord.y / 1000));
-                            } else {
-                                newWeekdaysData.data.push(0);
-                            }
+                    const chartDataToDisplay = [];
+
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekDaysData.find((record) => record.x === i);
+                        if (matchedRecord) {
+                            newWeekdaysData.data.push(parseInt(matchedRecord.y / 1000));
+                        } else {
+                            newWeekdaysData.data.push(0);
                         }
+                    }
 
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x === i);
+                    for (let i = 0; i < 24; i++) {
+                        let matchedRecord = weekendsData.find((record) => record.x === i);
 
-                            if (matchedRecord) {
-                                newWeekendsData.data.push(parseInt(matchedRecord.y / 1000));
-                            } else {
-                                newWeekendsData.data.push(0);
-                            }
+                        if (matchedRecord) {
+                            newWeekendsData.data.push(parseInt(matchedRecord.y / 1000));
+                        } else {
+                            newWeekendsData.data.push(0);
                         }
-                        chartDataToDisplay.push(newWeekdaysData);
-                        chartDataToDisplay.push(newWeekendsData);
-                        setAreaChartData(chartDataToDisplay);
-                        setIsAvgUsageChartLoading(false);
-                    })
-                    .catch((error) => {
-                setIsAvgUsageChartLoading(false);
-            });
+                    }
+                    chartDataToDisplay.push(newWeekdaysData);
+                    chartDataToDisplay.push(newWeekendsData);
+                    setAreaChartData(chartDataToDisplay);
+                    setIsAvgUsageChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsAvgUsageChartLoading(false);
+                });
         };
 
         const averageUsageByHourFetch = async () => {
-                setIsAvgHourlyChartLoading(true);
-                let payload =  {
-                    date_from: startDate.toLocaleDateString(),
-                    date_to: endDate.toLocaleDateString(),
-                    tz_info: timeZone,
-                };
-                await fetchAvgDailyUsageByHour(bldgId, payload)
+            setIsAvgHourlyChartLoading(true);
+            let payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
-                        let response = res.data;
+                    let response = res.data;
 
-                        // default chart structure
-                        let heatMapData = [
-                            {
-                                name: 'Monday',
-                                data: [],
-                            },
-                            {
-                                name: 'Tuesday',
-                                data: [],
-                            },
-                            {
-                                name: 'Wednesday',
-                                data: [],
-                            },
-                            {
-                                name: 'Thursday',
-                                data: [],
-                            },
-                            {
-                                name: 'Friday',
-                                data: [],
-                            },
-                            {
-                                name: 'Saturday',
-                                data: [],
-                            },
-                            {
-                                name: 'Sunday',
-                                data: [],
-                            },
-                        ];
+                    // default chart structure
+                    let heatMapData = [
+                        {
+                            name: 'Monday',
+                            data: [],
+                        },
+                        {
+                            name: 'Tuesday',
+                            data: [],
+                        },
+                        {
+                            name: 'Wednesday',
+                            data: [],
+                        },
+                        {
+                            name: 'Thursday',
+                            data: [],
+                        },
+                        {
+                            name: 'Friday',
+                            data: [],
+                        },
+                        {
+                            name: 'Saturday',
+                            data: [],
+                        },
+                        {
+                            name: 'Sunday',
+                            data: [],
+                        },
+                    ];
 
-                        // length === 0  then below data
-                        let defaultList = [
-                            {
-                                x: 12 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 1 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 2 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 3 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 4 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 5 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 6 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 7 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 8 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 9 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 10 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 11 + 'AM',
-                                y: 0,
-                            },
-                            {
-                                x: 12 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 1 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 2 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 3 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 4 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 5 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 6 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 7 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 8 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 9 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 10 + 'PM',
-                                y: 0,
-                            },
-                            {
-                                x: 11 + 'PM',
-                                y: 0,
-                            },
-                        ];
+                    // length === 0  then below data
+                    let defaultList = [
+                        {
+                            x: 12 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 1 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 2 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 3 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 4 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 5 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 6 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 7 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 8 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 9 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 10 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 11 + 'AM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 12 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 1 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 2 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 3 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 4 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 5 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 6 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 7 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 8 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 9 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 10 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                        {
+                            x: 11 + 'PM',
+                            y: 0,
+                            z: 0,
+                        },
+                    ];
 
-                        let mon = [];
-                        let tue = [];
-                        let wed = [];
-                        let thu = [];
-                        let fri = [];
-                        let sat = [];
-                        let sun = [];
+                    let mon = [];
+                    let tue = [];
+                    let wed = [];
+                    let thu = [];
+                    let fri = [];
+                    let sat = [];
+                    let sun = [];
 
-                        // Seperate record based on days
+                    // Seperate record based on days
+                    response.map((record) => {
+                        if (record.timeline.weekday === 1) {
+                            sun.push(record);
+                        }
+                        if (record.timeline.weekday === 2) {
+                            mon.push(record);
+                        }
+                        if (record.timeline.weekday === 3) {
+                            tue.push(record);
+                        }
+                        if (record.timeline.weekday === 4) {
+                            wed.push(record);
+                        }
+                        if (record.timeline.weekday === 5) {
+                            thu.push(record);
+                        }
+                        if (record.timeline.weekday === 6) {
+                            fri.push(record);
+                        }
+                        if (record.timeline.weekday === 7) {
+                            sat.push(record);
+                        }
+                    });
 
-                        response.map((record) => {
-                            if (record.timeline.weekday === 1) {
-                                sun.push(record);
-                            }
-                            if (record.timeline.weekday === 2) {
-                                mon.push(record);
-                            }
-                            if (record.timeline.weekday === 3) {
-                                tue.push(record);
-                            }
-                            if (record.timeline.weekday === 4) {
-                                wed.push(record);
-                            }
-                            if (record.timeline.weekday === 5) {
-                                thu.push(record);
-                            }
-                            if (record.timeline.weekday === 6) {
-                                fri.push(record);
-                            }
-                            if (record.timeline.weekday === 7) {
-                                sat.push(record);
-                            }
-                        });
+                    let finalList = [];
 
-                        heatMapData.map((record) => {
-                            if (record.name === 'Sunday') {
-                                let newData = [];
-                                if (sun.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = sun.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                    mon.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    tue.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    wed.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    thu.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    fri.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    sat.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+
+                    finalList.sort((a, b) => a - b);
+
+                    let minVal = finalList[0];
+                    let maxVal = finalList[finalList.length - 1];
+
+                    heatMapData.map((record) => {
+                        if (record.name === 'Sunday') {
+                            let newData = [];
+                            if (sun.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = sun.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Monday') {
-                                let newData = [];
-                                if (mon.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = mon.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Monday') {
+                            let newData = [];
+                            if (mon.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = mon.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Tuesday') {
-                                let newData = [];
-                                if (tue.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = tue.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Tuesday') {
+                            let newData = [];
+                            if (tue.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = tue.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Wednesday') {
-                                let newData = [];
-                                if (wed.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = wed.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Wednesday') {
+                            let newData = [];
+                            if (wed.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = wed.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Thursday') {
-                                let newData = [];
-                                if (thu.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = thu.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Thursday') {
+                            let newData = [];
+                            if (thu.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = thu.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Friday') {
-                                let newData = [];
-                                if (fri.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = fri.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Friday') {
+                            let newData = [];
+                            if (fri.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = fri.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
+                        }
 
-                            if (record.name === 'Saturday') {
-                                let newData = [];
-                                if (sat.length !== 0) {
-                                    for (let i = 0; i <= 23; i++) {
-                                        let found = sat.find((x) => x.timeline.hour === i);
-                                        let xval = '';
-                                        if (i === 0) {
-                                            xval = 12 + 'AM';
-                                        } else if (i < 12) {
-                                            xval = i + 'AM';
+                        if (record.name === 'Saturday') {
+                            let newData = [];
+                            if (sat.length !== 0) {
+                                for (let i = 0; i <= 23; i++) {
+                                    let found = sat.find((x) => x.timeline.hour === i);
+                                    let xval = '';
+                                    if (i === 0) {
+                                        xval = 12 + 'AM';
+                                    } else if (i < 12) {
+                                        xval = i + 'AM';
+                                    } else {
+                                        if (i == 12) {
+                                            xval = 12 + 'PM';
                                         } else {
-                                            if (i == 12) {
-                                                xval = 12 + 'PM';
-                                            } else {
-                                                var val = i % 12;
-                                                xval = val + 'PM';
-                                            }
-                                        }
-                                        if (found !== undefined) {
-                                            newData.push({
-                                                x: xval,
-                                                y: (found.energy_consuption / 1000).toFixed(0),
-                                            });
-                                        } else {
-                                            newData.push({
-                                                x: xval,
-                                                y: 0,
-                                            });
+                                            var val = i % 12;
+                                            xval = val + 'PM';
                                         }
                                     }
-                                    record.data = newData;
-                                } else {
-                                    record.data = defaultList;
+                                    if (found !== undefined) {
+                                        newData.push({
+                                            x: xval,
+                                            y: getAverageValue(
+                                                (found.energy_consuption / 1000).toFixed(0),
+                                                minVal,
+                                                maxVal
+                                            ),
+                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                        });
+                                    } else {
+                                        newData.push({
+                                            x: xval,
+                                            y: 0,
+                                            z: 0,
+                                        });
+                                    }
                                 }
+                                record.data = newData;
+                            } else {
+                                record.data = defaultList;
                             }
-                        });
+                        }
+                    });
 
-                        setWeekdaysSeries(heatMapData.reverse());
-                        setIsAvgHourlyChartLoading(false);
-                    })
-                    .catch((error) => {
-                setIsAvgHourlyChartLoading(false);
-            });
+                    setHeatMapChartData(heatMapData.reverse());
+                    setIsAvgHourlyChartLoading(false);
+                })
+                .catch((error) => {
+                    setIsAvgHourlyChartLoading(false);
+                });
         };
 
         endUsesByOfHour();
@@ -1039,24 +1006,15 @@ const TimeOfDay = () => {
                     />
                 </Col>
                 <Col xl={7}>
-                    <div className="card-body timeofday-content-style">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Hourly Average Consumption
-                        </h6>
-                        <h6 className="card-subtitle mb-3 custom-subtitle-style">Energy Usage By Hour</h6>
-
-                        {isAvgHourlyChartLoading ? (
-                            <div className="loader-center-style" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                            </div>
-                        ) : (
-                            <HeatMapChart
-                                options={weekdaysOptions}
-                                series={weekdaysSeries}
-                                height={weekdaysChartHeight}
-                            />
-                        )}
-                    </div>
+                    <HeatMapWidget
+                        title="Hourly Average Consumption"
+                        subtitle="Energy Usage By Hour (kWh)"
+                        hourlyAvgConsumpOpts={heatMapOptions}
+                        hourlyAvgConsumpData={heatMapChartData}
+                        heatMapChartHeight={weekdaysChartHeight}
+                        timeZone={timeZone}
+                        showRouteBtn={false}
+                    />
                 </Col>
             </Row>
 

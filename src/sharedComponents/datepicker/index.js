@@ -32,9 +32,9 @@ const Datepicker = ({
     const [endDate, setEndDate] = useState(rangeDate[1]);
     const [focusedInput, setFocusedInput] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
-    
+
     const refApi = useRef(null);
-    
+
     const onDateChangeSingle = (startDate) => {
         setStartDate(startDate);
     };
@@ -66,25 +66,51 @@ const Datepicker = ({
         setFocusedInput(focusedInput);
     }
 
-    const handleClose = () => {
+    const handleClose = (event) => {
         props.onClose && props.onClose();
         setIsOpen(false);
+        refApi.current = false;
+
+        if (!withApplyButton) {
+            applyDate(event);
+        }
     };
 
     const handleClickDay = (moment) => {
         props.onManuallyChangedDate && props.onManuallyChangedDate({ moment });
     };
 
-    const handleClickDatepickerBtn = () => {
-        if(refApi.current) {
+    const handleCancelClick = (event) => {
+        setStartDate(rangeDate[0]);
+        setEndDate(rangeDate[1]);
+
+        props.onCancel && props.onCancel({ startDate: rangeDate[0], endDate: rangeDate[1], event });
+        setFocusedInput(null);
+        handleClose();
+    };
+
+    const handleClickDatepickerBtn = (event) => {
+        if (refApi.current) {
             refApi.current = false;
+            withApplyButton && handleCancelClick(event);
             setIsOpen(false);
             return;
         }
 
-        
-        refApi.current = !refApi.current
+        refApi.current = !refApi.current;
         setFocusedInput('startDate');
+    };
+
+    const applyDate = (event) => {
+        if (!endDate) {
+            setEndDate(startDate);
+        }
+
+        const endDateOrStartDate = endDate ? endDate : startDate;
+
+        props.onApply && props.onApply({ startDate, endDate: endDateOrStartDate, event });
+        onDateChange({ startDate, endDate: endDateOrStartDate });
+        props.onCustomDateChange && props.onCustomDateChange({ startDate, endDate: endDateOrStartDate });
     };
 
     const formattedStartDate = rangeDate[0]?.format('MMM D') || '';
@@ -133,20 +159,14 @@ const Datepicker = ({
                                 size={Button.Sizes.md}
                                 type={Button.Type.secondaryGrey}
                                 label="Cancel"
-                                onClick={(event) => {
-                                    props.onCancel && props.onCancel({ startDate, endDate, event });
-                                    setFocusedInput(null);
-                                    handleClose();
-                                }}
+                                onClick={handleCancelClick}
                             />
                             <Button
                                 size={Button.Sizes.md}
                                 type={Button.Type.primary}
                                 label="Apply"
                                 onClick={(event) => {
-                                    props.onApply && props.onApply({ startDate, endDate, event });
-                                    onDateChange({ startDate, endDate });
-                                    props.onCustomDateChange({ startDate, endDate });
+                                    applyDate(event);
                                     setFocusedInput(null);
                                     handleClose();
                                 }}
@@ -154,7 +174,7 @@ const Datepicker = ({
                         </div>
                     )
                 }
-                onClose={handleClose}
+                onClose={!withApplyButton ? handleClose : undefined}
                 noBorder={true}
                 readOnly
                 displayFormat="MMM D"
