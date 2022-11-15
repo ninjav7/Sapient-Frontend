@@ -14,9 +14,10 @@ import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { options } from './configuration';
-import { DOWNLOAD_TYPES } from './constants';
+import { DOWNLOAD_TYPES } from '../constants';
 
 import './ColumnChart.scss';
+
 
 
 HighchartsExporting(Highcharts);
@@ -29,13 +30,13 @@ const ColumnChart = (props) => {
     
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
-            case DOWNLOAD_TYPES.DOWNLOAD_SVG:
+            case DOWNLOAD_TYPES.downloadSVG:
                 chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
                 break;
-            case DOWNLOAD_TYPES.DOWNLOAD_PNG:
+            case DOWNLOAD_TYPES.downloadPNG:
                 chartComponentRef.current.chart.exportChart({ type: 'image/png' });
                 break;
-            case DOWNLOAD_TYPES.DOWNLOAD_CSV:
+            case DOWNLOAD_TYPES.downloadSVG:
                 chartComponentRef.current.chart.downloadCSV();
                 break;
             default:
@@ -54,15 +55,15 @@ const ColumnChart = (props) => {
                     classNameButton="column-chart-download-button"
                     options={[
                         {
-                            name: DOWNLOAD_TYPES.DOWNLOAD_SVG,
+                            name: DOWNLOAD_TYPES.downloadSVG,
                             label: 'Download SVG',
                         },
                         {
-                            name: DOWNLOAD_TYPES.DOWNLOAD_PNG,
+                            name: DOWNLOAD_TYPES.downloadPNG,
                             label: 'Download PNG',
                         },
                         {
-                            name: DOWNLOAD_TYPES.DOWNLOAD_CSV,
+                            name: DOWNLOAD_TYPES.downloadCSV,
                             label: 'Download CSV',
                         },
                     ]}

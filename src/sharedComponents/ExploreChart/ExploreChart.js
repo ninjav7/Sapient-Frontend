@@ -5,7 +5,7 @@ import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
 import Typography from '../typography';
 import { options } from './constants';
-import { downloadOptions } from '../constants';
+import { DOWNLOAD_TYPES } from '../constants';
 import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import HighchartsExporting from 'highcharts/modules/exporting';
@@ -21,13 +21,13 @@ const ExploreChart = (props) => {
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
-            case downloadOptions.downloadSVG:
+            case DOWNLOAD_TYPES.downloadSVG:
                 downloadSVG();
                 break;
-            case downloadOptions.downloadPNG:
+            case DOWNLOAD_TYPES.downloadPNG:
                 downloadPNG();
                 break;
-            case downloadOptions.downloadCSV:
+            case DOWNLOAD_TYPES.downloadCSV:
                 downloadCSV();
                 break;
             default:
@@ -58,15 +58,15 @@ const ExploreChart = (props) => {
                     <DropDownIcon
                         options={[
                             {
-                                name: downloadOptions.downloadSVG,
+                                name: DOWNLOAD_TYPES.downloadSVG,
                                 label: 'Download SVG',
                             },
                             {
-                                name: downloadOptions.downloadPNG,
+                                name: DOWNLOAD_TYPES.downloadPNG,
                                 label: 'Download PNG',
                             },
                             {
-                                name: downloadOptions.downloadCSV,
+                                name: DOWNLOAD_TYPES.downloadCSV,
                                 label: 'Download CSV',
                             },
                         ]}
