@@ -6,16 +6,18 @@ import DropDownBase from './DropDownBase';
 
 import { ReactComponent as MoreVerticalSVG } from '../../assets/icons/more-vertical.svg';
 
-const TriggerButton = forwardRef((props, ref) => (
-    <Button
-        iconAlignment={Button.IconAlignment.right}
-        type={Button.Type.secondaryGrey}
-        size={Button.Sizes.md}
-        buttonRef={ref}
-        {...props}
-        icon={props.icon ? props.icon : <MoreVerticalSVG className='more-vertical' />}
-    />
-));
+const TriggerButton = forwardRef((props, ref) => {
+    return(
+        <Button
+            iconAlignment={Button.IconAlignment.right}
+            type={Button.Type.secondaryGrey}
+            size={Button.Sizes.md}
+            buttonRef={ref}
+            {...props}
+            icon={props.icon ? props.icon : <MoreVerticalSVG className='more-vertical' />}
+        />
+    )
+})
 
 TriggerButton.displayName = 'TriggerButton';
 
