@@ -206,7 +206,10 @@ const HeatMapWidget = ({
         xaxis: {
             labels: {
                 show: true,
+                rotate: 0,
             },
+            tickAmount: 12,
+            tickPlacement: 'between',
             categories: [
                 '12AM',
                 '1AM',
@@ -279,12 +282,7 @@ const HeatMapWidget = ({
                                         size={Button.Sizes.sm}
                                         icon={<Download />}
                                         type={Button.Type.secondaryGrey}
-                                        onClick={() =>
-                                            getHeatMapCSVExport(
-                                                hourlyAvgConsumpData,
-                                                hourlyAvgConsumpOpts?.xaxis?.categories
-                                            )
-                                        }
+                                        onClick={() => getHeatMapCSVExport(series, options?.xaxis?.categories)}
                                         className="mr-4"
                                     />
                                     <Button
@@ -308,17 +306,13 @@ const HeatMapWidget = ({
                             icon={faDownload}
                             size="md"
                             className="download-chart-btn mouse-pointer mr-3 mt-3"
-                            onClick={() =>
-                                getHeatMapCSVExport(
-                                    hourlyAvgConsumpData.reverse(),
-                                    hourlyAvgConsumpOpts?.xaxis?.categories
-                                )
-                            }
+                            onClick={() => getHeatMapCSVExport(series.reverse(), options?.xaxis?.categories)}
                         />
                     </div>
                 )}
             </>
             <Brick sizeInRem={1} />
+
             <div>
                 <HeatMapChart options={options} series={series} height={height} />
             </div>
