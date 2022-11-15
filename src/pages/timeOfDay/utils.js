@@ -4,7 +4,7 @@ export const heatMapOptions = {
     chart: {
         type: 'heatmap',
         toolbar: {
-            show: true,
+            show: false,
         },
     },
     dataLabels: {
