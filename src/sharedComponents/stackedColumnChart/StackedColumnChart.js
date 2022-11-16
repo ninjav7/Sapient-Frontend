@@ -1,28 +1,28 @@
 import React, { useRef } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
+import Highcharts from 'highcharts';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
-import Highcharts from 'highcharts';
 import PropTypes from 'prop-types';
 
-import Typography from '../typography';
 import Button from '../button/Button';
-import Brick from '../brick';
+import Typography from '../typography';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
+import Brick from '../brick';
 
-import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { options } from './configuration';
 import { DOWNLOAD_TYPES } from '../constants';
 
-import './ColumnChart.scss';
+import './StackedColumnChart.scss';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
 highchartsAccessibility(Highcharts);
 
-const ColumnChart = (props) => {
+const StackedColumnChart = (props) => {
     const chartComponentRef = useRef(null);
 
     const handleDropDownOptionClicked = (name) => {
@@ -34,6 +34,7 @@ const ColumnChart = (props) => {
                 chartComponentRef.current.chart.exportChart({ type: 'image/png' });
                 break;
             case DOWNLOAD_TYPES.downloadCSV:
+                console.log('csv');
                 chartComponentRef.current.chart.downloadCSV();
                 break;
             default:
@@ -42,7 +43,7 @@ const ColumnChart = (props) => {
     };
 
     return (
-        <div className="column-chart-wrapper" style={props.style}>
+        <div className="stacked-column-chart-wrapper" style={props.style}>
             <div className="d-flex align-items-center justify-content-between">
                 <div>
                     <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
@@ -70,11 +71,12 @@ const ColumnChart = (props) => {
                 />
             </div>
             <Brick sizeInRem={1.5} />
+
             <HighchartsReact highcharts={Highcharts} options={options(props)} ref={chartComponentRef} />
 
             {props.onMoreDetail && (
                 <Button
-                    className="column-chart-more-detail"
+                    className="stacked-column-chart-more-detail"
                     label="More Details"
                     size={Button.Sizes.lg}
                     icon={<ArrowRight style={{ height: 11 }} />}
@@ -87,7 +89,7 @@ const ColumnChart = (props) => {
     );
 };
 
-ColumnChart.propTypes = {
+StackedColumnChart.propTypes = {
     title: PropTypes.string.isRequired,
     subTitle: PropTypes.string.isRequired,
     colors: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -103,4 +105,4 @@ ColumnChart.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
 };
 
-export default ColumnChart;
+export default StackedColumnChart;
