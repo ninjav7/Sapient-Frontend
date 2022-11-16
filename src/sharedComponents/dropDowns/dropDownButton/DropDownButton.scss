@@ -82,6 +82,10 @@
         align-items: center;
         border-color: $primary-gray-200 !important;
 
+        &:hover{
+            cursor: pointer;
+        }
+
         &-icon {
             margin-left: 0.1563rem;
         }

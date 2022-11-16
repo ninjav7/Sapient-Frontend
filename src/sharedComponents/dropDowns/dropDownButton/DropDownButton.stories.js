@@ -32,8 +32,8 @@ export const Default = (props) => {
                     <h6>Icon Leading</h6>
                     <DropDownButton
                         {...props}
-                        links={props.links.map((link, index) =>
-                            index === 3 ? { ...link } : { ...link, icon: <ProfileSVG /> }
+                        options={props.options.map((option, index) =>
+                            index === 3 ? { ...option } : { ...option, icon: <ProfileSVG /> }
                         )}
                     />
                 </div>
@@ -59,7 +59,7 @@ export const Default = (props) => {
 
 Default.args = {
     label: 'Account',
-    links: [
+    options: [
         {
             link: '#',
             label: 'View profile',

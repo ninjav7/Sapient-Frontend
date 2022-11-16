@@ -703,7 +703,9 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&device_search=${deviceSearch}&sort_by=ace`;
+            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&device_search=${encodeURIComponent(
+                deviceSearch
+            )}&sort_by=ace`;
             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let data = res.data;
                 setPassiveDeviceData(data.data);
@@ -733,7 +735,7 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_type=passive&building_id=${bldgId}&mac=${deviceSearch.trimStart()}`;
+            let params = `?device_type=passive&building_id=${bldgId}&mac=${encodeURIComponent(deviceSearch)}`;
             await axios.post(`${BaseUrl}${searchDevices}${params}`, {}, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(res.data);
@@ -835,7 +837,7 @@ const PassiveDevices = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                setDeviceSearch(e.target.value);
+                                setDeviceSearch(e.target.value.trim());
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
