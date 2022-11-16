@@ -947,7 +947,7 @@ const EquipChartModal = ({
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
                                                         className="font-weight-bold"
-                                                        value={equipmentData?.equipments_name}
+                                                        defaultValue={equipmentData?.equipments_name}
                                                         onChange={(e) => {
                                                             handleChange('name', e.target.value);
                                                         }}
