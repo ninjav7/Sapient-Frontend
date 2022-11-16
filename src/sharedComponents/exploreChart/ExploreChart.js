@@ -21,32 +21,20 @@ const ExploreChart = (props) => {
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
-            case DOWNLOAD_TYPES.downloadSVG:
-                downloadSVG();
-                break;
-            case DOWNLOAD_TYPES.downloadPNG:
-                downloadPNG();
-                break;
-            case DOWNLOAD_TYPES.downloadCSV:
-                downloadCSV();
-                break;
-            default:
-                break;
+        case DOWNLOAD_TYPES.downloadSVG:
+            chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
+            break;
+        case DOWNLOAD_TYPES.downloadPNG:
+            chartComponentRef.current.chart.exportChart({ type: 'image/png' });
+            break;
+        case DOWNLOAD_TYPES.downloadCSV:
+            chartComponentRef.current.chart.downloadCSV();
+            break;
+        default:
+            break;
         }
     };
-
-    const downloadCSV = () => {
-        chartComponentRef.current.chart.downloadCSV();
-    };
-
-    const downloadPNG = () => {
-        chartComponentRef.current.chart.exportChart({ type: 'image/png' });
-    };
-
-    const downloadSVG = () => {
-        chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
-    };
-
+    
     return (
         <div className="explore-chart-wrapper">
             <div className="chart-header">
@@ -72,9 +60,7 @@ const ExploreChart = (props) => {
                         ]}
                         label={null}
                         triggerButtonIcon={<BurgerSVG />}
-                        handleClick={(name) => {
-                            handleDropDownOptionClicked(name);
-                        }}
+                        handleClick={handleDropDownOptionClicked}
                     />
                 </div>
             </div>
