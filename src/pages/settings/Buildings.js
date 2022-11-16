@@ -35,6 +35,17 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
         '/settings/active-devices',
     ]);
 
+    const handleBuildingClick = (record) => {
+        localStorage.setItem('buildingId', record.building_id);
+        localStorage.setItem('buildingName', record.building_name);
+        localStorage.setItem('buildingTimeZone', record.timezone);
+        BuildingStore.update((s) => {
+            s.BldgId = record.building_id;
+            s.BldgName = record.building_name;
+            s.BldgTimeZone = record.timezone;
+        });
+    };
+
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
@@ -170,15 +181,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                         <div
                                                             className="buildings-name"
                                                             onClick={() => {
-                                                                localStorage.setItem('buildingId', record.building_id);
-                                                                localStorage.setItem(
-                                                                    'buildingName',
-                                                                    record.building_name
-                                                                );
-                                                                BuildingStore.update((s) => {
-                                                                    s.BldgId = record.building_id;
-                                                                    s.BldgName = record.building_name;
-                                                                });
+                                                                handleBuildingClick(record);
                                                             }}>
                                                             {record.building_name}
                                                         </div>
@@ -187,12 +190,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                     <div
                                                         className="buildings-name"
                                                         onClick={() => {
-                                                            localStorage.setItem('buildingId', record.building_id);
-                                                            localStorage.setItem('buildingName', record.building_name);
-                                                            BuildingStore.update((s) => {
-                                                                s.BldgId = record.building_id;
-                                                                s.BldgName = record.building_name;
-                                                            });
+                                                            handleBuildingClick(record);
                                                         }}>
                                                         {record.building_name}
                                                     </div>
