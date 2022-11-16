@@ -730,7 +730,6 @@ const ExploreByBuildings = () => {
         if (selectedBuildingId === '') {
             return;
         }
-
         const fetchExploreChartData = async (id) => {
             let value = apiRequestBody(startDate, endDate, timeZone);
             await fetchExploreBuildingChart(value, selectedBuildingId)
@@ -741,27 +740,38 @@ const ExploreByBuildings = () => {
                     arr = exploreTableData.filter(function (item) {
                         return item.building_id === selectedBuildingId;
                     });
-                    let exploreData = [];
-                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    let result = data.map(Object.values);
+                    let formattedArray=[];
+                    result.map((ele) =>{
+                    if(ele[1]=== "") 
+                    {
+                    formattedArray.push([ele[0], null]) 
+                    }
+                    else{
+                    formattedArray.push([ele[0], Number(ele[1]) ]) 
+                    }
+                    })
+                    // let exploreData = [];
+                    //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: arr[0].building_name,
-                        data: formattedData,
+                        data: formattedArray,
                         id: arr[0].building_id,
                     };
-                    let coll = [];
-                    let sname = arr[0].building_name;
-                    data.map((el) => {
-                        let ab = {};
-                        ab['timestamp'] = el[0];
-                        ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
-                        coll.push(ab);
-                    });
-                    if (objectExplore.length === 0) {
-                        setObjectExplore(coll);
-                    } else {
-                        let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
-                        setObjectExplore(result);
-                    }
+                    // let coll = [];
+                    // let sname = arr[0].building_name;
+                    // data.map((el) => {
+                    //     let ab = {};
+                    //     ab['timestamp'] = el[0];
+                    //     ab[sname] = el[1] === null ? '-' : el[1].toFixed(2);
+                    //     coll.push(ab);
+                    // });
+                    // if (objectExplore.length === 0) {
+                    //     setObjectExplore(coll);
+                    // } else {
+                    //     let result = objectExplore.map((item, i) => Object.assign({}, item, coll[i]));
+                    //     setObjectExplore(result);
+                    // }
                     setSeriesData([...seriesData, recordToInsert]);
                     setSeriesLineData([...seriesLineData, recordToInsert]);
                     setSelectedBuildingId('');
@@ -806,13 +816,24 @@ const ExploreByBuildings = () => {
                 arr = exploreTableData.filter(function (item) {
                     return item.building_id === id;
                 });
-                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                let recordToInsert = {
-                    name: arr[0].building_name,
-                    data: formattedData,
-                    id: arr[0].building_id,
-                };
-                dataarr.push(recordToInsert);
+                let result = data.map(Object.values);
+                    let formattedArray=[];
+                    result.map((ele) =>{
+                    if(ele[1]=== "") 
+                    {
+                    formattedArray.push([ele[0], null]) 
+                    }
+                    else{
+                    formattedArray.push([ele[0], Number(ele[1]) ]) 
+                    }
+                    })
+                    // let exploreData = [];
+                    //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    let recordToInsert = {
+                        name: arr[0].building_name,
+                        data: formattedArray,
+                        id: arr[0].building_id,
+                    };
                 if (selectedAllBuildingId.length === dataarr.length) {
                     setSeriesData(dataarr);
                     setSeriesLineData(dataarr);

@@ -125,7 +125,7 @@ export const options = {
             ch =
                 ch +
                 `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                    .utc(seriesX[0][dataPointIndex])
+                    (seriesX[0][dataPointIndex])
                     .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
             for (let i = 0; i < series.length; i++) {
                 if (isNaN(parseInt(series[i][dataPointIndex])) === false)
@@ -136,7 +136,6 @@ export const options = {
                             series[i][dataPointIndex]
                         )} kWh </td></tr>`;
             }
-
             return `<div class="line-chart-widget-tooltip">
                     <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
                     ${ch}
@@ -147,7 +146,7 @@ export const options = {
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment.utc(timestamp).format('DD/MM HH:00');
+                return moment(timestamp).format('DD/MM HH:00');
             },
         },
     },
@@ -206,7 +205,7 @@ export const optionsLines = {
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment.utc(timestamp).format('DD/MM');
+                return moment(timestamp).format('DD/MM');
             },
         },
     },
