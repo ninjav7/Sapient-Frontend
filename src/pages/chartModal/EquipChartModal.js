@@ -80,6 +80,8 @@ const EquipChartModal = ({
     const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
+    const [isDataChanged, setDataChanged] = useState(false);
+    const [defaultEquipData, setDefaultEquipData] = useState({});
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
@@ -152,10 +154,45 @@ const EquipChartModal = ({
     //     return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     // };
 
+    const validateDataChange = (key, value) => {
+        if (key === 'name') {
+            if (defaultEquipData?.equipments_name === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
+        if (key === 'end_use') {
+            if (defaultEquipData?.end_use_id === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
+        if (key === 'space_id') {
+            if (defaultEquipData?.location_id === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
+        if (key === 'note') {
+            if (defaultEquipData?.note === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
+        if (key === 'equipment_type') {
+            if (defaultEquipData?.equipments_type_id === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
+        setDataChanged(true);
+    };
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
         let equipObj = Object.assign({}, equipmentData);
         obj[key] = value;
+        validateDataChange(key, value);
         if (key === 'space_id') {
             setLocation(value);
         }
@@ -186,6 +223,7 @@ const EquipChartModal = ({
         }
 
         obj[key] = value;
+        validateDataChange(key, value);
         setUpdateEqipmentData(obj);
     };
 
@@ -208,6 +246,8 @@ const EquipChartModal = ({
                     setSelectedTab(0);
                     setEquipResult({});
                     setEquipmentData({});
+                    setUpdateEqipmentData({});
+                    setDataChanged(false);
                     if (activePage === 'explore') {
                         setSelectedTab(0);
                     }
@@ -218,6 +258,20 @@ const EquipChartModal = ({
                     fetchEquipmentData(arr);
                 });
         } catch (error) {}
+    };
+
+    const handleCloseWithoutSave = () => {
+        handleChartClose();
+        setEquipResult({});
+        setEquipmentData({});
+        setDataChanged(false);
+        setUpdateEqipmentData({});
+        if (activePage === 'explore') {
+            setSelectedTab(0);
+        }
+        if (activePage === 'equipment') {
+            setSelectedTab(1);
+        }
     };
 
     const fetchEquipmentChart = async (equipId) => {
@@ -327,9 +381,10 @@ const EquipChartModal = ({
                     let response = res.data.data;
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
-                    // setEndUses(response?.end_use_id);
+
                     setEquipBreakerLink(response?.breaker_link);
                     setEquipmentData(response);
+                    setDefaultEquipData(response);
                 });
             } catch (error) {}
         };
@@ -522,15 +577,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleChartClose();
-                                                    setEquipResult({});
-                                                    setEquipmentData({});
-                                                    if (activePage === 'explore') {
-                                                        setSelectedTab(0);
-                                                    }
-                                                    if (activePage === 'equipment') {
-                                                        setSelectedTab(1);
-                                                    }
+                                                    handleCloseWithoutSave();
                                                 }}>
                                                 Cancel
                                             </button>
@@ -541,7 +588,8 @@ const EquipChartModal = ({
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
                                                     handleSave();
-                                                }}>
+                                                }}
+                                                disabled={!isDataChanged}>
                                                 Save
                                             </button>
                                         </div>
@@ -573,15 +621,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleChartClose();
-                                                    setEquipResult({});
-                                                    setEquipmentData({});
-                                                    if (activePage === 'explore') {
-                                                        setSelectedTab(0);
-                                                    }
-                                                    if (activePage === 'equipment') {
-                                                        setSelectedTab(1);
-                                                    }
+                                                    handleCloseWithoutSave();
                                                 }}>
                                                 Cancel
                                             </button>
@@ -592,7 +632,8 @@ const EquipChartModal = ({
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
                                                     handleSave();
-                                                }}>
+                                                }}
+                                                disabled={!isDataChanged}>
                                                 Save
                                             </button>
                                         </div>
@@ -624,15 +665,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    handleChartClose();
-                                                    setEquipResult({});
-                                                    setEquipmentData({});
-                                                    if (activePage === 'explore') {
-                                                        setSelectedTab(0);
-                                                    }
-                                                    if (activePage === 'equipment') {
-                                                        setSelectedTab(1);
-                                                    }
+                                                    handleCloseWithoutSave();
                                                 }}>
                                                 Cancel
                                             </button>
@@ -643,7 +676,8 @@ const EquipChartModal = ({
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
                                                     handleSave();
-                                                }}>
+                                                }}
+                                                disabled={!isDataChanged}>
                                                 Save
                                             </button>
                                         </div>
@@ -913,7 +947,7 @@ const EquipChartModal = ({
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
                                                         className="font-weight-bold"
-                                                        defaultValue={equipmentData?.equipments_name}
+                                                        value={equipmentData?.equipments_name}
                                                         onChange={(e) => {
                                                             handleChange('name', e.target.value);
                                                         }}

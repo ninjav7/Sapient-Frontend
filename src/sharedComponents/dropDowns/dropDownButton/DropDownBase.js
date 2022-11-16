@@ -32,6 +32,7 @@ const DropDownBase = ({
     header,
     classNameMenu,
     handleClick,
+    closeOnSelect = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -72,31 +73,28 @@ const DropDownBase = ({
                     )}
                 </>
             );
-            return (
-                <>
-                    {isLink ? (
-                        <Link
-                            key={_.uniqueId('drop-down-button-link')}
-                            to={link}
-                            className={cx('drop-down-button-list-item', {
-                                active,
-                                [className]: !!className,
-                            })}>
-                            {dropdownItemContent}
-                        </Link>
-                    ) : (
-                        <div
-                            key={_.uniqueId('drop-down-button-link')}
-                            className={cx('drop-down-button-list-item', {
-                                active,
-                                [className]: !!className,
-                            })}
-                            onClick={() => handleClick(name)}>
-                            {dropdownItemContent}
-                        </div>
-                    )}
-                </>
-            );
+
+            const itemProps = {
+                key: _.uniqueId('drop-down-button-link'),
+                className: cx('drop-down-button-list-item', {
+                    active,
+                    [className]: !!className,
+                }),
+                onClick:
+                    handleClick &&
+                    ((event) => {
+                        handleClick(name, event);
+                        closeOnSelect && setClose();
+                    }),
+                to: link,
+                name,
+            };
+
+            if (isLink) {
+                return <Link {...itemProps}>{dropdownItemContent}</Link>;
+            }
+
+            return <div {...itemProps}>{dropdownItemContent}</div>;
         });
 
     return (
@@ -134,18 +132,21 @@ const DropDownBase = ({
 DropDownBase.propTypes = {
     options: PropTypes.arrayOf(
         PropTypes.shape({
-            link: PropTypes.string.isRequired,
+            link: PropTypes.string,
             label: PropTypes.string.isRequired,
             active: PropTypes.bool,
             className: PropTypes.string,
             icon: PropTypes.node,
             key: PropTypes.string,
+            name: PropTypes.string,
         }).isRequired
     ),
     withSearch: PropTypes.bool,
     header: PropTypes.node,
     triggerButton: PropTypes.node.isRequired,
     classNameMenu: PropTypes.string,
+    handleClick: PropTypes.func,
+    closeOnSelect: PropTypes.bool,
 };
 
 DropDownBase.defaultProps = {
