@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLayer } from 'react-laag';
 import PropTypes from 'prop-types';
 
+import { removeProps } from '../../helpers/helper';
+
 const DropDown = ({ triggerButton, ...props }) => {
     const [isOpen, setOpen] = useState(props.isOpen);
+
+    useEffect(() => {
+        setOpen(props.isOpen);
+    }, [props.isOpen]);
 
     // helper function to close the menu
     const close = () => {
@@ -30,7 +36,7 @@ const DropDown = ({ triggerButton, ...props }) => {
     });
 
     return (
-        <div className="DropDown-wrapper" {...props}>
+        <div className="DropDown-wrapper" {...removeProps(props, 'onOpen', 'isOpen')}>
             {React.cloneElement(triggerButton, { ...triggerProps, onClick: handleClick })}
             {renderLayer(
                 <div {...layerProps}>{isOpen && React.cloneElement(props.children, { ...props.children.props })}</div>

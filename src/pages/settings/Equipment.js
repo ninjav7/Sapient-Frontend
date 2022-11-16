@@ -39,7 +39,8 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
-import EquipChartModal from '../explore/EquipChartModal';
+import EquipChartModal from '../../pages/chartModal/EquipChartModal';
+import { timeZone } from '../../utils/helper';
 import './style.css';
 
 const EquipmentTable = ({
@@ -425,7 +426,11 @@ const EquipmentTable = ({
                                                         <td>
                                                             {record.last_data === ''
                                                                 ? '-'
-                                                                : moment(record?.last_data).fromNow()}
+                                                                : moment
+                                                                      .utc(record?.last_data)
+                                                                      .clone()
+                                                                      .tz(timeZone)
+                                                                      .fromNow()}
                                                         </td>
                                                     )}
                                                     {selectedOptions.some((record) => record.value === 'device_id') && (
@@ -709,7 +714,11 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+
+            let params = `?building_id=${bldgId}&equipment_search=${encodeURIComponent(
+                equipSearch
+            )}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+
             await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
@@ -882,7 +891,9 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${encodeURIComponent(
+                equipSearch
+            )}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1069,7 +1080,7 @@ const Equipment = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                setEquipSearch(e.target.value);
+                                setEquipSearch(e.target.value.trim());
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
@@ -1267,7 +1278,6 @@ const Equipment = () => {
                                     handleChange('end_use', e.value);
                                 }}
                                 className="basic-single font-weight-bold"
-                                isDisabled
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

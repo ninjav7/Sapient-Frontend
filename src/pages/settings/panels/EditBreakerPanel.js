@@ -13,9 +13,7 @@ import {
     generalPassiveDevices,
     getBreakers,
     updatePanel,
-    createBreaker,
     generalEquipments,
-    listSensor,
     resetBreakers,
     deletePanel,
 } from '../../../services/Network';
@@ -77,6 +75,7 @@ const EditBreakerPanel = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+    const isLoading = LoadingStore.useState((s) => s.isLoading);
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
@@ -493,7 +492,9 @@ const EditBreakerPanel = () => {
         const fetchBreakersData = async () => {
             try {
                 setBreakerDataFetched(true);
-
+                LoadingStore.update((s) => {
+                    s.isLoading = true;
+                });
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -508,12 +509,14 @@ const EditBreakerPanel = () => {
                     setBreakerDataFetched(false);
                     LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
+                        s.isLoading = false;
                     });
                 });
             } catch (error) {
                 setBreakerDataFetched(false);
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
+                    s.isLoading = false;
                 });
             }
         };
@@ -579,7 +582,9 @@ const EditBreakerPanel = () => {
         const fetchBreakersData = async () => {
             try {
                 setBreakerDataFetched(true);
-
+                LoadingStore.update((s) => {
+                    s.isLoading = true;
+                });
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -594,10 +599,15 @@ const EditBreakerPanel = () => {
                     setBreakerDataFetched(false);
                     LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
+                        s.isLoading = false;
                     });
                 });
             } catch (error) {
                 setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
             }
         };
 
@@ -1059,11 +1069,9 @@ const EditBreakerPanel = () => {
                             </div>
                         </Row>
 
-                        {isBreakerDataFetched && (
+                        {isLoading && (
                             <Row>
-                                <div
-                                    style={{ width: '50%', height: '30vh', position: 'relative' }}
-                                    className="breaker-loader-styling">
+                                <div className="breaker-loader-styling w-50 position-relative">
                                     <Skeleton count={1} height={50} width={200} />
                                     <Skeleton count={1} height={50} width={200} />
                                     <Skeleton count={1} height={50} width={200} />
@@ -1078,7 +1086,7 @@ const EditBreakerPanel = () => {
                             </Row>
                         )}
 
-                        {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
+                        {activePanelType === 'distribution' && !isLoading && !panelDataFetched && (
                             <>
                                 <Row className="main-breaker-styling">
                                     <div className="breaker-container">
@@ -1155,7 +1163,7 @@ const EditBreakerPanel = () => {
                             </>
                         )}
 
-                        {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
+                        {activePanelType === 'disconnect' && !isLoading && !panelDataFetched && (
                             <div className="row m-4">
                                 <ReactFlow
                                     nodes={disconnectedBreakersNodes}
@@ -1181,7 +1189,7 @@ const EditBreakerPanel = () => {
                             </CardHeader>
 
                             <CardBody>
-                                {isBreakerDataFetched ? (
+                                {isLoading ? (
                                     <Form>
                                         <Skeleton count={1} height={40} width={150} />
                                     </Form>
@@ -1217,7 +1225,7 @@ const EditBreakerPanel = () => {
                         </CardHeader>
 
                         <CardBody>
-                            {isBreakerDataFetched ? (
+                            {isLoading ? (
                                 <Form>
                                     <Skeleton count={1} height={40} width={150} />
                                 </Form>
