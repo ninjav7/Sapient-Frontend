@@ -9,8 +9,8 @@ import DonutChartLabels from './DonutChartLabels';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { ReactComponent as Download } from '../assets/icons/download.svg';
-import { getCSVDataExport } from './utils';
 import './style.scss';
+import { getDonutChartCSVExport } from '../helpers/chartsExport';
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
@@ -79,7 +79,7 @@ const DonutChartWidget = ({
                                         size={Button.Sizes.sm}
                                         icon={<Download />}
                                         type={Button.Type.secondaryGrey}
-                                        onClick={() => getCSVDataExport(labels, series, pageType)}
+                                        onClick={() => getDonutChartCSVExport(labels, series, pageType)}
                                         className="mr-4"
                                     />
                                     <Button
@@ -99,7 +99,7 @@ const DonutChartWidget = ({
                                     icon={faDownload}
                                     size="md"
                                     className="download-chart-btn mouse-pointer mr-3 mt-3"
-                                    onClick={() => getCSVDataExport(labels, series, pageType)}
+                                    onClick={() => getDonutChartCSVExport(labels, series, pageType)}
                                 />
                             </div>
                         )}

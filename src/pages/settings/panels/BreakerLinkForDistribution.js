@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
-import { getBezierPath, getEdgeCenter, getMarkerEnd } from 'react-flow-renderer';
-import { BreakersStore } from '../../../store/BreakersStore';
+import { getBezierPath, getEdgeCenter } from 'react-flow-renderer';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
-import { LoadingStore } from '../../../store/LoadingStore';
-import './panel-style.css';
 import { BuildingStore } from '../../../store/BuildingStore';
+import { LoadingStore } from '../../../store/LoadingStore';
+import { BreakersStore } from '../../../store/BreakersStore';
+import { setProcessing, breakerLinkingAlerts } from './utils';
+import './panel-style.css';
 
 const foreignObjectSize = 30;
 
@@ -172,7 +173,9 @@ export default function CustomEdge({
                     let response = res?.data;
                     triggerBreakerAPI();
                 });
-        } catch (error) {}
+        } catch (error) {
+            setProcessing(false);
+        }
     };
 
     const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
@@ -192,15 +195,16 @@ export default function CustomEdge({
                     let response = res?.data;
                     triggerBreakerAPI();
                 });
-        } catch (error) {}
+        } catch (error) {
+            setProcessing(false);
+        }
     };
 
     const linkBreakers = () => {
         // breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3
         if (sourceBreakerObj?.data?.breakerType === 3 || targetBreakerObj?.data?.breakerType === 3) {
-            alert(
-                `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-            );
+            breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
+            return;
         }
 
         // breakerLink= 1:1
@@ -208,8 +212,9 @@ export default function CustomEdge({
             if (panelData?.voltage === '600') {
                 // Setup Triple Breaker
                 if (targetBreakerObj?.data?.breaker_number + 2 > distributedBreakersData.length) {
-                    alert(
-                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    breakerLinkingAlerts(
+                        sourceBreakerObj?.data?.breaker_number,
+                        targetBreakerObj?.data?.breaker_number
                     );
                     return;
                 }
@@ -219,25 +224,30 @@ export default function CustomEdge({
                 );
 
                 if (sourceBreakerObj?.data?.breakerType === 3) {
-                    alert(
-                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    breakerLinkingAlerts(
+                        sourceBreakerObj?.data?.breaker_number,
+                        targetBreakerObj?.data?.breaker_number
                     );
                     return;
                 }
 
                 if (targetBreakerObj?.data?.breakerType === 3) {
-                    alert(
-                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    breakerLinkingAlerts(
+                        sourceBreakerObj?.data?.breaker_number,
+                        targetBreakerObj?.data?.breaker_number
                     );
                     return;
                 }
 
                 if (thirdBreakerObj?.data?.breakerType === 3) {
-                    alert(
-                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    breakerLinkingAlerts(
+                        sourceBreakerObj?.data?.breaker_number,
+                        targetBreakerObj?.data?.breaker_number
                     );
                     return;
                 }
+
+                setProcessing(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -269,6 +279,8 @@ export default function CustomEdge({
                 return;
             }
 
+            setProcessing(true);
+
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
@@ -291,23 +303,22 @@ export default function CustomEdge({
 
         // breakerLink= 2:2
         if (sourceBreakerObj?.data?.breakerType === 2 && targetBreakerObj?.data?.breakerType === 2) {
-            alert(
-                `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-            );
+            breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
+            return;
         }
 
         // breakerLink= 1:2 && breakerLink= 2:1
         if (sourceBreakerObj?.data?.breakerType === 2 || targetBreakerObj?.data?.breakerType === 2) {
             if (panelData?.voltage === '120/240') {
-                alert(
-                    `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
-                );
+                breakerLinkingAlerts(sourceBreakerObj?.data?.breaker_number, targetBreakerObj?.data?.breaker_number);
                 return;
             }
             if (sourceBreakerObj?.data?.breakerType === 2) {
                 let parentBreakerObj = distributedBreakersData.find(
                     (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
+
+                setProcessing(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -341,6 +352,8 @@ export default function CustomEdge({
                 let thirdBreakerObj = distributedBreakersData.find(
                     (record) => record?.data.parentBreaker === targetBreakerObj?.id
                 );
+
+                setProcessing(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -382,6 +395,8 @@ export default function CustomEdge({
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
+                setProcessing(true);
+
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
                     voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
@@ -418,6 +433,8 @@ export default function CustomEdge({
                 let parentBreakerObj = distributedBreakersData.find(
                     (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
+
+                setProcessing(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -457,6 +474,8 @@ export default function CustomEdge({
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
+                setProcessing(true);
+
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
                     voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
@@ -494,6 +513,8 @@ export default function CustomEdge({
                     (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
+                setProcessing(true);
+
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
                     voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
@@ -524,6 +545,8 @@ export default function CustomEdge({
             }
         }
         if (sourceBreakerObj?.data?.breakerType === 2 && targetBreakerObj?.data?.breakerType === 2) {
+            setProcessing(true);
+
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
