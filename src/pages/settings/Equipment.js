@@ -714,7 +714,11 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+
+            let params = `?building_id=${bldgId}&equipment_search=${encodeURIComponent(
+                equipSearch
+            )}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+
             await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let response = res.data;
                 setGeneralEquipmentData(response.data);
@@ -887,7 +891,9 @@ const Equipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
+            let params = `?building_id=${bldgId}&equipment_search=${encodeURIComponent(
+                equipSearch
+            )}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
@@ -1074,7 +1080,7 @@ const Equipment = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                setEquipSearch(e.target.value);
+                                setEquipSearch(e.target.value.trim());
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>

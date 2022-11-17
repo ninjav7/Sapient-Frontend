@@ -20,18 +20,31 @@ const SearchField = (props) => {
     );
 };
 
-const DropDownBase = (props) => {
+const DropDownBase = ({
+    onOpen,
+    onClose,
+    options,
+    withSearch,
+    children,
+    isLink,
+    triggerButton,
+    placement,
+    header,
+    classNameMenu,
+    handleClick,
+    closeOnSelect = true,
+}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
     const setOpen = () => {
         setIsOpen(true);
-        props.onOpen && props.onOpen();
+        onOpen && onOpen();
     };
 
     const setClose = () => {
         setIsOpen(false);
-        props.onClose && props.onClose();
+        onClose && onClose();
     };
 
     const handleSearchChange = (event) => {
@@ -42,20 +55,11 @@ const DropDownBase = (props) => {
         isOpen: isOpen,
     });
 
-    const triggerButton =
-        typeof props.triggerButton === 'function' ? props.triggerButton({ isOpen }) : props.triggerButton;
-
-    const links = props.links
+    const dropdownItems = options
         .filter(({ label }) => label.toLowerCase().includes(searchQuery.toLowerCase()))
-        .map(({ link, label, active, className, icon, key }) => {
-            return (
-                <Link
-                    key={_.uniqueId('drop-down-button-link')}
-                    to={link}
-                    className={cx('drop-down-button-list-item', {
-                        active,
-                        [className]: !!className,
-                    })}>
+        .map(({ link, name, label, active, className, icon, key }) => {
+            const dropdownItemContent = (
+                <>
                     {icon &&
                         React.cloneElement(icon, {
                             ...icon.props,
@@ -67,30 +71,52 @@ const DropDownBase = (props) => {
                             {key}
                         </Typography.Body>
                     )}
-                </Link>
+                </>
             );
+
+            const itemProps = {
+                key: _.uniqueId('drop-down-button-link'),
+                className: cx('drop-down-button-list-item', {
+                    active,
+                    [className]: !!className,
+                }),
+                onClick:
+                    handleClick &&
+                    ((event) => {
+                        handleClick(name, event);
+                        closeOnSelect && setClose();
+                    }),
+                to: link,
+                name,
+            };
+
+            if (isLink) {
+                return <Link {...itemProps}>{dropdownItemContent}</Link>;
+            }
+
+            return <div {...itemProps}>{dropdownItemContent}</div>;
         });
-    
+
     return (
         <div className={dropDownClasses}>
             <DropDown
-                placement={props.placement}
+                placement={placement}
                 isOpen={isOpen}
                 triggerButton={React.cloneElement(triggerButton, { ...triggerButton.props })}
                 onOpen={setOpen}
                 onClose={setClose}>
-                <div className={cx('drop-down-button-menu', props.classNameMenu)}>
-                    {props.header && (
-                        <div className={cx('drop-down-button-menu-header', 'border-bottom', props.header.className)}>
-                            {React.cloneElement(props.header, { ...props.header.props })}
+                <div className={cx('drop-down-button-menu', classNameMenu)}>
+                    {header && (
+                        <div className={cx('drop-down-button-menu-header', 'border-bottom', header.className)}>
+                            {React.cloneElement(header, { ...header.props })}
                         </div>
                     )}
-                    {props.withSearch && <SearchField onChange={handleSearchChange} value={searchQuery} />}
+                    {withSearch && <SearchField onChange={handleSearchChange} value={searchQuery} />}
                     <nav>
-                        {links.length ? (
-                            links
-                        ) : props.children ? (
-                            props.children
+                        {dropdownItems.length ? (
+                            dropdownItems
+                        ) : children ? (
+                            children
                         ) : (
                             <Typography.Body size={Typography.Sizes.xs} className="p-2 text-center">
                                 No options
@@ -104,25 +130,28 @@ const DropDownBase = (props) => {
 };
 
 DropDownBase.propTypes = {
-    links: PropTypes.arrayOf(
+    options: PropTypes.arrayOf(
         PropTypes.shape({
-            link: PropTypes.string.isRequired,
+            link: PropTypes.string,
             label: PropTypes.string.isRequired,
             active: PropTypes.bool,
             className: PropTypes.string,
             icon: PropTypes.node,
             key: PropTypes.string,
+            name: PropTypes.string,
         }).isRequired
     ),
     withSearch: PropTypes.bool,
     header: PropTypes.node,
     triggerButton: PropTypes.node.isRequired,
     classNameMenu: PropTypes.string,
+    handleClick: PropTypes.func,
+    closeOnSelect: PropTypes.bool,
 };
 
 DropDownBase.defaultProps = {
     withSearch: false,
-    links: [],
+    options: [],
 };
 
 export default DropDownBase;

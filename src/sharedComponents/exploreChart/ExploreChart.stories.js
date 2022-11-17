@@ -1,9 +1,10 @@
 import React from 'react';
-import LineChart from './LineChart';
+import ExploreChart from './ExploreChart';
 import { mockedData, mockedData2, mockedData3 } from './mock';
+
 export default {
-    title: 'Charts/LineChart',
-    component: LineChart,
+    title: 'Charts/ExploreChart',
+    component: ExploreChart,
 };
 
 export const Default = () => {
@@ -13,5 +14,5 @@ export const Default = () => {
         maxDate: new Date('2022-11-1').getTime(),
     };
 
-    return <LineChart title={'Chart title'} subTitle={'Chart subtitle'} data={data} dateRange={dateRange} />;
+    return <ExploreChart title={'Chart title'} subTitle={'Chart subtitle'} data={data} dateRange={dateRange} />;
 };

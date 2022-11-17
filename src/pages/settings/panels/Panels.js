@@ -160,7 +160,7 @@ const Panels = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&panel_search=${panelSearch}`;
+            let params = `?building_id=${bldgId}&panel_search=${encodeURIComponent(panelSearch)}`;
             await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
                 setPanelData(res.data);
                 setIsPanelDataFetched(false);
@@ -261,7 +261,7 @@ const Panels = () => {
                             aria-describedby="search-addon"
                             value={panelSearch}
                             onChange={(e) => {
-                                setPanelSearch(e.target.value);
+                                setPanelSearch(e.target.value.trim());
                             }}
                         />
                         <span
