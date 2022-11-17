@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Row } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';

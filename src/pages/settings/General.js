@@ -734,7 +734,7 @@ const General = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card mt-4">
                         <CardHeader>
                             <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Building Details
@@ -880,7 +880,7 @@ const General = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card mt-2">
                         <CardHeader>
                             <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Address
@@ -1062,7 +1062,7 @@ const General = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card mt-2">
                         <CardHeader>
                             <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Date & Time
@@ -1130,7 +1130,7 @@ const General = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card mt-2">
                         <CardHeader>
                             <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Operating Hours
@@ -1745,7 +1745,7 @@ const General = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card mt-2">
                         <CardHeader>
                             <h5 className="header-title" style={{ margin: '2px' }}>
                                 Danger Zone

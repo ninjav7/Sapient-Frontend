@@ -332,11 +332,10 @@ const IndividualPassiveDevice = () => {
                     </div>
                 </div>
 
-                <div className="container">
-                    <div className="row">
+                    <div className="row mt-4">
                         <div className="col-4">
                             <h5 className="device-title">Device Details</h5>
-                            <div className="mt-2">
+                            <div className="mt-4">
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
@@ -499,7 +498,6 @@ const IndividualPassiveDevice = () => {
                             )}
                         </div>
                     </div>
-                </div>
             </div>
 
             <DeviceChartModel
