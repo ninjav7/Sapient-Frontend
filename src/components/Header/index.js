@@ -70,26 +70,23 @@ const Header = ({ type, title }) => {
     return (
         <React.Fragment>
             {type === 'page' && (
-                <Row className="page-title">
-                    <Col className="header-container">
-                        <span className="heading-style">{title}</span>
-
-                        <div
-                            className="btn-group custom-button-group header-widget-styling"
-                            role="group"
-                            aria-label="Basic example">
-                            <div>
-                                <TimeFrameSelector
-                                    onCustomDateChange={onCustomDateChange}
-                                    onDateFilterChange={onDateFilterChange}
-                                    rangeDate={rangeDate}
-                                    timeOptions={customOptions}
-                                    defaultValue={filterPeriod}
-                                />
-                            </div>
+                <div className="d-flex justify-content-between">
+                    <div className="heading-style">{title}</div>
+                    <div
+                        className="btn-group custom-button-group header-widget-styling"
+                        role="group"
+                        aria-label="Basic example">
+                        <div>
+                            <TimeFrameSelector
+                                onCustomDateChange={onCustomDateChange}
+                                onDateFilterChange={onDateFilterChange}
+                                rangeDate={rangeDate}
+                                timeOptions={customOptions}
+                                defaultValue={filterPeriod}
+                            />
                         </div>
-                    </Col>
-                </Row>
+                    </div>
+                </div>
             )}
 
             {type === 'modal' && (
