@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import 'moment-timezone';
-import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
 import StackedBarChart from '../charts/StackedBarChart';
-import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
 import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
@@ -19,13 +16,11 @@ import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory } from 'react-router-dom';
-import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
+import StackedColumnChart from '../../sharedComponents/stackedColumnChart/StackedColumnChart';
+import { fetchTrendType } from './utils';
 
 const EndUsesPage = () => {
-    const cookies = new Cookies();
-    const userdata = cookies.get('user');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
@@ -186,10 +181,6 @@ const EndUsesPage = () => {
 
     const history = useHistory();
 
-    const fetchTrendType = (now, old) => {
-        return now >= old ? TRENDS_BADGE_TYPES.UPWARD_TREND : TRENDS_BADGE_TYPES.DOWNWARD_TREND;
-    };
-
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
         history.push({
@@ -278,17 +269,6 @@ const EndUsesPage = () => {
                                             ),
                                             text: 'since last period',
                                         },
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.yearly
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.yearly
-                                            ),
-                                            text: 'from same period last year',
-                                        },
                                     ],
                                 },
                                 {
@@ -310,17 +290,6 @@ const EndUsesPage = () => {
                                             ),
                                             text: 'since last period',
                                         },
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.yearly
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.yearly
-                                            ),
-                                            text: 'from same period last year',
-                                        },
                                     ],
                                 },
                             ],
@@ -341,11 +310,14 @@ const EndUsesPage = () => {
             await fetchEndUsesChart(bldgId, payload)
                 .then((res) => {
                     let responseData = res?.data;
+
+                    // Working loop with ApexChart
                     responseData.forEach((endUse) => {
                         endUse.data.forEach((record) => {
                             record.y = parseInt(record.y / 1000);
                         });
                     });
+
                     setBarChartData(responseData);
                     setIsEndUsesChartLoading(false);
                 })
@@ -368,59 +340,51 @@ const EndUsesPage = () => {
             <Header title="End Uses" type="page" />
 
             {isEndUsesDataFetched ? (
-                <Row className="ml-2">
-                    <Skeleton count={1} color="#f9fafb" height={120} width={650} />
-                </Row>
+                <div className="mt-4">
+                    <Skeleton count={1} color="#f9fafb" height={90} width={650} />
+                </div>
             ) : (
-                <Row className="ml-2">
-                    <div className="card-group button-style mt-1 mb-0">
-                        {endUsesData?.map((record, index) => {
-                            return (
-                                <div className="card usage-card-box-style button-style">
-                                    <div className="card-body">
-                                        <div className="enduses-content-1">
-                                            <p className="dot" style={{ backgroundColor: record?.color }}></p>
-                                            <span className="card-title card-title-style">{record?.device}</span>
-                                        </div>
-                                        <div className="enduses-content-2">
-                                            <span className="card-text card-content-style">
-                                                {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                                    maximumFractionDigits: 0,
-                                                })}
-                                            </span>
-                                            <span className="card-unit-style">kWh</span>
-                                        </div>
+                <div className="card-group button-style mt-4">
+                    {endUsesData?.map((record, index) => {
+                        return (
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div className="enduses-content-1">
+                                        <p className="dot" style={{ backgroundColor: record?.color }}></p>
+                                        <span className="card-title card-title-style">{record?.device}</span>
+                                    </div>
+                                    <div className="enduses-content-2">
+                                        <span className="card-text card-content-style">
+                                            {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
+                                                maximumFractionDigits: 0,
+                                            })}
+                                        </span>
+                                        <span className="card-unit-style">kWh</span>
                                     </div>
                                 </div>
-                            );
-                        })}
-                    </div>
-                </Row>
+                            </div>
+                        );
+                    })}
+                </div>
             )}
 
             {isEndUsesChartLoading ? (
-                <Row>
-                    <Col xl={12}>
-                        <div className="loader-center-style" style={{ height: '400px' }}>
-                            <Spinner className="m-2" color={'primary'} />
-                        </div>
-                    </Col>
-                </Row>
+                <div className="loader-center-style mt-4" style={{ height: '400px' }}>
+                    <Spinner color={'primary'} />
+                </div>
             ) : (
-                <Row className="ml-1 mt-4">
-                    <Col xl={12}>
-                        <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
-                    </Col>
-                </Row>
+                <div className="mt-4">
+                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
+                </div>
             )}
 
-            <Row className="ml-4 mt-4">
+            <div className="mt-4">
                 <TopEndUsesWidget
                     title="Top Systems by Usage"
                     subtitle="Click explore to see more energy usage details."
                     data={topEndUsesData}
                 />
-            </Row>
+            </div>
         </React.Fragment>
     );
 };

@@ -37,8 +37,7 @@ const RoleTable = ({ roleDataList, permissionData, setProcessing }) => {
 
     return (
         <Card>
-            <CardBody>
-                <Table className="mb-0 bordered table-hover">
+            <Table className="mt-4 mb-0 bordered table-hover">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -92,8 +91,7 @@ const RoleTable = ({ roleDataList, permissionData, setProcessing }) => {
                             )}
                         </>
                     )}
-                </Table>
-            </CardBody>
+            </Table>
         </Card>
     );
 };
@@ -136,7 +134,7 @@ const Roles = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Roles</span>
 
@@ -160,7 +158,7 @@ const Roles = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2 ml-2">
+            <Row className="mt-4">
                 <Col xl={3}>
                     <div className="">
                         <div className="active-sensor-header">

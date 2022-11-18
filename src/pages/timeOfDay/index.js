@@ -992,11 +992,11 @@ const TimeOfDay = () => {
 
     return (
         <React.Fragment>
-            <div className="ml-2">
+            <div>
                 <Header title="Time of Day" type="page" />
             </div>
 
-            <Row className="ml-2 mb-2">
+            <Row className="mt-4 mb-2">
                 <Col xl={5}>
                     <EndUseTotals
                         series={donutChartData}
@@ -1017,7 +1017,7 @@ const TimeOfDay = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2 ml-2">
+            <Row className="mt-4">
                 <Col xl={12}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>

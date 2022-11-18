@@ -327,16 +327,16 @@ const IndividualPassiveDevice = () => {
                         </div>
                         <div className="mt-2 single-passive-tabs-style">
                             <span className="mr-3 single-passive-tab-active">Configure</span>
-                            <span className="mr-3 single-passive-tab">History</span>
+                            {/* Commented for future use as part of PLT-533  */}
+                            {/* <span className="mr-3 single-passive-tab">History</span> */}
                         </div>
                     </div>
                 </div>
 
-                <div className="container">
-                    <div className="row">
+                    <div className="row mt-4">
                         <div className="col-4">
                             <h5 className="device-title">Device Details</h5>
-                            <div className="mt-2">
+                            <div className="mt-4">
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
@@ -499,7 +499,6 @@ const IndividualPassiveDevice = () => {
                             )}
                         </div>
                     </div>
-                </div>
             </div>
 
             <DeviceChartModel

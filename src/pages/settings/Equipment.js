@@ -142,12 +142,11 @@ const EquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody>
                     {userPermission?.user_role === 'admin' ||
                     (userPermission &&
                         userPermission?.permissions?.permissions?.building_equipment_permission?.view) ? (
                         <>
-                            <Table className="mb-0 bordered table-hover">
+                            <Table className="mt-4 mb-0 bordered table-hover">
                                 <thead>
                                     <tr className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
@@ -558,9 +557,8 @@ const EquipmentTable = ({
                             </div>
                         </>
                     ) : (
-                        <p>You don't have view access</p>
+                        <p className='mt-4'>You don't have view access</p>
                     )}
-                </CardBody>
             </Card>
 
             {/* {userPermission?.user_role === 'admin' ||
@@ -1044,7 +1042,7 @@ const Equipment = () => {
                     <span className="heading-style">Equipment</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+                        <div>
                             {userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.building_equipment_permission?.create ? (
                                 <button
@@ -1070,9 +1068,9 @@ const Equipment = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                    <div class="input-group rounded">
                         <input
                             type="search"
                             class="form-control rounded"

@@ -82,8 +82,8 @@ const AccountSettings = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
-                <Col className="header-container" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Row className="page-title">
+                <Col className="header-container d-flex justify-content-between">
                     <span className="heading-style">General Account Settings</span>
                     {userPermission?.user_role === 'admin' ||
                     userPermission?.permissions?.permissions?.account_general_permission?.edit ? (
@@ -115,9 +115,9 @@ const AccountSettings = () => {
                 </Col>
             </Row>
 
-            <Row>
+            <Row className='mt-4'>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card">
                         <CardHeader>
                             <h5 className="header-title" style={{ margin: '2px' }}>
                                 Account Details

@@ -46,30 +46,33 @@ const TopEndUsesWidget = (props) => {
             <div className="w-100">
                 <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
                 <Typography.Body size={Typography.Sizes.xs}>{props.subtitle}</Typography.Body>
-                {/* <Brick /> */}
             </div>
-            {props.data.map((topEndItem) => {
-                return (
-                    <div className="top-end-uses">
-                        <div className="d-flex align-items-center">
-                            <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
-                            {topEndItem.viewHandler && (
-                                <Button
-                                    onClick={topEndItem.viewHandler}
-                                    label="View"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                />
-                            )}
+            <div className="top-end-uses-container w-100">
+                {props.data.map((topEndItem) => {
+                    return (
+                        <div className="top-end-uses">
+                            <div className="d-flex align-items-center">
+                                <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
+                                {topEndItem.viewHandler && (
+                                    <Button
+                                        onClick={topEndItem.viewHandler}
+                                        label="View"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                    />
+                                )}
+                            </div>
+
+                            <Brick />
+
+                            {topEndItem.items &&
+                                topEndItem.items.map((item) => (
+                                    <TopEndUsesWidgetContent {...item} key={generateID()} />
+                                ))}
                         </div>
-
-                        <Brick />
-
-                        {topEndItem.items &&
-                            topEndItem.items.map((item) => <TopEndUsesWidgetContent {...item} key={generateID()} />)}
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
         </div>
     );
 };

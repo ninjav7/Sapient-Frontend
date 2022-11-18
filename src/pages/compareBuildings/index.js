@@ -61,8 +61,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
 
     return (
         <Card>
-            <CardBody>
-                <Table className="mb-0 bordered">
+                <Table className="mt-4 mb-0 bordered">
                     <thead>
                         <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'name') && (
@@ -584,7 +583,6 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                         </tbody>
                     )}
                 </Table>
-            </CardBody>
         </Card>
     );
 };
@@ -692,9 +690,9 @@ const CompareBuildings = () => {
         <React.Fragment>
             <Header title="Compare Buildings" type="page" />
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div className="input-group rounded ml-4">
+                    <div className="input-group rounded">
                         <input
                             type="search"
                             className="form-control rounded"

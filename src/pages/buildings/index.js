@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Row } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -420,12 +419,12 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
-            <Row lg={12} className="mb-4 bldg-kpi-style">
+            <div className="mt-4 mb-4">
                 <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
-            </Row>
+            </div>
 
             <div className="bldg-page-grid-style">
-                <div className="ml-2">
+                <div>
                     <EnergyConsumptionByEndUse
                         title="Energy Consumption by End Use"
                         subtitle="Energy Totals"
