@@ -71,7 +71,7 @@ const Header = ({ type, title }) => {
         <React.Fragment>
             {type === 'page' && (
                 <div className="d-flex justify-content-between">
-                    <div className="heading-style">{title}</div>
+                    <div className="heading-style d-flex align-items-center">{title}</div>
                     <div
                         className="btn-group custom-button-group header-widget-styling"
                         role="group"
