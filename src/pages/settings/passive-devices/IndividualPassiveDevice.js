@@ -327,7 +327,8 @@ const IndividualPassiveDevice = () => {
                         </div>
                         <div className="mt-2 single-passive-tabs-style">
                             <span className="mr-3 single-passive-tab-active">Configure</span>
-                            <span className="mr-3 single-passive-tab">History</span>
+                            {/* Commented for future use as part of PLT-533  */}
+                            {/* <span className="mr-3 single-passive-tab">History</span> */}
                         </div>
                     </div>
                 </div>
