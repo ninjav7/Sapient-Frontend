@@ -16,12 +16,11 @@ import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory } from 'react-router-dom';
-import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import StackedColumnChart from '../../sharedComponents/stackedColumnChart/StackedColumnChart';
+import { fetchTrendType } from './utils';
 
 const EndUsesPage = () => {
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
@@ -182,10 +181,6 @@ const EndUsesPage = () => {
 
     const history = useHistory();
 
-    const fetchTrendType = (now, old) => {
-        return now >= old ? TRENDS_BADGE_TYPES.UPWARD_TREND : TRENDS_BADGE_TYPES.DOWNWARD_TREND;
-    };
-
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
         history.push({
@@ -274,17 +269,6 @@ const EndUsesPage = () => {
                                             ),
                                             text: 'since last period',
                                         },
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.yearly
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.yearly
-                                            ),
-                                            text: 'from same period last year',
-                                        },
                                     ],
                                 },
                                 {
@@ -305,17 +289,6 @@ const EndUsesPage = () => {
                                                 record?.after_hours_energy_consumption?.old
                                             ),
                                             text: 'since last period',
-                                        },
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.yearly
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.yearly
-                                            ),
-                                            text: 'from same period last year',
                                         },
                                     ],
                                 },

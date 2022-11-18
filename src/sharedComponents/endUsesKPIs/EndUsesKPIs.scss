@@ -1,7 +1,7 @@
 @import '../../assets/scss/colors';
 @import '../assets/scss/helpers';
 
-.top-end-uses {
+.end-uses-kpi {
     &-wrapper {
         display: flex;
         column-gap: 1.5rem;
@@ -9,21 +9,16 @@
         flex-wrap: wrap;
     }
 
-    &-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 1.5rem;
-    }
-
     @extend .borders-base;
     display: inline-block;
-    min-width: 22.8125rem;
+    min-width: 100%;
+    min-height: 9rem;
 
     padding: 1.5rem;
 
-    .top-end-uses-widget-content {
+    .end-uses-kpi-widget-content {
         &:not(:last-child) {
-            margin-bottom: 1.5rem;
+            margin-right: 2rem;
         }
     }
 
@@ -37,7 +32,7 @@
     }
 
     &-trends-badge-wrapper {
-        .top-end-uses-trend-badge:not(:last-child) {
+        .end-uses-kpi-trend-badge:not(:last-child) {
             margin-bottom: 0.25rem;
         }
     }
