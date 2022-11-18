@@ -1435,7 +1435,7 @@ const ExploreByEquipment = () => {
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: legendName,
-                        data: formattedData,
+                        data: data,
                         id: arr[0].equipment_id,
                     };
                     let coll = [];
