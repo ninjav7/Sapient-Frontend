@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import StackedBarChart from './StackedBarChart';
+import { UNITS } from '../../constants/units';
 import './style.scss';
 
 const EndUsesCategory = ({ endUsesData }) => {
@@ -15,7 +16,7 @@ const EndUsesCategory = ({ endUsesData }) => {
                         </div>
                         <div className="d-flex">
                             <p className="enduse-type-text"> {record?.energy_consumption?.now}</p>
-                            <div className="enduse-type-unit"> {'kWh'} </div>
+                            <div className="enduse-type-unit"> {UNITS.KWH} </div>
                         </div>
                     </div>
                 );
@@ -41,12 +42,17 @@ const EndUsesTypeWidget = ({ endUsesData, barChartOptions, barChartData }) => {
 };
 
 EndUsesTypeWidget.propTypes = {
-    title: PropTypes.string.isRequired,
-    subtitle: PropTypes.string.isRequired,
-    height: PropTypes.string,
-    width: PropTypes.string,
-    startEndDayCount: PropTypes.number,
-    series: PropTypes.arrayOf(
+    endUsesData: PropTypes.arrayOf(
+        PropTypes.shape({
+            device: PropTypes.string.isRequired,
+            energy_consumption: PropTypes.object.isRequired,
+            after_hours_energy_consumption: PropTypes.object.isRequired,
+            color: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    barChartOptions: PropTypes.object.isRequired,
+    barChartData: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,
             data: PropTypes.arrayOf(
@@ -55,6 +61,18 @@ EndUsesTypeWidget.propTypes = {
                     y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
                 }).isRequired
             ),
+        })
+    ).isRequired,
+};
+
+EndUsesCategory.propTypes = {
+    endUsesData: PropTypes.arrayOf(
+        PropTypes.shape({
+            device: PropTypes.string.isRequired,
+            energy_consumption: PropTypes.object.isRequired,
+            after_hours_energy_consumption: PropTypes.object.isRequired,
+            color: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
         })
     ).isRequired,
 };

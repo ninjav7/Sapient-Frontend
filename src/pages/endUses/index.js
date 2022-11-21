@@ -296,6 +296,7 @@ const EndUsesPage = () => {
                         }
                         data.push(record);
                     });
+                    console.log('SSR EndUses Data => ', data);
                     setEndUsesData(data);
 
                     setTopEndUsesData(endUsesList);
@@ -320,6 +321,7 @@ const EndUsesPage = () => {
                         });
                     });
 
+                    console.log('responseData :>> ', responseData);
                     setBarChartData(responseData);
                     setIsEndUsesChartLoading(false);
                 })
