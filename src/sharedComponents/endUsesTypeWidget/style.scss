@@ -68,6 +68,8 @@
 }
 
 .enduse-type {
+    min-height: 3.5rem;
+
     &-title {
         margin: 0 0 0.3125rem 0;
         color: $primary-gray-700;

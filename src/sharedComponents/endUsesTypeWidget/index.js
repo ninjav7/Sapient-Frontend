@@ -5,7 +5,7 @@ import './style.scss';
 
 const EndUsesCategory = ({ endUsesData }) => {
     return (
-        <div className="w-50 d-flex justify-content-start">
+        <div className="w-50 d-flex justify-content-start enduse-type">
             {endUsesData?.map((record) => {
                 return (
                     <div className={`enduse-type-body`}>
