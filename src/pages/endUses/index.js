@@ -3,22 +3,19 @@ import moment from 'moment';
 import 'moment-timezone';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
-import StackedBarChart from '../charts/StackedBarChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Spinner } from 'reactstrap';
-import Skeleton from 'react-loading-skeleton';
 import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
 import { useHistory } from 'react-router-dom';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
-import StackedColumnChart from '../../sharedComponents/stackedColumnChart/StackedColumnChart';
 import { fetchTrendType } from './utils';
+import EndUsesTypeWidget from '../../sharedComponents/endUsesTypeWidget';
 
 const EndUsesPage = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -221,27 +218,6 @@ const EndUsesPage = () => {
             await fetchEndUses(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
-                    let data = [];
-                    response.forEach((record, index) => {
-                        if (index === 0) {
-                            record.color = '#66A4CE';
-                        }
-                        if (index === 1) {
-                            record.color = '#FBE384';
-                        }
-                        if (index === 2) {
-                            record.color = '#59BAA4';
-                        }
-                        if (index === 3) {
-                            record.color = '#80E1D9';
-                        }
-                        if (index === 4) {
-                            record.color = '#847CB5';
-                        }
-                        data.push(record);
-                    });
-                    setEndUsesData(data);
-
                     let endUsesList = [];
                     response.forEach((record, index) => {
                         let obj = {
@@ -296,6 +272,33 @@ const EndUsesPage = () => {
                         };
                         endUsesList.push(obj);
                     });
+
+                    let data = [];
+                    response.forEach((record, index) => {
+                        record.energy_consumption.now = formatConsumptionValue(
+                            Math.round(record?.energy_consumption?.now / 1000),
+                            0
+                        );
+                        if (index === 0) {
+                            record.color = '#66A4CE';
+                        }
+                        if (index === 1) {
+                            record.color = '#FBE384';
+                        }
+                        if (index === 2) {
+                            record.color = '#59BAA4';
+                        }
+                        if (index === 3) {
+                            record.color = '#80E1D9';
+                        }
+                        if (index === 4) {
+                            record.color = '#847CB5';
+                        }
+                        data.push(record);
+                    });
+                    console.log('SSR EndUses Data => ', data);
+                    setEndUsesData(data);
+
                     setTopEndUsesData(endUsesList);
                     setIsEndUsesDataFetched(false);
                 })
@@ -318,6 +321,7 @@ const EndUsesPage = () => {
                         });
                     });
 
+                    console.log('responseData :>> ', responseData);
                     setBarChartData(responseData);
                     setIsEndUsesChartLoading(false);
                 })
@@ -339,44 +343,11 @@ const EndUsesPage = () => {
         <React.Fragment>
             <Header title="End Uses" type="page" />
 
-            {isEndUsesDataFetched ? (
-                <div className="mt-4">
-                    <Skeleton count={1} color="#f9fafb" height={90} width={650} />
-                </div>
-            ) : (
-                <div className="card-group button-style mt-4">
-                    {endUsesData?.map((record, index) => {
-                        return (
-                            <div className="card usage-card-box-style button-style">
-                                <div className="card-body">
-                                    <div className="enduses-content-1">
-                                        <p className="dot" style={{ backgroundColor: record?.color }}></p>
-                                        <span className="card-title card-title-style">{record?.device}</span>
-                                    </div>
-                                    <div className="enduses-content-2">
-                                        <span className="card-text card-content-style">
-                                            {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                                maximumFractionDigits: 0,
-                                            })}
-                                        </span>
-                                        <span className="card-unit-style">kWh</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {isEndUsesChartLoading ? (
-                <div className="loader-center-style mt-4" style={{ height: '400px' }}>
-                    <Spinner color={'primary'} />
-                </div>
-            ) : (
-                <div className="mt-4">
-                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
-                </div>
-            )}
+            <EndUsesTypeWidget
+                endUsesData={endUsesData}
+                barChartOptions={barChartOptions}
+                barChartData={barChartData}
+            />
 
             <div className="mt-4">
                 <TopEndUsesWidget
