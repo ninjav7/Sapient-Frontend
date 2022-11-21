@@ -93,13 +93,6 @@ const EndUseType = () => {
         },
     });
 
-    const [equipTypeChartData, setEquipTypeChartData] = useState([
-        {
-            name: 'Usage by Floor',
-            data: [],
-        },
-    ]);
-
     const [energyChartOptions, setEnergyChartOptions] = useState({
         chart: {
             type: 'bar',
@@ -402,13 +395,6 @@ const EndUseType = () => {
                         equipTypeUsage.push((record.consumption.now / 1000).toFixed(2));
                     });
 
-                    let equipTypeConsumption = [
-                        {
-                            name: 'Usage by Equipment Type',
-                            data: equipTypeUsage,
-                        },
-                    ];
-
                     let xaxisData = {
                         categories: equipTypeName,
                         axisBorder: {
@@ -420,7 +406,6 @@ const EndUseType = () => {
                     };
 
                     setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
-                    setEquipTypeChartData(equipTypeConsumption);
                     setHvacUsageData(data);
                     setIsEquipTypeChartLoading(false);
                 })
@@ -495,177 +480,6 @@ const EndUseType = () => {
             <div className="mt-4">
                 <EndUsesKPIs data={endUsesData} />
             </div>
-
-            {/* {isEndUsesDataFetched ? (
-                <div className="mt-4">
-                    <Skeleton count={1} color="#f9fafb" height={150} width={1100} />
-                </div>
-            ) : (
-                <div className="endUses-button-container mt-4">
-                    <div className="usage-card-box-style enduses-button-style">
-                        <div className="card-body">
-                            <p className="subtitle-style" style={{ margin: '2px' }}>
-                                Total Consumption
-                            </p>
-                            <p className="card-text usage-card-content-style">
-                                {endUsesData?.energy_consumption?.now === 0
-                                    ? 0
-                                    : (endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                          maximumFractionDigits: 0,
-                                      })}
-                                <span className="card-unit-style">&nbsp;kWh</span>
-                            </p>
-                            {endUsesData?.energy_consumption?.now >= endUsesData?.energy_consumption?.old ? (
-                                <button
-                                    className="button-danger text-danger btn-font-style"
-                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-arrow-growth">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.energy_consumption?.now,
-                                                endUsesData?.energy_consumption?.old
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            ) : (
-                                <button
-                                    className="button-success text-success btn-font-style"
-                                    style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.energy_consumption?.now,
-                                                endUsesData?.energy_consumption?.old
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            )}
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">since last period</span>
-                            <br />
-                            {endUsesData?.energy_consumption?.now >= endUsesData?.energy_consumption?.yearly ? (
-                                <button
-                                    className="button-danger text-danger btn-font-style"
-                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-arrow-growth">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.energy_consumption?.now,
-                                                endUsesData?.energy_consumption?.yearly
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            ) : (
-                                <button
-                                    className="button-success text-success btn-font-style"
-                                    style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.energy_consumption?.now,
-                                                endUsesData?.energy_consumption?.yearly
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            )}
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">from same period last year</span>
-                        </div>
-                    </div>
-
-                    <div className="usage-card-box-style enduses-button-style">
-                        <div className="card-body">
-                            <p className="subtitle-style" style={{ margin: '2px' }}>
-                                After-Hours Consumption
-                            </p>
-                            <p className="card-text usage-card-content-style">
-                                {endUsesData?.after_hours_energy_consumption?.now === 0
-                                    ? 0
-                                    : (endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
-                                          undefined,
-                                          {
-                                              maximumFractionDigits: 0,
-                                          }
-                                      )}
-                                <span className="card-unit-style">&nbsp;kWh</span>
-                            </p>
-                            {endUsesData?.after_hours_energy_consumption?.now >=
-                            endUsesData?.after_hours_energy_consumption?.old ? (
-                                <button
-                                    className="button-danger text-danger btn-font-style"
-                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-arrow-growth">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.after_hours_energy_consumption?.now,
-                                                endUsesData?.after_hours_energy_consumption?.old
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            ) : (
-                                <button
-                                    className="button-success text-success btn-font-style"
-                                    style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.after_hours_energy_consumption?.now,
-                                                endUsesData?.after_hours_energy_consumption?.old
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            )}
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">since last period</span>
-                            <br />
-                            {endUsesData?.after_hours_energy_consumption?.now >=
-                            endUsesData?.after_hours_energy_consumption?.yearly ? (
-                                <button
-                                    className="button-danger text-danger btn-font-style"
-                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-arrow-growth">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.after_hours_energy_consumption?.now,
-                                                endUsesData?.after_hours_energy_consumption?.yearly
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            ) : (
-                                <button
-                                    className="button-success text-success btn-font-style"
-                                    style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>
-                                            {percentageHandler(
-                                                endUsesData?.after_hours_energy_consumption?.now,
-                                                endUsesData?.after_hours_energy_consumption?.yearly
-                                            )}
-                                            %
-                                        </strong>
-                                    </i>
-                                </button>
-                            )}
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">from same period last year</span>
-                        </div>
-                    </div>
-                </div>
-            )} */}
 
             <div className="mt-4">
                 <BarChartWidget

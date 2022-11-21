@@ -218,32 +218,6 @@ const EndUsesPage = () => {
             await fetchEndUses(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
-                    let data = [];
-                    response.forEach((record, index) => {
-                        record.energy_consumption.now = formatConsumptionValue(
-                            Math.round(record?.energy_consumption?.now / 1000),
-                            0
-                        );
-                        if (index === 0) {
-                            record.color = '#66A4CE';
-                        }
-                        if (index === 1) {
-                            record.color = '#FBE384';
-                        }
-                        if (index === 2) {
-                            record.color = '#59BAA4';
-                        }
-                        if (index === 3) {
-                            record.color = '#80E1D9';
-                        }
-                        if (index === 4) {
-                            record.color = '#847CB5';
-                        }
-                        data.push(record);
-                    });
-                    console.log('data => ', data);
-                    setEndUsesData(data);
-
                     let endUsesList = [];
                     response.forEach((record, index) => {
                         let obj = {
@@ -298,6 +272,32 @@ const EndUsesPage = () => {
                         };
                         endUsesList.push(obj);
                     });
+
+                    let data = [];
+                    response.forEach((record, index) => {
+                        record.energy_consumption.now = formatConsumptionValue(
+                            Math.round(record?.energy_consumption?.now / 1000),
+                            0
+                        );
+                        if (index === 0) {
+                            record.color = '#66A4CE';
+                        }
+                        if (index === 1) {
+                            record.color = '#FBE384';
+                        }
+                        if (index === 2) {
+                            record.color = '#59BAA4';
+                        }
+                        if (index === 3) {
+                            record.color = '#80E1D9';
+                        }
+                        if (index === 4) {
+                            record.color = '#847CB5';
+                        }
+                        data.push(record);
+                    });
+                    setEndUsesData(data);
+
                     setTopEndUsesData(endUsesList);
                     setIsEndUsesDataFetched(false);
                 })
