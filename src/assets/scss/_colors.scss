@@ -1,9 +1,10 @@
-
 $base-white: #ffffff;
 
 $success: #d1fadf;
+$success-50: #ecfdf3;
 $success-100: #d1fadf;
 $success-600: #039855;
+$success-700: #027a48;
 $success-800: #05603a;
 
 $error-25: #fffbfa;
@@ -15,6 +16,9 @@ $error-500: #f04438;
 $error-600: #d92d20;
 $error-700: #b42318;
 $error-800: #912018;
+
+$warning-100: #fef0c7;
+$warning-700: #B54708;
 
 $primary-indigo-25: #f5f8ff;
 $primary-indigo-50: #eef4ff;
@@ -42,13 +46,13 @@ $primary-gray-600: #475467;
 $primary-gray-700: #344054;
 $primary-gray-800: #1d2939;
 $primary-gray-900: #101828;
-$primary-gray-950: #070C17;
+$primary-gray-950: #070c17;
 
 $dataviz-blue-50: #eff5ff;
 $dataviz-blue-100: #dbe8fe;
 $dataviz-blue-600: #2955e7;
 
 :export {
-  primaryIndigo50: $primary-indigo-50;
-  primaryIndigo400: $primary-indigo-400;
+    primaryIndigo50: $primary-indigo-50;
+    primaryIndigo400: $primary-indigo-400;
 }

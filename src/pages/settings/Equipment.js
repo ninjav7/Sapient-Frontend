@@ -1,79 +1,46 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Row, Col, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 import axios from 'axios';
-import {
-    BaseUrl,
-    generalEquipments,
-    getLocation,
-    equipmentType,
-    createEquipment,
-    getEndUseId,
-    updateEquipment,
-    listSensor,
-    searchEquipment,
-    deleteEquipment,
-    lastUsedEquimentDevice,
-} from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, getEndUseId } from '../../services/Network';
+
+import { ReactComponent as WifiSVG } from '../../sharedComponents/assets/icons/wifi.svg';
+import { ReactComponent as WifiSlashSVG } from '../../sharedComponents/assets/icons/wifislash.svg';
+
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
-import { Search } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { MultiSelect } from 'react-multi-select-component';
-import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
-import Input from '../../sharedComponents/form/input/Input';
-import Textarea from '../../sharedComponents/form/textarea/Textarea';
-import Switch from 'react-switch';
-import LineChart from '../charts/LineChart';
 import Button from '../../sharedComponents/button/Button';
-import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
+import StatusBadge from '../../sharedComponents/statusBadge/StatusBadge';
 
 import 'react-datepicker/dist/react-datepicker.css';
-import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 
 import _ from 'lodash';
 
-import { timePicker15MinutesIntervalOption } from '../../constants/time';
-
-import {
-    updatePlugRuleRequest,
-    fetchPlugRuleDetails,
-    deletePlugRuleRequest,
-    getGraphDataRequest,
-    getListSensorsForBuildingsRequest,
-    linkSensorsToRuleRequest,
-    listLinkSocketRulesRequest,
-    unlinkSocketRequest,
-    getUnlinkedSocketRules,
-    getFiltersForSensorsRequest,
-} from '../../services/plugRules';
-import { ceil } from 'lodash';
 import { Badge } from '../../sharedComponents/badge';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+// import { getCSVDataExport } from './utils';
 
-import {
-    allEquipmentDataGlobal,
-    equipmentData,
-    equipmentDataGlobal,
-    equipmentId,
-    toggleRecord,
-} from '../../store/globalState';
+import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import Dropdown from 'react-bootstrap/Dropdown';
 import EquipChartModal from '../../pages/chartModal/EquipChartModal';
 import './style.css';
-import { getEqupmentWithSearch, deleteEquipmentRequest } from '../../services/equipment';
+import {
+    getEqupmentDataRequest,
+    deleteEquipmentRequest,
+    addNewEquipment,
+    getFiltersForEquipmentRequest,
+    getEndUseDataRequest,
+} from '../../services/equipment';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="#202020" height={35}>
@@ -110,520 +77,15 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
         </tr>
     </SkeletonTheme>
 );
-
-const EquipmentTable = ({
-    equipmentData,
-    isEquipDataFetched,
-    equipmentTypeData,
-    endUse,
-    fetchEquipmentData,
-    selectedOptions,
-    equipmentDataWithFilter,
-    locationData,
-    nextPageData,
-    previousPageData,
-    paginationData,
-    pageSize,
-    setPageSize,
-    setIsDelete,
-    setIsEdit,
-    setEquipmentFilter,
-    handleChartOpen,
-    setEquipmentIdData,
-    pageNo,
-    setPageNo,
-}) => {
-    const [nameOrder, setNameOrder] = useState(false);
-    const [equipTypeOrder, setEquipTypeOrder] = useState(false);
-    const [locationOrder, setLocationOrder] = useState(false);
-    const [TagsOrder, setTagsOrder] = useState(false);
-    const [sensorOrder, setSensorOrder] = useState(false);
-    const [lastDataOrder, setLastDataOrder] = useState(false);
-    const [deviceIdOrder, setDeviceIdOrder] = useState(false);
-
-    const [equpimentDataNow] = useAtom(equipmentDataGlobal);
-
-    const [userPermission] = useAtom(userPermissionData);
-
-    const handleColumnSort = (order, columnName) => {
-        if (columnName === 'equipments_name') {
-            setEquipTypeOrder(false);
-            setLocationOrder(false);
-            setTagsOrder(false);
-            setSensorOrder(false);
-            setLastDataOrder(false);
-            setDeviceIdOrder(false);
-        }
-        if (columnName === 'equipments_type') {
-            setNameOrder(false);
-            setLocationOrder(false);
-            setTagsOrder(false);
-            setSensorOrder(false);
-            setLastDataOrder(false);
-            setDeviceIdOrder(false);
-        }
-        if (columnName === 'tags') {
-            setEquipTypeOrder(false);
-            setLocationOrder(false);
-            setNameOrder(false);
-            setSensorOrder(false);
-            setLastDataOrder(false);
-            setDeviceIdOrder(false);
-        }
-        if (columnName === 'location') {
-            setEquipTypeOrder(false);
-            setNameOrder(false);
-            setTagsOrder(false);
-            setSensorOrder(false);
-            setLastDataOrder(false);
-            setDeviceIdOrder(false);
-        }
-        if (columnName === 'sensor_number') {
-            setEquipTypeOrder(false);
-            setLocationOrder(false);
-            setTagsOrder(false);
-            setNameOrder(false);
-            setLastDataOrder(false);
-            setDeviceIdOrder(false);
-        }
-        if (columnName === 'device_mac') {
-            setEquipTypeOrder(false);
-            setLocationOrder(false);
-            setTagsOrder(false);
-            setSensorOrder(false);
-            setLastDataOrder(false);
-            setNameOrder(false);
-        }
-        equipmentDataWithFilter(order, columnName);
-    };
-
-    const [equipData, setEquipData] = useState(null);
-
-    return (
-        <>
-            <Card>
-                <CardBody>
-                    {userPermission?.user_role === 'admin' ||
-                    (userPermission &&
-                        userPermission?.permissions?.permissions?.building_equipment_permission?.view) ? (
-                        <>
-                            <Table className="mb-0 bordered table-hover">
-                                <thead>
-                                    <tr className="mouse-pointer">
-                                        {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
-                                        {selectedOptions.some((record) => record.value === 'name') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setNameOrder(!nameOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Name</div>
-                                                    {nameOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'equipments_name')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'equipments_name')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Equipment Type</div>
-                                                    {equipTypeOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'equipments_type')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'equipments_type')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'location') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setLocationOrder(!locationOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Location</div>
-                                                    {locationOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'location')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'location')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'tags') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setTagsOrder(!TagsOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Tags</div>
-                                                    {TagsOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'tags')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'tags')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setSensorOrder(!sensorOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Sensor Number</div>
-                                                    {sensorOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'sensor_number')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'sensor_number')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'last_data') && (
-                                            <th className="active-device-header">
-                                                <div className="active-device-flex">
-                                                    <div>Last Data</div>
-                                                </div>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'device_id') && (
-                                            <th
-                                                className="active-device-header"
-                                                onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
-                                                <div className="active-device-flex">
-                                                    <div>Device ID</div>
-                                                    {deviceIdOrder ? (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('ace', 'device_mac')}>
-                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            className="ml-2"
-                                                            onClick={() => handleColumnSort('dce', 'device_mac')}>
-                                                            <FontAwesomeIcon
-                                                                icon={faAngleDown}
-                                                                color="grey"
-                                                                size="md"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        <th className="active-device-header">
-                                            <div className="active-device-flex">
-                                                <div>Actions</div>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                {isEquipDataFetched ? (
-                                    <tbody>
-                                        <SkeletonTheme color="#202020" height={35}>
-                                            <tr>
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-                                                <td>
-                                                    <Skeleton count={10} />
-                                                </td>
-                                            </tr>
-                                        </SkeletonTheme>
-                                    </tbody>
-                                ) : (
-                                    <tbody>
-                                        {equipmentData.map((record, index) => {
-                                            return (
-                                                <tr
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setEquipData(record);
-                                                        // setFormValidation(false);
-                                                    }}
-                                                    className="mouse-pointer">
-                                                    {selectedOptions.some((record) => record.value === 'status') && (
-                                                        <td className="text-center">
-                                                            <div>
-                                                                {record?.status ? (
-                                                                    <div className="icon-bg-styling">
-                                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="icon-bg-styling-slash">
-                                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    )}
-                                                    {selectedOptions.some((record) => record.value === 'name') && (
-                                                        <td className="font-weight-bold">
-                                                            {!(record.equipments_name === '')
-                                                                ? record.equipments_name
-                                                                : '-'}
-                                                        </td>
-                                                    )}
-                                                    {selectedOptions.some(
-                                                        (record) => record.value === 'equip_type'
-                                                    ) && <td className="font-weight-bold">{record.equipments_type}</td>}
-                                                    {selectedOptions.some((record) => record.value === 'location') && (
-                                                        <td>{record.location === '' ? ' - ' : record.location}</td>
-                                                    )}
-                                                    {selectedOptions.some((record) => record.value === 'tags') && (
-                                                        <td>
-                                                            {
-                                                                <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                                    {record.tags.length === 0
-                                                                        ? 'None'
-                                                                        : `${`${record.tags[0]} + ${
-                                                                              record?.tags?.length - 1
-                                                                          }`} `}
-                                                                </div>
-                                                            }
-                                                        </td>
-                                                    )}
-                                                    {selectedOptions.some(
-                                                        (record) => record.value === 'sensor_number'
-                                                    ) && (
-                                                        <td>
-                                                            {record?.sensor_number.length === 0
-                                                                ? '-'
-                                                                : `${record?.sensor_number.join(',')} /
-                                                                  ${record?.total_sensor}`}
-                                                        </td>
-                                                    )}
-                                                    {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                        <td>
-                                                            {record.last_data === ''
-                                                                ? '-'
-                                                                : moment(record?.last_data).fromNow()}
-                                                        </td>
-                                                    )}
-                                                    {selectedOptions.some((record) => record.value === 'device_id') && (
-                                                        <td className="font-weight-bold">{record.device_mac}</td>
-                                                    )}
-                                                    <td>
-                                                        <Dropdown className="float-end" align="end">
-                                                            <div>
-                                                                <Dropdown.Toggle
-                                                                    as="a"
-                                                                    className="cursor-pointer arrow-none text-muted">
-                                                                    <div className="triple-dot-style">
-                                                                        <FontAwesomeIcon
-                                                                            icon={faEllipsisVertical}
-                                                                            color="#1D2939"
-                                                                            size="lg"
-                                                                        />
-                                                                    </div>
-                                                                </Dropdown.Toggle>
-                                                            </div>
-                                                            <Dropdown.Menu>
-                                                                <div
-                                                                    onClick={() => {
-                                                                        setEquipmentFilter({
-                                                                            equipment_id: record?.equipments_id,
-                                                                            equipment_name: record?.equipments_name,
-                                                                        });
-                                                                        handleChartOpen();
-                                                                    }}>
-                                                                    <Dropdown.Item>
-                                                                        <FontAwesomeIcon
-                                                                            icon={faPen}
-                                                                            color="#1D2939"
-                                                                            size="lg"
-                                                                            className="mr-4"
-                                                                        />
-                                                                        Edit
-                                                                    </Dropdown.Item>
-                                                                </div>
-                                                                <div
-                                                                    onClick={() => {
-                                                                        if (record.device_type === 'active') {
-                                                                            return;
-                                                                        }
-                                                                        setEquipmentIdData(record?.equipments_id);
-                                                                        setIsDelete(true);
-                                                                    }}>
-                                                                    <Dropdown.Item
-                                                                        disabled={record.device_type === 'active'}>
-                                                                        <FontAwesomeIcon
-                                                                            icon={faTrash}
-                                                                            color={
-                                                                                record.device_type === 'active'
-                                                                                    ? '#ad716c'
-                                                                                    : '#d92d20'
-                                                                            }
-                                                                            size="lg"
-                                                                            className="mr-4"
-                                                                        />
-                                                                        <span
-                                                                            className={
-                                                                                record.device_type === 'active'
-                                                                                    ? 'disable-delete-btn-style'
-                                                                                    : 'delete-btn-style'
-                                                                            }>
-                                                                            Delete
-                                                                        </span>
-                                                                    </Dropdown.Item>
-                                                                </div>
-                                                            </Dropdown.Menu>
-                                                        </Dropdown>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                )}
-                            </Table>
-                            <div className="page-button-style">
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-light font-weight-bold mt-4"
-                                    disabled={
-                                        paginationData.pagination !== undefined
-                                            ? paginationData.pagination.previous === null
-                                                ? true
-                                                : false
-                                            : false
-                                    }
-                                    onClick={() => {
-                                        previousPageData(paginationData.pagination.previous);
-                                    }}>
-                                    Previous
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-light font-weight-bold mt-4"
-                                    disabled={
-                                        paginationData.pagination !== undefined
-                                            ? paginationData.pagination.next === null
-                                                ? true
-                                                : false
-                                            : false
-                                    }
-                                    onClick={() => {
-                                        nextPageData(paginationData.pagination.next);
-                                    }}>
-                                    Next
-                                </button>
-                                <div>
-                                    <select
-                                        value={pageSize}
-                                        className="btn btn-md btn-light font-weight-bold mt-4"
-                                        onChange={(e) => {
-                                            setPageSize(+e.target.value);
-                                            window.scrollTo(0, 0);
-                                        }}>
-                                        {[20, 50, 100].map((pageSize) => (
-                                            <option key={pageSize} value={pageSize} className="align-options-center">
-                                                Show {pageSize} devices
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <p>You don't have view access</p>
-                    )}
-                </CardBody>
-            </Card>
-        </>
-    );
-};
 
 const Equipment = () => {
     let cookies = new Cookies();
@@ -663,23 +125,15 @@ const Equipment = () => {
 
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
-    const [paginationData, setPaginationData] = useState({});
+    const [preparedEndUseData, setPreparedEndUseData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const tableColumnOptions = [
-        { label: 'Status', value: 'status' },
-        { label: 'Name', value: 'name' },
-        { label: 'Equipment Type', value: 'equip_type' },
-        { label: 'Location', value: 'location' },
-        { label: 'Tags', value: 'tags' },
-        { label: 'Sensor Number', value: 'sensor_number' },
-        { label: 'Last Data', value: 'last_data' },
-        { label: 'Device Id', value: 'device_id' },
-    ];
 
-    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [allSearchData, setAllSearchData] = useState([]);
+    const [selectedOption, setSelectedOption] = useState([]);
+    const [sortBy, setSortBy] = useState({});
 
-    const [equipSearch, setEquipSearch] = useState('');
+    const [search, setSearch] = useState('');
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
     const [endUseDataNow, setEndUseDataNow] = useState([]);
@@ -714,10 +168,10 @@ const Equipment = () => {
     }, [equipmentTypeData]);
 
     useEffect(() => {
-        if (equipSearch === '') {
+        if (search === '') {
             fetchEquipmentData();
         }
-    }, [equipSearch, pageSize]);
+    }, [search, pageSize]);
 
     useEffect(() => {
         if (endUseData) {
@@ -736,10 +190,28 @@ const Equipment = () => {
 
     const handleSearch = async () => {
         setIsEquipDataFetched(true);
-        await getEqupmentWithSearch(bldgId, equipSearch, pageSize, pageNo)
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+        await getEqupmentDataRequest(
+            pageSize,
+            pageNo,
+            bldgId,
+            search,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            {
+                ...sorting,
+            }
+        )
             .then((res) => {
                 let response = res.data;
-                console.log('MYRESPINSE', res);
                 setGeneralEquipmentData(response.data);
                 setIsEquipDataFetched(false);
             })
@@ -747,6 +219,10 @@ const Equipment = () => {
                 setIsProcessing(false);
             });
     };
+
+    useEffect(() => {
+        handleSearch();
+    }, [search]);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
@@ -759,32 +235,16 @@ const Equipment = () => {
     };
 
     const saveDeviceData = async () => {
-        let obj = Object.assign({}, createEqipmentData);
-        obj['building_id'] = bldgId;
-        try {
-            setIsProcessing(true);
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            await axios
-                .post(`${BaseUrl}${createEquipment}`, obj, {
-                    headers: header,
-                })
-                .then((res) => {
-                    setTimeout(function () {
-                        fetchEquipmentData();
-                    }, 0);
-                    // setFormValidation(false);
-                });
-
-            setIsProcessing(false);
-            handleClose();
-        } catch (error) {
-            setIsProcessing(false);
-        }
+        setIsProcessing(true);
+        await addNewEquipment(bldgId, createEqipmentData)
+            .then((res) => {
+                fetchEquipmentData();
+                handleClose();
+                setIsProcessing(false);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
     };
 
     const equipmentDataWithFilter = async (order, filterBy) => {
@@ -819,84 +279,6 @@ const Equipment = () => {
         }
     };
 
-    const nextPageData = async (path) => {
-        let page_size = path.split('page_size=')[1].split('&')[0];
-        let page_no = path.split('page_no=')[1].split('&')[0];
-        setPageSize(+page_size);
-        setPageNo(+page_no);
-        try {
-            setIsEquipDataFetched(true);
-            if (path === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}${params}`, {}, { headers }).then((res) => {
-                let responseData = res.data;
-                setPaginationData(res.data);
-                setGeneralEquipmentData(responseData.data);
-                setDuplicateGeneralEquipmentData(responseData.data);
-                let onlineEquip = [];
-                let offlineEquip = [];
-                responseData.data.forEach((record) => {
-                    if (record.status) {
-                        onlineEquip.push(record);
-                    }
-                    if (!record.status) {
-                        offlineEquip.push(record);
-                    }
-                });
-                setOnlineEquipData(onlineEquip);
-                setOfflineEquipData(offlineEquip);
-                setIsEquipDataFetched(false);
-                // setFormValidation(false);
-            });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
-    };
-
-    const previousPageData = async (path) => {
-        try {
-            setIsEquipDataFetched(true);
-            if (path === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}${params}`, {}, { headers }).then((res) => {
-                let responseData = res.data;
-                setPaginationData(res.data);
-                setGeneralEquipmentData(responseData.data);
-                setDuplicateGeneralEquipmentData(responseData.data);
-                let onlineEquip = [];
-                let offlineEquip = [];
-                responseData.data.forEach((record) => {
-                    if (record.status) {
-                        onlineEquip.push(record);
-                    }
-                    if (!record.status) {
-                        offlineEquip.push(record);
-                    }
-                });
-                setOnlineEquipData(onlineEquip);
-                setOfflineEquipData(offlineEquip);
-                setIsEquipDataFetched(false);
-                // setFormValidation(false);
-            });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
-    };
-    const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
     const [selectedIds, setSelectedIds] = useState([]);
 
     const renderLocation = useCallback((row, childrenTemplate) => {
@@ -904,189 +286,106 @@ const Equipment = () => {
 
         return childrenTemplate(location.join(' - '));
     }, []);
-
     const [skeletonLoading, setSkeletonLoading] = useState(true);
-    const [search, setSearch] = useState('');
     const [checkedAll, setCheckedAll] = useState(false);
-    const [sortBy, setSortBy] = useState({});
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [filterOptions, setFilterOptions] = useState([]);
 
+    const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
+
+    const [macTypeFilterString, setMacTypeFilterString] = useState('');
+
+    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
+    const [selectedOptionMac, setSelectedOptionMac] = useState([]);
+    const [isLoadingEndUseData,setIsLoadingEndUseData] = useState(true);
+
+
+    const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
+    const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
+    const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
+    const [tagsFilterString, setTagsTypeFilterString] = useState('');
+
     const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
     const [allEqupimentDataNow, setAllEqupimentDataNow] = useAtom(allEquipmentDataGlobal);
-    const [searchText, setSearchText] = useState('');
 
-    // useEffect(() => {
-    //     (async () => {
-    //         isLoadingRef.current = true;
-    //         const filters = await getFiltersForSensorsRequest({
-    //             activeBuildingId,
-    //             macTypeFilterString,
-    //             equpimentTypeFilterString,
-    //             sensorTypeFilterString,
-    //             floorTypeFilterString,
-    //             spaceTypeFilterString,
-    //             spaceTypeTypeFilterString,
-    //         });
-
-    //         filters.data.forEach((filterOptions) => {
-    //             const filterOptionsFetched = [
-    //                 {
-    //                     label: 'MAC Address',
-    //                     value: 'macAddresses',
-    //                     placeholder: 'All Mac addresses',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.mac_address.map((filterItem) => ({
-    //                         value: filterItem,
-    //                         label: filterItem,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setMacTypeFilterString, options),
-    //                     onDelete: () => {
-    //                         setSelectedOptionMac([]);
-    //                         setMacTypeFilterString('');
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Equipment Type',
-    //                     value: 'equipmentType',
-    //                     placeholder: 'All Equipment Types',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-    //                         value: filterItem.equipment_type_id,
-    //                         label: filterItem.equipment_type_name,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-    //                     onDelete: () => {
-    //                         setSelectedOption([]);
-    //                         setEqupimentTypeFilterString('');
-    //                     },
-    //                 },
-    //                 {
-    //                     label: 'Sensors',
-    //                     value: 'sensors',
-    //                     placeholder: 'All Sensors',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-    //                         value: filterItem,
-    //                         label: filterItem,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-    //                     onDelete: setSensorTypeFilterString(''),
-    //                 },
-    //                 {
-    //                     label: 'Floor',
-    //                     value: 'floor',
-    //                     placeholder: 'All Floors',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-    //                         value: filterItem.floor_id,
-    //                         label: filterItem.floor_name,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-    //                     onDelete: () => setFloorTypeFilterString(''),
-    //                 },
-    //                 {
-    //                     label: 'Space',
-    //                     value: 'space',
-    //                     placeholder: 'All Spaces',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.installed_space.map((filterItem) => ({
-    //                         value: filterItem.space_id,
-    //                         label: filterItem.space_name,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-    //                     onDelete: () => setSpaceTypeFilterString(''),
-    //                 },
-    //                 {
-    //                     label: 'Space Type',
-    //                     value: 'spaceType',
-    //                     placeholder: 'All Space Types',
-    //                     filterType: FILTER_TYPES.MULTISELECT,
-    //                     filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-    //                         value: filterItem.space_type_id,
-    //                         label: filterItem.space_type_name,
-    //                     })),
-    //                     onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-    //                     onDelete: () => setSpaceTypeTypeFilterString(''),
-    //                 },
-    //             ];
-
-    //             setFilterOptions(filterOptionsFetched);
-    //         });
-
-    //         isLoadingRef.current = false;
-    //     })();
-    // }, [
-    //     activeBuildingId,
-    //     macTypeFilterString,
-    //     equpimentTypeFilterString,
-    //     sensorTypeFilterString,
-    //     locationTypeFilterString,
-    //     floorTypeFilterString,
-    //     spaceTypeFilterString,
-    //     spaceTypeTypeFilterString,
-    // ]);
-
-    const currentRowSearched = () => {
-        // if (selectedRuleFilter === 0) {
-        //     return allSearchData;
-        // }
-        // if (selectedRuleFilter === 1) {
-        //     //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-        //     // and show when user selected but switched page
-        //     return selectedIds.reduce((acc, id) => {
-        //         const foundSelectedSensor = allSearchData.find((sensor) => sensor.id === id);
-        //         if (foundSelectedSensor) {
-        //             acc.push(foundSelectedSensor);
-        //         }
-        //         return acc;
-        //     }, []);
-        // }
-        // return allSearchData.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
-    };
     const currentRow = () => {
-        // if (selectedRuleFilter === 0) {
-        //     return allSensors;
-        // }
-        // if (selectedRuleFilter === 1) {
-        //     //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-        //     // and show when user selected but switched page
-        //     return selectedIds.reduce((acc, id) => {
-        //         const foundSelectedSensor = allSensors.find((sensor) => sensor.id === id);
-        //         if (foundSelectedSensor) {
-        //             acc.push(foundSelectedSensor);
-        //         }
-        //         return acc;
-        //     }, []);
-        // }
-        // return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+        if (selectedTab === 0) {
+            return generalEquipmentData;
+        } else if (selectedTab === 1) {
+            return onlineEquipData;
+        } else if (selectedTab === 2) {
+        }
+        return offlineEquipData;
     };
-
     const renderEquipType = useCallback((row) => {
         return <Badge text={<span className="gray-950">{row.status}</span>} />;
     }, []);
 
-    const renderAssignRule = useCallback(
-        (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
-        []
-    );
+    const renderSensors = useCallback((row) => {
+        return (
+            <div className="sensors-row-content">
+                {row.sensor_number.map((el) => {
+                    return (
+                        <Badge
+                            text={
+                                <span className="gray-950">
+                                    {el}/{row.total_sensor}
+                                </span>
+                            }
+                        />
+                    );
+                })}
+            </div>
+        );
+    });
+    const renderTags = useCallback((row) => {
+        return (
+            <div className="sensors-row-content">
+                {row.tags.map((el) => {
+                    return (
+                        <Badge
+                            text={
+                                <span className="gray-950">
+                                    {el}
+                                </span>
+                            }
+                        />
+                    );
+                })}
+            </div>
+        );
+    });
 
-    const handleRuleStateChange = (value, rule) => {};
+
     const fetchEquipmentData = async () => {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
+        isLoadingRef.current = true;
+        setIsEquipDataFetched(true);
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
             };
-
-            let params = `?building_id=${bldgId}&equipment_search=${equipSearch}&sort_by=ace&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
+        await getEqupmentDataRequest(
+            pageSize,
+            pageNo,
+            bldgId,
+            search,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            {
+                ...sorting,
+            }
+        )
+            .then((res) => {
                 let responseData = res.data;
-                setPaginationData(res.data);
+                setTotalItems(responseData.total_data);
+
                 setGeneralEquipmentData(responseData.data);
                 setDuplicateGeneralEquipmentData(responseData.data);
                 let onlineEquip = [];
@@ -1103,10 +402,12 @@ const Equipment = () => {
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
                 // setFormValidation(false);
+                isLoadingRef.current = false;
+            })
+            .catch((error) => {
+                setIsEquipDataFetched(false);
+                isLoadingRef.current = false;
             });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
     };
 
     const addEquimentData = () => {
@@ -1123,59 +424,57 @@ const Equipment = () => {
     }, [generalEquipmentData]);
 
     useEffect(() => {
-        const fetchEndUseData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setEndUseData(response);
-                });
-            } catch (error) {}
-        };
-
-        const fetchEquipTypeData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                setEquipmentTypeData([]);
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    response.sort((a, b) => {
-                        return a.equipment_type.localeCompare(b.equipment_type);
-                    });
-                    setEquipmentTypeData(response);
-                });
-            } catch (error) {}
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {}
-        };
-
-        fetchEquipmentData();
         fetchEndUseData();
-        // fetchOnlineEquipData();
-        // fetchOfflineEquipData();
+        fetchEquipmentData();
         fetchEquipTypeData();
         fetchLocationData();
     }, [bldgId, pageSize]);
+
+    const fetchEndUseData = async () => {
+        setIsLoadingEndUseData(true);
+        await getEndUseDataRequest().then((res) => {
+            const prepareEndUseType = res.reduce((acc, el) => {
+                acc[`${el.end_user_id}`] = el.name;
+                return acc;
+            }, {});
+            setEndUseData(res);
+            setPreparedEndUseData(prepareEndUseType);
+        }).finally(()=>{
+            setIsLoadingEndUseData(false);
+        })
+    };
+
+    const fetchEquipTypeData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setEquipmentTypeData([]);
+            let params = `?building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                let response = res.data.data;
+                response.sort((a, b) => {
+                    return a.equipment_type.localeCompare(b.equipment_type);
+                });
+                setEquipmentTypeData(response);
+            });
+        } catch (error) {}
+    };
+
+    const fetchLocationData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                setLocationData(res.data);
+            });
+        } catch (error) {}
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1193,17 +492,6 @@ const Equipment = () => {
                 s.parent = 'building-settings';
             });
         };
-        let arr = [
-            { label: 'Status', value: 'status' },
-            { label: 'Name', value: 'name' },
-            { label: 'Equipment Type', value: 'equip_type' },
-            { label: 'Location', value: 'location' },
-            { label: 'Tags', value: 'tags' },
-            { label: 'Sensor Number', value: 'sensor_number' },
-            { label: 'Last Data', value: 'last_data' },
-            { label: 'Device Id', value: 'device_id' },
-        ];
-        setSelectedOptions(arr);
         updateBreadcrumbStore();
     }, []);
 
@@ -1215,6 +503,124 @@ const Equipment = () => {
     const renderTagCell = (row) => {
         return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
     };
+
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
+
+    const renderEndUseCategory = (row) => {
+        return <div>{preparedEndUseData[row.end_use_id]}</div>;
+    };
+
+    const getFilters = async () => {
+        const filters = await getFiltersForEquipmentRequest({
+            bldgId,
+            macTypeFilterString,
+            equpimentTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+        });
+
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'MAC Address',
+                    value: 'macAddresses',
+                    placeholder: 'All Mac addresses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOptionMac([]);
+                        setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Equipment Type',
+                    value: 'equipmentType',
+                    placeholder: 'All Equipment Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.equipment_type.map((filterItem) => ({
+                        value: filterItem.equipment_type_id,
+                        label: filterItem.equipment_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setEqupimentTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Floor',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_floor.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+                    onDelete: () => setFloorTypeFilterString(''),
+                },
+                {
+                    label: 'Space',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_space.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                    onDelete: () => setSpaceTypeFilterString(''),
+                },
+                {
+                    label: 'Space Type',
+                    value: 'spaceType',
+                    placeholder: 'All Space Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
+                        value: filterItem.space_type_id,
+                        label: filterItem.space_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+                    onDelete: () => setSpaceTypeTypeFilterString(''),
+                },
+                {
+                    label: 'Tag',
+                    value: 'tag',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setTagsTypeFilterString, options),
+                    onDelete: () => setTagsTypeFilterString(''),
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+    };
+    useEffect(() => {
+        getFilters();
+        fetchEquipmentData();
+    }, [
+        bldgId,
+        macTypeFilterString,
+        equpimentTypeFilterString,
+        locationTypeFilterString,
+        floorTypeFilterString,
+        spaceTypeFilterString,
+        spaceTypeTypeFilterString,
+        tagsFilterString,
+    ]);
 
     const renderLastUsedCell = (row, childrenTemplate) => {
         const { last_used_data } = row;
@@ -1233,6 +639,10 @@ const Equipment = () => {
                 setIsProcessing(false);
             });
     };
+
+    useEffect(() => {
+        fetchEquipmentData();
+    }, [pageNo, pageSize]);
 
     return (
         <React.Fragment>
@@ -1266,102 +676,27 @@ const Equipment = () => {
                     </div>
                 </Col>
             </Row>
-
-            <Row className="mt-2">
-                <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                            onChange={(e) => {
-                                setEquipSearch(e.target.value);
-                            }}
-                        />
-                        <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
-                            <Search className="icon-sm" />
-                        </button>
-                    </div>
-                </Col>
-                <Col xl={9}>
-                    <div className="btn-group ml-2" role="group" aria-label="Basic example">
-                        <div>
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 0
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
-                                onClick={() => setSelectedTab(0)}>
-                                All Statuses
-                            </button>
-
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 1
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderRadius: '0px' }}
-                                onClick={() => setSelectedTab(1)}>
-                                <i className="uil uil-wifi mr-1"></i>Online
-                            </button>
-
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 2
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
-                                onClick={() => setSelectedTab(2)}>
-                                <i className="uil uil-wifi-slash mr-1"></i>Offline
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* ---------------------------------------------------------------------- */}
-                    <div className="float-right">
-                        <MultiSelect
-                            options={tableColumnOptions}
-                            value={selectedOptions}
-                            onChange={setSelectedOptions}
-                            labelledBy="Columns"
-                            className="column-filter-styling"
-                            valueRenderer={() => {
-                                return 'Columns';
-                            }}
-                            ClearSelectedIcon={null}
-                        />
-                    </div>
-                </Col>
-            </Row>
-            {console.log('generalEquipmentData534534', generalEquipmentData)}
             <Row>
                 <Col lg={12}>
-                    {selectedTab === 0 && (
+                    {isLoadingEndUseData ? (
+                        <SkeletonLoading />
+                    ) : (
                         <DataTableWidget
-                            isLoading={isLoadingRef.current}
+                            isLoading={isEquipDataFetched || isLoadingEndUseData}
                             isLoadingComponent={<SkeletonLoading />}
-                            id="sockets-plug-rules"
+                            id="equipment"
                             onSearch={(query) => {
                                 setPageNo(1);
                                 setSearch(query);
                             }}
                             buttonGroupFilterOptions={[
-                                { label: 'All' },
-                                { label: 'Selected' },
-                                { label: 'Unselected' },
+                                { label: 'All Statuses' },
+                                { label: 'Online', icon: <WifiSVG /> },
+                                { label: 'Offline', icon: <WifiSlashSVG /> },
                             ]}
-                            onStatus={setSelectedRuleFilter}
-                            rows={generalEquipmentData}
-                            searchResultRows={currentRowSearched()}
+                            onStatus={(value) => setSelectedTab(value)}
+                            rows={currentRow()}
+                            searchResultRows={generalEquipmentData}
                             filterOptions={filterOptions}
                             onDeleteRow={(event, id) => alert('Delete ' + id)}
                             onEditRow={(record, id) => {
@@ -1371,13 +706,9 @@ const Equipment = () => {
                                 });
                                 handleChartOpen();
                             }}
+                            // onDownload={() => getCSVDataExport(labels, series, pageType)}
+                            onDownload={() => console.log('CLICKED')}
                             headers={[
-                                {
-                                    name: 'Status',
-                                    accessor: 'status',
-                                    callbackValue: renderEquipType,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
                                 {
                                     name: 'Name',
                                     accessor: 'equipments_name',
@@ -1388,52 +719,29 @@ const Equipment = () => {
                                     accessor: 'equipments_type',
                                 },
                                 {
+                                    name: 'End Use Category',
+                                    accessor: 'end_use_id',
+                                    callbackValue: renderEndUseCategory,
+                                },
+                                {
                                     name: 'Location',
                                     accessor: 'location',
-                                    // callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Tags',
+                                    accessor: 'tags',
+                                    callbackValue: renderTags,
                                 },
                                 {
                                     name: 'Sensors',
-                                    accessor: 'sensor_count',
-                                },
-                                {
-                                    name: 'Last Data',
-                                    accessor: 'last_data',
-                                    // callbackValue: renderAssignRule,
+                                    accessor: 'sensor_number',
+                                    callbackValue: renderSensors,
                                 },
                                 {
                                     name: 'Device ID',
-                                    accessor: 'device_id',
-                                    // callbackValue: renderTagCell,
+                                    accessor: 'device_mac',
                                 },
                             ]}
-                            onCheckboxRow={alert}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="vehicle1"
-                                    name="vehicle1"
-                                    checked={checkedAll}
-                                    onChange={() => {
-                                        setCheckedAll(!checkedAll);
-                                    }}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="socket_rule"
-                                    name="socket_rule"
-                                    checked={selectedIds.includes(record?.id) || checkedAll}
-                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                    onChange={(e) => {
-                                        setSensorIdNow(record?.id);
-                                        handleRuleStateChange(e.target.value, record);
-                                    }}
-                                />
-                            )}
                             onPageSize={setPageSize}
                             onChangePage={setPageNo}
                             pageSize={pageSize}
@@ -1442,62 +750,12 @@ const Equipment = () => {
                                 if (search) {
                                     return totalItemsSearched;
                                 }
-                                if (selectedRuleFilter === 0) {
+                                if (selectedTab === 0) {
                                     return totalItems;
                                 }
 
                                 return 0;
                             })()}
-                        />
-                    )}
-                    {selectedTab === 1 && (
-                        <EquipmentTable
-                            equipmentData={onlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                            selectedOptions={selectedOptions}
-                            equipmentDataWithFilter={equipmentDataWithFilter}
-                            locationData={locationData}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
-                            pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            pageNo={pageNo}
-                            setPageNo={setPageNo}
-                            setIsDelete={setIsDelete}
-                            setEquipmentFilter={setEquipmentFilter}
-                            handleChartOpen={handleChartOpen}
-                            setEquipmentIdData={setEquipmentIdData}
-                            // formValidation={formValidation}
-                            // setFormValidation={setFormValidation}
-                        />
-                    )}
-                    {selectedTab === 2 && (
-                        <EquipmentTable
-                            equipmentData={offlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                            selectedOptions={selectedOptions}
-                            equipmentDataWithFilter={equipmentDataWithFilter}
-                            locationData={locationData}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
-                            pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            pageNo={pageNo}
-                            setPageNo={setPageNo}
-                            setIsDelete={setIsDelete}
-                            setEquipmentFilter={setEquipmentFilter}
-                            handleChartOpen={handleChartOpen}
-                            setEquipmentIdData={setEquipmentIdData}
-                            // formValidation={formValidation}
-                            // setFormValidation={setFormValidation}
                         />
                     )}
                 </Col>
@@ -1579,21 +837,21 @@ const Equipment = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                    <div className="add-equipment-footer">
                         <Button
-                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
-                            onClick={handleClose}>
-                            Cancel
-                        </Button>
+                            label="Cancel"
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryGrey}
+                            onClick={() => handleClose()}
+                        />
                         <Button
-                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            label={isProcessing ? 'Creating...' : 'Create'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.primary}
                             onClick={() => {
                                 saveDeviceData();
                             }}
-                            // disabled={!formValidation}
-                        >
-                            {isProcessing ? 'Adding...' : 'Add'}
-                        </Button>
+                        />
                     </div>
                 </Modal.Footer>
             </Modal>
@@ -1617,17 +875,21 @@ const Equipment = () => {
                     }}>
                     <Button
                         style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
-                        onClick={handleDeleteClose}>
-                        Cancel
-                    </Button>
+                        onClick={handleDeleteClose}
+                        type={Button.Type.secondaryGrey}
+                        size={Button.Sizes.lg}
+                        label="Cancel"
+                    />
                     <Button
                         disabled={processdelete}
                         style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}
                         onClick={() => {
                             deleteEquipmentFunc();
-                        }}>
-                        {processdelete ? 'Deleting...' : 'Delete'}
-                    </Button>
+                        }}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primary}
+                        label={processdelete ? 'Deleting...' : 'Delete'}
+                    />
                 </Modal.Footer>
             </Modal>
 

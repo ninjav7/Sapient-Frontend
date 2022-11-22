@@ -1,0 +1,43 @@
+@import '../../assets/scss/colors';
+
+.status-badge {
+    &-wrapper {
+        padding: 4px 12px;
+        background: $primary-gray-100;
+        border-radius: 50px;
+        display: inline-flex;
+        text-align: center;
+        align-items: center;
+        box-sizing: border-box;
+        &.success {
+            background-color: $success-50;
+            border: 1px solid $success-700;
+            .typography-wrapper {
+                color: $success-700;
+                path {
+                    fill: $success-700;
+                }
+            }
+        }
+        &.warning {
+            background-color: $warning-100;
+            border: 1px solid $warning-700;
+            .typography-wrapper {
+                color: $warning-700;
+                path {
+                    fill: $warning-700;
+                }
+            }
+        }
+        &.error {
+            background-color: $error-600;
+            border: 1px solid $error-600;
+            .typography-wrapper {
+                color: $base-white;
+                path {
+                    fill: $base-white;
+                }
+            }
+        }
+    }
+}
