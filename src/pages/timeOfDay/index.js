@@ -1,25 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
-import HeatMapChart from '../charts/HeatMapChart';
-import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import './style.css';
-import { Cookies } from 'react-cookie';
-import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
+import DailyUsageByHour from './DailyUsageByHour';
+import './style.css';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -997,7 +991,7 @@ const TimeOfDay = () => {
             </div>
 
             <Row className="mt-4 mb-2">
-                <Col xl={3}>
+                <Col xl={4}>
                     <EndUseTotals
                         series={donutChartData}
                         options={donutChartOpts}
@@ -1005,7 +999,7 @@ const TimeOfDay = () => {
                         className={'container-height'}
                     />
                 </Col>
-                <Col xl={9}>
+                <Col xl={8}>
                     <HeatMapWidget
                         title="Hourly Average Consumption"
                         subtitle="Energy Usage By Hour (kWh)"
@@ -1021,18 +1015,12 @@ const TimeOfDay = () => {
 
             <Row className="mt-4">
                 <Col xl={12}>
-                    <div className="card-body timeofday-content-style">
-                        <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>
-
-                        {isAvgUsageChartLoading ? (
-                            <div className="loader-center-style" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                            </div>
-                        ) : (
-                            <LineAreaChart options={areaChartOptions} series={areaChartData} height={400} />
-                        )}
-                    </div>
+                    <DailyUsageByHour
+                        title="Average Daily Usage by Hour"
+                        subtitle="Energy Usage By Hour (kWh)"
+                        options={areaChartOptions}
+                        series={areaChartData}
+                    />
                 </Col>
             </Row>
         </React.Fragment>
