@@ -127,7 +127,7 @@ const TimeOfDay = () => {
             showForZeroSeries: true,
             showForSingleSeries: true,
             position: 'top',
-            horizontalAlign: 'center',
+            horizontalAlign: 'right',
             floating: true,
             onItemClick: {
                 toggleDataSeries: false,
