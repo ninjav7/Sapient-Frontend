@@ -16,6 +16,7 @@ import { useHistory } from 'react-router-dom';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import { fetchTrendType } from './utils';
 import EndUsesTypeWidget from '../../sharedComponents/endUsesTypeWidget';
+import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 
 const EndUsesPage = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -43,10 +44,6 @@ const EndUsesPage = () => {
             },
         },
         colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
-        fill: {
-            opacity: 1,
-            colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
-        },
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -76,21 +73,6 @@ const EndUsesPage = () => {
             marker: {
                 show: false,
             },
-            // custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-            //     const { seriesX } = w.globals;
-            //     const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-
-            //     return `<div class="line-chart-widget-tooltip">
-            //             <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-            //             <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-            //                 series[seriesIndex][dataPointIndex],
-            //                 0
-            //             )} kWh</div>
-            //             <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-            //                 .tz(timeZone)
-            //                 .format(`MMM D 'YY @ hh:mm A`)}</div>
-            //         </div>`;
-            // },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { colors } = w.globals;
                 const { seriesX } = w.globals;
@@ -154,9 +136,6 @@ const EndUsesPage = () => {
                 },
             },
         },
-        fill: {
-            opacity: 1,
-        },
         states: {
             hover: {
                 filter: 'none',
@@ -184,6 +163,17 @@ const EndUsesPage = () => {
             pathname: `/energy/end-uses/${endUse}/${bldgId}`,
         });
     };
+
+    useEffect(() => {
+        if (endUsesData.length === 0) {
+            return;
+        }
+        let categories = [];
+        endUsesData.forEach((record) => {
+            categories.push(record.color);
+        });
+        setBarChartOptions({ ...barChartOptions, colors: categories });
+    }, [endUsesData]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -218,6 +208,7 @@ const EndUsesPage = () => {
             await fetchEndUses(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
+                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
                     let endUsesList = [];
                     response.forEach((record, index) => {
                         let obj = {
@@ -274,29 +265,14 @@ const EndUsesPage = () => {
                     });
 
                     let data = [];
-                    response.forEach((record, index) => {
+                    response.forEach((record) => {
                         record.energy_consumption.now = formatConsumptionValue(
                             Math.round(record?.energy_consumption?.now / 1000),
                             0
                         );
-                        if (index === 0) {
-                            record.color = '#66A4CE';
-                        }
-                        if (index === 1) {
-                            record.color = '#FBE384';
-                        }
-                        if (index === 2) {
-                            record.color = '#59BAA4';
-                        }
-                        if (index === 3) {
-                            record.color = '#80E1D9';
-                        }
-                        if (index === 4) {
-                            record.color = '#847CB5';
-                        }
+                        record.color = COLOR_SCHEME_BY_DEVICE[record?.device];
                         data.push(record);
                     });
-                    console.log('SSR EndUses Data => ', data);
                     setEndUsesData(data);
 
                     setTopEndUsesData(endUsesList);

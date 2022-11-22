@@ -213,10 +213,11 @@ const BuildingOverview = () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchOverallEndUse(bldgId, payload)
                 .then((res) => {
-                    setEnergyConsumption(res.data);
-                    const energyData = res.data;
+                    let response = res?.data;
+                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                    setEnergyConsumption(response);
                     let newDonutData = [];
-                    energyData.forEach((record) => {
+                    response.forEach((record) => {
                         let fixedConsumption = Math.round(record.energy_consumption.now);
                         newDonutData.push(fixedConsumption);
                     });

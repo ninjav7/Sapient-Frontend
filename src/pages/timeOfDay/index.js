@@ -95,13 +95,7 @@ const TimeOfDay = () => {
                 '10PM',
                 '11PM',
             ],
-            // labels: {
-            //     formatter: function (val, timestamp) {
-            //         let dateText = moment(timestamp).format('M/DD');
-            //         let weekText = moment(timestamp).format('ddd');
-            //         return `${weekText} ${dateText}`;
-            //     },
-            // },
+            tickAmount: 12,
             style: {
                 colors: ['#1D2939'],
                 fontSize: '12px',
