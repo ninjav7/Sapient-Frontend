@@ -1,28 +1,11 @@
 @import '../assets/scss/stories.scss';
 @import '../../assets/scss/colors';
 
-.line-chart-wrapper {
+.explore-chart-wrapper {
     border: 1px solid $primary-gray-200;
     padding: 1rem;
-    position: relative;
-
     border-radius: 0.5rem;
 
-    .chart-header {
-        padding-left: 0.625rem;
-    }
-    .more-details-wrapper {
-        display: flex;
-        position: absolute;
-        right: 1.625rem;
-        bottom: 1.25rem;
-        justify-content: flex-end;
-        margin: 0.625rem 0rem;
-    }
-    .highcharts-menu {
-        border-radius: 0.3125rem;
-        border-color: $primary-gray-200;
-    }
     .chart-header {
         padding-left: 0.625rem;
         display: flex;
@@ -43,7 +26,6 @@
         text-overflow: ellipsis;
         text-transform: capitalize;
     }
-
     .chart-legend-wrapper {
         display: flex;
         color: $primary-gray-550 !important;
@@ -58,7 +40,7 @@
             margin-right: 0.25rem;
         }
     }
-    .highcharts-legend .highcharts-area-series rect {
+    .highcharts-legend g path {
         display: none;
     }
 }

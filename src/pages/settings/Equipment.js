@@ -33,6 +33,7 @@ import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../store/globalS
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import EquipChartModal from '../../pages/chartModal/EquipChartModal';
+import { timeZone } from '../../utils/helper';
 import './style.css';
 import {
     getEqupmentDataRequest,
@@ -813,7 +814,6 @@ const Equipment = () => {
                                     handleChange('end_use', e.value);
                                 }}
                                 className="basic-single font-weight-bold"
-                                isDisabled
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

@@ -467,7 +467,7 @@ const ActiveDevices = () => {
     };
     const handleSearchtxt = (e) => {
         if (e.target.value !== '') {
-            setSearch(e.target.value.toUpperCase());
+            setSearch(e.target.value.trim().toUpperCase());
         } else {
             setActiveDeviceData(duplicateactiveDeviceData);
         }
@@ -482,9 +482,8 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_type=active&building_id=${bldgId}&mac=${search.trimStart()}`;
+                let params = `?device_type=active&building_id=${bldgId}&mac=${encodeURIComponent(search)}`;
                 await axios.post(`${BaseUrl}${searchDevices}${params}`, {}, { headers }).then((res) => {
-                    let response = res.data;
                     setActiveDeviceData(res.data);
                 });
                 setIsDeviceProcessing(false);

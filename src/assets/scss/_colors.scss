@@ -1,11 +1,89 @@
 $base-white: #ffffff;
+$base-black: #000000;
+$base-background: #fdfeff;
 
 $success: #d1fadf;
 $success-50: #ecfdf3;
 $success-100: #d1fadf;
 $success-600: #039855;
 $success-700: #027a48;
+$success-700: #027a48;
 $success-800: #05603a;
+
+$sapient-specific-hvac: #66a4ce;
+$sapient-specific-lighting: #fbe384;
+$sapient-specific-plug: #59baa4;
+$sapient-specific-process: #59f0fa;
+$sapient-specific-refridergation: #bab7db;
+
+$dataviz-main-1: #b863cf;
+$dataviz-main-2: #5e94e4;
+$dataviz-main-3: #44b87f;
+$dataviz-main-4: #e2ad5b;
+$dataviz-main-5: #e858a6;
+$dataviz-main-6: #fc9337;
+$dataviz-main-7: #8277ca;
+$dataviz-main-8: #45e6d9;
+$dataviz-main-9: #e55b5b;
+
+$dataviz-main-accessible-3: #21aa64;
+$dataviz-main-accessible-4: #c08c0c;
+$dataviz-main-accessible-6: #de7c15;
+$dataviz-main-accessible-8: #01a88f;
+
+$dataviz-dark-1: #8919b3;
+$dataviz-dark-2: #3e468f;
+$dataviz-dark-3: #00592e;
+$dataviz-dark-4: #8d6502;
+$dataviz-dark-5: #bc006d;
+$dataviz-dark-6: #b14b00;
+$dataviz-dark-7: #4d40a4;
+$dataviz-dark-8: #0c7ea0;
+$dataviz-dark-9: #9c2121;
+
+$dataviz-light-1: #9fc8f3;
+$dataviz-light-2: #9fc8f3;
+$dataviz-light-3: #96d4b3;
+$dataviz-light-4: #eac387;
+$dataviz-light-5: #ec8abf;
+$dataviz-light-6: #ffcf8e;
+$dataviz-light-7: #cac4e8;
+$dataviz-light-8: #b6f4ef;
+$dataviz-light-9: #facfd4;
+
+$dataviz-background-1: #f0e5f2;
+$dataviz-background-2: #e7eef8;
+$dataviz-background-3: #e5f0eb;
+$dataviz-background-4: #f9f1e6;
+$dataviz-background-5: #fbe4f0;
+$dataviz-background-6: #faeae1;
+$dataviz-background-7: #ecebf3;
+$dataviz-background-8: #eaf9f7;
+$dataviz-background-9: #fce3e3;
+
+$dataviz-blue-25: #f7faff;
+$dataviz-blue-50: #eff5ff;
+$dataviz-blue-100: #dbe8fe;
+$dataviz-blue-200: #bed5fe;
+$dataviz-blue-300: #97bafc;
+$dataviz-blue-400: #5f8efc;
+$dataviz-blue-500: #3c6df5;
+$dataviz-blue-600: #2955e7;
+$dataviz-blue-700: #2142d4;
+$dataviz-blue-800: #1e3daf;
+$dataviz-blue-900: #1e358a;
+
+$dataviz-red-25: #fff5f6;
+$dataviz-red-50: #fff1f3;
+$dataviz-red-100: #ffe4e8;
+$dataviz-red-200: #fecdd6;
+$dataviz-red-300: #fea3b4;
+$dataviz-red-400: #fd6f8e;
+$dataviz-red-500: #f63d68;
+$dataviz-red-600: #e31b54;
+$dataviz-red-700: #c01048;
+$dataviz-red-800: #a11043;
+$dataviz-red-900: #89123e;
 
 $error-25: #fffbfa;
 $error-50: #fef3f2;
@@ -48,11 +126,133 @@ $primary-gray-800: #1d2939;
 $primary-gray-900: #101828;
 $primary-gray-950: #070c17;
 
-$dataviz-blue-50: #eff5ff;
-$dataviz-blue-100: #dbe8fe;
-$dataviz-blue-600: #2955e7;
+$secondary-purple-600: #6b08db;
 
 :export {
+    baseWhite: $base-white;
+    baseBlack: $base-black;
+    baseBackground: $base-background;
+
+    primaryGray25: $primary-gray-25;
+    primaryGray50: $primary-gray-50;
+    primaryGray100: $primary-gray-100;
+    primaryGray150: $primary-gray-150;
+    primaryGray200: $primary-gray-200;
+    primaryGray250: $primary-gray-250;
+    primaryGray300: $primary-gray-300;
+    primaryGray400: $primary-gray-400;
+    primaryGray450: $primary-gray-450;
+    primaryGray500: $primary-gray-500;
+    primaryGray550: $primary-gray-550;
+    primaryGray600: $primary-gray-600;
+    primaryGray700: $primary-gray-700;
+    primaryGray800: $primary-gray-800;
+    primaryGray900: $primary-gray-900;
+    primaryGray950: $primary-gray-950;
+
+    primaryIndigo25: $primary-indigo-25;
     primaryIndigo50: $primary-indigo-50;
+    primaryIndigo100: $primary-indigo-100;
+    primaryIndigo200: $primary-indigo-200;
+    primaryIndigo300: $primary-indigo-300;
     primaryIndigo400: $primary-indigo-400;
+    primaryIndigo500: $primary-indigo-500;
+    primaryIndigo600: $primary-indigo-600;
+    primaryIndigo700: $primary-indigo-700;
+    primaryIndigo900: $primary-indigo-900;
+
+    secondaryPurple600: $secondary-purple-600;
+
+    success: $success;
+    success100: $success-100;
+    success600: $success-600;
+    success700: $success-700;
+    success800: $success-800;
+
+    sapientSpecificHvac: $sapient-specific-hvac;
+    sapientSpecificLighting: $sapient-specific-lighting;
+    sapientSpecificPlug: $sapient-specific-plug;
+    sapientSpecificProcess: $sapient-specific-process;
+    sapientSpecificRefridergation: $sapient-specific-refridergation;
+
+    datavizMain1: $dataviz-main-1;
+    datavizMain2: $dataviz-main-2;
+    datavizMain3: $dataviz-main-3;
+    datavizMain4: $dataviz-main-4;
+    datavizMain5: $dataviz-main-5;
+    datavizMain6: $dataviz-main-6;
+    datavizMain7: $dataviz-main-7;
+    datavizMain8: $dataviz-main-8;
+    datavizMain9: $dataviz-main-9;
+
+    datavizMainAccessible3: $dataviz-main-accessible-3;
+    datavizMainAccessible4: $dataviz-main-accessible-4;
+    datavizMainAccessible6: $dataviz-main-accessible-6;
+    datavizMainAccessible8: $dataviz-main-accessible-8;
+
+    datavizDark1: $dataviz-dark-1;
+    datavizDark2: $dataviz-dark-2;
+    datavizDark3: $dataviz-dark-3;
+    datavizDark4: $dataviz-dark-4;
+    datavizDark5: $dataviz-dark-5;
+    datavizDark6: $dataviz-dark-6;
+    datavizDark7: $dataviz-dark-7;
+    datavizDark8: $dataviz-dark-8;
+    datavizDark9: $dataviz-dark-9;
+
+    datavizLight1: $dataviz-light-1;
+    datavizLight2: $dataviz-light-2;
+    datavizLight3: $dataviz-light-3;
+    datavizLight4: $dataviz-light-4;
+    datavizLight5: $dataviz-light-5;
+    datavizLight6: $dataviz-light-6;
+    datavizLight7: $dataviz-light-7;
+    datavizLight8: $dataviz-light-8;
+    datavizLight9: $dataviz-light-9;
+
+    datavizBackground1: $dataviz-background-1;
+    datavizBackground2: $dataviz-background-2;
+    datavizBackground3: $dataviz-background-3;
+    datavizBackground4: $dataviz-background-4;
+    datavizBackground5: $dataviz-background-5;
+    datavizBackground6: $dataviz-background-6;
+    datavizBackground7: $dataviz-background-7;
+    datavizBackground8: $dataviz-background-8;
+    datavizBackground9: $dataviz-background-9;
+
+    datavizBlue25: $dataviz-blue-25;
+    datavizBlue50: $dataviz-blue-50;
+    datavizBlue100: $dataviz-blue-100;
+    datavizBlue200: $dataviz-blue-200;
+    datavizBlue300: $dataviz-blue-300;
+    datavizBlue400: $dataviz-blue-400;
+    datavizBlue500: $dataviz-blue-500;
+    datavizBlue600: $dataviz-blue-600;
+    datavizBlue700: $dataviz-blue-700;
+    datavizBlue800: $dataviz-blue-800;
+    datavizBlue900: $dataviz-blue-900;
+
+    datavizRed25: $dataviz-red-25;
+    datavizRed50: $dataviz-red-50;
+    datavizRed100: $dataviz-red-100;
+    datavizRed200: $dataviz-red-200;
+    datavizRed300: $dataviz-red-300;
+    datavizRed400: $dataviz-red-400;
+    datavizRed500: $dataviz-red-500;
+    datavizRed600: $dataviz-red-600;
+    datavizRed700: $dataviz-red-700;
+    datavizRed800: $dataviz-red-800;
+    datavizRed900: $dataviz-red-900;
+
+    error25: $error-25;
+    error50: $error-50;
+    error100: $error-100;
+    error200: $error-200;
+    error300: $error-300;
+    error500: $error-500;
+    error600: $error-600;
+    error700: $error-700;
+    error800: $error-800;
+
+    warning700: $warning-700;
 }

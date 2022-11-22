@@ -13,7 +13,6 @@ import './style.css';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { heatMapOptions } from './utils';
 import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
 
 const TimeOfDay = () => {
@@ -1009,11 +1008,11 @@ const TimeOfDay = () => {
                     <HeatMapWidget
                         title="Hourly Average Consumption"
                         subtitle="Energy Usage By Hour (kWh)"
-                        hourlyAvgConsumpOpts={heatMapOptions}
-                        hourlyAvgConsumpData={heatMapChartData}
-                        heatMapChartHeight={weekdaysChartHeight}
+                        series={heatMapChartData}
+                        height={weekdaysChartHeight}
                         timeZone={timeZone}
                         showRouteBtn={false}
+                        labelsPosition={'top'}
                     />
                 </Col>
             </Row>
