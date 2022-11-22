@@ -229,7 +229,7 @@ const TimeOfDay = () => {
     const [heatMapChartData, setHeatMapChartData] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = '265px';
+    const weekdaysChartHeight = '300px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
@@ -997,14 +997,15 @@ const TimeOfDay = () => {
             </div>
 
             <Row className="mt-4 mb-2">
-                <Col xl={5}>
+                <Col xl={3}>
                     <EndUseTotals
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
+                        className={'container-height'}
                     />
                 </Col>
-                <Col xl={7}>
+                <Col xl={9}>
                     <HeatMapWidget
                         title="Hourly Average Consumption"
                         subtitle="Energy Usage By Hour (kWh)"
@@ -1013,6 +1014,7 @@ const TimeOfDay = () => {
                         timeZone={timeZone}
                         showRouteBtn={false}
                         labelsPosition={'top'}
+                        className={'container-height'}
                     />
                 </Col>
             </Row>
