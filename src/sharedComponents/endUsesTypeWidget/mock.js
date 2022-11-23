@@ -5,66 +5,42 @@ const timeZone = 'US/Eastern';
 
 export const endUsesKPIsData = [
     {
-        device: 'Lighting',
+        device: 'HVAC',
         energy_consumption: {
             now: '7,490',
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         after_hours_energy_consumption: {
             now: 0,
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         color: '#66A4CE',
     },
     {
-        device: 'HVAC',
+        device: 'Lighting',
         energy_consumption: {
             now: '6,678',
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         after_hours_energy_consumption: {
             now: 0,
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         color: '#FBE384',
     },
     {
-        device: 'Process',
+        device: 'Plug',
         energy_consumption: {
             now: '3,601',
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         after_hours_energy_consumption: {
             now: 0,
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         color: '#59BAA4',
     },
     {
-        device: 'Plug',
+        device: 'Process',
         energy_consumption: {
             now: '3,329',
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         after_hours_energy_consumption: {
             now: 0,
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         color: '#80E1D9',
     },
@@ -72,15 +48,9 @@ export const endUsesKPIsData = [
         device: 'Other',
         energy_consumption: {
             now: '0',
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         after_hours_energy_consumption: {
             now: 0,
-            old: 0,
-            yearly: 0,
-            change: 0,
         },
         color: '#847CB5',
     },

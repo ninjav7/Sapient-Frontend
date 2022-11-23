@@ -1,12 +1,14 @@
 @import '../../assets/scss/colors';
 
-.enduse-type-widget-wrapper {
-    border: .0625rem solid $primary-gray-200;
-    border-radius: .5rem;
+.daily-usage-by-hour-wrapper {
+    border: .0625rem solid $primary-gray-200 !important;
+    border-radius: 0.5rem;
 }
 
-.enduse-stacked-chart {
-    padding: 0.5rem;
+.daily-usage-by-hour {
+    &-titles {
+        padding: 1rem 1.5rem 0 1.5rem;
+    }
 
     &-wrapper {
         .apexcharts-xaxis-label {
@@ -37,7 +39,6 @@
             display: none;
         }
     }
-    
     &-tooltip {
         opacity: 1;
         &-title {
@@ -64,39 +65,5 @@
             line-height: 1.0625rem;
             color: $primary-gray-500;
         }
-    }
-}
-
-.enduse-type {
-    min-height: 3.5rem;
-
-    &-title {
-        margin: 0 0 0.3125rem 0;
-        color: $primary-gray-700;
-        font-size: 0.75rem;
-        font-weight: 500;
-        line-height: 0.9375rem;
-    }
-
-    &-body {
-        padding: 0.5rem 0.625rem;
-    }
-
-    &-text {
-        font-family: 'Space Grotesk' !important;
-        margin: 0;
-        font-style: normal;
-        font-weight: 700;
-        font-size: 1.25rem;
-        line-height: 1.625rem;
-        color: $primary-gray-800;
-    }
-
-    &-unit {
-        font-weight: 600;
-        font-size: 0.75rem;
-        line-height: 0.75rem;
-        color: $primary-gray-700;
-        margin: auto 0 0.29rem 0.25rem;
     }
 }

@@ -81,6 +81,7 @@ const PortfolioOverview = () => {
             await fetchPortfolioEndUse(payload)
                 .then((res) => {
                     let response = res?.data;
+                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
                     response.forEach((record) => {
                         record.energy_consumption.now = Math.round(record.energy_consumption.now);
                         record.energy_consumption.old = Math.round(record.energy_consumption.old);

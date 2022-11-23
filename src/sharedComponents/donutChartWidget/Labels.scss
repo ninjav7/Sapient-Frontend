@@ -16,9 +16,10 @@
     &-wrapper {
         display: grid;
         row-gap: 0.25rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0rem;
         &.vertical {
-            row-gap: 0;
+            margin-top: 0.5rem;
+            row-gap: 10;
             .donut-chart-labels {
                 padding: 0.3125rem;
             }
@@ -26,6 +27,12 @@
     }
 
     &-wrapper.withTrend {
+        .donut-chart-labels {
+            grid-template-columns: auto 1.7fr 2fr auto;
+        }
+    }
+
+    &-wrapper.withValue {
         .donut-chart-labels {
             grid-template-columns: auto 1.7fr 2fr auto;
         }

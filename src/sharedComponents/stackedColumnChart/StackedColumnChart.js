@@ -96,14 +96,12 @@ StackedColumnChart.propTypes = {
     series: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,
-            // data: PropTypes.arrayOf(PropTypes.number.isRequired),
             data: PropTypes.array,
         })
     ),
     onMoreDetail: PropTypes.func,
     chartHeight: PropTypes.number,
     tooltipUnit: PropTypes.string,
-    // categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     categories: PropTypes.array,
 };
 
