@@ -19,14 +19,10 @@ import { ReactComponent as PlusSVG } from '../../assets/icons/plus.svg';
 
 const mapFilters = {
     [FILTER_TYPES.RANGE_SELECTOR]: (props) => {
-        // const { selectedFiltersValues, setSelectedFiltersValues } = useContext(DataTableWidgetContext);
         let filterValue = props.filterOptions;
         let currentValue = filterValue;
         
         const handleChange = () => {
-            // setSelectedFiltersValues((oldState) => {
-            //     return { ...oldState, [FILTER_TYPES.RANGE_SELECTOR]: filterValue };
-            // });
             props.onClose && props.onClose(currentValue);
         };
 
