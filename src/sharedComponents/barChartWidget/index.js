@@ -61,7 +61,7 @@ const BarChartWidget = ({
                         headerCategory: 'Timestamp',
                         headerValue: 'value',
                         dateFormatter(timestamp) {
-                            return moment.utc(timestamp).format(`MMM D 'YY @ hh:mm A`);
+                            return moment.utc(timestamp).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
                         },
                     },
                     svg: {
