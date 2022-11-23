@@ -65,7 +65,7 @@
     display: flex;
     width: '100%';
     width: 100%;
-    gap: '4px';
+    gap: .25rem;
     justify-content: space-between;
 }
 .add-equipment-footer-column {
@@ -76,7 +76,6 @@
 }
 .equipment-page .heading-style{
     margin-left: 0px;
-
 }
 .tab-switch {
     border: none;

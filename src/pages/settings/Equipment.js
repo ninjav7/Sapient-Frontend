@@ -22,12 +22,10 @@ import _ from 'lodash';
 
 import { Badge } from '../../sharedComponents/badge';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import { Checkbox } from '../../sharedComponents/form/checkbox';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-// import { getCSVDataExport } from './utils';
 
 import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../store/globalState';
 import { useAtom } from 'jotai';
@@ -351,7 +349,6 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
-                // setFormValidation(false);
                 isLoadingRef.current = false;
             })
             .catch((error) => {
