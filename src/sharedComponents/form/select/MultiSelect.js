@@ -18,7 +18,7 @@ import { selectAllOption } from './constants';
 
 import './style.scss';
 
-const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INPUT_TYPES.Default, ...props }) => {
+const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INPUT_TYPES.Default, closeOnBlur = false, ...props }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [value, setValue] = useState(props.value);
     const ref = useRef(null);
@@ -58,6 +58,10 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
     };
 
     const handleBlur = (event) => {
+        if(!closeOnBlur) {
+            return;
+        }
+        
         setIsOpen(false);
         props.onMenuClose && props.onMenuClose(event, props);
     };
@@ -132,6 +136,7 @@ MultiSelect.propTypes = {
     isSelectAll: PropTypes.bool,
     isSearchable: PropTypes.bool,
     withSelectAllOption: PropTypes.bool,
+    closeOnBlur: PropTypes.bool,
 };
 
 export default MultiSelect;
