@@ -54,7 +54,23 @@ const BarChartWidget = ({
             type: 'bar',
             height: 350,
             toolbar: {
-                show: true,
+                export: {
+                    csv: {
+                        filename: 'Total_Energy_Consumption_' + new Date().toISOString().split('T')[0],
+                        columnDelimiter: ',',
+                        headerCategory: 'Timestamp',
+                        headerValue: 'value',
+                        dateFormatter(timestamp) {
+                            return moment.utc(timestamp).format(`MMM D 'YY @ hh:mm A`);
+                        },
+                    },
+                    svg: {
+                        filename: 'Total_Energy_Consumption_' + new Date().toISOString().split('T')[0],
+                    },
+                    png: {
+                        filename: 'Total_Energy_Consumption_' + new Date().toISOString().split('T')[0],
+                    },
+                },
             },
             zoom: {
                 enabled: false,
