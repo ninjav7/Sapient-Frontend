@@ -1066,7 +1066,6 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        // onChange={setSelected}
                                                         onChange={(value) => {
                                                             handleChange('tags', value);
                                                         }}
@@ -1370,7 +1369,6 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        // onChange={setSelected}
                                                         onChange={(value) => {
                                                             handleChange('tags', value);
                                                         }}
@@ -1658,7 +1656,6 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData.tags : ''}
-                                                        // onChange={setSelected}
                                                         onChange={(value) => {
                                                             handleChange('tags', value);
                                                         }}
