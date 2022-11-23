@@ -35,7 +35,11 @@ Default.args = {
                 {label: 'Label 1', value: 1},
                 {label: 'Label 2', value: 2},
                 {label: 'Label 3', value: 3}
-            ]
+            ],
+            //Add any props you need for filter component
+            componentProps: {
+                isSearchable: true
+            }
         },
         {
             label: 'Total Consumption',
@@ -59,6 +63,22 @@ Default.args = {
                 {label: 'Label 2', value: 21},
                 {label: 'Label 3', value: 31}
             ],
+            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options))
+        },
+        {
+            label: 'Range Slider',
+            value: 'totalRange',
+            placeholder: 'All Ranges',
+            filterType: FILTER_TYPES.RANGE_SELECTOR,
+            filterOptions: [20, 100],
+            componentProps: {
+                prefix: "%",
+                
+                // We need specify callback if we want use Trends Filter Buttons.
+                withTrendsFilter: true,
+                handleButtonClick: (...args) => console.log(args)
+            },
+            onChange: (...args) => console.log(args),
             onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options))
         }
     ],
