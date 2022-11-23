@@ -105,16 +105,14 @@ const PortfolioOverview = () => {
                 .then((res) => {
                     let newArray = [
                         {
-                            name: 'Energy',
+                            name: 'Energy Value(kWh)',
                             data: [],
                         },
                     ];
                     res.data.forEach((record) => {
-                        const d = new Date(record.x);
-                        const milliseconds = d.getTime();
                         newArray[0].data.push({
-                            x: milliseconds,
-                            y: (record.y / 1000).toFixed(0),
+                            x: record.x,
+                            y: Math.round(record.y / 1000),
                         });
                     });
                     setEnergyConsumptionChart(newArray);
