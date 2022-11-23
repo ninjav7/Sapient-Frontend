@@ -71,6 +71,13 @@
 .add-equipment-footer-column {
     width: 50%;
 }
+.equipment-name-cell{
+    cursor: pointer;
+}
+.equipment-page .heading-style{
+    margin-left: 0px;
+
+}
 .tab-switch {
     border: none;
     background-color: #ffffff;

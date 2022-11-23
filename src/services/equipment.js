@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import axiosInstance from './axiosInstance';
-import { generalEquipments, deleteEquipment, createEquipment, getFiltersForEquipment, getEndUseId } from './Network';
+import { generalEquipments, deleteEquipment, createEquipment, getFiltersForEquipment, getEndUseId,getLocation } from './Network';
 
 export function getEqupmentDataRequest(
     pageSize,
@@ -13,9 +13,14 @@ export function getEqupmentDataRequest(
     floorTypeFilterString,
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
-    getParams
+    getParams,
+    withPagination,
 ) {
-    let params = `?building_id=${bldgId}&equipment_search=${search}&page_size=${pageSize}&page_no=${pageNo}`;
+
+    let params = `?building_id=${bldgId}&equipment_search=${search}`;
+    if(withPagination){
+        params+=`&page_size=${pageSize}&page_no=${pageNo}`;
+    }
     const filteredData = {
         floor_id: floorTypeFilterString,
         space_id: spaceTypeFilterString,
@@ -124,6 +129,11 @@ export function getFiltersForEquipmentRequest(args) {
 
 export function getEndUseDataRequest() {
     return axiosInstance.get(`${getEndUseId}`).then((res) => {
+        return res.data;
+    });
+}
+export  function getLocationDataRequest(bldgId){
+    return axiosInstance.get(`${getLocation}/${bldgId}`).then((res) => {
         return res.data;
     });
 }

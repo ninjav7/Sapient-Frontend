@@ -1464,15 +1464,6 @@ const ExploreByEquipment = () => {
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
 
-    useEffect(() => {
-        if (selectedAllEquipmentId.length === 1) {
-            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 100000);
-        } else {
-            selectedAllEquipmentId.map((ele) => {
-                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
-            });
-        }
-    }, [selectedAllEquipmentId]);
 
     useEffect(() => {
         if (removeEquipmentId === '') {
@@ -1488,55 +1479,6 @@ const ExploreByEquipment = () => {
 
     const dataarr = [];
 
-    const fetchExploreAllChartData = async (id) => {
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
-        await fetchExploreEquipmentChart(payload, params)
-            .then((res) => {
-                let responseData = res.data;
-                let data = responseData.data;
-                let arr = [];
-                arr = FilterDataList.filter(function (item) {
-                    return item.equipment_id === id;
-                });
-                let exploreData = [];
-                let sg = '';
-                let legendName = '';
-                sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
-                if (sg === '') {
-                    legendName = arr[0].equipment_name;
-                } else {
-                    legendName = arr[0].equipment_name + ' - ' + sg;
-                }
-                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                let recordToInsert = {
-                    name: legendName,
-                    data: formattedData,
-                    id: arr[0].equipment_id,
-                };
-                let coll = [];
-                let sname = arr[0].equipment_name;
-                formattedData.map((el) => {
-                    let ab = {};
-                    ab['timestamp'] = el[0];
-                    ab[sname] = el[1];
-                    coll.push(ab);
-                });
-                if (objectExplore.length === 0) {
-                    setObjectExplore(coll);
-                } else {
-                }
-                dataarr.push(recordToInsert);
-
-                if (totalEquipmentId.length === dataarr.length) {
-                    setSeriesData(dataarr);
-                    setSeriesLineData(dataarr);
-                }
-                setAllEquipmenData(dataarr);
-            })
-            .catch((error) => {
-            });
-    };
 
     useEffect(() => {
         if (equipmentListArray.length === 0) {
@@ -1547,9 +1489,6 @@ const ExploreByEquipment = () => {
             arr1 = seriesData.filter(function (item) {
                 return item.id === equipmentListArray[i];
             });
-            if (arr1.length === 0) {
-                fetchExploreAllChartData(equipmentListArray[i]);
-            }
         }
     }, [equipmentListArray]);
     useEffect(() => {

@@ -13,7 +13,7 @@ import Form from 'react-bootstrap/Form';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import Button from '../../sharedComponents/button/Button';
-import StatusBadge from '../../sharedComponents/statusBadge/StatusBadge';
+import { getTableCSVExport } from '../../sharedComponents/helpers/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from '../../sharedComponents/form/select';
@@ -41,6 +41,7 @@ import {
     addNewEquipment,
     getFiltersForEquipmentRequest,
     getEndUseDataRequest,
+    getLocationDataRequest,
 } from '../../services/equipment';
 
 const SkeletonLoading = () => (
@@ -89,8 +90,8 @@ const SkeletonLoading = () => (
 );
 
 const Equipment = () => {
+    const buildingName = localStorage.getItem('buildingName');
     let cookies = new Cookies();
-    let userdata = cookies.get('user');
 
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -169,12 +170,6 @@ const Equipment = () => {
     }, [equipmentTypeData]);
 
     useEffect(() => {
-        if (search === '') {
-            fetchEquipmentData();
-        }
-    }, [search, pageSize]);
-
-    useEffect(() => {
         if (endUseData) {
             addEndUseType();
         }
@@ -201,15 +196,16 @@ const Equipment = () => {
             pageNo,
             bldgId,
             search,
-            equpimentTypeFilterString,
+            equipmentTypeFilterString,
             macTypeFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
+            spaceFilterString,
             spaceTypeFilterString,
-            spaceTypeTypeFilterString,
             {
                 ...sorting,
-            }
+            },
+            true
         )
             .then((res) => {
                 let response = res.data;
@@ -248,38 +244,6 @@ const Equipment = () => {
             });
     };
 
-    const equipmentDataWithFilter = async (order, filterBy) => {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
-            await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
-                let responseData = res.data;
-                setGeneralEquipmentData(responseData.data);
-                setDuplicateGeneralEquipmentData(responseData.data);
-                let onlineEquip = [];
-                let offlineEquip = [];
-                responseData.forEach((record) => {
-                    if (record.status) {
-                        onlineEquip.push(record);
-                    }
-                    if (!record.status) {
-                        offlineEquip.push(record);
-                    }
-                });
-                setOnlineEquipData(onlineEquip);
-                setOfflineEquipData(offlineEquip);
-                setIsEquipDataFetched(false);
-            });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
-    };
-
     const [selectedIds, setSelectedIds] = useState([]);
 
     const renderLocation = useCallback((row, childrenTemplate) => {
@@ -287,25 +251,21 @@ const Equipment = () => {
 
         return childrenTemplate(location.join(' - '));
     }, []);
-    const [skeletonLoading, setSkeletonLoading] = useState(true);
-    const [checkedAll, setCheckedAll] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    const [sensorsIdNow, setSensorIdNow] = useState('');
     const [filterOptions, setFilterOptions] = useState([]);
 
-    const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
+    const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
 
     const [macTypeFilterString, setMacTypeFilterString] = useState('');
 
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
-    const [isLoadingEndUseData,setIsLoadingEndUseData] = useState(true);
-
+    const [isLoadingEndUseData, setIsLoadingEndUseData] = useState(true);
 
     const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
+    const [spaceFilterString, setSpaceFilterString] = useState('');
     const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
-    const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
     const [tagsFilterString, setTagsTypeFilterString] = useState('');
 
     const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
@@ -320,9 +280,6 @@ const Equipment = () => {
         }
         return offlineEquipData;
     };
-    const renderEquipType = useCallback((row) => {
-        return <Badge text={<span className="gray-950">{row.status}</span>} />;
-    }, []);
 
     const renderSensors = useCallback((row) => {
         return (
@@ -345,20 +302,11 @@ const Equipment = () => {
         return (
             <div className="sensors-row-content">
                 {row.tags.map((el) => {
-                    return (
-                        <Badge
-                            text={
-                                <span className="gray-950">
-                                    {el}
-                                </span>
-                            }
-                        />
-                    );
+                    return <Badge text={<span className="gray-950">{el}</span>} />;
                 })}
             </div>
         );
     });
-
 
     const fetchEquipmentData = async () => {
         isLoadingRef.current = true;
@@ -373,15 +321,16 @@ const Equipment = () => {
             pageNo,
             bldgId,
             search,
-            equpimentTypeFilterString,
+            equipmentTypeFilterString,
             macTypeFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
+            spaceFilterString,
             spaceTypeFilterString,
-            spaceTypeTypeFilterString,
             {
                 ...sorting,
-            }
+            },
+            true
         )
             .then((res) => {
                 let responseData = res.data;
@@ -426,55 +375,31 @@ const Equipment = () => {
 
     useEffect(() => {
         fetchEndUseData();
-        fetchEquipmentData();
-        fetchEquipTypeData();
         fetchLocationData();
     }, [bldgId, pageSize]);
 
     const fetchEndUseData = async () => {
         setIsLoadingEndUseData(true);
-        await getEndUseDataRequest().then((res) => {
-            const prepareEndUseType = res.reduce((acc, el) => {
-                acc[`${el.end_user_id}`] = el.name;
-                return acc;
-            }, {});
-            setEndUseData(res);
-            setPreparedEndUseData(prepareEndUseType);
-        }).finally(()=>{
-            setIsLoadingEndUseData(false);
-        })
-    };
-
-    const fetchEquipTypeData = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setEquipmentTypeData([]);
-            let params = `?building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                let response = res.data.data;
-                response.sort((a, b) => {
-                    return a.equipment_type.localeCompare(b.equipment_type);
-                });
-                setEquipmentTypeData(response);
+        await getEndUseDataRequest()
+            .then((res) => {
+                const prepareEndUseType = res.reduce((acc, el) => {
+                    acc[`${el.end_user_id}`] = el.name;
+                    return acc;
+                }, {});
+                setEndUseData(res);
+                setPreparedEndUseData(prepareEndUseType);
+            })
+            .finally(() => {
+                setIsLoadingEndUseData(false);
             });
-        } catch (error) {}
     };
 
     const fetchLocationData = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                setLocationData(res.data);
-            });
-        } catch (error) {}
+        await getLocationDataRequest(bldgId)
+            .then((res) => {
+                setLocationData(res);
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -499,11 +424,6 @@ const Equipment = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const [processdelete, setProcessdelete] = useState(false);
-    const [equipmentIdData, setEquipmentIdData] = useState('');
-
-    const renderTagCell = (row) => {
-        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
-    };
 
     const filterHandler = (setter, options) => {
         setter(options.map(({ value }) => value));
@@ -514,14 +434,29 @@ const Equipment = () => {
         return <div>{preparedEndUseData[row.end_use_id]}</div>;
     };
 
+    const handleOpenEditEquipment = (row) => {
+        setEquipmentFilter({
+            equipment_id: row?.equipments_id,
+            equipment_name: row?.equipments_name,
+        });
+        handleChartOpen();
+    };
+    const renderEquipmentsName = (row) => {
+        return (
+            <div onClick={() => handleOpenEditEquipment(row)} className="equipment-name-cell">
+                {row.equipments_name}
+            </div>
+        );
+    };
+
     const getFilters = async () => {
         const filters = await getFiltersForEquipmentRequest({
             bldgId,
             macTypeFilterString,
-            equpimentTypeFilterString,
+            equipmentTypeFilterString,
             floorTypeFilterString,
             spaceTypeFilterString,
-            spaceTypeTypeFilterString,
+            spaceTypeFilterString,
         });
 
         filters.data.forEach((filterOptions) => {
@@ -550,10 +485,10 @@ const Equipment = () => {
                         value: filterItem.equipment_type_id,
                         label: filterItem.equipment_type_name,
                     })),
-                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                    onClose: (options) => filterHandler(setEquipmentTypeFilterString, options),
                     onDelete: () => {
                         setSelectedOption([]);
-                        setEqupimentTypeFilterString('');
+                        setEquipmentTypeFilterString('');
                     },
                 },
                 {
@@ -577,8 +512,8 @@ const Equipment = () => {
                         value: filterItem.space_id,
                         label: filterItem.space_name,
                     })),
-                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                    onDelete: () => setSpaceTypeFilterString(''),
+                    onClose: (options) => filterHandler(setSpaceFilterString, options),
+                    onDelete: () => setSpaceFilterString(''),
                 },
                 {
                     label: 'Space Type',
@@ -589,8 +524,8 @@ const Equipment = () => {
                         value: filterItem.space_type_id,
                         label: filterItem.space_type_name,
                     })),
-                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                    onDelete: () => setSpaceTypeTypeFilterString(''),
+                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                    onDelete: () => setSpaceTypeFilterString(''),
                 },
                 {
                     label: 'Tag',
@@ -609,17 +544,21 @@ const Equipment = () => {
             setFilterOptions(filterOptionsFetched);
         });
     };
+
     useEffect(() => {
         getFilters();
         fetchEquipmentData();
     }, [
+        search,
         bldgId,
+        pageSize,
+        pageNo,
         macTypeFilterString,
-        equpimentTypeFilterString,
+        equipmentTypeFilterString,
         locationTypeFilterString,
         floorTypeFilterString,
+        spaceFilterString,
         spaceTypeFilterString,
-        spaceTypeTypeFilterString,
         tagsFilterString,
     ]);
 
@@ -628,9 +567,9 @@ const Equipment = () => {
 
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
-    const deleteEquipmentFunc = async () => {
+    const deleteEquipmentFunc = async (event, equipmentIdData, row) => {
         setProcessdelete(true);
-        await deleteEquipmentRequest(bldgId, equipmentIdData)
+        await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
                 setProcessdelete(false);
                 fetchEquipmentData();
@@ -641,39 +580,101 @@ const Equipment = () => {
             });
     };
 
-    useEffect(() => {
-        fetchEquipmentData();
-    }, [pageNo, pageSize]);
+    const headerProps = [
+        {
+            name: 'Name',
+            accessor: 'equipments_name',
+            callbackValue: renderEquipmentsName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Equipment Type',
+            accessor: 'equipments_type',
+        },
+        {
+            name: 'End Use Category',
+            accessor: 'end_use_id',
+            callbackValue: renderEndUseCategory,
+        },
+        {
+            name: 'Location',
+            accessor: 'location',
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTags,
+        },
+        {
+            name: 'Sensors',
+            accessor: 'sensor_number',
+            callbackValue: renderSensors,
+        },
+        {
+            name: 'Device ID',
+            accessor: 'device_mac',
+        },
+    ];
+
+    const handleDownloadCsv = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+        await getEqupmentDataRequest(
+            pageSize,
+            pageNo,
+            bldgId,
+            search,
+            equipmentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            floorTypeFilterString,
+            spaceFilterString,
+            spaceTypeFilterString,
+            {
+                ...sorting,
+            },
+            false
+        )
+            .then((res) => {
+                let response = res.data;
+                getTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
+
+                setIsEquipDataFetched(false);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
+    };
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title equipment-page">
                 <Col className="header-container">
                     <span className="heading-style">Equipment</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
-                            {userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.building_equipment_permission?.create ? (
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
-                                    onClick={() => {
-                                        handleShow();
-                                        setCreateEqipmentData({
-                                            name: '',
-                                            equipment_type: '',
-                                            end_use: '',
-                                            space_id: '',
-                                        });
-                                        // setFormValidation(false);
-                                    }}>
-                                    <i className="uil uil-plus mr-1"></i>Add Equipment
-                                </button>
-                            ) : (
-                                <></>
-                            )}
-                        </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.building_equipment_permission?.create ? (
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={() => {
+                                    handleShow();
+                                    setCreateEqipmentData({
+                                        name: '',
+                                        equipment_type: '',
+                                        end_use: '',
+                                        space_id: '',
+                                    });
+                                }}>
+                                <i className="uil uil-plus mr-1"></i>Add Equipment
+                            </button>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 </Col>
             </Row>
@@ -699,7 +700,7 @@ const Equipment = () => {
                             rows={currentRow()}
                             searchResultRows={generalEquipmentData}
                             filterOptions={filterOptions}
-                            onDeleteRow={(event, id) => alert('Delete ' + id)}
+                            onDeleteRow={(event, id, row) => deleteEquipmentFunc(event, id, row)}
                             onEditRow={(record, id) => {
                                 setEquipmentFilter({
                                     equipment_id: record?.equipments_id,
@@ -707,42 +708,8 @@ const Equipment = () => {
                                 });
                                 handleChartOpen();
                             }}
-                            // onDownload={() => getCSVDataExport(labels, series, pageType)}
-                            onDownload={() => console.log('CLICKED')}
-                            headers={[
-                                {
-                                    name: 'Name',
-                                    accessor: 'equipments_name',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Equipment Type',
-                                    accessor: 'equipments_type',
-                                },
-                                {
-                                    name: 'End Use Category',
-                                    accessor: 'end_use_id',
-                                    callbackValue: renderEndUseCategory,
-                                },
-                                {
-                                    name: 'Location',
-                                    accessor: 'location',
-                                },
-                                {
-                                    name: 'Tags',
-                                    accessor: 'tags',
-                                    callbackValue: renderTags,
-                                },
-                                {
-                                    name: 'Sensors',
-                                    accessor: 'sensor_number',
-                                    callbackValue: renderSensors,
-                                },
-                                {
-                                    name: 'Device ID',
-                                    accessor: 'device_mac',
-                                },
-                            ]}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
                             onPageSize={setPageSize}
                             onChangePage={setPageNo}
                             pageSize={pageSize}
