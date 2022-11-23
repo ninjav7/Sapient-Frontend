@@ -185,6 +185,12 @@ const EquipChartModal = ({
                 return;
             }
         }
+        if (key === 'tags') {
+            if (defaultEquipData?.tags === value) {
+                setDataChanged(false);
+                return;
+            }
+        }
         setDataChanged(true);
     };
 
@@ -202,6 +208,9 @@ const EquipChartModal = ({
         if (key === 'end_use') {
             equipObj['end_use_id'] = value;
             setEquipmentData(equipObj);
+        }
+        if (key === 'tags') {
+            setSelected(value);
         }
         setUpdateEqipmentData(obj);
     };
@@ -230,7 +239,10 @@ const EquipChartModal = ({
     const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
-            obj['tag'] = selected;
+            if (obj.tags) {
+                obj.tag = obj.tags;
+                delete obj.tags;
+            }
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -356,8 +368,8 @@ const EquipChartModal = ({
                     setEquipType(response?.equipments_type_id);
 
                     setEquipBreakerLink(response?.breaker_link);
-                    setEquipmentData(response);
                     setDefaultEquipData(response);
+                    setEquipmentData(response);
                 });
             } catch (error) {}
         };
@@ -1025,7 +1037,9 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        onChange={setSelected}
+                                                        onChange={(value) => {
+                                                            handleChange('tags', value);
+                                                        }}
                                                         name="tag"
                                                         placeHolder="+ Add Tag"
                                                     />
@@ -1326,7 +1340,9 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        onChange={setSelected}
+                                                        onChange={(value) => {
+                                                            handleChange('tags', value);
+                                                        }}
                                                         name="tag"
                                                         placeHolder="+ Add Tag"
                                                     />
@@ -1611,7 +1627,9 @@ const EquipChartModal = ({
                                                     <Form.Label>Tags</Form.Label>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData.tags : ''}
-                                                        onChange={setSelected}
+                                                        onChange={(value) => {
+                                                            handleChange('tags', value);
+                                                        }}
                                                         name="tag"
                                                         placeHolder="+ Add Tag"
                                                     />
