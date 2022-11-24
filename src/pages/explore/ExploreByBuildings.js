@@ -437,7 +437,7 @@ const ExploreByBuildings = () => {
             <Row>
                 <div className="explore-data-table-style">
                     {isExploreChartDataLoading ? (
-                        <div className="loader-center-style" style={{ height: '400px' }}>
+                        <div className="loader-center-style" style={{ height: '25rem' }}>
                         </div>
                     ) : (
                         <>
