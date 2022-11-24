@@ -1,25 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
-import HeatMapChart from '../charts/HeatMapChart';
-import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { fetchBuilidingHourly, fetchAvgDailyUsageByHour, fetchBuildingAfterHours } from '../timeOfDay/services';
 import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import './style.css';
-import { Cookies } from 'react-cookie';
-import { Spinner } from 'reactstrap';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
+import DailyUsageByHour from './DailyUsageByHour';
+import './style.css';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -101,13 +95,7 @@ const TimeOfDay = () => {
                 '10PM',
                 '11PM',
             ],
-            // labels: {
-            //     formatter: function (val, timestamp) {
-            //         let dateText = moment(timestamp).format('M/DD');
-            //         let weekText = moment(timestamp).format('ddd');
-            //         return `${weekText} ${dateText}`;
-            //     },
-            // },
+            tickAmount: 12,
             style: {
                 colors: ['#1D2939'],
                 fontSize: '12px',
@@ -139,7 +127,7 @@ const TimeOfDay = () => {
             showForZeroSeries: true,
             showForSingleSeries: true,
             position: 'top',
-            horizontalAlign: 'center',
+            horizontalAlign: 'right',
             floating: true,
             onItemClick: {
                 toggleDataSeries: false,
@@ -229,7 +217,7 @@ const TimeOfDay = () => {
     const [heatMapChartData, setHeatMapChartData] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = '265px';
+    const weekdaysChartHeight = '300px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
@@ -992,19 +980,20 @@ const TimeOfDay = () => {
 
     return (
         <React.Fragment>
-            <div className="ml-2">
+            <div>
                 <Header title="Time of Day" type="page" />
             </div>
 
-            <Row className="ml-2 mb-2">
-                <Col xl={5}>
+            <Row className="mt-4 mb-2">
+                <Col xl={4}>
                     <EndUseTotals
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
+                        className={'container-height'}
                     />
                 </Col>
-                <Col xl={7}>
+                <Col xl={8}>
                     <HeatMapWidget
                         title="Hourly Average Consumption"
                         subtitle="Energy Usage By Hour (kWh)"
@@ -1013,24 +1002,19 @@ const TimeOfDay = () => {
                         timeZone={timeZone}
                         showRouteBtn={false}
                         labelsPosition={'top'}
+                        className={'container-height'}
                     />
                 </Col>
             </Row>
 
-            <Row className="mt-2 ml-2">
+            <Row className="mt-4">
                 <Col xl={12}>
-                    <div className="card-body timeofday-content-style">
-                        <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>
-
-                        {isAvgUsageChartLoading ? (
-                            <div className="loader-center-style" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                            </div>
-                        ) : (
-                            <LineAreaChart options={areaChartOptions} series={areaChartData} height={400} />
-                        )}
-                    </div>
+                    <DailyUsageByHour
+                        title="Average Daily Usage by Hour"
+                        subtitle="Energy Usage By Hour (kWh)"
+                        options={areaChartOptions}
+                        series={areaChartData}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

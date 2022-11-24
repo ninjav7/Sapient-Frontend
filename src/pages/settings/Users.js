@@ -55,9 +55,7 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
 
     return (
         <Card>
-            <CardBody>
-                {/* {dataFetched ? ( */}
-                <Table className="mb-0 bordered table-hover">
+            <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr className="mouse-pointer">
                             <th>Name</th>
@@ -131,8 +129,7 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
                             })}
                         </tbody>
                     )}
-                </Table>
-            </CardBody>
+            </Table>
         </Card>
     );
 };
@@ -268,7 +265,7 @@ const Users = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Users</span>
 
@@ -292,7 +289,7 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2 ml-2">
+            <Row className="mt-4">
                 <Col xl={3}>
                     <div className="">
                         <div className="active-sensor-header">
@@ -315,7 +312,7 @@ const Users = () => {
             </Row>
 
             <Row>
-                <Col lg={12}>
+                <Col lg={12} className='mt-4'>
                     <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
                 </Col>
             </Row>

@@ -240,7 +240,7 @@ const PlugRules = () => {
                 rule_search: search,
             },
         };
-        
+
         await fetchPlugRules(activeBuildingId, params).then((res) => {
             if (res.status) {
                 setSkeletonLoading(false);
@@ -256,7 +256,7 @@ const PlugRules = () => {
             setOfflinePlugRuleData(offlineData);
         });
     };
-    
+
     useEffect(() => {
         fetchPlugRuleData();
     }, [activeBuildingId, search]);
@@ -330,16 +330,15 @@ const PlugRules = () => {
 
     return (
         <React.Fragment>
-            <div className="plug-rules-header mt-4 ml-4 mr-3">
+            <div className="plug-rules-header">
                 <div className="plug-left-header">
-                    {/* <div className="plug-blg-name">NYPL</div> */}
                     <div className="plug-blg-name">
                         {localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName')}
                     </div>
                     <div className="plug-heading">Plug Rules</div>
                 </div>
                 <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                    <div className="mr-2">
+                    <div>
                         <button
                             type="button"
                             className="btn btn-md btn-primary font-weight-bold"
@@ -354,7 +353,7 @@ const PlugRules = () => {
             </div>
 
             <Row>
-                <Col lg={12} style={{ paddingLeft: 36 }}>
+                <Col lg={12}>
                     <Brick sizeInRem={2} />
                     {skeletonLoading ? (
                         <SkeletonTheme color="#202020" height={35}>

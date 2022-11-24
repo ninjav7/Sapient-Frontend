@@ -18,7 +18,7 @@ const ICON_SIZES = {
 const Titles = ({ title, subtitle, pageType }) => {
     return (
         <>
-            <div className={`ml-3 ${pageType === 'building' ? 'mt-2' : 'mt-3'}`}>
+            <div className="ml-3 mt-2">
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
