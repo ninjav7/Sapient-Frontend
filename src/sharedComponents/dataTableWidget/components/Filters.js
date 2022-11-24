@@ -19,22 +19,22 @@ import { ReactComponent as PlusSVG } from '../../assets/icons/plus.svg';
 
 const mapFilters = {
     [FILTER_TYPES.RANGE_SELECTOR]: (props) => {
-        const { selectedFiltersValues, setSelectedFiltersValues } = useContext(DataTableWidgetContext);
-        let filterValue = [...(selectedFiltersValues[FILTER_TYPES.RANGE_SELECTOR] || [])];
-
+        let filterValue = props.filterOptions;
+        let currentValue = filterValue;
+        
         const handleChange = () => {
-            setSelectedFiltersValues((oldState) => {
-                return { ...oldState, [FILTER_TYPES.RANGE_SELECTOR]: filterValue };
-            });
+            props.onClose && props.onClose(currentValue);
         };
 
         const handleRangeSliderChange = (value) => {
             filterValue = value;
+            currentValue = value;
+            props.onChange && props.onChange(value);
         };
 
         const buttonLabel = () => {
-            return `${filterValue[0]} - ${filterValue[1]} % Threshold`;
-        };
+            return `${filterValue[0]} - ${filterValue[1]} ${props.componentProps.prefix} Threshold`;
+        }
 
         return (
             <DropDownBase
@@ -59,6 +59,7 @@ const mapFilters = {
                     range={filterValue}
                     prefix="%"
                     onSelectionChange={handleRangeSliderChange}
+                    {...props.componentProps}
                 />
             </DropDownBase>
         );
@@ -92,10 +93,11 @@ const mapFilters = {
                 onMenuClose={() => props.onClose(selectedOptions)}
                 components={{
                     Control: (controlProps) => (
-                        <div {...controlProps}>
+                        <div {...controlProps} onBlur={() =>{}}>
                             <FilterHeaderButton
                                 isOpen={controlProps.menuIsOpen}
                                 {...props}
+                                onBlur={() =>{}}
                                 buttonLabel={
                                     selectedItems.length > 1
                                         ? `${selectedItems.length} List items`
@@ -106,6 +108,8 @@ const mapFilters = {
                         </div>
                     ),
                 }}
+                isSearchable
+                {...props.componentProps}
             />
         );
     },
@@ -173,6 +177,7 @@ const mapFilters = {
                 <LastUpdated
                     onChange={handleChange}
                     initialValues={selectedFiltersValues[FILTER_TYPES.LAST_UPDATED_SELECTOR]}
+                    {...props.componentProps}
                 />
             </DropDownBase>
         );
@@ -214,11 +219,12 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
 
             {selectedFilters.map((filter, key) => {
                 const Component = mapFilters[filter.filterType];
+                
                 const handleDeleteFilter = (args) => {
                     onDeleteFilter(args);
                     filter.onDelete && filter.onDelete(args);
                 };
-
+                
                 //@TODO Delete on change filter carefully
                 return (
                     <Component
