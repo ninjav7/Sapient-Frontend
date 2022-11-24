@@ -21,6 +21,8 @@
     &.vertical {
         padding: 1rem 1.5rem 1.5rem 2rem;
         flex-direction: column;
+        margin-top: 4rem;
+        margin-bottom: 1rem;
 
         &.vertical.no-total {
             min-width: 19.5rem;
@@ -41,7 +43,7 @@
             max-height: 11.25rem;
         }
         &.vertical {
-            width: 11.875rem;
+            width: 13.875rem;
             height: 9.375rem;
             margin-bottom: 2.3125rem;
         }

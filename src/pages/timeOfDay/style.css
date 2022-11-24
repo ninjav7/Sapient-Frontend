@@ -39,5 +39,9 @@
 
 .heatmap-chart-widget {
     padding-right: 1rem;
-    margin-bottom: 0px;
+    margin-bottom: 0rem;
+}
+
+.container-height {
+    min-height: 30rem;
 }

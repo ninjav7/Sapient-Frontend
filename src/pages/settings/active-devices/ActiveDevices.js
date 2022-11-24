@@ -104,8 +104,7 @@ const ActiveDevicesTable = ({
 
     return (
         <Card>
-            <CardBody>
-                <Table className="mb-0 bordered table-hover">
+                <Table className="mt-4 mb-0 bordered table-hover">
                     <thead>
                         <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'status') && (
@@ -319,7 +318,7 @@ const ActiveDevicesTable = ({
                     )}
                 </Table>
 
-                <div className="page-button-style ml-2">
+                <div className="page-button-style">
                     <div>
                         <button
                             type="button"
@@ -354,7 +353,6 @@ const ActiveDevicesTable = ({
                         </select>
                     </div>
                 </div>
-            </CardBody>
         </Card>
     );
 };
@@ -639,12 +637,8 @@ const ActiveDevices = () => {
                     <span className="heading-style">Active Devices</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        {/* <div className="mr-2">
-                            <button type="button" className="btn btn-md btn-light font-weight-bold">
-                                Attach Kasa Account
-                            </button>
-                        </div> */}
-                        <div className="mr-2">
+                    
+                        <div>
                             <Link
                                 to={{
                                     pathname: `/settings/active-devices/provision`,
@@ -668,9 +662,9 @@ const ActiveDevices = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                    <div class="input-group rounded">
                         <input
                             type="search"
                             class="form-control rounded"

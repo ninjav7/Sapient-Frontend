@@ -1,10 +1,10 @@
 .single-passive-container {
-    margin: 25px;
-    padding: 16px;
+    margin: 0rem !important;
+    padding: 1rem;
     width: auto;
-    height: 100px;
+    height: 6.25rem;
     background: #f9fafb;
-    border-bottom: 1px solid #eaecf0;
+    border-bottom: .0625rem solid #eaecf0;
 }
 .sub-heading {
     font-family: 'Inter';

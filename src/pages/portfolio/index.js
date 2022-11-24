@@ -81,6 +81,7 @@ const PortfolioOverview = () => {
             await fetchPortfolioEndUse(payload)
                 .then((res) => {
                     let response = res?.data;
+                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
                     response.forEach((record) => {
                         record.energy_consumption.now = Math.round(record.energy_consumption.now);
                         record.energy_consumption.old = Math.round(record.energy_consumption.old);
@@ -185,8 +186,8 @@ const PortfolioOverview = () => {
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>
-                    <Row className="mt-1 mb-2">
-                        <div className="col kpi-style">
+                    <Row className="mt-4 mb-2">
+                        <div>
                             <PortfolioKPIs
                                 daysCount={daysCount}
                                 totalBuilding={buildingsEnergyConsume.length}
@@ -196,7 +197,7 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <Row className="ml-0 mt-3">
+                    <Row className="mt-3">
                         <Col lg={6}>
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
