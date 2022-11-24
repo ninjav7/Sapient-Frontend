@@ -297,7 +297,6 @@ const EndUsesPage = () => {
                         });
                     });
 
-                    console.log('responseData :>> ', responseData);
                     setBarChartData(responseData);
                     setIsEndUsesChartLoading(false);
                 })
