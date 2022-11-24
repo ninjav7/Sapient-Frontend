@@ -454,7 +454,7 @@ const ExploreByBuildings = () => {
 
             <Row>
                 <div className="explore-data-table-style">
-                    <Col lg={12} style={{padding:"1.25rem"}}>
+                    <Col lg={12}>
 
                         <DataTableWidget
                             isLoading={isExploreDataLoading}

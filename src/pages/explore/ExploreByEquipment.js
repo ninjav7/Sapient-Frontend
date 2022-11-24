@@ -711,7 +711,7 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-data-table-style">
-                    <Col lg={12} style={{ marginBottom: "10rem", padding:"1.25rem"}}>
+                    <Col lg={12}>
 
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
