@@ -18,7 +18,12 @@ import { MenuListPerRow } from './components/TableComponents/MenuListPerRow';
 
 import useDebounce from '../hooks/useDebounce';
 import useLocalStorage from '../hooks/useLocalStorage/useLocalStorage';
-import { arrayMoveImmutable, generateID, getStatesForSelectAllCheckbox } from '../helpers/helper';
+import {
+    arrayMoveImmutable,
+    generateID,
+    getStatesForSelectAllCheckbox,
+    stringOrNumberPropTypes,
+} from '../helpers/helper';
 
 import { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES } from './constants';
 
@@ -414,7 +419,18 @@ DataTableWidget.propTypes = {
     status: PropTypes.number,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
-    filterOptions: PropTypes.array,
+    filterOptions: PropTypes.arrayOf(PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+        placeholder: PropTypes.string.isRequired,
+        filterType: PropTypes.oneOf(Object.values(FILTER_TYPES)),
+        filterOptions: PropTypes.arrayOf(PropTypes.shape({
+            label: PropTypes.string.isRequired,
+            value: stringOrNumberPropTypes.isRequired,
+        })),
+        // Props depend on what component was selected for particular filter.
+        componentProps: PropTypes.object,
+    })),
     headers: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,
