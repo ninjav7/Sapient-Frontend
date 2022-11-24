@@ -189,13 +189,6 @@ export const optionsLines = {
         '#12B76A',
         '#DC6803',
     ],
-    // fill: {
-    //     type: 'gradient',
-    //     gradient: {
-    //         opacityFrom: 0.91,
-    //         opacityTo: 0.1,
-    //     },
-    // },
     xaxis: {
         type: 'datetime',
         labels: {
