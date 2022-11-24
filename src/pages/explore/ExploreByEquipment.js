@@ -514,7 +514,7 @@ const ExploreByEquipment = () => {
     const fetchExploreChartData = async () => {
         setChartLoading(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?consumption=energy&equipment_id=${equipIdNow}&divisible_by=1000`;
+        let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${equipIdNow}&divisible_by=1000`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;

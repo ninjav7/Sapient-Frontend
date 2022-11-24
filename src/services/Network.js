@@ -151,7 +151,6 @@ export const getExploreEquipmentList = '/api/explorer/equipment_list';
 export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
-export const getEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreFilter = '/api/explorer/filter_by_daterange';
 
 // Peak Demand
