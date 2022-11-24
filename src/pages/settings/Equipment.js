@@ -128,7 +128,9 @@ const Equipment = () => {
     const [preparedEndUseData, setPreparedEndUseData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-
+    const [showDeleteEquipmentModal, setShowDeleteEquipmentModal] = useState(false);
+    const [rowToDelete, setRowToDelete] = useState();
+    const [isDeletting, setIsDeletting] = useState(false);
     const [allSearchData, setAllSearchData] = useState([]);
     const [selectedOption, setSelectedOption] = useState([]);
     const [sortBy, setSortBy] = useState({});
@@ -420,8 +422,6 @@ const Equipment = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
-    const [processdelete, setProcessdelete] = useState(false);
-
     const filterHandler = (setter, options) => {
         setter(options.map(({ value }) => value));
         setPageNo(1);
@@ -550,6 +550,7 @@ const Equipment = () => {
         bldgId,
         pageSize,
         pageNo,
+        sortBy,
         macTypeFilterString,
         equipmentTypeFilterString,
         locationTypeFilterString,
@@ -564,16 +565,18 @@ const Equipment = () => {
 
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
-    const deleteEquipmentFunc = async (event, equipmentIdData, row) => {
-        setProcessdelete(true);
+    const deleteEquipmentFunc = async (row) => {
+        setIsDeletting(true);
         await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
-                setProcessdelete(false);
                 fetchEquipmentData();
-                setIsDelete(false);
+                setIsDeletting(false);
+                setShowDeleteEquipmentModal(false);
             })
             .catch((error) => {
-                setIsProcessing(false);
+                alert(error);
+                setShowDeleteEquipmentModal(false);
+                setIsDeletting(false);
             });
     };
 
@@ -587,29 +590,35 @@ const Equipment = () => {
         {
             name: 'Equipment Type',
             accessor: 'equipments_type',
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'End Use Category',
             accessor: 'end_use_id',
             callbackValue: renderEndUseCategory,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Location',
             accessor: 'location',
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Tags',
             accessor: 'tags',
             callbackValue: renderTags,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sensors',
             accessor: 'sensor_number',
             callbackValue: renderSensors,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Device ID',
             accessor: 'device_mac',
+            onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
@@ -645,7 +654,10 @@ const Equipment = () => {
                 setIsProcessing(false);
             });
     };
-
+    const handleDeleteRowClicked = (row) => {
+        setShowDeleteEquipmentModal(true);
+        setRowToDelete(row);
+    };
     return (
         <React.Fragment>
             <Row className="page-title equipment-page">
@@ -697,14 +709,8 @@ const Equipment = () => {
                             rows={currentRow()}
                             searchResultRows={generalEquipmentData}
                             filterOptions={filterOptions}
-                            onDeleteRow={(event, id, row) => deleteEquipmentFunc(event, id, row)}
-                            onEditRow={(record, id) => {
-                                setEquipmentFilter({
-                                    equipment_id: record?.equipments_id,
-                                    equipment_name: record?.equipments_name,
-                                });
-                                handleChartOpen();
-                            }}
+                            onDeleteRow={(event, id, row) => handleDeleteRowClicked(row)}
+                            onEditRow={(record, id, row) => handleOpenEditEquipment(row)}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
                             onPageSize={setPageSize}
@@ -725,6 +731,39 @@ const Equipment = () => {
                     )}
                 </Col>
             </Row>
+            <Modal
+                show={showDeleteEquipmentModal}
+                onHide={() => setShowDeleteEquipmentModal(false)}
+                centered
+                backdrop="static"
+                keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Equipment</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">Are you sure you want to delete the Equipment?</div>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        onClick={() => setShowDeleteEquipmentModal(false)}
+                    />
+
+                    <Button
+                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primaryDistructive}
+                        onClick={() => {
+                            deleteEquipmentFunc(rowToDelete);
+                        }}
+                    />
+                </Modal.Footer>
+            </Modal>
 
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header>
@@ -819,44 +858,6 @@ const Equipment = () => {
                     </div>
                 </Modal.Footer>
             </Modal>
-
-            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Delete Equpiment</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <span style={{ fontSize: '15px' }}>Are you sure you want to delete the Equipment?</span>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        flexWrap: 'nowrap',
-                    }}>
-                    <Button
-                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
-                        onClick={handleDeleteClose}
-                        type={Button.Type.secondaryGrey}
-                        size={Button.Sizes.lg}
-                        label="Cancel"
-                    />
-                    <Button
-                        disabled={processdelete}
-                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}
-                        onClick={() => {
-                            deleteEquipmentFunc();
-                        }}
-                        size={Button.Sizes.lg}
-                        type={Button.Type.primary}
-                        label={processdelete ? 'Deleting...' : 'Delete'}
-                    />
-                </Modal.Footer>
-            </Modal>
-
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}

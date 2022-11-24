@@ -58,7 +58,7 @@
 }
 .sensors-row-content {
     display: flex;
-    column-gap: 4px;
+    column-gap: .25rem;
     justify-content: flex-start;
 }
 .add-equipment-footer {

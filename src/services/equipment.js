@@ -1,6 +1,13 @@
 import _ from 'lodash';
 import axiosInstance from './axiosInstance';
-import { generalEquipments, deleteEquipment, createEquipment, getFiltersForEquipment, getEndUseId,getLocation } from './Network';
+import {
+    generalEquipments,
+    deleteEquipment,
+    createEquipment,
+    getFiltersForEquipment,
+    getEndUseId,
+    getLocation,
+} from './Network';
 
 export function getEqupmentDataRequest(
     pageSize,
@@ -14,19 +21,20 @@ export function getEqupmentDataRequest(
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
     getParams,
-    withPagination,
+    withPagination
 ) {
-
     let params = `?building_id=${bldgId}&equipment_search=${search}`;
-    if(withPagination){
-        params+=`&page_size=${pageSize}&page_no=${pageNo}`;
+    if (withPagination) {
+        params += `&page_size=${pageSize}&page_no=${pageNo}`;
+    }
+    if (getParams.order_by && getParams.sort_by) {
+        params += `&order_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
     }
     const filteredData = {
         floor_id: floorTypeFilterString,
         space_id: spaceTypeFilterString,
         space_type_id: spaceTypeTypeFilterString,
         mac_address: macTypeFilterString,
-        ...getParams,
     };
     if (equipmentTypeFilterString.length) {
         filteredData['equipment_types'] = equipmentTypeFilterString;
@@ -85,7 +93,9 @@ export function deleteEquipmentRequest(bldgId, equipmentIdData) {
     let params = `?equipment_id=${equipmentIdData}&building_id=${bldgId}`;
     return axiosInstance.delete(`${deleteEquipment}${params}`).then((res) => {
         return res;
-    });
+    }).catch((err)=>{
+        throw new Error(err);
+    })
 }
 export function addNewEquipment(bldgId, createEqipmentData) {
     let params = Object.assign({}, createEqipmentData);
@@ -95,10 +105,6 @@ export function addNewEquipment(bldgId, createEqipmentData) {
         return res;
     });
 }
-
-// export function getFiltersForEquipmentRequest(){
-//     /api/config/configuration-filter
-// }
 
 /**
  * Request filters.
@@ -132,7 +138,7 @@ export function getEndUseDataRequest() {
         return res.data;
     });
 }
-export  function getLocationDataRequest(bldgId){
+export function getLocationDataRequest(bldgId) {
     return axiosInstance.get(`${getLocation}/${bldgId}`).then((res) => {
         return res.data;
     });
