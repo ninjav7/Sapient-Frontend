@@ -14,15 +14,15 @@ const BrushChart = ({
     className = '',
 }) => {
     return (
-        <Card style={{ width: '100%' }}>
+        <Card style={{ marginBottom:"0px" }}>
             <CardBody>
                 <div id="wrapper">
-                    <div id="chart-line2" className={`line-chart-widget-wrapper ${className}`}>
+                    <div id="chart-line2" className={`line-chart-widget-wrapper ${className} mb-2`}>
                         <Brick sizeInRem={1} />
-                        <ReactApexChart options={optionsData} series={seriesData} type="line" height={230} />
+                        <ReactApexChart options={optionsData} series={seriesData} type="line" height={350} />
                     </div>
-                    <div id="chart-line">
-                        <ReactApexChart options={optionsLineData} series={seriesLineData} type="area" height={130} />
+                    <div id="chart-line" className={`line-chart-widget-wrapper`} >
+                        <ReactApexChart options={optionsLineData} series={seriesLineData} type="area" height={90} />
                     </div>
                 </div>
             </CardBody>
