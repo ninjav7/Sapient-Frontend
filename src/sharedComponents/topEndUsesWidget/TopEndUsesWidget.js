@@ -66,8 +66,8 @@ const TopEndUsesWidget = (props) => {
                             <Brick />
 
                             {topEndItem.items &&
-                                topEndItem.items.map((item) => (
-                                    <TopEndUsesWidgetContent {...item} key={generateID()} />
+                                topEndItem.items.map((item, index) => (
+                                    <TopEndUsesWidgetContent {...item} key={index} />
                                 ))}
                         </div>
                     );

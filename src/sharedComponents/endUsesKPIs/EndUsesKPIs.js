@@ -43,7 +43,7 @@ const EndUsesKPIs = ({ data }) => {
     return (
         <div className="end-uses-kpi-wrapper">
             <div className="end-uses-kpi d-flex justify-content-start">
-                {data.items && data.items.map((item) => <EndUsesKPIsContent {...item} key={generateID()} />)}
+                {data.items && data.items.map((item) => <EndUsesKPIsContent {...item} />)}
             </div>
         </div>
     );
@@ -51,7 +51,7 @@ const EndUsesKPIs = ({ data }) => {
 
 EndUsesKPIsContent.propTypes = {
     title: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
+    value: PropTypes.number,
     unit: PropTypes.string.isRequired,
     trends: PropTypes.arrayOf(
         PropTypes.shape({
