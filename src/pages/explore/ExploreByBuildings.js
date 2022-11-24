@@ -460,9 +460,7 @@ const ExploreByBuildings = () => {
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
                             id="explore-by-building"
-                            onSearch={(query) => {
-                                setSearch(query);
-                            }}
+                            onSearch= {setSearch}
                             buttonGroupFilterOptions={[]}
                             onStatus={setSelectedBuildingFilter}
                             rows={currentRow()}
@@ -502,7 +500,6 @@ const ExploreByBuildings = () => {
                                     onSort: (method, name) => setSortBy({ method, name }),
                                 },
                             ]}
-                            onCheckboxRow={alert}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""

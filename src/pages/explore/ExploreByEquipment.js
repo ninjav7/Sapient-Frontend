@@ -717,9 +717,7 @@ const ExploreByEquipment = () => {
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
                             id="explore-by-equipment"
-                            onSearch={(query) => {
-                                setSearch(query);
-                            }}
+                            onSearch= {setSearch}
                             buttonGroupFilterOptions={[]}
                             onStatus={setSelectedEquipmentFilter}
                             rows={currentRow()}
@@ -768,7 +766,6 @@ const ExploreByEquipment = () => {
                                     onSort: (method, name) => setSortBy({ method, name }),
                                 },
                             ]}
-                            onCheckboxRow={alert}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
