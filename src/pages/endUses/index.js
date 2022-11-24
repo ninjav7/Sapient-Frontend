@@ -15,7 +15,7 @@ import { UNITS } from '../../constants/units';
 import { useHistory } from 'react-router-dom';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import { fetchTrendType } from './utils';
-import EndUsesTypeWidget from '../../sharedComponents/endUsesTypeWidget';
+import EndUsesTypeWidget from './endUsesTypeWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 
 const EndUsesPage = () => {

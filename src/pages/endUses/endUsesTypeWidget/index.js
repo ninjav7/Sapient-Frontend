@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import StackedBarChart from './StackedBarChart';
-import { UNITS } from '../../constants/units';
+import { UNITS } from '../../../constants/units';
 import './style.scss';
 
 const EndUsesCategory = ({ endUsesData }) => {

@@ -50,9 +50,16 @@ const EndUsesKPIs = ({ data }) => {
 };
 
 EndUsesKPIsContent.propTypes = {
-    trendValue: PropTypes.number.isRequired,
-    trendType: PropTypes.oneOf(Object.values(TrendsBadge.Type)).isRequired,
-    text: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    value: PropTypes.number.isRequired,
+    unit: PropTypes.string.isRequired,
+    trends: PropTypes.arrayOf(
+        PropTypes.shape({
+            trendValue: PropTypes.number.isRequired,
+            trendType: PropTypes.oneOf(Object.values(TrendsBadge.Type)).isRequired,
+            text: PropTypes.string.isRequired,
+        }).isRequired
+    ).isRequired,
 };
 
 EndUsesKPIs.propTypes = {
