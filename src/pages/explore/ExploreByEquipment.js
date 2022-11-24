@@ -31,7 +31,7 @@ import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Collections } from '@mui/icons-material';
 
 const SkeletonLoading = () => (
-    <SkeletonTheme color="#202020" height={35}>
+    <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
             <th>
                 <Skeleton count={5} />
