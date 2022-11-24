@@ -26,7 +26,7 @@ const EndUsesKPIsContent = ({ title, value, unit, trends }) => {
                 {trends &&
                     trends.map(({ trendValue, trendType, text }) => {
                         return (
-                            <div className="d-flex end-uses-kpi-trend-badge">
+                            <div className="d-flex end-uses-kpi-trend-badge" key={generateID()}>
                                 <TrendsBadge type={trendType} value={trendValue} />
                                 <Typography.Body className="gray-550 ml-1" size={Typography.Sizes.sm}>
                                     {text}
@@ -43,16 +43,23 @@ const EndUsesKPIs = ({ data }) => {
     return (
         <div className="end-uses-kpi-wrapper">
             <div className="end-uses-kpi d-flex justify-content-start">
-                {data.items && data.items.map((item) => <EndUsesKPIsContent {...item} key={generateID()} />)}
+                {data.items && data.items.map((item, index) => <EndUsesKPIsContent {...item} key={index} />)}
             </div>
         </div>
     );
 };
 
 EndUsesKPIsContent.propTypes = {
-    trendValue: PropTypes.number.isRequired,
-    trendType: PropTypes.oneOf(Object.values(TrendsBadge.Type)).isRequired,
-    text: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    value: PropTypes.number,
+    unit: PropTypes.string.isRequired,
+    trends: PropTypes.arrayOf(
+        PropTypes.shape({
+            trendValue: PropTypes.number.isRequired,
+            trendType: PropTypes.oneOf(Object.values(TrendsBadge.Type)).isRequired,
+            text: PropTypes.string.isRequired,
+        }).isRequired
+    ).isRequired,
 };
 
 EndUsesKPIs.propTypes = {

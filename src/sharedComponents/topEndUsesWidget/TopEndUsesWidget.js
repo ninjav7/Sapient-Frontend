@@ -27,7 +27,7 @@ const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
                 {trends &&
                     trends.map(({ trendValue, trendType, text }) => {
                         return (
-                            <div className="d-flex top-end-uses-trend-badge">
+                            <div className="d-flex top-end-uses-trend-badge" key={generateID()}>
                                 <TrendsBadge type={trendType} value={trendValue} />
                                 <Typography.Body className="gray-550 ml-1" size={Typography.Sizes.sm}>
                                     {text}
@@ -50,7 +50,7 @@ const TopEndUsesWidget = (props) => {
             <div className="top-end-uses-container w-100">
                 {props.data.map((topEndItem) => {
                     return (
-                        <div className="top-end-uses">
+                        <div className="top-end-uses" key={generateID()}>
                             <div className="d-flex align-items-center">
                                 <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
                                 {topEndItem.viewHandler && (
