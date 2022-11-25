@@ -331,33 +331,6 @@ const EquipChartModal = ({
         }
     };
 
-    const fetchEquipmentYTDUsageData = async (equipId) => {
-        try {
-            setIsYtdDataFetching(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?equipment_id=${equipId}&consumption=energy`;
-
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                    apiRequestBody(startDate, endDate, timeZone),
-                    { headers }
-                )
-                .then((res) => {
-                    let response = res.data.data;
-                    setYtdData(response[0]);
-                    setIsYtdDataFetching(false);
-                });
-        } catch (error) {
-            setIsYtdDataFetching(false);
-        }
-    };
-
     useEffect(() => {
         if (!equipmentFilter?.equipment_id) {
             return;
@@ -448,7 +421,6 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchEndUseData();
         fetchEquipTypeData();
@@ -518,7 +490,6 @@ const EquipChartModal = ({
             buildingAlertsData();
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
     }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {

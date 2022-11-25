@@ -1727,7 +1727,6 @@ const PlugRule = () => {
                     </div>
                 </>
             )}
-
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
                     <DataTableWidget
