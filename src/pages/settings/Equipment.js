@@ -31,7 +31,6 @@ import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../store/globalS
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import EquipChartModal from '../../pages/chartModal/EquipChartModal';
-import { timeZone } from '../../utils/helper';
 import './style.css';
 import {
     getEqupmentDataRequest,
@@ -41,9 +40,10 @@ import {
     getEndUseDataRequest,
     getLocationDataRequest,
 } from '../../services/equipment';
+import { primaryGray100 } from '../../assets/scss/_colors.scss';
 
 const SkeletonLoading = () => (
-    <SkeletonTheme color="#202020" height={35}>
+    <SkeletonTheme color={primaryGray100} height={35}>
         <tr>
             <th>
                 <Skeleton count={5} />
@@ -238,10 +238,10 @@ const Equipment = () => {
                 fetchEquipmentData();
                 handleClose();
                 setIsProcessing(false);
-        })
-        .catch((error) => {
-            setIsProcessing(false);
-        });
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
     };
 
     const [selectedIds, setSelectedIds] = useState([]);

@@ -8,7 +8,6 @@ export default {
 };
 
 export const Default = () => {
-    console.log("StatusBadge.type.error",StatusBadge.Type);
     return (
         <>
             <StatusBadge text="17 m" type={StatusBadge.Type.warning} />

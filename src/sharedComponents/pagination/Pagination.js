@@ -77,7 +77,7 @@ const Pagination = (props) => {
                         <ArrowRight />
                     </div>
                 </li>
-                {paginationRange.map((pageNumber, index) => {
+                {paginationRange.map((pageNumber) => {
                     if (pageNumber === DOTS) {
                         return (
                             <li className="pagination-item dots" key={generateID()}>
