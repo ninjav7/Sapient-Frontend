@@ -238,10 +238,10 @@ const Equipment = () => {
                 fetchEquipmentData();
                 handleClose();
                 setIsProcessing(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
+        })
+        .catch((error) => {
+            setIsProcessing(false);
+        });
     };
 
     const [selectedIds, setSelectedIds] = useState([]);

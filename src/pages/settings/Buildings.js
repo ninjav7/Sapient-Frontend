@@ -136,7 +136,6 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
 
     return (
         <Card>
-            <CardBody>
                 {error ? (
                     <>
                         <p>You don't have view access of this page</p>
@@ -212,7 +211,6 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                         )}
                     </Table>
                 )}
-            </CardBody>
         </Card>
     );
 };
@@ -334,7 +332,7 @@ const Buildings = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Buildings</span>
 
@@ -359,7 +357,7 @@ const Buildings = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2 ml-2">
+            <Row className="mt-4">
                 <Col xl={3}>
                     <div className="">
                         <div className="active-sensor-header">
@@ -378,7 +376,7 @@ const Buildings = () => {
             </Row>
 
             <Row>
-                <Col lg={10}>
+                <Col lg={10} className='mt-4'>
                     <BuildingTable
                         buildingsData={buildingsData}
                         isDataProcessing={isDataProcessing}

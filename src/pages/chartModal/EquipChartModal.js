@@ -138,22 +138,6 @@ const EquipChartModal = ({
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
-    // Commented for future Use
-    // const getCSVLinkData = () => {
-    //     let acd=[];
-    //     if(seriesData.length!==0)
-    //        {
-    //          seriesData[0].data.map((ele)=>{
-
-    //             acd.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`),ele[1] === null ? '-' : ele[1].toFixed(2)])
-    //          })
-    //        }
-    //     let arr = seriesData.length > 0 ? seriesData[0].data : [];
-
-    //     let streamData = seriesData.length > 0 ? acd : [];
-    //     return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
-    // };
-
     const validateDataChange = (key, value) => {
         if (key === 'name') {
             if (defaultEquipData?.equipments_name === value) {
@@ -438,7 +422,6 @@ const EquipChartModal = ({
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        //fetchBuildingAlerts();
         fetchEndUseData();
         fetchEquipTypeData();
         fetchLocationData();
@@ -511,8 +494,14 @@ const EquipChartModal = ({
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
         setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [daysCount]);
 
     useEffect(() => {
@@ -878,17 +867,6 @@ const EquipChartModal = ({
                                                     <i className="uil uil-download-alt mr-2"></i>
                                                     Download CSV
                                                 </Dropdown.Item>
-                                                {/* Commented for future use */}
-                                                {/* <div className="mr-3">
-                                                    <CSVLink
-                                                        style={{ color: 'black', paddingLeft: '1.5rem' }}
-                                                        filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
-                                                        target="_blank"
-                                                        data={getCSVLinkData()}>
-                                                        <i className="uil uil-download-alt mr-2"></i>
-                                                        Download CSV
-                                                    </CSVLink>
-                                                </div> */}
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
@@ -930,7 +908,7 @@ const EquipChartModal = ({
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
                                                         className="font-weight-bold"
-                                                        value={equipmentData?.equipments_name}
+                                                        defaultValue={equipmentData?.equipments_name}
                                                         onChange={(e) => {
                                                             handleChange('name', e.target.value);
                                                         }}

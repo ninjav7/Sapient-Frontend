@@ -74,6 +74,9 @@
 .equipment-name-cell{
     cursor: pointer;
 }
+.equipment-page{
+    margin-bottom: 1rem;
+}
 .equipment-page .heading-style{
     margin-left: 0px;
 }

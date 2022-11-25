@@ -1,4 +1,5 @@
 import { getTableHeadersList } from '../heatMapWidget/utils';
+import { xaxisCategoryByHour } from './helper';
 
 export const getDonutChartCSVExport = (labels, series, pageType) => {
     let data = [];
@@ -57,5 +58,34 @@ export const getHeatMapCSVExport = (heatMapData, categories) => {
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     hiddenElement.target = '_blank';
     hiddenElement.download = `Hourly_Average_Consumption_${new Date().toISOString().split('T')[0]}.csv`;
+    hiddenElement.click();
+};
+
+export const getAreaChartCSVExport = (chartData) => {
+    if (chartData.length === 0) {
+        return;
+    }
+
+    let exportData = [];
+
+    xaxisCategoryByHour.forEach((record, index) => {
+        let arr = [];
+        arr.push(record);
+        arr.push(chartData[0].data[index]);
+        arr.push(chartData[1].data[index]);
+        exportData.push(arr);
+    });
+
+    let csv = `Time, ${getTableHeadersList(chartData)}\n`;
+
+    exportData.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+
+    let hiddenElement = document.createElement('a');
+    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = `Average_Usage_By_Hour_${new Date().toISOString().split('T')[0]}.csv`;
     hiddenElement.click();
 };

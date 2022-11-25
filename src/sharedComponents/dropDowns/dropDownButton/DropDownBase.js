@@ -20,22 +20,24 @@ const SearchField = (props) => {
     );
 };
 
-const DropDownBase = ({
-    onOpen,
-    onClose,
-    options,
-    withSearch,
-    children,
-    isLink,
-    triggerButton,
-    placement,
-    header,
-    classNameMenu,
-    handleClick,
-    closeOnSelect = true,
-}) => {
+const DropDownBase = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    
+    const {
+        onOpen,
+        onClose,
+        options,
+        withSearch,
+        children,
+        isLink,
+        triggerButton,
+        placement,
+        header,
+        classNameMenu,
+        handleClick,
+        closeOnSelect = true
+    } = props 
 
     const setOpen = () => {
         setIsOpen(true);
@@ -96,13 +98,15 @@ const DropDownBase = ({
 
             return <div {...itemProps}>{dropdownItemContent}</div>;
         });
-
+    
+    const triggerButtonNode = typeof triggerButton === 'function' ? triggerButton({isOpen, searchQuery, setIsOpen, setSearchQuery, ...props}) : triggerButton;
+    
     return (
         <div className={dropDownClasses}>
             <DropDown
                 placement={placement}
                 isOpen={isOpen}
-                triggerButton={React.cloneElement(triggerButton, { ...triggerButton.props })}
+                triggerButton={React.cloneElement(triggerButtonNode, { ...triggerButtonNode.props })}
                 onOpen={setOpen}
                 onClose={setClose}>
                 <div className={cx('drop-down-button-menu', classNameMenu)}>

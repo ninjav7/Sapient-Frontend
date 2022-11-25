@@ -127,8 +127,8 @@ const PassiveDevicesTable = ({
     return (
         <>
             <Card onMouseMove={handleMouseMove}>
-                <CardBody>
-                    <Table className="mb-0 bordered table-hover">
+               
+                    <Table className="mt-4 mb-0 bordered table-hover">
                         <thead>
                             <tr className="mouse-pointer">
                                 {selectedOptions.some((record) => record.value === 'status') && (
@@ -373,7 +373,7 @@ const PassiveDevicesTable = ({
                         )}
                     </Table>
 
-                    <div className="page-button-style ml-2 ">
+                    <div className="page-button-style">
                         <div>
                             <button
                                 type="button"
@@ -408,7 +408,7 @@ const PassiveDevicesTable = ({
                             </select>
                         </div>
                     </div>
-                </CardBody>
+              
             </Card>
         </>
     );
@@ -807,7 +807,7 @@ const PassiveDevices = () => {
                     <span className="heading-style">Passive Devices</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+                        <div>
                             {userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
                                 <button
@@ -827,9 +827,9 @@ const PassiveDevices = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                    <div class="input-group rounded">
                         <input
                             type="search"
                             class="form-control rounded"
