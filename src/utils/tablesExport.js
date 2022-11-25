@@ -6,7 +6,7 @@ export const getTableHeadersList = (record) => {
     return arr.join(', ');
 };
 
-export const getTableCSVExport = (name, tableData, columns, preparedEndUseData) => {
+export const getEquipmentTableCSVExport = (name, tableData, columns, preparedEndUseData) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
         let arr = [];

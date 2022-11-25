@@ -13,7 +13,7 @@ import Form from 'react-bootstrap/Form';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import Button from '../../sharedComponents/button/Button';
-import { getTableCSVExport } from '../../sharedComponents/helpers/tablesExport';
+import { getEquipmentTableCSVExport } from '../../utils/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import Select from '../../sharedComponents/form/select';
@@ -646,7 +646,7 @@ const Equipment = () => {
         )
             .then((res) => {
                 let response = res.data;
-                getTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
+                getEquipmentTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
 
                 setIsEquipDataFetched(false);
             })
