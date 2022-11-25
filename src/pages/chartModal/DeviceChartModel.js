@@ -17,6 +17,7 @@ import Header from '../../components/Header';
 import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
+import {fetchOptions, deviceOptionLine} from '../../helpers/ChartOption';
 
 const DeviceChartModel = ({
     showChart,
@@ -61,157 +62,9 @@ const DeviceChartModel = ({
         }
     };
 
-    const [options, setOptions] = useState({
-        chart: {
-            id: 'chart-line2',
-            type: 'line',
-            height: 180,
-            toolbar: {
-                autoSelected: 'pan',
-                show: false,
-            },
-            animations: {
-                enabled: false,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#10B981', '#2955E7'],
-        fill: {
-            opacity: 1,
-        },
-        markers: {
-            size: 0,
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return `${moment(timestamp).tz(timeZone).format('DD/MM')} ${moment(timestamp)
-                        .tz(timeZone)
-                        .format('LT')}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    return val.toFixed(0);
-                },
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+    const [options, setOptions] = useState(fetchOptions);
 
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        },
-    });
-
-    const [optionsLine, setOptionsLine] = useState({
-        chart: {
-            id: 'chart-line',
-
-            height: 90,
-
-            type: 'area',
-
-            brush: {
-                target: 'chart-line2',
-
-                enabled: true,
-            },
-
-            toolbar: {
-                show: false,
-            },
-
-            selection: {
-                enabled: true,
-            },
-            animations: {
-                enabled: false,
-            },
-        },
-
-        colors: ['#008FFB'],
-
-        fill: {
-            type: 'gradient',
-
-            gradient: {
-                opacityFrom: 0.91,
-
-                opacityTo: 0.1,
-            },
-        },
-
-        xaxis: {
-            type: 'datetime',
-
-            tooltip: {
-                enabled: false,
-            },
-
-            labels: {
-                formatter: function (val, timestamp) {
-                    return '';
-                },
-            },
-        },
-
-        yaxis: {
-            tickAmount: 2,
-
-            labels: {
-                formatter: function (val) {
-                    return val.toFixed(0);
-                },
-            },
-        },
-    });
+    const [optionsLine, setOptionsLine] = useState(deviceOptionLine);
 
     const handleShow = () => {
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
@@ -239,8 +92,14 @@ const DeviceChartModel = ({
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
         setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [daysCount]);
 
     useEffect(() => {
@@ -338,8 +197,14 @@ const DeviceChartModel = ({
             },
         };
         let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
         setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [selectedUnit]);
 
     return (

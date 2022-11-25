@@ -417,6 +417,7 @@ export const equipOptionsLines = {
     },
 }
 
+//Active/Passive Device Chart 
 export const fetchOptions = (selectedUnit, timeZone) => {
     return ({
         chart: {
@@ -583,11 +584,21 @@ export const deviceOptionLine = {
             opacityTo: 0.1,
         },
     },
-
+    grid: {
+        yaxis: {
+            lines: {
+                show: false
+              }
+        },
+        xaxis: {
+            lines: {
+                show: false
+              }
+        },
+    },
     xaxis: {
         show: false,
     },
-
     yaxis: {
         show: false,
     },

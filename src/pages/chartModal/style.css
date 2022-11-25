@@ -403,7 +403,7 @@
     padding: 16px 12px;
     gap: 1.2rem;
     /* position: absolute; */
-    width: 368px;
+    width: 350px;
     background: #3f4b5c;
     border: 2px solid #070c17;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);
@@ -420,7 +420,7 @@
     padding: 16px 12px;
     gap: 1.2rem;
     /* position: absolute; */
-    width: 368px;
+    width: 350px;
     background: grey;
     border: 2px solid grey;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);

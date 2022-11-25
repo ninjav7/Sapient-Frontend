@@ -1006,7 +1006,7 @@ const EquipChartModal = ({
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
                                                         onChange={(e) => {
-                                                            handleChange('space_id', e.target.value);
+                                                            handleChange('location_id', e.target.value);
                                                         }}
                                                         value={location}>
                                                         <option value="" selected>

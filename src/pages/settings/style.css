@@ -316,7 +316,9 @@
 }
 
 .modal-container-style {
-    max-width: 95vw !important;
+    max-width: 75.375rem !important;
+    max-height: 48.4375rem !important;
+
 }
 
 .modal-tabs-style {
