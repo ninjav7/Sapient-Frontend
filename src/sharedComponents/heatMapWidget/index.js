@@ -22,7 +22,7 @@ const Titles = ({ title, subtitle, pageType }) => {
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
-                    fontWeight={Typography.Types.Medium}
+                    fontWeight={Typography.Types.SemiBold}
                     className="mb-1">
                     {title}
                 </Typography.Subheader>
