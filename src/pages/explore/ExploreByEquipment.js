@@ -66,8 +66,6 @@ const SkeletonLoading = () => (
     </SkeletonTheme>
 );
 
-
-
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
 
@@ -152,9 +150,9 @@ const ExploreByEquipment = () => {
         let xaxisLineObj = {
             type: 'datetime',
             labels: {
-                show:false,
+                show: false,
             },
-        }
+        };
         setOptionsData({ ...optionsData, xaxis: xaxisObj });
         setOptionsLineData({ ...optionsLineData, xaxis: xaxisLineObj });
     }, [daysCount]);
@@ -171,20 +169,37 @@ const ExploreByEquipment = () => {
         }
     }, [startDate, endDate]);
 
-
     useEffect(() => {
         setAllSearchData([]);
         if (equipIdNow) {
-        fetchExploreChartData(equipIdNow)
+            fetchExploreChartData(equipIdNow);
         }
     }, [equipIdNow]);
 
     const exploreDataFetch = async (bodyVal) => {
-        const ordered_by = sortBy.name === undefined ? "consumption" : sortBy.name;
-        const sort_by = sortBy.method === undefined ? "dce" : sortBy.method;
+        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
         setIsExploreDataLoading(true);
 
-        await fetchExploreEquipmentList(startDate,endDate, timeZone, bldgId, search, ordered_by, sort_by, pageSize, pageNo, minConValue,maxConValue, minPerValue, maxPerValue, selectedLocation, selectedEndUse, selectedEquipType, selectedSpaceType)
+        await fetchExploreEquipmentList(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            search,
+            ordered_by,
+            sort_by,
+            pageSize,
+            pageNo,
+            minConValue,
+            maxConValue,
+            minPerValue,
+            maxPerValue,
+            selectedLocation,
+            selectedEndUse,
+            selectedEquipType,
+            selectedSpaceType
+        )
             .then((res) => {
                 let responseData = res.data;
                 if (responseData.data.length !== 0) {
@@ -218,7 +233,6 @@ const ExploreByEquipment = () => {
     // ]);
     // };
 
-
     let arr = apiRequestBody(startDate, endDate, timeZone);
 
     const currentRow = () => {
@@ -234,8 +248,7 @@ const ExploreByEquipment = () => {
                 return acc;
             }, []);
         }
-        return allEquipmentList.filter(({ equipment_id }) => !selectedIds.find((eqID) => eqID === equipment_id
-        ));
+        return allEquipmentList.filter(({ equipment_id }) => !selectedIds.find((eqID) => eqID === equipment_id));
     };
 
     const currentRowSearched = () => {
@@ -257,36 +270,49 @@ const ExploreByEquipment = () => {
     const renderConsumption = (row) => {
         return (
             <>
-                <Typography.Body size={Typography.Sizes.sm}>{Math.round(row.consumption.now / 1000)} kWh</Typography.Body>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {Math.round(row.consumption.now / 1000)} kWh
+                </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={Math.round((row.consumption.now / topEnergyConsumption) * 100)} />
-            </>);
+            </>
+        );
     };
 
     const renderPerChange = (row) => {
-        return <TrendsBadge value={Math.abs(Math.round(row.consumption.change))} type={row.consumption.change===0? TrendsBadge.Type.NEUTRAL_TREND:row.consumption.now < row.consumption.old ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND} />;
+        return (
+            <TrendsBadge
+                value={Math.abs(Math.round(row.consumption.change))}
+                type={
+                    row.consumption.change === 0
+                        ? TrendsBadge.Type.NEUTRAL_TREND
+                        : row.consumption.now < row.consumption.old
+                        ? TrendsBadge.Type.DOWNWARD_TREND
+                        : TrendsBadge.Type.UPWARD_TREND
+                }
+            />
+        );
     };
 
     const renderEquipmentName = (row) => {
         return (
             <div style={{ fontSize: 0 }}>
-                <a className="typography-wrapper link" onClick={() => {
-                    setEquipmentFilter({
-                        equipment_id: row?.equipment_id,
-                        equipment_name: row?.equipment_name,
-                    });
-                    localStorage.setItem(
-                        'exploreEquipName',
-                        row?.equipment_name
-                    );
-                    handleChartOpen();
-                }}>
+                <a
+                    className="typography-wrapper link"
+                    onClick={() => {
+                        setEquipmentFilter({
+                            equipment_id: row?.equipment_id,
+                            equipment_name: row?.equipment_name,
+                        });
+                        localStorage.setItem('exploreEquipName', row?.equipment_name);
+                        handleChartOpen();
+                    }}>
                     {row.equipment_name}
                 </a>
                 <Brick sizeInPixels={3} />
             </div>
-        )
-    }
+        );
+    };
     const handleEquipStateChange = (value, equip) => {
         if (value === 'true') {
             let arr1 = seriesData.filter(function (item) {
@@ -297,14 +323,15 @@ const ExploreByEquipment = () => {
         }
 
         if (value === 'false') {
-
             setEquipIdNow(equip?.equipment_id);
         }
 
         const isAdding = value === 'false';
 
         setSelectedIds((prevState) => {
-            return isAdding ? [...prevState, equip.equipment_id] : prevState.filter((equipId) => equipId !== equip.equipment_id);
+            return isAdding
+                ? [...prevState, equip.equipment_id]
+                : prevState.filter((equipId) => equipId !== equip.equipment_id);
         });
     };
 
@@ -316,12 +343,21 @@ const ExploreByEquipment = () => {
             return;
         }
 
-
         const fetchAPI = async () => {
             await exploreDataFetch(arr);
         };
         fetchAPI();
-    }, [endDate, bldgId, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, maxConValue, maxPerValue]);
+    }, [
+        endDate,
+        bldgId,
+        pageSize,
+        pageNo,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        maxConValue,
+        maxPerValue,
+    ]);
 
     useEffect(() => {
         (async () => {
@@ -333,150 +369,157 @@ const ExploreByEquipment = () => {
                 timeZone,
                 selectedLocation,
                 selectedEquipType,
-                selectedSpaceType);
+                selectedSpaceType
+            );
 
-                setTopConsumption(filters.data.data.max_consumption);
-                setBottomConsumption(filters.data.data.min_consumption);
-                setFilterData(filters.data.data);
-                    const filterOptionsFetched = [
-                        {
-                            label:'Energy Consumption',
-                            value:'consumption',
-                            placeholder: 'All Consumptions',
-                            filterType: FILTER_TYPES.RANGE_SELECTOR,
-                            filterOptions:[Math.abs(Math.round(filters.data.data.min_consumption/1000)), Math.abs(Math.round(filters.data.data.max_consumption/1000))],
-                            componentProps:{
-                                prefix:' kWh',
-                                min:Math.abs(Math.round(filters.data.data.min_consumption/1000)),
-                                max:Math.abs(Math.round(filters.data.data.max_consumption/1000)+1),
-                                range:[Math.abs(Math.round(filters.data.data.min_consumption/1000)), Math.abs(Math.round(filters.data.data.max_consumption/1000))],
-                                withTrendsFilter:false,
-
-                            },
-                            onChange:function onChange(options) {},
-                            onClose:function onClose(options){
-                                set_minConValue(options[0]);
-                                set_maxConValue(options[1]);
-                            },
-                            onDelete:()=>{
-                                set_minConValue(0);
-                                set_maxConValue(0);
+            setTopConsumption(filters.data.data.max_consumption);
+            setBottomConsumption(filters.data.data.min_consumption);
+            setFilterData(filters.data.data);
+            const filterOptionsFetched = [
+                {
+                    label: 'Energy Consumption',
+                    value: 'consumption',
+                    placeholder: 'All Consumptions',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [
+                        Math.abs(Math.round(filters.data.data.min_consumption / 1000)),
+                        Math.abs(Math.round(filters.data.data.max_consumption / 1000)),
+                    ],
+                    componentProps: {
+                        prefix: ' kWh',
+                        min: Math.abs(Math.round(filters.data.data.min_consumption / 1000)),
+                        max: Math.abs(Math.round(filters.data.data.max_consumption / 1000) + 1),
+                        range: [
+                            Math.abs(Math.round(filters.data.data.min_consumption / 1000)),
+                            Math.abs(Math.round(filters.data.data.max_consumption / 1000)),
+                        ],
+                        withTrendsFilter: false,
+                    },
+                    onChange: function onChange(options) {},
+                    onClose: function onClose(options) {
+                        set_minConValue(options[0]);
+                        set_maxConValue(options[1]);
+                    },
+                    onDelete: () => {
+                        set_minConValue(0);
+                        set_maxConValue(0);
+                    },
+                },
+                {
+                    label: '% Change',
+                    value: 'change',
+                    placeholder: 'All % Change',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [Math.round(filters.data.data.min_change), Math.round(filters.data.data.max_change)],
+                    componentProps: {
+                        prefix: ' %',
+                        min: Math.round(filters.data.data.min_change) - 1,
+                        max: Math.round(filters.data.data.max_change) + 1,
+                        range: [Math.round(filters.data.data.min_change), Math.round(filters.data.data.max_change)],
+                        withTrendsFilter: true,
+                        handleButtonClick: function handleButtonClick() {
+                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                                args[_key] = arguments[_key];
                             }
-                        },
-                        {
-                            label:'% Change',
-                            value:'change',
-                            placeholder: 'All % Change',
-                            filterType: FILTER_TYPES.RANGE_SELECTOR,
-                            filterOptions:[Math.round(filters.data.data.min_change), Math.round(filters.data.data.max_change)],
-                            componentProps:{
-                                prefix:' %',
-                                min:Math.round(filters.data.data.min_change)-1,
-                                max:Math.round(filters.data.data.max_change)+1,
-                                range:[Math.round(filters.data.data.min_change), Math.round(filters.data.data.max_change)],
-                                withTrendsFilter:true,
-                                handleButtonClick:function handleButtonClick() {
-                                    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                                    {args[_key] = arguments[_key];}
-                                },
-                            },
-                            onChange:function onChange(options) {},
-                            onClose:function onClose(options){
-                                set_minPerValue(options[0]);
-                                set_maxPerValue(options[1]);
-                            },
-                            onDelete:()=>{
-                                set_minPerValue(0);
-                                set_maxPerValue(0);
-                            }
-                        },
-                    {
-                        label: 'Location',
-                        value: 'spaces',
-                        placeholder: 'All Locations',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.spaces.map((filterItem) => ({
-                            value: filterItem.space_id,
-                            label: filterItem.space_name,
-                        })),
-                        onClose: (options) => {},
-                        onDelete: () => {
-                            setSelectedLocation([]);
-                            //setMacTypeFilterString('');
                         },
                     },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipments_type',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onChange : function onChange(options) {},
-                        onClose: (options) => {
-                            let opt=options;
-                            if(opt.length!==0){
-                            let equipIds=[];
-                            for(let i=0;i<opt.length;i++){
-                                equipIds.push(opt[i].value)
+                    onChange: function onChange(options) {},
+                    onClose: function onClose(options) {
+                        set_minPerValue(options[0]);
+                        set_maxPerValue(options[1]);
+                    },
+                    onDelete: () => {
+                        set_minPerValue(0);
+                        set_maxPerValue(0);
+                    },
+                },
+                {
+                    label: 'Location',
+                    value: 'spaces',
+                    placeholder: 'All Locations',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filters.data.data.spaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {},
+                    onDelete: () => {
+                        setSelectedLocation([]);
+                        //setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Equipment Type',
+                    value: 'equipments_type',
+                    placeholder: 'All Equipment Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
+                        value: filterItem.equipment_type_id,
+                        label: filterItem.equipment_type_name,
+                    })),
+                    onChange: function onChange(options) {},
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let equipIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                equipIds.push(opt[i].value);
                             }
                             setSelectedEquipType(equipIds);
-                            }
-                        },
-                        onDelete: (options) => {
-                            setSelectedEquipType([]);
-                        },
+                        }
                     },
-                    {
-                        label: 'End Uses',
-                        value: 'end_users',
-                        placeholder: 'All End Uses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.end_users.map((filterItem) => ({
-                            value: filterItem.end_use_id,
-                            label: filterItem.end_use_name,
-                        })),
-                        onClose: (options) => {
-                            let opt=options;
-                            if(opt.length!==0){
-                            let endUseIds=[];
-                            for(let i=0;i<opt.length;i++){
-                                endUseIds.push(opt[i].value)
+                    onDelete: (options) => {
+                        setSelectedEquipType([]);
+                    },
+                },
+                {
+                    label: 'End Uses',
+                    value: 'end_users',
+                    placeholder: 'All End Uses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filters.data.data.end_users.map((filterItem) => ({
+                        value: filterItem.end_use_id,
+                        label: filterItem.end_use_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let endUseIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                endUseIds.push(opt[i].value);
                             }
                             setSelectedEndUse(endUseIds);
-                            }
-                        },
-                        onDelete:  () => {
-                            setSelectedEndUse([]);
-                        },
+                        }
                     },
-                    {
-                        label: 'Space Type',
-                        value: 'location_types',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.location_types.map((filterItem) => ({
-                            value: filterItem.location_type_id,
-                            label: filterItem.location_types_name,
-                        })),
-                        onClose: (options) => {
-                            let opt=options;
-                            if(opt.length!==0){
-                            let spaceIds=[];
-                            for(let i=0;i<opt.length;i++){
-                                spaceIds.push(opt[i].value)
+                    onDelete: () => {
+                        setSelectedEndUse([]);
+                    },
+                },
+                {
+                    label: 'Space Type',
+                    value: 'location_types',
+                    placeholder: 'All Space Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filters.data.data.location_types.map((filterItem) => ({
+                        value: filterItem.location_type_id,
+                        label: filterItem.location_types_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let spaceIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                spaceIds.push(opt[i].value);
                             }
                             setSelectedSpaceType(spaceIds);
-                            }
-                        },
-                        onDelete: () => {
-                            setSelectedSpaceType([]);
-                        },
-                    }
-                ];
-                setFilterOptions(filterOptionsFetched);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedSpaceType([]);
+                    },
+                },
+            ];
+            setFilterOptions(filterOptionsFetched);
 
             setIsExploreDataLoading(false);
         })();
@@ -487,9 +530,6 @@ const ExploreByEquipment = () => {
     //         exploreDataFetch();
     //     }
     // }, [equipmentSearchTxt]);
-
-
-  
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -543,8 +583,7 @@ const ExploreByEquipment = () => {
                 setSelectedEquipmentId('');
                 setChartLoading(false);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -655,44 +694,42 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
-
     const getCSVLinkData = () => {
-    //     let sData = [];
-    //     exploreTableData.map(function (obj) {
-    //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
-    //         sData.push([
-    //             obj.equipment_name,
-    //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
-    //             change,
-    //             obj.location,
-    //             obj.location_type,
-    //             obj.equipments_type,
-    //             obj.end_user,
-    //         ]);
-    //     });
-    //     let streamData = exploreTableData.length > 0 ? sData : [];
-
-    //     return [
-    //         [
-    //             'Name',
-    //             'Energy Consumption',
-    //             '% Change',
-    //             'Location',
-    //             'Location Type',
-    //             'Equipment Type',
-    //             'End Use Category',
-    //         ],
-    //         ...streamData,
-    //     ];
+        //     let sData = [];
+        //     exploreTableData.map(function (obj) {
+        //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
+        //         sData.push([
+        //             obj.equipment_name,
+        //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
+        //             change,
+        //             obj.location,
+        //             obj.location_type,
+        //             obj.equipments_type,
+        //             obj.end_user,
+        //         ]);
+        //     });
+        //     let streamData = exploreTableData.length > 0 ? sData : [];
+        //     return [
+        //         [
+        //             'Name',
+        //             'Energy Consumption',
+        //             '% Change',
+        //             'Location',
+        //             'Location Type',
+        //             'Equipment Type',
+        //             'End Use Category',
+        //         ],
+        //         ...streamData,
+        //     ];
     };
 
     return (
         <>
-            <Row className="ml-2 mr-2 explore-filters-style" >
+            <Row className="ml-2 mr-2 explore-filters-style">
                 <Header title="" type="page" />
             </Row>
 
-            <Row >
+            <Row>
                 <div className="explore-data-table-style">
                     {isExploreChartDataLoading ? (
                         <></>
@@ -712,12 +749,11 @@ const ExploreByEquipment = () => {
             <Row>
                 <div className="explore-data-table-style">
                     <Col lg={12}>
-
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
                             id="explore-by-equipment"
-                            onSearch= {setSearch}
+                            onSearch={setSearch}
                             buttonGroupFilterOptions={[]}
                             onStatus={setSelectedEquipmentFilter}
                             rows={currentRow()}
