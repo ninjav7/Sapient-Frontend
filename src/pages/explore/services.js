@@ -21,7 +21,7 @@ export function fetchExploreBuildingList(dateTimeData,search,order_by, sort_by, 
     if((minPerValue!==0 || maxPerValue!==0) && perAPIFlag!=='')
         obj["change"] ={
             gte:minPerValue,
-            lte:maxPerValue
+            lte:maxPerValue+1
         }
     if((minSqftValue!==0 || maxSqftValue!==0) && sqftAPIFlag!=='')
         obj["sq_ft_range"] ={

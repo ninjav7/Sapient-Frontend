@@ -314,7 +314,7 @@ const ExploreByEquipment = () => {
     };
     const fetchAPI = useCallback(() => {
         exploreDataFetch();
-    },[startDate,endDate, bldgId, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag, sortBy]);
+    },[startDate,endDate, bldgId,search, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -325,7 +325,7 @@ const ExploreByEquipment = () => {
         }
         
              fetchAPI();
-    }, [startDate,endDate, bldgId, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag, sortBy]);
+    }, [startDate,endDate, bldgId,search, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
 
     useEffect(()=>{
     },[selectedEquipType, selectedEndUse, selectedSpaceType,])
@@ -527,7 +527,7 @@ const ExploreByEquipment = () => {
     },[conAPIFlag, selectedEndUse])
 
     useEffect(()=>{
-        if((minConValue!==maxConValue && maxConValue!==0) && (minPerValue!==maxPerValue && maxPerValue!==0)){
+        if((minConValue!==maxConValue && maxConValue!==0) || (minPerValue!==maxPerValue && maxPerValue!==0)){
             const filterOptionsFetched = [
                 {
                     label:'Energy Consumption',
@@ -571,7 +571,24 @@ const ExploreByEquipment = () => {
                         withTrendsFilter:true,
                         handleButtonClick:function handleButtonClick() {
                             for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                            {args[_key] = arguments[_key];}
+                            {
+                                args[_key] = arguments[_key];
+                                if(args[0]===0){
+                                    set_minPerValue(bottomPerChange);
+                                    set_maxPerValue(topPerChange);
+                                    setPerAPIFlag(bottomPerChange+topPerChange);
+                                }
+                                if(args[0]===1){
+                                    set_minPerValue(bottomPerChange);
+                                    set_maxPerValue(0);
+                                    setPerAPIFlag(bottomPerChange+0);
+                                }
+                                if(args[0]===2){
+                                    set_minPerValue(0);
+                                    set_maxPerValue(topPerChange);
+                                    setPerAPIFlag(0+topPerChange);
+                                }
+                            }
                         },
                     },
                     onClose:function onClose(options){
@@ -677,7 +694,7 @@ const ExploreByEquipment = () => {
         ];
         setFilterOptions(filterOptionsFetched);
         }
-
+       
     },[minConValue, maxConValue, minPerValue, maxPerValue])
 
     useEffect(() => {

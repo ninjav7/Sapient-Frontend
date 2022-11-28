@@ -212,10 +212,10 @@ const ExploreByBuildings = () => {
                 setBottomEnergyConsumption(Math.abs(Math.round(bottomConsumption/1000)))
                 set_maxConValue(Math.abs(topConsumption===bottomConsumption?Math.round(topConsumption/1000)+1:Math.round(topConsumption/1000)))
                 setTopEnergyConsumption(Math.abs(Math.round(topConsumption/1000)))
-                set_minPerValue(Math.abs(Math.round(bottomChange)));
-                setBottomPerChange(Math.abs(Math.round(bottomChange)))
-                set_maxPerValue(Math.abs(topChange===bottomChange?Math.round(topChange)+1:Math.round(topChange)))
-                setTopPerChange(Math.abs(Math.round(topChange)))
+                set_minPerValue((Math.round(bottomChange)));
+                setBottomPerChange((Math.round(bottomChange)))
+                set_maxPerValue((topChange===bottomChange?Math.round(topChange)+1:Math.round(topChange)))
+                setTopPerChange((Math.round(topChange)))
                 set_minSqftValue(Math.abs(Math.round(bottomSqft)))
                 setBottomSquareFootage(Math.abs(Math.round(bottomSqft)))
                 setTopSquareFootage(Math.abs(Math.round(topSqft)))
@@ -255,7 +255,7 @@ const ExploreByBuildings = () => {
     ]);
 
         useEffect(()=>{
-            if((minConValue!==0 && maxConValue!==0) && (minPerValue!==0 && maxPerValue!==0) && (minSqftValue!==0 && maxSqftValue!==0)){
+            if((minConValue!==maxConValue && maxConValue!==0) || (minPerValue!==maxPerValue && maxPerValue!==0) || (minSqftValue!==maxSqftValue && maxSqftValue!==0)){
                 const filterOptionsFetched = [
                     {
                         label:'Energy Consumption',
@@ -295,7 +295,28 @@ const ExploreByBuildings = () => {
                             min:bottomPerChange,
                             max:topPerChange+1,
                             range:[minPerValue, maxPerValue],
-                            withTrendsFilter:false,
+                            withTrendsFilter:true,
+                            handleButtonClick:function handleButtonClick() {
+                                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
+                                {
+                                    args[_key] = arguments[_key];
+                                    if(args[0]===0){
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(topPerChange);
+                                        setPerAPIFlag(bottomPerChange+topPerChange);
+                                    }
+                                    if(args[0]===1){
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(0);
+                                        setPerAPIFlag(bottomPerChange+0);
+                                    }
+                                    if(args[0]===2){
+                                        set_minPerValue(0);
+                                        set_maxPerValue(topPerChange);
+                                        setPerAPIFlag(0+topPerChange);
+                                    }
+                                }
+                            },
                         },
                         onClose:function onClose(options){
                             set_minPerValue(options[0]);
@@ -477,7 +498,7 @@ const ExploreByBuildings = () => {
             isLoadingRef.current = true;
             setIsExploreDataLoading(true);
             const value = apiRequestBody(startDate, endDate, timeZone);
-            await fetchExploreBuildingList(value, search, ordered_by, sort_by)
+            await fetchExploreBuildingList(value, search, ordered_by, sort_by,minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, selectedBuildingType, conAPIFlag, perAPIFlag, sqftAPIFlag )
                 .then((res) => {
                     if (entryPoint === 'entered') {
                         totalBuildingId.length = 0;
