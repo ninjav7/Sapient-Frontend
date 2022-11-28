@@ -45,3 +45,9 @@
 .container-height {
     min-height: 30rem;
 }
+
+.custom-time-of-day-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+}
