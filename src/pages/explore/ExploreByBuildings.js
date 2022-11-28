@@ -25,6 +25,7 @@ import Brick from '../../sharedComponents/brick';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
+import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -94,9 +95,25 @@ const ExploreByBuildings = () => {
     const [optionsLineData, setOptionsLineData] = useState(optionsLines);
 
     let entryPoint = '';
-    const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
-    const [buildingSearchTxt, setBuildingSearchTxt] = useState('');
+    const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
+    const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
+    const [topPerChange, setTopPerChange] = useState(0);
+    const [bottomPerChange, setBottomPerChange] = useState(0);
+    const [topSquareFootage, setTopSquareFootage] = useState(0);
+    const [bottomSquareFootage, setBottomSquareFootage] = useState(0);
     const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
+
+    const [minConValue, set_minConValue] = useState(0);
+    const [maxConValue, set_maxConValue] = useState(0);
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(0);
+    const [minSqftValue, set_minSqftValue] = useState(0);
+    const [maxSqftValue, set_maxSqftValue] = useState(0);
+    const [conAPIFlag, setConAPIFlag] = useState('');
+    const [perAPIFlag, setPerAPIFlag] = useState('');
+    const [sqftAPIFlag, setSqftAPIFlag] = useState('');
+    const [selectedBuildingType,setSelectedBuildingType] = useState([]);
+    const [buildingTypeList, setBuildingTypeList] = useState([]);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -151,7 +168,7 @@ const ExploreByBuildings = () => {
         isLoadingRef.current = true;
         setIsExploreDataLoading(true);
         const value = apiRequestBody(startDate, endDate, timeZone);
-        await fetchExploreBuildingList(value, search, ordered_by, sort_by)
+        await fetchExploreBuildingList(value, search, ordered_by, sort_by,  minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, selectedBuildingType, conAPIFlag, perAPIFlag, sqftAPIFlag)
             .then((res) => {
                 if (entryPoint === 'entered') {
                     totalBuildingId.length = 0;
@@ -161,7 +178,49 @@ const ExploreByBuildings = () => {
                 let responseData = res.data;
                 setAllBuildingList(responseData);
                 setTotalItems(responseData.length);
-                setTopEnergyConsumption(responseData[0].consumption.now);
+                const uniqueIds=[];
+                const uniqueBuildingTypes = responseData.filter((element) => {
+                    const isDuplicate = uniqueIds.includes(element.building_type);
+                    if (!isDuplicate) {
+                        uniqueIds.push(element.building_type);
+                        return true;
+                    }
+                    return false;
+                });
+                setBuildingTypeList(uniqueBuildingTypes);
+                let topConsumption=responseData[0].consumption.now;
+                let bottomConsumption=responseData[0].consumption.now;
+                let topChange=responseData[0].consumption.change;
+                let bottomChange=responseData[0].consumption.change;
+                let topSqft=responseData[0].square_footage;
+                let bottomSqft=responseData[0].square_footage;
+                responseData.map((ele)=>{
+                    if(Number(ele.consumption.now)>topConsumption)
+                        topConsumption=ele.consumption.now;
+                    if(Number(ele.consumption.now)<bottomConsumption)
+                        bottomConsumption=ele.consumption.now;
+                    if(Number(ele.consumption.change)>topChange)
+                        topChange=ele.consumption.change;
+                    if(Number(ele.consumption.change)<bottomChange)
+                        bottomChange=ele.consumption.change;
+                    if(Number(ele.square_footage)>topSqft)
+                        topSqft=ele.square_footage;
+                    if(Number(ele.square_footage)<bottomSqft)
+                        bottomSqft=ele.square_footage;
+                })
+                set_minConValue(Math.abs(Math.round(bottomConsumption/1000)));
+                setBottomEnergyConsumption(Math.abs(Math.round(bottomConsumption/1000)))
+                set_maxConValue(Math.abs(topConsumption===bottomConsumption?Math.round(topConsumption/1000)+1:Math.round(topConsumption/1000)))
+                setTopEnergyConsumption(Math.abs(Math.round(topConsumption/1000)))
+                set_minPerValue(Math.abs(Math.round(bottomChange)));
+                setBottomPerChange(Math.abs(Math.round(bottomChange)))
+                set_maxPerValue(Math.abs(topChange===bottomChange?Math.round(topChange)+1:Math.round(topChange)))
+                setTopPerChange(Math.abs(Math.round(topChange)))
+                set_minSqftValue(Math.abs(Math.round(bottomSqft)))
+                setBottomSquareFootage(Math.abs(Math.round(bottomSqft)))
+                setTopSquareFootage(Math.abs(Math.round(topSqft)))
+                set_maxSqftValue(Math.abs(topSqft===bottomSqft?Math.round(topSqft)+1:Math.round(topSqft)))
+                
                 isLoadingRef.current = false;
                 setIsExploreDataLoading(false);
             })
@@ -179,14 +238,151 @@ const ExploreByBuildings = () => {
         if (endDate === null) {
             return;
         }
-
+        if(minConValue===0 && maxConValue===0 && minPerValue===0 && maxPerValue===0 && minSqftValue===0 && maxSqftValue===0 && selectedBuildingType.length===0)
         exploreDataFetch();
+        else{
+        filterexploreDataFetch();
+        }
     }, [
         startDate,
         endDate,
         sortBy.method,
         sortBy.name,
+        conAPIFlag,
+        perAPIFlag,
+        sqftAPIFlag,
+        selectedBuildingType
     ]);
+
+        useEffect(()=>{
+            if((minConValue!==0 && maxConValue!==0) && (minPerValue!==0 && maxPerValue!==0) && (minSqftValue!==0 && maxSqftValue!==0)){
+                const filterOptionsFetched = [
+                    {
+                        label:'Energy Consumption',
+                        value:'consumption',
+                        placeholder: 'All Consumptions',
+                        filterType: FILTER_TYPES.RANGE_SELECTOR,
+                        filterOptions:[minConValue, maxConValue],
+                        componentProps:{
+                            prefix:' kWh',
+                            title:'Consumption',
+                            min:bottomEnergyConsumption,
+                            max:topEnergyConsumption+1,
+                            range:[minConValue, maxConValue],
+                            withTrendsFilter:false,
+
+                        },
+                        onClose:function onClose(options){
+                            set_minConValue(options[0]);
+                            set_maxConValue(options[1]);
+                            setConAPIFlag(options[0]+options[1]);
+                        },
+                        onDelete:()=>{
+                            set_minConValue(bottomEnergyConsumption);
+                            set_maxConValue(topEnergyConsumption);
+                            setConAPIFlag('');
+                        }
+                    },
+                    {
+                        label:'% Change',
+                        value:'change',
+                        placeholder: 'All % Change',
+                        filterType: FILTER_TYPES.RANGE_SELECTOR,
+                        filterOptions:[minPerValue, maxPerValue],
+                        componentProps:{
+                            prefix:' %',
+                            title:'% Change',
+                            min:bottomPerChange,
+                            max:topPerChange+1,
+                            range:[minPerValue, maxPerValue],
+                            withTrendsFilter:false,
+                        },
+                        onClose:function onClose(options){
+                            set_minPerValue(options[0]);
+                            set_maxPerValue(options[1]);
+                            setPerAPIFlag(options[0]+options[1]);
+                        
+                        },
+                        onDelete:()=>{
+                            set_minPerValue(bottomPerChange);
+                            set_maxPerValue(topPerChange);
+                            setPerAPIFlag('');
+                        }
+                    },
+                    {
+                        label:'Square Footage',
+                        value:'square_footage',
+                        placeholder: 'All Square Footage',
+                        filterType: FILTER_TYPES.RANGE_SELECTOR,
+                        filterOptions:[minSqftValue, maxSqftValue],
+                        componentProps:{
+                            prefix:' sq.ft.',
+                            title:'Square Footage',
+                            min:bottomSquareFootage,
+                            max:topSquareFootage+1,
+                            range:[minSqftValue, maxSqftValue],
+                            withTrendsFilter:false,
+                        },
+                        onClose:function onClose(options){
+                            set_minSqftValue(options[0]);
+                            set_maxSqftValue(options[1]);
+                            setSqftAPIFlag(options[0]+options[1]);
+                        },
+                        onDelete:()=>{
+                            set_minSqftValue(bottomSquareFootage);
+                            set_maxSqftValue(topSquareFootage);
+                            setSqftAPIFlag('');
+                        }
+                    },
+                    {
+                        label: 'Building Type',
+                        value: 'building_type',
+                        placeholder: 'All Building Types',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: buildingTypeList.map((filterItem) => ({
+                            value: filterItem.building_type,
+                            label: filterItem.building_type,
+                        })),
+                        onClose: (options) => {
+                            let opt=options;
+                            if(opt.length!==0){
+                            let buildingType=[];
+                            for(let i=0;i<opt.length;i++){
+                                buildingType.push(opt[i].value)
+                            }
+                            setSelectedBuildingType(buildingType);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedBuildingType([]);
+                        },
+                    }
+            ];
+            setFilterOptions(filterOptionsFetched);
+
+            }
+        },[minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue])
+            const filterexploreDataFetch = async () => {
+                const ordered_by = sortBy.name === undefined ? "consumption" : sortBy.name;
+                const sort_by = sortBy.method === undefined ? "dce" : sortBy.method;
+                isLoadingRef.current = true;
+                setIsExploreDataLoading(true);
+                const value = apiRequestBody(startDate, endDate, timeZone);
+                await fetchExploreBuildingList(value, search, ordered_by, sort_by,  minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue, selectedBuildingType, conAPIFlag, perAPIFlag, sqftAPIFlag)
+                    .then((res) => {
+                    
+                        let responseData = res.data;
+                        setAllBuildingList(responseData);
+                        setTotalItems(responseData.length);
+                        setTopEnergyConsumption(responseData[0].consumption.now);
+                        isLoadingRef.current = false;
+                        setIsExploreDataLoading(false);
+                    })
+                    .catch((error) => {
+                        isLoadingRef.current = false;
+                        setIsExploreDataLoading(false);
+                    });
+            };
 
 
     const currentRow = () => {
@@ -425,9 +621,7 @@ const ExploreByBuildings = () => {
     //     return [['Name', 'Energy Consumption', '% Change', 'Square Footage', 'Building Type'], ...streamData];
     };
 
-    useEffect(() => {
-        if (buildingSearchTxt === '' && entryPoint !== 'entered') exploreDataFetch();
-    }, [buildingSearchTxt]);
+  
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -465,7 +659,7 @@ const ExploreByBuildings = () => {
                             onStatus={setSelectedBuildingFilter}
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
-                            filterOptions={[]}
+                            filterOptions={filterOptions}
                             onDownload={(query) => {
                                 getCSVLinkData(query);
                             }}
