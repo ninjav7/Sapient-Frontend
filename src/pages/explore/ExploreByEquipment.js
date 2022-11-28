@@ -176,10 +176,10 @@ const ExploreByEquipment = () => {
     }, [daysCount]);
 
     useEffect(() => {
-        if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+        if (selectedIds?.length >= 1) {
             let arr = [];
-            for (let i = 0; i < totalEquipmentId?.length; i++) {
-                arr.push(totalEquipmentId[i]);
+            for (let i = 0; i < selectedIds?.length; i++) {
+                arr.push(selectedIds[i]);
             }
             setSelectedAllEquipmentId(arr);
         } else {
@@ -787,7 +787,7 @@ const ExploreByEquipment = () => {
 
     const fetchExploreAllChartData = async (id) => {
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
+        let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${id}&divisible_by=1000`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
@@ -825,7 +825,7 @@ const ExploreByEquipment = () => {
                 }
                 dataarr.push(recordToInsert);
 
-                if (totalEquipmentId.length === dataarr.length) {
+                if (selectedIds.length === dataarr.length) {
                     setSeriesData(dataarr);
                     setSeriesLineData(dataarr);
                 }

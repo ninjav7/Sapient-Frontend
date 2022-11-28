@@ -121,10 +121,10 @@ const ExploreByBuildings = () => {
 
 
     useEffect(() => {
-        if (buildingIdSelection && totalBuildingId?.length >= 1) {
+        if (selectedIds?.length >= 1) {
             let arr = [];
-            for (let i = 0; i < totalBuildingId?.length; i++) {
-                arr.push(totalBuildingId[i]);
+            for (let i = 0; i < selectedIds?.length; i++) {
+                arr.push(selectedIds[i]);
             }
             setSeriesData([]);
             setSeriesLineData([]);
@@ -132,6 +132,7 @@ const ExploreByBuildings = () => {
         } else {
             setSelectedBuildingId('');
         }
+        console.log("selected IDs ",selectedIds);
     }, [startDate, endDate]);
 
     useEffect(() => {
@@ -580,6 +581,9 @@ const ExploreByBuildings = () => {
                 let responseData = res.data;
                 let data = responseData.data;
                 let arr = [];
+                arr = allBuildingList.filter(function (item) {
+                    return item.building_id === id;
+                });
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
@@ -587,16 +591,18 @@ const ExploreByBuildings = () => {
                     id: arr[0].building_id,
                 };
                 dataarr.push(recordToInsert);
-                if (selectedAllBuildingId.length === dataarr.length) {
-                    setSeriesData(dataarr);
-                    setSeriesLineData(dataarr);
-                }
-                setAllBuildingData(dataarr);
+                // if (selectedAllBuildingId.length === dataarr.length) {
+                    console.log(dataarr);
+                    setSeriesData([...seriesData, recordToInsert]);
+                    setSeriesLineData([...seriesLineData, recordToInsert]);
+                // }
+                // setAllBuildingData(dataarr);
             })
             .catch((error) => {});
     };
 
     useEffect(() => {
+        console.log(selectedAllBuildingId)
         if (selectedAllBuildingId.length === 1) {
             fetchExploreAllChartData(selectedAllBuildingId[0]);
         } else {
