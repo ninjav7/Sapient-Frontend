@@ -78,7 +78,7 @@ return axiosInstance.post(`${getExploreEquipmentChart}${params}`, payload).then(
     });
 }
 
-export function fetchExploreFilter(bldgId, startDate, endDate, timeZone,  selectedLocation, selectedEquipType, selectedSpaceType, minConValue, maxConValue, conAPIFlag) {
+export function fetchExploreFilter(bldgId, startDate, endDate, timeZone,  selectedLocation, selectedEquipType,selectedEndUse, selectedSpaceType, minConValue, maxConValue, conAPIFlag) {
     let params=`?building_id=${bldgId}&consumption=energy`;
     let payload={}
     payload["date_from"]= startDate;
@@ -95,6 +95,10 @@ export function fetchExploreFilter(bldgId, startDate, endDate, timeZone,  select
     if(selectedSpaceType.length!==0)
     {
         payload["space_type"] = selectedSpaceType;
+    }
+    if(selectedEndUse.length!==0)
+    {
+        payload["end_use"] = selectedEndUse;
     }
     if(conAPIFlag!==''){
         payload["consumption_range"] = {

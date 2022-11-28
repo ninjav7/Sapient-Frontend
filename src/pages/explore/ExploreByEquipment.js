@@ -339,7 +339,7 @@ const ExploreByEquipment = () => {
                 endDate,
                 timeZone,
                 [],
-                [],[], 0, 0, '');
+                [],[],[], 0, 0, '');
 
                 setFilterData(filters.data.data);
 
@@ -368,6 +368,7 @@ const ExploreByEquipment = () => {
                 timeZone,
                 selectedLocation,
                 selectedEquipType,
+                selectedEndUse,
                 selectedSpaceType, minConValue, maxConValue, conAPIFlag);
 
                 const filterOptionsFetched = [
