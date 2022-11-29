@@ -219,7 +219,7 @@ const DataTableWidget = (props) => {
 
     const currentRows = searchMode ? searchedRows : rows;
 
-    const isActionsAvailable = props.onDeleteRow && props.onEditRow;
+    const isActionsAvailable = props.onDeleteRow || props.onEditRow;
 
     const HeadComponent = ({ onSort, name, accessor }) => {
         const [state, setState] = useState(0);
@@ -276,6 +276,7 @@ const DataTableWidget = (props) => {
                         onChange={setSelectedFilters}
                         filterOptions={props.filterOptions}
                         selectedFilters={selectedFilters}
+                        showStatusFilter={props.showStatusFilter}
                         onDeleteFilter={handleDeleteFilter}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
@@ -317,53 +318,60 @@ const DataTableWidget = (props) => {
                                 React.cloneElement(props.isLoadingComponent, { ...props.isLoadingComponent.props })}
 
                             {!props.isLoading &&
-                                currentRows.map((row) => (
-                                    <Table.Row key={generateID()}>
-                                        {props.onCheckboxRow &&
-                                            //@ It is probably need to improve custom checkbox to make it generic
-                                            (props.customCheckboxForCell ? (
+                                currentRows.map((row) => {
+                                    const isDeletable = props.isDeletable(row);
+                                    const menuListPerRowProps = {};
+                                    if (props.onEditRow) {
+                                        menuListPerRowProps.onEditRow = (event) =>
+                                            props.onEditRow(event, row.id, row, props);
+                                    }
+                                    if (props.onDeleteRow && isDeletable) {
+                                        menuListPerRowProps.onDeleteRow = (event) =>
+                                            props.onDeleteRow(event, row.id, row, props);
+                                    }
+                                    return (
+                                        <Table.Row key={generateID()}>
+                                            {props.onCheckboxRow &&
+                                                //@ It is probably need to improve custom checkbox to make it generic
+                                                (props.customCheckboxForCell ? (
+                                                    <Table.Cell width={16}>
+                                                        {props.customCheckboxForCell(row)}
+                                                    </Table.Cell>
+                                                ) : (
+                                                    cellCheckboxTemplate(row.id)
+                                                ))}
+
+                                            {!props.onCheckboxRow && props.customCheckboxForCell && (
                                                 <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                            ) : (
-                                                cellCheckboxTemplate(row.id)
-                                            ))}
+                                            )}
 
-                                        {!props.onCheckboxRow && props.customCheckboxForCell && (
-                                            <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                        )}
+                                            {filteredHeaders.map(({ accessor, callbackValue }) => {
+                                                return (
+                                                    <Table.Cell key={accessor}>
+                                                        {accessor &&
+                                                            (callbackValue
+                                                                ? callbackValue(row, cellChildrenTemplate)
+                                                                : cellChildrenTemplate(row[accessor] || '-'))}
 
-                                        {filteredHeaders.map(({ accessor, callbackValue }) => {
-                                            return (
-                                                <Table.Cell key={accessor}>
-                                                    {accessor &&
-                                                        (callbackValue
-                                                            ? callbackValue(row, cellChildrenTemplate)
-                                                            : cellChildrenTemplate(row[accessor] || '-'))}
+                                                        {!accessor &&
+                                                            callbackValue &&
+                                                            callbackValue(row, cellChildrenTemplate, accessor)}
+                                                    </Table.Cell>
+                                                );
+                                            })}
 
-                                                    {!accessor &&
-                                                        callbackValue &&
-                                                        callbackValue(row, cellChildrenTemplate, accessor)}
+                                            {isActionsAvailable && (
+                                                <Table.Cell align="center" width={36}>
+                                                    <div className="d-flex justify-content-center">
+                                                        <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                            <MenuListPerRow {...menuListPerRowProps} />
+                                                        </DropDownIcon>
+                                                    </div>
                                                 </Table.Cell>
-                                            );
-                                        })}
-
-                                        {isActionsAvailable && (
-                                            <Table.Cell align="center" width={36}>
-                                                <div className="d-flex justify-content-center">
-                                                    <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
-                                                        <MenuListPerRow
-                                                            onEditRow={(event) =>
-                                                                props.onEditRow(event, row.id, row, props)
-                                                            }
-                                                            onDeleteRow={(event) =>
-                                                                props.onDeleteRow(event, row.id, row, props)
-                                                            }
-                                                        />
-                                                    </DropDownIcon>
-                                                </div>
-                                            </Table.Cell>
-                                        )}
-                                    </Table.Row>
-                                ))}
+                                            )}
+                                        </Table.Row>
+                                    );
+                                })}
                             {!props.isLoading && currentRows.length === 0 && (
                                 <>
                                     <Table.Row>
@@ -414,23 +422,28 @@ DataTableWidget.propTypes = {
     currentPage: PropTypes.number,
     pageSize: PropTypes.number,
     onPageSize: PropTypes.func,
+    showStatusFilter: PropTypes.bool,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
     status: PropTypes.number,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
-    filterOptions: PropTypes.arrayOf(PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        value: PropTypes.string.isRequired,
-        placeholder: PropTypes.string.isRequired,
-        filterType: PropTypes.oneOf(Object.values(FILTER_TYPES)),
-        filterOptions: PropTypes.arrayOf(PropTypes.shape({
+    filterOptions: PropTypes.arrayOf(
+        PropTypes.shape({
             label: PropTypes.string.isRequired,
-            value: stringOrNumberPropTypes.isRequired,
-        })),
-        // Props depend on what component was selected for particular filter.
-        componentProps: PropTypes.object,
-    })),
+            value: PropTypes.string.isRequired,
+            placeholder: PropTypes.string.isRequired,
+            filterType: PropTypes.oneOf(Object.values(FILTER_TYPES)),
+            filterOptions: PropTypes.arrayOf(
+                PropTypes.shape({
+                    label: PropTypes.string.isRequired,
+                    value: stringOrNumberPropTypes.isRequired,
+                })
+            ),
+            // Props depend on what component was selected for particular filter.
+            componentProps: PropTypes.object,
+        })
+    ),
     headers: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,

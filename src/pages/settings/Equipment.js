@@ -39,8 +39,10 @@ import {
     getFiltersForEquipmentRequest,
     getEndUseDataRequest,
     getLocationDataRequest,
+    getMetadataRequest,
 } from '../../services/equipment';
 import { primaryGray100 } from '../../assets/scss/_colors.scss';
+import Input from '../../sharedComponents/form/input/Input';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -117,7 +119,7 @@ const Equipment = () => {
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
 
-    const [createEqipmentData, setCreateEqipmentData] = useState({
+    const [createEquipmentData, setCreateEquipmentData] = useState({
         name: '',
         equipment_type: '',
         end_use: '',
@@ -138,34 +140,34 @@ const Equipment = () => {
 
     const [search, setSearch] = useState('');
 
-    const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
+    const [equipmentTypeDataAll, setEquipmentTypeDataAll] = useState([]);
     const [endUseDataNow, setEndUseDataNow] = useState([]);
     const [locationDataNow, setLocationDataNow] = useState([]);
-
     const addEquimentType = () => {
+        const preparedData = [];
         equipmentTypeData.map((item) => {
-            setEquipmentTypeDataNow((el) => [
-                ...el,
-                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
-            ]);
+            preparedData.push({ value: `${item?.equipment_id}`, label: `${item?.equipment_type} (${item?.end_use_name})` });
         });
+        setEquipmentTypeDataAll(preparedData);
     };
 
     const addEndUseType = () => {
         endUseData.map((item) => {
-            setEndUseDataNow((el) => [...el, { value: `${item?.end_user_id}`, label: `${item?.name}` }]);
+            setEndUseDataNow((el) => [...el, { value: `${item?.end_use_id}`, label: `${item?.name}` }]);
         });
     };
 
     const addLocationType = () => {
+        const preparedData = [];
+
         locationData.map((item) => {
-            setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+            preparedData.push({ value: `${item?.location_id}`, label: `${item?.location_name}` });
         });
+        setLocationDataNow(preparedData);
     };
 
     useEffect(() => {
         if (equipmentTypeData) {
-            setEquipmentTypeDataNow([]);
             addEquimentType();
         }
     }, [equipmentTypeData]);
@@ -223,18 +225,18 @@ const Equipment = () => {
     }, [search]);
 
     const handleChange = (key, value) => {
-        let obj = Object.assign({}, createEqipmentData);
+        let obj = Object.assign({}, createEquipmentData);
         if (key === 'equipment_type') {
             let endUseObj = equipmentTypeData.find((record) => record?.equipment_id === value);
             obj['end_use'] = endUseObj.end_use_id;
         }
         obj[key] = value;
-        setCreateEqipmentData(obj);
+        setCreateEquipmentData(obj);
     };
 
     const saveDeviceData = async () => {
         setIsProcessing(true);
-        await addNewEquipment(bldgId, createEqipmentData)
+        await addNewEquipment(bldgId, createEquipmentData)
             .then((res) => {
                 fetchEquipmentData();
                 handleClose();
@@ -371,22 +373,25 @@ const Equipment = () => {
 
     useEffect(() => {
         addEquimentData();
+        addEquimentType();
     }, [generalEquipmentData]);
 
     useEffect(() => {
-        fetchEndUseData();
+        fetchMetadata();
         fetchLocationData();
     }, [bldgId, pageSize]);
 
-    const fetchEndUseData = async () => {
+    const fetchMetadata = async () => {
         setIsLoadingEndUseData(true);
-        await getEndUseDataRequest()
+        await getMetadataRequest(bldgId)
             .then((res) => {
-                const prepareEndUseType = res.reduce((acc, el) => {
-                    acc[`${el.end_user_id}`] = el.name;
+                const { end_uses, equipment_type } = res.data;
+                const prepareEndUseType = end_uses.reduce((acc, el) => {
+                    acc[`${el.end_use_id}`] = el.name;
                     return acc;
                 }, {});
-                setEndUseData(res);
+                setEquipmentTypeData(equipment_type);
+                setEndUseData(end_uses);
                 setPreparedEndUseData(prepareEndUseType);
             })
             .finally(() => {
@@ -659,6 +664,11 @@ const Equipment = () => {
         setShowDeleteEquipmentModal(true);
         setRowToDelete(row);
     };
+
+    const handleAbleToDeleteRow = (row) => {
+        return row.device_type !== 'active';
+    };
+
     return (
         <React.Fragment>
             <Row className="page-title equipment-page">
@@ -673,7 +683,7 @@ const Equipment = () => {
                                 className="btn btn-md btn-primary font-weight-bold"
                                 onClick={() => {
                                     handleShow();
-                                    setCreateEqipmentData({
+                                    setCreateEquipmentData({
                                         name: '',
                                         equipment_type: '',
                                         end_use: '',
@@ -701,13 +711,8 @@ const Equipment = () => {
                                 setPageNo(1);
                                 setSearch(query);
                             }}
-                            buttonGroupFilterOptions={[
-                                { label: 'All Statuses' },
-                                { label: 'Online', icon: <WifiSVG /> },
-                                { label: 'Offline', icon: <WifiSlashSVG /> },
-                            ]}
-                            onStatus={(value) => setSelectedTab(value)}
                             rows={currentRow()}
+                            isDeletable={(row) => handleAbleToDeleteRow(row)}
                             searchResultRows={generalEquipmentData}
                             filterOptions={filterOptions}
                             onDeleteRow={(event, id, row) => handleDeleteRowClicked(row)}
@@ -766,26 +771,25 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show} onHide={handleClose} centered>
+            <Modal show={show} onHide={handleClose} centered className='modal-add-equipment'>
                 <Modal.Header>
                     <Modal.Title>Add Equipment</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Name</Form.Label>
-                            <Form.Control
+                            <Form.Label>Name</Form.Label>
+                            <Input
                                 type="text"
                                 placeholder="Enter Equipment Name"
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('name', e.target.value);
                                 }}
-                                value={createEqipmentData?.name}
+                                value={createEquipmentData?.name}
                                 autoFocus
                             />
                         </Form.Group>
-
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
                             <Select
@@ -794,14 +798,14 @@ const Equipment = () => {
                                 name="select"
                                 isSearchable={true}
                                 defaultValue={'Select Equipment Type'}
-                                options={equipmentTypeDataNow}
-                                value={equipmentTypeDataNow.filter(
-                                    (option) => option.value === createEqipmentData?.equipment_type
+                                options={equipmentTypeDataAll}
+                                value={equipmentTypeDataAll.filter(
+                                    (option) => option.value === createEquipmentData?.equipment_type
                                 )}
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.value);
                                 }}
-                                className="basic-single font-weight-bold"
+                                className="basic-single"
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -813,11 +817,11 @@ const Equipment = () => {
                                 isSearchable={true}
                                 defaultValue={'Selected End Use'}
                                 options={endUseDataNow}
-                                value={endUseDataNow.filter((option) => option.value === createEqipmentData?.end_use)}
+                                value={endUseDataNow.filter((option) => option.value === createEquipmentData?.end_use)}
                                 onChange={(e) => {
                                     handleChange('end_use', e.value);
                                 }}
-                                className="basic-single font-weight-bold"
+                                className="basic-single"
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -830,12 +834,12 @@ const Equipment = () => {
                                 defaultValue={'Select Equipment Location'}
                                 options={locationDataNow}
                                 value={locationDataNow.filter(
-                                    (option) => option.value === createEqipmentData?.space_id
+                                    (option) => option.value == createEquipmentData?.space_id
                                 )}
                                 onChange={(e) => {
                                     handleChange('space_id', e.value);
                                 }}
-                                className="basic-single font-weight-bold"
+                                className="basic-single"
                             />
                         </Form.Group>
                     </Form>
