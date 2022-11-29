@@ -23,6 +23,9 @@ Default.args = {
     range: [0, 1000],
     max: 1000,
     prefix: '%',
+    handleButtonClick: (args) => {
+        console.log(args);
+    },
 };
 
 WithFilters.args = Default.args;
