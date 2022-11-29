@@ -190,7 +190,6 @@ export const Filters = ({
     onChangeFilterValue,
     selectedFilters,
     onDeleteFilter,
-    showStatusFilter,
 }) => {
     const { widgetProps, setSearch } = useContext(DataTableWidgetContext);
 
@@ -221,7 +220,7 @@ export const Filters = ({
                     }}
                 />
             )}
-            {showStatusFilter && <StatusFilter />}
+            <StatusFilter />
 
             {selectedFilters.map((filter, key) => {
                 const Component = mapFilters[filter.filterType];

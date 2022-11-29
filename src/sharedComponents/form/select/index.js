@@ -22,10 +22,9 @@ const Select = ({
     options = [],
     type = DROPDOWN_INPUT_TYPES.Default,
     defaultValue,
-    value,
     ...props
 }) => {
-    const selectedOption = value;
+    const selectedOption = options.find(({ value }) => value === defaultValue);
 
     return (
         <div className={`react-select-wrapper ${className}`}>

@@ -146,7 +146,10 @@ const Equipment = () => {
     const addEquimentType = () => {
         const preparedData = [];
         equipmentTypeData.map((item) => {
-            preparedData.push({ value: `${item?.equipment_id}`, label: `${item?.equipment_type} (${item?.end_use_name})` });
+            preparedData.push({
+                value: `${item?.equipment_id}`,
+                label: `${item?.equipment_type} (${item?.end_use_name})`,
+            });
         });
         setEquipmentTypeDataAll(preparedData);
     };
@@ -719,6 +722,7 @@ const Equipment = () => {
                             onEditRow={(record, id, row) => handleOpenEditEquipment(row)}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
+                            buttonGroupFilterOptions={[]}
                             onPageSize={setPageSize}
                             onChangePage={setPageNo}
                             pageSize={pageSize}
@@ -771,7 +775,7 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show} onHide={handleClose} centered className='modal-add-equipment'>
+            <Modal show={show} onHide={handleClose} centered className="modal-add-equipment">
                 <Modal.Header>
                     <Modal.Title>Add Equipment</Modal.Title>
                 </Modal.Header>
@@ -797,11 +801,8 @@ const Equipment = () => {
                                 placeholder="Select Equipment Type"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Select Equipment Type'}
+                                defaultValue={createEquipmentData?.equipment_type}
                                 options={equipmentTypeDataAll}
-                                value={equipmentTypeDataAll.filter(
-                                    (option) => option.value === createEquipmentData?.equipment_type
-                                )}
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.value);
                                 }}
@@ -815,9 +816,8 @@ const Equipment = () => {
                                 placeholder="Selected End Use"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Selected End Use'}
+                                defaultValue={createEquipmentData?.end_use}
                                 options={endUseDataNow}
-                                value={endUseDataNow.filter((option) => option.value === createEquipmentData?.end_use)}
                                 onChange={(e) => {
                                     handleChange('end_use', e.value);
                                 }}
@@ -831,11 +831,8 @@ const Equipment = () => {
                                 placeholder="Select Equipment Location"
                                 name="select"
                                 isSearchable={true}
-                                defaultValue={'Select Equipment Location'}
+                                defaultValue={createEquipmentData?.space_id}
                                 options={locationDataNow}
-                                value={locationDataNow.filter(
-                                    (option) => option.value == createEquipmentData?.space_id
-                                )}
                                 onChange={(e) => {
                                     handleChange('space_id', e.value);
                                 }}

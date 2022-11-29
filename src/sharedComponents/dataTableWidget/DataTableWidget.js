@@ -276,7 +276,6 @@ const DataTableWidget = (props) => {
                         onChange={setSelectedFilters}
                         filterOptions={props.filterOptions}
                         selectedFilters={selectedFilters}
-                        showStatusFilter={props.showStatusFilter}
                         onDeleteFilter={handleDeleteFilter}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
@@ -319,10 +318,8 @@ const DataTableWidget = (props) => {
 
                             {!props.isLoading &&
                                 currentRows.map((row) => {
-                                    let isDeletable;
-                                    if(props?.isDeletable){
-                                        isDeletable = props?.isDeletable(row);
-                                    }
+                                    let isDeletable = props?.isDeletable && props?.isDeletable(row);
+
                                     const menuListPerRowProps = {};
                                     if (props.onEditRow) {
                                         menuListPerRowProps.onEditRow = (event) =>
@@ -426,7 +423,6 @@ DataTableWidget.propTypes = {
     currentPage: PropTypes.number,
     pageSize: PropTypes.number,
     onPageSize: PropTypes.func,
-    showStatusFilter: PropTypes.bool,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
     status: PropTypes.number,
