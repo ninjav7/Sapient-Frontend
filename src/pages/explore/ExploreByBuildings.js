@@ -561,6 +561,15 @@ const ExploreByBuildings = () => {
                 arr = allBuildingList.filter(function (item) {
                     return item.building_id === buildIdNow;
                 });
+                // let NulledData=[];
+                // data.map((ele)=>{
+                //     if(ele[1]===""){
+                //         NulledData.push([new Date(ele[0]),null])
+                //     }
+                //     else{
+                //         NulledData.push([new Date(ele[0]),ele[1]])
+                //     }
+                // })
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
@@ -585,6 +594,15 @@ const ExploreByBuildings = () => {
                 arr = allBuildingList.filter(function (item) {
                     return item.building_id === id;
                 });
+                // let NulledData=[];
+                // data.map((ele)=>{
+                //     if(ele[1]===""){
+                //         NulledData.push([ele[0],null])
+                //     }
+                //     else{
+                //         NulledData.push([ele[0],ele[1]])
+                //     }
+                // })
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
