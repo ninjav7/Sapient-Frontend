@@ -416,7 +416,7 @@ DataTableWidget.propTypes = {
     onDownload: PropTypes.func,
     onSearch: PropTypes.func,
     onDeleteRow: PropTypes.func,
-    isDeletable: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+    isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
     onChangePage: PropTypes.func,
     totalCount: PropTypes.number,
