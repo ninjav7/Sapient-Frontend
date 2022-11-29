@@ -255,7 +255,9 @@ const ExploreByBuildings = () => {
     ]);
 
         useEffect(()=>{
-            if((minConValue!==maxConValue && maxConValue!==0) || (minPerValue!==maxPerValue && maxPerValue!==0) || (minSqftValue!==maxSqftValue && maxSqftValue!==0)){
+            if((minConValue!==maxConValue && maxConValue!==0) || 
+                (minPerValue!==maxPerValue && maxPerValue!==0) || 
+                    (minSqftValue!==maxSqftValue && maxSqftValue!==0)){
                 const filterOptionsFetched = [
                     {
                         label:'Energy Consumption',
