@@ -6,7 +6,7 @@ import { formatConsumptionValue } from '../../helpers/helpers';
 
 import './Labels.scss';
 
-const DonutChartLabels = ({ labels = [], isShowValue = true, isShowTrend = true, className = '' }) => (
+const DonutChartLabels = ({ onHover, onMouseLeave, labels = [], isShowValue = true, isShowTrend, className = '' }) => (
     <div
         className={cx(
             'donut-chart-labels-wrapper',
@@ -16,9 +16,13 @@ const DonutChartLabels = ({ labels = [], isShowValue = true, isShowTrend = true,
             },
             className
         )}>
-        {labels.map(({ label, color, value, unit, trendValue, trendType, link = null }, index) => {
+        {labels.map(({ label, color, value, unit, trendValue, trendType, link = null, isHovered }, index) => {
             return (
-                <div key={index} className="donut-chart-labels">
+                <div
+                    key={index}
+                    className={cx('donut-chart-labels', { 'is-hovered': isHovered })}
+                    onMouseLeave={(event) => onMouseLeave(event, index)}
+                    onMouseOver={(event) => onHover(event, index)}>
                     <div className="donut-chart-labels-dot" style={{ background: color }}></div>
 
                     {link ? (
