@@ -319,7 +319,10 @@ const DataTableWidget = (props) => {
 
                             {!props.isLoading &&
                                 currentRows.map((row) => {
-                                    const isDeletable = props.isDeletable(row);
+                                    let isDeletable;
+                                    if(props?.isDeletable){
+                                        isDeletable = props?.isDeletable(row);
+                                    }
                                     const menuListPerRowProps = {};
                                     if (props.onEditRow) {
                                         menuListPerRowProps.onEditRow = (event) =>
@@ -416,6 +419,7 @@ DataTableWidget.propTypes = {
     onDownload: PropTypes.func,
     onSearch: PropTypes.func,
     onDeleteRow: PropTypes.func,
+    isDeletable: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     onEditRow: PropTypes.func,
     onChangePage: PropTypes.func,
     totalCount: PropTypes.number,
