@@ -899,8 +899,14 @@ const ExploreByBuildings = () => {
 
     useEffect(() => {
         let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
         setOptionsData({ ...optionsData, xaxis: xaxisObj });
-        setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
+        setOptionsLineData({ ...optionsLineData, xaxis: xaxisLineObj });
     }, [daysCount]);
 
     const handleInput = (values) => {
