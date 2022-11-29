@@ -1414,7 +1414,7 @@ const ExploreByEquipment = () => {
         const fetchExploreChartData = async () => {
             setChartLoading(true);
             let payload = apiRequestBody(startDate, endDate, timeZone);
-            let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
+            let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
             await fetchExploreEquipmentChart(payload, params)
                 .then((res) => {
                     let responseData = res.data;
@@ -1435,7 +1435,7 @@ const ExploreByEquipment = () => {
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
                         name: legendName,
-                        data: formattedData,
+                        data: data,
                         id: arr[0].equipment_id,
                     };
                     let coll = [];
@@ -1489,7 +1489,7 @@ const ExploreByEquipment = () => {
 
     const fetchExploreAllChartData = async (id) => {
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
+        let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${id}&divisible_by=1000`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
