@@ -26,6 +26,7 @@ const Datepicker = ({
     datepickerClassName = '',
     iconBtnClassName = '',
     withApplyButton = true,
+    isClosed = true,
     ...props
 }) => {
     const [startDate, setStartDate] = useState(rangeDate[0]);
@@ -51,6 +52,14 @@ const Datepicker = ({
             setIsOpen(true);
         }
     }, [!!focusedInput]);
+
+    useEffect(() => {
+        if (isClosed) {
+            props.onClose && props.onClose();
+            setFocusedInput(null);
+            handleClose();
+        }
+    }, [isClosed]);
 
     function onDateChange({ startDate, endDate }) {
         props.onChange && props.onChange(props.isSingleDay ? { startDate } : { startDate, endDate });
@@ -241,6 +250,7 @@ Datepicker.propTypes = {
     onCancel: PropTypes.func,
     onApply: PropTypes.func,
     onCustomDateChange: PropTypes.func,
+    isClosed: PropTypes.bool,
 };
 
 export default Datepicker;
