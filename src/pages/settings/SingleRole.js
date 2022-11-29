@@ -571,7 +571,7 @@ const SingleRole = () => {
         <React.Fragment>
             {/* ---------------- Page Heading ----------------  */}
             <Row className="page-title">
-                <Col lg={10} className="header-container">
+                <Col lg={10} className="d-flex justify-content-between">
                     <div>
                         <span className="heading-style">{roleName}</span>
                     </div>
@@ -600,7 +600,7 @@ const SingleRole = () => {
 
             {/* ---------------- Role Name ----------------  */}
 
-            <Row className="mt-2" style={{ marginLeft: '20px' }}>
+            <Row className="mt-2">
                 <Form>
                     <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
                         <div className="user-role-style">

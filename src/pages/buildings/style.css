@@ -361,7 +361,6 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1.5rem;
-    margin-left: 0.3125rem;
 }
 
 .custom-bldg-table-style {

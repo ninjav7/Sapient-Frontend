@@ -832,7 +832,7 @@ const EditBreakerPanel = () => {
     return (
         <React.Fragment>
             <Row className="page-title">
-                <Col className="header-container ml-2" xl={10}>
+                <Col className="header-container" xl={10}>
                     <span className="heading-style">Edit Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
@@ -860,7 +860,7 @@ const EditBreakerPanel = () => {
                 </Col>
             </Row>
 
-            <Row className="ml-4">
+            <Row>
                 <Col xl={10}>
                     <div className="panel-first-row-style mt-4">
                         <FormGroup>
@@ -960,7 +960,7 @@ const EditBreakerPanel = () => {
                 </Col>
             </Row>
 
-            <Row className="ml-4">
+            <Row>
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
                         <Row className="panel-header-styling ml-1 mr-1">
@@ -1217,7 +1217,7 @@ const EditBreakerPanel = () => {
                 </Col>
             </Row>
 
-            <Row className="ml-4 mt-4">
+            <Row className="mt-4">
                 <Col xl={10}>
                     <Card className="custom-card">
                         <CardHeader>

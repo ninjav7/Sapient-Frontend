@@ -1,16 +1,14 @@
 .single-passive-container {
-    margin: 25px;
-    padding: 16px;
     width: auto;
-    height: 100px;
+    height: 6.25rem;
     background: #f9fafb;
-    border-bottom: 1px solid #eaecf0;
+    border-bottom: .0625rem solid #eaecf0;
 }
 
 .nav-header-container {
-    padding: 16px;
+    padding: 0rem;
     width: auto;
-    border-bottom: 1px solid #eaecf0;
+    border-bottom: .0625rem solid #eaecf0;
 }
 .single-consumption-container {
     padding: 16px;

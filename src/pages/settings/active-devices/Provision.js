@@ -461,17 +461,17 @@ const Provision = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                    <span className="heading-style">
                         Add Devices
                     </span>
                 </Col>
             </Row>
             <Row>
                 <Col md={7}>
-                    <span className="sub-heading" style={{ marginLeft: '20px' }}>
+                    <span className="sub-heading">
                         Linked TP-Link Accounts
                     </span>
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                    <div className="mb-4 btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
                             <button
                                 type="button"
@@ -497,7 +497,7 @@ const Provision = () => {
                             </button>
                         </div>
                     </div>
-                    <Table className="m-4 bordered table-hover border" style={{ borderRadius: '6px' }}>
+                    <Table className="mt-4 bordered table-hover border" style={{ borderRadius: '6px' }}>
                         <thead>
                             <tr>
                                 <th>Email</th>
@@ -675,9 +675,9 @@ const Provision = () => {
                 </Col>
             </Row>
 
-            <Row>
+            <Row className='mt-4'>
                 <Col lg={7}>
-                    <span className="sub-heading" style={{ marginLeft: '20px' }}>
+                    <span className="sub-heading">
                         Devices
                     </span>
                 </Col>
@@ -695,7 +695,7 @@ const Provision = () => {
                                 Find Devices
                             </button>
                         </div>
-                        <div className="mr-2">
+                        <div >
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
@@ -719,11 +719,9 @@ const Provision = () => {
             </Row>
             <Row>
                 <Col lg={11}>
-                    {/* <span className='sub-heading' style={{ marginLeft: '20px' }}>Devices</span>
-                     */}
-                    <div className="nav-header-container" style={{ marginLeft: '20px' }}>
+                    <div className="nav-header-container">
                         <div className="passive-page-header">
-                            <div className="mt-2 single-passive-tabs-style">
+                            <div className="mt-4 single-passive-tabs-style">
                                 <button
                                     className="button-hide"
                                     onClick={() => {
@@ -757,7 +755,7 @@ const Provision = () => {
                     </div>
                     {selected === 0 ? (
                         <Table
-                            className="m-4 bordered table-hover border"
+                            className="mt-4 bordered table-hover border"
                             style={{ borderRadius: '6px', color: '#475467' }}>
                             <thead>
                                 <tr>

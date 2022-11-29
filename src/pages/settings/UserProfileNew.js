@@ -190,10 +190,10 @@ const UserProfileNew = () => {
                             </>
                         ) : (
                             <>
-                                <span className="heading-style ml-4">
+                                <span className="heading-style">
                                     {updateUserDetail?.first_name} {updateUserDetail?.last_name}
                                 </span>
-                                <p className="emailId-style ml-4">{updateUserDetail?.email}</p>
+                                <p className="emailId-style">{updateUserDetail?.email}</p>
                             </>
                         )}
                     </div>
@@ -214,9 +214,9 @@ const UserProfileNew = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card">
                         <CardHeader>
                             <h5 className="header-title" style={{ margin: '2px' }}>
                                 User Details
@@ -339,7 +339,7 @@ const UserProfileNew = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card">
                         <CardHeader>
                             <h5 className="header-title" style={{ margin: '2px' }}>
                                 User Roles
@@ -396,7 +396,7 @@ const UserProfileNew = () => {
 
             <Row>
                 <Col lg={8}>
-                    <Card className="custom-card card-alignment">
+                    <Card className="custom-card">
                         <CardHeader>
                             <h5 className="header-title" style={{ margin: '2px' }}>
                                 Danger Zone

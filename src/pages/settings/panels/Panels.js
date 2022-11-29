@@ -23,10 +23,9 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
 
     return (
         <Card>
-            <CardBody>
                 {userPermission?.user_role === 'admin' ||
                 userPermission?.permissions?.permissions?.building_panels_permission?.view ? (
-                    <Table className="mb-0 bordered table-hover">
+                    <Table className="mt-4 mb-0 bordered table-hover">
                         <thead>
                             <tr className="mouse-pointer">
                                 {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
@@ -119,9 +118,8 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                         )}
                     </Table>
                 ) : (
-                    <p>You dont have read access</p>
+                    <p className='mt-4'>You dont have read access</p>
                 )}
-            </CardBody>
         </Card>
     );
 };
@@ -227,12 +225,12 @@ const Panels = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                    <span className="heading-style">
                         Panels
                     </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+                        <div>
                             {userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.building_panels_permission?.create ? (
                                 <button
@@ -250,9 +248,9 @@ const Panels = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                    <div class="input-group rounded">
                         <input
                             type="search"
                             class="form-control rounded"

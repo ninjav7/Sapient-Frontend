@@ -7,7 +7,7 @@ import { Button } from '../button';
 import Brick from '../brick';
 import { TrendsBadge } from '../trendsBadge';
 import { UNITS } from '../../constants/units';
-import { generateID } from '../helpers/helper';
+import { generateID, stringOrNumberPropTypes } from '../helpers/helper';
 
 const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
     return (
@@ -16,7 +16,7 @@ const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
                 {title}
             </Typography.Subheader>
             <Brick sizeInRem={0.25} />
-            <Typography.Header className="d-inline-block" size={Typography.Sizes.lg}>
+            <Typography.Header className="d-inline-block mr-1" size={Typography.Sizes.lg}>
                 {value}
             </Typography.Header>
             <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
@@ -27,7 +27,7 @@ const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
                 {trends &&
                     trends.map(({ trendValue, trendType, text }) => {
                         return (
-                            <div className="d-flex top-end-uses-trend-badge">
+                            <div className="d-flex top-end-uses-trend-badge" key={generateID()}>
                                 <TrendsBadge type={trendType} value={trendValue} />
                                 <Typography.Body className="gray-550 ml-1" size={Typography.Sizes.sm}>
                                     {text}
@@ -46,30 +46,33 @@ const TopEndUsesWidget = (props) => {
             <div className="w-100">
                 <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
                 <Typography.Body size={Typography.Sizes.xs}>{props.subtitle}</Typography.Body>
-                <Brick />
             </div>
-            {props.data.map((topEndItem) => {
-                return (
-                    <div className="top-end-uses">
-                        <div className="d-flex align-items-center">
-                            <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
-                            {topEndItem.viewHandler && (
-                                <Button
-                                    onClick={topEndItem.viewHandler}
-                                    label="View"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                />
-                            )}
+            <div className="top-end-uses-container w-100">
+                {props.data.map((topEndItem) => {
+                    return (
+                        <div className="top-end-uses" key={generateID()}>
+                            <div className="d-flex align-items-center">
+                                <Typography.Header size={Typography.Sizes.sm}>{topEndItem.title}</Typography.Header>
+                                {topEndItem.viewHandler && (
+                                    <Button
+                                        onClick={topEndItem.viewHandler}
+                                        label="View"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                    />
+                                )}
+                            </div>
+
+                            <Brick />
+
+                            {topEndItem.items &&
+                                topEndItem.items.map((item) => (
+                                    <TopEndUsesWidgetContent {...item} key={generateID()} />
+                                ))}
                         </div>
-
-                        <Brick />
-
-                        {topEndItem.items &&
-                            topEndItem.items.map((item) => <TopEndUsesWidgetContent {...item} key={generateID()} />)}
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
         </div>
     );
 };
@@ -90,7 +93,7 @@ TopEndUsesWidget.propTypes = {
             items: PropTypes.arrayOf(
                 PropTypes.shape({
                     title: PropTypes.string.isRequired,
-                    value: PropTypes.number.isRequired,
+                    value: stringOrNumberPropTypes.isRequired,
                     unit: PropTypes.oneOf(Object.values(UNITS.KWH)),
                     trends: PropTypes.arrayOf(
                         PropTypes.shape({

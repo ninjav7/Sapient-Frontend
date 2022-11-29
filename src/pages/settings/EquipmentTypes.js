@@ -162,8 +162,7 @@ const EquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody>
-                    <Table className="mb-0 bordered table-hover">
+                    <Table className="mt-4 mb-0 bordered table-hover">
                         <thead>
                             <tr className="mouse-pointer">
                                 <th>Name</th>
@@ -266,7 +265,6 @@ const EquipmentTable = ({
                             </select>
                         </div>
                     </div>
-                </CardBody>
             </Card>
             <div>
                 <SingleEquipmentModal
@@ -514,7 +512,7 @@ const EquipmentTypes = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Equipment Types</span>
 
@@ -537,9 +535,9 @@ const EquipmentTypes = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-4">
                 <Col xl={3}>
-                    <div className="search-container ml-4">
+                    <div className="search-container">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                         <input
                             className="search-box ml-2"

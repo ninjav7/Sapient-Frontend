@@ -6,7 +6,7 @@ import { formatConsumptionValue } from '../../helpers/helpers';
 
 import './Labels.scss';
 
-const DonutChartLabels = ({ labels = [], isShowValue = true, isShowTrend, className = '' }) => (
+const DonutChartLabels = ({ labels = [], isShowValue = true, isShowTrend = true, className = '' }) => (
     <div
         className={cx(
             'donut-chart-labels-wrapper',
