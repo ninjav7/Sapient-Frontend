@@ -99,13 +99,13 @@ const NavLinks = () => {
     const handlePathChange = (pathName) => {
         switch (pathName) {
             case ENERGY_TAB:
-                handleEnergyClick(pathName);
+                handleEnergyClick();
                 break;
             case CONTROL_TAB:
                 handleControlClick();
                 break;
             case EXPLORE_TAB:
-                handleExploreClick(pathName);
+                handleExploreClick();
                 break;
             default:
                 history.push({
