@@ -326,7 +326,7 @@ const BuildingOverview = () => {
                         } else {
                             newWeekendsData.data.push({
                                 x: i,
-                                y: getAverageValue(i, minVal, maxVal),
+                                y: 0,
                                 z: 0,
                             });
                         }
