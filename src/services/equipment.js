@@ -8,6 +8,7 @@ import {
     getFiltersForEquipment,
     getEndUseId,
     getLocation,
+    getMetadata,
 } from './Network';
 
 export function getEqupmentDataRequest(
@@ -48,6 +49,14 @@ export function getEqupmentDataRequest(
         .then((res) => {
             return res;
         });
+}
+
+export function getMetadataRequest(bldgId) {
+    let params = `?building_id=${bldgId}`;
+
+    return axiosInstance.get(`${getMetadata}${params}`).then((res) => {
+        return res.data;
+    });
 }
 
 export function getUnlinkedSocketRules(
@@ -92,11 +101,14 @@ export function getUnlinkedSocketRules(
 
 export function deleteEquipmentRequest(bldgId, equipmentIdData) {
     let params = `?equipment_id=${equipmentIdData}&building_id=${bldgId}`;
-    return axiosInstance.delete(`${deleteEquipment}${params}`).then((res) => {
-        return res;
-    }).catch((err)=>{
-        throw new Error(err);
-    })
+    return axiosInstance
+        .delete(`${deleteEquipment}${params}`)
+        .then((res) => {
+            return res;
+        })
+        .catch((err) => {
+            throw new Error(err);
+        });
 }
 export function addNewEquipment(bldgId, createEqipmentData) {
     let params = Object.assign({}, createEqipmentData);
