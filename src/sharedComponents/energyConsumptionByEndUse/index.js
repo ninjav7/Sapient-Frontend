@@ -42,8 +42,9 @@ const EnergyConsumptionByEndUse = ({
     });
 
     return (
-        <div>
+        <div className='h-100'>
             <DonutChartWidget
+                className='h-100'
                 id="consumptionEnergyDonut"
                 title={title}
                 subtitle={subtitle}
@@ -51,6 +52,7 @@ const EnergyConsumptionByEndUse = ({
                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                 pageType={pageType}
                 bldgId={bldgId}
+                onMoreDetail={props.showRouteBtn ? props.handleRouteChange : null}
                 {...props}
             />
         </div>
