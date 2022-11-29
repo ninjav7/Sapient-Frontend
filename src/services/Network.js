@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-qa.azurewebsites.net';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
@@ -178,3 +178,4 @@ export const assignSensorsToRule = '/api/energy/plug_rule/assign-sensor-rule';
 export const unLinkSocket = '/api/energy/plug_rule/unlink-socket';
 export const graphData = '/api/energy/plug_rule/average-sensor-usage';
 export const getSensorLastUsed = '/api/energy/plug_rule/sensor-last-used';
+export const linkSocket = '/api/user_role/plug_rule/link_socket';
