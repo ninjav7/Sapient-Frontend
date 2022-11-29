@@ -33,7 +33,7 @@ const mapFilters = {
         };
 
         const buttonLabel = () => {
-            return `${filterValue[0]} - ${filterValue[1]} ${props.componentProps.prefix} Threshold`;
+            return `${filterValue[0]} - ${filterValue[1]} ${props.componentProps.prefix}`;
         };
 
         return (
