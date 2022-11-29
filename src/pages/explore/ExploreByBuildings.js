@@ -132,7 +132,6 @@ const ExploreByBuildings = () => {
         } else {
             setSelectedBuildingId('');
         }
-        console.log("selected IDs ",selectedIds);
     }, [startDate, endDate]);
 
     useEffect(() => {
@@ -591,18 +590,13 @@ const ExploreByBuildings = () => {
                     id: arr[0].building_id,
                 };
                 dataarr.push(recordToInsert);
-                // if (selectedAllBuildingId.length === dataarr.length) {
-                    console.log(dataarr);
                     setSeriesData([...seriesData, recordToInsert]);
                     setSeriesLineData([...seriesLineData, recordToInsert]);
-                // }
-                // setAllBuildingData(dataarr);
             })
             .catch((error) => {});
     };
 
     useEffect(() => {
-        console.log(selectedAllBuildingId)
         if (selectedAllBuildingId.length === 1) {
             fetchExploreAllChartData(selectedAllBuildingId[0]);
         } else {
