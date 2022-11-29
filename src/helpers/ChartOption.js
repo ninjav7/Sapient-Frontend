@@ -218,7 +218,8 @@ export const optionsLines = {
 }
 
 //Equip Chart Model
-export const equipOptions ={
+export const equipOptions= (selectedUnit, timeZone) =>  {
+    return({
     chart: {
         id: 'chart2',
         type: 'line',
@@ -349,7 +350,7 @@ export const equipOptions ={
                         `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
                         };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${(
                             series[i][dataPointIndex].toFixed(2)
-                        )} kWh </td></tr>`;
+                        )}&nbsp;${selectedUnit}</td></tr>`;
             }
 
             return `<div class="line-chart-widget-tooltip">
@@ -358,7 +359,7 @@ export const equipOptions ={
                 </table></div>`;
         },
     },
-}
+})}
 
 export const equipOptionsLines = {
     chart: {

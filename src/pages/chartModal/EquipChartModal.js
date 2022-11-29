@@ -134,6 +134,7 @@ const EquipChartModal = ({
         } catch (error) {}
     };
 
+    const getopt =equipOptions(selectedUnit,timeZone);
     const [options, setOptions] = useState(equipOptions);
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
@@ -532,6 +533,46 @@ const EquipChartModal = ({
         setOptions({ ...options, xaxis: xaxisObj });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [daysCount]);
+
+    useEffect(() => {
+        let toolTip = {
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                let timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            0
+                        )} ${selectedUnit}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
+                    </div>`;
+            },
+        };
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
+        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
+    }, [selectedUnit]);
 
     useEffect(() => {
         if (equipmentTypeData) {
