@@ -278,7 +278,7 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
+            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
                     headers,
@@ -340,7 +340,7 @@ const EquipChartModal = ({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?equipment_id=${equipId}&consumption=energy`;
+            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
 
             await axios
                 .post(
