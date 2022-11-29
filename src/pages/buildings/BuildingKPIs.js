@@ -41,8 +41,8 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
                 unit={KPI_UNITS.KWH_SQ_FT}
                 tooltipText={
                     daysCount > 1
-                        ? `Average energy density (kWh / sq. ft.) across the selected building for the past ${daysCount} days.`
-                        : `Average energy density (kWh / sq. ft.) across the selected building for the past ${daysCount} day.`
+                        ? `Energy density (kWh / sq. ft) of this building for the past ${daysCount} days.`
+                        : `Energy density (kWh / sq. ft) of this building for the past ${daysCount} day.`
                 }
                 tooltipId="avg-bld-dnty"
                 type={

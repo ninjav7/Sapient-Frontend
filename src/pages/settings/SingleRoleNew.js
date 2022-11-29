@@ -59,7 +59,6 @@ const UserTable = ({ userData }) => {
 
     return (
         <Card>
-            <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr className="mouse-pointer">
@@ -89,7 +88,6 @@ const UserTable = ({ userData }) => {
                         })}
                     </tbody>
                 </Table>
-            </CardBody>
         </Card>
     );
 };
@@ -616,8 +614,7 @@ const SingleRoleNew = () => {
 
             {/* ---------------- Role Name ----------------  */}
 
-            <Row className="mt-2" style={{ marginLeft: '20px' }}>
-                <Form>
+            <Form className="mt-4">
                     <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
                         <div className="user-role-style">
                             <h6 className="card-title">Role Name</h6>
@@ -639,14 +636,13 @@ const SingleRoleNew = () => {
                                 value={userPermissionRoleBody?.name}></Input>
                         )}
                     </FormGroup>
-                </Form>
-            </Row>
+            </Form>
 
             {/* ---------------- Permission & User Tab ----------------  */}
 
             <Row>
-                <Col lg={5} className="mt-2">
-                    <Nav className="nav nav-pills navtab-bg nav-justified ml-2">
+                <Col lg={5} className="mt-4">
+                    <Nav className="nav nav-pills navtab-bg nav-justified">
                         {tabContents.map((tab, index) => {
                             return (
                                 <NavItem key={index}>
@@ -670,7 +666,7 @@ const SingleRoleNew = () => {
                 <>
                     {/* ---------------- Account Permission Heading ----------------  */}
 
-                    <Row style={{ marginLeft: '15px' }}>
+                    <Row>
                         <Col lg={10} className="mt-4">
                             <FormGroup>
                                 <div className="single-line-style">
@@ -688,7 +684,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <Row>
                                         <Col lg={6}>
@@ -1089,8 +1085,8 @@ const SingleRoleNew = () => {
 
                     {/* ---------------- Building Specific Container ----------------  */}
 
-                    <Row style={{ marginLeft: '15px' }}>
-                        <Col lg={10} className="mt-4">
+                    <Row>
+                        <Col lg={10} className="mt-2">
                             <FormGroup>
                                 <div className="single-line-style">
                                     <h6 className="card-title">Building-Specific Permissions</h6>
@@ -1107,7 +1103,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <h5 className="header-title" style={{ margin: '2px' }}>
                                         Energy
@@ -1198,7 +1194,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <h5 className="header-title" style={{ margin: '2px' }}>
                                         Workspace Planning
@@ -1290,7 +1286,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <h5 className="header-title" style={{ margin: '2px' }}>
                                         Explore
@@ -1345,7 +1341,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <h5 className="header-title" style={{ margin: '2px' }}>
                                         Control
@@ -1500,7 +1496,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <Row>
                                         <Col lg={6}>
@@ -2134,7 +2130,7 @@ const SingleRoleNew = () => {
 
                     <Row className="mt-2">
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <Row>
                                         <Col lg={6}>
@@ -2474,7 +2470,7 @@ const SingleRoleNew = () => {
 
                     <Row>
                         <Col lg={10}>
-                            <Card className="custom-card card-alignment">
+                            <Card className="custom-card">
                                 <CardHeader>
                                     <h5 className="header-title" style={{ margin: '2px' }}>
                                         Danger Zone
@@ -2499,11 +2495,11 @@ const SingleRoleNew = () => {
 
             {activeTab === '2' && (
                 <>
-                    <Row className="page-title ml-2">
+                    <Row className="page-title">
                         <Col className="header-container">
-                            <Row className="mt-2 ml-2">
+                            <Row className="mt-4">
                                 <Col xl={3}>
-                                    <div className="">
+                                    <div>
                                         <div className="active-sensor-header">
                                             <div className="search-container mr-2">
                                                 <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
@@ -2533,7 +2529,7 @@ const SingleRoleNew = () => {
                             </div>
                         </Col>
                     </Row>
-                    <Row>
+                    <Row className='mt-2'>
                         <Col lg={10}>
                             <UserTable userData={userData} />
                         </Col>

@@ -22,14 +22,14 @@ const ICON_SIZES = {
     [Button.Sizes.lg]: 11,
 };
 
-const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
+const Titles = ({ title, subtitle }) => {
     return (
         <>
             <div className={`ml-3 mt-2`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
-                    fontWeight={Typography.Types.Medium}
+                    fontWeight={Typography.Types.SemiBold}
                     className="mb-1">
                     {title}
                 </Typography.Subheader>
@@ -43,6 +43,7 @@ const Titles = ({ sizeBrick, title, subtitle, pageType }) => {
 
 const DonutChartWidget = ({
     className = '',
+    donutChartClass = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
     items,
@@ -69,52 +70,48 @@ const DonutChartWidget = ({
     return (
         <>
             <div className={`donut-main-wrapper ${className}`}>
-                {type === DONUT_CHART_TYPES.HORIZONTAL && (
-                    <>
-                        {pageType === 'building' ? (
-                            <div className="container-header">
-                                <Titles {...{ title, subtitle, pageType }} />
-                                <div className="d-flex justify-content-between mr-2">
-                                    <Button
-                                        size={Button.Sizes.sm}
-                                        icon={<Download />}
-                                        type={Button.Type.secondaryGrey}
-                                        onClick={() => getDonutChartCSVExport(labels, series, pageType)}
-                                        className="mr-4"
-                                    />
-                                    <Button
-                                        label="More Details"
-                                        size={Button.Sizes.lg}
-                                        icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                        type={Button.Type.tertiary}
-                                        iconAlignment={Button.IconAlignment.right}
-                                        onClick={handleRouteChange}
-                                    />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="d-flex justify-content-between">
-                                <Titles {...{ title, subtitle, pageType }} />
-                                <FontAwesomeIcon
-                                    icon={faDownload}
-                                    size="md"
-                                    className="download-chart-btn mouse-pointer mr-3 mt-3"
-                                    onClick={() => getDonutChartCSVExport(labels, series, pageType)}
-                                />
-                            </div>
-                        )}
-                    </>
+                {pageType === 'building' ? (
+                    <div className="container-header">
+                        <Titles {...{ title, subtitle, pageType }} />
+                        <div className="d-flex justify-content-between mr-2">
+                            <Button
+                                size={Button.Sizes.sm}
+                                icon={<Download />}
+                                type={Button.Type.secondaryGrey}
+                                onClick={() => getDonutChartCSVExport(labels, series, pageType)}
+                                className="mr-4"
+                            />
+                            <Button
+                                label="More Details"
+                                size={Button.Sizes.lg}
+                                icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+                                type={Button.Type.tertiary}
+                                iconAlignment={Button.IconAlignment.right}
+                                onClick={handleRouteChange}
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    <div className="d-flex justify-content-between">
+                        <Titles {...{ title, subtitle, pageType }} />
+                        <FontAwesomeIcon
+                            icon={faDownload}
+                            size="md"
+                            className="download-chart-btn mouse-pointer mr-3 mt-3"
+                            onClick={() => getDonutChartCSVExport(labels, series, pageType)}
+                        />
+                    </div>
                 )}
-                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
-                    {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
+
+                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${donutChartClass} ${type}`}>
                     <>
                         <div className={`chart-wrapper ${type}`}>
                             <ReactApexChart options={options} {...props} series={series} type="donut" />
                         </div>
-                        <div className="chart-labels" style={{ maxWidth: 'max-content' }}>
+                        <div className="chart-labels">
                             <DonutChartLabels
                                 className={type}
-                                isShowTrend={type === DONUT_CHART_TYPES.HORIZONTAL}
+                                isShowTrend={true}
                                 isShowValue={type !== DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
                                 labels={items}
                             />
