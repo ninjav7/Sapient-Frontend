@@ -65,7 +65,7 @@ const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
                 </Dropdown.Item>
             )}
 
-            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings'  && (
+            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings' && (
                 <Dropdown.Item
                     onClick={() => {
                         handlePortfolioClick && handlePortfolioClick('Portfolio');

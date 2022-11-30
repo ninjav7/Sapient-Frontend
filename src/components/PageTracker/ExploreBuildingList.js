@@ -7,6 +7,20 @@ import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
     const history = useHistory();
 
+    const handleBuildingChange = (record) => {
+        localStorage.setItem('buildingId', record.building_id);
+        localStorage.setItem('buildingName', record.building_name);
+        localStorage.setItem('buildingTimeZone', record.timezone === '' ? 'US/Eastern' : record.timezone);
+        BuildingStore.update((s) => {
+            s.BldgId = record.building_id;
+            s.BldgName = record.building_name;
+            s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezone;
+        });
+        history.push({
+            pathname: `/explore-page/by-equipment/${record.building_id}`,
+        });
+    };
+
     return (
         <div>
             <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
@@ -19,20 +33,7 @@ const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
                         <Dropdown.Item
                             className={activeItem && 'selected'}
                             onClick={() => {
-                                localStorage.setItem('buildingId', record.building_id);
-                                localStorage.setItem('buildingName', record.building_name);
-                                localStorage.setItem(
-                                    'buildingTimeZone',
-                                    record.timezone === '' ? 'US/Eastern' : record.timezone
-                                );
-                                BuildingStore.update((s) => {
-                                    s.BldgId = record.building_id;
-                                    s.BldgName = record.building_name;
-                                    s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezone;
-                                });
-                                history.push({
-                                    pathname: `/explore-page/by-equipment/${record.building_id}`,
-                                });
+                                handleBuildingChange(record);
                             }}>
                             <div className="filter-bld-style">
                                 <div className="portfolio-txt-style">{record.building_name}</div>
