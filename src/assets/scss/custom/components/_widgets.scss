@@ -45,13 +45,13 @@
         color: $primary;
         border-radius: $border-radius;
         display: inline-block;
-        padding: 4px 12px;
+        padding: .25rem .75rem;
         position: relative;
-        min-width: 160px;
+        min-width: 10rem;
 
         i {
             display: block;
-            font-size: 12px;
+            font-size: .75rem;
             font-style: normal;
             font-weight: $font-weight-bold;
             position: relative;

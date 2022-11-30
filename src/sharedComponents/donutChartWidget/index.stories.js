@@ -1,9 +1,10 @@
 import React from 'react';
 import DonutChartWidget, { DONUT_CHART_TYPES } from './index';
 import { BrowserRouter } from 'react-router-dom';
+import colors from '../../assets/scss/_colors.scss';
 
 export default {
-    title: 'Components/Donut Chart Widget',
+    title: 'Charts/Donut Chart Widget',
     component: DonutChartWidget,
 };
 
@@ -26,7 +27,13 @@ const series = [12.553, 11.553, 1.553, 0.553];
 export const Default = () => {
     return (
         <BrowserRouter>
-            <DonutChartWidget items={donatChartMock} series={series} title="Title" subtitle="subtitle" />
+            <DonutChartWidget
+                items={donatChartMock}
+                series={series}
+                title="Title"
+                subtitle="subtitle"
+                style={{ width: 540 }}
+            />
         </BrowserRouter>
     );
 };
@@ -40,20 +47,7 @@ export const Vertical = () => {
                 title="Title"
                 subtitle="subtitle"
                 series={series}
-            />
-        </BrowserRouter>
-    );
-};
-
-export const VerticalNoTotal = () => {
-    return (
-        <BrowserRouter>
-            <DonutChartWidget
-                items={donatChartMock}
-                type={DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
-                title="Title"
-                subtitle="subtitle"
-                series={series}
+                style={{ width: 400 }}
             />
         </BrowserRouter>
     );

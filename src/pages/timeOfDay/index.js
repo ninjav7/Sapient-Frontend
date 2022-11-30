@@ -984,16 +984,16 @@ const TimeOfDay = () => {
                 <Header title="Time of Day" type="page" />
             </div>
 
-            <Row className="mt-4 mb-2">
-                <Col xl={4}>
+            <div className="custom-time-of-day-grid mt-4 mb-4">
+                <div>
                     <EndUseTotals
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
                         className={'container-height'}
                     />
-                </Col>
-                <Col xl={8}>
+                </div>
+                <div>
                     <HeatMapWidget
                         title="Hourly Average Consumption"
                         subtitle="Energy Usage By Hour (kWh)"
@@ -1004,19 +1004,17 @@ const TimeOfDay = () => {
                         labelsPosition={'top'}
                         className={'container-height'}
                     />
-                </Col>
-            </Row>
+                </div>
+            </div>
 
-            <Row className="mt-4">
-                <Col xl={12}>
-                    <DailyUsageByHour
-                        title="Average Daily Usage by Hour"
-                        subtitle="Energy Usage By Hour (kWh)"
-                        options={areaChartOptions}
-                        series={areaChartData}
-                    />
-                </Col>
-            </Row>
+            <div className="mt-2">
+                <DailyUsageByHour
+                    title="Average Daily Usage by Hour"
+                    subtitle="Energy Usage By Hour (kWh)"
+                    options={areaChartOptions}
+                    series={areaChartData}
+                />
+            </div>
         </React.Fragment>
     );
 };
