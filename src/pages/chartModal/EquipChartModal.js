@@ -64,12 +64,13 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
-        { value: 'power', label: 'Power (W)', unit: 'W' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A' },
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh',Consumption: 'Energy' },
+        { value: 'power', label: 'Power (W)', unit: 'W',Consumption: 'Power' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A',Consumption: 'Current' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -108,6 +109,10 @@ const EquipChartModal = ({
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
+    };
+    const handleConsumptionChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedConsumptionLabel(obj.Consumption);
     };
 
     const buildingAlertsData = async () => {
@@ -294,23 +299,23 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
-                    let NulledData=[];
-                    data.map((ele)=>{
-                    if(ele[1]===""){
-                        NulledData.push([new Date(ele[0]),null])
-                    }
-                    else{
-                        NulledData.push([new Date(ele[0]),ele[1]])
-                    }
-                })
-                    //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                  
+                    
                     if(selectedConsumption==="rmsCurrentMilliAmps"){
                         let exploreData = [];
+                        let NulledData=[];
                         let data=response.data;
                         for(let i=0;i<data.length;i++){
-                        const formattedData = getFormattedTimeIntervalData(data[i]?.data, startDate, endDate);
+                            data[i].data.map((ele)=>{
+                                if(ele[1]===""){
+                                    NulledData.push([new Date(ele[0]),null])
+                                }
+                                else{
+                                    NulledData.push([new Date(ele[0]),ele[1]])
+                                }
+                                })
                             let recordToInsert = {
-                                data: formattedData,
+                                data: NulledData,
                                 name: `Sensor ${data[i]?.sensor_name}`,
                                 unit: selectedUnit,
                             };
@@ -327,9 +332,17 @@ const EquipChartModal = ({
                         });
                 
                         let exploreData = [];
-                        //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                        let NulledData=[];
+                        data.map((ele)=>{
+                            if(ele[1]===""){
+                                NulledData.push([new Date(ele[0]),null])
+                            }
+                            else{
+                                NulledData.push([new Date(ele[0]),ele[1]])
+                            }
+                            })
                         let recordToInsert = {
-                            data: formattedData,
+                            data: NulledData,
                             name: localStorage.getItem("exploreEquipName"),
                             unit: selectedUnit,
                         };
@@ -567,6 +580,57 @@ const EquipChartModal = ({
         setOptions({ ...options, xaxis: xaxisObj });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [daysCount]);
+
+    useEffect(() => {
+        let toolTip = {
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { colors } = w.globals;
+                const { seriesX } = w.globals;
+                const { seriesNames } = w.globals;
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
+                        (seriesX[0][dataPointIndex]).tz(timeZone)
+                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
+                for (let i = 0; i < series.length; i++) {
+                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
+                        ch =
+                            ch +
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
+                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${(
+                                series[i][dataPointIndex].toFixed(2)
+                            )} kWh </td></tr>`;
+                }
+    
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">${selectedConsumptionLabel} Consumption</h6>
+                        ${ch}
+                    </table></div>`;
+            },
+        };
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show:false,
+            },
+        }
+        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
+    }, [selectedUnit]);
+
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -922,6 +986,7 @@ const EquipChartModal = ({
                                                 }
                                                 setConsumption(e.target.value);
                                                 handleUnitChange(e.target.value);
+                                                handleConsumptionChange(e.target.value);
                                             }}
                                             className="font-weight-bold model-sensor-energy-filter mr-2"
                                             style={{ display: 'inline-block', width: 'fit-content' }}

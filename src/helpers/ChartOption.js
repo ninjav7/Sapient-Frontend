@@ -266,7 +266,7 @@ export const equipOptions = (timeZone) => {
             autoScaleYaxis: true,
         },
     },
-    colors: ['#546E7A'],
+    colors: ['#3C6DF5'],
     stroke: {
         width: 2,
     },
@@ -288,6 +288,10 @@ export const equipOptions = (timeZone) => {
     },
     markers: {
         size: 0,
+
+    },
+    dataLabels: {
+        enabled: false,
     },
     xaxis: {
         type: 'datetime',
@@ -353,7 +357,7 @@ export const equipOptions = (timeZone) => {
             }
 
             return `<div class="line-chart-widget-tooltip">
-                    <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
+                    <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;"></h6>
                     ${ch}
                 </table></div>`;
         },
