@@ -205,6 +205,7 @@ const PortfolioOverview = () => {
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
+                                className='h-100'
                             />
                         </Col>
                         <Col lg={6}>
