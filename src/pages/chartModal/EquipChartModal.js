@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { faEllipsisV, faPowerOff, faArrowUpFromSquare } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -34,7 +34,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
@@ -66,6 +66,7 @@ const EquipChartModal = ({
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
         { value: 'power', label: 'Power (W)', unit: 'W' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -278,7 +279,7 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
+            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${selectedConsumption==="rmsCurrentMilliAmps"?"&detailed=true":""}`;
             await axios
                 .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
                     headers,
@@ -293,20 +294,54 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
-                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
-                    let recordToInsert = {
-                        data: formattedData,
-                        name: 'AHUs',
-                        unit: selectedUnit,
-                    };
-                    exploreData.push(recordToInsert);
-                    setDeviceData(exploreData);
-                    setSeriesData([
-                        {
-                            data: exploreData[0].data,
-                        },
-                    ]);
-                    setIsEquipDataFetched(false);
+                    let NulledData=[];
+                    data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                })
+                    //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    if(selectedConsumption==="rmsCurrentMilliAmps"){
+                        let exploreData = [];
+                        let data=response.data;
+                        for(let i=0;i<data.length;i++){
+                        const formattedData = getFormattedTimeIntervalData(data[i]?.data, startDate, endDate);
+                            let recordToInsert = {
+                                data: formattedData,
+                                name: `Sensor ${data[i]?.sensor_name}`,
+                                unit: selectedUnit,
+                            };
+                            exploreData.push(recordToInsert);
+                        }
+                        setDeviceData(exploreData);
+                        setSeriesData(exploreData);
+                        setIsEquipDataFetched(false);
+                    }
+                    else{
+                        let data = response.data.map((_data) => {
+                            _data[1] = parseInt(_data[1]);
+                            return _data;
+                        });
+                
+                        let exploreData = [];
+                        //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                        let recordToInsert = {
+                            data: formattedData,
+                            name: localStorage.getItem("exploreEquipName"),
+                            unit: selectedUnit,
+                        };
+                        exploreData.push(recordToInsert);
+                        setDeviceData(exploreData);
+                        setSeriesData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                        setIsEquipDataFetched(false);
+                    }
                 });
         } catch (error) {
             setIsEquipDataFetched(false);
@@ -548,7 +583,7 @@ const EquipChartModal = ({
             backdrop="static"
             keyboard={false}>
             <>
-                <Modal.Body>
+                <Modal.Body className='p-4'>
                     {equipmentData?.device_type === 'active' ? (
                         <>
                             <Row>
@@ -557,17 +592,17 @@ const EquipChartModal = ({
                                 </Col>
                             </Row>
                             <Row>
-                                <Col lg={9}>
+                                <Col lg={8}>
                                     <div>
                                         <span className="heading-style">{equipmentData?.equipments_name}</span>
                                     </div>
                                 </Col>
-                                <Col lg={3}>
-                                    <div className="button-wrapper">
+                                <Col lg={4}>
+                                    <div className="equip-button-wrapper">
                                         <div>
                                             <button
                                                 type="button"
-                                                className="btn btn-md btn-outline-danger font-weight-bold mr-4">
+                                                className="btn btn-md btn-outline-danger font-weight-bold">
                                                 <FontAwesomeIcon icon={faPowerOff} size="lg" style={{ color: 'red' }} />{' '}
                                                 Turn Off
                                             </button>
@@ -576,7 +611,7 @@ const EquipChartModal = ({
                                         <div>
                                             <button
                                                 type="button"
-                                                className="btn btn-md btn-light font-weight-bold mr-4"
+                                                className="btn btn-md btn-light font-weight-bold mr-4 ml-4"
                                                 onClick={() => {
                                                     handleCloseWithoutSave();
                                                 }}>
@@ -586,7 +621,7 @@ const EquipChartModal = ({
                                         <div>
                                             <button
                                                 type="button"
-                                                className="btn btn-md btn-primary font-weight-bold mr-4"
+                                                className="btn btn-md btn-primary font-weight-bold"
                                                 onClick={() => {
                                                     handleSave();
                                                 }}
@@ -857,8 +892,26 @@ const EquipChartModal = ({
                             </Col>
 
                             <Col lg={8}>
-                                <div className="model-sensor-filters">
-                                    <div>
+                                <div className="equip-model">
+                                    <div className='pt-3'>
+                                        <div className="ytd-heading">
+                                            Device : &nbsp;<span style={{fontWeight:"normal", textDecoration:'underline'}}>
+                                        {equipmentData?.device_mac}
+                                        </span>&nbsp;
+                                        <Button 
+                                            style={{border:'none'}}
+                                            onClick={()=>{  
+                                                redirectToConfigDevicePage(equipmentData?.device_id, 
+                                                equipmentData?.device_type === 'passive' ?'passive-device':equipmentData?.device_type === 'active'?'active-device':"");
+                                                }} 
+                                                disabled={equipmentData?.device_type === 'passive' ? equipBreakerLink?.length === 0 ? true : false:equipmentData !== null? equipmentData.device_id === ''? true: false: true}>
+                                            <FontAwesomeIcon icon={faArrowUpFromSquare} size="lg" style={{ color: 'black' }} />
+                                        </Button>
+                                        </div>
+                                        
+                                    </div>
+                                    <div style={{display:"flex"}}>
+                                    <div >
                                         <Input
                                             type="select"
                                             name="select"
@@ -880,8 +933,8 @@ const EquipChartModal = ({
                                     </div>
 
                                     <Header type="modal" />
-
-                                    <div className="mr-3 sensor-chart-options">
+                                    </div>
+                                    {/* <div className="mr-3 sensor-chart-options">
                                         <Dropdown>
                                             <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
                                                 <FontAwesomeIcon icon={faEllipsisV} size="lg" />
@@ -898,7 +951,7 @@ const EquipChartModal = ({
                                                 </Dropdown.Item>
                                             </Dropdown.Menu>
                                         </Dropdown>
-                                    </div>
+                                    </div> */}
                                 </div>
 
                                 {isEquipDataFetched ? (
@@ -1671,7 +1724,7 @@ const EquipChartModal = ({
                                                             <>
                                                                 {record.status && (
                                                                     <div>
-                                                                        <div className="power-off-style">
+                                                                        <div className="power-off-style-equip">
                                                                             <FontAwesomeIcon
                                                                                 icon={faPowerOff}
                                                                                 size="lg"
@@ -1683,7 +1736,7 @@ const EquipChartModal = ({
                                                                                 <img src={SocketLogo} alt="Socket" />
                                                                             </div>
                                                                         ) : (
-                                                                            <div className="online-socket-container">
+                                                                            <div className="online-socket-container-equip">
                                                                                 <img
                                                                                     src={UnionLogo}
                                                                                     alt="Union"

@@ -15,6 +15,22 @@
     align-items: stretch !important;
     align-content: stretch !important;
 }
+.equip-model {
+    padding-bottom: 15px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.equip-button-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
 .btnHover:hover {
     background-color: white;
 }
@@ -403,7 +419,7 @@
     padding: 16px 12px;
     gap: 1.2rem;
     /* position: absolute; */
-    width: 350px;
+    width: 325px;
     background: #3f4b5c;
     border: 2px solid #070c17;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);
@@ -420,7 +436,7 @@
     padding: 16px 12px;
     gap: 1.2rem;
     /* position: absolute; */
-    width: 350px;
+    width: 325px;
     background: grey;
     border: 2px solid grey;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);
@@ -591,4 +607,25 @@
 
 .equip-panel-info {
     padding: 2rem;
+}
+
+
+.power-off-style-equip {
+    padding-bottom: 6px;
+    width: 45px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+.online-socket-container-equip {
+    background: #ffffff;
+    border: 2px solid #eaecf0;
+    border-radius: 3px;
+    width: 45px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0px !important;
 }
