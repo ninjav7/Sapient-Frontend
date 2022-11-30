@@ -64,11 +64,12 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
-        { value: 'power', label: 'Power (W)', unit: 'W' },
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
+        { value: 'power', label: 'Power (W)', unit: 'W' , Consumption: 'Power Consumption' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -108,6 +109,10 @@ const EquipChartModal = ({
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
     };
+    const handleConsumptionChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedConsumptionLabel(obj.Consumption);
+    };
 
     const buildingAlertsData = async () => {
         if (startDate === null) {
@@ -135,7 +140,7 @@ const EquipChartModal = ({
     };
 
     const getopt =equipOptions(selectedUnit,timeZone);
-    const [options, setOptions] = useState(equipOptions);
+    const [options, setOptions] = useState(equipOptions(selectedUnit,timeZone));
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
@@ -552,13 +557,12 @@ const EquipChartModal = ({
                 let timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <h6 class="line-chart-widget-tooltip-title">${selectedConsumptionLabel}</h6>
                         <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
                             series[seriesIndex][dataPointIndex],
                             0
                         )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp)
                             .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
@@ -910,6 +914,7 @@ const EquipChartModal = ({
                                                 }
                                                 setConsumption(e.target.value);
                                                 handleUnitChange(e.target.value);
+                                                handleConsumptionChange(e.target.value);
                                             }}
                                             className="font-weight-bold model-sensor-energy-filter mr-2"
                                             style={{ display: 'inline-block', width: 'fit-content' }}
