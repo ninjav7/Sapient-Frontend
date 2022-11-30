@@ -39,6 +39,7 @@ import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
 import { apiRequestBody } from '../../helpers/helpers';
+import Select from '../../sharedComponents/form/select';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -64,9 +65,9 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh',Consumption: 'Energy' },
-        { value: 'power', label: 'Power (W)', unit: 'W',Consumption: 'Power' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A',Consumption: 'Current' },
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -284,7 +285,9 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${selectedConsumption==="rmsCurrentMilliAmps"?"&detailed=true":""}`;
+            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
+                selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+            }`;
             await axios
                 .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
                     headers,
@@ -299,21 +302,19 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
-                  
-                    
-                    if(selectedConsumption==="rmsCurrentMilliAmps"){
+
+                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
                         let exploreData = [];
-                        let NulledData=[];
-                        let data=response.data;
-                        for(let i=0;i<data.length;i++){
-                            data[i].data.map((ele)=>{
-                                if(ele[1]===""){
-                                    NulledData.push([new Date(ele[0]),null])
+                        let NulledData = [];
+                        let data = response.data;
+                        for (let i = 0; i < data.length; i++) {
+                            data[i].data.map((ele) => {
+                                if (ele[1] === '') {
+                                    NulledData.push([new Date(ele[0]), null]);
+                                } else {
+                                    NulledData.push([new Date(ele[0]), ele[1]]);
                                 }
-                                else{
-                                    NulledData.push([new Date(ele[0]),ele[1]])
-                                }
-                                })
+                            });
                             let recordToInsert = {
                                 data: NulledData,
                                 name: `Sensor ${data[i]?.sensor_name}`,
@@ -324,26 +325,24 @@ const EquipChartModal = ({
                         setDeviceData(exploreData);
                         setSeriesData(exploreData);
                         setIsEquipDataFetched(false);
-                    }
-                    else{
+                    } else {
                         let data = response.data.map((_data) => {
                             _data[1] = parseInt(_data[1]);
                             return _data;
                         });
-                
+
                         let exploreData = [];
-                        let NulledData=[];
-                        data.map((ele)=>{
-                            if(ele[1]===""){
-                                NulledData.push([new Date(ele[0]),null])
+                        let NulledData = [];
+                        data.map((ele) => {
+                            if (ele[1] === '') {
+                                NulledData.push([new Date(ele[0]), null]);
+                            } else {
+                                NulledData.push([new Date(ele[0]), ele[1]]);
                             }
-                            else{
-                                NulledData.push([new Date(ele[0]),ele[1]])
-                            }
-                            })
+                        });
                         let recordToInsert = {
                             data: NulledData,
-                            name: localStorage.getItem("exploreEquipName"),
+                            name: localStorage.getItem('exploreEquipName'),
                             unit: selectedUnit,
                         };
                         exploreData.push(recordToInsert);
@@ -574,9 +573,9 @@ const EquipChartModal = ({
         let xaxisLineObj = {
             type: 'datetime',
             labels: {
-                show:false,
+                show: false,
             },
-        }
+        };
         setOptions({ ...options, xaxis: xaxisObj });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [daysCount]);
@@ -601,19 +600,22 @@ const EquipChartModal = ({
                 let ch = '';
                 ch =
                     ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                        (seriesX[0][dataPointIndex]).tz(timeZone)
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(
+                        seriesX[0][dataPointIndex]
+                    )
+                        .tz(timeZone)
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
                     if (isNaN(parseInt(series[i][dataPointIndex])) === false)
                         ch =
                             ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${(
-                                series[i][dataPointIndex].toFixed(2)
+                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                                colors[i]
+                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                                2
                             )} kWh </td></tr>`;
                 }
-    
+
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">${selectedConsumptionLabel} Consumption</h6>
                         ${ch}
@@ -624,13 +626,12 @@ const EquipChartModal = ({
         let xaxisLineObj = {
             type: 'datetime',
             labels: {
-                show:false,
+                show: false,
             },
-        }
+        };
         setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
     }, [selectedUnit]);
-
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -647,7 +648,7 @@ const EquipChartModal = ({
             backdrop="static"
             keyboard={false}>
             <>
-                <Modal.Body className='p-4'>
+                <Modal.Body className="p-4">
                     {equipmentData?.device_type === 'active' ? (
                         <>
                             <Row>
@@ -957,47 +958,61 @@ const EquipChartModal = ({
 
                             <Col lg={8}>
                                 <div className="equip-model">
-                                    <div className='pt-3'>
+                                    <div className="pt-3">
                                         <div className="ytd-heading">
-                                            Device : &nbsp;<span style={{fontWeight:"normal", textDecoration:'underline'}}>
-                                        {equipmentData?.device_mac}
-                                        </span>&nbsp;
-                                        <Button 
-                                            style={{border:'none'}}
-                                            onClick={()=>{  
-                                                redirectToConfigDevicePage(equipmentData?.device_id, 
-                                                equipmentData?.device_type === 'passive' ?'passive-device':equipmentData?.device_type === 'active'?'active-device':"");
-                                                }} 
-                                                disabled={equipmentData?.device_type === 'passive' ? equipBreakerLink?.length === 0 ? true : false:equipmentData !== null? equipmentData.device_id === ''? true: false: true}>
-                                            <FontAwesomeIcon icon={faArrowUpFromSquare} size="lg" style={{ color: 'black' }} />
-                                        </Button>
+                                            Device : &nbsp;
+                                            <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
+                                                {equipmentData?.device_mac}
+                                            </span>
+                                            &nbsp;
+                                            <Button
+                                                style={{ border: 'none' }}
+                                                onClick={() => {
+                                                    redirectToConfigDevicePage(
+                                                        equipmentData?.device_id,
+                                                        equipmentData?.device_type === 'passive'
+                                                            ? 'passive-device'
+                                                            : equipmentData?.device_type === 'active'
+                                                            ? 'active-device'
+                                                            : ''
+                                                    );
+                                                }}
+                                                disabled={
+                                                    equipmentData?.device_type === 'passive'
+                                                        ? equipBreakerLink?.length === 0
+                                                            ? true
+                                                            : false
+                                                        : equipmentData !== null
+                                                        ? equipmentData.device_id === ''
+                                                            ? true
+                                                            : false
+                                                        : true
+                                                }>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowUpFromSquare}
+                                                    size="lg"
+                                                    style={{ color: 'black' }}
+                                                />
+                                            </Button>
                                         </div>
-                                        
                                     </div>
-                                    <div style={{display:"flex"}}>
-                                    <div >
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            onChange={(e) => {
-                                                if (e.target.value === 'passive-power') {
-                                                    return;
-                                                }
-                                                setConsumption(e.target.value);
-                                                handleUnitChange(e.target.value);
-                                                handleConsumptionChange(e.target.value);
-                                            }}
-                                            className="font-weight-bold model-sensor-energy-filter mr-2"
-                                            style={{ display: 'inline-block', width: 'fit-content' }}
-                                            defaultValue={selectedConsumption}>
-                                            {metric.map((record, index) => {
-                                                return <option value={record.value}>{record.label}</option>;
-                                            })}
-                                        </Input>
-                                    </div>
+                                    <div className="d-flex">
+                                        <div className="mr-2">
+                                            <Select
+                                                defaultValue={selectedConsumption}
+                                                options={metric}
+                                                onChange={(e) => {
+                                                    if (e.value === 'passive-power') {
+                                                        return;
+                                                    }
+                                                    setConsumption(e.value);
+                                                    handleUnitChange(e.value);
+                                                    handleConsumptionChange(e.value);
+                                                }}
+                                            />
+                                        </div>
 
-                                    <Header type="modal" />
+                                        <Header type="modal" />
                                     </div>
                                     {/* <div className="mr-3 sensor-chart-options">
                                         <Dropdown>
