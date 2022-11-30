@@ -3,7 +3,8 @@ import 'moment-timezone';
 
 
 //Explore
-export const options = {
+export const options = (timeZone) => {
+    return ({
     chart: {
         id: 'chart2',
         type: 'line',
@@ -28,8 +29,7 @@ export const options = {
                     headerCategory: 'Timestamp',
                     headerValue: 'value',
                     dateFormatter(timestamp) {
-                        return moment
-                            .utc(timestamp)
+                        return moment(timestamp).tz(timeZone)
                             .format(`MMM D 'YY @ hh:mm A`)
                     }
                 },
@@ -125,17 +125,15 @@ export const options = {
             let ch = '';
             ch =
                 ch +
-                `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                    .utc(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
+                `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(seriesX[0][dataPointIndex]).tz(timeZone).format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
             for (let i = 0; i < series.length; i++) {
                 if (isNaN(parseInt(series[i][dataPointIndex])) === false)
                     ch =
                         ch +
                         `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${parseInt(
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${(
                             series[i][dataPointIndex]
-                        )} kWh </td></tr>`;
+                        ).toFixed(2)} kWh </td></tr>`;
             }
 
             return `<div class="line-chart-widget-tooltip">
@@ -148,7 +146,7 @@ export const options = {
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment.utc(timestamp).format('DD/MM HH:00');
+                return moment(timestamp).tz(timeZone).format('DD/MM HH:00');
             },
         },
     },
@@ -160,6 +158,7 @@ export const options = {
         },
     },
 }
+)}
 
 export const optionsLines = {
     chart: {
@@ -218,7 +217,8 @@ export const optionsLines = {
 }
 
 //Equip Chart Model
-export const equipOptions ={
+export const equipOptions = (timeZone) => {
+    return ({
     chart: {
         id: 'chart2',
         type: 'line',
@@ -293,7 +293,7 @@ export const equipOptions ={
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment.utc(timestamp).format('DD/MMM - HH:mm');
+                return moment(timestamp).tz(timeZone).format('DD/MMM - HH:mm');
             },
         },
         style: {
@@ -340,7 +340,7 @@ export const equipOptions ={
             ch =
                 ch +
                 `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                    .utc(seriesX[0][dataPointIndex])
+                    (seriesX[0][dataPointIndex]).tz(timeZone)
                     .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
             for (let i = 0; i < series.length; i++) {
                 if (isNaN(parseInt(series[i][dataPointIndex])) === false)
@@ -358,6 +358,7 @@ export const equipOptions ={
                 </table></div>`;
         },
     },
+})
 }
 
 export const equipOptionsLines = {
