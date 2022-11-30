@@ -34,7 +34,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
@@ -134,7 +134,7 @@ const EquipChartModal = ({
         } catch (error) {}
     };
 
-    const [options, setOptions] = useState(equipOptions);
+    const [options, setOptions] = useState(equipOptions(timeZone));
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
@@ -293,10 +293,18 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
+                    let NulledData=[];
+                    data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                    })
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
-                        data: formattedData,
-                        name: 'AHUs',
+                        data: NulledData,
                         unit: selectedUnit,
                     };
                     exploreData.push(recordToInsert);

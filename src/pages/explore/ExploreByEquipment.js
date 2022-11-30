@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { xaxisFilters } from '../../helpers/explorehelpers';
+import { xaxisFilters } from '../../helpers/helpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -109,7 +109,7 @@ const ExploreByEquipment = () => {
 
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const [optionsData, setOptionsData] = useState(options);
+    const [optionsData, setOptionsData] = useState(options(timeZone));
 
     const [seriesLineData, setSeriesLineData] = useState([]);
     const [optionsLineData, setOptionsLineData] = useState(optionsLines);
@@ -576,17 +576,14 @@ const ExploreByEquipment = () => {
                                 if(args[0]===0){
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
-                                    setPerAPIFlag(bottomPerChange+topPerChange);
                                 }
                                 if(args[0]===1){
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(0);
-                                    setPerAPIFlag(bottomPerChange+0);
                                 }
                                 if(args[0]===2){
                                     set_minPerValue(0);
                                     set_maxPerValue(topPerChange);
-                                    setPerAPIFlag(0+topPerChange);
                                 }
                             }
                         },
@@ -738,10 +735,19 @@ const ExploreByEquipment = () => {
                 } else {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
+                let NulledData=[];
+                data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                })
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: legendName,
-                    data: formattedData,
+                    data: NulledData,
                     id: arr[0].equipment_id,
                 };
                 setSeriesData([...seriesData, recordToInsert]);
@@ -805,24 +811,21 @@ const ExploreByEquipment = () => {
                 } else {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
+                let NulledData=[];
+                data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                })
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: legendName,
-                    data: formattedData,
+                    data: NulledData,
                     id: arr[0].equipment_id,
                 };
-                let coll = [];
-                let sname = arr[0].equipment_name;
-                formattedData.map((el) => {
-                    let ab = {};
-                    ab['timestamp'] = el[0];
-                    ab[sname] = el[1];
-                    coll.push(ab);
-                });
-                if (objectExplore.length === 0) {
-                    setObjectExplore(coll);
-                } else {
-                }
                 dataarr.push(recordToInsert);
 
                 if (selectedIds.length === dataarr.length) {
@@ -899,7 +902,7 @@ const ExploreByEquipment = () => {
             </Row>
 
             <Row >
-                <div className="explore-data-table-style">
+                <div className="explore-data-table-style p-2 mb-2">
                     {isExploreChartDataLoading ? (
                         <></>
                     ) : (
