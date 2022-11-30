@@ -135,7 +135,7 @@ const EquipChartModal = ({
         } catch (error) {}
     };
 
-    const [options, setOptions] = useState(equipOptions);
+    const [options, setOptions] = useState(equipOptions(timeZone));
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
