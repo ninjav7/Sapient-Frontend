@@ -27,6 +27,8 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
     };
 
     const handleBldgChange = (bldgData, path) => {
+        let pathName = '';
+
         localStorage.setItem('buildingId', bldgData?.building_id);
         localStorage.setItem('buildingName', bldgData?.building_name);
         localStorage.setItem('buildingTimeZone', bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone);
@@ -35,10 +37,17 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
             s.BldgName = bldgData?.building_name;
             s.BldgTimeZone = bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone;
         });
-        let pathName = path.substr(0, path.lastIndexOf('/'));
-        history.push({
-            pathname: `${pathName}/${bldgData?.building_id}`,
-        });
+
+        if (path.includes('/energy')) {
+            pathName = path.substr(0, path.lastIndexOf('/'));
+            history.push({
+                pathname: `${pathName}/${bldgData?.building_id}`,
+            });
+        } else {
+            history.push({
+                pathname: `${'/settings/general'}`,
+            });
+        }
     };
 
     return (
@@ -60,7 +69,6 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                                 location.pathname === '/energy/compare-buildings' ? (
                                     <Dropdown.Item
                                         onClick={() => {
-                                            console.log('SSR handleBldgSwitchFrmPortfolioPage function executed');
                                             handleBldgSwitchFrmPortfolioPage(record);
                                         }}>
                                         <div className="filter-bld-style">
@@ -74,7 +82,6 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                                     <Dropdown.Item
                                         className={activeItem && 'selected'}
                                         onClick={() => {
-                                            console.log('SSR handleBldgChange function executed');
                                             handleBldgChange(record, location.pathname);
                                         }}>
                                         <div className="filter-bld-style">
