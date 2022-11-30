@@ -43,11 +43,14 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
             history.push({
                 pathname: `${pathName}/${bldgData?.building_id}`,
             });
-        } else {
-            history.push({
-                pathname: `${'/settings/general'}`,
-            });
+            return;
         }
+        if (path.includes('/control')) {
+            return;
+        }
+        history.push({
+            pathname: `${'/settings/general'}`,
+        });
     };
 
     return (
