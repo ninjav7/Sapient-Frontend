@@ -5,7 +5,7 @@ import React from 'react';
 
 const MenuListPerRow = ({ onDeleteRow, onEditRow }) => (
     <>
-        {onDeleteRow && (
+        {onEditRow && (
             <button className="reset-styles d-block w-100" onClick={onEditRow}>
                 <div className="dropdown-list-item d-flex align-items-center borders-bottom">
                     <EditSVG className="mr-3" /> <Typography.Body size={Typography.Sizes.lg}>Edit</Typography.Body>
