@@ -1,25 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { Cookies } from 'react-cookie';
-import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
-
-import SearchModal from '../SearchModal';
+import { Redirect, useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import { logoutUser } from '../../redux/actions';
-import { faGear, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
-
+import { faGear } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
-import { DateRangeStore } from '../../store/DateRangeStore';
+import { routesForAccountSettings } from './utils';
 
 const Control = () => {
     const location = useLocation();
+    const history = useHistory();
+    const cookies = new Cookies();
 
-    const currentParentRoute = ComponentStore.useState((s) => s.parent);
-    let history = useHistory();
-    let cookies = new Cookies();
+    const [userPermission] = useAtom(userPermissionData);
+    const [pageType, setPageType] = useState('');
+
+    const [accountRoutes, setAccountRoutes] = useState([
+        '/settings/account',
+        '/settings/buildings',
+        '/settings/users',
+        '/settings/roles',
+        '/settings/equipment-types',
+    ]);
+
+    const [configRoutes, setConfigRoutes] = useState([
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/settings/active-devices',
+    ]);
 
     const handleLogout = () => {
         cookies.remove('user', { path: '/' });
@@ -37,290 +51,235 @@ const Control = () => {
         }
     };
 
-    const setSideNavBar = (componentName) => {
-        if (componentName === 'Energy') {
-            ComponentStore.update((s) => {
-                s.parent = 'portfolio';
-            });
-        }
-        if (componentName === 'Control') {
-            ComponentStore.update((s) => {
-                s.parent = 'control';
-            });
-        }
-        if (componentName === 'Explore') {
-            ComponentStore.update((s) => {
-                s.parent = 'explore';
-            });
-        }
-        if (componentName === 'account') {
+    const handleSideNavChange = (routeType) => {
+        if (routeType === 'account-settings') {
             ComponentStore.update((s) => {
                 s.parent = 'account';
             });
         }
-        if (componentName === 'building-settings') {
+        if (routeType === 'building-settings') {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
-        } else {
-            return;
         }
     };
 
-    const [route, setRoute] = useState([
-        '/settings/account',
-        '/settings/buildings',
-        '/settings/users',
-        '/settings/roles',
-        '/settings/equipment-types',
-    ]);
-
-    const [internalRoute, setInternalRoute] = useState([
-        '/settings/general',
-        '/settings/layout',
-        '/settings/equipment',
-        '/settings/panels',
-        '/settings/active-devices',
-    ]);
-
-    const [userPermission] = useAtom(userPermissionData);
+    const handleRouteChange = () => {
+        let currentPath = location.pathname;
+        let pathName = '';
+        routesForAccountSettings.includes(currentPath) ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
+        history.push({
+            pathname: `${pathName}`,
+        });
+    };
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
             if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/account';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/buildings';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/users';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.account_roles_permission?.view) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/roles';
                     })
                 );
-                if (!route.includes('/settings/equipment-types')) {
-                    setRoute((el) => [...el, '/settings/equipment-types']);
+                if (!accountRoutes.includes('/settings/equipment-types')) {
+                    setAccountRoutes((el) => [...el, '/settings/equipment-types']);
                 }
             }
 
             if (
                 userPermission?.permissions?.permissions?.account_general_permission?.view &&
-                !route.includes('/settings/account')
+                !accountRoutes.includes('/settings/account')
             ) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setRoute((el) => [...el, '/settings/account']);
+                setAccountRoutes((el) => [...el, '/settings/account']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.account_buildings_permission?.view &&
-                !route.includes('/settings/buildings')
+                !accountRoutes.includes('/settings/buildings')
             ) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setRoute((el) => [...el, '/settings/buildings']);
+                setAccountRoutes((el) => [...el, '/settings/buildings']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.account_user_permission?.view &&
-                !route.includes('/settings/users')
+                !accountRoutes.includes('/settings/users')
             ) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setRoute((el) => [...el, '/settings/users']);
+                setAccountRoutes((el) => [...el, '/settings/users']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.account_roles_permission?.view &&
-                !route.includes('/settings/roles')
+                !accountRoutes.includes('/settings/roles')
             ) {
-                setRoute((el) =>
+                setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setRoute((el) => [...el, '/settings/roles']);
+                setAccountRoutes((el) => [...el, '/settings/roles']);
             }
         }
         if (userPermission?.user_role === 'admin') {
-            setRoute([]);
-            setRoute(['/settings/account']);
+            setAccountRoutes([]);
+            setAccountRoutes(['/settings/account']);
         }
     }, [userPermission]);
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
             if (userPermission?.permissions?.permissions === 'All Permissions') {
-                setRoute((el) => [...el, '/settings/general']);
+                setAccountRoutes((el) => [...el, '/settings/general']);
             }
 
             if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/general';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/layout';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment';
                     })
                 );
             }
             if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/panels';
                     })
                 );
-                if (!route.includes('/settings/active-devices')) {
-                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                if (!accountRoutes.includes('/settings/active-devices')) {
+                    setConfigRoutes((el) => [...el, '/settings/active-devices']);
                 }
             }
 
             if (
                 userPermission?.permissions?.permissions?.building_details_permission?.view &&
-                !route.includes('/settings/general')
+                !accountRoutes.includes('/settings/general')
             ) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/active-devices';
                     })
                 );
-                setInternalRoute((el) => [...el, '/settings/general']);
+                setConfigRoutes((el) => [...el, '/settings/general']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.building_layout_permission?.view &&
-                !route.includes('/settings/layout')
+                !accountRoutes.includes('/settings/layout')
             ) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/active-devices';
                     })
                 );
-                setInternalRoute((el) => [...el, '/settings/layout']);
+                setConfigRoutes((el) => [...el, '/settings/layout']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
-                !route.includes('/settings/equipment')
+                !accountRoutes.includes('/settings/equipment')
             ) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/active-devices';
                     })
                 );
-                setInternalRoute((el) => [...el, '/settings/equipment']);
+                setConfigRoutes((el) => [...el, '/settings/equipment']);
             }
 
             if (
                 userPermission?.permissions?.permissions?.building_panels_permission?.view &&
-                !route.includes('/settings/panels')
+                !accountRoutes.includes('/settings/panels')
             ) {
-                setInternalRoute((el) =>
+                setConfigRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/active-devices';
                     })
                 );
-                setInternalRoute((el) => [...el, '/settings/panels']);
+                setConfigRoutes((el) => [...el, '/settings/panels']);
             }
         }
         if (userPermission?.user_role === 'admin') {
-            setInternalRoute([]);
-            setInternalRoute(['/settings/general']);
+            setConfigRoutes([]);
+            setConfigRoutes(['/settings/general']);
         }
     }, [userPermission]);
+
+    useEffect(() => {
+        setPageType(location.pathname.split('/')[1]);
+    }, [location.pathname]);
 
     return (
         <>
             <div className="topbar-buttons-wrapper">
-                {currentParentRoute === 'buildings' ? (
-                    <>
-                        <Link to={`${internalRoute[0]}`} className="topbar-buttons">
-                            {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
-                            <div
-                                className={`${
-                                    location.pathname.split('/')[1] === 'settings'
-                                        ? 'navbar-icon-container-active float-right'
-                                        : 'navbar-icon-container float-right'
-                                }`}
-                                style={{ height: '100%' }}>
-                                <button
-                                    // className="btn btn-sm float-right font-icon-style"
-                                    className={`${
-                                        location.pathname.split('/')[1] === 'settings'
-                                            ? 'btn btn-sm float-right other-font-icon-style-active'
-                                            : 'btn btn-sm float-right other-font-icon-style'
-                                    }`}
-                                    onClick={() => {
-                                        setSideNavBar('building-settings');
-                                    }}>
-                                    <FontAwesomeIcon icon={faGear} size="lg" />
-                                </button>
-                            </div>
-                        </Link>
-                    </>
-                ) : (
-                    <>
-                        <Link to={`${route[0]}`} className="topbar-buttons">
-                            <div
-                                className={`${
-                                    location.pathname.split('/')[1] === 'settings'
-                                        ? 'navbar-icon-container-active'
-                                        : 'navbar-icon-container'
-                                }`}>
-                                <button
-                                    className={`${
-                                        location.pathname.split('/')[1] === 'settings'
-                                            ? 'btn btn-sm other-font-icon-style-active p-0'
-                                            : 'btn btn-sm other-font-icon-style'
-                                    }`}
-                                    onClick={() => {
-                                        setSideNavBar('account');
-                                    }}>
-                                    <FontAwesomeIcon icon={faGear} size="lg" />
-                                </button>
-                            </div>
-                        </Link>
-                    </>
-                )}
+                <div className="topbar-buttons">
+                    <div
+                        className={`float-right ${
+                            pageType === 'settings' ? 'navbar-icon-container-active ' : 'navbar-icon-container'
+                        }`}
+                        style={{ height: '100%' }}>
+                        <button
+                            className={`btn btn-sm float-right ${
+                                pageType === 'settings' ? 'other-font-icon-style-active' : 'other-font-icon-style'
+                            }`}
+                            onClick={() => {
+                                handleSideNavChange('building-settings');
+                                handleRouteChange();
+                            }}>
+                            <FontAwesomeIcon icon={faGear} size="lg" />
+                        </button>
+                    </div>
+                </div>
 
                 {/* <SearchModal /> */}
-
                 {/* <div className="navbar-icon-container float-right topbar-buttons">
                     <button className="btn btn-sm float-right other-font-icon-style">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />

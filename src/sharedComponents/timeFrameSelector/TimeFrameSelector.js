@@ -22,6 +22,7 @@ const selectOptions = [
 const TimeFrameSelector = (props) => {
     const [period, setPeriod] = useState(props.period);
     const [rangeDate, setRangeDate] = useState(props.rangeDate);
+    const [menuSelectOpen, setMenuSelectOpen] = useState(false);
 
     const handleChangeSelect = (option) => {
         option.moment && setRangeDate(option.moment());
@@ -47,9 +48,12 @@ const TimeFrameSelector = (props) => {
                     value={period}
                     options={props.timeOptions || selectOptions}
                     onChange={handleChangeSelect}
+                    onMenuOpen={() => setMenuSelectOpen(true)}
+                    onMenuClose={() => setMenuSelectOpen(false)}
                     {...props}
                 />
                 <Datepicker
+                    isClosed={menuSelectOpen}
                     rangeDate={rangeDate}
                     onManuallyChangedDate={setCustomDate}
                     onChange={handleDatePickerChange}
@@ -83,4 +87,3 @@ TimeFrameSelector.defaultProps = {
 };
 
 export default TimeFrameSelector;
-
