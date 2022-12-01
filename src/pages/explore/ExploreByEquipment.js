@@ -114,11 +114,11 @@ const ExploreByEquipment = () => {
     const [seriesLineData, setSeriesLineData] = useState([]);
     const [optionsLineData, setOptionsLineData] = useState(optionsLines);
 
-    const FilterDataList = ExploreFilterDataStore.useState((bs) => bs.items);
     const [filterData, setFilterData] = useState({});
     const [topConsumption, setTopConsumption] = useState(0);
     const [bottomConsumption, setBottomConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
+    const [neutralPerChange, setNeutralPerChange] = useState(0);
     const [bottomPerChange, setBottomPerChange] = useState(0);
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
@@ -135,17 +135,15 @@ const ExploreByEquipment = () => {
     const [maxConValue, set_maxConValue] = useState(0);
     const [minPerValue, set_minPerValue] = useState(0);
     const [maxPerValue, set_maxPerValue] = useState(0);
+    const [currentButtonId, setCurrentButtonId] = useState(0);
+    const [isopened, setIsOpened] = useState(false);
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
-    const [topPeakConsumption, setTopPeakConsumption] = useState(1);
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
-    const [selectedTab, setSelectedTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
-    const [objectExplore, setObjectExplore] = useState([]);
-    const [equipmentSearchTxt, setEquipmentSearchTxt] = useState('');
 
     useEffect(()=>{
         entryPoint = 'entered';
@@ -210,7 +208,6 @@ const ExploreByEquipment = () => {
                         setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption(Math.round(responseData.data[0].peak_power.now / 100000));
                 }
                 setExploreTableData(responseData.data);
                 setAllEquipmentList(responseData.data);
@@ -346,6 +343,7 @@ const ExploreByEquipment = () => {
                 setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption/1000)));
                 setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption/1000)));
                 setTopPerChange(Math.round(filters.data.data.max_change===filters.data.data.min_change?filters.data.data.max_change+1:filters.data.data.max_change))
+                setNeutralPerChange(Math.round(filters.data.data.neutral_change));
                 setBottomPerChange(Math.round(filters.data.data.min_change))
                 set_minConValue(Math.abs(Math.round(filters.data.data.min_consumption/1000)));
                 set_maxConValue(Math.abs(Math.round(filters.data.data.max_consumption/1000)));
@@ -412,12 +410,36 @@ const ExploreByEquipment = () => {
                             max:topPerChange+1,
                             range:[minPerValue, maxPerValue],
                             withTrendsFilter:true,
+                            currentButtonId:currentButtonId,
                             handleButtonClick:function handleButtonClick() {
                                 for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                                {args[_key] = arguments[_key];}
+                                {
+                                    args[_key] = arguments[_key];
+                                    if(args[0]===0){
+                                        setIsOpened(true)
+                                        setCurrentButtonId(0);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(topPerChange);
+                                        
+                                    }
+                                    if(args[0]===1){
+                                        setIsOpened(true)
+                                        setCurrentButtonId(1);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    }
+                                    if(args[0]===2){
+                                        setIsOpened(true)
+                                        setCurrentButtonId(2);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(topPerChange);
+                                    }
+                                }
                             },
                         },
-                        onClose:async function onClose(options){
+                        isOpened:isopened,
+                        onClose:function onClose(options){
+                            setIsOpened(false);
                             set_minPerValue(options[0]);
                             set_maxPerValue(options[1]);
                             setPageNo(1);
@@ -527,6 +549,182 @@ const ExploreByEquipment = () => {
     },[conAPIFlag, selectedEndUse])
 
     useEffect(()=>{
+        if(perAPIFlag!==""){
+        const filterOptionsFetched = [
+            {
+                label:'Energy Consumption',
+                value:'consumption',
+                placeholder: 'All Consumptions',
+                filterType: FILTER_TYPES.RANGE_SELECTOR,
+                filterOptions:[minConValue, maxConValue],
+                componentProps:{
+                    prefix:' kWh',
+                    title:'Consumption',
+                    min:bottomConsumption,
+                    max:topConsumption+1,
+                    range:[minConValue, maxConValue],
+                    withTrendsFilter:false,
+
+                },
+                onClose:async function onClose(options){
+                    set_minConValue(options[0]);
+                    set_maxConValue(options[1]);
+                    setPageNo(1);
+                    setConAPIFlag(options[0]+options[1])
+                },
+                onDelete:()=>{
+                    set_minConValue(bottomConsumption);
+                    set_maxConValue(topConsumption);
+                    setConAPIFlag('');
+                }
+            },
+            {
+                label:'% Change',
+                value:'change',
+                placeholder: 'All % Change',
+                filterType: FILTER_TYPES.RANGE_SELECTOR,
+                filterOptions:[minPerValue, maxPerValue],
+                componentProps:{
+                    prefix:' %',
+                    title:'% Change',
+                    min:bottomPerChange,
+                    max:topPerChange+1,
+                    range:[minPerValue, maxPerValue],
+                    withTrendsFilter:true,
+                    currentButtonId:currentButtonId,
+                    handleButtonClick:function handleButtonClick() {
+                        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
+                        {
+                            args[_key] = arguments[_key];
+                            if(args[0]===0){
+                                setIsOpened(true)
+                                setCurrentButtonId(0);
+                                set_minPerValue(bottomPerChange);
+                                set_maxPerValue(topPerChange);
+                                
+                            }
+                            if(args[0]===1){
+                                setIsOpened(true)
+                                setCurrentButtonId(1);
+                                set_minPerValue(bottomPerChange);
+                                set_maxPerValue(neutralPerChange);
+                            }
+                            if(args[0]===2){
+                                setIsOpened(true)
+                                setCurrentButtonId(2);
+                                set_minPerValue(neutralPerChange);
+                                set_maxPerValue(topPerChange);
+                            }
+                        }
+                    },
+                },
+                isOpened:isopened,
+                onClose:function onClose(options){
+                    setIsOpened(false);
+                    set_minPerValue(options[0]);
+                    set_maxPerValue(options[1]);
+                    setPageNo(1);
+                    setPerAPIFlag(options[0]+options[1])
+                },
+                onDelete:()=>{
+                    set_minPerValue(bottomPerChange);
+                    set_maxPerValue(topPerChange);
+                    setPerAPIFlag('');
+                }
+            },
+        {
+            label: 'Location',
+            value: 'spaces',
+            placeholder: 'All Locations',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: filterData.spaces.map((filterItem) => ({
+                value: filterItem.space_id,
+                label: filterItem.space_name,
+            })),
+            onClose: (options) => {},
+            onDelete: () => {
+                setSelectedLocation([]);
+                //setMacTypeFilterString('');
+            },
+        },
+        {
+            label: 'Equipment Type',
+            value: 'equipments_type',
+            placeholder: 'All Equipment Types',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: filterData.equipments_type.map((filterItem) => ({
+                value: filterItem.equipment_type_id,
+                label: filterItem.equipment_type_name,
+            })),
+            onChange : function onChange(options) {},
+            onClose: (options) => {
+                let opt=options;
+                if(opt.length!==0){
+                let equipIds=[];
+                for(let i=0;i<opt.length;i++){
+                    equipIds.push(opt[i].value)
+                }
+                setPageNo(1);
+                setSelectedEquipType(equipIds);
+                }
+            },
+            onDelete: (options) => {
+                setSelectedEquipType([]);
+            },
+        },
+        {
+            label: 'End Uses',
+            value: 'end_users',
+            placeholder: 'All End Uses',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: filterData.end_users.map((filterItem) => ({
+                value: filterItem.end_use_id,
+                label: filterItem.end_use_name,
+            })),
+            onClose: (options) => {
+                let opt=options;
+                if(opt.length!==0){
+                let endUseIds=[];
+                for(let i=0;i<opt.length;i++){
+                    endUseIds.push(opt[i].value)
+                }
+                setPageNo(1);
+                setSelectedEndUse(endUseIds);
+                }
+            },
+            onDelete:  () => {
+                setSelectedEndUse([]);
+            },
+        },
+        {
+            label: 'Space Type',
+            value: 'location_types',
+            placeholder: 'All Space Types',
+            filterType: FILTER_TYPES.MULTISELECT,
+            filterOptions: filterData.location_types.map((filterItem) => ({
+                value: filterItem.location_type_id,
+                label: filterItem.location_types_name,
+            })),
+            onClose: (options) => {
+                let opt=options;
+                if(opt.length!==0){
+                let spaceIds=[];
+                for(let i=0;i<opt.length;i++){
+                    spaceIds.push(opt[i].value)
+                }
+                setPageNo(1);
+                setSelectedSpaceType(spaceIds);
+                }
+            },
+            onDelete: () => {
+                setSelectedSpaceType([]);
+            },
+        }
+    ];
+    setFilterOptions(filterOptionsFetched);
+    }
+    },[perAPIFlag])
+    useEffect(()=>{
         if((minConValue!==maxConValue && maxConValue!==0) || (minPerValue!==maxPerValue && maxPerValue!==0)){
             const filterOptionsFetched = [
                 {
@@ -569,29 +767,39 @@ const ExploreByEquipment = () => {
                         max:topPerChange+1,
                         range:[minPerValue, maxPerValue],
                         withTrendsFilter:true,
+                        currentButtonId:currentButtonId,
                         handleButtonClick:function handleButtonClick() {
                             for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
                             {
                                 args[_key] = arguments[_key];
                                 if(args[0]===0){
+                                    setIsOpened(true)
+                                    setCurrentButtonId(0);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
+                                    
                                 }
                                 if(args[0]===1){
+                                    setIsOpened(true)
+                                    setCurrentButtonId(1);
                                     set_minPerValue(bottomPerChange);
-                                    set_maxPerValue(0);
+                                    set_maxPerValue(neutralPerChange);
                                 }
                                 if(args[0]===2){
-                                    set_minPerValue(0);
+                                    setIsOpened(true)
+                                    setCurrentButtonId(2);
+                                    set_minPerValue(neutralPerChange);
                                     set_maxPerValue(topPerChange);
                                 }
                             }
                         },
                     },
+                    isOpened:isopened,
                     onClose:function onClose(options){
                         set_minPerValue(options[0]);
                         set_maxPerValue(options[1]);
                         setPageNo(1);
+                        setIsOpened(false);
                         setPerAPIFlag(options[0]+options[1])
                     },
                     onDelete:()=>{
@@ -799,7 +1007,8 @@ const ExploreByEquipment = () => {
                 let responseData = res.data;
                 let data = responseData.data;
                 let arr = [];
-                arr = FilterDataList.filter(function (item) {
+               
+                arr = allEquipmentList.filter(function (item) {
                     return item.equipment_id === id;
                 });
                 let exploreData = [];
@@ -827,7 +1036,6 @@ const ExploreByEquipment = () => {
                     id: arr[0].equipment_id,
                 };
                 dataarr.push(recordToInsert);
-
                 if (selectedIds.length === dataarr.length) {
                     setSeriesData(dataarr);
                     setSeriesLineData(dataarr);
