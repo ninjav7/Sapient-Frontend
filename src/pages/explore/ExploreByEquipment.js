@@ -314,7 +314,7 @@ const ExploreByEquipment = () => {
     };
     const fetchAPI = useCallback(() => {
         exploreDataFetch();
-    },[startDate,endDate, bldgId,search, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
+    },[startDate,endDate, bldgId,search,sortBy, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -325,7 +325,7 @@ const ExploreByEquipment = () => {
         }
         
              fetchAPI();
-    }, [startDate,endDate, bldgId,search, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
+    }, [startDate,endDate, bldgId,search,sortBy, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
 
     useEffect(()=>{
     },[selectedEquipType, selectedEndUse, selectedSpaceType,])

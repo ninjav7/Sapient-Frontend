@@ -17,11 +17,9 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
-import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
-import axios from 'axios';
+import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
-import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import 'moment-timezone';
@@ -32,7 +30,6 @@ import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import Button from '../../sharedComponents/button/Button';
@@ -568,17 +565,17 @@ const EquipChartModal = ({
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
     }, [startDate, endDate, selectedConsumption]);
 
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show: false,
-            },
-        };
-        setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [daysCount]);
+    // useEffect(() => {
+    //     let xaxisObj = xaxisFilters(daysCount, timeZone);
+    //     let xaxisLineObj = {
+    //         type: 'datetime',
+    //         labels: {
+    //             show: false,
+    //         },
+    //     };
+    //     setOptions({ ...options, xaxis: xaxisObj });
+    //     setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
+    // }, [daysCount]);
 
     useEffect(() => {
         let toolTip = {
@@ -617,7 +614,7 @@ const EquipChartModal = ({
                 }
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">${selectedConsumptionLabel} Consumption</h6>
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">${selectedConsumptionLabel}</h6>
                         ${ch}
                     </table></div>`;
             },
@@ -631,7 +628,7 @@ const EquipChartModal = ({
         };
         setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [selectedUnit]);
+    }, [daysCount]);
 
     useEffect(() => {
         if (equipmentTypeData) {
