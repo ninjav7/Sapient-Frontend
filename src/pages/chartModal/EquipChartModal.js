@@ -1828,7 +1828,7 @@ const EquipChartModal = ({
 
                                                                 {!record.status && (
                                                                     <div>
-                                                                        <div className="power-off-style">
+                                                                        <div className="power-off-style-equip">
                                                                             <FontAwesomeIcon
                                                                                 icon={faPowerOff}
                                                                                 size="lg"
@@ -1840,7 +1840,7 @@ const EquipChartModal = ({
                                                                                 <img src={SocketLogo} alt="Socket" />
                                                                             </div>
                                                                         ) : (
-                                                                            <div className="online-socket-container">
+                                                                            <div className="online-socket-container-equip">
                                                                                 <img
                                                                                     src={UnionLogo}
                                                                                     alt="Union"
