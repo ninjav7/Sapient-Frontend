@@ -266,12 +266,23 @@ export const equipOptions = (timeZone) => {
             autoScaleYaxis: true,
         },
     },
+    legend: {
+        position: 'top',
+        horizontalAlign: 'right',
+        showForSingleSeries: true,
+        showForNullSeries: false,
+        showForZeroSeries: true,
+        fontSize: '18px',
+        fontFamily: 'Helvetica, Arial',
+        fontWeight: 600,
+        itemMargin: {
+            horizontal: 30,
+            vertical: 20,
+        },
+    },
     colors: ['#3C6DF5'],
     stroke: {
         width: 2,
-    },
-    dataLabels: {
-        enabled: false,
     },
     colors: [
         '#3C6DF5',

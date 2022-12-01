@@ -295,20 +295,16 @@ const EquipChartModal = ({
                 })
                 .then((res) => {
                     let response = res.data;
-
-                    let data = response.data.map((_data) => {
-                        _data[1] = parseInt(_data[1]);
-                        return _data;
-                    });
-
-                    data.forEach((record) => {});
-                    let exploreData = [];
+                    console.log(response);
+                  
 
                     if (selectedConsumption === 'rmsCurrentMilliAmps') {
                         let exploreData = [];
-                        let NulledData = [];
+                        
                         let data = response.data;
+                        console.log(data)
                         for (let i = 0; i < data.length; i++) {
+                            let NulledData = [];
                             data[i].data.map((ele) => {
                                 if (ele[1] === '') {
                                     NulledData.push([new Date(ele[0]), null]);
@@ -323,6 +319,7 @@ const EquipChartModal = ({
                             };
                             exploreData.push(recordToInsert);
                         }
+                        console.log(exploreData);
                         setDeviceData(exploreData);
                         setSeriesData(exploreData);
                         setIsEquipDataFetched(false);
