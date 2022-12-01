@@ -295,14 +295,12 @@ const EquipChartModal = ({
                 })
                 .then((res) => {
                     let response = res.data;
-                    console.log(response);
                   
 
                     if (selectedConsumption === 'rmsCurrentMilliAmps') {
                         let exploreData = [];
                         
                         let data = response.data;
-                        console.log(data)
                         for (let i = 0; i < data.length; i++) {
                             let NulledData = [];
                             data[i].data.map((ele) => {
@@ -319,7 +317,6 @@ const EquipChartModal = ({
                             };
                             exploreData.push(recordToInsert);
                         }
-                        console.log(exploreData);
                         setDeviceData(exploreData);
                         setSeriesData(exploreData);
                         setIsEquipDataFetched(false);

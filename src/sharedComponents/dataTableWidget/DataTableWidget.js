@@ -442,6 +442,7 @@ DataTableWidget.propTypes = {
             ),
             // Props depend on what component was selected for particular filter.
             componentProps: PropTypes.object,
+            isOpened: PropTypes.bool,
         })
     ),
     headers: PropTypes.arrayOf(

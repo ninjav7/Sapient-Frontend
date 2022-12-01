@@ -1,45 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Cookies } from 'react-cookie';
 import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { buildingData } from '../../store/globalState';
 import { useAtom } from 'jotai';
+import { accountRoutes, configRoutes } from './utils';
 
-const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
+const PortfolioItem = ({ handlePortfolioClick }) => {
     const location = useLocation();
     const history = useHistory();
 
-    const configRoutes = [
-        '/settings/general',
-        '/settings/layout',
-        '/settings/equipment',
-        '/settings/panels',
-        '/settings/active-devices',
-        '/settings/passive-devices',
-    ];
-
     const handleChange = () => {
-        if (configRoutes.includes(location.pathname)) {
-            history.push({
-                pathname: `/settings/account`,
-            });
-        } else {
-            history.push({
-                pathname: `/energy/portfolio/overview`,
-            });
-        }
+        let pathName = '';
+        configRoutes.includes(location.pathname)
+            ? (pathName = `/settings/account`)
+            : (pathName = `/energy/portfolio/overview`);
+        history.push({
+            pathname: `${pathName}`,
+        });
     };
 
     return (
@@ -65,7 +52,7 @@ const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
                 </Dropdown.Item>
             )}
 
-            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings'  && (
+            {location.pathname !== '/energy/portfolio/overview' && location.pathname !== '/energy/compare-buildings' && (
                 <Dropdown.Item
                     onClick={() => {
                         handlePortfolioClick && handlePortfolioClick('Portfolio');
@@ -94,20 +81,7 @@ const FilterBuildings = ({ handleValueChange, value }) => {
 };
 
 const BuildingSwitcher = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const location = useLocation();
-
-    const accountRoutes = [
-        '/energy/portfolio/overview',
-        '/energy/compare-buildings',
-        '/settings/account',
-        '/settings/buildings',
-        '/settings/users',
-        '/settings/roles',
-        '/settings/equipment-types',
-    ];
 
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);

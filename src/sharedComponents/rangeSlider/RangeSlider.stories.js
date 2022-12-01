@@ -11,11 +11,13 @@ export default {
 
 export const Default = (props) => <RangeSlider {...props} />;
 
-export const WithFilters = (props) => <RangeSlider {...props} buttonGroup={[
-    {label: 'All'},
-    {icon: <TrendDownSVG />},
-    {icon: <TrendUpSVG />},
-]} withTrendsFilter/>;
+export const WithFilters = (props) => (
+    <RangeSlider
+        {...props}
+        buttonGroup={[{ label: 'All' }, { icon: <TrendDownSVG /> }, { icon: <TrendUpSVG /> }]}
+        withTrendsFilter
+    />
+);
 
 Default.args = {
     step: 1,
