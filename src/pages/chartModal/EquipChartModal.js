@@ -31,7 +31,7 @@ import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
@@ -90,7 +90,7 @@ const EquipChartModal = ({
 
     const [location, setLocation] = useState('');
     const [equipType, setEquipType] = useState('');
-
+    const [closeFlag, setCloseFlag] = useState(false);
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
     const addEquimentType = () => {
@@ -261,10 +261,13 @@ const EquipChartModal = ({
     };
 
     const handleCloseWithoutSave = () => {
-        handleChartClose();
         setEquipResult({});
         setEquipmentData({});
+        setCloseFlag(true);
         setDataChanged(false);
+        setSelectedUnit(metric[0].unit);
+        setConsumption(metric[0].value);
+        setSelectedConsumptionLabel(metric[0].Consumption);
         setUpdateEqipmentData({});
         if (activePage === 'explore') {
             setSelectedTab(0);
@@ -272,6 +275,7 @@ const EquipChartModal = ({
         if (activePage === 'equipment') {
             setSelectedTab(1);
         }
+        handleChartClose();
     };
 
     const fetchEquipmentChart = async (equipId) => {
@@ -561,8 +565,13 @@ const EquipChartModal = ({
         if (sensorData.length !== 0) {
             buildingAlertsData();
         }
+        if(closeFlag!==true){
         fetchEquipmentChart(equipmentFilter?.equipment_id);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        }
+        else{
+            setCloseFlag(false);
+        }
     }, [startDate, endDate, selectedConsumption]);
 
     // useEffect(() => {
@@ -597,10 +606,8 @@ const EquipChartModal = ({
                 let ch = '';
                 ch =
                     ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(
-                        seriesX[0][dataPointIndex]
-                    )
-                        .tz(timeZone)
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(
+                        seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
                     if (isNaN(parseInt(series[i][dataPointIndex])) === false)
