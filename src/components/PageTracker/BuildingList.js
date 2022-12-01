@@ -5,6 +5,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { configRoutes } from './utils';
 
 const BuildingList = ({ buildingList = [], bldStoreId }) => {
     const location = useLocation();
@@ -46,6 +47,12 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
             return;
         }
         if (path.includes('/control')) {
+            return;
+        }
+        if (configRoutes.includes(path)) {
+            history.push({
+                pathname: `${path}`,
+            });
             return;
         }
         history.push({
