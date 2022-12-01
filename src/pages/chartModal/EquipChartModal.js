@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faEllipsisV, faPowerOff, faArrowUpFromSquare } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -568,17 +568,17 @@ const EquipChartModal = ({
         }
     }, [startDate, endDate, selectedConsumption]);
 
-    // useEffect(() => {
-    //     let xaxisObj = xaxisFilters(daysCount, timeZone);
-    //     let xaxisLineObj = {
-    //         type: 'datetime',
-    //         labels: {
-    //             show: false,
-    //         },
-    //     };
-    //     setOptions({ ...options, xaxis: xaxisObj });
-    //     setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    // }, [daysCount]);
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        let xaxisLineObj = {
+            type: 'datetime',
+            labels: {
+                show: false,
+            },
+        };
+        setOptions({ ...options, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
+    }, [daysCount]);
 
     useEffect(() => {
         let toolTip = {
@@ -611,7 +611,7 @@ const EquipChartModal = ({
                                 colors[i]
                             };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
                                 2
-                            )} kWh </td></tr>`;
+                            )}&nbsp;${selectedUnit} </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -629,7 +629,7 @@ const EquipChartModal = ({
         };
         setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
         setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [daysCount]);
+    }, [selectedUnit]);
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -959,10 +959,6 @@ const EquipChartModal = ({
                                     <div className="pt-3">
                                         <div className="ytd-heading">
                                             Device : &nbsp;
-                                            <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
-                                                {equipmentData?.device_mac}
-                                            </span>
-                                            &nbsp;
                                             <Button
                                                 style={{ border: 'none' }}
                                                 onClick={() => {
@@ -986,9 +982,12 @@ const EquipChartModal = ({
                                                             : false
                                                         : true
                                                 }>
+                                                    <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
+                                                {equipmentData?.device_mac}
+                                            </span>&nbsp;
                                                 <FontAwesomeIcon
-                                                    icon={faArrowUpFromSquare}
-                                                    size="lg"
+                                                    icon={faArrowUpRightFromSquare}
+                                                    size="md"
                                                     style={{ color: 'black' }}
                                                 />
                                             </Button>
@@ -1009,27 +1008,8 @@ const EquipChartModal = ({
                                                 }}
                                             />
                                         </div>
-
                                         <Header type="modal" />
                                     </div>
-                                    {/* <div className="mr-3 sensor-chart-options">
-                                        <Dropdown>
-                                            <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                                                <FontAwesomeIcon icon={faEllipsisV} size="lg" />
-                                            </Dropdown.Toggle>
-
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item>
-                                                    <i className="uil uil-calendar-alt mr-2"></i>Configure Column
-                                                </Dropdown.Item>
-
-                                                <Dropdown.Item>
-                                                    <i className="uil uil-download-alt mr-2"></i>
-                                                    Download CSV
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
-                                    </div> */}
                                 </div>
 
                                 {isEquipDataFetched ? (

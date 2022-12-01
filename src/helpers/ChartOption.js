@@ -335,44 +335,6 @@ export const equipOptions = (timeZone) => {
             },
         },
     },
-    tooltip: {
-        shared: false,
-        intersect: false,
-        style: {
-            fontSize: '12px',
-            fontFamily: 'Inter, Arial, sans-serif',
-            fontWeight: 600,
-            cssClass: 'apexcharts-xaxis-label',
-        },
-        marker: {
-            show: false,
-        },
-        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-            const { colors } = w.globals;
-            const { seriesX } = w.globals;
-            const { seriesNames } = w.globals;
-            let ch = '';
-            ch =
-                ch +
-                `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc
-                    (seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-            for (let i = 0; i < series.length; i++) {
-                if (isNaN(parseInt(series[i][dataPointIndex])) === false)
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${(
-                            series[i][dataPointIndex].toFixed(2)
-                        )} kWh </td></tr>`;
-            }
-
-            return `<div class="line-chart-widget-tooltip">
-                    <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;"></h6>
-                    ${ch}
-                </table></div>`;
-        },
-    },
 })
 }
 
