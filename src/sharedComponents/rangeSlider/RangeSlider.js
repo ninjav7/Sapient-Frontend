@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { getTrackBackground, Range } from 'react-range';
 
@@ -7,11 +7,10 @@ import Brick from '../brick';
 import Input from '../form/input/Input';
 import { ButtonGroup } from '../buttonGroup';
 
-import {ReactComponent as TrendUpSVG} from '../assets/icons/arrow-trend-up.svg';
-import {ReactComponent as TrendDownSVG} from '../assets/icons/arrow-trend-down.svg';
+import { ReactComponent as TrendUpSVG } from '../assets/icons/arrow-trend-up.svg';
+import { ReactComponent as TrendDownSVG } from '../assets/icons/arrow-trend-down.svg';
 
 import './RangeSlider.scss';
-
 
 const DEFAULT_STEP = 1;
 const COLORS = ['#EAECF0', '#2955E7', '#EAECF0'];
@@ -51,10 +50,29 @@ const Track = ({ props, children, min, max, values }) => (
     </div>
 );
 
-const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGroup, withTrendsFilter, handleButtonClick, title = 'Threshold', ...props }) => {
+const RangeSlider = ({
+    min: minProp,
+    max: maxProp,
+    prefix,
+    onSelectionChange = () => {},
+    buttonGroup,
+    withTrendsFilter,
+    handleButtonClick,
+    currentButtonId,
+    title = 'Threshold',
+    ...props
+}) => {
     const [values, setValues] = useState(props.range || []);
     const [from, setFrom] = useState(values[0] || 0);
     const [to, setTo] = useState(values[1] || 0);
+    const [[min, max], setMinMax] = useState([minProp, maxProp]);
+
+    useEffect(() => {
+        setMinMax([minProp, maxProp]);
+        setValues(props.range);
+        setFrom(props.range[0]);
+        setTo(props.range[1]);
+    }, [props.range, minProp, maxProp]);
 
     const handleSelection = (values) => {
         setValues(values);
@@ -66,11 +84,11 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGro
     const handleInputChange = (event) => {
         const { name, value } = event.target;
 
-        if (value.match(/\D/) || value < min || value > max) {
+        if (value.match(/[^\-*]\D/)) {
             return;
         }
 
-        const valueParsed = Number(value);
+        const valueParsed = value;
 
         if (name === 'from') {
             if (valueParsed > values[1]) {
@@ -129,11 +147,16 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGro
             <Typography.Body size={Typography.Sizes.lg}>{title}</Typography.Body>
             <Brick />
 
-
-            {buttonGroup && withTrendsFilter && <>
-                <ButtonGroup handleButtonClick={handleButtonClick} buttons={buttonGroup}/>
-                <Brick />
-            </>}
+            {buttonGroup && withTrendsFilter && (
+                <>
+                    <ButtonGroup
+                        handleButtonClick={handleButtonClick}
+                        buttons={buttonGroup}
+                        currentButtonId={currentButtonId || buttonGroup.findIndex(({ isActive }) => isActive)}
+                    />
+                    <Brick />
+                </>
+            )}
 
             <div className="range-slider-controls">
                 <Input
@@ -173,13 +196,8 @@ const RangeSlider = ({ min, max, prefix, onSelectionChange = () => {}, buttonGro
 };
 
 RangeSlider.defaultProps = {
-    buttonGroup: [
-        {label: 'All'},
-        {icon: <TrendDownSVG />},
-        {icon: <TrendUpSVG />},
-    ]
-}
-
+    buttonGroup: [{ label: 'All' }, { icon: <TrendDownSVG /> }, { icon: <TrendUpSVG /> }],
+};
 
 RangeSlider.propTypes = {
     step: PropTypes.number,
@@ -187,14 +205,20 @@ RangeSlider.propTypes = {
     range: PropTypes.arrayOf(PropTypes.number).isRequired,
     max: PropTypes.number.isRequired,
     prefix: PropTypes.string,
-    buttonGroup: PropTypes.arrayOf(PropTypes.shape({
-        label: PropTypes.string,
-        icon: PropTypes.node,
-        disabled: PropTypes.bool,
-    })),
+    buttonGroup: PropTypes.arrayOf(
+        PropTypes.shape({
+            label: PropTypes.string,
+            icon: PropTypes.node,
+            disabled: PropTypes.bool,
+            isActive: PropTypes.bool,
+        })
+    ),
+    //The same as is Active but the most prioritized
+    currentButtonId: PropTypes.number,
     handleButtonClick: PropTypes.func,
     withTrendsFilter: PropTypes.bool,
     title: PropTypes.string,
+    isDisabledValidation: PropTypes.bool,
 };
 
 export default RangeSlider;

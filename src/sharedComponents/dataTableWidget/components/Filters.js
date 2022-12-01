@@ -38,6 +38,7 @@ const mapFilters = {
 
         return (
             <DropDownBase
+                isOpened={props.isOpened}
                 key={generateID()}
                 placement="bottom-start"
                 onClose={handleChange}
