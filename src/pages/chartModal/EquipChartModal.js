@@ -34,7 +34,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';

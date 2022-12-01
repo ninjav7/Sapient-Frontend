@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
-import { xaxisFilters } from '../../helpers/helpers';
+import { xaxisFilters } from '../../helpers/explorehelpers';
 import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
