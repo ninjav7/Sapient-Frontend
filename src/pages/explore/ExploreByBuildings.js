@@ -90,7 +90,7 @@ const ExploreByBuildings = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
 
-    const [optionsData, setOptionsData] = useState(options);
+    const [optionsData, setOptionsData] = useState(options(timeZone));
     const [seriesLineData, setSeriesLineData] = useState([]);
     const [optionsLineData, setOptionsLineData] = useState(optionsLines);
 
@@ -561,10 +561,19 @@ const ExploreByBuildings = () => {
                 arr = allBuildingList.filter(function (item) {
                     return item.building_id === buildIdNow;
                 });
+                let NulledData=[];
+                data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                })
                 const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
-                    data: formattedData,
+                    data: NulledData,
                     id: arr[0].building_id,
                 };
                 setSeriesData([...seriesData, recordToInsert]);
@@ -585,10 +594,19 @@ const ExploreByBuildings = () => {
                 arr = allBuildingList.filter(function (item) {
                     return item.building_id === id;
                 });
-                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                let NulledData=[];
+                data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([ele[0],null])
+                    }
+                    else{
+                        NulledData.push([ele[0],ele[1]])
+                    }
+                })
+                //const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                 let recordToInsert = {
                     name: arr[0].building_name,
-                    data: formattedData,
+                    data: NulledData,
                     id: arr[0].building_id,
                 };
                 dataarr.push(recordToInsert);
@@ -652,7 +670,7 @@ const ExploreByBuildings = () => {
             </Row>
 
             <Row>
-                <div className="explore-data-table-style">
+                <div className="explore-data-table-style p-2 mb-2">
                     {isExploreChartDataLoading ? (
                         <div className="loader-center-style" style={{ height: '25rem' }}>
                         </div>

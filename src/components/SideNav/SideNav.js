@@ -30,6 +30,15 @@ const SideNav = () => {
         ComponentStore.update((s) => {
             s.parent = route.parent;
         });
+
+        if (route.parent === 'buildings') {
+            let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
+            history.push({
+                pathname: `${pathName}/${bldgId}`,
+            });
+            return;
+        }
+        
         history.push({
             pathname: `${route.path}`,
         });

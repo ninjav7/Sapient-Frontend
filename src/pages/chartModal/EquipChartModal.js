@@ -134,7 +134,7 @@ const EquipChartModal = ({
         } catch (error) {}
     };
 
-    const [options, setOptions] = useState(equipOptions);
+    const [options, setOptions] = useState(equipOptions(timeZone));
 
     const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
@@ -293,10 +293,18 @@ const EquipChartModal = ({
 
                     data.forEach((record) => {});
                     let exploreData = [];
+                    let NulledData=[];
+                    data.map((ele)=>{
+                    if(ele[1]===""){
+                        NulledData.push([new Date(ele[0]),null])
+                    }
+                    else{
+                        NulledData.push([new Date(ele[0]),ele[1]])
+                    }
+                    })
                     const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
                     let recordToInsert = {
-                        data: formattedData,
-                        name: 'AHUs',
+                        data: NulledData,
                         unit: selectedUnit,
                     };
                     exploreData.push(recordToInsert);
