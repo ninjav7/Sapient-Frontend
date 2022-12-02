@@ -7,6 +7,14 @@ export const configRoutes = [
     '/settings/panels',
     '/settings/active-devices',
     '/settings/passive-devices',
+    '/settings/active-devices/provision',
+];
+
+export const configChildRoutes = [
+    '/settings/panels/edit-panel',
+    '/settings/active-devices/single/',
+    '/settings/passive-devices/single/',
+    '/settings/active-devices/provision',
 ];
 
 export const portfolioRoutes = ['/energy/portfolio/overview', '/energy/compare-buildings'];

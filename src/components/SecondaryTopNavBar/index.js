@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 
-import { accountRoutes, configRoutes, portfolioRoutes, updateBuildingStore } from './utils';
+import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes, updateBuildingStore } from './utils';
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -75,6 +75,15 @@ const SecondaryTopNavBar = () => {
             redirectToEndpoint(`/settings/account`);
             return;
         }
+
+        if (
+            path.includes(configChildRoutes[0]) ||
+            path.includes(configChildRoutes[1]) ||
+            path.includes(configChildRoutes[2])
+        ) {
+            redirectToEndpoint(`/settings/account`);
+            return;
+        }
     };
 
     const handleBuildingChange = (record, path) => {
@@ -103,6 +112,24 @@ const SecondaryTopNavBar = () => {
         if (location.pathname.includes('/energy')) {
             let pathName = path.substr(0, path.lastIndexOf('/'));
             redirectToEndpoint(`${pathName}/${record?.value}`);
+            return;
+        }
+
+        if (
+            path.includes(configChildRoutes[0]) ||
+            path.includes(configChildRoutes[1]) ||
+            path.includes(configChildRoutes[2]) ||
+            path.includes(configChildRoutes[3])
+        ) {
+            if (path.includes('edit-panel')) {
+                redirectToEndpoint(`/settings/panels`);
+            }
+            if (path.includes('active-devices')) {
+                redirectToEndpoint(`/settings/active-devices`);
+            }
+            if (path.includes('passive-devices')) {
+                redirectToEndpoint(`/settings/passive-devices`);
+            }
             return;
         }
     };
@@ -134,7 +161,7 @@ const SecondaryTopNavBar = () => {
                     label: record?.building_name,
                     value: record?.building_id,
                     timezone: record?.timezone,
-                    iconForSelected: <BuildingSVG />,
+                    iconForSelected: <BuildingSVG className="p-0 square" />,
                 };
                 bldgList[2].options.push(obj);
             });
@@ -158,7 +185,7 @@ const SecondaryTopNavBar = () => {
             value: bldgId,
             label: bldgName,
             timezone: bldgTimeZone,
-            icon: <BuildingSVG />,
+            icon: <BuildingSVG className="p-0 square" />,
         };
         setSelectedBuilding(bldgObj);
     }, [bldgId]);
