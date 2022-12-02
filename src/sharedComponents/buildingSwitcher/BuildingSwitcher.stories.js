@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import BuildingSwitcher from './BuildingSwitcher';
 import Typography from '../typography';
@@ -7,13 +7,35 @@ import { ReactComponent as BuildingSVG } from '../assets/icons/building-icon.svg
 import { ReactComponent as PortfolioSVG } from '../assets/icons/portfolio-icon.svg';
 
 import '../assets/scss/stories.scss';
+import Brick from '../brick';
 
 export default {
     title: 'Components/BuildingSwitcher',
     component: BuildingSwitcher,
 };
 
-export const Default = (props) => <BuildingSwitcher {...props} defaultMenuIsOpen />;
+export const Default = (props) => {
+    const [currentValue, setCurrentValue] = useState(props.defaultValue);
+
+    return (
+        <>
+            <h5>Select any options to demonstrate how "current value" changes dynamically</h5>
+            <select
+                onChange={(e) => {
+                    const getCurrentValue = props.options[2].options.find((d) => d.value == e.target.value);
+                    setCurrentValue(getCurrentValue);
+                }}>
+                {props.options[2].options.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                ))}
+            </select>
+
+            <Brick sizeInRem={2} />
+
+            <BuildingSwitcher {...props} currentValue={currentValue} defaultMenuIsOpen />
+        </>
+    );
+};
 
 Default.args = {
     style: {
