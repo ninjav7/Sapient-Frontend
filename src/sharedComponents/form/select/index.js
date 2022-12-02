@@ -34,7 +34,7 @@ const Select = ({
                 type={type}
                 options={options}
                 defaultValue={!_.isObject(defaultValue) ? selectedOption : defaultValue}
-                value={currentValue || defaultValue}
+                value={currentValue || selectedOption}
                 components={{
                     ...Object.assign(
                         { DropdownIndicator, Control, Option, SingleValue },
