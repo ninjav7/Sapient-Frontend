@@ -24,12 +24,7 @@ const SecondaryTopNavBar = () => {
 
     const [buildingListData] = useAtom(buildingData);
 
-    const [selectedBuilding, setSelectedBuilding] = useState({
-        value: 'portfolio',
-        label: 'Portfolio',
-        timezone: '',
-        icon: <PortfolioSVG className="p-0 square" />,
-    });
+    const [selectedBuilding, setSelectedBuilding] = useState({});
 
     const [buildingsList, setBuildingsList] = useState([
         {
@@ -152,7 +147,7 @@ const SecondaryTopNavBar = () => {
         if (bldgId === null || bldgId === 'portfolio') {
             let obj = {
                 value: 'portfolio',
-                label: 'Portfolio1',
+                label: 'Portfolio',
                 timezone: '',
                 icon: <PortfolioSVG className="p-0 square" />,
             };
