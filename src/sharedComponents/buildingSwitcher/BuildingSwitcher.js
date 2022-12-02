@@ -25,10 +25,6 @@ const createGroup = (groupName, options, setValue) => {
 };
 
 const BuildingSwitcher = (props) => {
-    useEffect(() => {
-        console.log('SSR props.defaultValue :>> ', props.defaultValue);
-    });
-
     const options = props.options.map(({ group, options }) =>
         createGroup(
             group,

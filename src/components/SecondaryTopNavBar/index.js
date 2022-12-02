@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
+
 import { accountRoutes, configRoutes, portfolioRoutes, updateBuildingStore } from './utils';
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
+
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
-import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+
 import './style.scss';
 
 const SecondaryTopNavBar = () => {
@@ -21,13 +24,6 @@ const SecondaryTopNavBar = () => {
 
     const [buildingListData] = useAtom(buildingData);
 
-    // const [selectedBuilding, setSelectedBuilding] = useState({});
-    // const [selectedBuilding, setSelectedBuilding] = useState({
-    //     label: 'Development test building',
-    //     value: '6388b4d67f5321c24c76d1e4',
-    //     timezone: 'US/Eastern',
-    //     icon: <PortfolioSVG className="p-0 square" />,
-    // });
     const [selectedBuilding, setSelectedBuilding] = useState({
         value: 'portfolio',
         label: 'Portfolio',
@@ -180,7 +176,7 @@ const SecondaryTopNavBar = () => {
                     buildings={buildingsList}
                     selectedBuilding={selectedBuilding}
                     breadCrumbsItems={breadcrumList}
-                    switchStyle={`buidling-switcher`}
+                    switchStyle={`building-switcher`}
                 />
             </div>
         </React.Fragment>
