@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import Select, { DROPDOWN_INPUT_TYPES } from '../form/select';
@@ -25,6 +25,10 @@ const createGroup = (groupName, options, setValue) => {
 };
 
 const BuildingSwitcher = (props) => {
+    useEffect(() => {
+        console.log('SSR props.defaultValue :>> ', props.defaultValue);
+    });
+
     const options = props.options.map(({ group, options }) =>
         createGroup(
             group,

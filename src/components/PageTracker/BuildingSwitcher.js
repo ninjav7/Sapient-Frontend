@@ -13,7 +13,7 @@ import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { buildingData } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { accountRoutes, configRoutes } from './utils';
+import { oldAccountRoutes, configRoutes } from './utils';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     const location = useLocation();
@@ -104,7 +104,7 @@ const BuildingSwitcher = () => {
         });
     }, [portfolioName]);
 
-    const dropDownTitle = accountRoutes.includes(location.pathname) ? 'Portfolio' : bldStoreName;
+    const dropDownTitle = oldAccountRoutes.includes(location.pathname) ? 'Portfolio' : bldStoreName;
 
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());

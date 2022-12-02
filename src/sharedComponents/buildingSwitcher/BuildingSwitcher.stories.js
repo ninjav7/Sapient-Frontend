@@ -58,7 +58,7 @@ Default.args = {
             options: [
                 {
                     label: '123 Main St. Portland, OR',
-                    value: 3,
+                    value: 1,
                     iconForSelected: <BuildingSVG />,
                 },
                 {
