@@ -22,6 +22,7 @@ const Select = ({
     options = [],
     type = DROPDOWN_INPUT_TYPES.Default,
     defaultValue,
+    currentValue,
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
@@ -33,7 +34,7 @@ const Select = ({
                 type={type}
                 options={options}
                 defaultValue={!_.isObject(defaultValue) ? selectedOption : defaultValue}
-                value={selectedOption}
+                value={currentValue || defaultValue}
                 components={{
                     ...Object.assign(
                         { DropdownIndicator, Control, Option, SingleValue },
@@ -57,6 +58,9 @@ Select.Multi = MultiSelect;
 Select.propTypes = {
     selectClassName: PropTypes.string,
     defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]).isRequired,
+
+    // The difference between default and current values, is currentValue allows to change current value dynamically
+    currentValue: PropTypes.arrayOf(PropTypes.object),
     options: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
