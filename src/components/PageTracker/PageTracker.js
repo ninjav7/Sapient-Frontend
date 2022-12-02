@@ -3,7 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import Breadcrumbs from './Breadcrumbs';
 import { BuildingSwitcher } from '../../sharedComponents/buildingSwitcher';
-import { accountRoutes, configRoutes, portfolioRoutes, updateBuildingStore } from './utils';
+import { portfolioRoutes, updateBuildingStore } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';

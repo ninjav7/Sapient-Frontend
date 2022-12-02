@@ -1,16 +1,5 @@
 import { BuildingStore } from '../../store/BuildingStore';
 
-// Plan to depricate
-export const oldAccountRoutes = [
-    '/energy/portfolio/overview',
-    '/energy/compare-buildings',
-    '/settings/account',
-    '/settings/buildings',
-    '/settings/users',
-    '/settings/roles',
-    '/settings/equipment-types',
-];
-
 export const configRoutes = [
     '/settings/general',
     '/settings/layout',
