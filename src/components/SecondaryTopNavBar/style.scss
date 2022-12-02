@@ -1,0 +1,17 @@
+@import '../../assets/scss/colors';
+
+.buidling-switcher-container {
+    border-bottom: 0.0625rem solid $primary-gray-200;
+}
+
+.buidling-switcher{
+    width: 11.75rem !important;
+}
+
+.secondary-nav-style {
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 2.8125rem;
+    height: 2.75rem;
+}

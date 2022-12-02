@@ -197,7 +197,7 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <Row className="mt-3">
+                    <Row className="mt-3 container-gap">
                         <Col lg={6}>
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
@@ -205,7 +205,7 @@ const PortfolioOverview = () => {
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
-                                className='h-100'
+                                className="h-100"
                             />
                         </Col>
                         <Col lg={6}>

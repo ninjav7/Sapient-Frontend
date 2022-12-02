@@ -43,7 +43,7 @@ const BuildingSwitcher = (props) => {
     const filteredProps = removeProps(props, 'options', 'defaultMenuIsOpen');
 
     return (
-        <div className="building-switcher-wrapper" {...filteredProps}>
+        <div className={`building-switcher-wrapper ${props.switchStyle}`} {...filteredProps}>
             <Select {...props} options={options} type={DROPDOWN_INPUT_TYPES.Icon} />
         </div>
     );
@@ -67,6 +67,7 @@ BuildingSwitcher.propTypes = {
         label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
         value: stringOrNumberPropTypes.isRequired,
     }).isRequired,
+    switchStyle: PropTypes.string,
 };
 
 export default BuildingSwitcher;

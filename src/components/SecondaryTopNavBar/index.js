@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import Breadcrumbs from './Breadcrumbs';
-import { BuildingSwitcher } from '../../sharedComponents/buildingSwitcher';
-import { portfolioRoutes, updateBuildingStore } from './utils';
+import { accountRoutes, configRoutes, portfolioRoutes, updateBuildingStore } from './utils';
+import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
-import { buildingData } from '../../store/globalState';
-import '../style.css';
-import './PageTracker.scss';
+import SecondaryNavBar from '../../sharedComponents/secondaryNavBar/SecondaryNavBar';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import './style.scss';
 
-const PageTracker = () => {
+const SecondaryTopNavBar = () => {
     const location = useLocation();
     const history = useHistory();
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const bldgTimeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+    const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
 
     const [buildingListData] = useAtom(buildingData);
 
-    const [selectedBuilding, setSelectedBuilding] = useState({});
-
+    // const [selectedBuilding, setSelectedBuilding] = useState({});
     // const [selectedBuilding, setSelectedBuilding] = useState({
-    //     value: 'portfolio',
-    //     label: 'Portfolio',
-    //     timezone: '',
+    //     label: 'Development test building',
+    //     value: '6388b4d67f5321c24c76d1e4',
+    //     timezone: 'US/Eastern',
     //     icon: <PortfolioSVG className="p-0 square" />,
     // });
+    const [selectedBuilding, setSelectedBuilding] = useState({
+        value: 'portfolio',
+        label: 'Portfolio',
+        timezone: '',
+        icon: <PortfolioSVG className="p-0 square" />,
+    });
 
     const [buildingsList, setBuildingsList] = useState([
         {
@@ -64,6 +69,21 @@ const PageTracker = () => {
             redirectToEndpoint(`/energy/portfolio/overview`);
             return;
         }
+
+        if (path.includes('/explore-page/by-equipment')) {
+            redirectToEndpoint(`/explore-page/by-buildings`);
+            return;
+        }
+
+        if (path.includes('/control/plug-rules')) {
+            redirectToEndpoint(`/energy/portfolio/overview`);
+            return;
+        }
+
+        if (accountRoutes.includes(path) || configRoutes.includes(path)) {
+            redirectToEndpoint(`/settings/account`);
+            return;
+        }
     };
 
     const handleBuildingChange = (record, path) => {
@@ -71,6 +91,21 @@ const PageTracker = () => {
 
         if (portfolioRoutes.includes(path)) {
             redirectToEndpoint(`/energy/building/overview/${record?.value}`);
+            return;
+        }
+
+        if (path === '/explore-page/by-buildings') {
+            redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
+            return;
+        }
+
+        if (path.includes('/explore-page/by-equipment')) {
+            redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
+            return;
+        }
+
+        if (accountRoutes.includes(path)) {
+            redirectToEndpoint(`/settings/general`);
             return;
         }
 
@@ -137,28 +172,19 @@ const PageTracker = () => {
         setSelectedBuilding(bldgObj);
     }, [bldgId]);
 
-    useEffect(() => {
-        console.log('SSR bldgId', bldgId);
-        console.log('SSR selectedBuilding', selectedBuilding);
-    });
-
     return (
         <React.Fragment>
-            <div className="page-tracker-container energy-second-nav-custom">
-                <div className="mt-1">
-                    <BuildingSwitcher
-                        onChange={(e) => handleBldgSwitcherChange(e.value)}
-                        options={buildingsList}
-                        defaultValue={selectedBuilding}
-                    />
-                </div>
-
-                <div className="route-tracker">
-                    <Breadcrumbs />
-                </div>
+            <div className="buidling-switcher-container w-100 secondary-nav-style">
+                <SecondaryNavBar
+                    onChangeBuilding={(e) => handleBldgSwitcherChange(e.value)}
+                    buildings={buildingsList}
+                    selectedBuilding={selectedBuilding}
+                    breadCrumbsItems={breadcrumList}
+                    switchStyle={`buidling-switcher`}
+                />
             </div>
         </React.Fragment>
     );
 };
 
-export default PageTracker;
+export default SecondaryTopNavBar;
