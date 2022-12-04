@@ -7,8 +7,6 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
-    builidingAlerts,
-    equipmentGraphData,
     updateEquipment,
     listSensor,
     equipmentDetails,
@@ -17,8 +15,8 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
-import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';import axios from 'axios';
-import BrushChart from '../charts/BrushChart';
+import { fetchExploreEquipmentChart } from '../explore/services';
+import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import moment from 'moment';
@@ -31,12 +29,13 @@ import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
-import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
 import { apiRequestBody } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import { fetchDateRange } from '../../helpers/formattedChartData';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -102,8 +101,6 @@ const EquipChartModal = ({
         });
     };
 
-    const [buildingAlert, setBuildingAlerts] = useState([]);
-
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
@@ -112,35 +109,6 @@ const EquipChartModal = ({
         let obj = metric.find((record) => record.value === value);
         setSelectedConsumptionLabel(obj.Consumption);
     };
-
-    const buildingAlertsData = async () => {
-        if (startDate === null) {
-            return;
-        }
-
-        if (endDate === null) {
-            return;
-        }
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${1}`;
-            await axios
-                .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    setBuildingAlerts(res.data);
-                });
-        } catch (error) {}
-    };
-
-    const [options, setOptions] = useState(equipOptions(timeZone));
-
-    const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
     const validateDataChange = (key, value) => {
         if (key === 'name') {
@@ -278,81 +246,70 @@ const EquipChartModal = ({
         handleChartClose();
     };
 
-    const fetchEquipmentChart = async (equipId) => {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
-                selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
-            }`;
-            await axios
-                .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    let response = res.data;
-                  
+    const fetchEquipmentChart = async (equipId, equiName) => {
+        setIsEquipDataFetched(true);
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+        await fetchExploreEquipmentChart(payload, params)
+            .then((res) => {
+                let response = res.data;
 
-                    if (selectedConsumption === 'rmsCurrentMilliAmps') {
-                        let exploreData = [];
-                        
-                        let data = response.data;
-                        for (let i = 0; i < data.length; i++) {
-                            let NulledData = [];
-                            data[i].data.map((ele) => {
-                                if (ele[1] === '') {
-                                    NulledData.push([new Date(ele[0]), null]);
-                                } else {
-                                    NulledData.push([new Date(ele[0]), ele[1]]);
-                                }
-                            });
-                            let recordToInsert = {
-                                data: NulledData,
-                                name: `Sensor ${data[i]?.sensor_name}`,
-                                unit: selectedUnit,
-                            };
-                            exploreData.push(recordToInsert);
-                        }
-                        setDeviceData(exploreData);
-                        setSeriesData(exploreData);
-                        setIsEquipDataFetched(false);
-                    } else {
-                        let data = response.data.map((_data) => {
-                            _data[1] = parseInt(_data[1]);
-                            return _data;
-                        });
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    let exploreData = [];
 
-                        let exploreData = [];
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
                         let NulledData = [];
-                        data.map((ele) => {
+                        data[i].data.map((ele) => {
                             if (ele[1] === '') {
-                                NulledData.push([new Date(ele[0]), null]);
+                                NulledData.push({ x: new Date(ele[0]), y: null });
                             } else {
-                                NulledData.push([new Date(ele[0]), ele[1]]);
+                                NulledData.push({ x: new Date(ele[0]), y: ele[1] });
                             }
                         });
                         let recordToInsert = {
+                            name: equipmentFilter?.equipment_name,
                             data: NulledData,
-                            name: localStorage.getItem('exploreEquipName'),
-                            unit: selectedUnit,
                         };
+
                         exploreData.push(recordToInsert);
-                        setDeviceData(exploreData);
-                        setSeriesData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
-                        setIsEquipDataFetched(false);
                     }
-                });
-        } catch (error) {
-            setIsEquipDataFetched(false);
-        }
+                    setDeviceData(exploreData);
+                    setSeriesData(exploreData);
+                    setIsEquipDataFetched(false);
+                } else {
+                    let data = response.data.map((_data) => {
+                        _data[1] = parseInt(_data[1]);
+                        return _data;
+                    });
+
+                    let exploreData = [];
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele[1] === '') {
+                            NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                        } else {
+                            NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: equiName,
+                        data: NulledData,
+                    };
+                    exploreData.push(recordToInsert);
+                    setDeviceData(exploreData);
+                    // setSeriesData([
+                    //     {
+                    //         data: exploreData[0].data,
+                    //     },
+                    // ]);
+                    setIsEquipDataFetched(false);
+                }
+            })
+            .catch((error) => {});
+        setIsEquipDataFetched(false);
     };
 
     const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
@@ -427,24 +384,6 @@ const EquipChartModal = ({
             } catch (error) {}
         };
 
-        const fetchBuildingAlerts = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${1}`;
-                await axios
-                    .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
-                    .then((res) => {
-                        setBuildingAlerts(res.data);
-                    });
-            } catch (error) {}
-        };
-
         const fetchEndUseData = async () => {
             try {
                 let headers = {
@@ -489,7 +428,7 @@ const EquipChartModal = ({
             } catch (error) {}
         };
 
-        fetchEquipmentChart(equipmentFilter?.equipment_id);
+        fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchEndUseData();
@@ -555,81 +494,13 @@ const EquipChartModal = ({
         if (endDate === null) {
             return;
         }
-
-        if (sensorData.length !== 0) {
-            buildingAlertsData();
-        }
-        if(closeFlag!==true){
-        fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
-        }
-        else{
+        if (closeFlag !== true) {
+            fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
+            fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        } else {
             setCloseFlag(false);
         }
     }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show: false,
-            },
-        };
-        setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [daysCount]);
-
-    useEffect(() => {
-        let toolTip = {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(
-                        seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    if (isNaN(parseInt(series[i][dataPointIndex])) === false)
-                        ch =
-                            ch +
-                            `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                                colors[i]
-                            };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                                2
-                            )}&nbsp;${selectedUnit} </td></tr>`;
-                }
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">${selectedConsumptionLabel}</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        };
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show: false,
-            },
-        };
-        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [selectedUnit]);
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -871,87 +742,6 @@ const EquipChartModal = ({
                                         )}
                                     </div>
                                 </div>
-
-                                <div className="equipment-alert-container" style={{ marginTop: '5rem' }}>
-                                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                        Equipment Alerts
-                                    </h6>
-                                    <a
-                                        rel="noopener noreferrer"
-                                        className="link-primary mr-2"
-                                        style={{
-                                            display: 'inline-block',
-                                            float: 'right',
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}></a>
-                                    <span
-                                        className="float-right mr-0 font-weight-bold"
-                                        style={{ color: 'blue' }}
-                                        onClick={() => setBuildingAlerts([])}>
-                                        Clear
-                                    </span>
-
-                                    <div className="mt-2 alert-container">
-                                        {buildingAlert.map((record) => {
-                                            return (
-                                                <>
-                                                    {record.type === 'building-add' && (
-                                                        <div className="alert-card mb-2">
-                                                            <div>
-                                                                <i className="uil uil-triangle" />
-                                                                <span className="alert-heading">
-                                                                    <b> New Peak</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    225.3 kW &nbsp; 3/3/22 @ 3:20 PM
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Today
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {record.type === 'energy-trend' && (
-                                                        <div className="alert-card mb-2">
-                                                            <div>
-                                                                <i className="uil uil-arrow-growth" />
-                                                                <span className="alert-heading">
-                                                                    <b> Energy Trend</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    18% from last year this time
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Yesterday
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {record.type === 'notification' && (
-                                                        <div className="alert-card">
-                                                            <div>
-                                                                <i className="uil uil-exclamation-triangle" />
-                                                                <span className="alert-heading">
-                                                                    <b> Service Soon</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    80 Run Hours in 45 days
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Yesterday
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
                             </Col>
 
                             <Col lg={8}>
@@ -982,9 +772,10 @@ const EquipChartModal = ({
                                                             : false
                                                         : true
                                                 }>
-                                                    <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
-                                                {equipmentData?.device_mac}
-                                            </span>&nbsp;
+                                                <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
+                                                    {equipmentData?.device_mac}
+                                                </span>
+                                                &nbsp;
                                                 <FontAwesomeIcon
                                                     icon={faArrowUpRightFromSquare}
                                                     size="md"
@@ -1018,11 +809,11 @@ const EquipChartModal = ({
                                     </div>
                                 ) : (
                                     <div>
-                                        <BrushChart
-                                            seriesData={deviceData}
-                                            optionsData={options}
-                                            seriesLineData={seriesData}
-                                            optionsLineData={optionsLine}
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            data={deviceData}
+                                            dateRange={fetchDateRange(startDate, endDate)}
                                         />
                                     </div>
                                 )}
@@ -1318,11 +1109,14 @@ const EquipChartModal = ({
                                                             </div>
                                                             <div className="equip-breaker-value float-left">
                                                                 {equipBreakerLink?.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
                                                                 {equipBreakerLink?.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
                                                                 {equipBreakerLink?.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1636,11 +1430,14 @@ const EquipChartModal = ({
                                                                 </div>
                                                                 <div className="equip-breaker-value float-left">
                                                                     {equipBreakerLink?.length === 1 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
                                                                     {equipBreakerLink?.length === 2 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
                                                                     {equipBreakerLink?.length === 3 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
                                                                 </div>
                                                             </div>
                                                         </div>

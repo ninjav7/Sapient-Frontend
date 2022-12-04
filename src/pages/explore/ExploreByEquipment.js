@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import BrushChart from '../charts/BrushChart';
-import { percentageHandler } from '../../utils/helper';
-import { xaxisFilters } from '../../helpers/explorehelpers';
-import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
 import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { ExploreFilterDataStore } from '../../store/ExploreFilterDataStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
@@ -16,10 +11,10 @@ import { useParams } from 'react-router-dom';
 import EquipChartModal from '../chartModal/EquipChartModal';
 import './style.css';
 import 'moment-timezone';
+import moment from 'moment';
 import Header from '../../components/Header';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
-import { options, optionsLines } from '../../helpers/ChartOption';
 import { apiRequestBody } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
@@ -28,7 +23,8 @@ import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
 import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
-import { Collections } from '@mui/icons-material';
+import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
+import { fetchDateRange } from '../../helpers/formattedChartData';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -66,8 +62,6 @@ const SkeletonLoading = () => (
     </SkeletonTheme>
 );
 
-
-
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
 
@@ -97,23 +91,17 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
-
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
 
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const [optionsData, setOptionsData] = useState(options(timeZone));
-
     const [seriesLineData, setSeriesLineData] = useState([]);
-    const [optionsLineData, setOptionsLineData] = useState(optionsLines);
-
     const [filterData, setFilterData] = useState({});
     const [topConsumption, setTopConsumption] = useState(0);
     const [bottomConsumption, setBottomConsumption] = useState(0);
@@ -145,33 +133,21 @@ const ExploreByEquipment = () => {
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
 
-    useEffect(()=>{
-        entryPoint = 'entered';
-    },[])
     useEffect(() => {
-        if(entryPoint!=="entered"){
-        setConAPIFlag('');
-        setPerAPIFlag('');
-        setSelectedIds([]);
-        setSelectedEndUse([]);
-        setSelectedEquipType([]);
-        setSelectedSpaceType([]);
-        setConAPIFlag('');
-        setPerAPIFlag('');
+        entryPoint = 'entered';
+    }, []);
+    useEffect(() => {
+        if (entryPoint !== 'entered') {
+            setConAPIFlag('');
+            setPerAPIFlag('');
+            setSelectedIds([]);
+            setSelectedEndUse([]);
+            setSelectedEquipType([]);
+            setSelectedSpaceType([]);
+            setConAPIFlag('');
+            setPerAPIFlag('');
         }
     }, [bldgId]);
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show:false,
-            },
-        }
-        setOptionsData({ ...optionsData, xaxis: xaxisObj });
-        setOptionsLineData({ ...optionsLineData, xaxis: xaxisLineObj });
-    }, [daysCount]);
 
     useEffect(() => {
         if (selectedIds?.length >= 1) {
@@ -185,20 +161,39 @@ const ExploreByEquipment = () => {
         }
     }, [startDate, endDate]);
 
-
     useEffect(() => {
         setAllSearchData([]);
         if (equipIdNow) {
-        fetchExploreChartData(equipIdNow)
+            fetchExploreChartData(equipIdNow);
         }
     }, [equipIdNow]);
 
     const exploreDataFetch = async (bodyVal) => {
-        const ordered_by = sortBy.name === undefined ? "consumption" : sortBy.name;
-        const sort_by = sortBy.method === undefined ? "dce" : sortBy.method;
+        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
         setIsExploreDataLoading(true);
 
-        await fetchExploreEquipmentList(startDate,endDate, timeZone, bldgId, search, ordered_by, sort_by, pageSize, pageNo, minConValue,maxConValue, minPerValue, maxPerValue, selectedLocation, selectedEndUse, selectedEquipType, selectedSpaceType, conAPIFlag, perAPIFlag)
+        await fetchExploreEquipmentList(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            search,
+            ordered_by,
+            sort_by,
+            pageSize,
+            pageNo,
+            minConValue,
+            maxConValue,
+            minPerValue,
+            maxPerValue,
+            selectedLocation,
+            selectedEndUse,
+            selectedEquipType,
+            selectedSpaceType,
+            conAPIFlag,
+            perAPIFlag
+        )
             .then((res) => {
                 let responseData = res.data;
                 if (responseData.data.length !== 0) {
@@ -236,8 +231,7 @@ const ExploreByEquipment = () => {
                 return acc;
             }, []);
         }
-        return allEquipmentList.filter(({ equipment_id }) => !selectedIds.find((eqID) => eqID === equipment_id
-        ));
+        return allEquipmentList.filter(({ equipment_id }) => !selectedIds.find((eqID) => eqID === equipment_id));
     };
 
     const currentRowSearched = () => {
@@ -259,36 +253,49 @@ const ExploreByEquipment = () => {
     const renderConsumption = (row) => {
         return (
             <>
-                <Typography.Body size={Typography.Sizes.sm}>{Math.round(row.consumption.now / 1000)} kWh</Typography.Body>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {Math.round(row.consumption.now / 1000)} kWh
+                </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={Math.round((row.consumption.now / topEnergyConsumption) * 100)} />
-            </>);
+            </>
+        );
     };
 
     const renderPerChange = (row) => {
-        return <TrendsBadge value={Math.abs(Math.round(row.consumption.change))} type={row.consumption.change===0? TrendsBadge.Type.NEUTRAL_TREND:row.consumption.now < row.consumption.old ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND} />;
+        return (
+            <TrendsBadge
+                value={Math.abs(Math.round(row.consumption.change))}
+                type={
+                    row.consumption.change === 0
+                        ? TrendsBadge.Type.NEUTRAL_TREND
+                        : row.consumption.now < row.consumption.old
+                        ? TrendsBadge.Type.DOWNWARD_TREND
+                        : TrendsBadge.Type.UPWARD_TREND
+                }
+            />
+        );
     };
 
     const renderEquipmentName = (row) => {
         return (
             <div style={{ fontSize: 0 }}>
-                <a className="typography-wrapper link" onClick={() => {
-                    setEquipmentFilter({
-                        equipment_id: row?.equipment_id,
-                        equipment_name: row?.equipment_name,
-                    });
-                    localStorage.setItem(
-                        'exploreEquipName',
-                        row?.equipment_name
-                    );
-                    handleChartOpen();
-                }}>
+                <a
+                    className="typography-wrapper link"
+                    onClick={() => {
+                        setEquipmentFilter({
+                            equipment_id: row?.equipment_id,
+                            equipment_name: row?.equipment_name,
+                        });
+                        localStorage.setItem('exploreEquipName', row?.equipment_name);
+                        handleChartOpen();
+                    }}>
                     {row.equipment_name}
                 </a>
                 <Brick sizeInPixels={3} />
             </div>
-        )
-    }
+        );
+    };
     const handleEquipStateChange = (value, equip) => {
         if (value === 'true') {
             let arr1 = seriesData.filter(function (item) {
@@ -299,19 +306,33 @@ const ExploreByEquipment = () => {
         }
 
         if (value === 'false') {
-
             setEquipIdNow(equip?.equipment_id);
         }
 
         const isAdding = value === 'false';
 
         setSelectedIds((prevState) => {
-            return isAdding ? [...prevState, equip.equipment_id] : prevState.filter((equipId) => equipId !== equip.equipment_id);
+            return isAdding
+                ? [...prevState, equip.equipment_id]
+                : prevState.filter((equipId) => equipId !== equip.equipment_id);
         });
     };
     const fetchAPI = useCallback(() => {
         exploreDataFetch();
-    },[startDate,endDate, bldgId,search,sortBy, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
+    }, [
+        startDate,
+        endDate,
+        bldgId,
+        search,
+        sortBy,
+        pageSize,
+        pageNo,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        conAPIFlag,
+        perAPIFlag,
+    ]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -320,116 +341,137 @@ const ExploreByEquipment = () => {
         if (endDate === null) {
             return;
         }
-        
-             fetchAPI();
-    }, [startDate,endDate, bldgId,search,sortBy, pageSize, pageNo, selectedEquipType, selectedEndUse, selectedSpaceType, conAPIFlag, perAPIFlag]);
 
-    useEffect(()=>{
-    },[selectedEquipType, selectedEndUse, selectedSpaceType,])
+        fetchAPI();
+    }, [
+        startDate,
+        endDate,
+        bldgId,
+        search,
+        sortBy,
+        pageSize,
+        pageNo,
+        selectedEquipType,
+        selectedEndUse,
+        selectedSpaceType,
+        conAPIFlag,
+        perAPIFlag,
+    ]);
+
+    useEffect(() => {}, [selectedEquipType, selectedEndUse, selectedSpaceType]);
     useEffect(() => {
-        
         (async () => {
             setIsExploreDataLoading(true);
-            const filters = await fetchExploreFilter(
-                bldgId,
-                startDate,
-                endDate,
-                timeZone,
-                [],
-                [],[],[], 0, 0, '');
-
+            const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
+            if (filters?.data?.data !== null) {
                 setFilterData(filters.data.data);
 
-                setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption/1000)));
-                setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption/1000)));
-                setTopPerChange(Math.round(filters.data.data.max_change===filters.data.data.min_change?filters.data.data.max_change+1:filters.data.data.max_change))
+                setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption / 1000)));
+                setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption / 1000)));
+                setTopPerChange(
+                    Math.round(
+                        filters.data.data.max_change === filters.data.data.min_change
+                            ? filters.data.data.max_change + 1
+                            : filters.data.data.max_change
+                    )
+                );
                 setNeutralPerChange(Math.round(filters.data.data.neutral_change));
-                setBottomPerChange(Math.round(filters.data.data.min_change))
-                set_minConValue(Math.abs(Math.round(filters.data.data.min_consumption/1000)));
-                set_maxConValue(Math.abs(Math.round(filters.data.data.max_consumption/1000)));
+                setBottomPerChange(Math.round(filters.data.data.min_change));
+                set_minConValue(Math.abs(Math.round(filters.data.data.min_consumption / 1000)));
+                set_maxConValue(Math.abs(Math.round(filters.data.data.max_consumption / 1000)));
                 set_minPerValue(Math.round(filters.data.data.min_change));
-                set_maxPerValue(Math.round(filters.data.data.max_change===filters.data.data.min_change?filters.data.data.max_change+1:filters.data.data.max_change))
-               
-                   
+                set_maxPerValue(
+                    Math.round(
+                        filters.data.data.max_change === filters.data.data.min_change
+                            ? filters.data.data.max_change + 1
+                            : filters.data.data.max_change
+                    )
+                );
+            }
 
             setIsExploreDataLoading(false);
         })();
-    }, [startDate,endDate, bldgId]);
+    }, [startDate, endDate, bldgId]);
 
-    useEffect(()=>{
-        if(conAPIFlag!=='' || selectedEndUse.length!==0){
-        (async () => {
-            const filters = await fetchExploreFilter(
-                bldgId,
-                startDate,
-                endDate,
-                timeZone,
-                selectedLocation,
-                selectedEquipType,
-                selectedEndUse,
-                selectedSpaceType, minConValue, maxConValue, conAPIFlag);
+    useEffect(() => {
+        if (conAPIFlag !== '' || selectedEndUse.length !== 0) {
+            (async () => {
+                const filters = await fetchExploreFilter(
+                    bldgId,
+                    startDate,
+                    endDate,
+                    timeZone,
+                    selectedLocation,
+                    selectedEquipType,
+                    selectedEndUse,
+                    selectedSpaceType,
+                    minConValue,
+                    maxConValue,
+                    conAPIFlag
+                );
 
                 const filterOptionsFetched = [
                     {
-                        label:'Energy Consumption',
-                        value:'consumption',
+                        label: 'Energy Consumption',
+                        value: 'consumption',
                         placeholder: 'All Consumptions',
                         filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions:[minConValue, maxConValue],
-                        componentProps:{
-                            prefix:' kWh',
-                            title:'Consumption',
-                            min:bottomConsumption,
-                            max:topConsumption+1,
-                            range:[minConValue, maxConValue],
-                            withTrendsFilter:false,
-    
+                        filterOptions: [minConValue, maxConValue],
+                        componentProps: {
+                            prefix: ' kWh',
+                            title: 'Consumption',
+                            min: bottomConsumption,
+                            max: topConsumption + 1,
+                            range: [minConValue, maxConValue],
+                            withTrendsFilter: false,
                         },
-                        onClose:async function onClose(options){
+                        onClose: async function onClose(options) {
                             set_minConValue(options[0]);
                             set_maxConValue(options[1]);
                             setPageNo(1);
-                            setConAPIFlag(options[0]+options[1])
+                            setConAPIFlag(options[0] + options[1]);
                         },
-                        onDelete:()=>{
+                        onDelete: () => {
                             set_minConValue(bottomConsumption);
                             set_maxConValue(topConsumption);
                             setConAPIFlag('');
-                        }
+                        },
                     },
                     {
-                        label:'% Change',
-                        value:'change',
+                        label: '% Change',
+                        value: 'change',
                         placeholder: 'All % Change',
                         filterType: FILTER_TYPES.RANGE_SELECTOR,
-                        filterOptions:[minPerValue, maxPerValue],
-                        componentProps:{
-                            prefix:' %',
-                            title:'% Change',
-                            min:bottomPerChange,
-                            max:topPerChange+1,
-                            range:[minPerValue, maxPerValue],
-                            withTrendsFilter:true,
-                            currentButtonId:currentButtonId,
-                            handleButtonClick:function handleButtonClick() {
-                                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                                {
+                        filterOptions: [minPerValue, maxPerValue],
+                        componentProps: {
+                            prefix: ' %',
+                            title: '% Change',
+                            min: bottomPerChange,
+                            max: topPerChange + 1,
+                            range: [minPerValue, maxPerValue],
+                            withTrendsFilter: true,
+                            currentButtonId: currentButtonId,
+                            handleButtonClick: function handleButtonClick() {
+                                for (
+                                    var _len = arguments.length, args = new Array(_len), _key = 0;
+                                    _key < _len;
+                                    _key++
+                                ) {
                                     args[_key] = arguments[_key];
-                                    if(args[0]===0){
-                                        setIsOpened(true)
+                                    if (args[0] === 0) {
+                                        setIsOpened(true);
                                         setCurrentButtonId(0);
                                         set_minPerValue(bottomPerChange);
                                         set_maxPerValue(topPerChange);
-                                        
                                     }
-                                    if(args[0]===1){
-                                        setIsOpened(true)
+                                    if (args[0] === 1) {
+                                        setIsOpened(true);
                                         setCurrentButtonId(1);
                                         set_minPerValue(bottomPerChange);
                                         set_maxPerValue(neutralPerChange);
                                     }
-                                    if(args[0]===2){
-                                        setIsOpened(true)
+                                    if (args[0] === 2) {
+                                        setIsOpened(true);
                                         setCurrentButtonId(2);
                                         set_minPerValue(neutralPerChange);
                                         set_maxPerValue(topPerChange);
@@ -437,26 +479,201 @@ const ExploreByEquipment = () => {
                                 }
                             },
                         },
-                        isOpened:isopened,
-                        onClose:function onClose(options){
+                        isOpened: isopened,
+                        onClose: function onClose(options) {
                             setIsOpened(false);
                             set_minPerValue(options[0]);
                             set_maxPerValue(options[1]);
                             setPageNo(1);
-                            setPerAPIFlag(options[0]+options[1])
+                            setPerAPIFlag(options[0] + options[1]);
                         },
-                        onDelete:()=>{
+                        onDelete: () => {
                             set_minPerValue(bottomPerChange);
                             set_maxPerValue(topPerChange);
                             setPerAPIFlag('');
-                        }
+                        },
                     },
+                    {
+                        label: 'Location',
+                        value: 'spaces',
+                        placeholder: 'All Locations',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filters.data.data.spaces.map((filterItem) => ({
+                            value: filterItem.space_id,
+                            label: filterItem.space_name,
+                        })),
+                        onClose: (options) => {},
+                        onDelete: () => {
+                            setSelectedLocation([]);
+                            //setMacTypeFilterString('');
+                        },
+                    },
+                    {
+                        label: 'Equipment Type',
+                        value: 'equipments_type',
+                        placeholder: 'All Equipment Types',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
+                            value: filterItem.equipment_type_id,
+                            label: filterItem.equipment_type_name,
+                        })),
+                        onChange: function onChange(options) {},
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let equipIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    equipIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedEquipType(equipIds);
+                            }
+                        },
+                        onDelete: (options) => {
+                            setSelectedEquipType([]);
+                        },
+                    },
+                    {
+                        label: 'End Uses',
+                        value: 'end_users',
+                        placeholder: 'All End Uses',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filterData.end_users.map((filterItem) => ({
+                            value: filterItem.end_use_id,
+                            label: filterItem.end_use_name,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let endUseIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    endUseIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedEndUse(endUseIds);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedEndUse([]);
+                        },
+                    },
+                    {
+                        label: 'Space Type',
+                        value: 'location_types',
+                        placeholder: 'All Space Types',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filters.data.data.location_types.map((filterItem) => ({
+                            value: filterItem.location_type_id,
+                            label: filterItem.location_types_name,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let spaceIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    spaceIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedSpaceType(spaceIds);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedSpaceType([]);
+                        },
+                    },
+                ];
+                setFilterOptions(filterOptionsFetched);
+            })();
+        }
+    }, [conAPIFlag, selectedEndUse]);
+
+    useEffect(() => {
+        if (perAPIFlag !== '') {
+            const filterOptionsFetched = [
+                {
+                    label: 'Energy Consumption',
+                    value: 'consumption',
+                    placeholder: 'All Consumptions',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minConValue, maxConValue],
+                    componentProps: {
+                        prefix: ' kWh',
+                        title: 'Consumption',
+                        min: bottomConsumption,
+                        max: topConsumption + 1,
+                        range: [minConValue, maxConValue],
+                        withTrendsFilter: false,
+                    },
+                    onClose: async function onClose(options) {
+                        set_minConValue(options[0]);
+                        set_maxConValue(options[1]);
+                        setPageNo(1);
+                        setConAPIFlag(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        set_minConValue(bottomConsumption);
+                        set_maxConValue(topConsumption);
+                        setConAPIFlag('');
+                    },
+                },
+                {
+                    label: '% Change',
+                    value: 'change',
+                    placeholder: 'All % Change',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minPerValue, maxPerValue],
+                    componentProps: {
+                        prefix: ' %',
+                        title: '% Change',
+                        min: bottomPerChange,
+                        max: topPerChange + 1,
+                        range: [minPerValue, maxPerValue],
+                        withTrendsFilter: true,
+                        currentButtonId: currentButtonId,
+                        handleButtonClick: function handleButtonClick() {
+                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                                args[_key] = arguments[_key];
+                                if (args[0] === 0) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(0);
+                                    set_minPerValue(bottomPerChange);
+                                    set_maxPerValue(topPerChange);
+                                }
+                                if (args[0] === 1) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(1);
+                                    set_minPerValue(bottomPerChange);
+                                    set_maxPerValue(neutralPerChange);
+                                }
+                                if (args[0] === 2) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(2);
+                                    set_minPerValue(neutralPerChange);
+                                    set_maxPerValue(topPerChange);
+                                }
+                            }
+                        },
+                    },
+                    isOpened: isopened,
+                    onClose: function onClose(options) {
+                        setIsOpened(false);
+                        set_minPerValue(options[0]);
+                        set_maxPerValue(options[1]);
+                        setPageNo(1);
+                        setPerAPIFlag(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        set_minPerValue(bottomPerChange);
+                        set_maxPerValue(topPerChange);
+                        setPerAPIFlag('');
+                    },
+                },
                 {
                     label: 'Location',
                     value: 'spaces',
                     placeholder: 'All Locations',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filters.data.data.spaces.map((filterItem) => ({
+                    filterOptions: filterData.spaces.map((filterItem) => ({
                         value: filterItem.space_id,
                         label: filterItem.space_name,
                     })),
@@ -471,20 +688,20 @@ const ExploreByEquipment = () => {
                     value: 'equipments_type',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filters.data.data.equipments_type.map((filterItem) => ({
+                    filterOptions: filterData.equipments_type.map((filterItem) => ({
                         value: filterItem.equipment_type_id,
                         label: filterItem.equipment_type_name,
                     })),
-                    onChange : function onChange(options) {},
+                    onChange: function onChange(options) {},
                     onClose: (options) => {
-                        let opt=options;
-                        if(opt.length!==0){
-                        let equipIds=[];
-                        for(let i=0;i<opt.length;i++){
-                            equipIds.push(opt[i].value)
-                        }
-                        setPageNo(1);
-                        setSelectedEquipType(equipIds);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let equipIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                equipIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedEquipType(equipIds);
                         }
                     },
                     onDelete: (options) => {
@@ -501,17 +718,17 @@ const ExploreByEquipment = () => {
                         label: filterItem.end_use_name,
                     })),
                     onClose: (options) => {
-                        let opt=options;
-                        if(opt.length!==0){
-                        let endUseIds=[];
-                        for(let i=0;i<opt.length;i++){
-                            endUseIds.push(opt[i].value)
-                        }
-                        setPageNo(1);
-                        setSelectedEndUse(endUseIds);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let endUseIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                endUseIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedEndUse(endUseIds);
                         }
                     },
-                    onDelete:  () => {
+                    onDelete: () => {
                         setSelectedEndUse([]);
                     },
                 },
@@ -520,272 +737,89 @@ const ExploreByEquipment = () => {
                     value: 'location_types',
                     placeholder: 'All Space Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filters.data.data.location_types.map((filterItem) => ({
+                    filterOptions: filterData.location_types.map((filterItem) => ({
                         value: filterItem.location_type_id,
                         label: filterItem.location_types_name,
                     })),
                     onClose: (options) => {
-                        let opt=options;
-                        if(opt.length!==0){
-                        let spaceIds=[];
-                        for(let i=0;i<opt.length;i++){
-                            spaceIds.push(opt[i].value)
-                        }
-                        setPageNo(1);
-                        setSelectedSpaceType(spaceIds);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let spaceIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                spaceIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedSpaceType(spaceIds);
                         }
                     },
                     onDelete: () => {
                         setSelectedSpaceType([]);
                     },
-                }
+                },
             ];
             setFilterOptions(filterOptionsFetched);
-                
-                   
-
-        })();
-    }
-    },[conAPIFlag, selectedEndUse])
-
-    useEffect(()=>{
-        if(perAPIFlag!==""){
-        const filterOptionsFetched = [
-            {
-                label:'Energy Consumption',
-                value:'consumption',
-                placeholder: 'All Consumptions',
-                filterType: FILTER_TYPES.RANGE_SELECTOR,
-                filterOptions:[minConValue, maxConValue],
-                componentProps:{
-                    prefix:' kWh',
-                    title:'Consumption',
-                    min:bottomConsumption,
-                    max:topConsumption+1,
-                    range:[minConValue, maxConValue],
-                    withTrendsFilter:false,
-
-                },
-                onClose:async function onClose(options){
-                    set_minConValue(options[0]);
-                    set_maxConValue(options[1]);
-                    setPageNo(1);
-                    setConAPIFlag(options[0]+options[1])
-                },
-                onDelete:()=>{
-                    set_minConValue(bottomConsumption);
-                    set_maxConValue(topConsumption);
-                    setConAPIFlag('');
-                }
-            },
-            {
-                label:'% Change',
-                value:'change',
-                placeholder: 'All % Change',
-                filterType: FILTER_TYPES.RANGE_SELECTOR,
-                filterOptions:[minPerValue, maxPerValue],
-                componentProps:{
-                    prefix:' %',
-                    title:'% Change',
-                    min:bottomPerChange,
-                    max:topPerChange+1,
-                    range:[minPerValue, maxPerValue],
-                    withTrendsFilter:true,
-                    currentButtonId:currentButtonId,
-                    handleButtonClick:function handleButtonClick() {
-                        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                        {
-                            args[_key] = arguments[_key];
-                            if(args[0]===0){
-                                setIsOpened(true)
-                                setCurrentButtonId(0);
-                                set_minPerValue(bottomPerChange);
-                                set_maxPerValue(topPerChange);
-                                
-                            }
-                            if(args[0]===1){
-                                setIsOpened(true)
-                                setCurrentButtonId(1);
-                                set_minPerValue(bottomPerChange);
-                                set_maxPerValue(neutralPerChange);
-                            }
-                            if(args[0]===2){
-                                setIsOpened(true)
-                                setCurrentButtonId(2);
-                                set_minPerValue(neutralPerChange);
-                                set_maxPerValue(topPerChange);
-                            }
-                        }
-                    },
-                },
-                isOpened:isopened,
-                onClose:function onClose(options){
-                    setIsOpened(false);
-                    set_minPerValue(options[0]);
-                    set_maxPerValue(options[1]);
-                    setPageNo(1);
-                    setPerAPIFlag(options[0]+options[1])
-                },
-                onDelete:()=>{
-                    set_minPerValue(bottomPerChange);
-                    set_maxPerValue(topPerChange);
-                    setPerAPIFlag('');
-                }
-            },
-        {
-            label: 'Location',
-            value: 'spaces',
-            placeholder: 'All Locations',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: filterData.spaces.map((filterItem) => ({
-                value: filterItem.space_id,
-                label: filterItem.space_name,
-            })),
-            onClose: (options) => {},
-            onDelete: () => {
-                setSelectedLocation([]);
-                //setMacTypeFilterString('');
-            },
-        },
-        {
-            label: 'Equipment Type',
-            value: 'equipments_type',
-            placeholder: 'All Equipment Types',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: filterData.equipments_type.map((filterItem) => ({
-                value: filterItem.equipment_type_id,
-                label: filterItem.equipment_type_name,
-            })),
-            onChange : function onChange(options) {},
-            onClose: (options) => {
-                let opt=options;
-                if(opt.length!==0){
-                let equipIds=[];
-                for(let i=0;i<opt.length;i++){
-                    equipIds.push(opt[i].value)
-                }
-                setPageNo(1);
-                setSelectedEquipType(equipIds);
-                }
-            },
-            onDelete: (options) => {
-                setSelectedEquipType([]);
-            },
-        },
-        {
-            label: 'End Uses',
-            value: 'end_users',
-            placeholder: 'All End Uses',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: filterData.end_users.map((filterItem) => ({
-                value: filterItem.end_use_id,
-                label: filterItem.end_use_name,
-            })),
-            onClose: (options) => {
-                let opt=options;
-                if(opt.length!==0){
-                let endUseIds=[];
-                for(let i=0;i<opt.length;i++){
-                    endUseIds.push(opt[i].value)
-                }
-                setPageNo(1);
-                setSelectedEndUse(endUseIds);
-                }
-            },
-            onDelete:  () => {
-                setSelectedEndUse([]);
-            },
-        },
-        {
-            label: 'Space Type',
-            value: 'location_types',
-            placeholder: 'All Space Types',
-            filterType: FILTER_TYPES.MULTISELECT,
-            filterOptions: filterData.location_types.map((filterItem) => ({
-                value: filterItem.location_type_id,
-                label: filterItem.location_types_name,
-            })),
-            onClose: (options) => {
-                let opt=options;
-                if(opt.length!==0){
-                let spaceIds=[];
-                for(let i=0;i<opt.length;i++){
-                    spaceIds.push(opt[i].value)
-                }
-                setPageNo(1);
-                setSelectedSpaceType(spaceIds);
-                }
-            },
-            onDelete: () => {
-                setSelectedSpaceType([]);
-            },
         }
-    ];
-    setFilterOptions(filterOptionsFetched);
-    }
-    },[perAPIFlag])
-    useEffect(()=>{
-        if((minConValue!==maxConValue && maxConValue!==0) || (minPerValue!==maxPerValue && maxPerValue!==0)){
+    }, [perAPIFlag]);
+    useEffect(() => {
+        if ((minConValue !== maxConValue && maxConValue !== 0) || (minPerValue !== maxPerValue && maxPerValue !== 0)) {
             const filterOptionsFetched = [
                 {
-                    label:'Energy Consumption',
-                    value:'consumption',
+                    label: 'Energy Consumption',
+                    value: 'consumption',
                     placeholder: 'All Consumptions',
                     filterType: FILTER_TYPES.RANGE_SELECTOR,
-                    filterOptions:[minConValue, maxConValue],
-                    componentProps:{
-                        prefix:' kWh',
-                        title:'Consumption',
-                        min:bottomConsumption,
-                        max:topConsumption+1,
-                        range:[minConValue, maxConValue],
-                        withTrendsFilter:false,
-
+                    filterOptions: [minConValue, maxConValue],
+                    componentProps: {
+                        prefix: ' kWh',
+                        title: 'Consumption',
+                        min: bottomConsumption,
+                        max: topConsumption + 1,
+                        range: [minConValue, maxConValue],
+                        withTrendsFilter: false,
                     },
-                    onClose:function onClose(options){
+                    onClose: function onClose(options) {
                         set_minConValue(options[0]);
                         set_maxConValue(options[1]);
                         setPageNo(1);
-                        setConAPIFlag(options[0]+options[1])
+                        setConAPIFlag(options[0] + options[1]);
                     },
-                    onDelete:()=>{
+                    onDelete: () => {
                         set_minConValue(bottomConsumption);
                         set_maxConValue(topConsumption);
                         setConAPIFlag('');
-                    }
+                    },
                 },
                 {
-                    label:'% Change',
-                    value:'change',
+                    label: '% Change',
+                    value: 'change',
                     placeholder: 'All % Change',
                     filterType: FILTER_TYPES.RANGE_SELECTOR,
-                    filterOptions:[minPerValue, maxPerValue],
-                    componentProps:{
-                        prefix:' %',
-                        title:'% Change',
-                        min:bottomPerChange,
-                        max:topPerChange+1,
-                        range:[minPerValue, maxPerValue],
-                        withTrendsFilter:true,
-                        currentButtonId:currentButtonId,
-                        handleButtonClick:function handleButtonClick() {
-                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) 
-                            {
+                    filterOptions: [minPerValue, maxPerValue],
+                    componentProps: {
+                        prefix: ' %',
+                        title: '% Change',
+                        min: bottomPerChange,
+                        max: topPerChange + 1,
+                        range: [minPerValue, maxPerValue],
+                        withTrendsFilter: true,
+                        currentButtonId: currentButtonId,
+                        handleButtonClick: function handleButtonClick() {
+                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
                                 args[_key] = arguments[_key];
-                                if(args[0]===0){
-                                    setIsOpened(true)
+                                if (args[0] === 0) {
+                                    setIsOpened(true);
                                     setCurrentButtonId(0);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
                                 }
-                                if(args[0]===1){
-                                    setIsOpened(true)
+                                if (args[0] === 1) {
+                                    setIsOpened(true);
                                     setCurrentButtonId(1);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(neutralPerChange);
                                 }
-                                if(args[0]===2){
-                                    setIsOpened(true)
+                                if (args[0] === 2) {
+                                    setIsOpened(true);
                                     setCurrentButtonId(2);
                                     set_minPerValue(neutralPerChange);
                                     set_maxPerValue(topPerChange);
@@ -793,113 +827,112 @@ const ExploreByEquipment = () => {
                             }
                         },
                     },
-                    isOpened:isopened,
-                    onClose:function onClose(options){
+                    isOpened: isopened,
+                    onClose: function onClose(options) {
                         set_minPerValue(options[0]);
                         set_maxPerValue(options[1]);
                         setPageNo(1);
                         setIsOpened(false);
-                        setPerAPIFlag(options[0]+options[1])
+                        setPerAPIFlag(options[0] + options[1]);
                     },
-                    onDelete:()=>{
+                    onDelete: () => {
                         set_minPerValue(bottomPerChange);
                         set_maxPerValue(topPerChange);
                         setPerAPIFlag('');
-                    }
+                    },
                 },
-            {
-                label: 'Location',
-                value: 'spaces',
-                placeholder: 'All Locations',
-                filterType: FILTER_TYPES.MULTISELECT,
-                filterOptions: filterData.spaces.map((filterItem) => ({
-                    value: filterItem.space_id,
-                    label: filterItem.space_name,
-                })),
-                onClose: (options) => {},
-                onDelete: () => {
-                    setSelectedLocation([]);
-                    //setMacTypeFilterString('');
+                {
+                    label: 'Location',
+                    value: 'spaces',
+                    placeholder: 'All Locations',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData.spaces.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => {},
+                    onDelete: () => {
+                        setSelectedLocation([]);
+                        //setMacTypeFilterString('');
+                    },
                 },
-            },
-            {
-                label: 'Equipment Type',
-                value: 'equipments_type',
-                placeholder: 'All Equipment Types',
-                filterType: FILTER_TYPES.MULTISELECT,
-                filterOptions: filterData.equipments_type.map((filterItem) => ({
-                    value: filterItem.equipment_type_id,
-                    label: filterItem.equipment_type_name,
-                })),
-                onChange : function onChange(options) {},
-                onClose: (options) => {
-                    let opt=options;
-                    if(opt.length!==0){
-                    let equipIds=[];
-                    for(let i=0;i<opt.length;i++){
-                        equipIds.push(opt[i].value)
-                    }
-                    setPageNo(1);
-                    setSelectedEquipType(equipIds);
-                    }
+                {
+                    label: 'Equipment Type',
+                    value: 'equipments_type',
+                    placeholder: 'All Equipment Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData.equipments_type.map((filterItem) => ({
+                        value: filterItem.equipment_type_id,
+                        label: filterItem.equipment_type_name,
+                    })),
+                    onChange: function onChange(options) {},
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let equipIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                equipIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedEquipType(equipIds);
+                        }
+                    },
+                    onDelete: (options) => {
+                        setSelectedEquipType([]);
+                    },
                 },
-                onDelete: (options) => {
-                    setSelectedEquipType([]);
+                {
+                    label: 'End Uses',
+                    value: 'end_users',
+                    placeholder: 'All End Uses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData.end_users.map((filterItem) => ({
+                        value: filterItem.end_use_id,
+                        label: filterItem.end_use_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let endUseIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                endUseIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedEndUse(endUseIds);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedEndUse([]);
+                    },
                 },
-            },
-            {
-                label: 'End Uses',
-                value: 'end_users',
-                placeholder: 'All End Uses',
-                filterType: FILTER_TYPES.MULTISELECT,
-                filterOptions: filterData.end_users.map((filterItem) => ({
-                    value: filterItem.end_use_id,
-                    label: filterItem.end_use_name,
-                })),
-                onClose: (options) => {
-                    let opt=options;
-                    if(opt.length!==0){
-                    let endUseIds=[];
-                    for(let i=0;i<opt.length;i++){
-                        endUseIds.push(opt[i].value)
-                    }
-                    setPageNo(1);
-                    setSelectedEndUse(endUseIds);
-                    }
+                {
+                    label: 'Space Type',
+                    value: 'location_types',
+                    placeholder: 'All Space Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterData.location_types.map((filterItem) => ({
+                        value: filterItem.location_type_id,
+                        label: filterItem.location_types_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let spaceIds = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                spaceIds.push(opt[i].value);
+                            }
+                            setPageNo(1);
+                            setSelectedSpaceType(spaceIds);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedSpaceType([]);
+                    },
                 },
-                onDelete:  () => {
-                    setSelectedEndUse([]);
-                },
-            },
-            {
-                label: 'Space Type',
-                value: 'location_types',
-                placeholder: 'All Space Types',
-                filterType: FILTER_TYPES.MULTISELECT,
-                filterOptions: filterData.location_types.map((filterItem) => ({
-                    value: filterItem.location_type_id,
-                    label: filterItem.location_types_name,
-                })),
-                onClose: (options) => {
-                    let opt=options;
-                    if(opt.length!==0){
-                    let spaceIds=[];
-                    for(let i=0;i<opt.length;i++){
-                        spaceIds.push(opt[i].value)
-                    }
-                    setPageNo(1);
-                    setSelectedSpaceType(spaceIds);
-                    }
-                },
-                onDelete: () => {
-                    setSelectedSpaceType([]);
-                },
-            }
-        ];
-        setFilterOptions(filterOptionsFetched);
+            ];
+            setFilterOptions(filterOptionsFetched);
         }
-       
-    },[minConValue, maxConValue, minPerValue, maxPerValue])
+    }, [minConValue, maxConValue, minPerValue, maxPerValue]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -942,28 +975,23 @@ const ExploreByEquipment = () => {
                 } else {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
-                let NulledData=[];
-                data.map((ele)=>{
-                    if(ele[1]===""){
-                        NulledData.push([new Date(ele[0]),null])
+                let NulledData = [];
+                data.map((ele) => {
+                    if (ele[1] === '') {
+                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                    } else {
+                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
                     }
-                    else{
-                        NulledData.push([new Date(ele[0]),ele[1]])
-                    }
-                })
-                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                });
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
-                    id: arr[0].equipment_id,
                 };
                 setSeriesData([...seriesData, recordToInsert]);
-                setSeriesLineData([...seriesLineData, recordToInsert]);
                 setSelectedEquipmentId('');
                 setChartLoading(false);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -1006,7 +1034,7 @@ const ExploreByEquipment = () => {
                 let responseData = res.data;
                 let data = responseData.data;
                 let arr = [];
-               
+
                 arr = allEquipmentList.filter(function (item) {
                     return item.equipment_id === id;
                 });
@@ -1019,20 +1047,17 @@ const ExploreByEquipment = () => {
                 } else {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
-                let NulledData=[];
-                data.map((ele)=>{
-                    if(ele[1]===""){
-                        NulledData.push([new Date(ele[0]),null])
+                let NulledData = [];
+                data.map((ele) => {
+                    if (ele[1] === '') {
+                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                    } else {
+                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
                     }
-                    else{
-                        NulledData.push([new Date(ele[0]),ele[1]])
-                    }
-                })
-                const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                });
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
-                    id: arr[0].equipment_id,
                 };
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {
@@ -1041,9 +1066,7 @@ const ExploreByEquipment = () => {
                 }
                 setAllEquipmenData(dataarr);
             })
-            .catch((error) => {
-                //setIsExploreDataLoading(false);
-            });
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -1071,54 +1094,52 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
-
     const getCSVLinkData = () => {
-    //     let sData = [];
-    //     exploreTableData.map(function (obj) {
-    //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
-    //         sData.push([
-    //             obj.equipment_name,
-    //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
-    //             change,
-    //             obj.location,
-    //             obj.location_type,
-    //             obj.equipments_type,
-    //             obj.end_user,
-    //         ]);
-    //     });
-    //     let streamData = exploreTableData.length > 0 ? sData : [];
-
-    //     return [
-    //         [
-    //             'Name',
-    //             'Energy Consumption',
-    //             '% Change',
-    //             'Location',
-    //             'Location Type',
-    //             'Equipment Type',
-    //             'End Use Category',
-    //         ],
-    //         ...streamData,
-    //     ];
+        //     let sData = [];
+        //     exploreTableData.map(function (obj) {
+        //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
+        //         sData.push([
+        //             obj.equipment_name,
+        //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
+        //             change,
+        //             obj.location,
+        //             obj.location_type,
+        //             obj.equipments_type,
+        //             obj.end_user,
+        //         ]);
+        //     });
+        //     let streamData = exploreTableData.length > 0 ? sData : [];
+        //     return [
+        //         [
+        //             'Name',
+        //             'Energy Consumption',
+        //             '% Change',
+        //             'Location',
+        //             'Location Type',
+        //             'Equipment Type',
+        //             'End Use Category',
+        //         ],
+        //         ...streamData,
+        //     ];
     };
 
     return (
         <>
-            <Row className="ml-2 mr-2 explore-filters-style" >
+            <Row className="ml-2 mr-2 explore-filters-style">
                 <Header title="" type="page" />
             </Row>
 
-            <Row >
+            <Row>
                 <div className="explore-data-table-style p-2 mb-2">
                     {isExploreChartDataLoading ? (
                         <></>
                     ) : (
                         <>
-                            <BrushChart
-                                seriesData={seriesData}
-                                optionsData={optionsData}
-                                seriesLineData={seriesLineData}
-                                optionsLineData={optionsLineData}
+                            <ExploreChart
+                                title={''}
+                                subTitle={''}
+                                data={seriesData}
+                                dateRange={fetchDateRange(startDate, endDate)}
                             />
                         </>
                     )}
@@ -1128,12 +1149,11 @@ const ExploreByEquipment = () => {
             <Row>
                 <div className="explore-data-table-style">
                     <Col lg={12}>
-
                         <DataTableWidget
                             isLoading={isExploreDataLoading}
                             isLoadingComponent={<SkeletonLoading />}
                             id="explore-by-equipment"
-                            onSearch= {setSearch}
+                            onSearch={setSearch}
                             buttonGroupFilterOptions={[]}
                             onStatus={setSelectedEquipmentFilter}
                             rows={currentRow()}

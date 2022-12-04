@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Input, Spinner } from 'reactstrap';
-import Dropdown from 'react-bootstrap/Dropdown';
 import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
 import 'moment-timezone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
+import { faXmark } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
-import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
-import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import Header from '../../components/Header';
-import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
-import {fetchOptions, deviceOptionLine} from '../../helpers/ChartOption';
+import Select from '../../sharedComponents/form/select';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import { fetchDateRange } from '../../helpers/formattedChartData';
 
 const DeviceChartModel = ({
     showChart,
@@ -62,10 +61,6 @@ const DeviceChartModel = ({
         }
     };
 
-    const [options, setOptions] = useState(fetchOptions);
-
-    const [optionsLine, setOptionsLine] = useState(deviceOptionLine);
-
     const handleShow = () => {
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
         else setDropDown('dropdown-menu dropdown-menu-right');
@@ -89,18 +84,6 @@ const DeviceChartModel = ({
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
     };
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show:false,
-            },
-        }
-        setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [daysCount]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -135,29 +118,21 @@ const DeviceChartModel = ({
                         setSeriesData([]);
                         let response = res.data;
                         let data = response;
-                        let exploreData = [];
 
+                        let NulledData = [];
+                        data.map((ele) => {
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                NulledData.push({ x: moment(new Date(ele[0])).tz(timeZone), y: ele[1] / UNIT_DIVIDER });
+                            } else {
+                                NulledData.push({ x: moment(new Date(ele[0])).tz(timeZone), y: ele[1] });
+                            }
+                        });
                         let recordToInsert = {
-                            data: data,
+                            data: NulledData,
                             name: getRequiredConsumptionLabel(selectedConsumption),
                         };
-                        try {
-                            recordToInsert.data = recordToInsert.data.map((_data) => {
-                                _data[0] = new Date(_data[0]);
-                                if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                    _data[1] = _data[1] / UNIT_DIVIDER;
-                                }
+                        setDeviceData([recordToInsert]);
 
-                                return _data;
-                            });
-                        } catch (error) {}
-                        exploreData.push(recordToInsert);
-                        setDeviceData(exploreData);
-                        setSeriesData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
                         setIsSensorChartLoading(false);
                     });
             } catch (error) {
@@ -165,47 +140,8 @@ const DeviceChartModel = ({
             }
         };
         exploreDataFetch();
+        console.log(fetchDateRange(startDate, endDate));
     }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        let toolTip = {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                let timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            0
-                        )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        };
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show:false,
-            },
-        }
-        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [selectedUnit]);
 
     return (
         <Modal show={showChart} size="xl" centered backdrop="static" keyboard={false}>
@@ -233,25 +169,38 @@ const DeviceChartModel = ({
             </div>
 
             <div className="model-sensor-filters-v2">
-                <div>
-                    <Input
-                        type="select"
-                        name="select"
-                        id="exampleSelect"
-                        onChange={(e) => {
-                            if (e.target.value === 'passive-power') {
-                                return;
-                            }
-                            setConsumption(e.target.value);
-                            handleUnitChange(e.target.value);
-                        }}
-                        className="font-weight-bold model-sensor-energy-filter mr-2"
-                        style={{ display: 'inline-block', width: 'fit-content' }}
-                        defaultValue={selectedConsumption}>
-                        {metric.map((record, index) => {
-                            return <option value={record.value}>{record.label}</option>;
-                        })}
-                    </Input>
+                <div className="d-flex">
+                    <div className="mr-2">
+                        {/* <Input
+                            type="select"
+                            name="select"
+                            id="exampleSelect"
+                            onChange={(e) => {
+                                if (e.target.value === 'passive-power') {
+                                    return;
+                                }
+                                setConsumption(e.target.value);
+                                handleUnitChange(e.target.value);
+                            }}
+                            className="font-weight-bold model-sensor-energy-filter mr-2"
+                            style={{ display: 'inline-block', width: 'fit-content' }}
+                            defaultValue={selectedConsumption}>
+                            {metric.map((record, index) => {
+                                return <option value={record.value}>{record.label}</option>;
+                            })}
+                        </Input> */}
+                        <Select
+                            defaultValue={selectedConsumption}
+                            options={metric}
+                            onChange={(e) => {
+                                if (e.value === 'passive-power') {
+                                    return;
+                                }
+                                setConsumption(e.value);
+                                handleUnitChange(e.value);
+                            }}
+                        />
+                    </div>
                 </div>
 
                 <div
@@ -260,31 +209,6 @@ const DeviceChartModel = ({
                     aria-label="Basic example">
                     <Header type="modal" />
                 </div>
-
-                <div className="mr-3 sensor-chart-options">
-                    <Dropdown>
-                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                            <FontAwesomeIcon icon={faEllipsisV} size="lg" />
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                            <Dropdown.Item>
-                                <i className="uil uil-calendar-alt mr-2"></i>Configure Column
-                            </Dropdown.Item>
-
-                            <div className="mr-3">
-                                <CSVLink
-                                    style={{ color: 'black', paddingLeft: '1.5rem' }}
-                                    filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
-                                    target="_blank"
-                                    data={getCSVLinkData()}>
-                                    <i className="uil uil-download-alt mr-2"></i>
-                                    Download CSV
-                                </CSVLink>
-                            </div>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </div>
             </div>
 
             {isSensorChartLoading ? (
@@ -292,12 +216,12 @@ const DeviceChartModel = ({
                     <Spinner className="m-2" color={'primary'} />
                 </div>
             ) : (
-                <div>
-                    <BrushChart
-                        seriesData={deviceData}
-                        optionsData={options}
-                        seriesLineData={seriesData}
-                        optionsLineData={optionsLine}
+                <div className="p-4">
+                    <LineChart
+                        title={''}
+                        subTitle={''}
+                        data={deviceData}
+                        dateRange={fetchDateRange(startDate, endDate)}
                     />
                 </div>
             )}
