@@ -150,10 +150,17 @@ const IndividualPassiveDevice = () => {
                     let exploreData = [];
                     let NulledData = [];
                     data.map((ele) => {
-                        if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                            NulledData.push({ x: moment(new Date(ele[0])).tz(timeZone), y: ele[1] / UNIT_DIVIDER });
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
                         } else {
-                            NulledData.push({ x: moment(new Date(ele[0])).tz(timeZone), y: ele[1] });
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                NulledData.push({
+                                    x: moment.utc(new Date(ele?.time_stamp)),
+                                    y: ele?.consumption / UNIT_DIVIDER,
+                                });
+                            } else {
+                                NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                            }
                         }
                     });
                     let recordToInsert = {

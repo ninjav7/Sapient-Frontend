@@ -263,10 +263,10 @@ const EquipChartModal = ({
                     for (let i = 0; i < data.length; i++) {
                         let NulledData = [];
                         data[i].data.map((ele) => {
-                            if (ele[1] === '') {
-                                NulledData.push({ x: new Date(ele[0]), y: null });
+                            if (ele.consumption === '') {
+                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: null });
                             } else {
-                                NulledData.push({ x: new Date(ele[0]), y: ele[1] });
+                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: ele.consumption });
                             }
                         });
                         let recordToInsert = {
@@ -288,10 +288,10 @@ const EquipChartModal = ({
                     let exploreData = [];
                     let NulledData = [];
                     data.map((ele) => {
-                        if (ele[1] === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
                         } else {
-                            NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
                         }
                     });
                     let recordToInsert = {
@@ -300,11 +300,6 @@ const EquipChartModal = ({
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
-                    // setSeriesData([
-                    //     {
-                    //         data: exploreData[0].data,
-                    //     },
-                    // ]);
                     setIsEquipDataFetched(false);
                 }
             })

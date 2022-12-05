@@ -151,10 +151,12 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedIds?.length >= 1) {
+            setSeriesData([]);
             let arr = [];
             for (let i = 0; i < selectedIds?.length; i++) {
                 arr.push(selectedIds[i]);
             }
+
             setSelectedAllEquipmentId(arr);
         } else {
             setSelectedEquipmentId('');
@@ -977,10 +979,10 @@ const ExploreByEquipment = () => {
                 }
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele[1] === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                    if (ele?.consumption === '') {
+                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
+                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
                     }
                 });
                 let recordToInsert = {
@@ -1004,10 +1006,10 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedAllEquipmentId.length === 1) {
-            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 100000);
+            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 200000);
         } else {
             selectedAllEquipmentId.map((ele) => {
-                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 200000);
             });
         }
     }, [selectedAllEquipmentId]);
@@ -1049,21 +1051,24 @@ const ExploreByEquipment = () => {
                 }
                 let NulledData = [];
                 data.map((ele) => {
-                    if (ele[1] === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: null });
+                    if (ele?.consumption === '') {
+                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele[0])), y: ele[1] });
+                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
                     }
                 });
+                console.log('nulled', NulledData);
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
                 };
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {
+                    console.log('record', dataarr);
                     setSeriesData(dataarr);
-                    setSeriesLineData(dataarr);
+                    //setSeriesLineData(dataarr);
                 }
+
                 setAllEquipmenData(dataarr);
             })
             .catch((error) => {});
