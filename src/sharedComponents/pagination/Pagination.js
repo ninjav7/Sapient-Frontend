@@ -59,6 +59,7 @@ const Pagination = (props) => {
             <Select
                 defaultValue={pageListSizes.find(({ value }) => +value === pageSize) || pageListSizes[0]}
                 label="Select"
+                menuPlacement="auto"
                 onChange={({ value }) => {
                     if (value === -1) {
                         return;

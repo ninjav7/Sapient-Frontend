@@ -22,10 +22,10 @@ const AccountSettings = () => {
     const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
     const [userPermission] = useAtom(userPermissionData);
 
-    let entryPoint=""
-    useEffect(()=>{
-        entryPoint="entered"
-    },[])
+    let entryPoint = '';
+    useEffect(() => {
+        entryPoint = 'entered';
+    }, []);
     const updateAccountName = async () => {
         localStorage.removeItem('accountName');
         const headers = {
@@ -51,7 +51,7 @@ const AccountSettings = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Account Settings',
+                        label: 'Settings',
                         path: '/settings/account',
                         active: true,
                     },
@@ -66,12 +66,12 @@ const AccountSettings = () => {
     }, []);
 
     useEffect(() => {
-        if(entryPoint==="entered"){
-        let usr_acc=localStorage.getItem('accountName');
-        UserStore.update((s) => {
-            s.accountName = usr_acc;
-        });
-    }
+        if (entryPoint === 'entered') {
+            let usr_acc = localStorage.getItem('accountName');
+            UserStore.update((s) => {
+                s.accountName = usr_acc;
+            });
+        }
     }, [userdata]);
 
     useEffect(() => {
@@ -115,7 +115,7 @@ const AccountSettings = () => {
                 </Col>
             </Row>
 
-            <Row className='mt-4'>
+            <Row className="mt-4">
                 <Col lg={8}>
                     <Card className="custom-card">
                         <CardHeader>

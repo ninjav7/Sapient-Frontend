@@ -62,7 +62,7 @@ export const equipmentDetails = '/api/config/equipments_details/by_id';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
-export const getFiltersForEquipment = '/api/config/configuration-filter'
+export const getFiltersForEquipment = '/api/config/configuration-filter';
 export const equipmentType = '/api/config/get_equipment_type';
 export const getEquipmentType = '/api/config/get_equipment_type_by_name/';
 export const addEquipmentType = '/api/config/create_equipment_type';
@@ -121,7 +121,6 @@ export const kasaLinkAccount = '/api/config/kasa/link_account';
 export const kasaUnLinkAccount = '/api/config/kasa/unlink_account';
 export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 export const getMetadata = '/api/config/metadata';
-
 
 // kasa accounts
 export const get_kasa_devices = '/api/config/kasa/get_devices';

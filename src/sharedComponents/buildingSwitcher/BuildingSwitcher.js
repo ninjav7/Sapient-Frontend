@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import Select, { DROPDOWN_INPUT_TYPES } from '../form/select';
@@ -63,6 +63,13 @@ BuildingSwitcher.propTypes = {
         label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
         value: stringOrNumberPropTypes.isRequired,
     }).isRequired,
+
+    // The difference between default and current values, is currentValue allows to change current value dynamically
+    currentValue: PropTypes.shape({
+        icon: PropTypes.node,
+        label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
+        value: stringOrNumberPropTypes.isRequired,
+    }),
 };
 
 export default BuildingSwitcher;

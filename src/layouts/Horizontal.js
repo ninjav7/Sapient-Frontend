@@ -3,10 +3,10 @@ import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
 import './style.css';
 import { changeLayout } from '../redux/actions';
-import PageTracker from '../components/PageTracker/PageTracker';
 import SideNav from '../components/SideNav/SideNav';
 import TopNav from '../components/TopNav/TopNav';
 import { useLocation } from 'react-router-dom';
+import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 
 const loading = () => <div className="text-center"></div>;
 
@@ -36,7 +36,7 @@ const HorizontalLayout = (props) => {
                 </div>
 
                 <div>
-                    <PageTracker />
+                    <SecondaryTopNavBar />
                 </div>
 
                 <div>
