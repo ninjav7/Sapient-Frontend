@@ -240,8 +240,8 @@ const IndividualActiveDevice = () => {
                 let newList = [
                     {
                         label: 'Active Devices',
-                        path: '/settings/passive-devices',
-                        active: true,
+                        path: '/settings/active-devices',
+                        active: false,
                     },
                 ];
                 bs.items = newList;
@@ -252,6 +252,24 @@ const IndividualActiveDevice = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Active Devices',
+                    path: '/settings/active-devices',
+                    active: false,
+                },
+                {
+                    label: activeData?.identifier,
+                    path: '/settings/active-devices/single',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+    }, [activeData]);
 
     useEffect(() => {
         const fetchActiveDeviceSensorData = async () => {
@@ -443,207 +461,197 @@ const IndividualActiveDevice = () => {
                 </div>
 
                 {/* <div className="container"> */}
-                    <div className="row mt-4">
-                        <div className="col-4">
-                            <h5 className="device-title">Device Details</h5>
-                            <div className="mt-4">
+                <div className="row mt-4">
+                    <div className="col-4">
+                        <h5 className="device-title">Device Details</h5>
+                        <div className="mt-4">
+                            <div>
+                                <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
+                                    <Form.Label className="device-label-style">Installed Location</Form.Label>
+                                    {isLocationFetched ? (
+                                        <Skeleton count={1} height={35} />
+                                    ) : (
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                setActiveLocationId(e.target.value);
+                                            }}
+                                            value={activeLocationId}>
+                                            <option>Select Location</option>
+                                            {locationData.map((record, index) => {
+                                                return (
+                                                    <option value={record?.location_id}>{record?.location_name}</option>
+                                                );
+                                            })}
+                                        </Input>
+                                    )}
+
+                                    <Form.Label className="device-sub-label-style mt-1">
+                                        Location this device is installed in.
+                                    </Form.Label>
+                                </Form.Group>
+                            </div>
+                            <div className="single-passive-grid">
                                 <div>
-                                    <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
-                                        <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                        {isLocationFetched ? (
-                                            <Skeleton count={1} height={35} />
-                                        ) : (
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    setActiveLocationId(e.target.value);
-                                                }}
-                                                value={activeLocationId}>
-                                                <option>Select Location</option>
-                                                {locationData.map((record, index) => {
-                                                    return (
-                                                        <option value={record?.location_id}>
-                                                            {record?.location_name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        )}
-
-                                        <Form.Label className="device-sub-label-style mt-1">
-                                            Location this device is installed in.
-                                        </Form.Label>
-                                    </Form.Group>
+                                    <h6 className="device-label-style" htmlFor="customSwitches">
+                                        Identifier
+                                    </h6>
+                                    <h6 className="passive-device-value">
+                                        {activeData?.identifier ? activeData?.identifier : ''}
+                                    </h6>
                                 </div>
-                                <div className="single-passive-grid">
-                                    <div>
-                                        <h6 className="device-label-style" htmlFor="customSwitches">
-                                            Identifier
-                                        </h6>
-                                        <h6 className="passive-device-value">
-                                            {activeData?.identifier ? activeData?.identifier : ''}
-                                        </h6>
-                                    </div>
-                                    <div>
-                                        <h6 className="device-label-style" htmlFor="customSwitches">
-                                            Device Model
-                                        </h6>
-                                        <h6 className="passive-device-value">
-                                            {activeData?.model ? activeData?.model : ''}
-                                        </h6>
-                                    </div>
-                                </div>
-                                <div className="single-passive-grid">
-                                    <div>
-                                        <h6 className="device-label-style" htmlFor="customSwitches">
-                                            Firmware Version
-                                        </h6>
-                                        <h6 className="passive-device-value">v1.2</h6>
-                                    </div>
-                                    <div>
-                                        <h6 className="device-label-style" htmlFor="customSwitches">
-                                            Device Version
-                                        </h6>
-                                        <h6 className="passive-device-value">v2</h6>
-                                    </div>
+                                <div>
+                                    <h6 className="device-label-style" htmlFor="customSwitches">
+                                        Device Model
+                                    </h6>
+                                    <h6 className="passive-device-value">
+                                        {activeData?.model ? activeData?.model : ''}
+                                    </h6>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-8">
-                            <h5 className="device-title">Sensors ({sensors.length})</h5>
-                            <div className="mt-2">
-                                <div className="active-sensor-header">
-                                    <div className="search-container mr-2">
-                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                        <input
-                                            className="search-box ml-2"
-                                            type="search"
-                                            name="search"
-                                            placeholder="Search..."
-                                        />
-                                    </div>
+                            <div className="single-passive-grid">
+                                <div>
+                                    <h6 className="device-label-style" htmlFor="customSwitches">
+                                        Firmware Version
+                                    </h6>
+                                    <h6 className="passive-device-value">v1.2</h6>
+                                </div>
+                                <div>
+                                    <h6 className="device-label-style" htmlFor="customSwitches">
+                                        Device Version
+                                    </h6>
+                                    <h6 className="passive-device-value">v2</h6>
                                 </div>
                             </div>
-
-                            <div className="socket-container">
-                                <div className="mt-2 sockets-slots-container">
-                                    {sensors.map((record, index) => {
-                                        return (
-                                            <>
-                                                {record?.status && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#3C6DF5"
-                                                            />
-                                                        </div>
-                                                        {record?.equipment_type_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {!record?.status && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#EAECF0"
-                                                            />
-                                                        </div>
-                                                        {record?.equipment_type_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {isFetchingSensorData ? (
-                                <div className="mt-4">
-                                    <Skeleton count={8} height={40} />
-                                </div>
-                            ) : (
-                                <>
-                                    {sensors.map((record, index) => {
-                                        return (
-                                            <div className="sensor-container-style mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{record.index}</span>
-                                                    <span className="sensor-data-title">
-                                                        {record?.equipment_type_name
-                                                            ? record?.equipment_type_name
-                                                            : 'No Equipment'}
-                                                        {record.equipment_id === '' ? (
-                                                            ''
-                                                        ) : (
-                                                            <div className="ml-2 badge badge-soft-primary">
-                                                                {record.equipment}
-                                                            </div>
-                                                        )}
-                                                    </span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <FontAwesomeIcon
-                                                        icon={faChartMixed}
-                                                        size="md"
-                                                        onClick={() => {
-                                                            handleChartShow(record.id);
-                                                        }}
-                                                        className="mouse-pointer"
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        className="btn btn-default passive-edit-style"
-                                                        onClick={() => {
-                                                            fetchEquipmentTypeData();
-                                                            setSelectedEquipTypeId(record.equipment_type_id);
-                                                            setNewEquipTypeID(record.equipment_type_id);
-                                                            setNewEquipTypeValue(record.equipment_type);
-                                                            setSelectedSensorId(record.id);
-                                                            handleEquipmentShow();
-                                                        }}>
-                                                        Edit
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </>
-                            )}
                         </div>
                     </div>
+                    <div className="col-8">
+                        <h5 className="device-title">Sensors ({sensors.length})</h5>
+                        <div className="mt-2">
+                            <div className="active-sensor-header">
+                                <div className="search-container mr-2">
+                                    <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                    <input
+                                        className="search-box ml-2"
+                                        type="search"
+                                        name="search"
+                                        placeholder="Search..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="socket-container">
+                            <div className="mt-2 sockets-slots-container">
+                                {sensors.map((record, index) => {
+                                    return (
+                                        <>
+                                            {record?.status && (
+                                                <div>
+                                                    <div className="power-off-style">
+                                                        <FontAwesomeIcon icon={faPowerOff} size="lg" color="#3C6DF5" />
+                                                    </div>
+                                                    {record?.equipment_type_id === '' ? (
+                                                        <div className="socket-rect">
+                                                            <img src={SocketLogo} alt="Socket" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="online-socket-container">
+                                                            <img
+                                                                src={UnionLogo}
+                                                                alt="Union"
+                                                                className="union-icon-style"
+                                                                width="35vw"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {!record?.status && (
+                                                <div>
+                                                    <div className="power-off-style">
+                                                        <FontAwesomeIcon icon={faPowerOff} size="lg" color="#EAECF0" />
+                                                    </div>
+                                                    {record?.equipment_type_id === '' ? (
+                                                        <div className="socket-rect">
+                                                            <img src={SocketLogo} alt="Socket" />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="online-socket-container">
+                                                            <img
+                                                                src={UnionLogo}
+                                                                alt="Union"
+                                                                className="union-icon-style"
+                                                                width="35vw"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {isFetchingSensorData ? (
+                            <div className="mt-4">
+                                <Skeleton count={8} height={40} />
+                            </div>
+                        ) : (
+                            <>
+                                {sensors.map((record, index) => {
+                                    return (
+                                        <div className="sensor-container-style mt-3">
+                                            <div className="sensor-data-style">
+                                                <span className="sensor-data-no">{record.index}</span>
+                                                <span className="sensor-data-title">
+                                                    {record?.equipment_type_name
+                                                        ? record?.equipment_type_name
+                                                        : 'No Equipment'}
+                                                    {record.equipment_id === '' ? (
+                                                        ''
+                                                    ) : (
+                                                        <div className="ml-2 badge badge-soft-primary">
+                                                            {record.equipment}
+                                                        </div>
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="sensor-data-style-right">
+                                                <FontAwesomeIcon
+                                                    icon={faChartMixed}
+                                                    size="md"
+                                                    onClick={() => {
+                                                        handleChartShow(record.id);
+                                                    }}
+                                                    className="mouse-pointer"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    className="btn btn-default passive-edit-style"
+                                                    onClick={() => {
+                                                        fetchEquipmentTypeData();
+                                                        setSelectedEquipTypeId(record.equipment_type_id);
+                                                        setNewEquipTypeID(record.equipment_type_id);
+                                                        setNewEquipTypeValue(record.equipment_type);
+                                                        setSelectedSensorId(record.id);
+                                                        handleEquipmentShow();
+                                                    }}>
+                                                    Edit
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </>
+                        )}
+                    </div>
+                </div>
                 {/* </div> */}
             </div>
 
