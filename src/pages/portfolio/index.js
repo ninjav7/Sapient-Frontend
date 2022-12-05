@@ -20,6 +20,8 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
+import { updateBuildingStore } from '../../components/SecondaryTopNavBar/utils';
+import { BuildingStore } from '../../store/BuildingStore';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -170,7 +172,17 @@ const PortfolioOverview = () => {
                 s.parent = 'portfolio';
             });
         };
+
+        const updateBuildingStore = () => {
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
+                s.BldgTimeZone = '';
+            });
+        };
+
         updateBreadcrumbStore();
+        updateBuildingStore();
     }, []);
 
     useEffect(() => {
