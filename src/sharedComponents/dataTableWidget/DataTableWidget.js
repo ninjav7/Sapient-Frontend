@@ -221,7 +221,7 @@ const DataTableWidget = (props) => {
 
     const isActionsAvailable = props.onDeleteRow || props.onEditRow;
 
-    const HeadComponent = ({ onSort, name, accessor }) => {
+    const HeadComponent = ({ onSort, name, accessor, ...props }) => {
         const [state, setState] = useState(0);
 
         const cellProps = {
@@ -239,6 +239,7 @@ const DataTableWidget = (props) => {
                 }),
             role: onSort && 'button',
             className: cx(SORT_TYPES[state], SORT_TYPES[state] !== null && 'sort-type-selected', onSort && 'on-sort'),
+            ...props,
         };
 
         return (
@@ -252,8 +253,8 @@ const DataTableWidget = (props) => {
     };
 
     const memoizedHeaders = useMemo(() => {
-        return filteredHeaders.map(({ name, onSort, accessor }, index) => (
-            <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
+        return filteredHeaders.map(({ name, onSort, accessor, cellProps }, index) => (
+            <HeadComponent  name={name} onSort={onSort} accessor={accessor} {...cellProps} key={index} />
         ));
     }, [JSON.stringify(filteredHeaders)]);
 
@@ -330,7 +331,7 @@ const DataTableWidget = (props) => {
                                             props.onDeleteRow(event, row.id, row, props);
                                     }
                                     return (
-                                        <Table.Row key={generateID()}>
+                                        <Table.Row {...(row.rowProps || {})} key={generateID()}>
                                             {props.onCheckboxRow &&
                                                 //@ It is probably need to improve custom checkbox to make it generic
                                                 (props.customCheckboxForCell ? (
@@ -345,9 +346,9 @@ const DataTableWidget = (props) => {
                                                 <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
                                             )}
 
-                                            {filteredHeaders.map(({ accessor, callbackValue }) => {
+                                            {filteredHeaders.map(({ accessor, callbackValue, cellProps }) => {
                                                 return (
-                                                    <Table.Cell key={accessor}>
+                                                    <Table.Cell {...cellProps} key={accessor}>
                                                         {accessor &&
                                                             (callbackValue
                                                                 ? callbackValue(row, cellChildrenTemplate)

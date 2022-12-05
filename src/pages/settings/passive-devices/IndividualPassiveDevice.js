@@ -261,7 +261,7 @@ const IndividualPassiveDevice = () => {
                     {
                         label: 'Passive Devices',
                         path: '/settings/passive-devices',
-                        active: true,
+                        active: false,
                     },
                 ];
                 bs.items = newList;
@@ -272,6 +272,24 @@ const IndividualPassiveDevice = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Passive Devices',
+                    path: '/settings/passive-devices',
+                    active: false,
+                },
+                {
+                    label: passiveData?.identifier,
+                    path: '/settings/passive-devices/single',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+    }, [passiveData]);
 
     return (
         <>

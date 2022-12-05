@@ -241,8 +241,8 @@ const IndividualActiveDevice = () => {
                 let newList = [
                     {
                         label: 'Active Devices',
-                        path: '/settings/passive-devices',
-                        active: true,
+                        path: '/settings/active-devices',
+                        active: false,
                     },
                 ];
                 bs.items = newList;
@@ -253,6 +253,24 @@ const IndividualActiveDevice = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Active Devices',
+                    path: '/settings/active-devices',
+                    active: false,
+                },
+                {
+                    label: activeData?.identifier,
+                    path: '/settings/active-devices/single',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+    }, [activeData]);
 
     useEffect(() => {
         const fetchActiveDeviceSensorData = async () => {
