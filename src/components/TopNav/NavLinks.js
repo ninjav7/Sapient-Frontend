@@ -40,6 +40,11 @@ const NavLinks = () => {
             history.push({
                 pathname: `/energy/portfolio/overview`,
             });
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
+                s.BldgTimeZone = '';
+            });
         }
     };
 
