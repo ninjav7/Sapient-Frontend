@@ -171,24 +171,6 @@ const DeviceChartModel = ({
             <div className="model-sensor-filters-v2">
                 <div className="d-flex">
                     <div className="mr-2">
-                        {/* <Input
-                            type="select"
-                            name="select"
-                            id="exampleSelect"
-                            onChange={(e) => {
-                                if (e.target.value === 'passive-power') {
-                                    return;
-                                }
-                                setConsumption(e.target.value);
-                                handleUnitChange(e.target.value);
-                            }}
-                            className="font-weight-bold model-sensor-energy-filter mr-2"
-                            style={{ display: 'inline-block', width: 'fit-content' }}
-                            defaultValue={selectedConsumption}>
-                            {metric.map((record, index) => {
-                                return <option value={record.value}>{record.label}</option>;
-                            })}
-                        </Input> */}
                         <Select
                             defaultValue={selectedConsumption}
                             options={metric}
