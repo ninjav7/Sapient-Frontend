@@ -39,7 +39,7 @@ const BuildingSwitcher = (props) => {
     const filteredProps = removeProps(props, 'options', 'defaultMenuIsOpen');
 
     return (
-        <div className={`building-switcher-wrapper ${props.switchStyle}`} {...filteredProps}>
+        <div className="building-switcher-wrapper" {...filteredProps}>
             <Select {...props} options={options} type={DROPDOWN_INPUT_TYPES.Icon} />
         </div>
     );
