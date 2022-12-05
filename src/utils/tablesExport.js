@@ -38,14 +38,12 @@ export const getEquipmentTableCSVExport = (name, tableData, columns, preparedEnd
         }
         dataToExport.push(arr);
     });
-
     let csv = `${getTableHeadersList(columns)}\n`;
 
     dataToExport.forEach(function (row) {
         csv += row.join(',');
         csv += '\n';
     });
-
     let hiddenElement = document.createElement('a');
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     hiddenElement.target = '_blank';
