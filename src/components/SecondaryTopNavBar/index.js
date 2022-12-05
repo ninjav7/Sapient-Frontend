@@ -198,6 +198,7 @@ const SecondaryTopNavBar = () => {
                     buildings={buildingsList}
                     selectedBuilding={selectedBuilding}
                     breadCrumbsItems={breadcrumList}
+                    switchStyle={`switcher-custom-style`}
                 />
             </div>
         </React.Fragment>
