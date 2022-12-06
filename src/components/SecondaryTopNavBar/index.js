@@ -156,6 +156,7 @@ const SecondaryTopNavBar = () => {
     useEffect(() => {
         const getBuildingList = async () => {
             let bldgList = [...buildingsList];
+            let allBuildingsList = [];
             buildingListData.forEach((record) => {
                 let obj = {
                     label: record?.building_name,
@@ -163,8 +164,9 @@ const SecondaryTopNavBar = () => {
                     timezone: record?.timezone,
                     iconForSelected: <BuildingSVG className="p-0 square" />,
                 };
-                bldgList[2].options.push(obj);
+                allBuildingsList.push(obj);
             });
+            bldgList[2].options = allBuildingsList;
             setBuildingsList(bldgList);
         };
         getBuildingList();
