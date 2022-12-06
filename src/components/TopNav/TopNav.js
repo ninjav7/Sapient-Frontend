@@ -6,7 +6,8 @@ import Control from './Control';
 import { useAtom } from 'jotai';
 import { buildingData, userPermissionData } from '../../store/globalState';
 import { BuildingListStore } from '../../store/BuildingStore';
-import { fetchBuildingsList, fetchPermissions } from './services';
+import { fetchBuildingsList } from '../../services/buildings';
+import { fetchPermissions } from '../../services/permissions';
 import { accountRoutes, configChildRoutes, configRoutes } from '../SecondaryTopNavBar/utils';
 import '../style.css';
 
