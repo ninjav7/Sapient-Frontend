@@ -23,6 +23,7 @@ import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 
 import './style.scss';
+import { onHoverHandler, onUnHoverHandler } from './helper';
 
 HighchartsMore(Highcharts);
 HighchartsSolidGauge(Highcharts);
@@ -123,15 +124,23 @@ const DonutChartWidget = ({
     };
 
     const hoverChart = (index) => {
-        const plot = chartComponentRef.current?.chart.series[0].data[index];
+        const data = chartComponentRef.current?.chart.series[0].data;
+        const plot = data[index];
+
         plot.setState('hover');
+
+        onHoverHandler(data, index);
 
         renderCenteredItemContent(series[index], items[index]?.unit);
     };
 
     const unHoverChart = (index) => {
-        const plot = chartComponentRef.current?.chart.series[0].data[index];
+        const data = chartComponentRef.current?.chart.series[0].data;
+        const plot = data[index];
+
         plot.setState('normal');
+
+        onUnHoverHandler(data, index);
 
         renderCenteredItemContent(totalValue, items[0]?.unit);
     };

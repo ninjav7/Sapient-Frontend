@@ -1,0 +1,39 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.bar-chart {
+    &-wrapper {
+        @extend .borders-base;
+        padding: 1rem;
+        position: relative;
+
+        .tooltip-header {
+            display: none;
+            visibility: hidden;
+        }
+        .chart-tooltip {
+            border-color: $dataviz-main-2;
+        }
+    }
+
+    &-meta-info-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: flex-end;
+        margin-bottom: 1.25rem;
+    }
+
+    &-more-detail {
+        display: flex;
+        justify-content: end;
+    }
+
+    &-meta-info {
+        column-gap: 0.5rem;
+    }
+
+    &-meta-info-trend-badge {
+        align-self: center;
+    }
+}

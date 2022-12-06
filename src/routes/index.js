@@ -493,6 +493,7 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
+        // PLT-492: Hide Role Page
         // {
         //     path: '/settings/gateways',
         //     name: 'Gateways',
@@ -559,14 +560,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-        {
-            path: '/settings/roles',
-            name: 'Roles',
-            component: Roles,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
+        // {
+        //     path: '/settings/roles',
+        //     name: 'Roles',
+        //     component: Roles,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
         {
             path: '/settings/equipment-types',
             name: 'Equipment Types',
