@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Input, Spinner } from 'reactstrap';
+import { Row, Col, Input, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
 import 'moment-timezone';
@@ -17,6 +17,7 @@ import './style.css';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
+import Typography from '../../sharedComponents/typography';
 
 const DeviceChartModel = ({
     showChart,
@@ -156,12 +157,17 @@ const DeviceChartModel = ({
         <Modal show={showChart} size="xl" centered backdrop="static" keyboard={false}>
             <div className="chart-model-header">
                 <div>
-                    <div className="model-sensor-date-time">{localStorage.getItem('identifier')}</div>
-
-                    <div>
-                        <span className="model-sensor-name mr-2">{sensorData.name}</span>
-
-                        <span className="model-equip-name">{sensorData.equipment}</span>
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        Type={Typography.Types.Light}
+                        className="model-sensor-date-time">
+                        {localStorage.getItem('identifier')}
+                    </Typography.Subheader>
+                    <div className="chart-model-subheader">
+                        <Typography.Header size={Typography.Sizes.md}>{sensorData.name}</Typography.Header>
+                        <Typography.Subheader size={Typography.Sizes.md} className="chart-model-title">
+                            {sensorData.equipment}
+                        </Typography.Subheader>
                     </div>
                 </div>
 

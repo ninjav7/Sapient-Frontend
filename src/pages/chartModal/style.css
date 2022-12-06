@@ -319,6 +319,33 @@
     color: blue;
 }
 
+.chart-model-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    align-content: stretch;
+    padding: 25px;
+    height: fit-content;
+}
+
+.chart-model-subheader {
+    display: flex;
+    flex-direction: row; 
+}
+.chart-model-title{
+    margin-left: 1rem;
+    padding-top: 0.4rem;
+}
+.model-sensor-name {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    color: #1d2939;
+}
+
 .ytd-value {
     font-family: 'Space Grotesk';
     font-style: normal;
