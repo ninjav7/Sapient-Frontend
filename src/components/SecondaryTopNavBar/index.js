@@ -54,7 +54,7 @@ const SecondaryTopNavBar = () => {
     };
 
     const handlePortfolioClick = (record, path) => {
-        updateBuildingStore(record);
+        updateBuildingStore(record?.value, record?.label, record?.timezone);
 
         if (portfolioRoutes.includes(path) || path.includes('/energy')) {
             redirectToEndpoint(`/energy/portfolio/overview`);
@@ -87,7 +87,7 @@ const SecondaryTopNavBar = () => {
     };
 
     const handleBuildingChange = (record, path) => {
-        updateBuildingStore(record);
+        updateBuildingStore(record?.value, record?.label, record?.timezone);
 
         if (portfolioRoutes.includes(path)) {
             redirectToEndpoint(`/energy/building/overview/${record?.value}`);
@@ -152,6 +152,14 @@ const SecondaryTopNavBar = () => {
         setSelectedBuilding(bldgObj);
         handleBuildingChange(bldgObj, location.pathname);
     };
+
+    useEffect(() => {
+        let bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
+
+        if (bldgObj) {
+            setSelectedBuilding(bldgObj);
+        }
+    }, [buildingsList]);
 
     useEffect(() => {
         const getBuildingList = async () => {
