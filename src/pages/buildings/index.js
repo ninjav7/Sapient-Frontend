@@ -288,6 +288,10 @@ const BuildingOverview = () => {
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
 
+                    if (minVal === maxVal) {
+                        minVal = 0;
+                    }
+
                     let heatMapData = [];
 
                     let newWeekdaysData = {
