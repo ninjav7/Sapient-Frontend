@@ -1,5 +1,5 @@
-import axiosInstance from '../../services/axiosInstance';
-import { getBuildings } from '../../services/Network';
+import axiosInstance from '../services/axiosInstance';
+import { getBuildings } from '../services/Network';
 
 export function fetchBuildingsList(state) {
     let params = `?config=${state}`;
