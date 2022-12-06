@@ -1,8 +1,18 @@
 import { assignMeasureUnit, renderComponents } from '../columnChart/helper';
 import Typography from '../typography';
+import colorPalette from '../../assets/scss/_colors.scss';
 import React from 'react';
 
-const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series, categories, tooltipUnit}) => ({
+const chartsBaseConfig = ({
+    columnType,
+    chartHeight,
+    onMoreDetail,
+    colors,
+    series,
+    categories,
+    tooltipUnit,
+    yAxisWithAssignMeasure = true,
+}) => ({
     chart: {
         type: columnType,
         height: chartHeight || 341,
@@ -20,7 +30,10 @@ const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series
         align: onMoreDetail ? 'left' : 'center',
         useHTML: true,
         labelFormat: renderComponents(
-            <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
+            <Typography.Subheader
+                size={Typography.Sizes.sm}
+                className="gray-550"
+                style={{ fill: colorPalette.primaryGray550 }}>
                 {'{name}'}
             </Typography.Subheader>
         ),
@@ -31,7 +44,7 @@ const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series
 
     tooltip: {
         headerFormat: `<div class="chart-tooltip">${renderComponents(
-            <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
+            <Typography.Subheader size={Typography.Sizes.sm} className="gray-550 tooltip-header">
                 {'{point.key}'}
             </Typography.Subheader>
         )} <table>`,
@@ -63,7 +76,10 @@ const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series
         crosshair: true,
         labels: {
             format: renderComponents(
-                <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
+                <Typography.Subheader
+                    size={Typography.Sizes.sm}
+                    className="gray-550"
+                    style={{ fill: colorPalette.primaryGray550 }}>
                     {'{text}'}
                 </Typography.Subheader>
             ),
@@ -73,7 +89,10 @@ const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series
         title: null,
         labels: {
             format: renderComponents(
-                <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
+                <Typography.Subheader
+                    size={Typography.Sizes.sm}
+                    className="gray-550"
+                    style={{ fill: colorPalette.primaryGray550 }}>
                     {'{text}'}
                 </Typography.Subheader>
             ),
@@ -82,9 +101,14 @@ const chartsBaseConfig = ({columnType, chartHeight, onMoreDetail, colors, series
 
                 const { numberFormatter } = axis.chart;
 
+                const formattedValue = numberFormatter(value || 0, -1);
+
                 return renderComponents(
-                    <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
-                        {assignMeasureUnit(numberFormatter(value || 0, -1))}
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="gray-550"
+                        style={{ fill: colorPalette.primaryGray550 }}>
+                        {yAxisWithAssignMeasure ? assignMeasureUnit(formattedValue) : formattedValue}
                     </Typography.Subheader>
                 );
             },
