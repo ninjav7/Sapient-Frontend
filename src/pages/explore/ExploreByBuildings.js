@@ -317,7 +317,6 @@ const ExploreByBuildings = () => {
                                     setCurrentButtonId(0);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
-                                    setPerAPIFlag(bottomPerChange + topPerChange);
                                 }
                                 if (args[0] === 1) {
                                     setIsOpened(true);
@@ -330,14 +329,12 @@ const ExploreByBuildings = () => {
                                     //     set_minPerValue(0);
                                     //     set_maxPerValue(bottomPerChange+1);
                                     // }
-                                    setPerAPIFlag(bottomPerChange + 0);
                                 }
                                 if (args[0] === 2) {
                                     setIsOpened(true);
                                     setCurrentButtonId(2);
                                     set_minPerValue(0);
                                     set_maxPerValue(topPerChange);
-                                    setPerAPIFlag(0 + topPerChange);
                                 }
                             }
                         },

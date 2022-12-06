@@ -335,17 +335,6 @@
     color: #1a53d7;
 }
 
-.chart-model-header {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: stretch;
-    align-content: stretch;
-    padding: 25px;
-    height: fit-content;
-    /* width: 500vw; */
-}
 
 .model-sensor-date-time {
     font-family: 'Inter';
@@ -354,15 +343,6 @@
     font-size: 12px;
     /* line-height: 18px; */
     color: #667085;
-}
-
-.model-sensor-name {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 18px;
-    /* line-height: 28px; */
-    color: #1d2939;
 }
 
 .model-equip-name {
