@@ -151,7 +151,6 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedIds?.length >= 1) {
-            setSeriesData([]);
             let arr = [];
             for (let i = 0; i < selectedIds?.length; i++) {
                 arr.push(selectedIds[i]);
@@ -495,21 +494,20 @@ const ExploreByEquipment = () => {
                             setPerAPIFlag('');
                         },
                     },
-                    {
-                        label: 'Location',
-                        value: 'spaces',
-                        placeholder: 'All Locations',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filters.data.data.spaces.map((filterItem) => ({
-                            value: filterItem.space_id,
-                            label: filterItem.space_name,
-                        })),
-                        onClose: (options) => {},
-                        onDelete: () => {
-                            setSelectedLocation([]);
-                            //setMacTypeFilterString('');
-                        },
-                    },
+                    // {
+                    //     label: 'Location',
+                    //     value: 'spaces',
+                    //     placeholder: 'All Locations',
+                    //     filterType: FILTER_TYPES.MULTISELECT,
+                    //     filterOptions: filters.data.data.spaces.map((filterItem) => ({
+                    //         value: filterItem.space_id,
+                    //         label: filterItem.space_name,
+                    //     })),
+                    //     onClose: (options) => {},
+                    //     onDelete: () => {
+                    //         setSelectedLocation([]);
+                    //     },
+                    // },
                     {
                         label: 'Equipment Type',
                         value: 'equipments_type',
@@ -670,21 +668,20 @@ const ExploreByEquipment = () => {
                         setPerAPIFlag('');
                     },
                 },
-                {
-                    label: 'Location',
-                    value: 'spaces',
-                    placeholder: 'All Locations',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.spaces.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
-                    onClose: (options) => {},
-                    onDelete: () => {
-                        setSelectedLocation([]);
-                        //setMacTypeFilterString('');
-                    },
-                },
+                // {
+                //     label: 'Location',
+                //     value: 'spaces',
+                //     placeholder: 'All Locations',
+                //     filterType: FILTER_TYPES.MULTISELECT,
+                //     filterOptions: filterData.spaces.map((filterItem) => ({
+                //         value: filterItem.space_id,
+                //         label: filterItem.space_name,
+                //     })),
+                //     onClose: (options) => {},
+                //     onDelete: () => {
+                //         setSelectedLocation([]);
+                //     },
+                // },
                 {
                     label: 'Equipment Type',
                     value: 'equipments_type',
@@ -843,21 +840,20 @@ const ExploreByEquipment = () => {
                         setPerAPIFlag('');
                     },
                 },
-                {
-                    label: 'Location',
-                    value: 'spaces',
-                    placeholder: 'All Locations',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.spaces.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
-                    onClose: (options) => {},
-                    onDelete: () => {
-                        setSelectedLocation([]);
-                        //setMacTypeFilterString('');
-                    },
-                },
+                // {
+                //     label: 'Location',
+                //     value: 'spaces',
+                //     placeholder: 'All Locations',
+                //     filterType: FILTER_TYPES.MULTISELECT,
+                //     filterOptions: filterData.spaces.map((filterItem) => ({
+                //         value: filterItem.space_id,
+                //         label: filterItem.space_name,
+                //     })),
+                //     onClose: (options) => {},
+                //     onDelete: () => {
+                //         setSelectedLocation([]);
+                //     },
+                // },
                 {
                     label: 'Equipment Type',
                     value: 'equipments_type',
@@ -1006,10 +1002,14 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedAllEquipmentId.length === 1) {
-            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 200000);
+            setTimeout(() => {
+                fetchExploreAllChartData(selectedAllEquipmentId[0]);
+            }, 200000);
         } else {
             selectedAllEquipmentId.map((ele) => {
-                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 200000);
+                setTimeout(() => {
+                    fetchExploreAllChartData(ele);
+                }, 200000);
             });
         }
     }, [selectedAllEquipmentId]);
@@ -1057,19 +1057,17 @@ const ExploreByEquipment = () => {
                         NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
                     }
                 });
-                console.log('nulled', NulledData);
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
                 };
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {
-                    console.log('record', dataarr);
                     setSeriesData(dataarr);
                     //setSeriesLineData(dataarr);
                 }
 
-                setAllEquipmenData(dataarr);
+                //setAllEquipmenData(dataarr);
             })
             .catch((error) => {});
     };
