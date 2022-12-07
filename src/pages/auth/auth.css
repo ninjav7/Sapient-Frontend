@@ -24,7 +24,7 @@
     margin-bottom: 4rem;
 }
 .logoDesign{
-    width: 6.25rem;
+    width: 9.375rem;
     height:3.125rem;
 }
 body{
@@ -58,13 +58,12 @@ h3{
     font-size: 0.75rem;
 }
 
-.text-mutes{
-    color: #626B7F;
-    font-weight: 400 !important;
-}
 
 .text-muted{
     color: #626B7F;
+    font-weight: 500 !important;
+    font-size: 0.75rem;
+    padding-top: 0.75rem;
     
 }
 .alertPop{
@@ -74,7 +73,7 @@ h3{
     border-radius: 4px;
 }
 .alertText{
-    color: #626B7F;
+    color: #054F31;
     font-weight: 600 !important;
     font-size: 1rem;
 }

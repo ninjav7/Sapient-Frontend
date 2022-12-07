@@ -1,38 +1,35 @@
 import React from 'react';
-
-import { Row, Col, Label, FormGroup, Button, Alert, InputGroup } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 import './auth.css';
 import Slide1 from '../../assets/images/login/building-1.jpg';
 import Slide2 from '../../assets/images/login/building-2.jpg';
 import Slide3 from '../../assets/images/login/building-3.jpg';
+import Carousel from 'react-bootstrap/Carousel';
 
-function Holder({ title, rightContent }) {
+function Holder({ rightContent }) {
     return (
         <Row>
             <Col lg={6} className="pr-0 pl-0">
-                <div id="carouselExampleSlidesOnly" className="carousel slide" data-ride="carousel">
-                    <div className="carousel-inner">
-                        <div className="carousel-item active">
-                            <img className="backgroundStyle" src={Slide1} alt="First slide" />
-                            <div class="carousel-caption">
-                                <h3>A radically better way of achieving efficient buildings.</h3>
-                            </div>
-                        </div>
-                        <div className="carousel-item">
-                            <img className="backgroundStyle" src={Slide2} alt="Second slide" />
-                            <div class="carousel-caption">
-                                <h3>A radically better way of achieving efficient buildings.</h3>
-                            </div>
-                        </div>
-                        <div className="carousel-item">
-                            <img className="backgroundStyle" src={Slide3} alt="Third slide" />
-                            <div class="carousel-caption">
-                                <h3>A radically better way of achieving efficient buildings.</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* <div className="backgroundStyle"></div> */}
+                <Carousel controls={false} indicators={false}>
+                    <Carousel.Item>
+                        <img className="backgroundStyle" src={Slide3} />
+                        <Carousel.Caption>
+                            <h3>A radically better way of achieving efficient buildings.</h3>
+                        </Carousel.Caption>
+                    </Carousel.Item>
+                    <Carousel.Item>
+                        <img className="backgroundStyle" src={Slide2} />
+                        <Carousel.Caption>
+                            <h3>A radically better way of achieving efficient buildings.</h3>
+                        </Carousel.Caption>
+                    </Carousel.Item>
+                    <Carousel.Item>
+                        <img className="backgroundStyle" src={Slide1} />
+                        <Carousel.Caption>
+                            <h3>A radically better way of achieving efficient buildings.</h3>
+                        </Carousel.Caption>
+                    </Carousel.Item>
+                </Carousel>
             </Col>
             <Col lg={6} className="pr-0 pl-0">
                 <div className="rightSide">

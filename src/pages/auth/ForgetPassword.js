@@ -8,7 +8,7 @@ import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import './auth.css';
-import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
+import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 class ForgetPassword extends Component {
@@ -86,10 +86,7 @@ class ForgetPassword extends Component {
                                         <a href="/">
                                             <LogoSVG className="logoDesign" />
                                         </a>
-                                        <Typography.Header
-                                            size={Typography.Sizes.sm}
-                                            Type={Typography.Types.Bold}
-                                            className="text-muted">
+                                        <Typography.Header size={Typography.Sizes.sm} className="text-muted">
                                             {this.state.titleText}
                                         </Typography.Header>
                                     </div>
@@ -155,8 +152,7 @@ class ForgetPassword extends Component {
                                                 <AvGroup className="">
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Regular}
-                                                        className="text-muted mb-1">
+                                                        className="text-mute mb-1">
                                                         Email
                                                     </Typography.Subheader>
                                                     <InputGroup>

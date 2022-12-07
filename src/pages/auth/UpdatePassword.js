@@ -9,7 +9,7 @@ import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import './auth.css';
-import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
+import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -75,10 +75,7 @@ class Confirm extends Component {
                                         <a href="/">
                                             <LogoSVG className="logoDesign" />
                                         </a>
-                                        <Typography.Header
-                                            size={Typography.Sizes.sm}
-                                            Type={Typography.Types.Bold}
-                                            className="text-muted">
+                                        <Typography.Header size={Typography.Sizes.sm} className="text-muted">
                                             {this.state.titleText}
                                         </Typography.Header>
                                     </div>

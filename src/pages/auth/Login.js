@@ -8,7 +8,7 @@ import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
 import './auth.css';
-import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
+import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import {} from '../../assets/images/login/building-1.jpg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
@@ -83,10 +83,7 @@ class Login extends Component {
                                         <a href="/">
                                             <LogoSVG className="logoDesign" />
                                         </a>
-                                        <Typography.Header
-                                            size={Typography.Sizes.sm}
-                                            Type={Typography.Types.Bold}
-                                            className="text-muted">
+                                        <Typography.Header size={Typography.Sizes.sm} className="text-muted">
                                             Sign in
                                         </Typography.Header>
                                     </div>
@@ -106,10 +103,7 @@ class Login extends Component {
                                         className="authentication-form"
                                         autoComplete="off">
                                         <AvGroup className="">
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}
-                                                Type={Typography.Types.Regular}
-                                                className="text-muted mb-1">
+                                            <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
                                                 Email
                                             </Typography.Subheader>
                                             <InputGroup>
@@ -127,10 +121,7 @@ class Login extends Component {
                                         </AvGroup>
 
                                         <AvGroup className="mb-3 pt-5">
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}
-                                                Type={Typography.Types.Regular}
-                                                className="text-muted mb-1">
+                                            <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
                                                 Password
                                             </Typography.Subheader>
 
