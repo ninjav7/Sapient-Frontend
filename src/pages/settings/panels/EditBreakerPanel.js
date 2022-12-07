@@ -454,8 +454,8 @@ const EditBreakerPanel = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Edit Panel',
-                        path: '/settings/panels/create-panel',
+                        label: 'Panels',
+                        path: '/settings/panels',
                         active: true,
                     },
                 ];
@@ -464,13 +464,28 @@ const EditBreakerPanel = () => {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
+            window.scrollTo(0, 0);
         };
         updateBreadcrumbStore();
     }, []);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Panels',
+                    path: '/settings/panels',
+                    active: false,
+                },
+                {
+                    label: panel?.panel_name,
+                    path: '/settings/panels/edit-panel',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+    }, [panel]);
 
     useEffect(() => {
         setReactFlowDisconnectStyle({ ...reactFlowDisconnectStyle, height: `${dynamicDisconnectHeight}px` });

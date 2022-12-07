@@ -5,6 +5,7 @@ import 'react-time-picker/dist/TimePicker.css';
 import { Cookies } from 'react-cookie';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
 import { BaseUrl, updateAccount } from '../../services/Network';
@@ -22,10 +23,10 @@ const AccountSettings = () => {
     const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
     const [userPermission] = useAtom(userPermissionData);
 
-    let entryPoint=""
-    useEffect(()=>{
-        entryPoint="entered"
-    },[])
+    let entryPoint = '';
+    useEffect(() => {
+        entryPoint = 'entered';
+    }, []);
     const updateAccountName = async () => {
         localStorage.removeItem('accountName');
         const headers = {
@@ -51,7 +52,7 @@ const AccountSettings = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Account Settings',
+                        label: 'Settings',
                         path: '/settings/account',
                         active: true,
                     },
@@ -62,16 +63,26 @@ const AccountSettings = () => {
                 s.parent = 'account';
             });
         };
+
+        const updateBuildingStore = () => {
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
+                s.BldgTimeZone = '';
+            });
+        };
+
         updateBreadcrumbStore();
+        updateBuildingStore();
     }, []);
 
     useEffect(() => {
-        if(entryPoint==="entered"){
-        let usr_acc=localStorage.getItem('accountName');
-        UserStore.update((s) => {
-            s.accountName = usr_acc;
-        });
-    }
+        if (entryPoint === 'entered') {
+            let usr_acc = localStorage.getItem('accountName');
+            UserStore.update((s) => {
+                s.accountName = usr_acc;
+            });
+        }
     }, [userdata]);
 
     useEffect(() => {
@@ -115,7 +126,7 @@ const AccountSettings = () => {
                 </Col>
             </Row>
 
-            <Row className='mt-4'>
+            <Row className="mt-4">
                 <Col lg={8}>
                     <Card className="custom-card">
                         <CardHeader>
