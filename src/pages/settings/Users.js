@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Card, Table, Button } from 'reactstrap';
+import { Row, Col, Card, Table, Button, Input } from 'reactstrap';
 import moment from 'moment';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listUsers, addUser, addMemberUser, getMemberUser } from '../../services/Network';
+import { BaseUrl, listUsers, addUser, addMemberUser, getMemberUser, vendorPermissions } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -22,100 +22,122 @@ import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 
-const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
-    const [userPermission] = useAtom(userPermissionData);
+const SkeletonLoading = () => (
+    <SkeletonTheme color="$primary-gray-1000" height={35}>
+        <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Users',
-                        path: '/settings/users',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-    return (
-        <Card>
-            <Table className="mb-0 bordered table-hover">
-                <thead>
-                    <tr className="mouse-pointer">
-                        <th>Name</th>
-                        <th>Building Access</th>
-                        <th>Email</th>
-                        <th>Last Active</th>
-                    </tr>
-                </thead>
-                {isUserDataFetched ? (
-                    <tbody>
-                        <SkeletonTheme color="#202020" height={35}>
-                            <tr>
-                                <td>
-                                    <Skeleton count={5} />
-                                </td>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-                                <td>
-                                    <Skeleton count={5} />
-                                </td>
+            <th>
+                <Skeleton count={5} />
+            </th>
+        </tr>
+    </SkeletonTheme>
+);
 
-                                <td>
-                                    <Skeleton count={5} />
-                                </td>
+// const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
+//     const [userPermission] = useAtom(userPermissionData);
 
-                                <td>
-                                    <Skeleton count={5} />
-                                </td>
-                            </tr>
-                        </SkeletonTheme>
-                    </tbody>
-                ) : (
-                    <tbody>
-                        {userData.map((record, index) => {
-                            return (
-                                <tr className="mouse-pointer">
-                                    <td className="font-weight-bold panel-name">
-                                        {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                                            <Link to={`/settings/user-profile/single/${record?._id}`}>
-                                                <a>
-                                                    {record?.first_name
-                                                        ? record?.first_name + ' ' + record?.last_name
-                                                        : record?.name}
-                                                </a>
-                                            </Link>
-                                        ) : (
-                                            <>
-                                                <a>
-                                                    {record?.first_name
-                                                        ? record?.first_name + ' ' + record?.last_name
-                                                        : record?.name}
-                                                </a>
-                                            </>
-                                        )}
-                                    </td>
-                                    <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
-                                    <td className="">{record?.email === '' ? '-' : record?.email}</td>
-                                    <td className="font-weight-bold">
-                                        {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                )}
-            </Table>
-        </Card>
-    );
-};
+//     useEffect(() => {
+//         const updateBreadcrumbStore = () => {
+//             BreadcrumbStore.update((bs) => {
+//                 let newList = [
+//                     {
+//                         label: 'Users',
+//                         path: '/settings/users',
+//                         active: true,
+//                     },
+//                 ];
+//                 bs.items = newList;
+//             });
+//             ComponentStore.update((s) => {
+//                 s.parent = 'account';
+//             });
+//         };
+//         updateBreadcrumbStore();
+//     }, []);
+
+//     return (
+//         <Card>
+//             <Table className="mb-0 bordered table-hover">
+//                 <thead>
+//                     <tr className="mouse-pointer">
+//                         <th>Name</th>
+//                         <th>Building Access</th>
+//                         <th>Email</th>
+//                         <th>Last Active</th>
+//                     </tr>
+//                 </thead>
+//                 {isUserDataFetched ? (
+//                     <tbody>
+//                         <SkeletonTheme color="#202020" height={35}>
+//                             <tr>
+//                                 <td>
+//                                     <Skeleton count={5} />
+//                                 </td>
+
+//                                 <td>
+//                                     <Skeleton count={5} />
+//                                 </td>
+
+//                                 <td>
+//                                     <Skeleton count={5} />
+//                                 </td>
+
+//                                 <td>
+//                                     <Skeleton count={5} />
+//                                 </td>
+//                             </tr>
+//                         </SkeletonTheme>
+//                     </tbody>
+//                 ) : (
+//                     <tbody>
+//                         {userData.map((record, index) => {
+//                             return (
+//                                 <tr className="mouse-pointer">
+//                                     <td className="font-weight-bold panel-name">
+//                                         {userPermission?.user_role === 'admin' ||
+//                                         userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
+//                                             <Link to={`/settings/user-profile/single/${record?._id}`}>
+//                                                 <a>
+//                                                     {record?.first_name
+//                                                         ? record?.first_name + ' ' + record?.last_name
+//                                                         : record?.name}
+//                                                 </a>
+//                                             </Link>
+//                                         ) : (
+//                                             <>
+//                                                 <a>
+//                                                     {record?.first_name
+//                                                         ? record?.first_name + ' ' + record?.last_name
+//                                                         : record?.name}
+//                                                 </a>
+//                                             </>
+//                                         )}
+//                                     </td>
+//                                     <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
+//                                     <td className="">{record?.email === '' ? '-' : record?.email}</td>
+//                                     <td className="font-weight-bold">
+//                                         {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
+//                                     </td>
+//                                 </tr>
+//                             );
+//                         })}
+//                     </tbody>
+//                 )}
+//             </Table>
+//         </Card>
+//     );
+// };
 
 const Users = () => {
     // Modal states
@@ -138,11 +160,13 @@ const Users = () => {
     const [dataFetched, setDataFetched] = useState(false);
 
     const [userSearchInfo, setUserSearchInfo] = useState('');
+    const [rolesData, setRolesData] = useState([]);
 
     const [userObj, setUserObj] = useState({
         first_name: '',
         last_name: '',
         email: '',
+        role: '',
     });
 
     // setFormValidation
@@ -202,14 +226,14 @@ const Users = () => {
             };
 
             let userData = Object.assign({}, userObj);
-
+            let params = '?request_type=invite';
             await axios
-                .post(`${BaseUrl}${addMemberUser}`, userData, {
+                .post(`${BaseUrl}${addMemberUser}${params}`, userData, {
                     headers: header,
                 })
                 .then((res) => {
                     let response = res.data;
-                    setGeneratedUserId(response.id);
+                    //setGeneratedUserId(response.id);
                     getUsersList();
                 });
             setIsProcessing(false);
@@ -223,6 +247,25 @@ const Users = () => {
         getUsersList();
     }, 1000);
 
+    const fetchRoles = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            await axios.post(`${BaseUrl}${vendorPermissions}`, {}, { headers }).then((res) => {
+                let response = res.data;
+                console.log(response.data);
+                setRolesData(response.data);
+            });
+        } catch (error) {}
+    };
+
+    useEffect(() => {
+        fetchRoles();
+    }, []);
     useEffect(() => {
         debouncedFetchData();
     }, [bldgId, userSearchInfo]);
@@ -241,6 +284,42 @@ const Users = () => {
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.post(`${BaseUrl}${addMemberUser}`, { headers }).then((res) => {});
+    };
+
+    const currentRow = () => {
+        return userData;
+    };
+    const renderName = (row) => {
+        return (
+            <>
+                {userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
+                    <Link to={`/settings/user-profile/single/${row?._id}`}>
+                        <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
+                    </Link>
+                ) : (
+                    <>
+                        <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
+                    </>
+                )}
+            </>
+        );
+    };
+
+    const renderRole = (row) => {
+        return <Typography.Body size={Typography.Sizes.sm}>{row?.role === '' ? '-' : row?.role}</Typography.Body>;
+    };
+
+    const renderEmail = (row) => {
+        return <Typography.Body size={Typography.Sizes.sm}>{row?.email === '' ? '-' : row?.email}</Typography.Body>;
+    };
+
+    const renderLastActive = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.sm}>
+                {row?.last_login === '' ? '-' : row?.last_login}
+            </Typography.Body>
+        );
     };
 
     return (
@@ -269,31 +348,44 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-4">
-                <Col xl={3}>
-                    <div className="">
-                        <div className="active-sensor-header">
-                            <div className="search-container mr-2">
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                <input
-                                    className="search-box ml-2"
-                                    type="search"
-                                    name="search"
-                                    placeholder="Search..."
-                                    value={userSearchInfo}
-                                    onChange={(e) => {
-                                        setUserSearchInfo(e.target.value);
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </Col>
-            </Row>
-
             <Row>
                 <Col lg={12} className="mt-4">
-                    <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
+                    <DataTableWidget
+                        isLoading={isUserDataFetched}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="users"
+                        buttonGroupFilterOptions={[]}
+                        onSearch={setUserSearchInfo}
+                        onStatus={[]}
+                        rows={currentRow()}
+                        searchResultRows={currentRow()}
+                        headers={[
+                            {
+                                name: 'Name',
+                                accessor: 'name',
+                                callbackValue: renderName,
+                            },
+                            {
+                                name: 'Email',
+                                accessor: 'email',
+                                callbackValue: renderEmail,
+                            },
+                            {
+                                name: 'Role',
+                                accessor: 'role',
+                                callbackValue: renderRole,
+                            },
+
+                            {
+                                name: 'Last Active',
+                                accessor: 'last_active',
+                                callbackValue: renderLastActive,
+                            },
+                        ]}
+                        totalCount={(() => {
+                            return 0;
+                        })()}
+                    />
                 </Col>
             </Row>
 
@@ -349,14 +441,20 @@ const Users = () => {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>User Role</Form.Label>
-                            <Form.Control
-                                type="text"
+                            <Input
+                                type="select"
+                                name="select"
+                                id="roles"
                                 className="font-weight-bold"
-                                // onChange={(e) => {
-                                //     // handleChange('email', e.target.value);
-                                // }}
-                                // value={userObj.email}
-                            />
+                                onChange={(e) => {
+                                    handleChange('role', e.target.value);
+                                }}
+                                value={userObj?.role}>
+                                <option selected>Select Role</option>
+                                {rolesData?.map((record) => {
+                                    return <option value={record?.id}>{record?.name}</option>;
+                                })}
+                            </Input>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -373,7 +471,6 @@ const Users = () => {
                         <Button
                             style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
                             variant="primary"
-                            disabled={!formValidation}
                             onClick={() => {
                                 saveUserData();
                             }}>
