@@ -17,11 +17,13 @@ export function getEqupmentDataRequest(
     bldgId,
     search,
     equipmentTypeFilterString,
+    endUseFilterString,
     macTypeFilterString,
     locationTypeFilterString,
     floorTypeFilterString,
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
+    tagsFilterString,
     getParams,
     withPagination
 ) {
@@ -40,6 +42,12 @@ export function getEqupmentDataRequest(
     };
     if (equipmentTypeFilterString.length) {
         filteredData['equipment_types'] = equipmentTypeFilterString;
+    }
+    if (tagsFilterString.length) {
+        filteredData['tags'] = tagsFilterString;
+    }
+    if (endUseFilterString.length) {
+        filteredData['end_uses'] = endUseFilterString;
     }
 
     return axiosInstance
@@ -132,11 +140,12 @@ export function getFiltersForEquipmentRequest(args) {
                     query_collection: 'equipment',
                     building_id: args.bldgId,
                     mac_address: args.macTypeFilterString,
-                    equipment_types: args.equpimentTypeFilterString,
+                    equipment_types: args.equipmentTypeFilterString,
+                    end_use: args.endUseFilterString,
                     floor_id: args.floorTypeFilterString,
                     space_id: args.spaceTypeFilterString,
                     space_type_id: args.spaceTypeTypeFilterString,
-                    tags: args.tags,
+                    tags: args.tagsFilterString,
                 },
                 _.identity
             ),
