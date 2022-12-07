@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Link } from 'react-router-dom';
-import { Col, FormGroup, Button, Alert, InputGroup } from 'reactstrap';
-import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
+import { Container, Row, Col, Card, CardBody } from 'reactstrap';
 import { isUserAuthenticated } from '../../helpers/authUtils';
+import { FormGroup, Button, Alert, InputGroup } from 'reactstrap';
+import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
@@ -11,18 +12,16 @@ import './auth.css';
 import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-class ForgetPassword extends Component {
+
+class Confirm extends Component {
     _isMounted = false;
 
     constructor(props) {
         super(props);
-
-        this.handleValidSubmit = this.handleValidSubmit.bind(this);
-        this.onDismiss = this.onDismiss.bind(this);
         this.state = {
             passwordResetSuccessful: false,
             isLoading: false,
-            titleText: 'Reset Password',
+            titleText: 'Set Password',
             showReset: false,
             redirectToLogin: false,
         };
@@ -38,16 +37,6 @@ class ForgetPassword extends Component {
         document.body.classList.remove('authentication-bg');
     }
 
-    /**
-     * On error dismiss
-     */
-    onDismiss() {
-        this.setState({ passwordResetSuccessful: false });
-    }
-
-    /**
-     * Handles the submit
-     */
     handleValidSubmit = (event, values) => {
         this.setState({ isLoading: true });
 
@@ -97,27 +86,20 @@ class ForgetPassword extends Component {
                                         <>
                                             <Alert color="success" className="alertPop" isOpen={true}>
                                                 <div>
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="alertText">
+                                                    <Typography.Subheader className="alertText">
                                                         <FontAwesomeIcon
                                                             icon={faCircleCheck}
                                                             size="lg"
                                                             className="ml-2 mr-2"
                                                             style={{ marginRight: '4px', color: 'green' }}
                                                         />
-                                                        Request Sent
+                                                        Password Set
                                                     </Typography.Subheader>
                                                 </div>
                                             </Alert>
                                             <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
-                                                If a login is associated with your email, an email will be sent with
-                                                instructions on how to reset your password.
-                                            </Typography.Subheader>
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}
-                                                className="text-mute mt-4 mb-5">
-                                                It may take a few minutes for the email to be delivered.
+                                                You have successfully set your password. You may now log in to the
+                                                Sapient Energy Portal.
                                             </Typography.Subheader>
 
                                             <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
@@ -134,15 +116,6 @@ class ForgetPassword extends Component {
                                         </>
                                     ) : (
                                         <>
-                                            <Typography.Subheader size={Typography.Sizes.md} className="text-mute">
-                                                Please enter the email associated with your account.
-                                            </Typography.Subheader>
-                                            <Typography.Subheader
-                                                size={Typography.Sizes.md}
-                                                className="text-mute mt-4 mb-5">
-                                                Instructions on resetting your password will be sent to the email
-                                            </Typography.Subheader>
-
                                             {this.props.error && (
                                                 <Alert color="danger" isOpen={this.props.error ? true : false}>
                                                     <div>{this.props.error}</div>
@@ -153,29 +126,46 @@ class ForgetPassword extends Component {
                                                 onValidSubmit={this.handleValidSubmit}
                                                 className="authentication-form">
                                                 <AvGroup className="">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Regular}
-                                                        className="text-muted mb-1">
-                                                        Email
-                                                    </Typography.Subheader>
+                                                    <Typography.Header className="text-mute mb-2">
+                                                        New Password
+                                                    </Typography.Header>
+
                                                     <InputGroup>
                                                         <AvInput
-                                                            type="text"
-                                                            name="email"
-                                                            id="email"
-                                                            placeholder="hello@Sapient.industries"
-                                                            value={this.state.email}
+                                                            type="password"
+                                                            name="password"
+                                                            id="password"
+                                                            placeholder="Enter your password"
+                                                            value={this.state.password}
                                                             required
                                                         />
                                                     </InputGroup>
-
+                                                    <Typography.Subheader className="mt-2 mb-4">
+                                                        Use 8 or more characters with a mix of letters, numbers &
+                                                        symbols
+                                                    </Typography.Subheader>
+                                                    <AvFeedback>This field is invalid</AvFeedback>
+                                                </AvGroup>
+                                                <AvGroup className="">
+                                                    <Typography.Header className=" text-mute mb-2">
+                                                        Confirm New Password
+                                                    </Typography.Header>
+                                                    <InputGroup>
+                                                        <AvInput
+                                                            type="password"
+                                                            name="password"
+                                                            id="password"
+                                                            placeholder="Enter your password"
+                                                            value={this.state.password}
+                                                            required
+                                                        />
+                                                    </InputGroup>
                                                     <AvFeedback>This field is invalid</AvFeedback>
                                                 </AvGroup>
 
                                                 <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
                                                     <Button color="primary" className="btn-block">
-                                                        Reset Password
+                                                        Set Password
                                                     </Button>
                                                 </FormGroup>
                                             </AvForm>
@@ -191,4 +181,4 @@ class ForgetPassword extends Component {
     }
 }
 
-export default connect()(ForgetPassword);
+export default connect()(Confirm);

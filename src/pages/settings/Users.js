@@ -1,19 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
+import { Row, Col, Card, Table, Button } from 'reactstrap';
 import moment from 'moment';
-import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -30,6 +17,10 @@ import './style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import debounce from 'lodash.debounce';
+import Typography from '../../sharedComponents/typography';
+import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import { Checkbox } from '../../sharedComponents/form/checkbox';
 
 const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -56,79 +47,71 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
     return (
         <Card>
             <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Building Access</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                        </tr>
-                    </thead>
-                    {isUserDataFetched ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                <thead>
+                    <tr className="mouse-pointer">
+                        <th>Name</th>
+                        <th>Building Access</th>
+                        <th>Email</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                {isUserDataFetched ? (
+                    <tbody>
+                        <SkeletonTheme color="#202020" height={35}>
+                            <tr>
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+                            </tr>
+                        </SkeletonTheme>
+                    </tbody>
+                ) : (
+                    <tbody>
+                        {userData.map((record, index) => {
+                            return (
+                                <tr className="mouse-pointer">
+                                    <td className="font-weight-bold panel-name">
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
+                                            <Link to={`/settings/user-profile/single/${record?._id}`}>
+                                                <a>
+                                                    {record?.first_name
+                                                        ? record?.first_name + ' ' + record?.last_name
+                                                        : record?.name}
+                                                </a>
+                                            </Link>
+                                        ) : (
+                                            <>
+                                                <a>
+                                                    {record?.first_name
+                                                        ? record?.first_name + ' ' + record?.last_name
+                                                        : record?.name}
+                                                </a>
+                                            </>
+                                        )}
+                                    </td>
+                                    <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
+                                    <td className="">{record?.email === '' ? '-' : record?.email}</td>
+                                    <td className="font-weight-bold">
+                                        {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
                                     </td>
                                 </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {userData.map((record, index) => {
-                                return (
-                                    <tr className="mouse-pointer">
-                                        <td className="font-weight-bold panel-name">
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                                                <Link to={`/settings/user-profile/single/${record?._id}`}>
-                                                    <a>
-                                                        {record?.first_name
-                                                            ? record?.first_name + ' ' + record?.last_name
-                                                            : record?.name}
-                                                    </a>
-                                                </Link>
-                                            ) : (
-                                                <>
-                                                    <a>
-                                                        {record?.first_name
-                                                            ? record?.first_name + ' ' + record?.last_name
-                                                            : record?.name}
-                                                    </a>
-                                                </>
-                                            )}
-                                            {/* {!userPermission?.permissions?.permissions?.account_user_permission
-                                                    ?.edit && (
-                                                    <a>
-                                                        {record?.first_name
-                                                            ? record?.first_name + ' ' + record?.last_name
-                                                            : record?.name}
-                                                    </a>
-                                                )} */}
-                                        </td>
-                                        <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
-                                        <td className="">{record?.email === '' ? '-' : record?.email}</td>
-                                        <td className="font-weight-bold">
-                                            {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
+                            );
+                        })}
+                    </tbody>
+                )}
             </Table>
         </Card>
     );
@@ -251,9 +234,6 @@ const Users = () => {
         getUsersList();
     }, [generatedUserId]);
 
-    // TODO:
-    const [addMemberUserBody, seTaddMemberUserBody] = useState({});
-
     const createUserMember = () => {
         const headers = {
             'Content-Type': 'application/json',
@@ -312,7 +292,7 @@ const Users = () => {
             </Row>
 
             <Row>
-                <Col lg={12} className='mt-4'>
+                <Col lg={12} className="mt-4">
                     <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
                 </Col>
             </Row>
@@ -321,7 +301,7 @@ const Users = () => {
                 <Modal.Header>
                     <Modal.Title>Add User</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body className="add-user-model">
                     <Form>
                         <Row>
                             <Col md={6}>
@@ -365,6 +345,17 @@ const Users = () => {
                                     handleChange('email', e.target.value);
                                 }}
                                 value={userObj.email}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>User Role</Form.Label>
+                            <Form.Control
+                                type="text"
+                                className="font-weight-bold"
+                                // onChange={(e) => {
+                                //     // handleChange('email', e.target.value);
+                                // }}
+                                // value={userObj.email}
                             />
                         </Form.Group>
                     </Form>

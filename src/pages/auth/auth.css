@@ -1,11 +1,81 @@
 .auth-container{
     margin:0 auto !important;
     }
-    
-.authbackground {
-    background-image: url('../../assets/images/login.jpg');
-    background-repeat: no-repeat;
+
+.backgroundStyle{
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-repeat: no-repeat;
     background-size: 100% 100%;
     }
+.subButton{
+    width:100%;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.logoContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 4rem;
+}
+.logoDesign{
+    width: 6.25rem;
+    height:3.125rem;
+}
+body{
+    margin:0px !important;
+}
+.rightContentStyle{
+    width:100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+.rightSide{
+    height: 100%;
+    width: 100%;
+}
+
+.carousel-caption{
+    padding-top: 0rem;
+    padding-bottom: 65%;
+}
+
+h3{
+    color: white;
+}
+
+.text-mute{
+    color: #626B7F;
+    font-weight: 500 !important;
+    font-size: 0.75rem;
+}
+
+.text-mutes{
+    color: #626B7F;
+    font-weight: 400 !important;
+}
+
+.text-muted{
+    color: #626B7F;
     
+}
+.alertPop{
+    background: #D1FADF !important;
+    border-color: #D1FADF !important;
+    color: #054F31 !important;
+    border-radius: 4px;
+}
+.alertText{
+    color: #626B7F;
+    font-weight: 600 !important;
+    font-size: 1rem;
+}
     

@@ -37,9 +37,8 @@ const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
-const Register = React.lazy(() => import('../pages/auth/Register'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
-const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
+const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
 // apps
@@ -653,27 +652,20 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        // {
-        //     path: '/account/register',
-        //     name: 'Register',
-        //     component: Register,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/confirm',
-        //     name: 'Confirm',
-        //     component: Confirm,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/forget-password',
-        //     name: 'Forget Password',
-        //     component: ForgetPassword,
-        //     route: Route,
-        //     visibility: true,
-        // },
+        {
+            path: '/account/update-password',
+            name: 'Update Password',
+            component: UpdatePassword,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/forget-password',
+            name: 'Forget Password',
+            component: ForgetPassword,
+            route: Route,
+            visibility: true,
+        },
         {
             path: '/*',
             name: 'Error 404',
