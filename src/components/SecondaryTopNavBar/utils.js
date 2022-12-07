@@ -29,14 +29,14 @@ export const accountRoutes = [
 
 export const buildingRoutes = ['/energy/building/overview', '/energy/end-uses', '/energy/time-of-day'];
 
-export const updateBuildingStore = (bldg) => {
-    localStorage.setItem('buildingId', bldg?.value);
-    localStorage.setItem('buildingName', bldg?.label);
-    localStorage.setItem('buildingTimeZone', bldg?.timezone === '' ? 'US/Eastern' : bldg?.timezone);
+export const updateBuildingStore = (bldgId, bldgName, bldgTimeZone) => {
+    localStorage.setItem('buildingId', bldgId);
+    localStorage.setItem('buildingName', bldgName);
+    localStorage.setItem('buildingTimeZone', bldgTimeZone === '' ? 'US/Eastern' : bldgTimeZone);
 
     BuildingStore.update((s) => {
-        s.BldgId = bldg?.value;
-        s.BldgName = bldg?.label;
-        s.BldgTimeZone = bldg?.timezone === '' ? 'US/Eastern' : bldg?.timezone;
+        s.BldgId = bldgId;
+        s.BldgName = bldgName;
+        s.BldgTimeZone = bldgTimeZone === '' ? 'US/Eastern' : bldgTimeZone;
     });
 };

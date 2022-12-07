@@ -5,6 +5,7 @@ import 'react-time-picker/dist/TimePicker.css';
 import { Cookies } from 'react-cookie';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
 import { BaseUrl, updateAccount } from '../../services/Network';
@@ -62,7 +63,17 @@ const AccountSettings = () => {
                 s.parent = 'account';
             });
         };
+
+        const updateBuildingStore = () => {
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
+                s.BldgTimeZone = '';
+            });
+        };
+
         updateBreadcrumbStore();
+        updateBuildingStore();
     }, []);
 
     useEffect(() => {
