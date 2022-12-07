@@ -81,16 +81,16 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA' },
-        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA' },
-        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA' },
-        { value: 'power', label: 'Power (W)', unit: 'W' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[2].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
     const [searchSensor, setSearchSensor] = useState('');
-
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
     const handleSearchChange = (e) => {
         setSearchSensor(e.target.value);
     };
@@ -521,6 +521,8 @@ const IndividualPassiveDevice = () => {
                 setConsumption={setConsumption}
                 selectedUnit={selectedUnit}
                 setSelectedUnit={setSelectedUnit}
+                selectedConsumptionLabel={selectedConsumptionLabel}
+                setSelectedConsumptionLabel={setSelectedConsumptionLabel}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}

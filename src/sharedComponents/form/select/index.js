@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
+import cx from 'classnames';
 
 import MultiSelect from './MultiSelect';
-import { Control, DropdownIndicator, MenuList, Option, SingleValue } from './customComponents';
+import {
+    Control,
+    DropdownIndicator,
+    MenuList,
+    Option,
+    SingleValue,
+    ValueContainerSingle as ValueContainer,
+    GroupHeading,
+} from './customComponents';
 
+import useClickOutside from '../../hooks/useClickOutside';
 import { stringOrNumberPropTypes } from '../../helpers/helper';
 
 import './style.scss';
@@ -26,9 +36,54 @@ const Select = ({
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
+    const containerRef = useRef(null);
+
+    const [isFocused, setIsFocused] = useState(false);
+    const [inputValue, setInputValue] = useState('');
+
+    const events = props.isSearchable ? ['mousedown'] : [];
+
+    const closeMenu = useCallback(() => {
+        setIsFocused(false);
+        setInputValue('');
+    }, []);
+
+    const clickOutsideHandler = useCallback((event) => {
+        let menu = containerRef.current.querySelector('.select__menu');
+
+        if (!containerRef.current.contains(event.target) || !menu || !menu.contains(event.target)) {
+            closeMenu();
+        }
+    }, []);
+
+    useClickOutside(containerRef, events, clickOutsideHandler);
+
+    const propsForSearchable = {
+        ...(props.isSearchable
+            ? {
+                  closeMenu,
+                  inputValue,
+                  onMenuInputFocus: (event) => {
+                      props.onMenuInputFocus && props.onMenuInputFocus(event);
+                      setIsFocused(true);
+                  },
+                  onChange: (event) => {
+                      props.onChange && props.onChange(event);
+                      setIsFocused(false);
+                  },
+                  onInputChange: (val) => {
+                      props.onInputChange && props.onInputChange(val);
+                      setInputValue(val);
+                  },
+
+                  menuIsOpen: isFocused || undefined,
+                  isFocused: isFocused || undefined,
+              }
+            : {}),
+    };
 
     return (
-        <div className={`react-select-wrapper ${className}`}>
+        <div className={cx(`react-select-wrapper`, className)} ref={containerRef}>
             <ReactSelect
                 {...props}
                 type={type}
@@ -37,14 +92,16 @@ const Select = ({
                 value={currentValue || selectedOption}
                 components={{
                     ...Object.assign(
-                        { DropdownIndicator, Control, Option, SingleValue },
-                        props.isSearchable ? { MenuList } : null
+                        { DropdownIndicator, Control, Option, SingleValue, ValueContainer },
+                        props.isSearchable ? { MenuList, ValueContainer, GroupHeading } : null
                     ),
                     ...props.components,
                 }}
                 className={selectClassName}
                 isSearchable={false}
                 backspaceRemovesValue={false}
+                classNamePrefix="select"
+                {...propsForSearchable}
             />
         </div>
     );
@@ -60,7 +117,7 @@ Select.propTypes = {
     defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]).isRequired,
 
     // The difference between default and current values, is currentValue allows to change current value dynamically
-    currentValue: PropTypes.arrayOf(PropTypes.object),
+    currentValue: PropTypes.object,
     options: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]).isRequired,
@@ -73,6 +130,7 @@ Select.propTypes = {
             isSelected: PropTypes.bool,
             isDisabled: PropTypes.bool,
             isFocused: PropTypes.bool,
+            hasValue: PropTypes.bool,
         })
     ).isRequired,
     customOption: PropTypes.node,
@@ -82,6 +140,11 @@ Select.propTypes = {
     isSearchable: PropTypes.bool,
     defaultMenuIsOpen: PropTypes.bool,
     menuIsOpen: PropTypes.bool,
+    customSearchCallback: PropTypes.func,
+    searchFieldsProps: PropTypes.shape({
+        wrapper: PropTypes.any,
+    }),
+    searchNoResults: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
 };
 
 export default Select;

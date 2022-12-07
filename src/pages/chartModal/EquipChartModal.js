@@ -267,9 +267,12 @@ const EquipChartModal = ({
                         let NulledData = [];
                         data[i].data.map((ele) => {
                             if (ele.consumption === '') {
-                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: null });
+                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp).getTime()), y: null });
                             } else {
-                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: ele.consumption });
+                                NulledData.push({
+                                    x: moment.utc(new Date(ele.time_stamp).getTime()),
+                                    y: ele.consumption,
+                                });
                             }
                         });
                         let recordToInsert = {
@@ -292,9 +295,12 @@ const EquipChartModal = ({
                     let NulledData = [];
                     data.map((ele) => {
                         if (ele?.consumption === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp).getTime()), y: null });
                         } else {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                            NulledData.push({
+                                x: moment.utc(new Date(ele?.time_stamp).getTime()),
+                                y: ele?.consumption,
+                            });
                         }
                     });
                     let recordToInsert = {
@@ -855,6 +861,8 @@ const EquipChartModal = ({
                                         <LineChart
                                             title={''}
                                             subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
                                             data={deviceData}
                                             dateRange={fetchDateRange(startDate, endDate)}
                                         />

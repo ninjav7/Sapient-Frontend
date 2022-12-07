@@ -6,10 +6,11 @@ import Typography from '../../typography';
 import { TinyPieChart } from '../../tinyPieChart';
 import { Checkbox } from '../checkbox';
 import Input from '../input/Input';
+import Brick from '../../brick';
 
 import { selectAllOption } from './constants';
 import { DROPDOWN_INPUT_TYPES } from './index';
-import { conditionalClass, optionClasses } from './helpers';
+import { conditionalClass, defaultSearch, optionClasses } from './helpers';
 
 import { ReactComponent as CheckedSVG } from '../../assets/icons/checked-big.svg';
 import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
@@ -112,6 +113,31 @@ export const Option = (props) => {
     const className = optionClasses({ isDisabled, isSelected, isFocused, customOption });
 
     return <CustomOptionContent {...props} className={className} component={components.Option} />;
+};
+
+export const ValueContainerSingle = ({ children, ...props }) => {
+    // We do this because react-select automatically deletes selected value during search.
+    const { label } = props.getValue()[0] || {};
+
+    return (
+        <components.ValueContainer {...props}>
+            {!!props.selectProps.inputValue && (
+                <>
+                    <SingleValue {...props} data={{}} children={label} />
+                </>
+            )}
+
+            {children}
+        </components.ValueContainer>
+    );
+};
+
+export const GroupHeading = ({ children, ...props }) => {
+    if (!props.data.hasValue) {
+        return null;
+    }
+
+    return <components.GroupHeading {...props}>{children}</components.GroupHeading>;
 };
 
 //Multi
@@ -229,52 +255,113 @@ export const ValueContainerMulti = ({ children, ...props }) => {
     );
 };
 
-export const MenuList = ({ selectProps: { onMenuInputFocus }, ...props }) => {
+export const MenuList = ({
+    selectProps: {
+        onMenuInputFocus,
+        closeMenu,
+        onInputChange,
+        inputValue,
+        customSearchCallback,
+        isMulti,
+        searchFieldsProps,
+        searchNoResults,
+    },
+    ...props
+}) => {
     const [value, setValue] = useState('');
 
-    const handleMouseDown = (event) => {
+    const memoizedCallBack = useCallback((event) => {
         event.stopPropagation();
-        event.preventDefault();
-
         event.target.focus();
-    };
+    }, []);
 
-    const handleChange = (event) => {
-        event.stopPropagation();
-        event.preventDefault();
+    const memoizedChangeHandler = useCallback(
+        (event) => {
+            if (customSearchCallback) {
+                return setValue(event.target.value);
+            }
 
-        event.target.focus();
-        setValue(event.target.value);
-    };
-
-    //@TODO Implement search if options are grouped
-    const filteredChildren = React.Children.toArray(props.children).filter(({ props }) =>
-        props.data.label.toLowerCase().includes(value.toLowerCase())
+            onInputChange &&
+                onInputChange(event.currentTarget.value, {
+                    action: 'input-change',
+                });
+        },
+        [customSearchCallback]
     );
+
+    const memoizedKeyDownHandler = useCallback((event) => {
+        if (event.key === 'Escape') {
+            closeMenu();
+        }
+    }, []);
+
+    // Copied from source
+    const ariaAttributes = {
+        'aria-autocomplete': 'list',
+        'aria-label': props['aria-label'],
+        'aria-labelledby': props['aria-labelledby'],
+    };
+
+    const filteredChildren = (() => {
+        if (customSearchCallback) {
+            return customSearchCallback({
+                data: React.Children.toArray(props.children),
+                query: {
+                    setValue,
+                    value,
+                },
+                nativeSearch: {
+                    inputValue,
+                    memoizedChangeHandler,
+                },
+            });
+        }
+
+        return props.children;
+    })();
+
+    const isSearchNoResults = typeof searchNoResults === 'string';
+
+    const renderNoResultsContent = () => {
+        if (!isSearchNoResults && React.isValidElement(searchNoResults)) {
+            return React.cloneElement(searchNoResults, { ...searchNoResults?.props });
+        }
+
+        return (
+            <Typography.Body size={Typography.Sizes.xs} className="text-center p-2">
+                {isSearchNoResults ? searchNoResults : 'No options'}
+            </Typography.Body>
+        );
+    };
 
     return (
         <>
-            <div className="search-field-wrapper">
+            <div
+                {...searchFieldsProps?.wrapper}
+                className={cx('search-field-wrapper', searchFieldsProps?.wrapper.className)}>
                 <Input
-                    onChange={handleChange}
+                    placeholder="Search..."
+                    {...ariaAttributes}
+                    autoCorrect="off"
+                    autoComplete="off"
+                    spellCheck="false"
+                    type="text"
                     iconUrl={SearchURL}
-                    value={value}
-                    onMouseDown={handleMouseDown}
-                    onInput={() => {}}
-                    onKeyDown={null}
+                    {...searchFieldsProps}
+                    value={customSearchCallback ? value : inputValue}
+                    onChange={memoizedChangeHandler}
+                    onMouseDown={memoizedCallBack}
+                    onTouchEnd={memoizedCallBack}
                     onFocus={onMenuInputFocus}
-                    placeholder="Search"
+                    onKeyDown={memoizedKeyDownHandler}
                 />
+
+                {/* We need it because we don't have 'select all' with margin for single select */}
+                {!isMulti && <Brick sizeInRem={0.625} />}
             </div>
 
             <components.MenuList {...props}>
-                {filteredChildren.length ? (
-                    filteredChildren
-                ) : (
-                    <Typography.Body size={Typography.Sizes.xs} className="text-center p-2">
-                        No options
-                    </Typography.Body>
-                )}
+                {filteredChildren.length ? filteredChildren : renderNoResultsContent()}
             </components.MenuList>
         </>
     );

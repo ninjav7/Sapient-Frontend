@@ -32,10 +32,10 @@ export function fetchExploreBuildingList(
             gte: (minConValue - 1) * 1000,
             lte: (maxConValue + 1) * 1000,
         };
-    if ((minPerValue !== 0 || maxPerValue !== 0) && perAPIFlag !== '')
+    if (perAPIFlag !== '')
         obj['change'] = {
             gte: minPerValue,
-            lte: maxPerValue + 1,
+            lte: maxPerValue,
         };
     if ((minSqftValue !== 0 || maxSqftValue !== 0) && sqftAPIFlag !== '')
         obj['sq_ft_range'] = {
@@ -87,7 +87,7 @@ export function fetchExploreEquipmentList(
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
         };
-    if ((minPerValue !== 0 || maxPerValue !== 0) && perAPIFlag !== '')
+    if (perAPIFlag !== '')
         payload['change'] = {
             gte: Number(minPerValue),
             lte: Number(maxPerValue),

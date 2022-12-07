@@ -123,6 +123,8 @@ const ExploreByEquipment = () => {
     const [maxConValue, set_maxConValue] = useState(0);
     const [minPerValue, set_minPerValue] = useState(0);
     const [maxPerValue, set_maxPerValue] = useState(0);
+    const [topVal, setTopVal] = useState(0);
+    const [bottomVal, setBottomVal] = useState(0);
     const [currentButtonId, setCurrentButtonId] = useState(0);
     const [isopened, setIsOpened] = useState(false);
 
@@ -155,7 +157,7 @@ const ExploreByEquipment = () => {
             for (let i = 0; i < selectedIds?.length; i++) {
                 arr.push(selectedIds[i]);
             }
-
+            setSeriesData([]);
             setSelectedAllEquipmentId(arr);
         } else {
             setSelectedEquipmentId('');
@@ -366,7 +368,14 @@ const ExploreByEquipment = () => {
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
             if (filters?.data?.data !== null) {
                 setFilterData(filters.data.data);
-
+                setTopVal(
+                    Math.round(
+                        filters.data.data.max_change === filters.data.data.min_change
+                            ? filters.data.data.max_change + 1
+                            : filters.data.data.max_change
+                    )
+                );
+                setBottomVal(Math.round(filters.data.data.min_change));
                 setTopConsumption(Math.abs(Math.round(filters?.data?.data?.max_consumption / 1000)));
                 setBottomConsumption(Math.abs(Math.round(filters?.data?.data?.min_consumption / 1000)));
                 setTopPerChange(
@@ -447,8 +456,8 @@ const ExploreByEquipment = () => {
                         componentProps: {
                             prefix: ' %',
                             title: '% Change',
-                            min: bottomPerChange,
-                            max: topPerChange + 1,
+                            min: bottomVal,
+                            max: topVal + 1,
                             range: [minPerValue, maxPerValue],
                             withTrendsFilter: true,
                             currentButtonId: currentButtonId,
@@ -464,18 +473,38 @@ const ExploreByEquipment = () => {
                                         setCurrentButtonId(0);
                                         set_minPerValue(bottomPerChange);
                                         set_maxPerValue(topPerChange);
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(topPerChange);
                                     }
                                     if (args[0] === 1) {
                                         setIsOpened(true);
                                         setCurrentButtonId(1);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(neutralPerChange);
+                                        if (bottomPerChange < 0) {
+                                            setBottomVal(bottomPerChange);
+                                            setTopVal(neutralPerChange);
+                                            set_minPerValue(bottomPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        } else if (bottomPerChange >= 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(neutralPerChange + 1);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        }
                                     }
                                     if (args[0] === 2) {
                                         setIsOpened(true);
                                         setCurrentButtonId(2);
-                                        set_minPerValue(neutralPerChange);
-                                        set_maxPerValue(topPerChange);
+                                        if (topPerChange > 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(topPerChange);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(topPerChange);
+                                        } else if (bottomPerChange >= 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(neutralPerChange + 1);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        }
                                     }
                                 }
                             },
@@ -625,8 +654,8 @@ const ExploreByEquipment = () => {
                     componentProps: {
                         prefix: ' %',
                         title: '% Change',
-                        min: bottomPerChange,
-                        max: topPerChange + 1,
+                        min: bottomVal,
+                        max: topVal + 1,
                         range: [minPerValue, maxPerValue],
                         withTrendsFilter: true,
                         currentButtonId: currentButtonId,
@@ -638,18 +667,38 @@ const ExploreByEquipment = () => {
                                     setCurrentButtonId(0);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
+                                    setBottomVal(bottomPerChange);
+                                    setTopVal(topPerChange);
                                 }
                                 if (args[0] === 1) {
                                     setIsOpened(true);
                                     setCurrentButtonId(1);
-                                    set_minPerValue(bottomPerChange);
-                                    set_maxPerValue(neutralPerChange);
+                                    if (bottomPerChange < 0) {
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(neutralPerChange);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(neutralPerChange + 1);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    }
                                 }
                                 if (args[0] === 2) {
                                     setIsOpened(true);
                                     setCurrentButtonId(2);
-                                    set_minPerValue(neutralPerChange);
-                                    set_maxPerValue(topPerChange);
+                                    if (topPerChange > 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(topPerChange);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(topPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(neutralPerChange + 1);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    }
                                 }
                             }
                         },
@@ -797,8 +846,8 @@ const ExploreByEquipment = () => {
                     componentProps: {
                         prefix: ' %',
                         title: '% Change',
-                        min: bottomPerChange,
-                        max: topPerChange + 1,
+                        min: bottomVal,
+                        max: topVal + 1,
                         range: [minPerValue, maxPerValue],
                         withTrendsFilter: true,
                         currentButtonId: currentButtonId,
@@ -810,28 +859,48 @@ const ExploreByEquipment = () => {
                                     setCurrentButtonId(0);
                                     set_minPerValue(bottomPerChange);
                                     set_maxPerValue(topPerChange);
+                                    setBottomVal(bottomPerChange);
+                                    setTopVal(topPerChange);
                                 }
                                 if (args[0] === 1) {
                                     setIsOpened(true);
                                     setCurrentButtonId(1);
-                                    set_minPerValue(bottomPerChange);
-                                    set_maxPerValue(neutralPerChange);
+                                    if (bottomPerChange < 0) {
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(neutralPerChange);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(neutralPerChange + 1);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    }
                                 }
                                 if (args[0] === 2) {
                                     setIsOpened(true);
                                     setCurrentButtonId(2);
-                                    set_minPerValue(neutralPerChange);
-                                    set_maxPerValue(topPerChange);
+                                    if (topPerChange > 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(topPerChange);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(topPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(neutralPerChange);
+                                        setTopVal(neutralPerChange + 1);
+                                        set_minPerValue(neutralPerChange);
+                                        set_maxPerValue(neutralPerChange);
+                                    }
                                 }
                             }
                         },
                     },
                     isOpened: isopened,
                     onClose: function onClose(options) {
+                        setIsOpened(false);
                         set_minPerValue(options[0]);
                         set_maxPerValue(options[1]);
                         setPageNo(1);
-                        setIsOpened(false);
                         setPerAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
@@ -976,9 +1045,9 @@ const ExploreByEquipment = () => {
                 let NulledData = [];
                 data.map((ele) => {
                     if (ele?.consumption === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
                     }
                 });
                 let recordToInsert = {
@@ -1002,14 +1071,10 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (selectedAllEquipmentId.length === 1) {
-            setTimeout(() => {
-                fetchExploreAllChartData(selectedAllEquipmentId[0]);
-            }, 200000);
+            fetchExploreAllChartData(selectedAllEquipmentId[0]);
         } else {
             selectedAllEquipmentId.map((ele) => {
-                setTimeout(() => {
-                    fetchExploreAllChartData(ele);
-                }, 200000);
+                fetchExploreAllChartData(ele);
             });
         }
     }, [selectedAllEquipmentId]);
@@ -1052,9 +1117,9 @@ const ExploreByEquipment = () => {
                 let NulledData = [];
                 data.map((ele) => {
                     if (ele?.consumption === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
                     }
                 });
                 let recordToInsert = {
@@ -1064,10 +1129,7 @@ const ExploreByEquipment = () => {
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {
                     setSeriesData(dataarr);
-                    //setSeriesLineData(dataarr);
                 }
-
-                //setAllEquipmenData(dataarr);
             })
             .catch((error) => {});
     };
@@ -1097,35 +1159,6 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
-    const getCSVLinkData = () => {
-        //     let sData = [];
-        //     exploreTableData.map(function (obj) {
-        //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
-        //         sData.push([
-        //             obj.equipment_name,
-        //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
-        //             change,
-        //             obj.location,
-        //             obj.location_type,
-        //             obj.equipments_type,
-        //             obj.end_user,
-        //         ]);
-        //     });
-        //     let streamData = exploreTableData.length > 0 ? sData : [];
-        //     return [
-        //         [
-        //             'Name',
-        //             'Energy Consumption',
-        //             '% Change',
-        //             'Location',
-        //             'Location Type',
-        //             'Equipment Type',
-        //             'End Use Category',
-        //         ],
-        //         ...streamData,
-        //     ];
-    };
-
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1141,6 +1174,8 @@ const ExploreByEquipment = () => {
                             <ExploreChart
                                 title={''}
                                 subTitle={''}
+                                tooltipUnit="KWh"
+                                tooltipLabel="Energy Consumption"
                                 data={seriesData}
                                 dateRange={fetchDateRange(startDate, endDate)}
                             />
@@ -1162,9 +1197,7 @@ const ExploreByEquipment = () => {
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
-                            onDownload={(query) => {
-                                getCSVLinkData(query);
-                            }}
+                            onDownload={[]}
                             headers={[
                                 {
                                     name: 'Name',

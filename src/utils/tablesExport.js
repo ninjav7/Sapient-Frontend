@@ -6,7 +6,7 @@ export const getTableHeadersList = (record) => {
     return arr.join(', ');
 };
 
-export const getEquipmentTableCSVExport = (name, tableData, columns, preparedEndUseData) => {
+export const getEquipmentTableCSVExport = (tableData, columns, preparedEndUseData) => {
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
         let arr = [];
@@ -38,17 +38,11 @@ export const getEquipmentTableCSVExport = (name, tableData, columns, preparedEnd
         }
         dataToExport.push(arr);
     });
-
     let csv = `${getTableHeadersList(columns)}\n`;
 
     dataToExport.forEach(function (row) {
         csv += row.join(',');
         csv += '\n';
     });
-
-    let hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = `${name}_${new Date().toISOString().split('T')[0]}.csv`;
-    hiddenElement.click();
+    return csv;
 };

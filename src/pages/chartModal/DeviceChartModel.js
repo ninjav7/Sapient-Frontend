@@ -32,6 +32,8 @@ const DeviceChartModel = ({
     metric,
     selectedConsumption,
     setConsumption,
+    selectedConsumptionLabel,
+    setSelectedConsumptionLabel,
     getRequiredConsumptionLabel,
     isSensorChartLoading,
     setIsSensorChartLoading,
@@ -55,10 +57,12 @@ const DeviceChartModel = ({
         if (deviceType === 'active') {
             setSelectedUnit(metric[0].unit);
             setConsumption(metric[0].value);
+            setSelectedConsumptionLabel(metric[0].Consumption);
         }
         if (deviceType === 'passive') {
             setSelectedUnit(metric[2].unit);
             setConsumption(metric[2].value);
+            setSelectedConsumptionLabel(metric[2].Consumption);
         }
     };
 
@@ -84,6 +88,7 @@ const DeviceChartModel = ({
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
+        setSelectedConsumptionLabel(obj.Consumption);
     };
 
     useEffect(() => {
@@ -217,6 +222,8 @@ const DeviceChartModel = ({
                     <LineChart
                         title={''}
                         subTitle={''}
+                        tooltipUnit={selectedUnit}
+                        tooltipLabel={selectedConsumptionLabel}
                         data={deviceData}
                         dateRange={fetchDateRange(startDate, endDate)}
                     />
