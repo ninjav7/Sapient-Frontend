@@ -498,43 +498,6 @@ const Equipment = () => {
                         setEndUseFilterString('');
                     },
                 },
-                //will be used in future
-                // {
-                //     label: 'Floor',
-                //     value: 'floor',
-                //     placeholder: 'All Floors',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                //         value: filterItem.floor_id,
-                //         label: filterItem.floor_name,
-                //     })),
-                //     onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                //     onDelete: () => setFloorTypeFilterString(''),
-                // },
-                // {
-                //     label: 'Space',
-                //     value: 'space',
-                //     placeholder: 'All Spaces',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                //         value: filterItem.space_id,
-                //         label: filterItem.space_name,
-                //     })),
-                //     onClose: (options) => filterHandler(setSpaceFilterString, options),
-                //     onDelete: () => setSpaceFilterString(''),
-                // },
-                // {
-                //     label: 'Space Type',
-                //     value: 'spaceType',
-                //     placeholder: 'All Space Types',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                //         value: filterItem.space_type_id,
-                //         label: filterItem.space_type_name,
-                //     })),
-                //     onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                //     onDelete: () => setSpaceTypeFilterString(''),
-                // },
                 {
                     label: 'Tag',
                     value: 'tag',
