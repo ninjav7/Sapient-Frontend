@@ -1,10 +1,29 @@
 @import '../assets/scss/stories.scss';
 @import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
 
 .explore-chart-wrapper {
     border: 1px solid $primary-gray-200;
     padding: 1rem;
     border-radius: 0.5rem;
+    .highcharts-navigator-xaxis{
+        display: none;
+    }
+
+    .chart-tooltip {
+        @extend .box-shadow-lg;
+        padding: 0.4375rem 0.8125rem;
+        background: $base-white;
+
+        border-radius: 0.25rem;
+        overflow: hidden;
+
+        border: 0.0625rem solid $primary-gray-450;
+
+        td + td {
+            padding-left: 1rem !important;
+        }
+    }
 
     .chart-header {
         padding-left: 0.625rem;

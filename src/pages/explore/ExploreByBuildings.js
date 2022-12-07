@@ -111,6 +111,8 @@ const ExploreByBuildings = () => {
     const [buildingTypeList, setBuildingTypeList] = useState([]);
     const [currentButtonId, setCurrentButtonId] = useState(0);
     const [isopened, setIsOpened] = useState(false);
+    const [topVal, setTopVal] = useState(0);
+    const [bottomVal, setBottomVal] = useState(0);
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -222,6 +224,8 @@ const ExploreByBuildings = () => {
                             : Math.round(topConsumption / 1000)
                     )
                 );
+                setTopVal(Math.round(topChange));
+                setBottomVal(Math.round(bottomChange));
                 setTopEnergyConsumption(Math.abs(Math.round(topConsumption / 1000)));
                 set_minPerValue(Math.round(bottomChange));
                 setBottomPerChange(Math.round(bottomChange));
@@ -248,15 +252,7 @@ const ExploreByBuildings = () => {
         if (endDate === null) {
             return;
         }
-        if (
-            minConValue === 0 &&
-            maxConValue === 0 &&
-            minPerValue === 0 &&
-            maxPerValue === 0 &&
-            minSqftValue === 0 &&
-            maxSqftValue === 0 &&
-            selectedBuildingType.length === 0
-        )
+        if (conAPIFlag === '' && perAPIFlag === '' && sqftAPIFlag === '' && selectedBuildingType.length === 0)
             exploreDataFetch();
         else {
             filterexploreDataFetch();
@@ -304,8 +300,8 @@ const ExploreByBuildings = () => {
                     componentProps: {
                         prefix: ' %',
                         title: '% Change',
-                        min: bottomPerChange,
-                        max: topPerChange + 1,
+                        min: bottomVal,
+                        max: topVal + 1,
                         range: [minPerValue, maxPerValue],
                         withTrendsFilter: true,
                         currentButtonId: currentButtonId,
@@ -315,26 +311,40 @@ const ExploreByBuildings = () => {
                                 if (args[0] === 0) {
                                     setIsOpened(true);
                                     setCurrentButtonId(0);
+                                    setBottomVal(bottomPerChange);
+                                    setTopVal(topPerChange + 1);
                                     set_minPerValue(bottomPerChange);
-                                    set_maxPerValue(topPerChange);
+                                    set_maxPerValue(topPerChange + 1);
                                 }
                                 if (args[0] === 1) {
                                     setIsOpened(true);
                                     setCurrentButtonId(1);
-                                    // if(bottomPerChange<0){
-                                    //     set_minPerValue(bottomPerChange);
-                                    //     set_maxPerValue(0);
-                                    // }
-                                    // else if(bottomPerChange>=0){
-                                    //     set_minPerValue(0);
-                                    //     set_maxPerValue(bottomPerChange+1);
-                                    // }
+                                    if (bottomPerChange < 0) {
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(0);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(0);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(0);
+                                        setTopVal(1);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(0);
+                                    }
                                 }
                                 if (args[0] === 2) {
                                     setIsOpened(true);
                                     setCurrentButtonId(2);
-                                    set_minPerValue(0);
-                                    set_maxPerValue(topPerChange);
+                                    if (topPerChange > 0) {
+                                        setBottomVal(0);
+                                        setTopVal(topPerChange);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(topPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(0);
+                                        setTopVal(1);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(0);
+                                    }
                                 }
                             }
                         },
@@ -404,6 +414,159 @@ const ExploreByBuildings = () => {
             setFilterOptions(filterOptionsFetched);
         }
     }, [minConValue, maxConValue, minPerValue, maxPerValue, minSqftValue, maxSqftValue]);
+
+    useEffect(() => {
+        if (perAPIFlag !== '') {
+            const filterOptionsFetched = [
+                {
+                    label: 'Energy Consumption',
+                    value: 'consumption',
+                    placeholder: 'All Consumptions',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minConValue, maxConValue],
+                    componentProps: {
+                        prefix: ' kWh',
+                        title: 'Consumption',
+                        min: bottomEnergyConsumption,
+                        max: topEnergyConsumption + 1,
+                        range: [minConValue, maxConValue],
+                        withTrendsFilter: false,
+                    },
+                    onClose: function onClose(options) {
+                        set_minConValue(options[0]);
+                        set_maxConValue(options[1]);
+                        setConAPIFlag(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        set_minConValue(bottomEnergyConsumption);
+                        set_maxConValue(topEnergyConsumption);
+                        setConAPIFlag('');
+                    },
+                },
+                {
+                    label: '% Change',
+                    value: 'change',
+                    placeholder: 'All % Change',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minPerValue, maxPerValue],
+                    componentProps: {
+                        prefix: ' %',
+                        title: '% Change',
+                        min: bottomVal,
+                        max: topVal + 1,
+                        range: [minPerValue, maxPerValue],
+                        withTrendsFilter: true,
+                        currentButtonId: currentButtonId,
+                        handleButtonClick: function handleButtonClick() {
+                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                                args[_key] = arguments[_key];
+                                if (args[0] === 0) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(0);
+                                    setBottomVal(bottomPerChange);
+                                    setTopVal(topPerChange + 1);
+                                    set_minPerValue(bottomPerChange);
+                                    set_maxPerValue(topPerChange + 1);
+                                }
+                                if (args[0] === 1) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(1);
+                                    if (bottomPerChange < 0) {
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(0);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(0);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(0);
+                                        setTopVal(1);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(0);
+                                    }
+                                }
+                                if (args[0] === 2) {
+                                    setIsOpened(true);
+                                    setCurrentButtonId(2);
+                                    if (topPerChange > 0) {
+                                        setBottomVal(0);
+                                        setTopVal(topPerChange);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(topPerChange);
+                                    } else if (bottomPerChange >= 0) {
+                                        setBottomVal(0);
+                                        setTopVal(1);
+                                        set_minPerValue(0);
+                                        set_maxPerValue(0);
+                                    }
+                                }
+                            }
+                        },
+                    },
+                    isOpened: isopened,
+                    onClose: function onClose(options) {
+                        setIsOpened(false);
+                        set_minPerValue(options[0]);
+                        set_maxPerValue(options[1]);
+                        setPerAPIFlag(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        set_minPerValue(bottomPerChange);
+                        set_maxPerValue(topPerChange);
+                        setPerAPIFlag('');
+                    },
+                },
+                {
+                    label: 'Square Footage',
+                    value: 'square_footage',
+                    placeholder: 'All Square Footage',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minSqftValue, maxSqftValue],
+                    componentProps: {
+                        prefix: ' sq.ft.',
+                        title: 'Square Footage',
+                        min: bottomSquareFootage,
+                        max: topSquareFootage + 1,
+                        range: [minSqftValue, maxSqftValue],
+                        withTrendsFilter: false,
+                    },
+                    onClose: function onClose(options) {
+                        set_minSqftValue(options[0]);
+                        set_maxSqftValue(options[1]);
+                        setSqftAPIFlag(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        set_minSqftValue(bottomSquareFootage);
+                        set_maxSqftValue(topSquareFootage);
+                        setSqftAPIFlag('');
+                    },
+                },
+                {
+                    label: 'Building Type',
+                    value: 'building_type',
+                    placeholder: 'All Building Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: buildingTypeList.map((filterItem) => ({
+                        value: filterItem.building_type,
+                        label: filterItem.building_type,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let buildingType = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                buildingType.push(opt[i].value);
+                            }
+                            setSelectedBuildingType(buildingType);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedBuildingType([]);
+                    },
+                },
+            ];
+            setFilterOptions(filterOptionsFetched);
+        }
+    }, [perAPIFlag]);
+
     const filterexploreDataFetch = async () => {
         const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
@@ -616,9 +779,9 @@ const ExploreByBuildings = () => {
                 let NulledData = [];
                 data.map((ele) => {
                     if (ele.consumption === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: null });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
                     }
                 });
                 let recordToInsert = {
@@ -645,16 +808,19 @@ const ExploreByBuildings = () => {
                 let NulledData = [];
                 data.map((ele) => {
                     if (ele.consumption === '') {
-                        NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: null });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                     } else {
-                        NulledData.push({ x: moment.utc(new Date(ele.time_stamp)), y: ele.consumption });
+                        NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
                     }
                 });
                 let recordToInsert = {
                     name: arr[0]?.building_name,
                     data: NulledData,
                 };
-                setSeriesData([...seriesData, recordToInsert]);
+                dataarr.push(recordToInsert);
+                if (selectedIds.length === dataarr.length) {
+                    setSeriesData(dataarr);
+                }
             })
             .catch((error) => {});
     };
@@ -677,22 +843,6 @@ const ExploreByBuildings = () => {
         setSeriesLineData(allBuildingData);
     }, [allBuildingData]);
 
-    const getCSVLinkData = () => {
-        //     let sData = [];
-        //     exploreTableData.map(function (obj) {
-        //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
-        //         sData.push([
-        //             obj.building_name,
-        //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
-        //             change,
-        //             obj.square_footage + ' sq.ft.',
-        //             obj.building_type,
-        //         ]);
-        //     });
-        //     let streamData = exploreTableData.length > 0 ? sData : [];
-        //     return [['Name', 'Energy Consumption', '% Change', 'Square Footage', 'Building Type'], ...streamData];
-    };
-
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -708,6 +858,8 @@ const ExploreByBuildings = () => {
                             <ExploreChart
                                 title={''}
                                 subTitle={''}
+                                tooltipUnit="KWh"
+                                tooltipLabel="Energy Consumption"
                                 data={seriesData}
                                 dateRange={fetchDateRange(startDate, endDate)}
                             />
@@ -729,9 +881,7 @@ const ExploreByBuildings = () => {
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
-                            onDownload={(query) => {
-                                getCSVLinkData(query);
-                            }}
+                            onDownload={[]}
                             headers={[
                                 {
                                     name: 'Name',

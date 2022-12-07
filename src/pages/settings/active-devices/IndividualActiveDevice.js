@@ -128,15 +128,21 @@ const IndividualActiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Energy Consumed (Wh)', unit: 'Wh' },
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)', unit: 'Wh' },
-        { value: 'mV', label: 'Voltage (mV)', unit: 'mV' },
-        { value: 'mAh', label: 'Current (mA)', unit: 'mA' },
-        { value: 'power', label: 'Real Power (W)', unit: 'W' },
+        { value: 'energy', label: 'Energy Consumed (Wh)', unit: 'Wh', Consumption: 'Energy Consumption' },
+        {
+            value: 'totalconsumedenergy',
+            label: 'Total Consumed Energy (Wh)',
+            unit: 'Wh',
+            Consumption: 'Total Consumed Energy',
+        },
+        { value: 'mV', label: 'Voltage (mV)', unit: 'mV', Consumption: 'Voltage' },
+        { value: 'mAh', label: 'Current (mA)', unit: 'mA', Consumption: 'Current' },
+        { value: 'power', label: 'Real Power (W)', unit: 'W', Consumption: 'Real Power' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -666,6 +672,8 @@ const IndividualActiveDevice = () => {
                 setConsumption={setConsumption}
                 selectedUnit={selectedUnit}
                 setSelectedUnit={setSelectedUnit}
+                selectedConsumptionLabel={selectedConsumptionLabel}
+                setSelectedConsumptionLabel={setSelectedConsumptionLabel}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}

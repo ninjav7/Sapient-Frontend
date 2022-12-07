@@ -20,7 +20,7 @@ HighchartsData(Highcharts);
 const LineChart = (props) => {
     const chartComponentRef = useRef(null);
 
-    const { data, title, subTitle, handleClick, dateRange } = props;
+    const { data, title, subTitle, handleMoreClick, dateRange, tooltipUnit, tooltipLabel } = props;
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -84,20 +84,22 @@ const LineChart = (props) => {
             <HighchartsReact
                 highcharts={Highcharts}
                 constructorType={'stockChart'}
-                options={options({ data, dateRange, Highcharts })}
+                options={options({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel })}
                 ref={chartComponentRef}
             />
-            <div className="more-details-wrapper">
-                <Button
-                    onClick={handleClick}
-                    className="ml-4"
-                    label="More Details"
-                    size={Button.Sizes.md}
-                    type={Button.Type.tertiary}
-                    icon={<ArrowSVG />}
-                    iconAlignment="right"
-                />
-            </div>
+            {handleMoreClick && (
+                <div className="more-details-wrapper">
+                    <Button
+                        onClick={handleMoreClick}
+                        className="ml-4"
+                        label="More Details"
+                        size={Button.Sizes.md}
+                        type={Button.Type.tertiary}
+                        icon={<ArrowSVG />}
+                        iconAlignment="right"
+                    />
+                </div>
+            )}
         </div>
     );
 };
