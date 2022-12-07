@@ -36,9 +36,10 @@ export const generalBldgDelete = '/api/config/general/delete_building';
 export const updateAccount = '/api/user_role/user/update-user';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
+export const vendorPermissions = '/api/user_role/user-permission-role/vendor-permissions';
 
 // user permission and roles
-export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const addMemberUser = '/api/user_role/user-permission-role/invite-reset-user';
 export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
 export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
 export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
