@@ -250,8 +250,6 @@ const Equipment = () => {
             });
     };
 
-    const [selectedIds, setSelectedIds] = useState([]);
-
     const renderLocation = useCallback((row, childrenTemplate) => {
         const location = [row.installed_floor, row.installed_space];
 
@@ -673,8 +671,8 @@ const Equipment = () => {
     };
 
     return (
-        <React.Fragment>
-            <Row className="page-title equipment-page">
+        <div className='equipment-page'>
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Equipment</span>
 
@@ -869,7 +867,7 @@ const Equipment = () => {
                 setSelectedTab={setSelectedModalTab}
                 activePage="equipment"
             />
-        </React.Fragment>
+        </div>
     );
 };
 
