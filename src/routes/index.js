@@ -42,7 +42,6 @@ const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
-const PageTracker = React.lazy(() => import('../components/PageTracker/PageTracker'));
 // apps
 const CalendarApp = React.lazy(() => import('../pages/apps/Calendar'));
 const EmailInbox = React.lazy(() => import('../pages/apps/Email/Inbox'));
@@ -494,6 +493,7 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
+        // PLT-492: Hide Role Page
         // {
         //     path: '/settings/gateways',
         //     name: 'Gateways',
@@ -560,14 +560,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-        {
-            path: '/settings/roles',
-            name: 'Roles',
-            component: Roles,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
+        // {
+        //     path: '/settings/roles',
+        //     name: 'Roles',
+        //     component: Roles,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
         {
             path: '/settings/equipment-types',
             name: 'Equipment Types',

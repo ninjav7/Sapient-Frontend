@@ -5,13 +5,15 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
+import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
+import { updateBuildingStore } from '../SecondaryTopNavBar/utils';
 
 const NavLinks = () => {
     const location = useLocation();
     const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [buildingListData] = useAtom(buildingData);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
@@ -32,6 +34,15 @@ const NavLinks = () => {
     ];
 
     const handleEnergyClick = () => {
+        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        if (!bldgObj?.active) {
+            history.push({
+                pathname: `/energy/portfolio/overview`,
+            });
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
+
         if (configRoutes.includes(location.pathname) || location.pathname.includes('/explore-page/by-equipment')) {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
@@ -40,16 +51,33 @@ const NavLinks = () => {
             history.push({
                 pathname: `/energy/portfolio/overview`,
             });
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
         }
     };
 
     const handleControlClick = () => {
+        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        if (!bldgObj?.active) {
+            history.push({
+                pathname: `/energy/portfolio/overview`,
+            });
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
         history.push({
             pathname: `/control/plug-rules`,
         });
     };
 
     const handleExploreClick = () => {
+        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        if (!bldgObj?.active) {
+            history.push({
+                pathname: `/explore-page/by-buildings`,
+            });
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
+        }
         if (
             configRoutes.includes(location.pathname) ||
             location.pathname.includes('/energy/building/overview') ||
