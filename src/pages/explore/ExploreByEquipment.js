@@ -1053,6 +1053,7 @@ const ExploreByEquipment = () => {
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
+                    id: arr[0].equipment_id,
                 };
                 setSeriesData([...seriesData, recordToInsert]);
                 setSelectedEquipmentId('');
@@ -1125,6 +1126,7 @@ const ExploreByEquipment = () => {
                 let recordToInsert = {
                     name: legendName,
                     data: NulledData,
+                    id: arr[0].equipment_id,
                 };
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {
