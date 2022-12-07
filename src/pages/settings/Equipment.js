@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, getEndUseId } from '../../services/Network';
-
-import { ReactComponent as WifiSVG } from '../../sharedComponents/assets/icons/wifi.svg';
-import { ReactComponent as WifiSlashSVG } from '../../sharedComponents/assets/icons/wifislash.svg';
-
+import  useCSVDownload  from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -261,6 +256,7 @@ const Equipment = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
     const [filterOptions, setFilterOptions] = useState([]);
+    const { download } = useCSVDownload();
 
     const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
     const [endUseFilterString, setEndUseFilterString] = useState('');
@@ -467,7 +463,7 @@ const Equipment = () => {
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeFilterString,
-            tagsFilterString
+            tagsFilterString,
         });
 
         filters.data.forEach((filterOptions) => {
@@ -663,6 +659,7 @@ const Equipment = () => {
         )
             .then((res) => {
                 let response = res.data;
+                download(buildingName, getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData));
                 getEquipmentTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
 
                 setIsEquipDataFetched(false);
