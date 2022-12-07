@@ -3,26 +3,39 @@
 
 .building-switcher {
     &-wrapper {
+        .search-field-wrapper {
+            margin-bottom: 0.75rem;
+
+            .brick {
+                display: none;
+            }
+        }
         .typography-wrapper {
             overflow: hidden;
             text-overflow: ellipsis;
+
             * {
                 text-overflow: ellipsis;
                 overflow: hidden;
             }
         }
-        .react-select-wrapper [class*='-menu'] {
+        .react-select-wrapper [class*='-menu']:not([class*='-control']) {
             margin: 0;
-            min-width: 300px;
+            min-width: 18.75rem;
         }
 
         //@TDOD Probably should be in React Select
         [class*='-Group'] {
             padding-bottom: 0.5rem;
+
+            &:first-child {
+                padding-top: 0;
+            }
         }
         [class*='-group'] {
             margin-bottom: 0.4375rem;
-            padding-left: 7px;
+            padding-left: 0.4375rem;
+
             & > div {
                 font-weight: 500;
                 font-size: 0.625rem;
@@ -32,15 +45,21 @@
             }
         }
         .react-select-wrapper [class*='-option'] {
-            padding-left: 8px;
-            padding-right: 8px;
-            border-radius: 6px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            border-radius: 0.375rem;
         }
+
         [class*='-MenuList'] {
             padding: 0 1rem;
+
+            & > .react-select-option:last-child {
+                margin-bottom: 0.5rem;
+            }
         }
-        .react-select-wrapper [class*='-control'],
-        .react-select-wrapper [class*='-control'].is-open {
+
+        .react-select-wrapper [class*='-control']:not(.input-control),
+        .react-select-wrapper [class*='-control']:not(.input-control).is-open {
             border: 0;
             box-shadow: none;
             cursor: pointer;
@@ -53,5 +72,9 @@
                 background: $primary-gray-50;
             }
         }
+    }
+
+    &-search-field {
+        padding: 0.5rem 0.5rem 0 0.5rem !important;
     }
 }
