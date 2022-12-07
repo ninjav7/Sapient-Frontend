@@ -44,7 +44,7 @@ const UserTable = ({ userData }) => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users',
+                        path: '/settings/users/users',
                         active: true,
                     },
                 ];
@@ -59,35 +59,35 @@ const UserTable = ({ userData }) => {
 
     return (
         <Card>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Building Access</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {userData.map((record, index) => {
-                            return (
-                                <tr className="mouse-pointer">
-                                    <td className="font-weight-bold panel-name">
-                                        <Link
-                                            to={{
-                                                pathname: `/settings/user-profile/single/${record?.user_id}`,
-                                            }}>
-                                            <a>{record.name ? record.name : 'test user'}</a>
-                                        </Link>
-                                    </td>
-                                    <td className="">-</td>
-                                    <td className="">{record.user_email}</td>
-                                    <td className="font-weight-bold">-</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </Table>
+            <Table className="mb-0 bordered table-hover">
+                <thead>
+                    <tr className="mouse-pointer">
+                        <th>Name</th>
+                        <th>Building Access</th>
+                        <th>Email</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {userData.map((record, index) => {
+                        return (
+                            <tr className="mouse-pointer">
+                                <td className="font-weight-bold panel-name">
+                                    <Link
+                                        to={{
+                                            pathname: `/settings/user-profile/single/${record?.user_id}`,
+                                        }}>
+                                        <a>{record.name ? record.name : 'test user'}</a>
+                                    </Link>
+                                </td>
+                                <td className="">-</td>
+                                <td className="">{record.user_email}</td>
+                                <td className="font-weight-bold">-</td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </Table>
         </Card>
     );
 };
@@ -615,27 +615,27 @@ const SingleRoleNew = () => {
             {/* ---------------- Role Name ----------------  */}
 
             <Form className="mt-4">
-                    <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
-                        <div className="user-role-style">
-                            <h6 className="card-title">Role Name</h6>
-                        </div>
+                <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
+                    <div className="user-role-style">
+                        <h6 className="card-title">Role Name</h6>
+                    </div>
 
-                        {loadingData ? (
-                            <Skeleton count={1} height={40} width={350} />
-                        ) : (
-                            <Input
-                                type="text"
-                                name="text"
-                                id="exampleSelect"
-                                className="font-weight-bold user-role-textbox"
-                                onChange={(e) => {
-                                    setRoleName(e.target.value);
-                                    setUserPermissionRoleBody({ ...userPermissionRoleBody, name: e.target.value });
-                                    // setFormValidation(true);
-                                }}
-                                value={userPermissionRoleBody?.name}></Input>
-                        )}
-                    </FormGroup>
+                    {loadingData ? (
+                        <Skeleton count={1} height={40} width={350} />
+                    ) : (
+                        <Input
+                            type="text"
+                            name="text"
+                            id="exampleSelect"
+                            className="font-weight-bold user-role-textbox"
+                            onChange={(e) => {
+                                setRoleName(e.target.value);
+                                setUserPermissionRoleBody({ ...userPermissionRoleBody, name: e.target.value });
+                                // setFormValidation(true);
+                            }}
+                            value={userPermissionRoleBody?.name}></Input>
+                    )}
+                </FormGroup>
             </Form>
 
             {/* ---------------- Permission & User Tab ----------------  */}
@@ -2529,7 +2529,7 @@ const SingleRoleNew = () => {
                             </div>
                         </Col>
                     </Row>
-                    <Row className='mt-2'>
+                    <Row className="mt-2">
                         <Col lg={10}>
                             <UserTable userData={userData} />
                         </Col>

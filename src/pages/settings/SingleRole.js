@@ -33,7 +33,7 @@ const UserTable = ({ userData }) => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users',
+                        path: '/settings/users/users',
                         active: true,
                     },
                 ];

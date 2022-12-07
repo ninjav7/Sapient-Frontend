@@ -22,7 +22,7 @@ const Control = () => {
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
         '/settings/buildings',
-        '/settings/users',
+        '/settings//users/users',
         '/settings/roles',
         '/settings/equipment-types',
     ]);
@@ -92,7 +92,7 @@ const Control = () => {
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/users';
+                        return current !== '/settings/users/users';
                     })
                 );
             }
@@ -133,14 +133,14 @@ const Control = () => {
 
             if (
                 userPermission?.permissions?.permissions?.account_user_permission?.view &&
-                !accountRoutes.includes('/settings/users')
+                !accountRoutes.includes('/settings/users/users')
             ) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setAccountRoutes((el) => [...el, '/settings/users']);
+                setAccountRoutes((el) => [...el, '/settings/users/users']);
             }
 
             if (
