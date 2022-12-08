@@ -7,7 +7,7 @@ import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-
 import { useAtom } from 'jotai';
 import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
-import { updateBuildingStore } from '../SecondaryTopNavBar/utils';
+import { configChildRoutes, updateBuildingStore } from '../SecondaryTopNavBar/utils';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -47,12 +47,24 @@ const NavLinks = () => {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
             });
-        } else {
-            history.push({
-                pathname: `/energy/portfolio/overview`,
-            });
-            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            return;
         }
+
+        if (
+            location.pathname.includes(configChildRoutes[0]) ||
+            location.pathname.includes(configChildRoutes[1]) ||
+            location.pathname.includes(configChildRoutes[2])
+        ) {
+            history.push({
+                pathname: `/energy/building/overview/${bldgId}`,
+            });
+            return;
+        }
+
+        history.push({
+            pathname: `/energy/portfolio/overview`,
+        });
+        updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
     };
 
     const handleControlClick = () => {
@@ -87,11 +99,23 @@ const NavLinks = () => {
             history.push({
                 pathname: `/explore-page/by-equipment/${bldgId}`,
             });
-        } else {
-            history.push({
-                pathname: `/explore-page/by-buildings`,
-            });
+            return;
         }
+
+        if (
+            location.pathname.includes(configChildRoutes[0]) ||
+            location.pathname.includes(configChildRoutes[1]) ||
+            location.pathname.includes(configChildRoutes[2])
+        ) {
+            history.push({
+                pathname: `/explore-page/by-equipment/${bldgId}`,
+            });
+            return;
+        }
+
+        history.push({
+            pathname: `/explore-page/by-buildings`,
+        });
     };
 
     const handleSideNavChange = (componentName) => {
