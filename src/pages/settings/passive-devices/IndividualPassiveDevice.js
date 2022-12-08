@@ -81,16 +81,16 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA' },
-        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA' },
-        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA' },
-        { value: 'power', label: 'Power (W)', unit: 'W' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[2].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
     const [searchSensor, setSearchSensor] = useState('');
-
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
     const handleSearchChange = (e) => {
         setSearchSensor(e.target.value);
     };
@@ -147,34 +147,27 @@ const IndividualPassiveDevice = () => {
                     setSeriesData([]);
                     let response = res.data;
                     let data = response;
-
                     let exploreData = [];
-
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                        } else {
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                NulledData.push({
+                                    x: moment.utc(new Date(ele?.time_stamp)),
+                                    y: ele?.consumption / UNIT_DIVIDER,
+                                });
+                            } else {
+                                NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                            }
+                        }
+                    });
                     let recordToInsert = {
-                        data: data,
+                        data: NulledData,
                         name: getRequiredConsumptionLabel(selectedConsumption),
                     };
-
-                    try {
-                        recordToInsert.data = recordToInsert.data.map((_data) => {
-                            _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
-                            _data[0] = new Date(_data[0]);
-
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                _data[1] = _data[1] / UNIT_DIVIDER;
-                            }
-                            return _data;
-                        });
-                    } catch (error) {}
-
-                    exploreData.push(recordToInsert);
-                    setDeviceData(exploreData);
-
-                    setSeriesData([
-                        {
-                            data: exploreData[0].data,
-                        },
-                    ]);
+                    setDeviceData([recordToInsert]);
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
@@ -460,7 +453,8 @@ const IndividualPassiveDevice = () => {
                                                             }}
                                                             className="mouse-pointer"
                                                         />
-                                                        <button
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                        {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
                                                             onClick={() => {
@@ -472,7 +466,7 @@ const IndividualPassiveDevice = () => {
                                                                 setBreakerId(record?.breaker_id);
                                                             }}>
                                                             Edit
-                                                        </button>
+                                                        </button> */}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -490,7 +484,8 @@ const IndividualPassiveDevice = () => {
                                                                 handleChartShow(record.id);
                                                             }}
                                                         />
-                                                        <button
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                        {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
                                                             onClick={() => {
@@ -499,7 +494,7 @@ const IndividualPassiveDevice = () => {
                                                                 openEditSensorPanelModel();
                                                             }}>
                                                             Edit
-                                                        </button>
+                                                        </button> */}
                                                     </div>
                                                 </div>
                                             )}
@@ -528,6 +523,8 @@ const IndividualPassiveDevice = () => {
                 setConsumption={setConsumption}
                 selectedUnit={selectedUnit}
                 setSelectedUnit={setSelectedUnit}
+                selectedConsumptionLabel={selectedConsumptionLabel}
+                setSelectedConsumptionLabel={setSelectedConsumptionLabel}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}

@@ -6,6 +6,7 @@ import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
 import {
     BaseUrl,
     generalActiveDevices,
@@ -127,15 +128,21 @@ const IndividualActiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Energy Consumed (Wh)', unit: 'Wh' },
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)', unit: 'Wh' },
-        { value: 'mV', label: 'Voltage (mV)', unit: 'mV' },
-        { value: 'mAh', label: 'Current (mA)', unit: 'mA' },
-        { value: 'power', label: 'Real Power (W)', unit: 'W' },
+        { value: 'energy', label: 'Energy Consumed (Wh)', unit: 'Wh', Consumption: 'Energy Consumption' },
+        {
+            value: 'totalconsumedenergy',
+            label: 'Total Consumed Energy (Wh)',
+            unit: 'Wh',
+            Consumption: 'Total Consumed Energy',
+        },
+        { value: 'mV', label: 'Voltage (mV)', unit: 'mV', Consumption: 'Voltage' },
+        { value: 'mAh', label: 'Current (mA)', unit: 'mA', Consumption: 'Current' },
+        { value: 'power', label: 'Real Power (W)', unit: 'W', Consumption: 'Real Power' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -315,32 +322,26 @@ const IndividualActiveDevice = () => {
 
                     let exploreData = [];
 
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                        } else {
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                NulledData.push({
+                                    x: moment.utc(new Date(ele.time_stamp)),
+                                    y: ele.consumption / UNIT_DIVIDER,
+                                });
+                            } else {
+                                NulledData.push({ x: moment.utc(new Date(ele.time)), y: ele.consumption });
+                            }
+                        }
+                    });
                     let recordToInsert = {
-                        data: data,
-
+                        data: NulledData,
                         name: getRequiredConsumptionLabel(selectedConsumption),
                     };
-
-                    try {
-                        recordToInsert.data = recordToInsert.data.map((_data) => {
-                            _data[0] = new Date(_data[0]);
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                _data[1] = _data[1] / UNIT_DIVIDER;
-                            }
-
-                            return _data;
-                        });
-                    } catch (error) {}
-
-                    exploreData.push(recordToInsert);
-
-                    setDeviceData(exploreData);
-
-                    setSeriesData([
-                        {
-                            data: exploreData[0].data,
-                        },
-                    ]);
+                    setDeviceData([recordToInsert]);
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
@@ -671,6 +672,8 @@ const IndividualActiveDevice = () => {
                 setConsumption={setConsumption}
                 selectedUnit={selectedUnit}
                 setSelectedUnit={setSelectedUnit}
+                selectedConsumptionLabel={selectedConsumptionLabel}
+                setSelectedConsumptionLabel={setSelectedConsumptionLabel}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}

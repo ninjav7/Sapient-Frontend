@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, getEndUseId } from '../../services/Network';
-
-import { ReactComponent as WifiSVG } from '../../sharedComponents/assets/icons/wifi.svg';
-import { ReactComponent as WifiSlashSVG } from '../../sharedComponents/assets/icons/wifislash.svg';
-
+import  useCSVDownload  from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -208,6 +203,7 @@ const Equipment = () => {
             floorTypeFilterString,
             spaceFilterString,
             spaceTypeFilterString,
+            tagsFilterString,
             {
                 ...sorting,
             },
@@ -250,8 +246,6 @@ const Equipment = () => {
             });
     };
 
-    const [selectedIds, setSelectedIds] = useState([]);
-
     const renderLocation = useCallback((row, childrenTemplate) => {
         const location = [row.installed_floor, row.installed_space];
 
@@ -260,13 +254,14 @@ const Equipment = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
     const [filterOptions, setFilterOptions] = useState([]);
+    const { download } = useCSVDownload();
 
     const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
+    const [endUseFilterString, setEndUseFilterString] = useState('');
 
     const [macTypeFilterString, setMacTypeFilterString] = useState('');
 
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
-    const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     const [isLoadingEndUseData, setIsLoadingEndUseData] = useState(true);
 
     const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
@@ -328,11 +323,13 @@ const Equipment = () => {
             bldgId,
             search,
             equipmentTypeFilterString,
+            endUseFilterString,
             macTypeFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
             spaceFilterString,
             spaceTypeFilterString,
+            tagsFilterString,
             {
                 ...sorting,
             },
@@ -460,28 +457,15 @@ const Equipment = () => {
             bldgId,
             macTypeFilterString,
             equipmentTypeFilterString,
+            endUseFilterString,
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeFilterString,
+            tagsFilterString,
         });
 
         filters.data.forEach((filterOptions) => {
             const filterOptionsFetched = [
-                {
-                    label: 'MAC Address',
-                    value: 'macAddresses',
-                    placeholder: 'All Mac addresses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                    onDelete: () => {
-                        setSelectedOptionMac([]);
-                        setMacTypeFilterString('');
-                    },
-                },
                 {
                     label: 'Equipment Type',
                     value: 'equipmentType',
@@ -498,40 +482,19 @@ const Equipment = () => {
                     },
                 },
                 {
-                    label: 'Floor',
-                    value: 'floor',
-                    placeholder: 'All Floors',
+                    label: 'End use Category',
+                    value: 'end_use',
+                    placeholder: 'All End use',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                        value: filterItem.floor_id,
-                        label: filterItem.floor_name,
+                    filterOptions: filterOptions.end_use.map((filterItem) => ({
+                        value: filterItem.end_use_id,
+                        label: filterItem.end_use_name,
                     })),
-                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                    onDelete: () => setFloorTypeFilterString(''),
-                },
-                {
-                    label: 'Space',
-                    value: 'space',
-                    placeholder: 'All Spaces',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceFilterString, options),
-                    onDelete: () => setSpaceFilterString(''),
-                },
-                {
-                    label: 'Space Type',
-                    value: 'spaceType',
-                    placeholder: 'All Space Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                        value: filterItem.space_type_id,
-                        label: filterItem.space_type_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                    onDelete: () => setSpaceTypeFilterString(''),
+                    onClose: (options) => filterHandler(setEndUseFilterString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setEndUseFilterString('');
+                    },
                 },
                 {
                     label: 'Tag',
@@ -562,6 +525,7 @@ const Equipment = () => {
         sortBy,
         macTypeFilterString,
         equipmentTypeFilterString,
+        endUseFilterString,
         locationTypeFilterString,
         floorTypeFilterString,
         spaceFilterString,
@@ -648,6 +612,7 @@ const Equipment = () => {
             floorTypeFilterString,
             spaceFilterString,
             spaceTypeFilterString,
+            tagsFilterString,
             {
                 ...sorting,
             },
@@ -655,6 +620,7 @@ const Equipment = () => {
         )
             .then((res) => {
                 let response = res.data;
+                download(buildingName, getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData));
                 getEquipmentTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
 
                 setIsEquipDataFetched(false);
@@ -673,8 +639,8 @@ const Equipment = () => {
     };
 
     return (
-        <React.Fragment>
-            <Row className="page-title equipment-page">
+        <div className='equipment-page'>
+            <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Equipment</span>
 
@@ -869,7 +835,7 @@ const Equipment = () => {
                 setSelectedTab={setSelectedModalTab}
                 activePage="equipment"
             />
-        </React.Fragment>
+        </div>
     );
 };
 
