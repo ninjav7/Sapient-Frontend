@@ -1005,6 +1005,7 @@ const EquipChartModal = ({
                                                 </Form.Group>
                                             </Col>
                                         </Row>
+                                        {/* Planned for Future Use */}
                                         {/* <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

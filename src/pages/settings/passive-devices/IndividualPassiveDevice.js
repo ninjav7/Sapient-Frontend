@@ -453,6 +453,7 @@ const IndividualPassiveDevice = () => {
                                                             }}
                                                             className="mouse-pointer"
                                                         />
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
                                                         {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
@@ -483,6 +484,7 @@ const IndividualPassiveDevice = () => {
                                                                 handleChartShow(record.id);
                                                             }}
                                                         />
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
                                                         {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
