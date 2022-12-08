@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 
 import BuildingSwitcher from './BuildingSwitcher';
-import Typography from '../typography';
+import Brick from '../brick';
 
 import { ReactComponent as BuildingSVG } from '../assets/icons/building-icon.svg';
 import { ReactComponent as PortfolioSVG } from '../assets/icons/portfolio-icon.svg';
 
 import '../assets/scss/stories.scss';
-import Brick from '../brick';
 
 export default {
     title: 'Components/BuildingSwitcher',
@@ -38,8 +37,10 @@ export const Default = (props) => {
 };
 
 Default.args = {
-    style: {
-        width: 226,
+    wrapperProps: {
+        style: {
+            width: 226,
+        },
     },
     onChange: (args) => {
         console.log(args);

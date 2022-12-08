@@ -787,6 +787,7 @@ const ExploreByBuildings = () => {
                 let recordToInsert = {
                     name: arr[0]?.building_name,
                     data: NulledData,
+                    id: arr[0]?.building_id,
                 };
                 setSeriesData([...seriesData, recordToInsert]);
             })
@@ -816,6 +817,7 @@ const ExploreByBuildings = () => {
                 let recordToInsert = {
                     name: arr[0]?.building_name,
                     data: NulledData,
+                    id: arr[0]?.building_id,
                 };
                 dataarr.push(recordToInsert);
                 if (selectedIds.length === dataarr.length) {

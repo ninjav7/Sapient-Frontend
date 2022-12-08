@@ -78,12 +78,19 @@
 .add-equipment-footer-column {
     width: 50%;
 }
+
 .equipment-name-cell {
     cursor: pointer;
 }
-.equipment-page {
+
+.equipment-page>.page-title{
     margin-bottom: 1rem;
 }
+
+.equipment-page .data-table-widget-wrapper {
+    min-height: 37.5rem;
+}
+
 .equipment-page .heading-style {
     margin-left: 0px;
 }
