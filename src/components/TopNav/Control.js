@@ -22,7 +22,7 @@ const Control = () => {
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
         '/settings/buildings',
-        '/settings/users/Users',
+        '/settings//users/users',
         '/settings/roles',
         '/settings/equipment-types',
     ]);

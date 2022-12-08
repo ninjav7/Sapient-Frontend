@@ -518,7 +518,7 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users/Users',
+            path: '/settings/users/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,

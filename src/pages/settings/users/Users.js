@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Input } from 'reactstrap';
-import moment from 'moment';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, addMemberUser, getMemberUser, vendorPermissions } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
-import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import '../style.css';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { Checkbox } from '../../../sharedComponents/form/checkbox';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -78,7 +76,7 @@ const Users = () => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users/Users',
+                        path: '/settings/users/users',
                         active: true,
                     },
                 ];
@@ -179,7 +177,6 @@ const Users = () => {
 
             await axios.post(`${BaseUrl}${vendorPermissions}`, {}, { headers }).then((res) => {
                 let response = res.data;
-                console.log(response.data);
                 setRolesData(response.data);
             });
         } catch (error) {}
@@ -313,14 +310,14 @@ const Users = () => {
 
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header>
-                    <Modal.Title>Add User</Modal.Title>
+                    <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
                 </Modal.Header>
                 <Modal.Body className="add-user-model">
                     <Form>
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>First Name</Form.Label>
+                                    <Typography.Subheader className="mb-1">First Name</Typography.Subheader>
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter First Name"
@@ -335,7 +332,7 @@ const Users = () => {
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Last Name</Form.Label>
+                                    <Typography.Subheader className="mb-1">Last Name</Typography.Subheader>
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter Last Name"
@@ -350,7 +347,7 @@ const Users = () => {
                         </Row>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Email Address</Form.Label>
+                            <Typography.Subheader className="mb-1">Email Address</Typography.Subheader>
                             <Form.Control
                                 type="text"
                                 placeholder="Enter Email"
@@ -362,7 +359,7 @@ const Users = () => {
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>User Role</Form.Label>
+                            <Typography.Subheader className="mb-1">User Role</Typography.Subheader>
                             <Input
                                 type="select"
                                 name="select"

@@ -53,7 +53,7 @@ const SideNav = () => {
                 setUserPermissionListGeneral('/settings/account');
             }
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
-                setUserPermissionListUsers('/settings/users/Users');
+                setUserPermissionListUsers('/settings/users/users');
             }
             if (!userPermission?.permissions?.permissions?.account_roles_permission?.view) {
                 setUserPermissionListRoles('/settings/roles');
