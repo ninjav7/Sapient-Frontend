@@ -37,6 +37,7 @@ const Select = ({
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
     const containerRef = useRef(null);
+    const lastValueRef = useRef(null);
 
     const [isFocused, setIsFocused] = useState(false);
     const [inputValue, setInputValue] = useState('');
@@ -67,15 +68,35 @@ const Select = ({
                       props.onMenuInputFocus && props.onMenuInputFocus(event);
                       setIsFocused(true);
                   },
-                  onChange: (event) => {
-                      props.onChange && props.onChange(event);
+                  onMenuInputBlur: (event) => {
+                      props.onMenuInputBlur && props.onMenuInputBlur(event);
                       setIsFocused(false);
+                  },
+                  onChange: (event) => {
+                      //@TODO Temporary, need to prevent selection by space on the keyboard
+                      if (lastValueRef.current !== 32) {
+                          props.onChange && props.onChange(event);
+                          setIsFocused(false);
+                      }
                   },
                   onInputChange: (val) => {
                       props.onInputChange && props.onInputChange(val);
                       setInputValue(val);
                   },
-
+                  onValueChange: (val) => {
+                      setInputValue(val);
+                  },
+                  onKeyDown: (event) => {
+                      props.onKeyDown && props.onKeyDown(event);
+                      //@TODO Not clear, why it is working.
+                      if (!!props.customSearchCallback) {
+                          setInputValue((prevState) => prevState + ' ');
+                      }
+                      lastValueRef.current = event.keyCode;
+                  },
+                  customOptionOnClick: () => {
+                      lastValueRef.current = null;
+                  },
                   menuIsOpen: isFocused || undefined,
                   isFocused: isFocused || undefined,
               }
