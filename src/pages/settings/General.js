@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader, Button, Spinner } from 'reactstrap';
+import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader, Spinner } from 'reactstrap';
 import Switch from 'react-switch';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -25,6 +25,13 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { buildingData } from '../../store/globalState';
 import TimezoneSelect from 'react-timezone-select';
 import DropDownInput from '../../components/DropdownInput/DropDownInput';
+import Typography from '../../sharedComponents/typography';
+import Button from '../../sharedComponents/button/Button';
+import Inputs from '../../sharedComponents/form/input/Input';
+import Select from '../../sharedComponents/form/select';
+import '../../sharedComponents/form/select/style.scss';
+import { ReactComponent as DeleteSVG } from '../../assets/icon/delete.svg';
+import colorPalette from '../../assets/scss/_colors.scss';
 
 const General = () => {
     let cookies = new Cookies();
@@ -53,8 +60,18 @@ const General = () => {
         total_paid: 0,
     });
 
+    const buildingType = [
+        {
+            label: 'Office Building',
+            value: 'Office Building',
+        },
+        {
+            label: 'Residential Building',
+            value: 'Residential Building',
+        },
+    ];
+
     const [bldgData, setBldgData] = useState({});
-    const [isbuildingDetailsFetched, setIsbuildingDetailsFetched] = useState(true);
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingDateTime, setBuildingDateTime] = useState({});
@@ -259,8 +276,6 @@ const General = () => {
     const fetchBuildingData = async () => {
         let fixing = true;
 
-        setIsbuildingDetailsFetched(true);
-
         if (fixing) {
             let data = {};
             if (bldgId) {
@@ -314,7 +329,6 @@ const General = () => {
                 });
             }
             // setBuildingData(data);
-            setIsbuildingDetailsFetched(false);
             // });
         }
     };
@@ -329,7 +343,6 @@ const General = () => {
         let fixing = true;
 
         const fetchBuildingData = async () => {
-            setIsbuildingDetailsFetched(true);
             if (fixing) {
                 let data = {};
                 if (bldgId) {
@@ -367,11 +380,9 @@ const General = () => {
                     });
                 }
                 // setBuildingData(data);
-                setIsbuildingDetailsFetched(false);
                 // });
             }
             // setBuildingData(data);
-            setIsbuildingDetailsFetched(false);
             // });
         };
 
@@ -689,452 +700,313 @@ const General = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col lg={8}>
-                    <div className="building-heading-container">
-                        <div className="heading-style">General Building Settings</div>
-
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between">
                         <div>
-                            {isbuildingDetailsFetched ? (
-                                <Skeleton count={1} height={40} width={150} />
-                            ) : (
-                                <>
-                                    <button
-                                        type="button"
-                                        className="btn btn-default buildings-cancel-style"
-                                        onClick={() => {
-                                            setIsEditing(false);
-
-                                            fetchBuildingData();
-                                        }}>
-                                        Cancel
-                                    </button>
-                                    {loadButton ? (
-                                        <Button color="primary" disabled>
-                                            <Spinner size="sm">Loading...</Spinner>
-                                            <span> Saving</span>
-                                        </Button>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            className="btn btn-primary buildings-save-style ml-3"
-                                            onClick={() => {
-                                                setLoadButton(true);
-                                                saveBuildingSettings();
-                                            }}>
-                                            Save
-                                        </button>
-                                    )}
-                                </>
-                            )}
+                            <Typography.Header size={Typography.Sizes.lg}>General Building Settings</Typography.Header>
+                        </div>
+                        <div>
+                            <div className="d-flex">
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        fetchBuildingData();
+                                    }}
+                                />
+                                <Button
+                                    label={loadButton ? 'Saving' : 'Save'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        setLoadButton(true);
+                                        saveBuildingSettings();
+                                    }}
+                                    className="ml-2"
+                                    disabled={loadButton}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={9}>
                     <Card className="custom-card mt-4">
                         <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Building Details
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Building Details
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-3">
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Active</h6>
-
-                                            <h6 className="building-content-subtitle mb-2" htmlFor="customSwitches">
-                                                Non-admin users can only view active buildings.
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={75} />
-                                        ) : (
-                                            <Switch
-                                                onChange={() => {
-                                                    handleSwitchChange();
-                                                }}
-                                                checked={buildingDetails.active}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Building Name</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                A human-friendly display name for this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="name"
-                                                    id="buildingName"
-                                                    onChange={(e) => {
-                                                        localStorage.setItem('generalBuildingName', e.target.value);
-                                                        handleBldgSettingChanges('name', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    placeholder="Enter Building Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    value={buildingDetails.name}
-                                                />
-                                            </div>
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Type</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                The primary use/type of this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="select"
-                                                    name="typee"
-                                                    id="exampleSelect"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('typee', e.target.value);
-                                                        localStorage.setItem('generalBuildingType', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    value={buildingDetails.typee}
-                                                    className="font-weight-bold">
-                                                    <option>Office Building</option>
-
-                                                    <option>Residential Building</option>
-                                                </Input>
-                                            </div>
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Square Footage</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                The total square footage of this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="square_footage"
-                                                    id="exampleNumber"
-                                                    placeholder="Enter value"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('square_footage', +e.target.value);
-                                                        localStorage.setItem('generalSquareFootage', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    value={buildingDetails.square_footage}
-                                                    className="font-weight-bold"
-                                                />
-                                            </div>
-                                        )}
-                                    </FormGroup>
+                        <CardBody className="mb-1">
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>Active</Typography.Header>
+                                    <Typography.Body size={Typography.Sizes.md}>
+                                        Non-admin users can only view active buildings.
+                                    </Typography.Body>
                                 </div>
-                            </Form>
+                                <div className="col d-flex align-items-center">
+                                    <Switch
+                                        onChange={() => {
+                                            handleSwitchChange();
+                                        }}
+                                        checked={buildingDetails.active}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>Building Name</Typography.Header>
+                                    <Typography.Body size={Typography.Sizes.md}>
+                                        A human-friendly display name for this building
+                                    </Typography.Body>
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Building Name"
+                                        onChange={(e) => {
+                                            localStorage.setItem('generalBuildingName', e.target.value);
+                                            handleBldgSettingChanges('name', e.target.value);
+                                        }}
+                                        className="w-100"
+                                        value={buildingDetails?.name}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>Type</Typography.Header>
+                                    <Typography.Body size={Typography.Sizes.md}>
+                                        The primary use/type of this building
+                                    </Typography.Body>
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Select
+                                        id="endUseSelect"
+                                        placeholder="Select Building Type"
+                                        name="select"
+                                        isSearchable={true}
+                                        defaultValue={buildingDetails.typee}
+                                        options={buildingType}
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('typee', e.value);
+                                            localStorage.setItem('generalBuildingType', e.value);
+                                        }}
+                                        className="w-100"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="row mt-4">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>Square Footage</Typography.Header>
+                                    <Typography.Body size={Typography.Sizes.md}>
+                                        The total square footage of this building
+                                    </Typography.Body>
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Square Footage"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('square_footage', +e.target.value);
+                                            localStorage.setItem('generalSquareFootage', e.target.value);
+                                        }}
+                                        className="w-100"
+                                        value={buildingDetails?.square_footage}
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
                     </Card>
                 </Col>
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={9}>
                     <Card className="custom-card mt-2">
                         <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Address
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Address
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-1">
-                                    <FormGroup>
-                                        <Label for="userAddress1" className="building-content-title">
-                                            Street Address
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <div style={{ position: 'absolute' }}>
-                                                <Input
-                                                    type="text"
-                                                    name="street_address"
-                                                    id="userAddress1"
-                                                    placeholder="Address 1"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('street_address', e.target.value);
-                                                        settextLocation(e.target.value);
-                                                        if (getResponseOfPlaces) {
-                                                            setopenDropdown(true);
-                                                        }
-                                                    }}
-                                                    className="font-weight-bold"
-                                                    value={selectedPlaceLabel || buildingAddress.street_address}
-                                                />
-                                                {openDropdown && (
-                                                    <div
-                                                        style={{
-                                                            backgroundColor: 'white',
-                                                            border: '1px solid black',
-                                                            zIndex: 1000,
-                                                        }}>
-                                                        {getResponseOfPlaces?.features?.map((item) => {
-                                                            return (
-                                                                <div
-                                                                    className="onchangedrowpdown"
-                                                                    onClick={() => {
-                                                                        setSelectedPlaceLabel(item?.properties?.label);
-                                                                        localStorage.setItem(
-                                                                            'generalStreetAddress',
-                                                                            item?.properties?.label
-                                                                        );
-                                                                        setTotalSelectedData(item);
-                                                                        setopenDropdown(false);
-                                                                    }}>
-                                                                    {item?.properties?.label}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            // <ge-autocomplete
-                                            //     onChange={(e) => {
-                                            //     }}
-                                            //     api_key="ge-2200db37475e4ed3"></ge-autocomplete>
-                                        )}
-                                        {/* <div>{getResponseOfPlaces}</div> */}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label for="userAddress2" className="building-content-title">
-                                            Address 2 (optional)
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="address_2"
-                                                id="userAddress2"
-                                                placeholder="Address 2"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('address_2', e.target.value);
-                                                    localStorage.setItem('generalStreetAddress2', e.target.value);
-                                                }}
-                                                // onBlur={EditAddressHandler}
-
-                                                value={buildingAddress.address_2}
-                                            />
-                                        )}
-                                    </FormGroup>
+                        <CardBody className="mb-2">
+                            <div className="row">
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        label="Street Address"
+                                        placeholder="Enter Address 1"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('street_address', e.value);
+                                            settextLocation(e.value);
+                                            if (getResponseOfPlaces) {
+                                                setopenDropdown(true);
+                                            }
+                                        }}
+                                        className="w-100"
+                                        value={selectedPlaceLabel || buildingAddress?.street_address}
+                                    />
                                 </div>
 
-                                <div className="grid-style-2">
-                                    <FormGroup>
-                                        <Label for="userCity" className="building-content-title">
-                                            City
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="city"
-                                                id="userCity"
-                                                placeholder="Enter your city"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('city', e.target.value);
-                                                    localStorage.setItem(
-                                                        'generalCity',
-                                                        totalSelectedData?.properties?.locality
-                                                    );
-                                                }}
-                                                // onBlur={EditAddressHandler}
-                                                value={totalSelectedData?.properties?.locality || buildingAddress.city}
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label for="userState" className="building-content-title">
-                                            State
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="state"
-                                                id="userState"
-                                                value={totalSelectedData?.properties?.region || buildingAddress.state}
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('state', e.target.value);
-                                                    localStorage.setItem(
-                                                        'generalState',
-                                                        totalSelectedData?.properties?.region
-                                                    );
-                                                }}
-                                                // onBlur={EditAddressHandler}
-                                                className="font-weight-bold"
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label for="useZipCode" className="building-content-title">
-                                            Zip
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="number"
-                                                name="zip_code"
-                                                id="useZipCode"
-                                                placeholder="Enter zip code"
-                                                value={buildingAddress.zip_code}
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('zip_code', +e.target.value);
-                                                    localStorage.setItem('generalZipCode', +e.target.value);
-                                                }}
-                                                // onBlur={EditAddressHandler}
-
-                                                className="font-weight-bold"
-                                            />
-                                        )}
-                                    </FormGroup>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        label="Address 2 (optional)"
+                                        placeholder="Enter Address 2 (optional)"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('address_2', e.value);
+                                            localStorage.setItem('generalStreetAddress2', e.value);
+                                        }}
+                                        className="w-100"
+                                        value={buildingAddress?.address_2}
+                                    />
                                 </div>
-                            </Form>
+                            </div>
+
+                            <div className="row mt-4">
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        label="City"
+                                        placeholder="Enter City"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('city', e.value);
+                                            localStorage.setItem(
+                                                'generalCity',
+                                                totalSelectedData?.properties?.locality
+                                            );
+                                        }}
+                                        className="w-100"
+                                        value={totalSelectedData?.properties?.locality || buildingAddress?.city}
+                                    />
+                                </div>
+
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        label="State"
+                                        placeholder="Select State"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('state', e.value);
+                                            localStorage.setItem('generalState', totalSelectedData?.properties?.region);
+                                        }}
+                                        className="w-100"
+                                        value={totalSelectedData?.properties?.region || buildingAddress?.state}
+                                    />
+                                </div>
+
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="number"
+                                        label="Zip"
+                                        placeholder="Enter Zip Code"
+                                        onChange={(e) => {
+                                            handleBldgSettingChanges('zip_code', +e.target.value);
+                                            localStorage.setItem('generalZipCode', +e.target.value);
+                                        }}
+                                        className="w-100"
+                                        value={buildingAddress?.zip_code}
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
                     </Card>
                 </Col>
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={9}>
                     <Card className="custom-card mt-2">
                         <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Date & Time
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Date & Time
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-4">
-                                    <div className="single-line-style">
-                                        <h6 className="building-content-title">Timezone</h6>
-                                    </div>
-
-                                    <div className="single-line-style">
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={25} width={150} />
-                                        ) : (
-                                            <div className="select-wrapper font-weight-bold">
-                                                <TimezoneSelect
-                                                    value={buildingDateTime.timezone}
-                                                    onChange={setSelectedTimezone}
-                                                    labelStyle={'abbrev'}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="single-line-style">
-                                        <h6 className="building-content-title">Use 24-hour Clock</h6>
-                                    </div>
-
-                                    <div>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={25} width={150} />
-                                        ) : (
-                                            <Switch
-                                                onChange={(e) => {
-                                                    handleDateTimeSwitch();
-
-                                                    if (e) {
-                                                        setTimeZone('24');
-                                                        localStorage.setItem('generaltimeZone', '24');
-                                                    }
-
-                                                    if (!e) {
-                                                        setTimeZone('12');
-                                                        localStorage.setItem('generaltimeZone', '12');
-                                                    }
-                                                }}
-                                                checked={buildingDateTime.time_format}
-                                                onColor={'#2955E7'}
-                                                name="time_format"
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-                                        )}
-                                    </div>
+                        <CardBody className="mb-1">
+                            <div className="row d-flex align-items-center">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>TimeZone</Typography.Header>
                                 </div>
-                            </Form>
+                                <div className="col">
+                                    <TimezoneSelect
+                                        value={buildingDateTime?.timezone ? buildingDateTime?.timezone : ''}
+                                        onChange={setSelectedTimezone}
+                                        className="react-select-wrapper w-100"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="row d-flex align-items-center mt-4">
+                                <div className="col">
+                                    <Typography.Header size={Typography.Sizes.xs}>Use 24-hour Clock</Typography.Header>
+                                </div>
+                                <div className="col">
+                                    <Switch
+                                        onChange={(e) => {
+                                            handleDateTimeSwitch();
+
+                                            if (e) {
+                                                setTimeZone('24');
+                                                localStorage.setItem('generaltimeZone', '24');
+                                            }
+
+                                            if (!e) {
+                                                setTimeZone('12');
+                                                localStorage.setItem('generaltimeZone', '12');
+                                            }
+                                        }}
+                                        checked={buildingDateTime.time_format}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
                     </Card>
                 </Col>
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={9}>
                     <Card className="custom-card mt-2">
                         <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Operating Hours
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Operating Hours
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
                         <CardBody>
@@ -1744,29 +1616,28 @@ const General = () => {
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={9}>
                     <Card className="custom-card mt-2">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                Danger Zone
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Danger Zone
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
                         <CardBody>
-                            <Form>
-                                <FormGroup>
-                                    {isbuildingDetailsFetched ? (
-                                        <Skeleton count={1} height={40} width={150} />
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={deleteBuildingHandler}
-                                            className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                            <i className="uil uil-trash mr-2"></i>Delete Building
-                                        </button>
-                                    )}
-                                </FormGroup>
-                            </Form>
+                            <div>
+                                <Button
+                                    label="Delete Building"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryDistructive}
+                                    // onClick={deleteBuildingHandler}
+                                    icon={<DeleteSVG />}
+                                />
+                            </div>
                         </CardBody>
                     </Card>
                 </Col>
