@@ -371,7 +371,7 @@ const ExploreByEquipment = () => {
                 setTopVal(
                     Math.round(
                         filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change + 1
+                            ? filters.data.data.max_change
                             : filters.data.data.max_change
                     )
                 );
@@ -381,7 +381,7 @@ const ExploreByEquipment = () => {
                 setTopPerChange(
                     Math.round(
                         filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change + 1
+                            ? filters.data.data.max_change
                             : filters.data.data.max_change
                     )
                 );
@@ -393,7 +393,7 @@ const ExploreByEquipment = () => {
                 set_maxPerValue(
                     Math.round(
                         filters.data.data.max_change === filters.data.data.min_change
-                            ? filters.data.data.max_change + 1
+                            ? filters.data.data.max_change
                             : filters.data.data.max_change
                     )
                 );
