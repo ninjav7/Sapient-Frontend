@@ -670,6 +670,10 @@ const TimeOfDay = () => {
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
 
+                    if (minVal === maxVal) {
+                        minVal = 0;
+                    }
+
                     heatMapData.map((record) => {
                         if (record.name === 'Sunday') {
                             let newData = [];

@@ -1005,7 +1005,8 @@ const EquipChartModal = ({
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Row>
+                                        {/* Planned for Future Use */}
+                                        {/* <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Typography.Subheader
@@ -1028,7 +1029,7 @@ const EquipChartModal = ({
                                                     </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1376,7 +1377,7 @@ const EquipChartModal = ({
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Row>
+                                        {/* <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Typography.Subheader
@@ -1399,7 +1400,7 @@ const EquipChartModal = ({
                                                     </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
