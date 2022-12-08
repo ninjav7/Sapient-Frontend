@@ -65,7 +65,7 @@ const OptionChartAndCheck = ({ percentChart, labelChart, isSelected, isOptionCom
 };
 
 //Single
-const CustomOptionContent = ({ component: Component, className, ...props }) => {
+const CustomOptionContent = ({ component: Component, className, customOptionOnClick, ...props }) => {
     const { supportText } = props.data;
     const { type, customOption } = props.selectProps;
 
@@ -84,7 +84,7 @@ const CustomOptionContent = ({ component: Component, className, ...props }) => {
 
     return (
         <Component {...props} className={className}>
-            <div className="d-flex justify-content-between align-items-center">
+            <div className="d-flex justify-content-between align-items-center" onClick={customOptionOnClick}>
                 <OptionIcon {...IconProps} type={type} />
 
                 <OptionTypo {...TypoProps} />
@@ -108,11 +108,18 @@ export const SingleValue = ({ children, ...props }) => {
 
 export const Option = (props) => {
     const { isDisabled, isSelected, isFocused } = props;
-    const { customOption } = props.selectProps;
+    const { customOption, customOptionOnClick } = props.selectProps;
 
     const className = optionClasses({ isDisabled, isSelected, isFocused, customOption });
 
-    return <CustomOptionContent {...props} className={className} component={components.Option} />;
+    return (
+        <CustomOptionContent
+            {...props}
+            className={className}
+            component={components.Option}
+            customOptionOnClick={customOptionOnClick}
+        />
+    );
 };
 
 export const ValueContainerSingle = ({ children, ...props }) => {

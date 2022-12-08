@@ -453,7 +453,8 @@ const IndividualPassiveDevice = () => {
                                                             }}
                                                             className="mouse-pointer"
                                                         />
-                                                        <button
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                        {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
                                                             onClick={() => {
@@ -465,7 +466,7 @@ const IndividualPassiveDevice = () => {
                                                                 setBreakerId(record?.breaker_id);
                                                             }}>
                                                             Edit
-                                                        </button>
+                                                        </button> */}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -483,7 +484,8 @@ const IndividualPassiveDevice = () => {
                                                                 handleChartShow(record.id);
                                                             }}
                                                         />
-                                                        <button
+                                                        {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                        {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
                                                             onClick={() => {
@@ -492,7 +494,7 @@ const IndividualPassiveDevice = () => {
                                                                 openEditSensorPanelModel();
                                                             }}>
                                                             Edit
-                                                        </button>
+                                                        </button> */}
                                                     </div>
                                                 </div>
                                             )}
