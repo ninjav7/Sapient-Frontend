@@ -21,7 +21,7 @@ import IndividualActiveDevice from '../pages/settings/active-devices/IndividualA
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
-import Users from '../pages/settings/Users';
+import Users from '../pages/settings/users/Users';
 import UserProfile from '../pages/settings/UserProfile';
 import UserProfileNew from '../pages/settings/UserProfileNew';
 import Roles from '../pages/settings/Roles';
@@ -518,7 +518,7 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users',
+            path: '/settings/users/Users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
