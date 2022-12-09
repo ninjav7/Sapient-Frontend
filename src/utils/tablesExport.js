@@ -63,7 +63,6 @@ export const getExploreByEquipmentTableCSVExport = (tableData, columns) => {
                     break;
                 case 'consumption':
                     const consumption = tableRow['consumption'];
-                    //console.log(consumption);
                     arr.push(`${consumption.now / 1000} kWh`);
                     break;
                 case 'change':
@@ -88,7 +87,6 @@ export const getExploreByEquipmentTableCSVExport = (tableData, columns) => {
 };
 
 export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
-    console.log(tableData);
     let dataToExport = [];
     tableData.forEach((tableRow, index) => {
         let arr = [];
