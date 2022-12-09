@@ -27,7 +27,8 @@ export function getEqupmentDataRequest(
     getParams,
     withPagination
 ) {
-    let params = `?building_id=${bldgId}&equipment_search=${search}`;
+    const searchData = encodeURIComponent(search);
+    let params = `?building_id=${bldgId}&equipment_search=${searchData}`;
     if (withPagination) {
         params += `&page_size=${pageSize}&page_no=${pageNo}`;
     }
