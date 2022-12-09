@@ -12,7 +12,9 @@ const OperatingHours = (props) => {
     return (
         <>
             {props.weekDay !== 'Mon' && <Brick sizeInRem={1} />}
-            <div className="d-flex justify-content-start align-items-center">
+            <div
+                className="d-flex justify-content-start align-items-center"
+                style={{ opacity: props.isOperating ? '0.3' : '1' }}>
                 <div className="d-flex align-items-center mr-4">
                     <Switch
                         onChange={props.onSwitchToggle}
