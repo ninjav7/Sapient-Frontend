@@ -6,7 +6,7 @@ import * as FeatherIcon from 'react-feather';
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
 // settings
-import General from '../pages/settings/General';
+import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';

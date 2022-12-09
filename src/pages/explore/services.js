@@ -27,7 +27,7 @@ export function fetchExploreBuildingList(
 ) {
     let params = `?consumption=energy&search_by_name=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
     let obj = { ...dateTimeData };
-    if ((minConValue !== 0 || maxConValue !== 0) && conAPIFlag !== '')
+    if (conAPIFlag !== '')
         obj['consumption_range'] = {
             gte: (minConValue - 1) * 1000,
             lte: (maxConValue + 1) * 1000,
@@ -37,7 +37,7 @@ export function fetchExploreBuildingList(
             gte: minPerValue - 0.5,
             lte: maxPerValue + 0.5,
         };
-    if ((minSqftValue !== 0 || maxSqftValue !== 0) && sqftAPIFlag !== '')
+    if (sqftAPIFlag !== '')
         obj['sq_ft_range'] = {
             gte: minSqftValue,
             lte: maxSqftValue,
@@ -77,12 +77,18 @@ export function fetchExploreEquipmentList(
     conAPIFlag,
     perAPIFlag
 ) {
-    let params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&ordered_by=${order_by}&sort_by=${sort_by}&search_by_name=${search}`;
+    let params = '';
+    if (pageSize === 0 && pageNo === 0) {
+        params = `?consumption=energy&building_id=${bldgId}&ordered_by=${order_by}&sort_by=${sort_by}&search_by_name=${search}`;
+    } else {
+        params = `?consumption=energy&building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}&ordered_by=${order_by}&sort_by=${sort_by}&search_by_name=${search}`;
+    }
+
     let payload = {};
     payload['date_from'] = startDate;
     payload['date_to'] = endDate;
     payload['tz_info'] = timeZone;
-    if ((minConValue !== 0 || maxConValue !== 0) && conAPIFlag !== '')
+    if (conAPIFlag !== '')
         payload['consumption_range'] = {
             gte: (Number(minConValue) - 1) * 1000,
             lte: (Number(maxConValue) + 1) * 1000,
