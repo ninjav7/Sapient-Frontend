@@ -21,7 +21,7 @@ const mapFilters = {
     [FILTER_TYPES.RANGE_SELECTOR]: (props) => {
         let filterValue = props.filterOptions;
         let currentValue = filterValue;
-        
+
         const handleChange = () => {
             props.onClose && props.onClose(currentValue);
         };
@@ -33,11 +33,12 @@ const mapFilters = {
         };
 
         const buttonLabel = () => {
-            return `${filterValue[0]} - ${filterValue[1]} ${props.componentProps.prefix} Threshold`;
-        }
+            return `${filterValue[0]} - ${filterValue[1]} ${props.componentProps.prefix}`;
+        };
 
         return (
             <DropDownBase
+                isOpened={props.isOpened}
                 key={generateID()}
                 placement="bottom-start"
                 onClose={handleChange}
@@ -93,11 +94,11 @@ const mapFilters = {
                 onMenuClose={() => props.onClose(selectedOptions)}
                 components={{
                     Control: (controlProps) => (
-                        <div {...controlProps} onBlur={() =>{}}>
+                        <div {...controlProps} onBlur={() => {}}>
                             <FilterHeaderButton
                                 isOpen={controlProps.menuIsOpen}
                                 {...props}
-                                onBlur={() =>{}}
+                                onBlur={() => {}}
                                 buttonLabel={
                                     selectedItems.length > 1
                                         ? `${selectedItems.length} List items`
@@ -184,7 +185,13 @@ const mapFilters = {
     },
 };
 
-export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selectedFilters, onDeleteFilter }) => {
+export const Filters = ({
+    filterOptions,
+    onChange,
+    onChangeFilterValue,
+    selectedFilters,
+    onDeleteFilter,
+}) => {
     const { widgetProps, setSearch } = useContext(DataTableWidgetContext);
 
     const handleSearchChange = (event) => {
@@ -214,17 +221,16 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
                     }}
                 />
             )}
-
             <StatusFilter />
 
             {selectedFilters.map((filter, key) => {
                 const Component = mapFilters[filter.filterType];
-                
+
                 const handleDeleteFilter = (args) => {
                     onDeleteFilter(args);
                     filter.onDelete && filter.onDelete(args);
                 };
-                
+
                 //@TODO Delete on change filter carefully
                 return (
                     <Component

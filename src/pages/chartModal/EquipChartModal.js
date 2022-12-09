@@ -4,11 +4,9 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
-    builidingAlerts,
-    equipmentGraphData,
     updateEquipment,
     listSensor,
     equipmentDetails,
@@ -17,12 +15,10 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
-import { getFormattedTimeIntervalData } from '../../helpers/formattedChartData';
+import { fetchExploreEquipmentChart } from '../explore/services';
 import axios from 'axios';
-import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
-import Dropdown from 'react-bootstrap/Dropdown';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
@@ -32,13 +28,17 @@ import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { formatConsumptionValue, xaxisFilters } from '../../helpers/explorehelpers';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
-import { equipOptions, equipOptionsLines } from '../../helpers/ChartOption';
+import '../../sharedComponents/typography/style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
+import Select from '../../sharedComponents/form/select';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import { fetchDateRange } from '../../helpers/formattedChartData';
+import Typography from '../../sharedComponents/typography';
+//import Input from '../../sharedComponents/form/input/Input';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -64,8 +64,9 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
-        { value: 'power', label: 'Power (W)', unit: 'W' , Consumption: 'Power Consumption' },
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -91,7 +92,7 @@ const EquipChartModal = ({
 
     const [location, setLocation] = useState('');
     const [equipType, setEquipType] = useState('');
-
+    const [closeFlag, setCloseFlag] = useState(false);
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
 
     const addEquimentType = () => {
@@ -103,8 +104,6 @@ const EquipChartModal = ({
         });
     };
 
-    const [buildingAlert, setBuildingAlerts] = useState([]);
-
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
         setSelectedUnit(obj.unit);
@@ -113,36 +112,6 @@ const EquipChartModal = ({
         let obj = metric.find((record) => record.value === value);
         setSelectedConsumptionLabel(obj.Consumption);
     };
-
-    const buildingAlertsData = async () => {
-        if (startDate === null) {
-            return;
-        }
-
-        if (endDate === null) {
-            return;
-        }
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${1}`;
-            await axios
-                .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    setBuildingAlerts(res.data);
-                });
-        } catch (error) {}
-    };
-
-    const getopt =equipOptions(selectedUnit,timeZone);
-    const [options, setOptions] = useState(equipOptions(selectedUnit,timeZone));
-
-    const [optionsLine, setOptionsLine] = useState(equipOptionsLines);
 
     const validateDataChange = (key, value) => {
         if (key === 'name') {
@@ -263,10 +232,13 @@ const EquipChartModal = ({
     };
 
     const handleCloseWithoutSave = () => {
-        handleChartClose();
         setEquipResult({});
         setEquipmentData({});
+        setCloseFlag(true);
         setDataChanged(false);
+        setSelectedUnit(metric[0].unit);
+        setConsumption(metric[0].value);
+        setSelectedConsumptionLabel(metric[0].Consumption);
         setUpdateEqipmentData({});
         if (activePage === 'explore') {
             setSelectedTab(0);
@@ -274,48 +246,86 @@ const EquipChartModal = ({
         if (activePage === 'equipment') {
             setSelectedTab(1);
         }
+        handleChartClose();
     };
 
-    const fetchEquipmentChart = async (equipId) => {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
-            await axios
-                .post(`${BaseUrl}${equipmentGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    let response = res.data;
+    const fetchEquipmentChart = async (equipId, equiName) => {
+        setIsEquipDataFetched(true);
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
+        await fetchExploreEquipmentChart(payload, params)
+            .then((res) => {
+                let response = res.data;
 
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    let exploreData = [];
+
+                    let data = response.data;
+                    for (let i = 0; i < data.length; i++) {
+                        let NulledData = [];
+                        data[i].data.map((ele) => {
+                            if (ele.consumption === '') {
+                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                            } else {
+                                NulledData.push({
+                                    x: new Date(ele.time_stamp).getTime(),
+                                    y: ele.consumption,
+                                });
+                            }
+                        });
+                        let recordToInsert = {
+                            name: `Sensor ${data[i].sensor_name}`,
+                            data: NulledData,
+                        };
+
+                        exploreData.push(recordToInsert);
+                    }
+                    setDeviceData(exploreData);
+                    setSeriesData(exploreData);
+                    setIsEquipDataFetched(false);
+                } else {
                     let data = response.data.map((_data) => {
                         _data[1] = parseInt(_data[1]);
                         return _data;
                     });
-
-                    data.forEach((record) => {});
                     let exploreData = [];
-                    const formattedData = getFormattedTimeIntervalData(data, startDate, endDate);
+                    let NulledData = [];
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({
+                                x: new Date(ele?.time_stamp).getTime(),
+                                y: ele?.consumption,
+                            });
+                        }
+                    });
                     let recordToInsert = {
-                        data: data,
-                        name: 'AHUs',
-                        unit: selectedUnit,
+                        name: equiName,
+                        data: NulledData,
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
-                    setSeriesData([
-                        {
-                            data: exploreData[0].data,
-                        },
-                    ]);
                     setIsEquipDataFetched(false);
-                });
-        } catch (error) {
-            setIsEquipDataFetched(false);
+                }
+            })
+            .catch((error) => {});
+        setIsEquipDataFetched(false);
+    };
+
+    const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
+        if (equipDeviceId === '' || equipDeviceId === null) {
+            return '';
+        }
+
+        if (deviceType === 'active-device') {
+            return `/settings/active-devices/single/${equipDeviceId}`;
+        }
+
+        if (deviceType === 'passive-device') {
+            return `/settings/passive-devices/single/${equipDeviceId}`;
         }
     };
 
@@ -325,15 +335,11 @@ const EquipChartModal = ({
         }
 
         if (deviceType === 'active-device') {
-            history.push({
-                pathname: `/settings/active-devices/single/${equipDeviceId}`,
-            });
+            history.push({ pathname: `/settings/active-devices/single/${equipDeviceId}` });
         }
 
         if (deviceType === 'passive-device') {
-            history.push({
-                pathname: `/settings/passive-devices/single/${equipDeviceId}`,
-            });
+            history.push({ pathname: `/settings/passive-devices/single/${equipDeviceId}` });
         }
     };
 
@@ -391,24 +397,6 @@ const EquipChartModal = ({
             } catch (error) {}
         };
 
-        const fetchBuildingAlerts = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${1}`;
-                await axios
-                    .post(`${BaseUrl}${builidingAlerts}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                        headers,
-                    })
-                    .then((res) => {
-                        setBuildingAlerts(res.data);
-                    });
-            } catch (error) {}
-        };
-
         const fetchEndUseData = async () => {
             try {
                 let headers = {
@@ -453,7 +441,7 @@ const EquipChartModal = ({
             } catch (error) {}
         };
 
-        fetchEquipmentChart(equipmentFilter?.equipment_id);
+        fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchEndUseData();
@@ -519,64 +507,13 @@ const EquipChartModal = ({
         if (endDate === null) {
             return;
         }
-
-        if (sensorData.length !== 0) {
-            buildingAlertsData();
+        if (closeFlag !== true) {
+            fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
+            fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        } else {
+            setCloseFlag(false);
         }
-        fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
     }, [startDate, endDate, selectedConsumption]);
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show:false,
-            },
-        }
-        setOptions({ ...options, xaxis: xaxisObj });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [daysCount]);
-
-    useEffect(() => {
-        let toolTip = {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                let timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">${selectedConsumptionLabel}</h6>
-                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            0
-                        )} ${selectedUnit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        };
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        let xaxisLineObj = {
-            type: 'datetime',
-            labels: {
-                show:false,
-            },
-        }
-        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
-        setOptionsLine({ ...optionsLine, xaxis: xaxisLineObj });
-    }, [selectedUnit]);
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -593,51 +530,65 @@ const EquipChartModal = ({
             backdrop="static"
             keyboard={false}>
             <>
-                <Modal.Body>
+                <Modal.Body className="p-4">
                     {equipmentData?.device_type === 'active' ? (
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">{equipmentData?.location}</h6>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        Type={Typography.Types.Light}
+                                        className="text-muted">
+                                        {equipmentData?.location}
+                                    </Typography.Subheader>
                                 </Col>
                             </Row>
                             <Row>
-                                <Col lg={9}>
+                                <Col lg={8}>
                                     <div>
-                                        <span className="heading-style">{equipmentData?.equipments_name}</span>
+                                        <Typography.Header size={Typography.Sizes.md}>
+                                            {equipmentData?.equipments_name}
+                                        </Typography.Header>
                                     </div>
                                 </Col>
-                                <Col lg={3}>
-                                    <div className="button-wrapper">
+                                <Col lg={4}>
+                                    <div className="equip-button-wrapper">
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-outline-danger font-weight-bold mr-4">
-                                                <FontAwesomeIcon icon={faPowerOff} size="lg" style={{ color: 'red' }} />{' '}
-                                                Turn Off
-                                            </button>
+                                            <Button
+                                                label="Turn Off"
+                                                icon={
+                                                    <FontAwesomeIcon
+                                                        icon={faPowerOff}
+                                                        size="lg"
+                                                        style={{ color: 'red' }}
+                                                    />
+                                                }
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primaryDistructive}
+                                            />
                                         </div>
 
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-light font-weight-bold mr-4"
+                                            <Button
+                                                label="Cancel"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
+                                                className="mr-4 ml-4"
                                                 onClick={() => {
                                                     handleCloseWithoutSave();
-                                                }}>
-                                                Cancel
-                                            </button>
+                                                }}
+                                            />
                                         </div>
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            <Button
+                                                label="Save"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
                                                 onClick={() => {
                                                     handleSave();
                                                 }}
-                                                disabled={!isDataChanged}>
-                                                Save
-                                            </button>
+                                                disabled={!isDataChanged}
+                                            />
                                         </div>
                                     </div>
                                 </Col>
@@ -651,37 +602,45 @@ const EquipChartModal = ({
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">{equipmentData?.location}</h6>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        Type={Typography.Types.Light}
+                                        className="text-muted">
+                                        {equipmentData?.location}
+                                    </Typography.Subheader>
                                 </Col>
                             </Row>
                             <Row>
                                 <Col lg={9}>
                                     <div>
-                                        <span className="heading-style">{equipmentData?.equipments_name}</span>
+                                        <Typography.Header size={Typography.Sizes.md}>
+                                            {equipmentData?.equipments_name}
+                                        </Typography.Header>
                                     </div>
                                 </Col>
                                 <Col lg={3}>
-                                    <div className="button-wrapper">
+                                    <div className="equip-button-wrapper">
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-light font-weight-bold mr-4"
+                                            <Button
+                                                label="Cancel"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
                                                 onClick={() => {
                                                     handleCloseWithoutSave();
-                                                }}>
-                                                Cancel
-                                            </button>
+                                                }}
+                                            />
                                         </div>
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            <Button
+                                                label="Save"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                className="ml-4"
                                                 onClick={() => {
                                                     handleSave();
                                                 }}
-                                                disabled={!isDataChanged}>
-                                                Save
-                                            </button>
+                                                disabled={!isDataChanged}
+                                            />
                                         </div>
                                     </div>
                                 </Col>
@@ -695,37 +654,45 @@ const EquipChartModal = ({
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">{equipmentData?.location}</h6>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        Type={Typography.Types.Light}
+                                        className="text-muted">
+                                        {equipmentData?.location}
+                                    </Typography.Subheader>
                                 </Col>
                             </Row>
                             <Row>
                                 <Col lg={9}>
                                     <div>
-                                        <span className="heading-style">{equipmentData?.equipments_name}</span>
+                                        <Typography.Header size={Typography.Sizes.md}>
+                                            {equipmentData?.equipments_name}
+                                        </Typography.Header>
                                     </div>
                                 </Col>
                                 <Col lg={3}>
-                                    <div className="button-wrapper">
+                                    <div className="equip-button-wrapper">
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-light font-weight-bold mr-4"
+                                            <Button
+                                                label="Cancel"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.secondaryGrey}
                                                 onClick={() => {
                                                     handleCloseWithoutSave();
-                                                }}>
-                                                Cancel
-                                            </button>
+                                                }}
+                                            />
                                         </div>
                                         <div>
-                                            <button
-                                                type="button"
-                                                className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            <Button
+                                                label="Save"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.primary}
+                                                className="ml-4"
                                                 onClick={() => {
                                                     handleSave();
                                                 }}
-                                                disabled={!isDataChanged}>
-                                                Save
-                                            </button>
+                                                disabled={!isDataChanged}
+                                            />
                                         </div>
                                     </div>
                                 </Col>
@@ -735,23 +702,31 @@ const EquipChartModal = ({
                         ''
                     )}
 
-                    <div className="mt-2 mouse-pointer">
-                        <span
-                            className={selectedTab === 0 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                            onClick={() => setSelectedTab(0)}>
-                            Metrics
-                        </span>
-                        <span
-                            className={selectedTab === 1 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                            onClick={() => setSelectedTab(1)}>
-                            Configure
-                        </span>
-                        {/* <span
-                            className={selectedTab === 2 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                            onClick={() => setSelectedTab(2)}>
-                            History
-                        </span> */}
-                    </div>
+                    <Row className="mt-2 mouse-pointer">
+                        <Col lg={1}>
+                            <span>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    Type={Typography.Types.Light}
+                                    className={selectedTab === 0 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'}
+                                    onClick={() => setSelectedTab(0)}>
+                                    Metrics
+                                </Typography.Subheader>
+                            </span>
+                        </Col>
+                        <Col lg={1}>
+                            <span>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    Type={Typography.Types.Light}
+                                    className={selectedTab === 1 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'}
+                                    onClick={() => setSelectedTab(1)}>
+                                    Configure
+                                </Typography.Subheader>
+                            </span>
+                        </Col>
+                        <Col lg={10}></Col>
+                    </Row>
 
                     {selectedTab === 0 && (
                         <Row className="mt-4">
@@ -818,132 +793,69 @@ const EquipChartModal = ({
                                         )}
                                     </div>
                                 </div>
-
-                                <div className="equipment-alert-container" style={{ marginTop: '5rem' }}>
-                                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                        Equipment Alerts
-                                    </h6>
-                                    <a
-                                        rel="noopener noreferrer"
-                                        className="link-primary mr-2"
-                                        style={{
-                                            display: 'inline-block',
-                                            float: 'right',
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}></a>
-                                    <span
-                                        className="float-right mr-0 font-weight-bold"
-                                        style={{ color: 'blue' }}
-                                        onClick={() => setBuildingAlerts([])}>
-                                        Clear
-                                    </span>
-
-                                    <div className="mt-2 alert-container">
-                                        {buildingAlert.map((record) => {
-                                            return (
-                                                <>
-                                                    {record.type === 'building-add' && (
-                                                        <div className="alert-card mb-2">
-                                                            <div>
-                                                                <i className="uil uil-triangle" />
-                                                                <span className="alert-heading">
-                                                                    <b> New Peak</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    225.3 kW &nbsp; 3/3/22 @ 3:20 PM
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Today
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {record.type === 'energy-trend' && (
-                                                        <div className="alert-card mb-2">
-                                                            <div>
-                                                                <i className="uil uil-arrow-growth" />
-                                                                <span className="alert-heading">
-                                                                    <b> Energy Trend</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    18% from last year this time
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Yesterday
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {record.type === 'notification' && (
-                                                        <div className="alert-card">
-                                                            <div>
-                                                                <i className="uil uil-exclamation-triangle" />
-                                                                <span className="alert-heading">
-                                                                    <b> Service Soon</b>
-                                                                </span>
-                                                                <br />
-                                                                <span className="alert-content">
-                                                                    80 Run Hours in 45 days
-                                                                </span>
-                                                                <div className="float-right ml-4 alert-weekday">
-                                                                    Yesterday
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
                             </Col>
 
                             <Col lg={8}>
-                                <div className="model-sensor-filters">
-                                    <div>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            onChange={(e) => {
-                                                if (e.target.value === 'passive-power') {
-                                                    return;
-                                                }
-                                                setConsumption(e.target.value);
-                                                handleUnitChange(e.target.value);
-                                                handleConsumptionChange(e.target.value);
-                                            }}
-                                            className="font-weight-bold model-sensor-energy-filter mr-2"
-                                            style={{ display: 'inline-block', width: 'fit-content' }}
-                                            defaultValue={selectedConsumption}>
-                                            {metric.map((record, index) => {
-                                                return <option value={record.value}>{record.label}</option>;
-                                            })}
-                                        </Input>
+                                <div className="equip-model">
+                                    <div className="pt-3">
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            Type={Typography.Types.Light}
+                                            className="ytd-heading">
+                                            Device : &nbsp;
+                                            <Link
+                                                style={{
+                                                    pointerEvents:
+                                                        equipmentData?.device_type === 'passive'
+                                                            ? equipBreakerLink?.length === 0
+                                                                ? 'none'
+                                                                : ''
+                                                            : equipmentData !== null
+                                                            ? equipmentData.device_id === ''
+                                                                ? 'none'
+                                                                : ''
+                                                            : 'none',
+                                                }}
+                                                target="_blank"
+                                                to={redirectToConfigDevicePageLink(
+                                                    equipmentData?.device_id,
+                                                    equipmentData?.device_type === 'passive'
+                                                        ? 'passive-device'
+                                                        : equipmentData?.device_type === 'active'
+                                                        ? 'active-device'
+                                                        : ''
+                                                )}>
+                                                <span
+                                                    className="buttonhover"
+                                                    style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
+                                                    {equipmentData?.device_mac}
+                                                    &nbsp;
+                                                    <FontAwesomeIcon
+                                                        icon={faArrowUpRightFromSquare}
+                                                        size="md"
+                                                        style={{ color: 'base-black' }}
+                                                    />
+                                                </span>
+                                            </Link>
+                                        </Typography.Subheader>
+                                        {/* </div> */}
                                     </div>
-
-                                    <Header type="modal" />
-
-                                    <div className="mr-3 sensor-chart-options">
-                                        <Dropdown>
-                                            <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                                                <FontAwesomeIcon icon={faEllipsisV} size="lg" />
-                                            </Dropdown.Toggle>
-
-                                            <Dropdown.Menu>
-                                                <Dropdown.Item>
-                                                    <i className="uil uil-calendar-alt mr-2"></i>Configure Column
-                                                </Dropdown.Item>
-
-                                                <Dropdown.Item>
-                                                    <i className="uil uil-download-alt mr-2"></i>
-                                                    Download CSV
-                                                </Dropdown.Item>
-                                            </Dropdown.Menu>
-                                        </Dropdown>
+                                    <div className="d-flex">
+                                        <div className="mr-2">
+                                            <Select
+                                                defaultValue={selectedConsumption}
+                                                options={metric}
+                                                onChange={(e) => {
+                                                    if (e.value === 'passive-power') {
+                                                        return;
+                                                    }
+                                                    setConsumption(e.value);
+                                                    handleUnitChange(e.value);
+                                                    handleConsumptionChange(e.value);
+                                                }}
+                                            />
+                                        </div>
+                                        <Header type="modal" />
                                     </div>
                                 </div>
 
@@ -953,11 +865,13 @@ const EquipChartModal = ({
                                     </div>
                                 ) : (
                                     <div>
-                                        <BrushChart
-                                            seriesData={deviceData}
-                                            optionsData={options}
-                                            seriesLineData={seriesData}
-                                            optionsLineData={optionsLine}
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
+                                            data={deviceData}
+                                            dateRange={fetchDateRange(startDate, endDate)}
                                         />
                                     </div>
                                 )}
@@ -971,14 +885,23 @@ const EquipChartModal = ({
                                 <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
-                                            <Col lg={12}>
-                                                <h4>Equipment Details</h4>
+                                            <Col lg={12} className="mb-2">
+                                                <Typography.Header
+                                                    size={Typography.Sizes.md}
+                                                    Type={Typography.Types.Regular}>
+                                                    Equipment Details
+                                                </Typography.Header>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Name</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Name
+                                                    </Typography.Subheader>
                                                     <Form.Control
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
@@ -992,8 +915,12 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Type</Form.Label>
-                                                    {/* equipmentTypeDataNow */}
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Type
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1020,7 +947,12 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>End Use Category</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        End Use Category
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1045,14 +977,19 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Location</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Location
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
                                                         id="exampleSelect"
                                                         className="font-weight-bold"
                                                         onChange={(e) => {
-                                                            handleChange('space_id', e.target.value);
+                                                            handleChange('location_id', e.target.value);
                                                         }}
                                                         value={location}>
                                                         <option value="" selected>
@@ -1066,28 +1003,49 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    <Form.Label>Location this equipment is installed in.</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
+                                                        Location this equipment is installed in.
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Row>
+                                        {/* Planned for Future Use */}
+                                        {/* <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Serves Zones</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Server Zones
+                                                    </Typography.Subheader>
                                                     <TagsInput
                                                         value={selectedZones}
                                                         onChange={setSelectedZones}
                                                         name="Zones"
                                                         placeHolder="+ Add Location"
                                                     />
-                                                    <Form.Label>What area this piece of equipment services.</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
+                                                        What area this piece of equipment services.
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Tags</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Tags
+                                                    </Typography.Subheader>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
                                                         onChange={(value) => {
@@ -1102,7 +1060,12 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Notes</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Notes
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="textarea"
                                                         name="text"
@@ -1121,7 +1084,6 @@ const EquipChartModal = ({
                                     <Col lg={4}>
                                         <div className="modal-right-container">
                                             <div className="equip-panel-info">
-                                                {/* <div className="modal-right-pic"></div> */}
                                                 {equipBreakerLink?.length === 0 ? (
                                                     <div className="equip-breaker-style">
                                                         <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
@@ -1224,8 +1186,12 @@ const EquipChartModal = ({
                                                     </>
                                                 )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                    <span className="modal-right-card-title">Energy Monitoring</span>
-
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.lg}
+                                                        Type={Typography.Types.Light}
+                                                        className="modal-right-card-title">
+                                                        Energy Monitoring
+                                                    </Typography.Subheader>
                                                     <Button
                                                         label="View"
                                                         size={Button.Sizes.md}
@@ -1242,23 +1208,40 @@ const EquipChartModal = ({
                                                 <div className="equip-breaker-container">
                                                     <div className="equip-breaker-detail">
                                                         <div className="phase-style">
-                                                            <div className="equip-breaker-header mb-1">Phases</div>
-                                                            <div className="equip-breaker-value float-left">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.sm}
+                                                                Type={Typography.Types.Light}
+                                                                className="equip-breaker-header mb-1">
+                                                                Phases
+                                                            </Typography.Subheader>
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                Type={Typography.Types.Light}
+                                                                className="equip-breaker-value float-left">
                                                                 {equipBreakerLink[0]?.breaker_type}
-                                                            </div>
+                                                            </Typography.Subheader>
                                                         </div>
                                                         <div className="installed-style">
-                                                            <div className="equip-breaker-header mb-1">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.sm}
+                                                                Type={Typography.Types.Light}
+                                                                className="equip-breaker-header mb-1">
                                                                 Installed at
-                                                            </div>
-                                                            <div className="equip-breaker-value float-left">
+                                                            </Typography.Subheader>
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                Type={Typography.Types.Light}
+                                                                className="equip-breaker-value box float-left">
                                                                 {equipBreakerLink?.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
                                                                 {equipBreakerLink?.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
                                                                 {equipBreakerLink?.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
-                                                            </div>
+                                                                    `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                            </Typography.Subheader>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1274,14 +1257,23 @@ const EquipChartModal = ({
                                 <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
-                                            <Col lg={12}>
-                                                <h4>Equipment Details</h4>
+                                            <Col lg={12} className="mb-1">
+                                                <Typography.Header
+                                                    size={Typography.Sizes.md}
+                                                    Type={Typography.Types.Regular}>
+                                                    Equipment Details
+                                                </Typography.Header>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Name</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Name
+                                                    </Typography.Subheader>
                                                     <Form.Control
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
@@ -1295,8 +1287,12 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Type</Form.Label>
-                                                    {/* equipmentTypeDataNow */}
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Type
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1323,7 +1319,12 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col lg={4}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>End Use Category</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        End Use Category
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1348,7 +1349,12 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Location</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Location
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1369,28 +1375,48 @@ const EquipChartModal = ({
                                                             );
                                                         })}
                                                     </Input>
-                                                    <Form.Label>Location this equipment is installed in.</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
+                                                        Location this equipment is installed in.
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        <Row>
+                                        {/* <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Serves Zones</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Serves Zones
+                                                    </Typography.Subheader>
                                                     <TagsInput
                                                         value={selectedZones}
                                                         onChange={setSelectedZones}
                                                         name="Zones"
                                                         placeHolder="+ Add Location"
                                                     />
-                                                    <Form.Label>What area this piece of equipment services.</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
+                                                        What area this piece of equipment services.
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
-                                        </Row>
+                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Tags</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Tags
+                                                    </Typography.Subheader>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData?.tags : ''}
                                                         onChange={(value) => {
@@ -1405,7 +1431,12 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Notes</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Notes
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="textarea"
                                                         name="text"
@@ -1539,7 +1570,12 @@ const EquipChartModal = ({
                                                     </>
                                                 )}
                                                 <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                    <span className="modal-right-card-title">Energy Monitoring</span>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.lg}
+                                                        Type={Typography.Types.Light}
+                                                        className="modal-right-card-title">
+                                                        Energy Monitoring
+                                                    </Typography.Subheader>
 
                                                     <Button
                                                         label="View"
@@ -1560,23 +1596,40 @@ const EquipChartModal = ({
                                                     <div className="equip-breaker-container">
                                                         <div className="equip-breaker-detail">
                                                             <div className="phase-style">
-                                                                <div className="equip-breaker-header mb-1">Phases</div>
-                                                                <div className="equip-breaker-value float-left">
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.sm}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="equip-breaker-header mb-1">
+                                                                    Phases
+                                                                </Typography.Subheader>
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="equip-breaker-value float-left">
                                                                     {equipBreakerLink[0]?.breaker_type}
-                                                                </div>
+                                                                </Typography.Subheader>
                                                             </div>
                                                             <div className="installed-style">
-                                                                <div className="equip-breaker-header mb-1">
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.sm}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="equip-breaker-header mb-1">
                                                                     Installed at
-                                                                </div>
-                                                                <div className="equip-breaker-value float-left">
+                                                                </Typography.Subheader>
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="equip-breaker-value justify-content-between box float-left">
                                                                     {equipBreakerLink?.length === 1 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
                                                                     {equipBreakerLink?.length === 2 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
                                                                     {equipBreakerLink?.length === 3 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
-                                                                </div>
+                                                                        `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                </Typography.Subheader>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1593,14 +1646,23 @@ const EquipChartModal = ({
                                 <Row className="mt-4">
                                     <Col lg={8}>
                                         <Row>
-                                            <Col lg={12}>
-                                                <h4>Equipment Details</h4>
+                                            <Col lg={12} className="mb-1">
+                                                <Typography.Header
+                                                    size={Typography.Sizes.md}
+                                                    Type={Typography.Types.Regular}>
+                                                    Equipment Details
+                                                </Typography.Header>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col lg={6}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Name</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Name
+                                                    </Typography.Subheader>
                                                     <Form.Control
                                                         type="text"
                                                         placeholder="Enter Equipment Name"
@@ -1614,7 +1676,12 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col lg={6}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Type</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Type
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1643,7 +1710,12 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Equipment Location</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Equipment Location
+                                                    </Typography.Subheader>
                                                     <Form.Control
                                                         type="text"
                                                         readOnly
@@ -1651,14 +1723,24 @@ const EquipChartModal = ({
                                                         className="font-weight-bold"
                                                         value={equipmentData !== null ? equipmentData.location : ''}
                                                     />
-                                                    <Form.Label>Location this equipment is installed in.</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
+                                                        Location this equipment is installed in.
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Applied Rule</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Applied Rule
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="select"
                                                         name="select"
@@ -1668,16 +1750,24 @@ const EquipChartModal = ({
                                                         <option selected>Desktop PC</option>
                                                         <option>Refigerator</option>
                                                     </Input>
-                                                    <Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mt-1">
                                                         The rule applied to this equipment to control when it is on.
-                                                    </Form.Label>
+                                                    </Typography.Subheader>
                                                 </Form.Group>
                                             </Col>
                                         </Row>
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Tags</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Tags
+                                                    </Typography.Subheader>
                                                     <TagsInput
                                                         value={equipmentData !== null ? equipmentData.tags : ''}
                                                         onChange={(value) => {
@@ -1692,7 +1782,12 @@ const EquipChartModal = ({
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Form.Label>Notes</Form.Label>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="text-muted mb-1">
+                                                        Notes
+                                                    </Typography.Subheader>
                                                     <Input
                                                         type="textarea"
                                                         name="text"
@@ -1717,7 +1812,7 @@ const EquipChartModal = ({
                                                             <>
                                                                 {record.status && (
                                                                     <div>
-                                                                        <div className="power-off-style">
+                                                                        <div className="power-off-style-equip">
                                                                             <FontAwesomeIcon
                                                                                 icon={faPowerOff}
                                                                                 size="lg"
@@ -1729,7 +1824,7 @@ const EquipChartModal = ({
                                                                                 <img src={SocketLogo} alt="Socket" />
                                                                             </div>
                                                                         ) : (
-                                                                            <div className="online-socket-container">
+                                                                            <div className="online-socket-container-equip">
                                                                                 <img
                                                                                     src={UnionLogo}
                                                                                     alt="Union"
@@ -1743,7 +1838,7 @@ const EquipChartModal = ({
 
                                                                 {!record.status && (
                                                                     <div>
-                                                                        <div className="power-off-style">
+                                                                        <div className="power-off-style-equip">
                                                                             <FontAwesomeIcon
                                                                                 icon={faPowerOff}
                                                                                 size="lg"
@@ -1755,7 +1850,7 @@ const EquipChartModal = ({
                                                                                 <img src={SocketLogo} alt="Socket" />
                                                                             </div>
                                                                         ) : (
-                                                                            <div className="online-socket-container">
+                                                                            <div className="online-socket-container-equip">
                                                                                 <img
                                                                                     src={UnionLogo}
                                                                                     alt="Union"
@@ -1772,7 +1867,12 @@ const EquipChartModal = ({
                                                 </div>
                                             </div>
                                             <div className="modal-right-card mt-2">
-                                                <span className="modal-right-card-title">Power Strip Socket 2</span>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.lg}
+                                                    Type={Typography.Types.Light}
+                                                    className="modal-right-card-title">
+                                                    Power Strip - Socket 2
+                                                </Typography.Subheader>
 
                                                 <Button
                                                     label="View Devices"
@@ -1813,39 +1913,51 @@ const EquipChartModal = ({
                                             <div className="mt-4 modal-right-group">
                                                 <FormGroup>
                                                     <div className="single-line-style">
-                                                        <h6
-                                                            className="card-subtitle mb-2 text-muted"
-                                                            htmlFor="customSwitches">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.sm}
+                                                            Type={Typography.Types.Light}
+                                                            className="card-title">
                                                             MAC Address
-                                                        </h6>
-                                                        <h6 className="card-title">
+                                                        </Typography.Subheader>
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="card-subtitle mb-2 text-muted">
                                                             {equipmentData !== null ? equipmentData.device_mac : ''}
-                                                        </h6>
+                                                        </Typography.Subheader>
                                                     </div>
                                                 </FormGroup>
                                                 <FormGroup>
                                                     <div className="single-line-style">
-                                                        <h6
-                                                            className="card-subtitle mb-2 text-muted"
-                                                            htmlFor="customSwitches">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.sm}
+                                                            Type={Typography.Types.Light}
+                                                            className="card-title">
                                                             Device type
-                                                        </h6>
-                                                        <h6 className="card-title">
+                                                        </Typography.Subheader>
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="card-subtitle mb-2 text-muted">
                                                             {equipmentData !== null ? equipmentData?.device_type : ''}
-                                                        </h6>
+                                                        </Typography.Subheader>
                                                     </div>
                                                 </FormGroup>
                                             </div>
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6
-                                                        className="card-subtitle mb-2 text-muted"
-                                                        htmlFor="customSwitches">
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.sm}
+                                                        Type={Typography.Types.Light}
+                                                        className="card-title">
                                                         Installed at
-                                                    </h6>
-                                                    <h6 className="card-title">
+                                                    </Typography.Subheader>
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Light}
+                                                        className="card-subtitle mb-2 text-muted">
                                                         {equipmentData !== null ? equipmentData.location : ''}
-                                                    </h6>
+                                                    </Typography.Subheader>
                                                 </div>
                                             </FormGroup>
                                         </div>

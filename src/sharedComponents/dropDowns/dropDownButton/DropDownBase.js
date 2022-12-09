@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import _ from 'lodash';
 import cx from 'classnames';
@@ -21,7 +21,6 @@ const SearchField = (props) => {
 };
 
 const DropDownBase = (props) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     
     const {
@@ -36,8 +35,15 @@ const DropDownBase = (props) => {
         header,
         classNameMenu,
         handleClick,
+        isOpened = false,
         closeOnSelect = true
-    } = props 
+    } = props;
+
+    const [isOpen, setIsOpen] = useState(isOpened);
+    
+    useEffect(() => {
+        setIsOpen(isOpened)
+    }, [isOpened])
 
     const setOpen = () => {
         setIsOpen(true);
@@ -151,6 +157,7 @@ DropDownBase.propTypes = {
     classNameMenu: PropTypes.string,
     handleClick: PropTypes.func,
     closeOnSelect: PropTypes.bool,
+    isOpened: PropTypes.bool,
 };
 
 DropDownBase.defaultProps = {

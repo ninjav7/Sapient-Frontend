@@ -1,90 +1,136 @@
-import _ from 'lodash';
+import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 
-import { DONUT_CHART_TYPES } from '.';
-import { UNITS } from '../../constants/units';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import colors from '../../assets/scss/_colors.scss';
+import { onHoverHandler, onUnHoverHandler } from './helper';
 
-export const configDonutChartWidget = (type) => {
-    const options = {
-        chart: {
-            type: 'donut',
-            toolbar: {
-                show: false,
+export const configDonutChartWidget = ({
+    colors,
+    changeItemsState,
+    totalValue,
+    items,
+    renderCenteredItemContent,
+    centeredItemContent,
+    labels,
+    series,
+}) => ({
+    ...chartsBaseConfig({}),
+    chart: {
+        type: 'pie',
+        height: '205px',
+        events: {
+            load: function () {
+                const unit = items[0]?.unit;
+
+                let series = this.series[0],
+                    seriesCenter = series.center,
+                    x = seriesCenter[0] + this.plotLeft,
+                    y = seriesCenter[1] + this.plotTop;
+
+                let chart = this,
+                    rend = chart.renderer;
+
+                rend.text(centeredItemContent(totalValue, unit), x, y, true)
+                    .attr({
+                        'text-anchor': 'middle',
+                        align: 'center',
+                        zIndex: 10,
+                    })
+                    .addClass('customTitle')
+                    .add();
             },
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 0);
-                },
+            render: function () {
+                const unit = items[0]?.unit;
+                centeredItemContent(88, unit);
             },
+        },
+    },
 
-            height: '100%',
-            width: '120%',
+    tooltip: {
+        enabled: false,
+    },
+
+    pane: {
+        startAngle: 36,
+        endAngle: 36,
+        background: [
+            {
+                backgroundColor: colors.baseWhite,
+                borderWidth: 0,
+            },
+        ],
+    },
+
+    yAxis: {
+        min: 0,
+        max: 100,
+        lineWidth: 0,
+        tickPositions: [],
+    },
+
+    plotOptions: {
+        pie: {
+            dataLabels: {
+                enabled: false,
+            },
+            startAngle: 0,
+            endAngle: 360,
+            center: ['50%', '50%'],
+            colors: colors,
+            linecap: 'round',
         },
-        legend: {
-            show: false,
+        solidgauge: {
+            dataLabels: {
+                enabled: false,
+            },
+            linecap: 'round',
+            stickyTracking: false,
+            rounded: true,
         },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            width: 0,
-        },
-        itemMargin: {
-            horizontal: 0,
-        },
-        plotOptions: {
-            pie: {
-                expandOnClick: false,
-                donut: {
-                    size: '82px',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '1rem',
-                            fontWeight: 500,
-                            lineHeight: '1rem',
-                            formatter: function (val) {
-                                let value = Math.round(val);
-                                let consumption = formatConsumptionValue(value, 0);
-                                return `${consumption} ${UNITS.KWH}`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            fontSize: '1rem',
-                            fontWeight: 500,
-                            lineHeight: '1rem',
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return Number(a) + Number(b);
-                                }, 0);
-                                return `${formatConsumptionValue(sum, 0)} ${UNITS.KWH}`;
-                            },
-                        },
+
+        series: {
+            point: {
+                events: {
+                    mouseOver: function () {
+                        changeItemsState(this.colorIndex, true);
+
+                        const unit = items[this.colorIndex]?.unit;
+
+                        renderCenteredItemContent(this.y, unit);
+
+                        onHoverHandler(this.series.data, this.index);
+                    },
+                    mouseOut: function () {
+                        changeItemsState(this.colorIndex, false);
+
+                        const unit = items[0]?.unit;
+
+                        renderCenteredItemContent(totalValue, unit);
+
+                        onUnHoverHandler(this.series.data, this.index);
                     },
                 },
             },
-        },
-        grid: {
-            padding: {
-                top: -5,
-                right: 0,
-                bottom: 0,
-                left: 0,
+            states: {
+                hover: {
+                    halo: {
+                        size: 6,
+                    },
+                    opacity: 1,
+                    brightness: 0,
+                },
             },
         },
-    };
-
-    if (type === DONUT_CHART_TYPES.VERTICAL_NO_TOTAL) {
-        _.set(options, 'plotOptions.pie.donut.labels.value.show', false);
-        _.set(options, 'plotOptions.pie.donut.labels.total.show', false);
-    }
-
-    return options;
-};
+    },
+    legend: false,
+    series: [
+        {
+            type: 'pie',
+            innerSize: '80%',
+            data: series.map((item, index) => [labels[index], item]),
+            showInLegend: true,
+            dataLabels: {
+                enabled: false,
+            },
+        },
+    ],
+});

@@ -62,6 +62,7 @@ export const equipmentDetails = '/api/config/equipments_details/by_id';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
+export const getFiltersForEquipment = '/api/config/configuration-filter';
 export const equipmentType = '/api/config/get_equipment_type';
 export const getEquipmentType = '/api/config/get_equipment_type_by_name/';
 export const addEquipmentType = '/api/config/create_equipment_type';
@@ -84,7 +85,6 @@ export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
-export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const updateDevice = '/api/config/devices/update_device';
 export const deletePassiveDevice = `/api/config/devices/delete/passive`;
 export const linkPassiveSensorToBreaker = `/api/config/sensor/passive/lnk_pas_snr_to_pnl_bkr`;
@@ -119,6 +119,7 @@ export const createDevice = '/api/config/devices/create_device';
 export const kasaLinkAccount = '/api/config/kasa/link_account';
 export const kasaUnLinkAccount = '/api/config/kasa/unlink_account';
 export const get_kasa_account = '/api/config/kasa/get_kasa_account';
+export const getMetadata = '/api/config/metadata';
 
 // kasa accounts
 export const get_kasa_devices = '/api/config/kasa/get_devices';
@@ -151,7 +152,6 @@ export const getExploreEquipmentList = '/api/explorer/equipment_list';
 export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
-export const getEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreFilter = '/api/explorer/filter_by_daterange';
 
 // Peak Demand
