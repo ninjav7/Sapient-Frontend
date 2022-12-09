@@ -128,7 +128,7 @@ const Equipment = () => {
     const [pageNo, setPageNo] = useState(1);
     const [showDeleteEquipmentModal, setShowDeleteEquipmentModal] = useState(false);
     const [rowToDelete, setRowToDelete] = useState();
-    const [isDeletting, setIsDeletting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [allSearchData, setAllSearchData] = useState([]);
     const [selectedOption, setSelectedOption] = useState([]);
     const [sortBy, setSortBy] = useState({});
@@ -501,17 +501,17 @@ const Equipment = () => {
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
     const deleteEquipmentFunc = async (row) => {
-        setIsDeletting(true);
+        setIsDeleting(true);
         await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
                 fetchEquipmentData();
-                setIsDeletting(false);
+                setIsDeleting(false);
                 setShowDeleteEquipmentModal(false);
             })
             .catch((error) => {
                 alert(error);
                 setShowDeleteEquipmentModal(false);
-                setIsDeletting(false);
+                setIsDeleting(false);
             });
     };
 
@@ -693,7 +693,7 @@ const Equipment = () => {
                     />
 
                     <Button
-                        label={isDeletting ? 'Deletting' : 'Delete'}
+                        label={isDeleting ? 'Deleting' : 'Delete'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primaryDistructive}
                         onClick={() => {
