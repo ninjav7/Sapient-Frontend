@@ -267,10 +267,10 @@ const EquipChartModal = ({
                         let NulledData = [];
                         data[i].data.map((ele) => {
                             if (ele.consumption === '') {
-                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp).getTime()), y: null });
+                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                             } else {
                                 NulledData.push({
-                                    x: moment.utc(new Date(ele.time_stamp).getTime()),
+                                    x: new Date(ele.time_stamp).getTime(),
                                     y: ele.consumption,
                                 });
                             }
@@ -290,15 +290,14 @@ const EquipChartModal = ({
                         _data[1] = parseInt(_data[1]);
                         return _data;
                     });
-
                     let exploreData = [];
                     let NulledData = [];
                     data.map((ele) => {
                         if (ele?.consumption === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp).getTime()), y: null });
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                         } else {
                             NulledData.push({
-                                x: moment.utc(new Date(ele?.time_stamp).getTime()),
+                                x: new Date(ele?.time_stamp).getTime(),
                                 y: ele?.consumption,
                             });
                         }
