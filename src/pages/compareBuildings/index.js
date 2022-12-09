@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
@@ -19,6 +19,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 
 const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter, isBuildingDataFetched }) => {
+    const history = useHistory();
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
     const [nameOrder, setNameOrder] = useState(false);
@@ -51,6 +52,20 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
         buildingDataWithFilter(order, columnName);
     };
 
+    const handleBuildingClick = (record) => {
+        localStorage.setItem('buildingId', record.building_id);
+        localStorage.setItem('buildingName', record.building_name);
+        localStorage.setItem('buildingTimeZone', record.timezone);
+        BuildingStore.update((s) => {
+            s.BldgId = record.building_id;
+            s.BldgName = record.building_name;
+            s.BldgTimeZone = record.timezone;
+        });
+        history.push({
+            pathname: `/energy/building/overview/${record.building_id}`,
+        });
+    };
+    
     useEffect(() => {
         if (!buildingsData.length > 0) {
             return;
@@ -267,23 +282,12 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <tr key={record.building_id} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'name') && (
                                             <th scope="row">
-                                                <Link
-                                                    to={{
-                                                        pathname: `/energy/building/overview/${record.building_id}`,
-                                                    }}>
                                                     <div
                                                         className="buildings-name"
-                                                        onClick={() => {
-                                                            localStorage.setItem('building_Id', record.building_id);
-                                                            localStorage.setItem('building_Name', record.building_name);
-                                                            BuildingStore.update((s) => {
-                                                                s.BldgId = record.building_id;
-                                                                s.BldgName = record.building_name;
-                                                            });
-                                                        }}>
+                                                        onClick={() => handleBuildingClick(record)}
+                                                        >
                                                         {record.building_name}
                                                     </div>
-                                                </Link>
                                                 <span className="badge badge-soft-secondary mr-2">Office</span>
                                             </th>
                                         )}

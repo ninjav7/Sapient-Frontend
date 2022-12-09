@@ -1,16 +1,19 @@
 import { useAtom } from 'jotai';
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { allFlattenRoutes } from '../../routes';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { userPermissionData } from '../../store/globalState';
 
 import './SideNav.scss';
 
 const SideNav = () => {
+    const location = useLocation();
+    const history = useHistory();
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
-    const location = useLocation();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');
@@ -23,6 +26,23 @@ const SideNav = () => {
     const [buildingPermissionLayouts, setBuildingPermissionLayouts] = useState('');
     const [buildingPermissionPanels, setBuildingPermissionPanels] = useState('');
 
+    const handleRouteChange = (route) => {
+        ComponentStore.update((s) => {
+            s.parent = route.parent;
+        });
+
+        if (route.parent === 'buildings') {
+            let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
+            history.push({
+                pathname: `${pathName}/${bldgId}`,
+            });
+            return;
+        }
+        
+        history.push({
+            pathname: `${route.path}`,
+        });
+    };
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
@@ -99,7 +119,6 @@ const SideNav = () => {
         }
     }, [userPermission]);
 
-
     useEffect(() => {
         let activeSideRoutes = [];
         allFlattenRoutes
@@ -134,47 +153,31 @@ const SideNav = () => {
     ]);
 
     return (
-        <>
-            <div className="side-nav">
-                {activeRoute.map((item, index) => {
-                    if (item.path.includes(':bldgId')) {
-                        item.path = item.path.split(':')[0].concat(localStorage.getItem('buildingId'));
-                    }
+        <div className="side-nav">
+            {activeRoute.map((item, index) => {
+                if (item.path.includes(':bldgId')) {
+                    item.path = item.path.split(':')[0].concat(bldgId);
+                }
+                if (item.path.includes('null') && item.parent === 'buildings') {
+                    let splitPath = item.path.split('null')[0];
+                    item.path = `${splitPath}${bldgId}`;
+                }
 
-                    let str1 = item.path.split('/')[2];
-                    let str2 = location.pathname.split('/')[2];
-                    let active = str1.localeCompare(str2);
+                let str1 = item.path.split('/')[2];
+                let str2 = location.pathname.split('/')[2];
+                let active = str1.localeCompare(str2);
+                let className = active === 0 ? 'active' : '';
 
-                    return (
-                        <Link to={item.path} key={index}>
-                            {active === 0 ? (
-                                <div
-                                    className="side-nav-content active"
-                                    key={index}
-                                    onClick={() => {
-                                        ComponentStore.update((s) => {
-                                            s.parent = item.parent;
-                                        });
-                                    }}>
-                                    {item.name}
-                                </div>
-                            ) : (
-                                <div
-                                    className="side-nav-content"
-                                    key={index}
-                                    onClick={() => {
-                                        ComponentStore.update((s) => {
-                                            s.parent = item.parent;
-                                        });
-                                    }}>
-                                    {item.name}
-                                </div>
-                            )}
-                        </Link>
-                    );
-                })}
-            </div>
-        </>
+                return (
+                    <div
+                        className={`side-nav-content mouse-pointer ${className}`}
+                        key={index}
+                        onClick={() => handleRouteChange(item)}>
+                        {item.name}
+                    </div>
+                );
+            })}
+        </div>
     );
 };
 

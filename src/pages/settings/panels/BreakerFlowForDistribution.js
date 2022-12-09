@@ -35,6 +35,10 @@ const DistributedBreakerComponent = ({ data, id }) => {
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
 
+    const [singleBreaker, setSingleBreaker] = useState({});
+    const [doubleBreaker, setDoubleBreaker] = useState({});
+    const [tripleBreaker, setTripleBreaker] = useState({});
+
     const [singleBreakerChanges, setSingleBreakerChanges] = useState({});
     const [doubleBreakerChanges, setDoubleBreakerChanges] = useState({});
     const [tripleBreakerChanges, setTripleBreakerChanges] = useState({});
@@ -696,9 +700,11 @@ const DistributedBreakerComponent = ({ data, id }) => {
             if (breakerObj.parentBreaker === '') {
                 let obj = distributedBreakersData.find((obj) => obj.data.parentBreaker === id);
                 setDoubleBreakerData(obj);
+                setDoubleBreaker(obj);
             } else {
                 let obj = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
                 setDoubleBreakerData(obj);
+                setDoubleBreaker(obj);
             }
         }
 
@@ -707,6 +713,8 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 let breakersList = distributedBreakersData.filter((obj) => obj.data.parentBreaker === id);
                 setDoubleBreakerData(breakersList[0]);
                 setTripleBreakerData(breakersList[1]);
+                setDoubleBreaker(breakersList[0]);
+                setTripleBreaker(breakersList[1]);
             } else {
                 let objOne = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
                 let objTwo = distributedBreakersData.find(
@@ -714,6 +722,8 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 );
                 setDoubleBreakerData(objOne);
                 setTripleBreakerData(objTwo);
+                setDoubleBreaker(objOne);
+                setTripleBreaker(objTwo);
             }
         }
     }, [breakerObj]);
@@ -862,6 +872,10 @@ const DistributedBreakerComponent = ({ data, id }) => {
             setDeviceIdDataLevelOne(newDeviceList);
         }
     }, [selectedDeviceData]);
+
+    useEffect(() => {
+        setSingleBreaker(data);
+    }, []);
 
     return (
         <React.Fragment>
@@ -1547,7 +1561,15 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 </>
 
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleEditBreakerClose}>
+                    <Button
+                        variant="light"
+                        onClick={() => {
+                            handleEditBreakerClose();
+                            setBreakerData(Object.assign({}, singleBreaker));
+                            setDoubleBreakerData(Object.assign({}, doubleBreaker));
+                            setTripleBreakerData(Object.assign({}, tripleBreaker));
+                            setLinkedSensors([]);
+                        }}>
                         Cancel
                     </Button>
                     <Button

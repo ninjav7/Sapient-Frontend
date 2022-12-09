@@ -15,7 +15,7 @@ const BrushChart = ({
 }) => {
     return (
         <Card className='mb-0'>
-            <CardBody>
+            <CardBody className='p-0'>
                 <div id="wrapper">
                     <div id="chart-line2" className={`line-chart-widget-wrapper ${className} mb-2`}>
                         <Brick sizeInRem={1} />

@@ -56,6 +56,41 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 4px;
 }
+.sensors-row-content {
+    display: flex;
+    column-gap: 0.25rem;
+    justify-content: flex-start;
+}
+.modal-add-equipment label {
+    font-weight: 400;
+}
+.add-equipment-footer {
+    display: flex;
+    width: '100%';
+    width: 100%;
+    gap: 0.25rem;
+    justify-content: space-between;
+}
+.add-equipment-footer-column {
+    width: 50%;
+}
+
+.equipment-name-cell {
+    cursor: pointer;
+}
+
+.equipment-page>.page-title{
+    margin-bottom: 1rem;
+}
+
+.equipment-page .data-table-widget-wrapper {
+    min-height: 37.5rem;
+}
+
+.equipment-page .heading-style {
+    margin-left: 0px;
+}
+
 .tab-switch {
     border: none;
     background-color: #ffffff;
@@ -316,7 +351,10 @@
 }
 
 .modal-container-style {
-    max-width: 95vw !important;
+    max-width: 75.375rem !important;
+    max-height: 48.4375rem !important;
+    height: 48.4375rem !important;
+
 }
 
 .modal-tabs-style {

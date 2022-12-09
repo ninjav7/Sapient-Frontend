@@ -9,7 +9,7 @@ import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BaseUrl, getBuilding, createBuilding, generalBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
-import { BuildingStore } from '../../store/BuildingStore';
+import { BuildingListStore, BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -136,56 +136,47 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
 
     return (
         <Card>
-                {error ? (
-                    <>
-                        <p>You don't have view access of this page</p>
-                    </>
-                ) : (
-                    <Table className="mb-0 bordered table-hover">
-                        <thead>
-                            <tr className="mouse-pointer">
-                                <th>Name</th>
-                                <th>Sq. Ft.</th>
-                                <th>Devices</th>
-                            </tr>
-                        </thead>
-                        {isDataProcessing ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+            {error ? (
+                <>
+                    <p>You don't have view access of this page</p>
+                </>
+            ) : (
+                <Table className="mb-0 bordered table-hover">
+                    <thead>
+                        <tr className="mouse-pointer">
+                            <th>Name</th>
+                            <th>Sq. Ft.</th>
+                            <th>Devices</th>
+                        </tr>
+                    </thead>
+                    {isDataProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                    </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                            <tbody>
-                                {buildingsData.map((record, index) => {
-                                    return (
-                                        <tr key={index} className="mouse-pointer">
-                                            <th scope="row">
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit ? (
-                                                    <Link to={`${internalRoute[0]}`}>
-                                                        <div
-                                                            className="buildings-name"
-                                                            onClick={() => {
-                                                                handleBuildingClick(record);
-                                                            }}>
-                                                            {record.building_name}
-                                                        </div>
-                                                    </Link>
-                                                ) : (
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {buildingsData.map((record, index) => {
+                                return (
+                                    <tr key={index} className="mouse-pointer">
+                                        <th scope="row">
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_buildings_permission
+                                                ?.edit ? (
+                                                <Link to={`${internalRoute[0]}`}>
                                                     <div
                                                         className="buildings-name"
                                                         onClick={() => {
@@ -193,24 +184,33 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                         }}>
                                                         {record.building_name}
                                                     </div>
-                                                )}
-                                                <span className="badge badge-soft-secondary label-styling mr-2">
-                                                    {record.building_type}
-                                                </span>
-                                            </th>
-                                            <td className="font-weight-bold">
-                                                {record.building_size.toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
-                                                })}
-                                            </td>
-                                            <td className="font-weight-bold">{record.num_of_devices}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        )}
-                    </Table>
-                )}
+                                                </Link>
+                                            ) : (
+                                                <div
+                                                    className="buildings-name"
+                                                    onClick={() => {
+                                                        handleBuildingClick(record);
+                                                    }}>
+                                                    {record.building_name}
+                                                </div>
+                                            )}
+                                            <span className="badge badge-soft-secondary label-styling mr-2">
+                                                {record.building_type}
+                                            </span>
+                                        </th>
+                                        <td className="font-weight-bold">
+                                            {record.building_size.toLocaleString(undefined, {
+                                                maximumFractionDigits: 2,
+                                            })}
+                                        </td>
+                                        <td className="font-weight-bold">{record.num_of_devices}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
+                </Table>
+            )}
         </Card>
     );
 };
@@ -275,6 +275,9 @@ const Buildings = () => {
                 handleClose();
                 fetchGeneralBuildingData();
                 fetchBuildingData();
+                BuildingListStore.update((s) => {
+                    s.fetchBuildingList = true;
+                });
             });
             setIsProcessing(false);
         } catch (error) {
@@ -376,7 +379,7 @@ const Buildings = () => {
             </Row>
 
             <Row>
-                <Col lg={10} className='mt-4'>
+                <Col lg={10} className="mt-4">
                     <BuildingTable
                         buildingsData={buildingsData}
                         isDataProcessing={isDataProcessing}

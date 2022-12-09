@@ -1,5 +1,6 @@
 @import '../assets/scss/stories.scss';
 @import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
 
 .line-chart-wrapper {
     border: 1px solid $primary-gray-200;
@@ -11,6 +12,22 @@
     .chart-header {
         padding-left: 0.625rem;
     }
+
+    .chart-tooltip {
+        @extend .box-shadow-lg;
+        padding: 0.4375rem 0.8125rem;
+        background: $base-white;
+
+        border-radius: 0.25rem;
+        overflow: hidden;
+
+        border: 0.0625rem solid $primary-gray-450;
+
+        td + td {
+            padding-left: 1rem !important;
+        }
+    }
+
     .more-details-wrapper {
         display: flex;
         position: absolute;
