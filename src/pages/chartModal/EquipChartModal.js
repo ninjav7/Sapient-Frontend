@@ -315,7 +315,7 @@ const EquipChartModal = ({
         setIsEquipDataFetched(false);
     };
 
-    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+    const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
         if (equipDeviceId === '' || equipDeviceId === null) {
             return '';
         }
@@ -326,6 +326,20 @@ const EquipChartModal = ({
 
         if (deviceType === 'passive-device') {
             return `/settings/passive-devices/single/${equipDeviceId}`;
+        }
+    };
+
+    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+        if (equipDeviceId === '' || equipDeviceId === null) {
+            return;
+        }
+
+        if (deviceType === 'active-device') {
+            history.push({ pathname: `/settings/active-devices/single/${equipDeviceId}` });
+        }
+
+        if (deviceType === 'passive-device') {
+            history.push({ pathname: `/settings/passive-devices/single/${equipDeviceId}` });
         }
     };
 
@@ -670,8 +684,7 @@ const EquipChartModal = ({
                                         </div>
                                         <div>
                                             <Button
-                                                label="s
-                                                Save"
+                                                label="Save"
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 className="ml-4"
@@ -804,7 +817,7 @@ const EquipChartModal = ({
                                                             : 'none',
                                                 }}
                                                 target="_blank"
-                                                to={redirectToConfigDevicePage(
+                                                to={redirectToConfigDevicePageLink(
                                                     equipmentData?.device_id,
                                                     equipmentData?.device_type === 'passive'
                                                         ? 'passive-device'
