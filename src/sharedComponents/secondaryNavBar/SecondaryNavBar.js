@@ -14,7 +14,8 @@ const SecondaryNavBar = (props) => {
             <BuildingSwitcher
                 onChange={props.onChangeBuilding}
                 options={props.buildings}
-                defaultValue={props.selectedBuilding}
+                currentValue={props.selectedBuilding}
+                {...props}
             />
             <div className="secondary-nav-bar-vertical-line" />
             <SubNavBreadCrumbs items={props.breadCrumbsItems} />

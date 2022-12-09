@@ -219,9 +219,9 @@ const DataTableWidget = (props) => {
 
     const currentRows = searchMode ? searchedRows : rows;
 
-    const isActionsAvailable = props.onDeleteRow && props.onEditRow;
+    const isActionsAvailable = props.onDeleteRow || props.onEditRow;
 
-    const HeadComponent = ({ onSort, name, accessor }) => {
+    const HeadComponent = ({ onSort, name, accessor, ...props }) => {
         const [state, setState] = useState(0);
 
         const cellProps = {
@@ -239,6 +239,7 @@ const DataTableWidget = (props) => {
                 }),
             role: onSort && 'button',
             className: cx(SORT_TYPES[state], SORT_TYPES[state] !== null && 'sort-type-selected', onSort && 'on-sort'),
+            ...props,
         };
 
         return (
@@ -252,8 +253,8 @@ const DataTableWidget = (props) => {
     };
 
     const memoizedHeaders = useMemo(() => {
-        return filteredHeaders.map(({ name, onSort, accessor }, index) => (
-            <HeadComponent name={name} onSort={onSort} accessor={accessor} key={index} />
+        return filteredHeaders.map(({ name, onSort, accessor, cellProps }, index) => (
+            <HeadComponent name={name} onSort={onSort} accessor={accessor} {...cellProps} key={index} />
         ));
     }, [JSON.stringify(filteredHeaders)]);
 
@@ -317,53 +318,61 @@ const DataTableWidget = (props) => {
                                 React.cloneElement(props.isLoadingComponent, { ...props.isLoadingComponent.props })}
 
                             {!props.isLoading &&
-                                currentRows.map((row) => (
-                                    <Table.Row key={generateID()}>
-                                        {props.onCheckboxRow &&
-                                            //@ It is probably need to improve custom checkbox to make it generic
-                                            (props.customCheckboxForCell ? (
+                                currentRows.map((row) => {
+                                    let isDeletable = props?.isDeletable && props?.isDeletable(row);
+
+                                    const menuListPerRowProps = {};
+                                    if (props.onEditRow) {
+                                        menuListPerRowProps.onEditRow = (event) =>
+                                            props.onEditRow(event, row.id, row, props);
+                                    }
+                                    if (props.onDeleteRow && isDeletable) {
+                                        menuListPerRowProps.onDeleteRow = (event) =>
+                                            props.onDeleteRow(event, row.id, row, props);
+                                    }
+                                    return (
+                                        <Table.Row {...(row.rowProps || {})} key={generateID()}>
+                                            {props.onCheckboxRow &&
+                                                //@ It is probably need to improve custom checkbox to make it generic
+                                                (props.customCheckboxForCell ? (
+                                                    <Table.Cell width={16}>
+                                                        {props.customCheckboxForCell(row)}
+                                                    </Table.Cell>
+                                                ) : (
+                                                    cellCheckboxTemplate(row.id)
+                                                ))}
+
+                                            {!props.onCheckboxRow && props.customCheckboxForCell && (
                                                 <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                            ) : (
-                                                cellCheckboxTemplate(row.id)
-                                            ))}
+                                            )}
 
-                                        {!props.onCheckboxRow && props.customCheckboxForCell && (
-                                            <Table.Cell width={16}>{props.customCheckboxForCell(row)}</Table.Cell>
-                                        )}
+                                            {filteredHeaders.map(({ accessor, callbackValue, cellProps }) => {
+                                                return (
+                                                    <Table.Cell {...cellProps} key={accessor}>
+                                                        {accessor &&
+                                                            (callbackValue
+                                                                ? callbackValue(row, cellChildrenTemplate)
+                                                                : cellChildrenTemplate(row[accessor] || '-'))}
 
-                                        {filteredHeaders.map(({ accessor, callbackValue }) => {
-                                            return (
-                                                <Table.Cell key={accessor}>
-                                                    {accessor &&
-                                                        (callbackValue
-                                                            ? callbackValue(row, cellChildrenTemplate)
-                                                            : cellChildrenTemplate(row[accessor] || '-'))}
+                                                        {!accessor &&
+                                                            callbackValue &&
+                                                            callbackValue(row, cellChildrenTemplate, accessor)}
+                                                    </Table.Cell>
+                                                );
+                                            })}
 
-                                                    {!accessor &&
-                                                        callbackValue &&
-                                                        callbackValue(row, cellChildrenTemplate, accessor)}
+                                            {isActionsAvailable && (
+                                                <Table.Cell align="center" width={36}>
+                                                    <div className="d-flex justify-content-center">
+                                                        <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                            <MenuListPerRow {...menuListPerRowProps} />
+                                                        </DropDownIcon>
+                                                    </div>
                                                 </Table.Cell>
-                                            );
-                                        })}
-
-                                        {isActionsAvailable && (
-                                            <Table.Cell align="center" width={36}>
-                                                <div className="d-flex justify-content-center">
-                                                    <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
-                                                        <MenuListPerRow
-                                                            onEditRow={(event) =>
-                                                                props.onEditRow(event, row.id, row, props)
-                                                            }
-                                                            onDeleteRow={(event) =>
-                                                                props.onDeleteRow(event, row.id, row, props)
-                                                            }
-                                                        />
-                                                    </DropDownIcon>
-                                                </div>
-                                            </Table.Cell>
-                                        )}
-                                    </Table.Row>
-                                ))}
+                                            )}
+                                        </Table.Row>
+                                    );
+                                })}
                             {!props.isLoading && currentRows.length === 0 && (
                                 <>
                                     <Table.Row>
@@ -395,6 +404,7 @@ const DataTableWidget = (props) => {
                         pageSize={pageSize}
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
+                        pageListSizes={props.pageListSizes}
                     />
                 </div>
             )}
@@ -408,6 +418,7 @@ DataTableWidget.propTypes = {
     onDownload: PropTypes.func,
     onSearch: PropTypes.func,
     onDeleteRow: PropTypes.func,
+    isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
     onChangePage: PropTypes.func,
     totalCount: PropTypes.number,
@@ -419,18 +430,23 @@ DataTableWidget.propTypes = {
     status: PropTypes.number,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
-    filterOptions: PropTypes.arrayOf(PropTypes.shape({
-        label: PropTypes.string.isRequired,
-        value: PropTypes.string.isRequired,
-        placeholder: PropTypes.string.isRequired,
-        filterType: PropTypes.oneOf(Object.values(FILTER_TYPES)),
-        filterOptions: PropTypes.arrayOf(PropTypes.shape({
+    filterOptions: PropTypes.arrayOf(
+        PropTypes.shape({
             label: PropTypes.string.isRequired,
-            value: stringOrNumberPropTypes.isRequired,
-        })),
-        // Props depend on what component was selected for particular filter.
-        componentProps: PropTypes.object,
-    })),
+            value: PropTypes.string.isRequired,
+            placeholder: PropTypes.string.isRequired,
+            filterType: PropTypes.oneOf(Object.values(FILTER_TYPES)),
+            filterOptions: PropTypes.arrayOf(
+                PropTypes.shape({
+                    label: PropTypes.string.isRequired,
+                    value: stringOrNumberPropTypes.isRequired,
+                })
+            ),
+            // Props depend on what component was selected for particular filter.
+            componentProps: PropTypes.object,
+            isOpened: PropTypes.bool,
+        })
+    ),
     headers: PropTypes.arrayOf(
         PropTypes.shape({
             name: PropTypes.string.isRequired,

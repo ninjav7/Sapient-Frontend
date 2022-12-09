@@ -1,36 +1,49 @@
-import React from 'react';
-import ReactApexChart from 'react-apexcharts';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
+import Highcharts from 'highcharts/highstock';
+import HighchartsMore from 'highcharts/highcharts-more';
+import HighchartsSolidGauge from 'highcharts/modules/solid-gauge';
+import HighchartsExporting from 'highcharts/modules/exporting';
+import HighchartsData from 'highcharts/modules/export-data';
+import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
+import HighchartsReact from 'highcharts-react-official';
 import PropTypes from 'prop-types';
+
 import Typography from '../typography';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/pro-regular-svg-icons';
-import { configDonutChartWidget } from './config';
-import DonutChartLabels from './DonutChartLabels';
 import Button from '../button/Button';
-import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
-import { ReactComponent as Download } from '../assets/icons/download.svg';
-import './style.scss';
+
+import DonutChartLabels from './DonutChartLabels';
+
+import { configDonutChartWidget } from './config';
 import { getDonutChartCSVExport } from '../helpers/chartsExport';
+import { formatConsumptionValue } from '../../helpers/explorehelpers';
+import { DOWNLOAD_TYPES } from '../constants';
+
+import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
+import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
+
+import './style.scss';
+import { onHoverHandler, onUnHoverHandler } from './helper';
+
+HighchartsMore(Highcharts);
+HighchartsSolidGauge(Highcharts);
+HighchartsExporting(Highcharts);
+HighchartsData(Highcharts);
 
 export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL: 'vertical',
     HORIZONTAL: 'horizontal',
-    VERTICAL_NO_TOTAL: 'vertical no-total',
 });
-
-const ICON_SIZES = {
-    [Button.Sizes.lg]: 11,
-};
 
 const Titles = ({ title, subtitle }) => {
     return (
         <>
-            <div className={`ml-3 mt-2`}>
+            <div className={`ml-3 mt-3`}>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
                     as="h5"
-                    fontWeight={Typography.Types.SemiBold}
-                    className="mb-1">
+                    fontWeight={Typography.Types.Medium}
+                    className="mb-0 mt-0">
                     {title}
                 </Typography.Subheader>
                 <Typography.Body size={Typography.Sizes.xs} as="h6">
@@ -46,81 +59,174 @@ const DonutChartWidget = ({
     donutChartClass = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
-    items,
+    items: itemsProp,
     title,
     subtitle,
-    isEnergyConsumptionChartLoading,
     pageType,
-    bldgId,
-    handleRouteChange,
-    showRouteBtn,
     ...props
 }) => {
+    const chartComponentRef = useRef(null);
+    const centeredItemRef = useRef(null);
+
+    const [items, setItems] = useState(itemsProp);
+
+    useEffect(() => {
+        setItems(itemsProp);
+    }, [itemsProp]);
+
+    useEffect(() => {
+        centeredItemRef.current = document.querySelector('.customTitle');
+    }, []);
+
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
     const series = items.map(({ value }) => Math.round(value));
 
-    const options = {
-        ...configDonutChartWidget(type),
-        labels,
-        colors,
-        id,
+    const totalValue = series.reduce((acc, item) => acc + item, 0);
+
+    useEffect(() => {
+        renderCenteredItemContent(totalValue, items[0]?.unit);
+    }, [totalValue]);
+
+    const handleDropDownOptionClicked = (name) => {
+        switch (name) {
+            case DOWNLOAD_TYPES.downloadSVG:
+                chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
+                break;
+            case DOWNLOAD_TYPES.downloadPNG:
+                chartComponentRef.current.chart.exportChart({ type: 'image/png' });
+                break;
+            case DOWNLOAD_TYPES.downloadCSV:
+                getDonutChartCSVExport(labels, series, pageType);
+                break;
+            default:
+                break;
+        }
+    };
+
+    const centeredItemContent = (value, unit) =>
+        ReactDOMServer.renderToString(
+            <Typography.Header size={Typography.Sizes.xs} className="gray-550">
+                {value} {unit}
+            </Typography.Header>
+        );
+
+    const renderCenteredItemContent = (value, unit) => {
+        if (!centeredItemRef.current) {
+            return;
+        }
+
+        centeredItemRef.current.innerHTML = centeredItemContent(formatConsumptionValue(value), unit);
+    };
+
+    const changeItemsState = (colorIndex, isHovered) => {
+        setItems((prevState) => prevState.map((item, index) => (index === colorIndex ? { ...item, isHovered } : item)));
+    };
+
+    const hoverChart = (index) => {
+        const data = chartComponentRef.current?.chart.series[0].data;
+        const plot = data[index];
+
+        plot.setState('hover');
+
+        onHoverHandler(data, index);
+
+        renderCenteredItemContent(series[index], items[index]?.unit);
+    };
+
+    const unHoverChart = (index) => {
+        const data = chartComponentRef.current?.chart.series[0].data;
+        const plot = data[index];
+
+        plot.setState('normal');
+
+        onUnHoverHandler(data, index);
+
+        renderCenteredItemContent(totalValue, items[0]?.unit);
+    };
+
+    const renderChart = () => {
+        return (
+            <HighchartsReact
+                highcharts={Highcharts}
+                options={configDonutChartWidget({
+                    changeItemsState,
+                    totalValue,
+                    items,
+                    renderCenteredItemContent,
+                    centeredItemContent,
+                    labels,
+                    series,
+                    colors,
+                })}
+                ref={chartComponentRef}
+            />
+        );
     };
 
     return (
         <>
-            <div className={`donut-main-wrapper ${className}`}>
-                {pageType === 'building' ? (
-                    <div className="container-header">
-                        <Titles {...{ title, subtitle, pageType }} />
-                        <div className="d-flex justify-content-between mr-2">
-                            <Button
-                                size={Button.Sizes.sm}
-                                icon={<Download />}
-                                type={Button.Type.secondaryGrey}
-                                onClick={() => getDonutChartCSVExport(labels, series, pageType)}
-                                className="mr-4"
-                            />
-                            <Button
-                                label="More Details"
-                                size={Button.Sizes.lg}
-                                icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
-                                type={Button.Type.tertiary}
-                                iconAlignment={Button.IconAlignment.right}
-                                onClick={handleRouteChange}
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    <div className="d-flex justify-content-between">
-                        <Titles {...{ title, subtitle, pageType }} />
-                        <FontAwesomeIcon
-                            icon={faDownload}
-                            size="md"
-                            className="download-chart-btn mouse-pointer mr-3 mt-3"
-                            onClick={() => getDonutChartCSVExport(labels, series, pageType)}
-                        />
-                    </div>
-                )}
+            <div className={`donut-main-wrapper ${className}`} style={props.style}>
+                <div className="d-flex justify-content-between">
+                    <Titles {...{ title, subtitle, pageType }} />
+                    <DropDownIcon
+                        classNameButton="donut-chart-download-button mr-3 mt-3"
+                        options={[
+                            {
+                                name: DOWNLOAD_TYPES.downloadSVG,
+                                label: 'Download SVG',
+                            },
+                            {
+                                name: DOWNLOAD_TYPES.downloadPNG,
+                                label: 'Download PNG',
+                            },
+                            {
+                                name: DOWNLOAD_TYPES.downloadCSV,
+                                label: 'Download CSV',
+                            },
+                        ]}
+                        label={''}
+                        triggerButtonIcon={<BurgerIcon />}
+                        handleClick={handleDropDownOptionClicked}
+                    />
+                </div>
 
-                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${donutChartClass} ${type}`}>
-                    <>
-                        <div className={`chart-wrapper ${type}`}>
-                            <ReactApexChart options={options} {...props} series={series} type="donut" />
-                        </div>
+                <div className={`donut-chart-widget-wrapper w-100 justify-content-center ${className} ${type}`}>
+                    <div className={`chart-wrapper ${type}`}>{renderChart()}</div>
+
+                    <div className="chart-labels">
                         <div className="chart-labels">
                             <DonutChartLabels
+                                onHover={(_, index) => hoverChart(index)}
+                                onMouseLeave={(_, index) => unHoverChart(index)}
                                 className={type}
-                                isShowTrend={true}
-                                isShowValue={type !== DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
+                                isShowTrend
+                                isShowValue
                                 labels={items}
                             />
                         </div>
-                    </>
+                    </div>
                 </div>
+
+                {props.onMoreDetail && (
+                    <div className="donut-chart-widget-more-detail">
+                        <Button
+                            label="More Details"
+                            size={Button.Sizes.lg}
+                            icon={<ArrowRight style={{ height: 11 }} />}
+                            type={Button.Type.tertiary}
+                            iconAlignment={Button.IconAlignment.right}
+                            onClick={props.onMoreDetail}
+                        />
+                    </div>
+                )}
             </div>
         </>
     );
+};
+
+DonutChartWidget.defaultProps = {
+    onMoreDetail: () => {},
 };
 
 DonutChartWidget.propTypes = {
@@ -137,9 +243,6 @@ DonutChartWidget.propTypes = {
         }).isRequired
     ).isRequired,
     pageType: PropTypes.string,
-    bldgId: PropTypes.string,
-    handleRouteChange: PropTypes.func,
-    showRouteBtn: PropTypes.bool,
 };
 
 export default DonutChartWidget;

@@ -17,24 +17,24 @@ HighchartsData(Highcharts);
 const ExploreChart = (props) => {
     const chartComponentRef = useRef(null);
 
-    const { data, title, subTitle, dateRange } = props;
+    const { data, title, subTitle, dateRange, tooltipUnit, tooltipLabel } = props;
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
-        case DOWNLOAD_TYPES.downloadSVG:
-            chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
-            break;
-        case DOWNLOAD_TYPES.downloadPNG:
-            chartComponentRef.current.chart.exportChart({ type: 'image/png' });
-            break;
-        case DOWNLOAD_TYPES.downloadCSV:
-            chartComponentRef.current.chart.downloadCSV();
-            break;
-        default:
-            break;
+            case DOWNLOAD_TYPES.downloadSVG:
+                chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
+                break;
+            case DOWNLOAD_TYPES.downloadPNG:
+                chartComponentRef.current.chart.exportChart({ type: 'image/png' });
+                break;
+            case DOWNLOAD_TYPES.downloadCSV:
+                chartComponentRef.current.chart.downloadCSV();
+                break;
+            default:
+                break;
         }
     };
-    
+
     return (
         <div className="explore-chart-wrapper">
             <div className="chart-header">
@@ -67,7 +67,7 @@ const ExploreChart = (props) => {
             <HighchartsReact
                 highcharts={Highcharts}
                 constructorType={'stockChart'}
-                options={options({ data, dateRange })}
+                options={options({ data, dateRange, tooltipUnit, tooltipLabel })}
                 ref={chartComponentRef}
             />
         </div>

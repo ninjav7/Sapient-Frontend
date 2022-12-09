@@ -20,6 +20,8 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
+import { updateBuildingStore } from '../../components/SecondaryTopNavBar/utils';
+import { BuildingStore } from '../../store/BuildingStore';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -170,7 +172,17 @@ const PortfolioOverview = () => {
                 s.parent = 'portfolio';
             });
         };
+
+        const updateBuildingStore = () => {
+            BuildingStore.update((s) => {
+                s.BldgId = 'portfolio';
+                s.BldgName = 'Portfolio';
+                s.BldgTimeZone = '';
+            });
+        };
+
         updateBreadcrumbStore();
+        updateBuildingStore();
     }, []);
 
     useEffect(() => {
@@ -197,7 +209,7 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <Row className="mt-3">
+                    <Row className="mt-3 container-gap">
                         <Col lg={6}>
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
@@ -205,6 +217,7 @@ const PortfolioOverview = () => {
                                 energyConsumption={energyConsumption}
                                 isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
                                 pageType="portfolio"
+                                className="h-100"
                             />
                         </Col>
                         <Col lg={6}>

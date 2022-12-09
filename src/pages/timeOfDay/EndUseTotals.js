@@ -28,6 +28,7 @@ const EndUseTotals = ({ energyConsumption, isEndUsageChartLoading, className = '
                 isEndUsageChartLoading={isEndUsageChartLoading}
                 type={DONUT_CHART_TYPES.VERTICAL}
                 className={className}
+                onMoreDetail={null}
             />
         </div>
     );
