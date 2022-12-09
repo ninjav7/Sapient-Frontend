@@ -315,7 +315,7 @@ const EquipChartModal = ({
         setIsEquipDataFetched(false);
     };
 
-    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+    const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
         if (equipDeviceId === '' || equipDeviceId === null) {
             return '';
         }
@@ -329,6 +329,19 @@ const EquipChartModal = ({
         }
     };
 
+    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+        if (equipDeviceId === '' || equipDeviceId === null) {
+            return;
+        }
+
+        if (deviceType === 'active-device') {
+            history.push({ pathname: `/settings/active-devices/single/${equipDeviceId}` });
+        }
+
+        if (deviceType === 'passive-device') {
+            history.push({ pathname: `/settings/passive-devices/single/${equipDeviceId}` });
+        }
+    };
     const fetchEquipmentYTDUsageData = async (equipId) => {
         try {
             setIsYtdDataFetching(true);
@@ -804,7 +817,7 @@ const EquipChartModal = ({
                                                             : 'none',
                                                 }}
                                                 target="_blank"
-                                                to={redirectToConfigDevicePage(
+                                                to={redirectToConfigDevicePageLink(
                                                     equipmentData?.device_id,
                                                     equipmentData?.device_type === 'passive'
                                                         ? 'passive-device'
