@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import  useCSVDownload  from '../../sharedComponents/hooks/useCSVDownload';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -198,7 +198,8 @@ const Equipment = () => {
             bldgId,
             search,
             equipmentTypeFilterString,
-            macTypeFilterString,
+            endUseFilterString,
+            deviceIdFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
             spaceFilterString,
@@ -259,8 +260,8 @@ const Equipment = () => {
     const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
     const [endUseFilterString, setEndUseFilterString] = useState('');
 
-    const [macTypeFilterString, setMacTypeFilterString] = useState('');
-
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
+    const [deviceMacAddress, setDeviceMacAddress] = useState('');
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
     const [isLoadingEndUseData, setIsLoadingEndUseData] = useState(true);
 
@@ -324,7 +325,7 @@ const Equipment = () => {
             search,
             equipmentTypeFilterString,
             endUseFilterString,
-            macTypeFilterString,
+            deviceIdFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
             spaceFilterString,
@@ -433,6 +434,11 @@ const Equipment = () => {
         setPageNo(1);
     };
 
+    const filterLabelHandler = (setter, options) => {
+        setter(options.map(({ label }) => label));
+        setPageNo(1);
+    };
+
     const renderEndUseCategory = (row) => {
         return <div>{preparedEndUseData[row.end_use_id]}</div>;
     };
@@ -455,7 +461,7 @@ const Equipment = () => {
     const getFilters = async () => {
         const filters = await getFiltersForEquipmentRequest({
             bldgId,
-            macTypeFilterString,
+            deviceMacAddress,
             equipmentTypeFilterString,
             endUseFilterString,
             floorTypeFilterString,
@@ -497,6 +503,25 @@ const Equipment = () => {
                     },
                 },
                 {
+                    label: 'Device ID',
+                    value: 'mac_address',
+                    placeholder: 'Select device ID',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
+                        value: filterItem.device_id,
+                        label: filterItem.device_mac_address,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setDeviceIdFilterString, options);
+                        filterLabelHandler(setDeviceMacAddress, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setDeviceIdFilterString('');
+                        setDeviceMacAddress('');
+                    },
+                },
+                {
                     label: 'Tag',
                     value: 'tag',
                     placeholder: 'All tags',
@@ -523,7 +548,8 @@ const Equipment = () => {
         pageSize,
         pageNo,
         sortBy,
-        macTypeFilterString,
+        deviceMacAddress,
+        deviceIdFilterString,
         equipmentTypeFilterString,
         endUseFilterString,
         locationTypeFilterString,
@@ -607,7 +633,7 @@ const Equipment = () => {
             bldgId,
             search,
             equipmentTypeFilterString,
-            macTypeFilterString,
+            deviceIdFilterString,
             locationTypeFilterString,
             floorTypeFilterString,
             spaceFilterString,
@@ -621,8 +647,6 @@ const Equipment = () => {
             .then((res) => {
                 let response = res.data;
                 download(buildingName, getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData));
-                getEquipmentTableCSVExport(buildingName, response.data, headerProps, preparedEndUseData);
-
                 setIsEquipDataFetched(false);
             })
             .catch((error) => {
@@ -639,7 +663,7 @@ const Equipment = () => {
     };
 
     return (
-        <div className='equipment-page'>
+        <div className="equipment-page">
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Equipment</span>
