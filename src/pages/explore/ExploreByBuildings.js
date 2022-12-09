@@ -25,6 +25,8 @@ import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
+import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -71,6 +73,7 @@ const ExploreByBuildings = () => {
     const [selectedBuildingFilter, setSelectedBuildingFilter] = useState(0);
     const [selectedIds, setSelectedIds] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
+    const { download } = useCSVDownload();
     const [checkedAll, setCheckedAll] = useState(false);
     const [buildIdNow, setBuildIdNow] = useState('');
     const history = useHistory();
@@ -741,6 +744,34 @@ const ExploreByBuildings = () => {
         search && fetchAllData();
     }, [search, startDate, endDate, sortBy.method, sortBy.name]);
 
+    const handleDownloadCsv = async () => {
+        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+        const value = apiRequestBody(startDate, endDate, timeZone);
+
+        await fetchExploreBuildingList(
+            value,
+            '',
+            ordered_by,
+            sort_by,
+            minConValue,
+            maxConValue,
+            minPerValue,
+            maxPerValue,
+            minSqftValue,
+            maxSqftValue,
+            [],
+            '',
+            '',
+            ''
+        )
+            .then((res) => {
+                let responseData = res.data;
+                download('Explore_By_Building', getExploreByBuildingTableCSVExport(responseData, headerProps));
+            })
+            .catch((error) => {});
+    };
+
     const handleBuildingStateChange = (value, build) => {
         if (value === 'true') {
             let arr1 = seriesData.filter(function (item) {
@@ -845,6 +876,38 @@ const ExploreByBuildings = () => {
         setSeriesLineData(allBuildingData);
     }, [allBuildingData]);
 
+    const headerProps = [
+        {
+            name: 'Name',
+            accessor: 'building_name',
+            callbackValue: renderBuildingName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Energy Consumption',
+            accessor: 'consumption',
+            callbackValue: renderConsumption,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'change',
+            callbackValue: renderPerChange,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Square Footage',
+            accessor: 'square_footage',
+            callbackValue: renderSquareFootage,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Building Type',
+            accessor: 'building_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ];
+
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -883,38 +946,8 @@ const ExploreByBuildings = () => {
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
-                            onDownload={[]}
-                            headers={[
-                                {
-                                    name: 'Name',
-                                    accessor: 'building_name',
-                                    callbackValue: renderBuildingName,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Energy Consumption',
-                                    accessor: 'consumption',
-                                    callbackValue: renderConsumption,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: '% Change',
-                                    accessor: 'change',
-                                    callbackValue: renderPerChange,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Square Footage',
-                                    accessor: 'square_footage',
-                                    callbackValue: renderSquareFootage,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Building Type',
-                                    accessor: 'building_type',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                            ]}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""

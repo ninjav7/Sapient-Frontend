@@ -13,6 +13,7 @@ import './style.css';
 import 'moment-timezone';
 import moment from 'moment';
 import Header from '../../components/Header';
+import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { apiRequestBody } from '../../helpers/helpers';
@@ -25,6 +26,7 @@ import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -72,6 +74,8 @@ const ExploreByEquipment = () => {
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const { download } = useCSVDownload();
 
     // New Refactor Declarations
     const isLoadingRef = useRef(false);
@@ -138,6 +142,7 @@ const ExploreByEquipment = () => {
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
+
     useEffect(() => {
         if (entryPoint !== 'entered') {
             setConAPIFlag('');
@@ -150,6 +155,21 @@ const ExploreByEquipment = () => {
             setPerAPIFlag('');
         }
     }, [bldgId]);
+
+    const pageListSizes = [
+        {
+            label: '20 Rows',
+            value: '20',
+        },
+        {
+            label: '50 Rows',
+            value: '50',
+        },
+        {
+            label: '100 Rows',
+            value: '100',
+        },
+    ];
 
     useEffect(() => {
         if (selectedIds?.length >= 1) {
@@ -362,6 +382,7 @@ const ExploreByEquipment = () => {
     ]);
 
     useEffect(() => {}, [selectedEquipType, selectedEndUse, selectedSpaceType]);
+
     useEffect(() => {
         (async () => {
             setIsExploreDataLoading(true);
@@ -1161,6 +1182,79 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData]);
 
+    const handleDownloadCsv = async () => {
+        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+
+        await fetchExploreEquipmentList(
+            startDate,
+            endDate,
+            timeZone,
+            bldgId,
+            '',
+            ordered_by,
+            sort_by,
+            0,
+            0,
+            minConValue,
+            maxConValue,
+            minPerValue,
+            maxPerValue,
+            [],
+            [],
+            [],
+            [],
+            '',
+            ''
+        )
+            .then((res) => {
+                let responseData = res.data;
+                download('Explore_By_Equipment', getExploreByEquipmentTableCSVExport(responseData.data, headerProps));
+            })
+            .catch((error) => {});
+    };
+
+    const headerProps = [
+        {
+            name: 'Name',
+            accessor: 'equipment_name',
+            callbackValue: renderEquipmentName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Energy Consumption',
+            accessor: 'consumption',
+            callbackValue: renderConsumption,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'change',
+            callbackValue: renderPerChange,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'location',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Space Type',
+            accessor: 'location_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Equipment Type',
+            accessor: 'equipments_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'End Use Category',
+            accessor: 'end_user',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ];
+
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1199,47 +1293,8 @@ const ExploreByEquipment = () => {
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
                             filterOptions={filterOptions}
-                            onDownload={[]}
-                            headers={[
-                                {
-                                    name: 'Name',
-                                    accessor: 'equipment_name',
-                                    callbackValue: renderEquipmentName,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Energy Consumption',
-                                    accessor: 'consumption',
-                                    callbackValue: renderConsumption,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: '% Change',
-                                    accessor: 'change',
-                                    callbackValue: renderPerChange,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Location',
-                                    accessor: 'location',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Space Type',
-                                    accessor: 'location_type',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Equipment Type',
-                                    accessor: 'equipments_type',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'End Use Category',
-                                    accessor: 'end_user',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                            ]}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
                             customCheckAll={() => (
                                 <Checkbox
                                     label=""
@@ -1269,6 +1324,7 @@ const ExploreByEquipment = () => {
                             onChangePage={setPageNo}
                             pageSize={pageSize}
                             currentPage={pageNo}
+                            pageListSizes={pageListSizes}
                             totalCount={(() => {
                                 if (search) {
                                     return totalItemsSearched;
