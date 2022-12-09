@@ -132,12 +132,12 @@ const DeviceChartModel = ({
                             } else {
                                 if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                     NulledData.push({
-                                        x: moment.utc(new Date(ele.time_stamp)),
+                                        x: new Date(ele.time_stamp).getTime(),
                                         y: ele.consumption / UNIT_DIVIDER,
                                     });
                                 } else {
                                     NulledData.push({
-                                        x: moment.utc(new Date(ele.time_stamp)),
+                                        x: new Date(ele.time_stamp).getTime(),
                                         y: ele.consumption,
                                     });
                                 }
