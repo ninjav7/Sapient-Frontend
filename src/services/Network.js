@@ -41,6 +41,7 @@ export const vendorPermissions = '/api/user_role/user-permission-role/vendor-per
 // user permission and roles
 export const addMemberUser = '/api/user_role/user-permission-role/invite-reset-user';
 export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const UpdateUserPassword = '/api/user_role/user-permission-role/user-update-password';
 export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
 export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
 export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';

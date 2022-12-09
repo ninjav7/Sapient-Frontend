@@ -12,18 +12,25 @@ import './auth.css';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
+import { BaseUrl, UpdateUserPassword } from '../../services/Network';
 
 class Confirm extends Component {
     _isMounted = false;
 
     constructor(props) {
         super(props);
+        console.log(this.props.match.params.id);
+        console.log(this.props.match.params.token);
         this.state = {
             passwordResetSuccessful: false,
             isLoading: false,
             titleText: 'Set Password',
             showReset: false,
             redirectToLogin: false,
+            matchError: false,
+            password: '',
+            cpassword: '',
         };
     }
 
@@ -37,14 +44,40 @@ class Confirm extends Component {
         document.body.classList.remove('authentication-bg');
     }
 
-    handleValidSubmit = (event, values) => {
-        this.setState({ isLoading: true });
-
-        // You can make actual api call to register here
-
-        window.setTimeout(() => {
-            this.setState({ isLoading: false, passwordResetSuccessful: true, titleText: 'Success', showReset: true });
-        }, 1000);
+    handleValidSubmit = async (event, values) => {
+        console.log('Password ', values);
+        if (values?.password !== values?.cpassword) {
+            this.setState({ matchError: true });
+            return;
+        }
+        try {
+            this.setState({ isLoading: true });
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${this.props.match.params.token}`,
+            };
+            await axios
+                .post(
+                    `${BaseUrl}${UpdateUserPassword}`,
+                    {
+                        password: values?.password,
+                        confirm_password: values?.cpassword,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+                    this.setState({
+                        isLoading: false,
+                        passwordResetSuccessful: true,
+                        titleText: 'Success',
+                        showReset: true,
+                    });
+                });
+        } catch (error) {
+            this.setState({ isLoading: false });
+        }
     };
 
     /**
@@ -113,9 +146,9 @@ class Confirm extends Component {
                                         </>
                                     ) : (
                                         <>
-                                            {this.props.error && (
-                                                <Alert color="danger" isOpen={this.props.error ? true : false}>
-                                                    <div>{this.props.error}</div>
+                                            {this.state.matchError && (
+                                                <Alert color="danger" isOpen={this.state.matchError ? true : false}>
+                                                    <div>Password and Confirm Password Not Matched</div>
                                                 </Alert>
                                             )}
 
@@ -150,10 +183,10 @@ class Confirm extends Component {
                                                     <InputGroup>
                                                         <AvInput
                                                             type="password"
-                                                            name="password"
-                                                            id="password"
+                                                            name="cpassword"
+                                                            id="cpassword"
                                                             placeholder="Enter your password"
-                                                            value={this.state.password}
+                                                            value={this.state.cpassword}
                                                             required
                                                         />
                                                     </InputGroup>

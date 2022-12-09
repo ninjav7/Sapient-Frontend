@@ -153,7 +153,6 @@ const Users = () => {
                 })
                 .then((res) => {
                     let response = res.data;
-                    //setGeneratedUserId(response.id);
                     getUsersList();
                 });
             setIsProcessing(false);
@@ -196,19 +195,14 @@ const Users = () => {
         getUsersList();
     }, [generatedUserId]);
 
-    const createUserMember = () => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.post(`${BaseUrl}${addMemberUser}`, { headers }).then((res) => {});
-    };
-
     const currentRow = () => {
         return userData;
     };
     const renderName = (row) => {
+        console.log(
+            userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.account_user_permission?.edit
+        );
         return (
             <>
                 {userPermission?.user_role === 'admin' ||

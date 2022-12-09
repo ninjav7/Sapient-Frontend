@@ -22,8 +22,8 @@ import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
 import Users from '../pages/settings/users/Users';
-import UserProfile from '../pages/settings/UserProfile';
-import UserProfileNew from '../pages/settings/UserProfileNew';
+import UserProfile from '../pages/settings/users/UserProfile';
+import UserProfileNew from '../pages/settings/users/UserProfileNew';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
 import SingleRoleNew from '../pages/settings/SingleRoleNew';
@@ -653,7 +653,7 @@ const authRoutes = {
             visibility: true,
         },
         {
-            path: '/account/update-password',
+            path: '/account/update-password/:id/:token',
             name: 'Update Password',
             component: UpdatePassword,
             route: Route,
