@@ -85,7 +85,7 @@ const BuildingSwitcher = (props) => {
             <Select
                 {...filteredProps}
                 options={options}
-                isSearchable={true}
+                isSearchable={false}
                 type={DROPDOWN_INPUT_TYPES.Icon}
                 customSearchCallback={({ data, query }) => defaultSearch(data, query.value)}
                 searchFieldsProps={{
