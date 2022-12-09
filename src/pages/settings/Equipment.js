@@ -185,45 +185,6 @@ const Equipment = () => {
 
     const isLoadingRef = useRef(false);
 
-    const handleSearch = async () => {
-        setIsEquipDataFetched(true);
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-        await getEqupmentDataRequest(
-            pageSize,
-            pageNo,
-            bldgId,
-            search,
-            equipmentTypeFilterString,
-            endUseFilterString,
-            deviceIdFilterString,
-            locationTypeFilterString,
-            floorTypeFilterString,
-            spaceFilterString,
-            spaceTypeFilterString,
-            tagsFilterString,
-            {
-                ...sorting,
-            },
-            true
-        )
-            .then((res) => {
-                let response = res.data;
-                setGeneralEquipmentData(response.data);
-                setIsEquipDataFetched(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
-    };
-
-    useEffect(() => {
-        handleSearch();
-    }, [search]);
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEquipmentData);
         if (key === 'equipment_type') {
