@@ -61,7 +61,11 @@
     column-gap: 0.25rem;
     justify-content: flex-start;
 }
-.modal-add-equipment label {
+
+.add-user-model{
+    height:15.875rem;
+}
+.modal-add-equipment  label {
     font-weight: 400;
 }
 .add-equipment-footer {
@@ -318,25 +322,11 @@
     flex-direction: column;
 }
 
-/* .container-single-content:hover { */
-/* background: #f3f4f7; */
-/* font-weight: 700; */
-/* background-image: url('../../assets/icon/pencil.png'); */
-/* background-repeat: no-repeat; */
-/* background-position: 225px 10px; */
-/* } */
 .hover-image-delete:hover {
     background: #f3f4f7;
     background-image: url('../../assets/icon/pencil.png');
 }
 
-/* .container-single-content:active {
-    background: #f2f4f7;
-    font-weight: 700;
-    background-image: url('../../assets/icon/arrow.svg');
-    background-repeat: no-repeat;
-    background-position: 225px 10px;
-} */
 
 .container-single-content {
     padding-top: 5px;

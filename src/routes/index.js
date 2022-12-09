@@ -21,9 +21,9 @@ import IndividualActiveDevice from '../pages/settings/active-devices/IndividualA
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
-import Users from '../pages/settings/Users';
-import UserProfile from '../pages/settings/UserProfile';
-import UserProfileNew from '../pages/settings/UserProfileNew';
+import Users from '../pages/settings/users/Users';
+import UserProfile from '../pages/settings/users/UserProfile';
+import UserProfileNew from '../pages/settings/users/UserProfileNew';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
 import SingleRoleNew from '../pages/settings/SingleRoleNew';
@@ -37,9 +37,8 @@ const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
-const Register = React.lazy(() => import('../pages/auth/Register'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
-const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
+const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
 // apps
@@ -519,7 +518,7 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users',
+            path: '/settings/users/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
@@ -653,27 +652,20 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        // {
-        //     path: '/account/register',
-        //     name: 'Register',
-        //     component: Register,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/confirm',
-        //     name: 'Confirm',
-        //     component: Confirm,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/forget-password',
-        //     name: 'Forget Password',
-        //     component: ForgetPassword,
-        //     route: Route,
-        //     visibility: true,
-        // },
+        {
+            path: '/account/update-password/:id/:token',
+            name: 'Update Password',
+            component: UpdatePassword,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/forget-password',
+            name: 'Forget Password',
+            component: ForgetPassword,
+            route: Route,
+            visibility: true,
+        },
         {
             path: '/*',
             name: 'Error 404',
