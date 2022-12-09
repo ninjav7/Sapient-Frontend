@@ -159,7 +159,7 @@ const IndividualPassiveDevice = () => {
                                     y: ele?.consumption / UNIT_DIVIDER,
                                 });
                             } else {
-                                NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: ele?.consumption });
+                                NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
                             }
                         }
                     });

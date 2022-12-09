@@ -267,10 +267,10 @@ const EquipChartModal = ({
                         let NulledData = [];
                         data[i].data.map((ele) => {
                             if (ele.consumption === '') {
-                                NulledData.push({ x: moment.utc(new Date(ele.time_stamp).getTime()), y: null });
+                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
                             } else {
                                 NulledData.push({
-                                    x: moment.utc(new Date(ele.time_stamp).getTime()),
+                                    x: new Date(ele.time_stamp).getTime(),
                                     y: ele.consumption,
                                 });
                             }
@@ -290,15 +290,14 @@ const EquipChartModal = ({
                         _data[1] = parseInt(_data[1]);
                         return _data;
                     });
-
                     let exploreData = [];
                     let NulledData = [];
                     data.map((ele) => {
                         if (ele?.consumption === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp).getTime()), y: null });
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                         } else {
                             NulledData.push({
-                                x: moment.utc(new Date(ele?.time_stamp).getTime()),
+                                x: new Date(ele?.time_stamp).getTime(),
                                 y: ele?.consumption,
                             });
                         }
@@ -316,7 +315,7 @@ const EquipChartModal = ({
         setIsEquipDataFetched(false);
     };
 
-    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+    const redirectToConfigDevicePageLink = (equipDeviceId, deviceType) => {
         if (equipDeviceId === '' || equipDeviceId === null) {
             return '';
         }
@@ -327,6 +326,20 @@ const EquipChartModal = ({
 
         if (deviceType === 'passive-device') {
             return `/settings/passive-devices/single/${equipDeviceId}`;
+        }
+    };
+
+    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+        if (equipDeviceId === '' || equipDeviceId === null) {
+            return;
+        }
+
+        if (deviceType === 'active-device') {
+            history.push({ pathname: `/settings/active-devices/single/${equipDeviceId}` });
+        }
+
+        if (deviceType === 'passive-device') {
+            history.push({ pathname: `/settings/passive-devices/single/${equipDeviceId}` });
         }
     };
 
@@ -805,7 +818,7 @@ const EquipChartModal = ({
                                                             : 'none',
                                                 }}
                                                 target="_blank"
-                                                to={redirectToConfigDevicePage(
+                                                to={redirectToConfigDevicePageLink(
                                                     equipmentData?.device_id,
                                                     equipmentData?.device_type === 'passive'
                                                         ? 'passive-device'

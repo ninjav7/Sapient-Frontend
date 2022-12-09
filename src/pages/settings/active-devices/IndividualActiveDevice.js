@@ -333,7 +333,7 @@ const IndividualActiveDevice = () => {
                                     y: ele.consumption / UNIT_DIVIDER,
                                 });
                             } else {
-                                NulledData.push({ x: moment.utc(new Date(ele.time)), y: ele.consumption });
+                                NulledData.push({ x: new Date(ele.time).getTime(), y: ele.consumption });
                             }
                         }
                     });
