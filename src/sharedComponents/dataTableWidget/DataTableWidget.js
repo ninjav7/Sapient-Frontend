@@ -254,7 +254,7 @@ const DataTableWidget = (props) => {
 
     const memoizedHeaders = useMemo(() => {
         return filteredHeaders.map(({ name, onSort, accessor, cellProps }, index) => (
-            <HeadComponent  name={name} onSort={onSort} accessor={accessor} {...cellProps} key={index} />
+            <HeadComponent name={name} onSort={onSort} accessor={accessor} {...cellProps} key={index} />
         ));
     }, [JSON.stringify(filteredHeaders)]);
 
@@ -404,6 +404,7 @@ const DataTableWidget = (props) => {
                         pageSize={pageSize}
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
+                        pageListSizes={props.pageListSizes}
                     />
                 </div>
             )}

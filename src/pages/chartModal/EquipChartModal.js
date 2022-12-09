@@ -18,7 +18,7 @@ import {
 import { fetchExploreEquipmentChart } from '../explore/services';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
@@ -276,7 +276,7 @@ const EquipChartModal = ({
                             }
                         });
                         let recordToInsert = {
-                            name: equipmentFilter?.equipment_name,
+                            name: `Sensor ${data[i].sensor_name}`,
                             data: NulledData,
                         };
 
@@ -318,19 +318,15 @@ const EquipChartModal = ({
 
     const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
         if (equipDeviceId === '' || equipDeviceId === null) {
-            return;
+            return '';
         }
 
         if (deviceType === 'active-device') {
-            history.push({
-                pathname: `/settings/active-devices/single/${equipDeviceId}`,
-            });
+            return `/settings/active-devices/single/${equipDeviceId}`;
         }
 
         if (deviceType === 'passive-device') {
-            history.push({
-                pathname: `/settings/passive-devices/single/${equipDeviceId}`,
-            });
+            return `/settings/passive-devices/single/${equipDeviceId}`;
         }
     };
 
@@ -795,29 +791,28 @@ const EquipChartModal = ({
                                             Type={Typography.Types.Light}
                                             className="ytd-heading">
                                             Device : &nbsp;
-                                            <Button
-                                                style={{ border: 'none' }}
-                                                onClick={() => {
-                                                    redirectToConfigDevicePage(
-                                                        equipmentData?.device_id,
+                                            <Link
+                                                style={{
+                                                    pointerEvents:
                                                         equipmentData?.device_type === 'passive'
-                                                            ? 'passive-device'
-                                                            : equipmentData?.device_type === 'active'
-                                                            ? 'active-device'
-                                                            : ''
-                                                    );
+                                                            ? equipBreakerLink?.length === 0
+                                                                ? 'none'
+                                                                : ''
+                                                            : equipmentData !== null
+                                                            ? equipmentData.device_id === ''
+                                                                ? 'none'
+                                                                : ''
+                                                            : 'none',
                                                 }}
-                                                disabled={
+                                                target="_blank"
+                                                to={redirectToConfigDevicePage(
+                                                    equipmentData?.device_id,
                                                     equipmentData?.device_type === 'passive'
-                                                        ? equipBreakerLink?.length === 0
-                                                            ? true
-                                                            : false
-                                                        : equipmentData !== null
-                                                        ? equipmentData.device_id === ''
-                                                            ? true
-                                                            : false
-                                                        : true
-                                                }>
+                                                        ? 'passive-device'
+                                                        : equipmentData?.device_type === 'active'
+                                                        ? 'active-device'
+                                                        : ''
+                                                )}>
                                                 <span
                                                     className="buttonhover"
                                                     style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
@@ -829,7 +824,7 @@ const EquipChartModal = ({
                                                         style={{ color: 'base-black' }}
                                                     />
                                                 </span>
-                                            </Button>
+                                            </Link>
                                         </Typography.Subheader>
                                         {/* </div> */}
                                     </div>
