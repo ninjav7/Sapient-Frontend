@@ -185,7 +185,6 @@ const ExploreByEquipment = () => {
     }, [startDate, endDate]);
 
     useEffect(() => {
-        setAllSearchData([]);
         if (equipIdNow) {
             fetchExploreChartData(equipIdNow);
         }
@@ -263,14 +262,14 @@ const ExploreByEquipment = () => {
         }
         if (selectedEquipmentFilter === 1) {
             return selectedIds.reduce((acc, id) => {
-                const foundSelectedEquipment = allSearchData.find((eqId) => eqId.equipment_id === id);
+                const foundSelectedEquipment = allEquipmentList.find((eqId) => eqId.equipment_id === id);
                 if (foundSelectedEquipment) {
                     acc.push(foundSelectedEquipment);
                 }
                 return acc;
             }, []);
         }
-        return allSearchData.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
+        return allEquipmentList.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
     };
 
     const renderConsumption = (row) => {
@@ -326,6 +325,7 @@ const ExploreByEquipment = () => {
             });
             setSeriesData(arr1);
             setSeriesLineData(arr1);
+            setEquipIdNow('');
         }
 
         if (value === 'false') {

@@ -779,6 +779,7 @@ const ExploreByBuildings = () => {
             });
             setSeriesData(arr1);
             setSeriesLineData(arr1);
+            setBuildIdNow('');
         }
         if (value === 'false') {
             setBuildIdNow(build?.building_id);
