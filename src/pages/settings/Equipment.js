@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import  useCSVDownload  from '../../sharedComponents/hooks/useCSVDownload';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -184,44 +184,6 @@ const Equipment = () => {
     }, [locationData]);
 
     const isLoadingRef = useRef(false);
-
-    const handleSearch = async () => {
-        setIsEquipDataFetched(true);
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-        await getEqupmentDataRequest(
-            pageSize,
-            pageNo,
-            bldgId,
-            search,
-            equipmentTypeFilterString,
-            macTypeFilterString,
-            locationTypeFilterString,
-            floorTypeFilterString,
-            spaceFilterString,
-            spaceTypeFilterString,
-            tagsFilterString,
-            {
-                ...sorting,
-            },
-            true
-        )
-            .then((res) => {
-                let response = res.data;
-                setGeneralEquipmentData(response.data);
-                setIsEquipDataFetched(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
-    };
-
-    useEffect(() => {
-        handleSearch();
-    }, [search]);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEquipmentData);
@@ -639,7 +601,7 @@ const Equipment = () => {
     };
 
     return (
-        <div className='equipment-page'>
+        <div className="equipment-page">
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Equipment</span>
