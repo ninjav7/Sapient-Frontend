@@ -684,8 +684,7 @@ const EquipChartModal = ({
                                         </div>
                                         <div>
                                             <Button
-                                                label="s
-                                                Save"
+                                                label="Save"
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 className="ml-4"
