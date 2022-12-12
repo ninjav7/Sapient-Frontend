@@ -20,8 +20,6 @@ class Confirm extends Component {
 
     constructor(props) {
         super(props);
-        console.log(this.props.match.params.id);
-        console.log(this.props.match.params.token);
         this.state = {
             passwordResetSuccessful: false,
             isLoading: false,
@@ -45,7 +43,6 @@ class Confirm extends Component {
     }
 
     handleValidSubmit = async (event, values) => {
-        console.log('Password ', values);
         if (values?.password !== values?.cpassword) {
             this.setState({ matchError: true });
             return;

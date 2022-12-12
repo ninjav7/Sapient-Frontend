@@ -204,10 +204,6 @@ const Users = () => {
         return userData;
     };
     const renderName = (row) => {
-        console.log(
-            userPermission?.user_role === 'admin' ||
-                userPermission?.permissions?.permissions?.account_user_permission?.edit
-        );
         return (
             <>
                 {userPermission?.user_role === 'admin' ||
