@@ -284,58 +284,6 @@ const GeneralBuildingSettings = () => {
         }
     };
 
-    const inputsBuildingHandler = (e) => {
-        setInputField({ [e.target.name]: e.target.value });
-    };
-
-    const inputsAddressHandler = (e) => {
-        setInputField({ [e.target.name]: e.target.value });
-    };
-
-    const dateHandler = (operating_hours, day) => {
-        let days = '';
-
-        let timeFrom = '';
-
-        let timeTo = '';
-
-        let stat = '';
-
-        if (operating_hours) {
-            days = operating_hours[day];
-
-            timeFrom = days['time_range'].frm;
-
-            timeTo = days['time_range'].to;
-
-            stat = days['stat'];
-        }
-
-        return {
-            frm: new Date(`January 31 1980 ${timeFrom}`),
-
-            to: new Date(`January 31 1980 ${timeTo}`),
-
-            stat,
-        };
-    };
-
-    const inputsActiveToggleHandler = (e) => {
-        setActiveToggle(!activeToggle);
-
-        const headers = {
-            'Content-Type': 'application/json',
-
-            accept: 'application/json',
-
-            Authorization: `Bearer ${userdata.token}`,
-        };
-
-        axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
-            setRender(!render);
-        });
-    };
-
     const handleSwitchChange = () => {
         let obj = buildingDetails;
 
@@ -472,6 +420,13 @@ const GeneralBuildingSettings = () => {
                 },
             },
         };
+    };
+
+    const handleTimeValueChange = (date, key) => {
+        setTimeValue({
+            ...timeValue,
+            [key]: timeZone === '24' ? moment(date)?.format('HH:00') : moment(date)?.format('h:00 a'),
+        });
     };
 
     const checkDateTimeHandler = (day, value) => {
@@ -1008,36 +963,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Mon'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'monFrom');
                                             }}
                                             startTime={timeValue?.monFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'monTo');
                                             }}
                                             endTime={timeValue?.monTo}
                                         />
@@ -1054,36 +985,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Tue'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'tueFrom');
                                             }}
                                             startTime={timeValue?.tueFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'tueTo');
                                             }}
                                             endTime={timeValue?.tueTo}
                                         />
@@ -1100,36 +1007,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Wed'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'wedFrom');
                                             }}
                                             startTime={timeValue?.wedFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'wedTo');
                                             }}
                                             endTime={timeValue?.wedTo}
                                         />
@@ -1146,36 +1029,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Thu'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'thuFrom');
                                             }}
                                             startTime={timeValue?.thuFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'thuTo');
                                             }}
                                             endTime={timeValue?.thuTo}
                                         />
@@ -1192,36 +1051,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Fri'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'friFrom');
                                             }}
                                             startTime={timeValue?.friFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'friTo');
                                             }}
                                             endTime={timeValue?.friTo}
                                         />
@@ -1238,36 +1073,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Sat'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'satFrom');
                                             }}
                                             startTime={timeValue?.satFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'satTo');
                                             }}
                                             endTime={timeValue?.satTo}
                                         />
@@ -1284,36 +1095,12 @@ const GeneralBuildingSettings = () => {
                                             weekDay={'Sun'}
                                             onStartTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunFrom: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunFrom: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'sunFrom');
                                             }}
                                             startTime={timeValue?.sunFrom}
                                             onEndTimeChange={(date) => {
                                                 operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
-
-                                                if (timeZone === '24') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunTo: moment(date)?.format('HH:00'),
-                                                    });
-                                                }
-                                                if (timeZone === '12') {
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunTo: moment(date)?.format('h:00 a'),
-                                                    });
-                                                }
+                                                handleTimeValueChange(date, 'sunTo');
                                             }}
                                             endTime={timeValue?.sunTo}
                                         />
