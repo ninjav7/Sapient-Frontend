@@ -3,18 +3,8 @@ import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import axios from 'axios';
 import moment from 'moment';
 import Switch from 'react-switch';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import 'react-time-picker/dist/TimePicker.css';
 import { useAtom } from 'jotai';
-import {
-    BaseUrl,
-    generalBuildingDetail,
-    generalBuildingAddress,
-    generalDateTime,
-    generalOperatingHours,
-    generalBldgDelete,
-} from '../../../services/Network';
+import { BaseUrl, generalBldgDelete } from '../../../services/Network';
 import { BuildingStore, BuildingListStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -28,10 +18,16 @@ import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Brick from '../../../sharedComponents/brick';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import {
+    updateGeneralBuildingChange,
+    updateBuildingAddressChange,
+    updateBuildingDateTimeChange,
+    updateOperatingHourChange,
+} from './services';
+import OperatingHours from './OperatingHours';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
 import './styles.scss';
-import OperatingHours from './OperatingHours';
 
 const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
@@ -176,38 +172,16 @@ const GeneralBuildingSettings = () => {
 
     const saveBuildingSettings = async () => {
         try {
-            let header = {
-                'Content-Type': 'application/json',
-
-                accept: 'application/json',
-
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            // let params = `?building_id=${bldgId}`;
-
-            let params = `/${bldgId}`;
-
+            const params = `/${bldgId}`;
             await axios
-
                 .all([
-                    axios.patch(`${BaseUrl}${generalBuildingDetail}${params}`, buildingDetails, {
-                        headers: header,
-                    }),
-
-                    axios.patch(`${BaseUrl}${generalBuildingAddress}${params}`, buildingAddress, {
-                        headers: header,
-                    }),
-
-                    axios.patch(`${BaseUrl}${generalDateTime}${params}`, buildingDateTime, {
-                        headers: header,
-                    }),
-
-                    axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, operationTime, { headers: header }),
+                    updateGeneralBuildingChange(buildingDetails, params),
+                    updateBuildingAddressChange(buildingAddress, params),
+                    updateBuildingDateTimeChange(buildingDateTime, params),
+                    updateOperatingHourChange(operationTime, params),
                 ])
-
                 .then(
-                    axios.spread((data1, data2, data3) => {
+                    axios.spread(() => {
                         setLoadButton(false);
                         localStorage.removeItem('generalState');
                         localStorage.removeItem('generalStreetAddress');
