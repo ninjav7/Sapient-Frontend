@@ -253,8 +253,6 @@ const GeneralBuildingSettings = () => {
                     sun: sun['stat'],
                 });
             }
-            // setBuildingData(data);
-            // });
         }
     };
 
@@ -523,11 +521,7 @@ const GeneralBuildingSettings = () => {
                         sun: sun['stat'],
                     });
                 }
-                // setBuildingData(data);
-                // });
             }
-            // setBuildingData(data);
-            // });
         };
 
         fetchBuildingData();
