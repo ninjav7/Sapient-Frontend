@@ -366,7 +366,6 @@ const EquipmentTypes = () => {
 
     const saveDeviceData = async () => {
         let obj = Object.assign({}, createEqipmentData);
-        obj['building_id'] = bldgId;
         obj['is_active'] = true;
         setCreateEqipmentData(obj);
         try {
@@ -404,7 +403,6 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
@@ -429,7 +427,6 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
@@ -493,7 +490,6 @@ const EquipmentTypes = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     let response = res.data;
                     response.sort((a, b) => {
