@@ -17,10 +17,15 @@ import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
+
             <th>
                 <Skeleton count={5} />
             </th>
@@ -220,20 +225,40 @@ const Users = () => {
     };
 
     const renderRole = (row) => {
-        return <Typography.Body size={Typography.Sizes.sm}>{row?.role === '' ? '-' : row?.role}</Typography.Body>;
+        return (
+            <Typography.Body size={Typography.Sizes.sm}>
+                {row?.role === '' ? '-' : row?.permissions[0].permission_name}
+            </Typography.Body>
+        );
+    };
+
+    const renderStatus = (row) => {
+        if (row?.is_verified === false) {
+            return <StatusBadge text="Pending" type={StatusBadge.Type.warning} />;
+        } else {
+            if (row?.is_active === false) {
+                return <StatusBadge text="Inactive" type={StatusBadge.Type.error} />;
+            } else if (row?.is_active === true) {
+                return <StatusBadge text="Active" type={StatusBadge.Type.success} />;
+            }
+        }
     };
 
     const renderEmail = (row) => {
         return <Typography.Body size={Typography.Sizes.sm}>{row?.email === '' ? '-' : row?.email}</Typography.Body>;
     };
 
-    const renderLastActive = (row) => {
-        return (
-            <Typography.Body size={Typography.Sizes.sm}>
-                {row?.last_login === '' ? '-' : row?.last_login}
-            </Typography.Body>
-        );
-    };
+    // function isValidDate(d) {
+    //     return d instanceof Date && !isNaN(d);
+    // }
+
+    // const renderLastActive = (row) => {
+    //     return (
+    //         <Typography.Body size={Typography.Sizes.sm}>
+    //             {isValidate(row?.last_login) ? new Date(row?.last_login) : row?.last_login}
+    //         </Typography.Body>
+    //     );
+    // };
 
     return (
         <React.Fragment>
@@ -288,11 +313,15 @@ const Users = () => {
                                 accessor: 'role',
                                 callbackValue: renderRole,
                             },
-
+                            {
+                                name: 'status',
+                                accessor: 'status',
+                                callbackValue: renderStatus,
+                            },
                             {
                                 name: 'Last Active',
                                 accessor: 'last_active',
-                                callbackValue: renderLastActive,
+                                // callbackValue: renderLastActive,
                             },
                         ]}
                         totalCount={(() => {

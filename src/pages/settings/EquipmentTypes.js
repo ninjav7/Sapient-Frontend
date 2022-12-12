@@ -405,7 +405,7 @@ const EquipmentTypes = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
@@ -430,7 +430,7 @@ const EquipmentTypes = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
@@ -469,7 +469,7 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+            let params = `?page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);

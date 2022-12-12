@@ -175,7 +175,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                         <th scope="row">
                                             {userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.account_buildings_permission
-                                                ?.edit ? (
+                                                ?.view ? (
                                                 <Link to={`${internalRoute[0]}`}>
                                                     <div
                                                         className="buildings-name"

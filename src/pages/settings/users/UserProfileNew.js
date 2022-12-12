@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, FormGroup, Label, Input, CardHeader, Button } from 'reactstrap';
+import { Row, Col, Card, CardBody, FormGroup, Label, Input, CardHeader } from 'reactstrap';
 import Switch from 'react-switch';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -22,6 +22,8 @@ import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../../store/globalState';
+import Typography from '../../../sharedComponents/typography';
+import Button from '../../../sharedComponents/button/Button';
 
 const UserProfileNew = () => {
     let cookies = new Cookies();
@@ -29,6 +31,8 @@ const UserProfileNew = () => {
 
     const [checked, setChecked] = useState(true);
     const [userDetail, setUserDetail] = useState();
+    const [isEditing, setIsEditing] = useState(false);
+    const [loadButton, setLoadButton] = useState(false);
 
     const [updateUserDetail, setUpdateUserDetail] = useState({
         first_name: '',
@@ -126,26 +130,27 @@ const UserProfileNew = () => {
     const [buildingListData] = useAtom(buildingData);
     const [allBuildings, setAllBuildings] = useState([]);
 
-    const getPermissionRoleFunc = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
+    // Commented for Future Use
+    // const getPermissionRoleFunc = async () => {
+    //     try {
+    //         let header = {
+    //             'Content-Type': 'application/json',
+    //             accept: 'application/json',
+    //             Authorization: `Bearer ${userdata.token}`,
+    //         };
 
-            await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
-                setRoleDataList(res.data.data);
-                return buildingListData?.map((item) => {
-                    setAllBuildings((el) => [...el, item?.building_id]);
-                });
-            });
-        } catch (err) {}
-    };
+    //         await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
+    //             setRoleDataList(res.data.data);
+    //             return buildingListData?.map((item) => {
+    //                 setAllBuildings((el) => [...el, item?.building_id]);
+    //             });
+    //         });
+    //     } catch (err) {}
+    // };
 
-    useEffect(() => {
-        getPermissionRoleFunc();
-    }, [buildingListData]);
+    // useEffect(() => {
+    //     getPermissionRoleFunc();
+    // }, [buildingListData]);
 
     const [permissionValue, setPermissionValue] = useState('');
     const [show, setShow] = useState(false);
@@ -354,10 +359,6 @@ const UserProfileNew = () => {
                                                     <h6 className="card-title admin-text-style">
                                                         {item?.permissions?.[0]?.permission_name}
                                                     </h6>
-                                                    <Link
-                                                        to={`/settings/roles/${item?.permissions?.[0]?.permission_id}`}>
-                                                        <span className="view-role-style">View Role</span>
-                                                    </Link>
                                                 </div>
                                                 <Input
                                                     type="select"
@@ -377,16 +378,6 @@ const UserProfileNew = () => {
                                         );
                                     })}
                                 </FormGroup>
-                                <hr />
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-light font-weight-bold cancel-btn-style mr-1"
-                                    onClick={() => {
-                                        handleShow();
-                                    }}>
-                                    <i className="uil uil-plus mr-2" />
-                                    Add Role
-                                </button>
                             </Form>
                         </CardBody>
                     </Card>
@@ -407,7 +398,7 @@ const UserProfileNew = () => {
                                     <button
                                         type="button"
                                         className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                        <i className="uil uil-trash mr-2"></i>Delete Building
+                                        <i className="uil uil-trash mr-2"></i>Remove User
                                     </button>
                                 </FormGroup>
                             </Form>
@@ -416,7 +407,7 @@ const UserProfileNew = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
+            {/* <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header>
                     <Modal.Title>Add Role</Modal.Title>
                 </Modal.Header>
@@ -451,7 +442,7 @@ const UserProfileNew = () => {
                         Save
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal> */}
         </React.Fragment>
     );
 };

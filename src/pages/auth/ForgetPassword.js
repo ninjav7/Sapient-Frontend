@@ -4,7 +4,8 @@ import { Redirect, Link } from 'react-router-dom';
 import { Col, FormGroup, Button, Alert, InputGroup } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { isUserAuthenticated } from '../../helpers/authUtils';
-// import { BaseUrl, addMemberUser } from '../../../services/Network';
+import axios from 'axios';
+import { BaseUrl, forgotUserPassword } from '../../services/Network';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
@@ -49,15 +50,43 @@ class ForgetPassword extends Component {
     /**
      * Handles the submit
      */
-    handleValidSubmit = (event, values) => {
-        this.setState({ isLoading: true });
+    // handleValidSubmit = (event, values) => {
+    //     this.setState({ isLoading: true });
 
-        // You can make actual api call to register here
-
-        window.setTimeout(() => {
-            this.setState({ isLoading: false, passwordResetSuccessful: true, titleText: 'Success', showReset: true });
-        }, 1000);
+    handleValidSubmit = async (event, values) => {
+        try {
+            this.setState({ isLoading: true });
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            };
+            await axios
+                .post(
+                    `${BaseUrl}${forgotUserPassword}`,
+                    {
+                        email: values?.email,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+                    this.setState({
+                        isLoading: false,
+                        titleText: 'Success',
+                        showReset: true,
+                    });
+                });
+        } catch (error) {
+            this.setState({ isLoading: false });
+        }
     };
+
+    // You can make actual api call to register here
+
+    //     window.setTimeout(() => {
+    //         this.setState({ isLoading: false, passwordResetSuccessful: true, titleText: 'Success', showReset: true });
+    //     }, 1000);
+    // };
 
     /**
      * Redirect to root
