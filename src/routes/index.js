@@ -544,7 +544,7 @@ const settingsRoutes = {
         },
 
         {
-            path: '/settings/user-profile/single/:userId',
+            path: '/settings/user-profile/single/:userId/:is_active',
             name: 'Users',
             component: UserProfileNew,
             route: PrivateRoute,

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, FormGroup, Label, Input, CardHeader } from 'reactstrap';
+import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import Switch from 'react-switch';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-time-picker/dist/TimePicker.css';
 import '../style.css';
@@ -10,7 +8,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
-import Select from 'react-select';
+import Brick from '../../../sharedComponents/brick';
 import {
     BaseUrl,
     assignUser,
@@ -19,11 +17,14 @@ import {
     updateSingleUserDetail,
 } from '../../../services/Network';
 import axios from 'axios';
-import Skeleton from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
+import Inputs from '../../../sharedComponents/form/input/Input';
+import Select from '../../../sharedComponents/form/select';
+import colorPalette from '../../../assets/scss/_colors.scss';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 
 const UserProfileNew = () => {
     let cookies = new Cookies();
@@ -33,15 +34,15 @@ const UserProfileNew = () => {
     const [userDetail, setUserDetail] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [loadButton, setLoadButton] = useState(false);
-
+    const { userId, is_active } = useParams();
     const [updateUserDetail, setUpdateUserDetail] = useState({
         first_name: '',
         last_name: '',
         email: '',
+        is_active: is_active,
     });
 
-    const { userId } = useParams();
-
+    const [selectedBuilding, setSelctedBuilding] = useState('1');
     const [userPermissionList, setUserPermissionList] = useState();
 
     useEffect(() => {
@@ -92,6 +93,8 @@ const UserProfileNew = () => {
             })
             .then((res) => {
                 setUserDetail(res?.data?.data);
+                setLoadButton(false);
+                getSingleUserDetailFunc();
             });
     };
 
@@ -158,291 +161,274 @@ const UserProfileNew = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const assignUserRoleFunc = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
+    // const assignUserRoleFunc = async () => {
+    //     try {
+    //         let header = {
+    //             'Content-Type': 'application/json',
+    //             accept: 'application/json',
+    //             Authorization: `Bearer ${userdata.token}`,
+    //         };
 
-            // const params = userId;
-            await axios
-                .post(
-                    `${BaseUrl}${assignUser}?member_user_id=${userId}`,
-                    {
-                        permission_role: permissionValue,
-                        buildings: allBuildings,
-                    },
-                    { headers: header }
-                )
-                .then((res) => {
-                    getSingleUserDetailFunc();
-                    setShow(false);
-                });
-        } catch (err) {}
-    };
+    //         // const params = userId;
+    //         await axios
+    //             .post(
+    //                 `${BaseUrl}${assignUser}?member_user_id=${userId}`,
+    //                 {
+    //                     permission_role: permissionValue,
+    //                     buildings: allBuildings,
+    //                 },
+    //                 { headers: header }
+    //             )
+    //             .then((res) => {
+    //                 getSingleUserDetailFunc();
+    //                 setShow(false);
+    //             });
+    //     } catch (err) {}
+    // };
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col md={8} className="header-container">
-                    <div>
-                        {updateUserDetail?.first_name?.length === 0 ? (
-                            <>
-                                <Skeleton count={2} height={20} width={300} />
-                            </>
-                        ) : (
-                            <>
-                                <span className="heading-style">
-                                    {updateUserDetail?.first_name} {updateUserDetail?.last_name}
-                                </span>
-                                <p className="emailId-style">{updateUserDetail?.email}</p>
-                            </>
-                        )}
-                    </div>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
-                            <button type="button" className="btn btn-md btn-light font-weight-bold cancel-btn-style">
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold ml-2"
-                                onClick={updateSingleUserDetailFunc}>
-                                Save
-                            </button>
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>
+                                {userDetail?.first_name} {userDetail?.last_name}
+                            </Typography.Header>
+                            <Typography.Subheader size={Typography.Sizes.lg}>{userDetail?.email}</Typography.Subheader>
+                        </div>
+                        <div>
+                            <div className="d-flex">
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                    }}
+                                />
+                                <Button
+                                    // label={'Save'}
+                                    label={loadButton ? 'Saving' : 'Save'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        updateSingleUserDetailFunc();
+                                    }}
+                                    className="ml-2"
+                                    disabled={!isEditing}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>
             </Row>
 
-            <Row className="mt-4">
-                <Col lg={8}>
-                    <Card className="custom-card">
+            <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                User Details
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    User Details
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
+
                         <CardBody>
-                            <Form>
-                                <div className="grid-style-3">
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-title">Active</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                Only active users can sign in
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Switch
-                                            onChange={() => setChecked(!checked)}
-                                            checked={checked}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                            width={44}
-                                            height={24}
-                                        />
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div>
-                                            <h6 className="card-title">First Name</h6>
-                                        </div>
-                                    </FormGroup>
-                                    {updateUserDetail?.first_name?.length === 0 ? (
-                                        <Skeleton count={1} height={40} width={350} />
-                                    ) : (
-                                        <FormGroup>
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="buildingName"
-                                                    id="buildingName"
-                                                    placeholder="Enter First Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    onChange={(e) => {
-                                                        setUpdateUserDetail({
-                                                            ...updateUserDetail,
-                                                            first_name: e.target.value,
-                                                        });
-                                                    }}
-                                                    value={updateUserDetail?.first_name}
-                                                />
-                                            </div>
-                                        </FormGroup>
-                                    )}
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-title">Last Name</h6>
-                                        </div>
-                                    </FormGroup>
-                                    {updateUserDetail?.last_name?.length === 0 ? (
-                                        <Skeleton count={1} height={40} width={350} />
-                                    ) : (
-                                        <FormGroup>
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="buildingName"
-                                                    id="buildingName"
-                                                    placeholder="Enter Last Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    value={updateUserDetail?.last_name}
-                                                    onChange={(e) => {
-                                                        setUpdateUserDetail({
-                                                            ...updateUserDetail,
-                                                            last_name: e.target.value,
-                                                        });
-                                                    }}
-                                                />
-                                            </div>
-                                        </FormGroup>
-                                    )}
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-title">Email Address</h6>
-                                        </div>
-                                    </FormGroup>
-                                    {updateUserDetail?.email?.length === 0 ? (
-                                        <Skeleton count={1} height={40} width={350} />
-                                    ) : (
-                                        <FormGroup>
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="buildingName"
-                                                    id="buildingName"
-                                                    placeholder="Enter Email"
-                                                    className="single-line-style font-weight-bold"
-                                                    value={updateUserDetail?.email}
-                                                    onChange={(e) => {
-                                                        setUpdateUserDetail({
-                                                            ...updateUserDetail,
-                                                            email: e.target.value,
-                                                        });
-                                                    }}
-                                                />
-                                            </div>
-                                        </FormGroup>
-                                    )}
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>Active</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm}>
+                                        Only active users can sign in
+                                    </Typography.Body>
                                 </div>
-                            </Form>
+                                <div className="col d-flex align-items-center">
+                                    <Switch
+                                        onChange={() => {
+                                            setIsEditing(true);
+                                            setUpdateUserDetail({
+                                                ...updateUserDetail,
+                                                is_active: !updateUserDetail?.is_active,
+                                            });
+                                        }}
+                                        checked={!updateUserDetail?.is_active}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
+                                </div>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>First Name</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter First Name"
+                                        onChange={(e) => {
+                                            setIsEditing(true);
+                                            setUpdateUserDetail({
+                                                ...updateUserDetail,
+                                                first_name: e.target.value,
+                                            });
+                                        }}
+                                        className="w-100"
+                                        value={updateUserDetail?.first_name}
+                                    />
+                                </div>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>Last Name</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Last Name"
+                                        onChange={(e) => {
+                                            setIsEditing(true);
+                                            setUpdateUserDetail({
+                                                ...updateUserDetail,
+                                                last_name: e.target.value,
+                                            });
+                                        }}
+                                        className="w-100"
+                                        value={updateUserDetail?.last_name}
+                                    />
+                                </div>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                        Email Address
+                                    </Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Email Address"
+                                        onChange={(e) => {
+                                            setIsEditing(true);
+                                            setUpdateUserDetail({
+                                                ...updateUserDetail,
+                                                email: e.target.value,
+                                            });
+                                        }}
+                                        className="w-100"
+                                        value={updateUserDetail?.email}
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
-                    </Card>
+                    </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col lg={8}>
-                    <Card className="custom-card">
+                <Col lg={9}>
+                    <div className="custom-card">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                User Roles
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    User Roles
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
+
                         <CardBody>
-                            <Form>
-                                <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Row>
+                                <Col lg={6}>
                                     {userPermissionList?.map((item) => {
                                         return (
                                             <>
-                                                <div className="user-role-style" style={{ marginTop: '15px' }}>
-                                                    <h6 className="card-title admin-text-style">
+                                                <div>
+                                                    <Typography.Subheader size={Typography.Sizes.md}>
                                                         {item?.permissions?.[0]?.permission_name}
-                                                    </h6>
+                                                    </Typography.Subheader>
+                                                    <Brick sizeInRem={1} />
                                                 </div>
-                                                <Input
-                                                    type="select"
-                                                    name="select"
-                                                    id="exampleSelect"
-                                                    className="font-weight-bold user-role-textbox">
-                                                    <option selected>All Buildings</option>
-                                                    {item?.building_access?.map((item) => {
-                                                        return (
-                                                            <option value={item?.building_id}>
-                                                                {item?.building_name}
-                                                            </option>
-                                                        );
-                                                    })}
-                                                </Input>
+                                                <div className="row d-flex align-items-center">
+                                                    <div className="col">
+                                                        <Select
+                                                            id="endUseSelect"
+                                                            placeholder="Select Buildings"
+                                                            name="select"
+                                                            options={[{ value: '1', label: 'All Building' }]}
+                                                            isSearchable={true}
+                                                            defaultValue={selectedBuilding}
+                                                            onChange={(e) => {
+                                                                setIsEditing(true);
+                                                                setSelctedBuilding(e.value);
+                                                            }}
+                                                            className="w-100"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </>
                                         );
                                     })}
-                                </FormGroup>
-                            </Form>
+
+                                    <Brick sizeInRem={1} />
+                                </Col>
+                            </Row>
                         </CardBody>
-                    </Card>
+                    </div>
                 </Col>
             </Row>
+
+            <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={8}>
-                    <Card className="custom-card">
+                <Col lg={9}>
+                    <div className="custom-card">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                Danger Zone
-                            </h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Danger Zone
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
+
                         <CardBody>
-                            <Form>
-                                <FormGroup>
-                                    <button
-                                        type="button"
-                                        className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                        <i className="uil uil-trash mr-2"></i>Remove User
-                                    </button>
-                                </FormGroup>
-                            </Form>
+                            <div>
+                                <Button
+                                    label="Remove User"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryDistructive}
+                                    // onClick={deleteBuildingHandler} -- Will be enabled once API is ready
+                                    icon={<DeleteSVG />}
+                                />
+                            </div>
                         </CardBody>
-                    </Card>
+                    </div>
                 </Col>
             </Row>
-
-            {/* <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Add Role</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Row>
-                            <Col>
-                                <Form.Group className="" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Role</Form.Label>
-                                    <Select
-                                        id="exampleSelect"
-                                        placeholder="Select Role"
-                                        name="select"
-                                        isSearchable={true}
-                                        defaultValue={'Select Role'}
-                                        options={locationDataNow}
-                                        onChange={(e) => {
-                                            setPermissionValue(e.value);
-                                        }}
-                                        className="font-weight-bold"
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer style={{ display: 'flex', width: '100%', flexWrap: 'nowrap' }}>
-                    <Button variant="light" style={{ width: '50%' }} onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button style={{ width: '50%' }} variant="primary" onClick={assignUserRoleFunc}>
-                        Save
-                    </Button>
-                </Modal.Footer>
-            </Modal> */}
         </React.Fragment>
     );
 };
