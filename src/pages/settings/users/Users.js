@@ -17,8 +17,10 @@ import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import moment from 'moment';
+import colorPalette from '../../../assets/scss/_colors.scss';
+import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -209,7 +211,7 @@ const Users = () => {
             <>
                 {userPermission?.user_role === 'admin' ||
                 userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                    <Link to={`/settings/user-profile/single/${row?._id}/${row?.is_active}`}>
+                    <Link to={`/settings/user-profile/single/${row?._id}/${row?.is_active}/${row?.is_verified}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 ) : (
@@ -231,12 +233,39 @@ const Users = () => {
 
     const renderStatus = (row) => {
         if (row?.is_verified === false) {
-            return <StatusBadge text="Pending" type={StatusBadge.Type.warning} />;
+            console.log('verified false', row?.is_verified);
+            return (
+                <Typography.Subheader
+                    size={Typography.Sizes.sm}
+                    className="d-flex pending-container justify-content-center"
+                    style={{ color: colorPalette.warning700 }}>
+                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
+                    Pending
+                </Typography.Subheader>
+            );
         } else {
             if (row?.is_active === false) {
-                return <StatusBadge text="Inactive" type={StatusBadge.Type.error} />;
+                console.log('verified active false', row?.is_active);
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="d-flex inactive-container justify-content-center"
+                        style={{ color: colorPalette.primaryGray800 }}>
+                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
+                        Inactive
+                    </Typography.Subheader>
+                );
             } else if (row?.is_active === true) {
-                return <StatusBadge text="Active" type={StatusBadge.Type.success} />;
+                console.log('verified active true', row?.is_active);
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="d-flex active-container justify-content-center"
+                        style={{ color: colorPalette.success700 }}>
+                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
+                        Active
+                    </Typography.Subheader>
+                );
             }
         }
     };
@@ -336,7 +365,7 @@ const Users = () => {
                     <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
                 </Modal.Header>
                 <Modal.Body className="add-user-model">
-                    <Form>
+                    <Form autoComplete="off">
                         <Row>
                             <Col md={6}>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -344,12 +373,12 @@ const Users = () => {
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter First Name"
-                                        className="font-weight-bold"
                                         onChange={(e) => {
                                             handleChange('first_name', e.target.value);
                                         }}
                                         value={userObj.first_name}
                                         autoFocus
+                                        required
                                     />
                                 </Form.Group>
                             </Col>
@@ -359,11 +388,11 @@ const Users = () => {
                                     <Form.Control
                                         type="text"
                                         placeholder="Enter Last Name"
-                                        className="font-weight-bold"
                                         onChange={(e) => {
                                             handleChange('last_name', e.target.value);
                                         }}
                                         value={userObj.last_name}
+                                        required
                                     />
                                 </Form.Group>
                             </Col>
@@ -374,11 +403,11 @@ const Users = () => {
                             <Form.Control
                                 type="text"
                                 placeholder="Enter Email"
-                                className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('email', e.target.value);
                                 }}
                                 value={userObj.email}
+                                required
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -387,7 +416,8 @@ const Users = () => {
                                 type="select"
                                 name="select"
                                 id="roles"
-                                className="font-weight-bold"
+                                contentEditable="false"
+                                required
                                 onChange={(e) => {
                                     handleChange('role', e.target.value);
                                 }}

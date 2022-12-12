@@ -178,7 +178,8 @@ class ForgetPassword extends Component {
 
                                             <AvForm
                                                 onValidSubmit={this.handleValidSubmit}
-                                                className="authentication-form">
+                                                className="authentication-form"
+                                                autoComplete="off">
                                                 <AvGroup className="">
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, CardBody, CardHeader } from 'reactstrap';
+import { Row, Col, CardBody, Input, CardHeader } from 'reactstrap';
 import Switch from 'react-switch';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-time-picker/dist/TimePicker.css';
@@ -9,13 +9,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
 import Brick from '../../../sharedComponents/brick';
-import {
-    BaseUrl,
-    assignUser,
-    getPermissionRole,
-    getSingleUserDetail,
-    updateSingleUserDetail,
-} from '../../../services/Network';
+import { BaseUrl, vendorPermissions, getSingleUserDetail, updateSingleUserDetail } from '../../../services/Network';
 import axios from 'axios';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../../store/globalState';
@@ -25,6 +19,9 @@ import Inputs from '../../../sharedComponents/form/input/Input';
 import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { faCircleCheck, faClockFour, faBan, faShare } from '@fortawesome/pro-thin-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import './styles.scss';
 
 const UserProfileNew = () => {
     let cookies = new Cookies();
@@ -34,7 +31,7 @@ const UserProfileNew = () => {
     const [userDetail, setUserDetail] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [loadButton, setLoadButton] = useState(false);
-    const { userId, is_active } = useParams();
+    const { userId, is_active, is_verified } = useParams();
     const [updateUserDetail, setUpdateUserDetail] = useState({
         first_name: '',
         last_name: '',
@@ -42,7 +39,10 @@ const UserProfileNew = () => {
         is_active: is_active,
     });
 
-    const [selectedBuilding, setSelctedBuilding] = useState('1');
+    const [userObj, setUserObj] = useState({
+        role: '',
+    });
+
     const [userPermissionList, setUserPermissionList] = useState();
 
     useEffect(() => {
@@ -98,6 +98,12 @@ const UserProfileNew = () => {
             });
     };
 
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, userObj);
+        obj[key] = value;
+        setUserObj(obj);
+    };
+
     useEffect(() => {
         if (userId) {
             getSingleUserDetailFunc();
@@ -114,77 +120,130 @@ const UserProfileNew = () => {
         }
     }, [userDetail]);
 
-    const [roleDataList, setRoleDataList] = useState();
+    const [rolesData, setRolesData] = useState([]);
+    const [buildingListData] = useAtom(buildingData);
 
-    const [locationDataNow, setLocationDataNow] = useState([]);
+    const getPermissionRoleFunc = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
 
-    const addLocationType = () => {
-        roleDataList.map((item) => {
-            setLocationDataNow((el) => [...el, { value: `${item?._id}`, label: `${item?.name}` }]);
-        });
+            await axios.post(`${BaseUrl}${vendorPermissions}`, {}, { headers }).then((res) => {
+                let response = res.data;
+                let arr = [];
+                response.data.map((el) => {
+                    arr.push({
+                        label: el.name,
+                        value: el.id,
+                    });
+                });
+                setRolesData(arr);
+            });
+        } catch (error) {}
     };
 
     useEffect(() => {
-        if (roleDataList) {
-            addLocationType();
+        getPermissionRoleFunc();
+    }, [buildingListData]);
+
+    const renderStatus = () => {
+        if (is_verified === false) {
+            console.log('verified false', is_verified);
+            return (
+                <Typography.Subheader
+                    size={Typography.Sizes.md}
+                    className="d-flex pending-container justify-content-center"
+                    style={{ color: colorPalette.warning700 }}>
+                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
+                    Pending
+                </Typography.Subheader>
+            );
+        } else {
+            if (!updateUserDetail?.is_active === true) {
+                console.log('verified active true', is_active);
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="d-flex active-container justify-content-center"
+                        style={{ color: colorPalette.success700 }}>
+                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
+                        Active
+                    </Typography.Subheader>
+                );
+            } else if (!updateUserDetail?.is_active === false) {
+                console.log('verified active false', is_active);
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="d-flex inactive-container justify-content-center"
+                        style={{ color: colorPalette.primaryGray800 }}>
+                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
+                        Inactive
+                    </Typography.Subheader>
+                );
+            }
         }
-    }, [roleDataList]);
+    };
 
-    const [buildingListData] = useAtom(buildingData);
-    const [allBuildings, setAllBuildings] = useState([]);
+    const deactivateUser = () => {
+        if (is_verified === false) {
+            return (
+                <>
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}
+                        className="d-flex deactivate-container justify-content-center"
+                        style={{ color: colorPalette.error700 }}>
+                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
+                        Deactivate User
+                    </Typography.Subheader>
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}
+                        className="d-flex activate-container justify-content-center"
+                        style={{ color: colorPalette.primaryIndigo600 }}>
+                        <FontAwesomeIcon icon={faShare} size="lg" style={{ color: colorPalette.primaryIndigo600 }} />
+                        Resend Invitation
+                    </Typography.Subheader>
+                </>
+            );
+        } else {
+            if (!updateUserDetail?.is_active === true) {
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}
+                        className="d-flex deactivate-container justify-content-center"
+                        style={{ color: colorPalette.error700 }}>
+                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
+                        Deactivate User
+                    </Typography.Subheader>
+                );
+            } else if (!updateUserDetail?.is_active === false) {
+                return (
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}
+                        className="d-flex activate-container justify-content-center"
+                        style={{ color: colorPalette.primaryIndigo600 }}>
+                        <FontAwesomeIcon
+                            icon={faCircleCheck}
+                            size="lg"
+                            style={{ color: colorPalette.primaryIndigo600 }}
+                        />
+                        Activate User
+                    </Typography.Subheader>
+                );
+            }
+        }
+    };
 
-    // Commented for Future Use
-    // const getPermissionRoleFunc = async () => {
-    //     try {
-    //         let header = {
-    //             'Content-Type': 'application/json',
-    //             accept: 'application/json',
-    //             Authorization: `Bearer ${userdata.token}`,
-    //         };
+    const userStatusHandler = () => {
+        var answer = window.confirm("'Are you sure wants o delete!!!'");
 
-    //         await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
-    //             setRoleDataList(res.data.data);
-    //             return buildingListData?.map((item) => {
-    //                 setAllBuildings((el) => [...el, item?.building_id]);
-    //             });
-    //         });
-    //     } catch (err) {}
-    // };
-
-    // useEffect(() => {
-    //     getPermissionRoleFunc();
-    // }, [buildingListData]);
-
-    const [permissionValue, setPermissionValue] = useState('');
-    const [show, setShow] = useState(false);
-
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
-    // const assignUserRoleFunc = async () => {
-    //     try {
-    //         let header = {
-    //             'Content-Type': 'application/json',
-    //             accept: 'application/json',
-    //             Authorization: `Bearer ${userdata.token}`,
-    //         };
-
-    //         // const params = userId;
-    //         await axios
-    //             .post(
-    //                 `${BaseUrl}${assignUser}?member_user_id=${userId}`,
-    //                 {
-    //                     permission_role: permissionValue,
-    //                     buildings: allBuildings,
-    //                 },
-    //                 { headers: header }
-    //             )
-    //             .then((res) => {
-    //                 getSingleUserDetailFunc();
-    //                 setShow(false);
-    //             });
-    //     } catch (err) {}
-    // };
+        if (answer) {
+            //some code
+        }
+    };
 
     return (
         <React.Fragment>
@@ -242,27 +301,11 @@ const UserProfileNew = () => {
                         <CardBody>
                             <div className="row">
                                 <div className="col">
-                                    <Typography.Subheader size={Typography.Sizes.md}>Active</Typography.Subheader>
+                                    {renderStatus()}
                                     <Brick sizeInRem={0.25} />
                                     <Typography.Body size={Typography.Sizes.sm}>
                                         Only active users can sign in
                                     </Typography.Body>
-                                </div>
-                                <div className="col d-flex align-items-center">
-                                    <Switch
-                                        onChange={() => {
-                                            setIsEditing(true);
-                                            setUpdateUserDetail({
-                                                ...updateUserDetail,
-                                                is_active: !updateUserDetail?.is_active,
-                                            });
-                                        }}
-                                        checked={!updateUserDetail?.is_active}
-                                        onColor={colorPalette.datavizBlue600}
-                                        uncheckedIcon={false}
-                                        checkedIcon={false}
-                                        className="react-switch"
-                                    />
                                 </div>
                             </div>
 
@@ -369,22 +412,28 @@ const UserProfileNew = () => {
                                                     <Typography.Subheader size={Typography.Sizes.md}>
                                                         {item?.permissions?.[0]?.permission_name}
                                                     </Typography.Subheader>
+
                                                     <Brick sizeInRem={1} />
                                                 </div>
                                                 <div className="row d-flex align-items-center">
                                                     <div className="col">
                                                         <Select
-                                                            id="endUseSelect"
-                                                            placeholder="Select Buildings"
-                                                            name="select"
-                                                            options={[{ value: '1', label: 'All Building' }]}
-                                                            isSearchable={true}
-                                                            defaultValue={selectedBuilding}
+                                                            id="roles"
+                                                            placeholder="Select Role"
+                                                            name="select Roles"
+                                                            className="font-weight-bold"
+                                                            style={{ color: 'black' }}
+                                                            options={rolesData}
+                                                            isSearchable={false}
+                                                            defaultValue={
+                                                                userObj.role == ''
+                                                                    ? item?.permissions?.[0]?.permission_id
+                                                                    : userObj.role
+                                                            }
                                                             onChange={(e) => {
                                                                 setIsEditing(true);
-                                                                setSelctedBuilding(e.value);
+                                                                handleChange('role', e.value);
                                                             }}
-                                                            className="w-100"
                                                         />
                                                     </div>
                                                 </div>
@@ -416,15 +465,7 @@ const UserProfileNew = () => {
                         </CardHeader>
 
                         <CardBody>
-                            <div>
-                                <Button
-                                    label="Remove User"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryDistructive}
-                                    // onClick={deleteBuildingHandler} -- Will be enabled once API is ready
-                                    icon={<DeleteSVG />}
-                                />
-                            </div>
+                            <div>{deactivateUser()}</div>
                         </CardBody>
                     </div>
                 </Col>

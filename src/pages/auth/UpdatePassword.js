@@ -151,7 +151,8 @@ class Confirm extends Component {
 
                                             <AvForm
                                                 onValidSubmit={this.handleValidSubmit}
-                                                className="authentication-form">
+                                                className="authentication-form"
+                                                autoComplete="off">
                                                 <AvGroup className="">
                                                     <Typography.Header className="text-mute mb-2">
                                                         New Password
