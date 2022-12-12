@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
-import 'react-datepicker/dist/react-datepicker.css';
-import 'react-time-picker/dist/TimePicker.css';
+import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -13,6 +11,11 @@ import './style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { accountId } from '../../store/globalState';
+import Typography from '../../sharedComponents/typography';
+import Button from '../../sharedComponents/button/Button';
+import Inputs from '../../sharedComponents/form/input/Input';
+import colorPalette from '../../assets/scss/_colors.scss';
+import Brick from '../../sharedComponents/brick';
 
 const AccountSettings = () => {
     const cookies = new Cookies();
@@ -93,94 +96,90 @@ const AccountSettings = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container d-flex justify-content-between">
-                    <span className="heading-style">General Account Settings</span>
-                    {userPermission?.user_role === 'admin' ||
-                    userPermission?.permissions?.permissions?.account_general_permission?.edit ? (
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between">
                         <div>
-                            <button
-                                onClick={() => {
-                                    setAccoutnIdData(localStorage.getItem('accountName'));
-                                    setInputValidation(false);
-                                }}
-                                type="button"
-                                className="btn btn-default buildings-cancel-style"
-                                disabled={!inputValidation}>
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={(e) => {
-                                    updateAccountName();
-                                }}
-                                type="button"
-                                className="btn btn-primary buildings-save-style ml-3"
-                                disabled={!inputValidation}>
-                                Save
-                            </button>
+                            <Typography.Header size={Typography.Sizes.lg}>General Account Settings</Typography.Header>
                         </div>
-                    ) : (
-                        ''
-                    )}
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.account_general_permission?.edit ? (
+                            <div>
+                                <div className="d-flex">
+                                    <Button
+                                        label="Cancel"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={() => {
+                                            setAccoutnIdData(localStorage.getItem('accountName'));
+                                            setInputValidation(false);
+                                        }}
+                                        disabled={!inputValidation}
+                                    />
+                                    <Button
+                                        label={'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={(e) => {
+                                            updateAccountName();
+                                        }}
+                                        className="ml-2"
+                                        disabled={!inputValidation}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            ''
+                        )}
+                    </div>
                 </Col>
             </Row>
 
-            <Row className="mt-4">
-                <Col lg={8}>
-                    <Card className="custom-card">
-                        <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                Account Details
-                            </h5>
-                        </CardHeader>
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-3">
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-title">Account Name</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                A human-friendly display name for this account
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
+            <Brick sizeInRem={2} />
 
-                                    <FormGroup>
-                                        <div className="singleline-box-style">
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_general_permission
-                                                ?.edit ? (
-                                                <Input
-                                                    type="text"
-                                                    name="buildingName"
-                                                    id="buildingName"
-                                                    placeholder="Enter Account Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    value={accoutnIdData}
-                                                    onChange={(e) => {
-                                                        setAccoutnIdData(e.target.value);
-                                                        setInputValidation(true);
-                                                    }}
-                                                />
-                                            ) : (
-                                                <Input
-                                                    type="text"
-                                                    name="buildingName"
-                                                    id="buildingName"
-                                                    placeholder="Enter Account Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    style={{ cursor: 'not-allowed' }}
-                                                    value={accoutnIdData}
-                                                    disabled={true}
-                                                />
-                                            )}
-                                        </div>
-                                    </FormGroup>
+            <Row>
+                <Col lg={9}>
+                    <div className="custom-card">
+                        <CardHeader>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Account Details
+                                </Typography.Subheader>
+                            </div>
+                        </CardHeader>
+
+                        <CardBody>
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>Account Name</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm}>
+                                        A human-friendly display name for this account
+                                    </Typography.Body>
                                 </div>
-                            </Form>
+                                <div className="col d-flex align-items-center">
+                                    <Inputs
+                                        type="text"
+                                        placeholder="Enter Account Name"
+                                        onChange={(e) => {
+                                            setAccoutnIdData(e.target.value);
+                                            setInputValidation(true);
+                                        }}
+                                        className="w-100"
+                                        value={accoutnIdData}
+                                        style={
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_general_permission?.edit
+                                                ? {}
+                                                : { cursor: 'not-allowed' }
+                                        }
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
-                    </Card>
+                    </div>
                 </Col>
             </Row>
         </React.Fragment>
