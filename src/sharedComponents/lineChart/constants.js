@@ -57,6 +57,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             borderWidth: 0,
             className: 'legend-text',
         },
+
         tooltip: {
             headerFormat: `<div class="chart-tooltip">${renderComponents(
                 <>
@@ -120,7 +121,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
                         lineWidth: 1,
                     },
                 },
-                threshold: null,
+                turboThreshold: 0,
             },
         },
         credits: {
@@ -152,7 +153,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
         },
 
         time: {
-            useUTC: false,
+            useUTC: true,
         },
         series: preparedData(data),
         exporting: {

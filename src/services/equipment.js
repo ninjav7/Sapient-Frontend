@@ -18,7 +18,7 @@ export function getEqupmentDataRequest(
     search,
     equipmentTypeFilterString,
     endUseFilterString,
-    macTypeFilterString,
+    macAddressFilterString,
     locationTypeFilterString,
     floorTypeFilterString,
     spaceTypeFilterString,
@@ -27,7 +27,8 @@ export function getEqupmentDataRequest(
     getParams,
     withPagination
 ) {
-    let params = `?building_id=${bldgId}&equipment_search=${search}`;
+    const searchData = encodeURIComponent(search);
+    let params = `?building_id=${bldgId}&equipment_search=${searchData}`;
     if (withPagination) {
         params += `&page_size=${pageSize}&page_no=${pageNo}`;
     }
@@ -38,10 +39,12 @@ export function getEqupmentDataRequest(
         floor_id: floorTypeFilterString,
         space_id: spaceTypeFilterString,
         space_type_id: spaceTypeTypeFilterString,
-        mac_address: macTypeFilterString,
     };
     if (equipmentTypeFilterString.length) {
         filteredData['equipment_types'] = equipmentTypeFilterString;
+    }
+    if (macAddressFilterString.length) {
+        filteredData['device_id'] = macAddressFilterString;
     }
     if (tagsFilterString.length) {
         filteredData['tags'] = tagsFilterString;
@@ -133,13 +136,15 @@ export function addNewEquipment(bldgId, createEqipmentData) {
  * @returns {Promise<AxiosResponse<any>>}
  */
 export function getFiltersForEquipmentRequest(args) {
+    const macAddressArr = args?.deviceMacAddress;
+    const macAddressQuery = macAddressArr ? macAddressArr.join('+') : null;
     return axiosInstance
         .get(`${getFiltersForEquipment}`, {
             params: _.pickBy(
                 {
                     query_collection: 'equipment',
                     building_id: args.bldgId,
-                    mac_address: args.macTypeFilterString,
+                    mac_address: macAddressQuery,
                     equipment_types: args.equipmentTypeFilterString,
                     end_use: args.endUseFilterString,
                     floor_id: args.floorTypeFilterString,
