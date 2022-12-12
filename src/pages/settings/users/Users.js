@@ -18,6 +18,7 @@ import Typography from '../../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
+import moment from 'moment';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -208,7 +209,7 @@ const Users = () => {
             <>
                 {userPermission?.user_role === 'admin' ||
                 userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                    <Link to={`/settings/user-profile/single/${row?._id}`}>
+                    <Link to={`/settings/user-profile/single/${row?._id}/${row?.is_active}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 ) : (
@@ -244,17 +245,20 @@ const Users = () => {
         return <Typography.Body size={Typography.Sizes.sm}>{row?.email === '' ? '-' : row?.email}</Typography.Body>;
     };
 
-    // function isValidDate(d) {
-    //     return d instanceof Date && !isNaN(d);
-    // }
+    function isValidDate(d) {
+        return d instanceof Date && !isNaN(d);
+    }
 
-    // const renderLastActive = (row) => {
-    //     return (
-    //         <Typography.Body size={Typography.Sizes.sm}>
-    //             {isValidate(row?.last_login) ? new Date(row?.last_login) : row?.last_login}
-    //         </Typography.Body>
-    //     );
-    // };
+    const renderLastActive = (row) => {
+        let dt = '';
+        if (isValidDate(new Date(row?.last_login))) {
+            let last_dt = new Date(row?.last_login);
+            dt = moment(last_dt).format(`MMM D 'YY @ hh:mm A`);
+        } else {
+            dt = row?.last_login;
+        }
+        return <Typography.Body size={Typography.Sizes.sm}>{dt}</Typography.Body>;
+    };
 
     return (
         <React.Fragment>
@@ -317,7 +321,7 @@ const Users = () => {
                             {
                                 name: 'Last Active',
                                 accessor: 'last_active',
-                                // callbackValue: renderLastActive,
+                                callbackValue: renderLastActive,
                             },
                         ]}
                         totalCount={(() => {
