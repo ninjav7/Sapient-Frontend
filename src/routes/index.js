@@ -22,7 +22,7 @@ import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
 import Users from '../pages/settings/users/Users';
-import UserProfileNew from '../pages/settings/users/UserProfileNew';
+import UserProfile from '../pages/settings/users/UserProfile';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
 import SingleRoleNew from '../pages/settings/SingleRoleNew';
@@ -545,7 +545,7 @@ const settingsRoutes = {
         {
             path: '/settings/user-profile/single/:userId/:is_active/:is_verified',
             name: 'Users',
-            component: UserProfileNew,
+            component: UserProfile,
             route: PrivateRoute,
             visibility: false,
             parent: 'account',

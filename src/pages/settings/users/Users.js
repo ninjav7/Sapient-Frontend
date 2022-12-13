@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Input } from 'reactstrap';
+import { Row, Col, Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, addMemberUser, getMemberUser, vendorPermissions } from '../../../services/Network';
+import { addMemberUsers, getMemberUserList, updateVendorPermissions } from './service';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -15,11 +16,14 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
+import Button from '../../../sharedComponents/button/Button';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import moment from 'moment';
+// import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const SkeletonLoading = () => (
@@ -233,7 +237,6 @@ const Users = () => {
 
     const renderStatus = (row) => {
         if (row?.is_verified === false) {
-            console.log('verified false', row?.is_verified);
             return (
                 <Typography.Subheader
                     size={Typography.Sizes.sm}
@@ -245,7 +248,6 @@ const Users = () => {
             );
         } else {
             if (row?.is_active === false) {
-                console.log('verified active false', row?.is_active);
                 return (
                     <Typography.Subheader
                         size={Typography.Sizes.sm}
@@ -256,7 +258,6 @@ const Users = () => {
                     </Typography.Subheader>
                 );
             } else if (row?.is_active === true) {
-                console.log('verified active true', row?.is_active);
                 return (
                     <Typography.Subheader
                         size={Typography.Sizes.sm}
@@ -299,14 +300,22 @@ const Users = () => {
                         <div className="mr-2">
                             {userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_user_permission?.create ? (
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
+                                <Button
+                                    label="Add User"
+                                    size={Button.Sizes.lg}
+                                    type={Button.Type.primary}
+                                    icon={
+                                        <FontAwesomeIcon
+                                            icon={faPlus}
+                                            size="lg"
+                                            style={{ color: colorPalette.baseWhite }}
+                                        />
+                                    }
+                                    iconAlignment={Button.IconAlignment.left}
                                     onClick={() => {
                                         handleShow();
-                                    }}>
-                                    <i className="uil uil-plus mr-1"></i>Add User
-                                </button>
+                                    }}
+                                />
                             ) : (
                                 <></>
                             )}
@@ -431,23 +440,27 @@ const Users = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                    <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
                         <Button
-                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            label="Cancle"
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryGrey}
+                            className="d-flex align-items-center button-container"
                             onClick={() => {
                                 handleClose();
                                 setFormValidation(false);
-                            }}>
-                            Cancel
-                        </Button>
+                            }}
+                        />
                         <Button
-                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
-                            variant="primary"
+                            label={isProcessing ? 'Adding User...' : 'Add & Invite User'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.primary}
+                            className="d-flex align-items-center button-container"
                             onClick={() => {
+                                setIsProcessing(true);
                                 saveUserData();
-                            }}>
-                            {isProcessing ? 'Adding User...' : 'Add User'}
-                        </Button>
+                            }}
+                        />
                     </div>
                 </Modal.Footer>
             </Modal>
