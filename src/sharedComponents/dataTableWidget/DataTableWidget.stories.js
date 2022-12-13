@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import DataTableWidget from './DataTableWidget';
 import '../assets/scss/stories.scss';
 import { FILTER_TYPES } from './constants';
+import { Button } from '../button';
 
 export default {
     title: 'Widgets/DataTableWidget',
@@ -10,6 +11,7 @@ export default {
 
 export const Default = (props) => {
     const [searchResultRows, setSearchResultRows] = useState([]);
+    const [filtersValues, setFiltersValues] = useState({});
 
     const handleSearchChange = (query) => {
         if (!query) {
@@ -21,7 +23,27 @@ export const Default = (props) => {
         );
     };
 
-    return <DataTableWidget {...props} onSearch={handleSearchChange} searchResultRows={searchResultRows} />;
+    const resetFilters = () => {
+        console.log(1);
+        setFiltersValues({
+            selectedFilters: [],
+            selectedFiltersValues: {},
+            withHandlers: true,
+        });
+    };
+
+    return (
+        <>
+            <DataTableWidget
+                {...props}
+                filters={filtersValues}
+                onSearch={handleSearchChange}
+                searchResultRows={searchResultRows}
+            />
+            <hr />
+            <Button type={Button.Type.primary} label={'Reset Filters'} onClick={resetFilters} />
+        </>
+    );
 };
 
 Default.args = {
@@ -73,7 +95,8 @@ Default.args = {
             filterOptions: [20, 100],
             componentProps: {
                 prefix: '%',
-
+                min: 0,
+                max: 120,
                 // We need specify callback if we want use Trends Filter Buttons.
                 withTrendsFilter: true,
                 handleButtonClick: (...args) => console.log(args),
