@@ -67,6 +67,7 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, fetchBu
                         handleChange('building_name', e.target.value.trim());
                     }}
                     error={null}
+                    labelSize={Typography.Sizes.md}
                 />
 
                 <Brick sizeInRem={1.5} />
