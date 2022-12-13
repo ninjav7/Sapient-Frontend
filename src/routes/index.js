@@ -20,7 +20,7 @@ import IndividualPassiveDevice from '../pages/settings/passive-devices/Individua
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
-import Buildings from '../pages/settings/Buildings';
+import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/Users';
 import UserProfile from '../pages/settings/UserProfile';
 import UserProfileNew from '../pages/settings/UserProfileNew';
