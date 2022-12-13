@@ -436,7 +436,13 @@ const EquipChartModal = ({
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    const data = res.data.map((el) => {
+                        return {
+                            label: el.location_name,
+                            value: el.location_id,
+                        };
+                    });
+                    setLocationData(data);
                 });
             } catch (error) {}
         };
@@ -983,26 +989,14 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Location
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold"
+                                                    <Select
+                                                        defaultValue={location}
+                                                        options={locationData}
                                                         onChange={(e) => {
-                                                            handleChange('location_id', e.target.value);
+                                                            handleChange('space_id', e.value);
                                                         }}
-                                                        value={location}>
-                                                        <option value="" selected>
-                                                            Select Location
-                                                        </option>
-                                                        {locationData?.map((record) => {
-                                                            return (
-                                                                <option value={record?.location_id}>
-                                                                    {record?.location_name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                        placeholder="Select Location"
+                                                    />
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Light}
