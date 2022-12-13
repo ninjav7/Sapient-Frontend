@@ -12,16 +12,18 @@ export default {
 export const Default = (props) => <RangeSlider {...props} />;
 
 export const WithFilters = (props) => (
-    <RangeSlider
-        {...props}
-        buttonGroup={[{ label: 'All' }, { icon: <TrendDownSVG /> }, { icon: <TrendUpSVG /> }]}
-        withTrendsFilter
-    />
+    <>
+        <RangeSlider
+            {...props}
+            buttonGroup={[{ label: 'All' }, { icon: <TrendDownSVG /> }, { icon: <TrendUpSVG /> }]}
+            withTrendsFilter
+        />
+    </>
 );
 
 Default.args = {
     step: 1,
-    min: 0,
+    min: -100,
     range: [0, 1000],
     max: 1000,
     prefix: '%',
