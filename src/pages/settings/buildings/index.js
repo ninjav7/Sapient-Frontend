@@ -16,9 +16,10 @@ import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import CreateBuilding from './CreateBuilding';
 import { formatConsumptionValue } from '../../../helpers/helpers';
-import { fetchBuildingList } from './services';
+import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -56,6 +57,19 @@ const Buildings = () => {
 
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [buildingsData, setBuildingsData] = useState([]);
+
+    const [buildingTypeList, setBuildingTypeList] = useState([]);
+    const [selectedBuildingType, setSelectedBuildingType] = useState([]);
+
+    const [filterOptions, setFilterOptions] = useState([]);
+
+    const [minVal, setMinVal] = useState(0);
+    const [maxVal, setMaxVal] = useState(0);
+
+    const [customMinMax, setCustomMinMax] = useState('');
+
+    const [minSqftVal, setMinSqftVal] = useState(0);
+    const [maxSqftVal, setMaxSqftVal] = useState(0);
 
     const [internalRoute, setInternalRoute] = useState([
         '/settings/general',
@@ -227,6 +241,38 @@ const Buildings = () => {
         }
     };
 
+    const getFilters = async () => {
+        const responseData = await getFiltersForBuildingsRequest();
+        const filterData = responseData[0];
+
+        let building_type = [];
+
+        filterData.building_type.forEach((filterItem) => {
+            let obj = {
+                value: filterItem,
+                label: filterItem,
+            };
+            building_type.push(obj);
+        });
+
+        setBuildingTypeList(building_type);
+        setMinSqftVal(filterData?.building_size_min);
+        setMaxSqftVal(filterData?.building_size_max);
+    };
+
+    const handleDownloadCsv = async () => {
+        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+        const search = '';
+
+        await fetchBuildingList(search, sort_by, ordered_by)
+            .then((res) => {
+                const responseData = res.data;
+                download('Buildings_List', getBuildingsTableCSVExport(responseData, headerProps));
+            })
+            .catch((error) => {});
+    };
+
     const headerProps = [
         {
             name: 'Building Name',
@@ -254,22 +300,90 @@ const Buildings = () => {
         },
     ];
 
-    const handleDownloadCsv = async () => {
-        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
-        const search = '';
+    useEffect(() => {
+        if (selectedBuildingType.length === 0) {
+            return;
+        }
 
-        await fetchBuildingList(search, sort_by, ordered_by)
-            .then((res) => {
-                const responseData = res.data;
-                download('Buildings_List', getBuildingsTableCSVExport(responseData, headerProps));
-            })
-            .catch((error) => {});
-    };
+        const fetchBuildingListByFilter = async (building_type) => {
+            // let buildingTypeSelected = building_type.join('%2b');
+            let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
+            setIsDataFetching(true);
+
+            const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+            const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+
+            await fetchBuildingList(search, sort_by, ordered_by, buildingTypeSelected)
+                .then((res) => {
+                    const data = res.data;
+                    setBuildingsData(data);
+                    setIsDataFetching(false);
+                })
+                .catch(() => {
+                    setIsDataFetching(false);
+                });
+        };
+
+        fetchBuildingListByFilter(selectedBuildingType);
+    }, [selectedBuildingType]);
+
+    useEffect(() => {
+        if (minSqftVal !== maxSqftVal && maxSqftVal !== 0) {
+            const filterOptionsFetched = [
+                {
+                    label: 'Building Type',
+                    value: 'building_type',
+                    placeholder: 'All Building Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: buildingTypeList,
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let buildingType = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                buildingType.push(opt[i].value);
+                            }
+                            setSelectedBuildingType(buildingType);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedBuildingType([]);
+                    },
+                },
+                {
+                    label: 'Square Footage',
+                    value: 'square_footage',
+                    placeholder: 'All Square Footage',
+                    filterType: FILTER_TYPES.RANGE_SELECTOR,
+                    filterOptions: [minSqftVal, maxSqftVal],
+                    componentProps: {
+                        prefix: ' sq.ft.',
+                        title: 'Square Footage',
+                        min: minSqftVal,
+                        max: maxSqftVal,
+                        range: [minSqftVal, maxSqftVal],
+                        withTrendsFilter: false,
+                    },
+                    onClose: function onClose(options) {
+                        setMinSqftVal(options[0]);
+                        setMaxSqftVal(options[1]);
+                        setCustomMinMax(options[0] + options[1]);
+                    },
+                    onDelete: () => {
+                        setMinSqftVal(minVal);
+                        setMaxSqftVal(maxVal);
+                        setCustomMinMax('');
+                    },
+                },
+            ];
+            setFilterOptions(filterOptionsFetched);
+        }
+    }, [buildingTypeList, minSqftVal, maxSqftVal, minVal, maxVal]);
 
     useEffect(() => {
         fetchGeneralBuildingData();
-    }, [search]);
+        getFilters();
+    }, [search, sortBy]);
 
     useEffect(() => {
         fetchUserPermission();
@@ -292,8 +406,16 @@ const Buildings = () => {
             });
         };
         updateBreadcrumbStore();
-        fetchGeneralBuildingData();
+        // fetchGeneralBuildingData();
     }, []);
+
+    useEffect(() => {
+        console.log('SSR minSqftVal [Jo backend se ayi hai] => ', minSqftVal);
+        console.log('SSR minSqftVal [Jo backend se ayi hai] => ', maxSqftVal);
+        console.log('SSR minVal [Jo user ne change kiya hai] => ', minVal);
+        console.log('SSR maxVal [Jo user ne change kiya hai] => ', maxVal);
+        console.log('SSR customMinMax [Jo backend ko bhejna hai] => ', customMinMax);
+    });
 
     return (
         <React.Fragment>
@@ -337,6 +459,7 @@ const Buildings = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
+                        filterOptions={filterOptions}
                         headers={headerProps}
                         totalCount={(() => {
                             return 0;

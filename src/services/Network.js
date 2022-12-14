@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-beta.azurewebsites.net';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
@@ -26,6 +26,7 @@ export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
+export const getFiltersForBuildings = '/api/config/general/general-buildings-filter';
 export const singleBuildingDetail = '/api/config/general/building-details';
 export const generalBldgDelete = '/api/config/general/delete_building';
 
