@@ -66,7 +66,7 @@ const Buildings = () => {
     const [minVal, setMinVal] = useState(0);
     const [maxVal, setMaxVal] = useState(0);
 
-    const [customMinMax, setCustomMinMax] = useState('');
+    const [sqftAPIFlag, setSqftAPIFlag] = useState('');
 
     const [minSqftVal, setMinSqftVal] = useState(0);
     const [maxSqftVal, setMaxSqftVal] = useState(0);
@@ -256,6 +256,8 @@ const Buildings = () => {
         });
 
         setBuildingTypeList(building_type);
+        setMinVal(filterData?.building_size_min);
+        setMaxVal(filterData?.building_size_max);
         setMinSqftVal(filterData?.building_size_min);
         setMaxSqftVal(filterData?.building_size_max);
     };
@@ -301,18 +303,18 @@ const Buildings = () => {
     ];
 
     useEffect(() => {
-        if (selectedBuildingType.length === 0) {
+        if (selectedBuildingType.length === 0 && sqftAPIFlag === '') {
             return;
         }
 
-        const fetchBuildingListByFilter = async (building_type) => {
-            let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
+        const fetchBuildingListByFilter = async (building_type, min_val, max_val) => {
             setIsDataFetching(true);
+            let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
 
             const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
             const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-            await fetchBuildingList(search, sort_by, ordered_by, buildingTypeSelected)
+            await fetchBuildingList(search, sort_by, ordered_by, buildingTypeSelected, min_val, max_val)
                 .then((res) => {
                     const data = res.data;
                     setBuildingsData(data);
@@ -323,8 +325,8 @@ const Buildings = () => {
                 });
         };
 
-        fetchBuildingListByFilter(selectedBuildingType);
-    }, [selectedBuildingType]);
+        fetchBuildingListByFilter(selectedBuildingType, minSqftVal, maxSqftVal);
+    }, [selectedBuildingType, sqftAPIFlag, sortBy, search]);
 
     useEffect(() => {
         if (minSqftVal !== maxSqftVal && maxSqftVal !== 0) {
@@ -361,20 +363,20 @@ const Buildings = () => {
                     componentProps: {
                         prefix: ' sq.ft.',
                         title: 'Square Footage',
-                        min: minSqftVal,
-                        max: maxSqftVal,
+                        min: minVal,
+                        max: maxVal,
                         range: [minSqftVal, maxSqftVal],
                         withTrendsFilter: false,
                     },
                     onClose: function onClose(options) {
                         setMinSqftVal(options[0]);
                         setMaxSqftVal(options[1]);
-                        setCustomMinMax(options[0] + options[1]);
+                        setSqftAPIFlag(options[0] + options[1]);
                     },
                     onDelete: () => {
                         setMinSqftVal(minVal);
                         setMaxSqftVal(maxVal);
-                        setCustomMinMax('');
+                        setSqftAPIFlag(0);
                     },
                 },
             ];
@@ -383,9 +385,12 @@ const Buildings = () => {
     }, [buildingTypeList, minSqftVal, maxSqftVal, minVal, maxVal]);
 
     useEffect(() => {
-        fetchGeneralBuildingData();
         getFilters();
-    }, [search, sortBy]);
+    }, [search]);
+
+    useEffect(() => {
+        fetchGeneralBuildingData();
+    }, []);
 
     useEffect(() => {
         fetchUserPermission();
