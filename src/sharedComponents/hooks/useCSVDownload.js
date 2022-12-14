@@ -1,7 +1,7 @@
 const useCSVDownload = () => {
     const download = (name, data) => {
         let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent(data);
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data);
         hiddenElement.target = '_blank';
         hiddenElement.download = name;
         hiddenElement.click();
