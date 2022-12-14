@@ -408,7 +408,6 @@ const Buildings = () => {
             });
         };
         updateBreadcrumbStore();
-        // fetchGeneralBuildingData();
     }, []);
 
     return (
@@ -439,7 +438,7 @@ const Buildings = () => {
                 </Col>
             </Row>
 
-            <Brick sizeInRem={1} />
+            <Brick sizeInRem={1.5} />
 
             <Row>
                 <Col lg={12}>
