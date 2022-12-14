@@ -26,7 +26,10 @@ import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
+import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import '../../helpers/Linq';
+import { CSVLink } from 'react-csv';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -95,17 +98,15 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
-
+    let top = '';
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const [seriesLineData, setSeriesLineData] = useState([]);
     const [filterData, setFilterData] = useState({});
     const [topConsumption, setTopConsumption] = useState(0);
     const [bottomConsumption, setBottomConsumption] = useState(0);
@@ -131,6 +132,7 @@ const ExploreByEquipment = () => {
     const [bottomVal, setBottomVal] = useState(0);
     const [currentButtonId, setCurrentButtonId] = useState(0);
     const [isopened, setIsOpened] = useState(false);
+    const [filtersValues, setFiltersValues] = useState({});
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
@@ -145,6 +147,11 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         if (entryPoint !== 'entered') {
+            setFiltersValues({
+                selectedFilters: [],
+            });
+
+            setSeriesData([]);
             setConAPIFlag('');
             setPerAPIFlag('');
             setSelectedIds([]);
@@ -222,9 +229,9 @@ const ExploreByEquipment = () => {
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
                         setSeriesData([]);
-                        setSeriesLineData([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    top = responseData.data[0].consumption.now;
                 }
                 setExploreTableData(responseData.data);
                 setAllEquipmentList(responseData.data);
@@ -273,13 +280,14 @@ const ExploreByEquipment = () => {
     };
 
     const renderConsumption = (row) => {
+        console.log(top);
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
                     {Math.round(row.consumption.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={Math.round((row.consumption.now / topEnergyConsumption) * 100)} />
+                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottomConsumption, top / 1000)} />
             </>
         );
     };
@@ -324,7 +332,6 @@ const ExploreByEquipment = () => {
                 return item.id !== equip?.equipment_id;
             });
             setSeriesData(arr1);
-            setSeriesLineData(arr1);
             setEquipIdNow('');
         }
 
@@ -345,7 +352,6 @@ const ExploreByEquipment = () => {
     }, [
         startDate,
         endDate,
-        bldgId,
         search,
         sortBy,
         pageSize,
@@ -369,7 +375,6 @@ const ExploreByEquipment = () => {
     }, [
         startDate,
         endDate,
-        bldgId,
         search,
         sortBy,
         pageSize,
@@ -1110,7 +1115,6 @@ const ExploreByEquipment = () => {
             return item.id !== removeEquipmentId;
         });
         setSeriesData(arr1);
-        setSeriesLineData(arr1);
     }, [removeEquipmentId]);
 
     const dataarr = [];
@@ -1178,7 +1182,6 @@ const ExploreByEquipment = () => {
         }
         if (allEquipmentData.length === exploreTableData.length) {
             setSeriesData(allEquipmentData);
-            setSeriesLineData(allEquipmentData);
         }
     }, [allEquipmentData]);
 
@@ -1213,6 +1216,36 @@ const ExploreByEquipment = () => {
             })
             .catch((error) => {});
     };
+
+    // const getCSVLinkData = () => {
+    //     let sData = [];
+    //     exploreTableData.map(function (obj) {
+    //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
+    //         sData.push([
+    //             obj.equipment_name,
+    //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
+    //             change,
+    //             obj.location,
+    //             obj.location_type,
+    //             obj.equipments_type,
+    //             obj.end_user,
+    //         ]);
+    //     });
+    //     let streamData = exploreTableData.length > 0 ? sData : [];
+
+    //     return [
+    //         [
+    //             'Name',
+    //             'Energy Consumption',
+    //             '% Change',
+    //             'Location',
+    //             'Location Type',
+    //             'Equipment Type',
+    //             'End Use Category',
+    //         ],
+    //         ...streamData,
+    //     ];
+    // };
 
     const headerProps = [
         {
@@ -1325,6 +1358,7 @@ const ExploreByEquipment = () => {
                             pageSize={pageSize}
                             currentPage={pageNo}
                             pageListSizes={pageListSizes}
+                            filters={filtersValues}
                             totalCount={(() => {
                                 if (search) {
                                     return totalItemsSearched;
