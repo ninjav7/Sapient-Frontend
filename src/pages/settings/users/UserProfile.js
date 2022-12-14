@@ -21,6 +21,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare } from '@fortawesome/pro-solid-svg-icons';
+import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 
 const UserProfile = () => {
@@ -43,6 +44,9 @@ const UserProfile = () => {
     });
 
     const [userPermissionList, setUserPermissionList] = useState();
+    const [show, setShow] = useState(false);
+    const [dangerZoneText, setDangerZoneText] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -193,7 +197,11 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700 }}>
+                        style={{ color: colorPalette.error700 }}
+                        onClick={() => {
+                            setDangerZoneText('Deactivate');
+                            setShow(true);
+                        }}>
                         <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
                         Deactivate User
                     </Typography.Subheader>
@@ -212,7 +220,11 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700 }}>
+                        style={{ color: colorPalette.error700 }}
+                        onClick={() => {
+                            setDangerZoneText('Deactivate');
+                            setShow(true);
+                        }}>
                         <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
                         Deactivate User
                     </Typography.Subheader>
@@ -222,7 +234,11 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex activate-container justify-content-center"
-                        style={{ color: colorPalette.primaryIndigo600 }}>
+                        style={{ color: colorPalette.primaryIndigo600 }}
+                        onClick={() => {
+                            setDangerZoneText('Activate');
+                            setShow(true);
+                        }}>
                         <FontAwesomeIcon
                             icon={faCircleCheck}
                             size="lg"
@@ -407,7 +423,7 @@ const UserProfile = () => {
                                             <>
                                                 <div>
                                                     <Typography.Subheader size={Typography.Sizes.md}>
-                                                        {item?.permissions?.[0]?.permission_name}
+                                                        {item?.permission_name}
                                                     </Typography.Subheader>
 
                                                     <Brick sizeInRem={1} />
@@ -423,9 +439,7 @@ const UserProfile = () => {
                                                             options={rolesData}
                                                             isSearchable={false}
                                                             defaultValue={
-                                                                userObj.role == ''
-                                                                    ? item?.permissions?.[0]?.permission_id
-                                                                    : userObj.role
+                                                                userObj.role == '' ? item?.permission_id : userObj.role
                                                             }
                                                             onChange={(e) => {
                                                                 setIsEditing(true);
@@ -467,6 +481,54 @@ const UserProfile = () => {
                     </div>
                 </Col>
             </Row>
+            <Modal
+                show={show}
+                onHide={() => {
+                    setShow(false);
+                }}
+                centered
+                dialogClassName="modal-active-deactive">
+                <Modal.Header style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+                    <Modal.Title>
+                        <Typography.Header size={Typography.Sizes.md} style={{ color: colorPalette.primary }}>
+                            {dangerZoneText} User
+                        </Typography.Header>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+                    <Typography.Subheader size={Typography.Sizes.md}>
+                        Are you sure you want to {dangerZoneText} the User?
+                    </Typography.Subheader>
+                </Modal.Body>
+                <Modal.Footer style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+                    <div className="add-equipment-footer">
+                        <Button
+                            label="Cancel"
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryGrey}
+                            onClick={() => setShow(false)}
+                            style={{ width: '8rem', justifyContent: 'center' }}
+                        />
+                        {dangerZoneText === 'Deactivate' ? (
+                            <Button
+                                label={isProcessing ? 'Deactivating...' : 'Deactivate'}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primaryDistructive}
+                                style={{ width: '8rem', justifyContent: 'center' }}
+                                onClick={() => {}}
+                            />
+                        ) : (
+                            <Button
+                                label={isProcessing ? 'Deactivating...' : 'Activate'}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}
+                                style={{ width: '8rem', justifyContent: 'center' }}
+                                onClick={() => {}}
+                            />
+                        )}
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };
