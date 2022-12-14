@@ -216,7 +216,13 @@ const NavLinks = () => {
                     let className = active === 0 ? 'active' : '';
 
                     return (
-                        <div key={index} className={`navbar-head-container mouse-pointer ${className}`}>
+                        <div
+                            key={index}
+                            className={`navbar-head-container mouse-pointer ${className}`}
+                            onClick={() => {
+                                handleSideNavChange(item.name);
+                                handlePathChange(item.path);
+                            }}>
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
                                     <div className={`font-icon-style ${className}`}>
@@ -233,14 +239,7 @@ const NavLinks = () => {
                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                     </div>
                                 )}
-                                <div
-                                    onClick={() => {
-                                        handleSideNavChange(item.name);
-                                        handlePathChange(item.path);
-                                    }}
-                                    className={`navbar-heading ${className}`}>
-                                    {item.name}
-                                </div>
+                                <div className={`navbar-heading ${className}`}>{item.name}</div>
                             </div>
                         </div>
                     );
