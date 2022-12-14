@@ -280,7 +280,6 @@ const ExploreByEquipment = () => {
     };
 
     const renderConsumption = (row) => {
-        console.log(top);
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
@@ -1217,6 +1216,7 @@ const ExploreByEquipment = () => {
             .catch((error) => {});
     };
 
+    //Planned for future CSV
     // const getCSVLinkData = () => {
     //     let sData = [];
     //     exploreTableData.map(function (obj) {
