@@ -6,6 +6,6 @@ export function saveBuildingData(payload) {
 }
 
 export function fetchBuildingList(search, sort_by, order_by) {
-    let params = `?building_search=${search}&order_by=${order_by}&sort_by=${sort_by}`;
+    let params = `?building_search=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
     return axiosInstance.get(`${generalBuilding}${params}`).then((res) => res);
 }
