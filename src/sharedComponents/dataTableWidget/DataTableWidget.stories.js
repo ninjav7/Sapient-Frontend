@@ -24,11 +24,8 @@ export const Default = (props) => {
     };
 
     const resetFilters = () => {
-        console.log(1);
         setFiltersValues({
             selectedFilters: [],
-            selectedFiltersValues: {},
-            withHandlers: true,
         });
     };
 

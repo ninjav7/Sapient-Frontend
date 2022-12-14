@@ -172,26 +172,6 @@ const DataTableWidget = (props) => {
     }, [JSON.stringify(props.filterOptions)]);
 
     useEffect(() => {
-        // if true then handlers for filters will be triggered
-        if (props.filters?.withHandlers) {
-            selectedFilters.forEach(({ filterType, onClose, onDelete, onChange, componentProps }) => {
-                if (filterType === FILTER_TYPES.MULTISELECT) {
-                    onClose && onClose([]);
-                    onDelete && onDelete([]);
-                    onChange && onChange([]);
-                }
-
-                if (filterType === FILTER_TYPES.RANGE_SELECTOR) {
-                    const { min, max } = componentProps;
-                    const defaultRange = !_.isNil(min) && !_.isNil(max) ? [min, max] : [];
-
-                    onClose && onClose(defaultRange);
-                    onDelete && onDelete(defaultRange);
-                    onChange && onChange(defaultRange);
-                }
-            });
-        }
-
         props.filters?.selectedFilters && setSelectedFilters([]);
     }, [props.filters]);
 
