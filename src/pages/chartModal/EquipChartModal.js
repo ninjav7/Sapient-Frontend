@@ -5,18 +5,14 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
-import {
-    BaseUrl,
-    updateEquipment,
-    listSensor,
-    equipmentDetails,
-    getExploreEquipmentYTDUsage,
-    getEndUseId,
-    equipmentType,
-    getLocation,
-} from '../../services/Network';
 import { fetchExploreEquipmentChart } from '../explore/services';
-import axios from 'axios';
+import {
+    updateListSensor,
+    updateEquipmentDetails,
+    getEquipmentDetails,
+    updateExploreEquipmentYTDUsage,
+    getMetadataRequest,
+} from './services';
 import { Cookies } from 'react-cookie';
 import { useHistory, Link } from 'react-router-dom';
 import moment from 'moment';
@@ -59,7 +55,6 @@ const EquipChartModal = ({
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
 
@@ -79,13 +74,11 @@ const EquipChartModal = ({
     const [isYtdDataFetching, setIsYtdDataFetching] = useState(false);
     const [ytdData, setYtdData] = useState({});
     const [selected, setSelected] = useState([]);
-    const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [isDataChanged, setDataChanged] = useState(false);
     const [defaultEquipData, setDefaultEquipData] = useState({});
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [equipResult, setEquipResult] = useState({});
@@ -195,40 +188,32 @@ const EquipChartModal = ({
         setUpdateEqipmentData(obj);
     };
 
-    const handleSave = () => {
-        try {
-            let obj = Object.assign({}, updateEqipmentData);
-            if (obj.tags) {
-                obj.tag = obj.tags;
-                delete obj.tags;
-            }
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?equipment_id=${equipmentData?.equipments_id}`;
-            axios
-                .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let arr = apiRequestBody(startDate, endDate, timeZone);
+    const handleSave = async () => {
+        let obj = Object.assign({}, updateEqipmentData);
+        if (obj.tags) {
+            obj.tag = obj.tags;
+            delete obj.tags;
+        }
+
+        let params = `?equipment_id=${equipmentData?.equipments_id}`;
+        await updateEquipmentDetails(obj, params)
+            .then((res) => {
+                let arr = apiRequestBody(startDate, endDate, timeZone);
+                setSelectedTab(0);
+                setEquipResult({});
+                setEquipmentData({});
+                setUpdateEqipmentData({});
+                setDataChanged(false);
+                if (activePage === 'explore') {
                     setSelectedTab(0);
-                    setEquipResult({});
-                    setEquipmentData({});
-                    setUpdateEqipmentData({});
-                    setDataChanged(false);
-                    if (activePage === 'explore') {
-                        setSelectedTab(0);
-                    }
-                    if (activePage === 'equipment') {
-                        setSelectedTab(1);
-                    }
-                    handleChartClose();
-                    fetchEquipmentData(arr);
-                });
-        } catch (error) {}
+                }
+                if (activePage === 'equipment') {
+                    setSelectedTab(1);
+                }
+                handleChartClose();
+                fetchEquipmentData(arr);
+            })
+            .catch((error) => {});
     };
 
     const handleCloseWithoutSave = () => {
@@ -276,7 +261,7 @@ const EquipChartModal = ({
                             }
                         });
                         let recordToInsert = {
-                            name: `Sensor ${data[i].sensor_name}`,
+                            name: `Sensor ${data[i].index_alias}`,
                             data: NulledData,
                         };
 
@@ -344,30 +329,18 @@ const EquipChartModal = ({
     };
 
     const fetchEquipmentYTDUsageData = async (equipId) => {
-        try {
-            setIsYtdDataFetching(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
-
-            await axios
-                .post(
-                    `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
-                    apiRequestBody(startDate, endDate, timeZone),
-                    { headers }
-                )
-                .then((res) => {
-                    let response = res.data.data;
-                    setYtdData(response[0]);
-                    setIsYtdDataFetching(false);
-                });
-        } catch (error) {
-            setIsYtdDataFetching(false);
-        }
+        setIsYtdDataFetching(true);
+        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        await updateExploreEquipmentYTDUsage(payload, params)
+            .then((res) => {
+                let response = res.data.data;
+                setYtdData(response[0]);
+                setIsYtdDataFetching(false);
+            })
+            .catch((error) => {
+                setIsYtdDataFetching(false);
+            });
     };
 
     useEffect(() => {
@@ -376,16 +349,9 @@ const EquipChartModal = ({
         }
 
         const fetchEquipmentDetails = async (equipId) => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `/${equipId}`;
-
-                await axios.get(`${BaseUrl}${equipmentDetails}${params}`, { headers }).then((res) => {
+            let params = `/${equipId}`;
+            await getEquipmentDetails(params)
+                .then((res) => {
                     let response = res.data.data;
                     setLocation(response?.location_id);
                     setEquipType(response?.equipments_type_id);
@@ -393,66 +359,31 @@ const EquipChartModal = ({
                     setEquipBreakerLink(response?.breaker_link);
                     setDefaultEquipData(response);
                     setEquipmentData(response);
-                });
-            } catch (error) {}
+                })
+                .catch((error) => {});
         };
 
-        const fetchEndUseData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
-                    setEndUse(res.data);
-                });
-            } catch (error) {}
-        };
+        const fetchMetadata = async () => {
+            await getMetadataRequest(bldgId)
+                .then((res) => {
+                    const { end_uses, equipment_type, location } = res.data;
 
-        const fetchEquipTypeData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    response.sort((a, b) => {
-                        return a.equipment_type.localeCompare(b.equipment_type);
-                    });
-                    setEquipmentTypeData(response);
-                });
-            } catch (error) {}
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    const data = res.data.map((el) => {
+                    const data = location.map((el) => {
                         return {
                             label: el.location_name,
                             value: el.location_id,
                         };
                     });
+                    setEquipmentTypeData(equipment_type);
+                    setEndUse(end_uses);
                     setLocationData(data);
-                });
-            } catch (error) {}
+                })
+                .finally(() => {});
         };
-
         fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
-        fetchEndUseData();
-        fetchEquipTypeData();
-        fetchLocationData();
+        fetchMetadata();
     }, [equipmentFilter]);
 
     useEffect(() => {
@@ -467,7 +398,6 @@ const EquipChartModal = ({
         if (equipmentData.length === 0) {
             return;
         }
-
         const fetchActiveDeviceSensorData = async () => {
             if (equipmentData !== null) {
                 if (
@@ -478,21 +408,13 @@ const EquipChartModal = ({
                     return;
                 }
             }
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${equipmentData.device_id}`;
-                axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+            let params = `?device_id=${equipmentData.device_id}`;
+            await updateListSensor(params)
+                .then((res) => {
                     let response = res.data;
                     setSensors(response);
-                    let sensorId = response.find(
-                        ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
-                    );
-                });
-            } catch (error) {}
+                })
+                .catch((error) => {});
         };
 
         if (equipmentData !== null) {
@@ -844,7 +766,6 @@ const EquipChartModal = ({
                                                 </span>
                                             </Link>
                                         </Typography.Subheader>
-                                        {/* </div> */}
                                     </div>
                                     <div className="d-flex">
                                         <div className="mr-2">
@@ -971,7 +892,7 @@ const EquipChartModal = ({
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
-                                                                <option value={record?.end_user_id}>
+                                                                <option value={record?.end_use_id}>
                                                                     {record?.name}
                                                                 </option>
                                                             );
@@ -1006,31 +927,6 @@ const EquipChartModal = ({
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        {/* Planned for Future Use */}
-                                        {/* <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Server Zones
-                                                    </Typography.Subheader>
-                                                    <TagsInput
-                                                        value={selectedZones}
-                                                        onChange={setSelectedZones}
-                                                        name="Zones"
-                                                        placeHolder="+ Add Location"
-                                                    />
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        What area this piece of equipment services.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1331,7 +1227,7 @@ const EquipChartModal = ({
                                                         <option selected>Select Category</option>
                                                         {endUse?.map((record) => {
                                                             return (
-                                                                <option value={record?.end_user_id}>
+                                                                <option value={record?.end_use_id}>
                                                                     {record?.name}
                                                                 </option>
                                                             );
@@ -1378,30 +1274,6 @@ const EquipChartModal = ({
                                                 </Form.Group>
                                             </Col>
                                         </Row>
-                                        {/* <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Serves Zones
-                                                    </Typography.Subheader>
-                                                    <TagsInput
-                                                        value={selectedZones}
-                                                        onChange={setSelectedZones}
-                                                        name="Zones"
-                                                        placeHolder="+ Add Location"
-                                                    />
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        What area this piece of equipment services.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row> */}
                                         <Row>
                                             <Col lg={12}>
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
