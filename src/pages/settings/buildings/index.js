@@ -306,7 +306,6 @@ const Buildings = () => {
         }
 
         const fetchBuildingListByFilter = async (building_type) => {
-            // let buildingTypeSelected = building_type.join('%2b');
             let buildingTypeSelected = encodeURIComponent(building_type.join('+'));
             setIsDataFetching(true);
 
@@ -344,10 +343,13 @@ const Buildings = () => {
                                 buildingType.push(opt[i].value);
                             }
                             setSelectedBuildingType(buildingType);
+                        } else {
+                            fetchGeneralBuildingData();
                         }
                     },
                     onDelete: () => {
                         setSelectedBuildingType([]);
+                        fetchGeneralBuildingData();
                     },
                 },
                 {
@@ -408,14 +410,6 @@ const Buildings = () => {
         updateBreadcrumbStore();
         // fetchGeneralBuildingData();
     }, []);
-
-    useEffect(() => {
-        console.log('SSR minSqftVal [Jo backend se ayi hai] => ', minSqftVal);
-        console.log('SSR minSqftVal [Jo backend se ayi hai] => ', maxSqftVal);
-        console.log('SSR minVal [Jo user ne change kiya hai] => ', minVal);
-        console.log('SSR maxVal [Jo user ne change kiya hai] => ', maxVal);
-        console.log('SSR customMinMax [Jo backend ko bhejna hai] => ', customMinMax);
-    });
 
     return (
         <React.Fragment>
