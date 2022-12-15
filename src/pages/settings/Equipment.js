@@ -764,7 +764,7 @@ const Equipment = () => {
                             <Form.Label>End Use Category</Form.Label>
                             <Select
                                 id="endUseSelect"
-                                placeholder="Select End Use"
+                                placeholder="Selected End Use"
                                 name="select"
                                 isSearchable={true}
                                 defaultValue={createEquipmentData?.end_use}
