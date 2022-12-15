@@ -27,7 +27,7 @@ const preparedData = (data) => {
     return result;
 };
 
-export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel }) => {
+export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel, widthOfWrapper }) => {
     return {
         chart: {
             type: 'line',
@@ -45,6 +45,8 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             enabled: true,
             align: 'left',
             bottom: 0,
+            width: widthOfWrapper,
+            itemMarginTop: 8,
             useHTML: true,
             labelFormatter: function () {
                 let color = hexToRgb(this.color);

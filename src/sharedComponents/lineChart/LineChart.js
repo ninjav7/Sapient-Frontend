@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './LineChart.scss';
 import Highcharts from 'highcharts/highstock';
 
@@ -19,8 +19,23 @@ HighchartsData(Highcharts);
 
 const LineChart = (props) => {
     const chartComponentRef = useRef(null);
+    const wrapperRef = useRef(null);
+    const [widthOfWrapper, setWidthOfWrapper] = useState(0);
 
     const { data, title, subTitle, handleMoreClick, dateRange, tooltipUnit, tooltipLabel } = props;
+
+    useEffect(() => {
+        const handleResize = () => {
+            const width = wrapperRef.current?.offsetWidth;
+            if (handleMoreClick) {
+                setWidthOfWrapper(width - 150);
+            } else {
+                setWidthOfWrapper(width);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+    });
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -51,7 +66,7 @@ const LineChart = (props) => {
     };
 
     return (
-        <div className="line-chart-wrapper">
+        <div className="line-chart-wrapper" ref={wrapperRef}>
             <div className="chart-header">
                 <div>
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
@@ -84,7 +99,7 @@ const LineChart = (props) => {
             <HighchartsReact
                 highcharts={Highcharts}
                 constructorType={'stockChart'}
-                options={options({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel })}
+                options={options({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel, widthOfWrapper })}
                 ref={chartComponentRef}
             />
             {handleMoreClick && (
