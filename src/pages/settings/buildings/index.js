@@ -126,7 +126,6 @@ const Buildings = () => {
                 text={
                     <Typography.Body size={Typography.Sizes.md} className="gray-950">
                         {row?.building_type === 'Office Building' ? 'Office' : 'Residential'}
-                        {/* {row?.building_type ? 'Office' : 'Residential'} */}
                     </Typography.Body>
                 }
             />
@@ -321,20 +320,10 @@ const Buildings = () => {
     };
 
     useEffect(() => {
-        if (selectedBuildingType.length === 0) {
-            return;
-        }
-
-        fetchBuildingListByFilter(selectedBuildingType, minSqftVal, maxSqftVal);
-    }, [selectedBuildingType]);
-
-    useEffect(() => {
-        if (sqftAPIFlag === '') {
-            return;
-        }
-
-        fetchBuildingListByFilter(selectedBuildingType, minSqftVal, maxSqftVal);
-    }, [sqftAPIFlag, sortBy, search]);
+        if (sqftAPIFlag === '' && selectedBuildingType.length === 0) {
+            fetchGeneralBuildingData();
+        } else fetchBuildingListByFilter(selectedBuildingType, minSqftVal, maxSqftVal);
+    }, [sqftAPIFlag, sortBy, search, selectedBuildingType]);
 
     useEffect(() => {
         if (minSqftVal !== maxSqftVal && maxSqftVal !== 0) {
@@ -353,13 +342,10 @@ const Buildings = () => {
                                 buildingType.push(opt[i].value);
                             }
                             setSelectedBuildingType(buildingType);
-                        } else {
-                            fetchGeneralBuildingData();
                         }
                     },
                     onDelete: () => {
                         setSelectedBuildingType([]);
-                        setSqftAPIFlag(100);
                     },
                 },
                 {
@@ -383,8 +369,8 @@ const Buildings = () => {
                     },
                     onDelete: () => {
                         setMinSqftVal(0);
-                        setMaxSqftVal(0);
-                        setSqftAPIFlag(0);
+                        setMaxSqftVal(maxVal);
+                        setSqftAPIFlag('');
                     },
                 },
             ];
@@ -395,10 +381,6 @@ const Buildings = () => {
     useEffect(() => {
         getFilters();
     }, [search]);
-
-    useEffect(() => {
-        fetchGeneralBuildingData();
-    }, []);
 
     useEffect(() => {
         fetchUserPermission();
