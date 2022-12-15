@@ -20,7 +20,7 @@ import IndividualPassiveDevice from '../pages/settings/passive-devices/Individua
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
-import Buildings from '../pages/settings/Buildings';
+import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/users/Users';
 import UserProfile from '../pages/settings/users/UserProfile';
 import Roles from '../pages/settings/Roles';
@@ -543,7 +543,7 @@ const settingsRoutes = {
         },
 
         {
-            path: '/settings/user-profile/single/:userId/',
+            path: '/settings/users/user-profile/single/:userId/',
             name: 'Users',
             component: UserProfile,
             route: PrivateRoute,

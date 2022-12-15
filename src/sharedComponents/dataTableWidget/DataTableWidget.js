@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState, memo, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import _, { filter } from 'lodash';
+import _ from 'lodash';
 
 import { Table } from '../table';
 import { DropDownIcon } from '../dropDowns/dropDownButton';
@@ -26,10 +26,9 @@ import {
 } from '../helpers/helper';
 
 import { FILTER_TYPES, LOCAL_STORAGE, SORT_TYPES } from './constants';
+import { ReactComponent as ArrowSortSVG } from '../assets/icons/arrow-sort.svg';
 
 import './DataTableWidget.scss';
-
-import { ReactComponent as ArrowSortSVG } from '../assets/icons/arrow-sort.svg';
 
 export const DataTableWidgetContext = React.createContext({});
 
@@ -52,33 +51,6 @@ export const initialFilterState = {
     [FILTER_TYPES.RANGE_SELECTOR]: [0, 100],
     [FILTER_TYPES.MULTISELECT]: [],
 };
-
-const filterOptions = [
-    {
-        label: 'Energy Consumption',
-        value: 'consumption',
-        placeholder: 'All Energy Consumption',
-        filterType: FILTER_TYPES.MULTISELECT,
-    },
-    {
-        label: 'Change',
-        value: 'change',
-        placeholder: 'All Changes',
-        filterType: FILTER_TYPES.RANGE_SELECTOR,
-    },
-    {
-        label: 'Square Footage',
-        value: 'sq_ft',
-        placeholder: 'All Square Footage',
-        filterType: FILTER_TYPES.LAST_UPDATED_SELECTOR,
-    },
-    {
-        label: 'Building Type',
-        value: 'building_type',
-        placeholder: 'All Building Types',
-        filterType: FILTER_TYPES.LOCATION_SELECTOR,
-    },
-];
 
 const DataTableWidget = (props) => {
     const [excludedHeaderLocalStorage, setExcludedHeadersLocalStorage] = useLocalStorage(
@@ -199,6 +171,10 @@ const DataTableWidget = (props) => {
         });
     }, [JSON.stringify(props.filterOptions)]);
 
+    useEffect(() => {
+        props.filters?.selectedFilters && setSelectedFilters([]);
+    }, [props.filters]);
+
     const cellChildrenTemplate = useCallback((children) => {
         return React.isValidElement(props.customComponentForCells) ? (
             React.cloneElement(props.customComponentForCells, { children, ...props.customComponentForCells.props })
@@ -285,7 +261,7 @@ const DataTableWidget = (props) => {
                     </div>
                 </div>
 
-                <Brick sizeInRem={1} />
+                <Brick sizeInRem={1.5} />
 
                 {!!filteredHeaders.length ? (
                     <Table>
@@ -464,6 +440,10 @@ DataTableWidget.propTypes = {
     customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     isLoadingComponent: PropTypes.node.isRequired,
     isLoading: PropTypes.bool.isRequired,
+    filters: PropTypes.shape({
+        selectedFilters: PropTypes.object,
+        selectedFiltersValues: PropTypes.object,
+    }),
 };
 
 export default DataTableWidget;

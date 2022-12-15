@@ -18,12 +18,7 @@ import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Brick from '../../../sharedComponents/brick';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import {
-    updateGeneralBuildingChange,
-    updateBuildingAddressChange,
-    updateBuildingDateTimeChange,
-    updateOperatingHourChange,
-} from './services';
+import { updateGeneralBuildingChange } from './services';
 import OperatingHours from './OperatingHours';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
@@ -67,12 +62,7 @@ const GeneralBuildingSettings = () => {
     const [bldgData, setBldgData] = useState({});
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
-    const [buildingDateTime, setBuildingDateTime] = useState({});
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
-    const [responseBuildingDetails, setResponseBuildingDetails] = useState({});
-    const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
-    const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
-    const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
 
     const [textLocation, settextLocation] = useState('');
 
@@ -171,29 +161,28 @@ const GeneralBuildingSettings = () => {
     };
 
     const saveBuildingSettings = async () => {
-        try {
-            const params = `/${bldgId}`;
-            await axios
-                .all([
-                    updateGeneralBuildingChange(buildingDetails, params),
-                    updateBuildingAddressChange(buildingAddress, params),
-                    updateBuildingDateTimeChange(buildingDateTime, params),
-                    updateOperatingHourChange(operationTime, params),
-                ])
-                .then(
-                    axios.spread(() => {
-                        setLoadButton(false);
-                        localStorage.removeItem('generalState');
-                        localStorage.removeItem('generalStreetAddress');
-                        localStorage.removeItem('generalBuildingName');
-                        localStorage.removeItem('generaltimeZone');
-                        localStorage.removeItem('generalZipCode');
-                        BuildingListStore.update((s) => {
-                            s.fetchBuildingList = true;
-                        });
-                    })
-                );
-        } catch (error) {}
+        setLoadButton(true);
+        const params = `/${bldgId}`;
+        let bldgData = {};
+        bldgData.info = buildingDetails;
+        bldgData.address = buildingAddress;
+        bldgData.operating_hours = operationTime.operating_hours;
+
+        await updateGeneralBuildingChange(bldgData, params)
+            .then((res) => {
+                setLoadButton(false);
+                localStorage.removeItem('generalState');
+                localStorage.removeItem('generalStreetAddress');
+                localStorage.removeItem('generalBuildingName');
+                localStorage.removeItem('generaltimeZone');
+                localStorage.removeItem('generalZipCode');
+                BuildingListStore.update((s) => {
+                    s.fetchBuildingList = true;
+                });
+            })
+            .catch((e) => {
+                setLoadButton(false);
+            });
     };
 
     const [buildingListData] = useAtom(buildingData);
@@ -212,12 +201,13 @@ const GeneralBuildingSettings = () => {
 
                 let buildingDetailsObj = {
                     name: data.building_name,
-                    typee: data.building_type,
+                    building_type: data.building_type,
                     square_footage: data.building_size,
                     active: data.active,
+                    timezone: data.timezone,
+                    time_format: data.time_format,
                 };
                 setBuildingDetails(buildingDetailsObj);
-                setResponseBuildingDetails(buildingDetailsObj);
 
                 let buildingAddressObj = {
                     street_address: data.street_address,
@@ -227,20 +217,11 @@ const GeneralBuildingSettings = () => {
                     zip_code: data.zip_code,
                 };
                 setBuildingAddress(buildingAddressObj);
-                setResponseBuildingAddress(buildingAddressObj);
-
-                let buildingDateTimeObj = {
-                    timezone: data.timezone,
-                    time_format: data.time_format,
-                };
-                setBuildingDateTime(buildingDateTimeObj);
-                setResponseBuildingDateTime(buildingDateTimeObj);
 
                 let buildingOperatingHours = {
                     operating_hours: data.operating_hours,
                 };
                 setBuildingOperatingHours(buildingOperatingHours);
-                setResponseBuildingOperatingHours(buildingOperatingHours);
 
                 const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
                 setWeekToggle({
@@ -265,9 +246,9 @@ const GeneralBuildingSettings = () => {
     };
 
     const handleDateTimeSwitch = () => {
-        let obj = buildingDateTime;
+        let obj = buildingDetails;
 
-        obj.active = !buildingDateTime.active;
+        obj.active = !buildingDetails.active;
 
         handleBldgSettingChanges('time_format', obj.active);
     };
@@ -289,7 +270,7 @@ const GeneralBuildingSettings = () => {
             setBuildingDetails(obj);
         }
 
-        if (key === 'typee') {
+        if (key === 'building_type') {
             let obj = Object.assign({}, buildingDetails);
 
             obj[key] = value;
@@ -346,19 +327,19 @@ const GeneralBuildingSettings = () => {
         }
 
         if (key === 'time_format') {
-            let obj = Object.assign({}, buildingDateTime);
+            let obj = Object.assign({}, buildingDetails);
 
             obj[key] = value;
 
-            setBuildingDateTime(obj);
+            setBuildingDetails(obj);
         }
 
         if (key === 'timezone') {
-            let obj = Object.assign({}, buildingDateTime);
+            let obj = Object.assign({}, buildingDetails);
 
             obj[key] = value;
 
-            setBuildingDateTime(obj);
+            setBuildingDetails(obj);
         }
     };
 
@@ -497,7 +478,7 @@ const GeneralBuildingSettings = () => {
                         active: data.active,
                         name: data.building_name,
                         square_footage: data.building_size,
-                        typee: data.building_type,
+                        building_type: data.building_type,
                         street_address: data.street_address,
                         address_2: data.address_2,
                         city: data.city,
@@ -601,7 +582,6 @@ const GeneralBuildingSettings = () => {
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
                                     onClick={() => {
-                                        setLoadButton(true);
                                         saveBuildingSettings();
                                     }}
                                     className="ml-2"
@@ -693,10 +673,10 @@ const GeneralBuildingSettings = () => {
                                         placeholder="Select Building Type"
                                         name="select"
                                         isSearchable={true}
-                                        defaultValue={buildingDetails.typee}
+                                        defaultValue={buildingDetails.building_type}
                                         options={buildingType}
                                         onChange={(e) => {
-                                            handleBldgSettingChanges('typee', e.value);
+                                            handleBldgSettingChanges('building_type', e.value);
                                             localStorage.setItem('generalBuildingType', e.value);
                                         }}
                                         className="w-100"
@@ -857,7 +837,7 @@ const GeneralBuildingSettings = () => {
                                 </div>
                                 <div className="col">
                                     <TimezoneSelect
-                                        value={buildingDateTime?.timezone ? buildingDateTime?.timezone : ''}
+                                        value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
                                         onChange={setSelectedTimezone}
                                         className="react-select-wrapper w-100"
                                     />
@@ -887,7 +867,7 @@ const GeneralBuildingSettings = () => {
                                                 localStorage.setItem('generaltimeZone', '12');
                                             }
                                         }}
-                                        checked={buildingDateTime.time_format}
+                                        checked={buildingDetails.time_format}
                                         onColor={colorPalette.datavizBlue600}
                                         uncheckedIcon={false}
                                         checkedIcon={false}

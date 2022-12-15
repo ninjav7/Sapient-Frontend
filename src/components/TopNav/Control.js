@@ -51,13 +51,13 @@ const Control = () => {
         }
     };
 
-    const handleSideNavChange = (routeType) => {
-        if (routeType === 'account-settings') {
+    const handleSideNavChange = () => {
+        if (accountRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'account';
             });
         }
-        if (routeType === 'building-settings') {
+        if (configRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
@@ -262,16 +262,15 @@ const Control = () => {
             <div className="topbar-buttons-wrapper">
                 <div className="topbar-buttons">
                     <div
-                        className={`float-right ${
+                        className={`float-right h-100 ${
                             pageType === 'settings' ? 'navbar-icon-container-active ' : 'navbar-icon-container'
-                        }`}
-                        style={{ height: '100%' }}>
+                        }`}>
                         <button
                             className={`btn btn-sm float-right ${
                                 pageType === 'settings' ? 'other-font-icon-style-active' : 'other-font-icon-style'
                             }`}
                             onClick={() => {
-                                handleSideNavChange('building-settings');
+                                handleSideNavChange();
                                 handleRouteChange();
                             }}>
                             <FontAwesomeIcon icon={faGear} size="lg" />

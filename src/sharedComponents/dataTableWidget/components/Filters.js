@@ -67,31 +67,19 @@ const mapFilters = {
     },
 
     [FILTER_TYPES.MULTISELECT]: (props) => {
-        // @TODO Not deleted, because it needs to be refactored
-        const { selectedFiltersValues, setSelectedFiltersValues } = useContext(DataTableWidgetContext);
         const [selectedOptions, setSelectedOptions] = useState([]);
 
-        //@TODO Delete saving selected values for filter in store
-        let filterValue = { ...(selectedFiltersValues[FILTER_TYPES.MULTISELECT] || []) };
-
         const handleChange = (options) => {
-            //@TODO Delete saving selected values for filter in store
-            // setSelectedFiltersValues((oldState) => {
-            //     return { ...oldState, [FILTER_TYPES.MULTISELECT]: options };
-            // });
             props.onChange && props.onChange(options);
             setSelectedOptions(options);
         };
-
-        //@TODO Delete saving selected values for filter in store
-        const selectedItems = selectedOptions; // Object.values(filterValue);
 
         return (
             <Select.Multi
                 options={props.filterOptions}
                 onChange={handleChange}
                 isSelectAll={true}
-                onMenuClose={() => props.onClose(selectedOptions)}
+                onMenuClose={() => props?.onClose && props.onClose(selectedOptions)}
                 components={{
                     Control: (controlProps) => (
                         <div {...controlProps} onBlur={() => {}}>
@@ -100,9 +88,9 @@ const mapFilters = {
                                 {...props}
                                 onBlur={() => {}}
                                 buttonLabel={
-                                    selectedItems.length > 1
-                                        ? `${selectedItems.length} List items`
-                                        : selectedItems[0]?.label
+                                    selectedOptions.length > 1
+                                        ? `${selectedOptions.length} List items`
+                                        : selectedOptions[0]?.label
                                 }
                                 onDeleteFilter={props.onDeleteFilter}
                             />
@@ -185,13 +173,7 @@ const mapFilters = {
     },
 };
 
-export const Filters = ({
-    filterOptions,
-    onChange,
-    onChangeFilterValue,
-    selectedFilters,
-    onDeleteFilter,
-}) => {
+export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selectedFilters, onDeleteFilter }) => {
     const { widgetProps, setSearch } = useContext(DataTableWidgetContext);
 
     const handleSearchChange = (event) => {
