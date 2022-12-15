@@ -298,7 +298,7 @@ export const MenuList = ({
 
     const memoizedKeyDownHandler = useCallback((event) => {
         if (event.key === 'Escape') {
-            closeMenu();
+            closeMenu && closeMenu();
         }
     }, []);
 

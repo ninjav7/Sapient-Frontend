@@ -26,10 +26,8 @@ export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
+export const getFiltersForBuildings = '/api/config/general/general-buildings-filter';
 export const singleBuildingDetail = '/api/config/general/building-details';
-export const generalBuildingAddress = '/api/config/general/address';
-export const generalDateTime = '/api/config/general/date_time';
-export const generalOperatingHours = '/api/config/general/operating_hours';
 export const generalBldgDelete = '/api/config/general/delete_building';
 
 //user roles
