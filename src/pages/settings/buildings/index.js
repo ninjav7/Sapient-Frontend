@@ -85,7 +85,7 @@ const Buildings = () => {
         const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-        await fetchBuildingList(search, sort_by, ordered_by)
+        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag)
             .then((res) => {
                 const data = res.data;
                 setBuildingsData(data);
@@ -308,7 +308,7 @@ const Buildings = () => {
         const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
-        await fetchBuildingList(search, sort_by, ordered_by, buildingTypeSelected, min_val, max_val)
+        await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag, buildingTypeSelected, min_val, max_val)
             .then((res) => {
                 const data = res.data;
                 setBuildingsData(data);
