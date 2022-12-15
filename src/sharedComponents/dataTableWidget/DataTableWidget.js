@@ -261,7 +261,7 @@ const DataTableWidget = (props) => {
                     </div>
                 </div>
 
-                <Brick sizeInRem={1} />
+                <Brick sizeInRem={1.5} />
 
                 {!!filteredHeaders.length ? (
                     <Table>

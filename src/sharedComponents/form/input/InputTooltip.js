@@ -19,6 +19,7 @@ const InputTooltip = ({
     tooltipId = generateID(),
     inputClassName = '',
     className = '',
+    labelSize = Typography.Sizes.sm,
     ...props
 }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
@@ -30,7 +31,7 @@ const InputTooltip = ({
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm}>{props.label}</Typography.Body>
+                    <Typography.Body size={`${labelSize}`}>{props.label}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
             )}
@@ -72,6 +73,7 @@ InputTooltip.propTypes = {
     label: PropTypes.string,
     tooltipId: PropTypes.string,
     error: PropTypes.string,
+    labelSize: PropTypes.string,
 };
 
 export default InputTooltip;

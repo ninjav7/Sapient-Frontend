@@ -128,3 +128,41 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
     });
     return csv;
 };
+
+export const getBuildingsTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'building_name':
+                    const name = tableRow['building_name'];
+                    const search = ',';
+                    const replaceWith = ' ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'building_size':
+                    const size = tableRow['building_size'];
+                    arr.push(`${size} Sq.Ft.`);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
