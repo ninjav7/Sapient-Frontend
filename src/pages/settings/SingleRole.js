@@ -65,7 +65,7 @@ const UserTable = ({ userData }) => {
                                     <td className="font-weight-bold panel-name">
                                         <Link
                                             to={{
-                                                pathname: `/settings/user-profile`,
+                                                pathname: `/settings/users/user-profile`,
                                             }}>
                                             <a>{record.name}</a>
                                         </Link>

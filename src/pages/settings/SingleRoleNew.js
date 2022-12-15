@@ -75,7 +75,7 @@ const UserTable = ({ userData }) => {
                                 <td className="font-weight-bold panel-name">
                                     <Link
                                         to={{
-                                            pathname: `/settings/user-profile/single/${record?.user_id}`,
+                                            pathname: `/settings/users/user-profile/single/${record?.user_id}`,
                                         }}>
                                         <a>{record.name ? record.name : 'test user'}</a>
                                     </Link>
