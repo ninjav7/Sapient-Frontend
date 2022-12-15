@@ -11,7 +11,8 @@ export function fetchBuildingList(search, sort_by, order_by, sqftAPIFlag, buildi
         let paramsToAppend = `&building_type=${building_type}`;
         params = params.concat(paramsToAppend);
     }
-    if (sqftAPIFlag !== '') {
+
+    if (sqftAPIFlag && sqftAPIFlag !== '') {
         let paramsToAppend = `&building_size_min=${minVal}&building_size_max=${maxVal}`;
         params = params.concat(paramsToAppend);
     }
