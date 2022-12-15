@@ -215,7 +215,7 @@ const Users = () => {
             <>
                 {userPermission?.user_role === 'admin' ||
                 userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                    <Link to={`/settings/user-profile/single/${row?._id}/${row?.is_active}/${row?.is_verified}`}>
+                    <Link to={`/settings/user-profile/single/${row?._id}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 ) : (

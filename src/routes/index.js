@@ -543,7 +543,7 @@ const settingsRoutes = {
         },
 
         {
-            path: '/settings/user-profile/single/:userId/:is_active/:is_verified',
+            path: '/settings/user-profile/single/:userId/',
             name: 'Users',
             component: UserProfile,
             route: PrivateRoute,
