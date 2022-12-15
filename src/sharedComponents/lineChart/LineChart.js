@@ -35,7 +35,8 @@ const LineChart = (props) => {
         };
 
         window.addEventListener('resize', handleResize);
-    });
+        return () => window.removeEventListener('resize', handleResize);
+    },[handleMoreClick]);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {

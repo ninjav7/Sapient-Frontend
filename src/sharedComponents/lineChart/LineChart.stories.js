@@ -7,12 +7,12 @@ export default {
 };
 
 const data = [
-    { name: 'mockedData1', data: mockedData },
-    { name: 'mockedData2', data: mockedData2 },
-    { name: 'mockedData3', data: mockedData3 },
-    { name: 'mockedData4', data: mockedData3 },
-    { name: 'mockedData5', data: mockedData3 },
-    { name: 'mockedData6', data: mockedData3 },
+    { name: 'MockedData1', data: mockedData },
+    { name: 'MockedData2', data: mockedData2 },
+    { name: 'MockedData3', data: mockedData3 },
+    { name: 'MockedData4', data: mockedData3 },
+    { name: 'MockedData5', data: mockedData3 },
+    { name: 'MockedData6', data: mockedData3 },
 ];
 const dateRange = {
     minDate: new Date('2022-09-1').getTime(),

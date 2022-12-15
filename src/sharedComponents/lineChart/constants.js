@@ -47,6 +47,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             bottom: 0,
             width: widthOfWrapper,
             itemMarginTop: 8,
+            itemDistance: 0,        
             useHTML: true,
             labelFormatter: function () {
                 let color = hexToRgb(this.color);
