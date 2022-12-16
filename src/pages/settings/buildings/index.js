@@ -109,21 +109,14 @@ const Buildings = () => {
 
     const renderBldgName = (row) => {
         return (
-            <>
-                {userPermission?.user_role === 'admin' ||
-                userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                    <Link
-                        className="typography-wrapper link"
-                        to={`${internalRoute[0]}`}
-                        onClick={() => {
-                            handleBuildingClick(row);
-                        }}>
-                        {row?.building_name === '' ? '-' : row?.building_name}
-                    </Link>
-                ) : (
-                    <div className="typography-wrapper link">{row?.building_name}</div>
-                )}
-            </>
+            <Link
+                className="typography-wrapper link"
+                to={`${internalRoute[0]}`}
+                onClick={() => {
+                    handleBuildingClick(row);
+                }}>
+                {row?.building_name === '' ? '-' : row?.building_name}
+            </Link>
         );
     };
 
