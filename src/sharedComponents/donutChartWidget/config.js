@@ -1,6 +1,7 @@
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 
 import colors from '../../assets/scss/_colors.scss';
+import { onHoverHandler, onUnHoverHandler } from './helper';
 
 export const configDonutChartWidget = ({
     colors,
@@ -95,6 +96,8 @@ export const configDonutChartWidget = ({
                         const unit = items[this.colorIndex]?.unit;
 
                         renderCenteredItemContent(this.y, unit);
+
+                        onHoverHandler(this.series.data, this.index);
                     },
                     mouseOut: function () {
                         changeItemsState(this.colorIndex, false);
@@ -102,6 +105,8 @@ export const configDonutChartWidget = ({
                         const unit = items[0]?.unit;
 
                         renderCenteredItemContent(totalValue, unit);
+
+                        onUnHoverHandler(this.series.data, this.index);
                     },
                 },
             },
@@ -110,6 +115,8 @@ export const configDonutChartWidget = ({
                     halo: {
                         size: 6,
                     },
+                    opacity: 1,
+                    brightness: 0,
                 },
             },
         },

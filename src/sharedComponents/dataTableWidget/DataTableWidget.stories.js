@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import DataTableWidget from './DataTableWidget';
 import '../assets/scss/stories.scss';
 import { FILTER_TYPES } from './constants';
+import { Button } from '../button';
 
 export default {
     title: 'Widgets/DataTableWidget',
@@ -10,6 +11,7 @@ export default {
 
 export const Default = (props) => {
     const [searchResultRows, setSearchResultRows] = useState([]);
+    const [filtersValues, setFiltersValues] = useState({});
 
     const handleSearchChange = (query) => {
         if (!query) {
@@ -21,7 +23,24 @@ export const Default = (props) => {
         );
     };
 
-    return <DataTableWidget {...props} onSearch={handleSearchChange} searchResultRows={searchResultRows} />;
+    const resetFilters = () => {
+        setFiltersValues({
+            selectedFilters: [],
+        });
+    };
+
+    return (
+        <>
+            <DataTableWidget
+                {...props}
+                filters={filtersValues}
+                onSearch={handleSearchChange}
+                searchResultRows={searchResultRows}
+            />
+            <hr />
+            <Button type={Button.Type.primary} label={'Reset Filters'} onClick={resetFilters} />
+        </>
+    );
 };
 
 Default.args = {
@@ -32,14 +51,14 @@ Default.args = {
             placeholder: 'All Energy Consumption',
             filterType: FILTER_TYPES.MULTISELECT,
             filterOptions: [
-                {label: 'Label 1', value: 1},
-                {label: 'Label 2', value: 2},
-                {label: 'Label 3', value: 3}
+                { label: 'Label 1', value: 1 },
+                { label: 'Label 2', value: 2 },
+                { label: 'Label 3', value: 3 },
             ],
             //Add any props you need for filter component
             componentProps: {
-                isSearchable: true
-            }
+                isSearchable: true,
+            },
         },
         {
             label: 'Total Consumption',
@@ -47,11 +66,11 @@ Default.args = {
             placeholder: 'All Energy Consumption',
             filterType: FILTER_TYPES.MULTISELECT,
             filterOptions: [
-                {label: 'Label 1', value: 12},
-                {label: 'Label 2', value: 21},
-                {label: 'Label 3', value: 31}
+                { label: 'Label 1', value: 12 },
+                { label: 'Label 2', value: 21 },
+                { label: 'Label 3', value: 31 },
             ],
-            onChange: (options) => alert('FilterChanged: onClick ' + JSON.stringify(options))
+            onChange: (options) => alert('FilterChanged: onClick ' + JSON.stringify(options)),
         },
         {
             label: 'Test',
@@ -59,11 +78,11 @@ Default.args = {
             placeholder: 'All tests',
             filterType: FILTER_TYPES.MULTISELECT,
             filterOptions: [
-                {label: 'Label 1', value: 12},
-                {label: 'Label 2', value: 21},
-                {label: 'Label 3', value: 31}
+                { label: 'Label 1', value: 12 },
+                { label: 'Label 2', value: 21 },
+                { label: 'Label 3', value: 31 },
             ],
-            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options))
+            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options)),
         },
         {
             label: 'Range Slider',
@@ -72,15 +91,16 @@ Default.args = {
             filterType: FILTER_TYPES.RANGE_SELECTOR,
             filterOptions: [20, 100],
             componentProps: {
-                prefix: "%",
-                
+                prefix: '%',
+                min: 0,
+                max: 120,
                 // We need specify callback if we want use Trends Filter Buttons.
                 withTrendsFilter: true,
-                handleButtonClick: (...args) => console.log(args)
+                handleButtonClick: (...args) => console.log(args),
             },
             onChange: (...args) => console.log(args),
-            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options))
-        }
+            onClose: (options) => alert('FilterChanged onClose : ' + JSON.stringify(options)),
+        },
     ],
     onDownload: () => alert('Download file'),
     onSearch: (query) => alert(query),
@@ -91,11 +111,19 @@ Default.args = {
     onStatus: (query) => alert('Status changed to: ' + query),
     totalPages: 90,
     headers: [
-        { name: 'Name', accessor: 'name', onSort: (type, accessor, name) => alert(`Type: ${type}, Accessor: ${accessor}, Name: ${name}`) },
-        { name: 'Description', accessor: 'description', onSort: (type, accessor, name) => alert(`Type: ${type}, Accessor: ${accessor}, Name: ${name}`) },
+        {
+            name: 'Name',
+            accessor: 'name',
+            onSort: (type, accessor, name) => alert(`Type: ${type}, Accessor: ${accessor}, Name: ${name}`),
+        },
+        {
+            name: 'Description',
+            accessor: 'description',
+            onSort: (type, accessor, name) => alert(`Type: ${type}, Accessor: ${accessor}, Name: ${name}`),
+        },
         { name: 'Location', accessor: 'location' },
         { name: 'Breakers', accessor: 'breakers' },
-        { name: 'Socket Count', accessor: 'socketCount' },
+        { name: 'Socket Count', accessor: 'socketCount', cellProps: { width: 180 } },
     ],
     rows: [
         {
@@ -107,6 +135,9 @@ Default.args = {
             action: [],
             breakers: 'Weekdays',
             socketCount: 15,
+            rowProps: {
+                style: { height: 53 },
+            },
         },
         {
             id: '632b0bf3142672f801c84318',

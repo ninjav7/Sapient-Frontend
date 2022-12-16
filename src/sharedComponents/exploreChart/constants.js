@@ -1,18 +1,23 @@
+import React from 'react';
 import { hexToRgb } from '../../utils/helper';
 import { DATAVIZ_COLORS } from '../../constants/colors';
-
-const preparedData = (data) =>
-    data.map((el, index) => {
+import { renderComponents } from '../columnChart/helper';
+import Typography from '../../sharedComponents/typography';
+export const preparedData = (data) => {
+    const result = data.map((el, index) => {
         return {
             type: 'line',
+            name: el.name,
             color: DATAVIZ_COLORS[`datavizMain${index + 1}`],
-            data: el,
+            data: el.data,
             lineWidth: 2,
             showInLegend: true,
         };
     });
+    return result;
+};
 
-export const options = ({ data, dateRange }) => {
+export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
     return {
         chart: {
             type: 'line',
@@ -56,19 +61,41 @@ export const options = ({ data, dateRange }) => {
             },
         },
         tooltip: {
-            style: {
-                fontWeight: 'normal',
-            },
-            snap: 0,
-            backgroundColor: 'white',
-            borderRadius: 8,
-            borderColor: '#8098F9',
-            useHTML: true,
-            padding: 10,
-            border: 1,
-            animation: true,
+            headerFormat: `<div class="chart-tooltip">${renderComponents(
+                <>
+                    <Typography.Subheader size={Typography.Sizes.md} className="gray-550">
+                        {tooltipLabel && tooltipLabel}
+                    </Typography.Subheader>
+                    <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
+                        {'{point.key}'}
+                    </Typography.Subheader>
+                </>
+            )} <table>`,
+            pointFormat: `<tr> <td style="color:{series.color};padding:0">
+                ${renderComponents(
+                    <Typography.Header className="gray-900" size={Typography.Sizes.xs}>
+                        content
+                    </Typography.Header>
+                ).replace('content', '<span style="color:{series.color};">{series.name}:</span>')}
+                </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
+                    <Typography.Header size={Typography.Sizes.xs}>{'{point.y:.2f}'}</Typography.Header>
+                )}${renderComponents(
+                <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.sm}>
+                    {tooltipUnit}
+                </Typography.Subheader>
+            )}</td></tr>`,
+            footerFormat: '</table></div>',
+            shared: true,
             split: false,
             shared: true,
+            useHTML: true,
+            snap: 0,
+            useHTML: true,
+            shape: 'div',
+            padding: 0,
+            borderWidth: 0,
+            shadow: 0,
+            borderRadius: '0.25rem',
         },
         rangeSelector: {
             enabled: false,
@@ -87,7 +114,7 @@ export const options = ({ data, dateRange }) => {
             alternateGridColor: '#F2F4F7',
             type: 'datetime',
             labels: {
-                format: '{value: %e %b %Y}',
+                format: '{value: %e %b `%y}',
             },
         },
         yAxis: {
@@ -99,7 +126,7 @@ export const options = ({ data, dateRange }) => {
             },
         },
         time: {
-            useUTC: false,
+            useUTC: true,
         },
         series: preparedData(data),
     };

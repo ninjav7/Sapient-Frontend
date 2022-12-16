@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Search } from 'react-feather';

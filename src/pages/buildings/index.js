@@ -269,7 +269,7 @@ const BuildingOverview = () => {
                     const weekDaysData = weekDaysResData.map((el) => {
                         weekDaysList.push(Math.round(el.y / 1000));
                         return {
-                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            x: parseInt(moment.utc(el.x).format('HH')),
                             y: Math.round(el.y / 1000),
                         };
                     });
@@ -277,7 +277,7 @@ const BuildingOverview = () => {
                     const weekendsData = weekEndResData.map((el) => {
                         weekEndList.push(Math.round(el.y / 1000));
                         return {
-                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            x: parseInt(moment.utc(el.x).format('HH')),
                             y: Math.round(el.y / 1000),
                         };
                     });
@@ -287,6 +287,10 @@ const BuildingOverview = () => {
 
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
+
+                    if (minVal === maxVal) {
+                        minVal = 0;
+                    }
 
                     let heatMapData = [];
 
@@ -326,7 +330,7 @@ const BuildingOverview = () => {
                         } else {
                             newWeekendsData.data.push({
                                 x: i,
-                                y: getAverageValue(i, minVal, maxVal),
+                                y: 0,
                                 z: 0,
                             });
                         }

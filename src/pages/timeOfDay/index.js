@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -407,14 +408,14 @@ const TimeOfDay = () => {
 
                     const weekDaysData = weekDaysResData.map((el) => {
                         return {
-                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            x: parseInt(moment.utc(el.x).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
                         return {
-                            x: parseInt(convertDateTime(el.x, timeZone).format('HH')),
+                            x: parseInt(moment.utc(el.x).format('HH')),
                             y: el.y.toFixed(0),
                         };
                     });
@@ -668,6 +669,10 @@ const TimeOfDay = () => {
 
                     let minVal = finalList[0];
                     let maxVal = finalList[finalList.length - 1];
+
+                    if (minVal === maxVal) {
+                        minVal = 0;
+                    }
 
                     heatMapData.map((record) => {
                         if (record.name === 'Sunday') {

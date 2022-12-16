@@ -6,7 +6,7 @@ import * as FeatherIcon from 'react-feather';
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
 // settings
-import General from '../pages/settings/General';
+import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
@@ -20,7 +20,7 @@ import IndividualPassiveDevice from '../pages/settings/passive-devices/Individua
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
-import Buildings from '../pages/settings/Buildings';
+import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/Users';
 import UserProfile from '../pages/settings/UserProfile';
 import UserProfileNew from '../pages/settings/UserProfileNew';
@@ -42,7 +42,6 @@ const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
-const PageTracker = React.lazy(() => import('../components/PageTracker/PageTracker'));
 // apps
 const CalendarApp = React.lazy(() => import('../pages/apps/Calendar'));
 const EmailInbox = React.lazy(() => import('../pages/apps/Email/Inbox'));
@@ -494,6 +493,7 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
+        // PLT-492: Hide Role Page
         // {
         //     path: '/settings/gateways',
         //     name: 'Gateways',
@@ -560,14 +560,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-        {
-            path: '/settings/roles',
-            name: 'Roles',
-            component: Roles,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
+        // {
+        //     path: '/settings/roles',
+        //     name: 'Roles',
+        //     component: Roles,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
         {
             path: '/settings/equipment-types',
             name: 'Equipment Types',

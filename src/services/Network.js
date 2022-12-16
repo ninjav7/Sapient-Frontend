@@ -26,10 +26,8 @@ export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
+export const getFiltersForBuildings = '/api/config/general/general-buildings-filter';
 export const singleBuildingDetail = '/api/config/general/building-details';
-export const generalBuildingAddress = '/api/config/general/address';
-export const generalDateTime = '/api/config/general/date_time';
-export const generalOperatingHours = '/api/config/general/operating_hours';
 export const generalBldgDelete = '/api/config/general/delete_building';
 
 //user roles
@@ -62,7 +60,7 @@ export const equipmentDetails = '/api/config/equipments_details/by_id';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
-export const getFiltersForEquipment = '/api/config/configuration-filter'
+export const getFiltersForEquipment = '/api/config/configuration-filter';
 export const equipmentType = '/api/config/get_equipment_type';
 export const getEquipmentType = '/api/config/get_equipment_type_by_name/';
 export const addEquipmentType = '/api/config/create_equipment_type';
@@ -85,7 +83,6 @@ export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
-export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const updateDevice = '/api/config/devices/update_device';
 export const deletePassiveDevice = `/api/config/devices/delete/passive`;
 export const linkPassiveSensorToBreaker = `/api/config/sensor/passive/lnk_pas_snr_to_pnl_bkr`;
@@ -120,7 +117,6 @@ export const kasaLinkAccount = '/api/config/kasa/link_account';
 export const kasaUnLinkAccount = '/api/config/kasa/unlink_account';
 export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 export const getMetadata = '/api/config/metadata';
-
 
 // kasa accounts
 export const get_kasa_devices = '/api/config/kasa/get_devices';

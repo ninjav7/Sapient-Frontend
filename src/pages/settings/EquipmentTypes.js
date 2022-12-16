@@ -162,109 +162,109 @@ const EquipmentTable = ({
     return (
         <>
             <Card>
-                    <Table className="mt-4 mb-0 bordered table-hover">
-                        <thead>
-                            <tr className="mouse-pointer">
-                                <th>Name</th>
-                                <th>Status</th>
-                                <th>End Use Category</th>
-                                <th>Equipment Count</th>
-                            </tr>
-                        </thead>
-                        {isDeviceProcessing ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                <Table className="mt-4 mb-0 bordered table-hover">
+                    <thead>
+                        <tr className="mouse-pointer">
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>End Use Category</th>
+                            <th>Equipment Count</th>
+                        </tr>
+                    </thead>
+                    {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {equipmentTypeData.map((record, index) => {
+                                return (
+                                    <tr
+                                        key={index}
+                                        onClick={() => {
+                                            if (userPermission?.user_role === 'admin') {
+                                                setEquipData(record);
+                                                Toggle();
+                                            }
+                                        }}
+                                        className="mouse-pointer">
+                                        <td className="equip-type-style">
+                                            {record.equipment_type ? record.equipment_type : '-'}
                                         </td>
+                                        <td>{record.status ? record.status : '-'}</td>
+                                        <td>{record.end_use_name ? record.end_use_name : '-'}</td>
+                                        <td>{record.equipment_count}</td>
                                     </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                            <tbody>
-                                {equipmentTypeData.map((record, index) => {
-                                    return (
-                                        <tr
-                                            key={index}
-                                            onClick={() => {
-                                                if (userPermission?.user_role === 'admin') {
-                                                    setEquipData(record);
-                                                    Toggle();
-                                                }
-                                            }}
-                                            className="mouse-pointer">
-                                            <td className="equip-type-style">
-                                                {record.equipment_type ? record.equipment_type : '-'}
-                                            </td>
-                                            <td>{record.status ? record.status : '-'}</td>
-                                            <td>{record.end_use_name ? record.end_use_name : '-'}</td>
-                                            <td>{record.equipment_count}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        )}
-                    </Table>
-                    <div className="page-button-style">
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                paginationData.pagination !== undefined
-                                    ? paginationData.pagination.previous === null
-                                        ? true
-                                        : false
+                                );
+                            })}
+                        </tbody>
+                    )}
+                </Table>
+                <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={
+                            paginationData.pagination !== undefined
+                                ? paginationData.pagination.previous === null
+                                    ? true
                                     : false
-                            }
-                            onClick={() => {
-                                previousPageData(paginationData.pagination.previous);
-                            }}>
-                            Previous
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                paginationData.pagination !== undefined
-                                    ? paginationData.pagination.next === null
-                                        ? true
-                                        : false
+                                : false
+                        }
+                        onClick={() => {
+                            previousPageData(paginationData.pagination.previous);
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={
+                            paginationData.pagination !== undefined
+                                ? paginationData.pagination.next === null
+                                    ? true
                                     : false
-                            }
-                            onClick={() => {
-                                nextPageData(paginationData.pagination.next);
+                                : false
+                        }
+                        onClick={() => {
+                            nextPageData(paginationData.pagination.next);
+                        }}>
+                        Next
+                    </button>
+                    <div>
+                        <select
+                            value={pageSize}
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onChange={(e) => {
+                                setPageSize(parseInt(e.target.value));
+                                window.scrollTo(0, 0);
                             }}>
-                            Next
-                        </button>
-                        <div>
-                            <select
-                                value={pageSize}
-                                className="btn btn-md btn-light font-weight-bold mt-4"
-                                onChange={(e) => {
-                                    setPageSize(parseInt(e.target.value));
-                                    window.scrollTo(0, 0);
-                                }}>
-                                {[20, 50, 100].map((pageSize) => (
-                                    <option key={pageSize} value={pageSize} className="align-options-center">
-                                        Show {pageSize} devices
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                            {[20, 50, 100].map((pageSize) => (
+                                <option key={pageSize} value={pageSize} className="align-options-center">
+                                    Show {pageSize} devices
+                                </option>
+                            ))}
+                        </select>
                     </div>
+                </div>
             </Card>
             <div>
                 <SingleEquipmentModal
@@ -366,7 +366,6 @@ const EquipmentTypes = () => {
 
     const saveDeviceData = async () => {
         let obj = Object.assign({}, createEqipmentData);
-        obj['building_id'] = bldgId;
         obj['is_active'] = true;
         setCreateEqipmentData(obj);
         try {
@@ -404,8 +403,7 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
@@ -429,8 +427,7 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
@@ -448,8 +445,8 @@ const EquipmentTypes = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Equipment',
-                        path: '/settings/equipment',
+                        label: 'Equipment Types',
+                        path: '/settings/equipment-types',
                         active: true,
                     },
                 ];
@@ -469,7 +466,7 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+            let params = `?page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);
@@ -493,7 +490,6 @@ const EquipmentTypes = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     let response = res.data;
                     response.sort((a, b) => {

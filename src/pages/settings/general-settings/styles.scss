@@ -1,0 +1,23 @@
+@import '../../../assets/scss/colors';
+
+.weekday-container {
+    padding: 0.1875rem 0.625rem;
+    gap: 0.5rem;
+    width: 3.75rem;
+    height: 1.5rem;
+    background: $primary-indigo-50;
+    border: 0.0625rem solid $primary-indigo-50;
+    border-radius: 0.25rem;
+}
+
+.time-selector-style {
+    padding: .5rem .625rem;
+    gap: .5rem;
+    width: 5.9375rem;
+    height: 2.25rem;
+    background: $base-white;
+    border: .0625rem solid $primary-gray-450;
+    border-radius: .375rem;
+    justify-content: center;
+    align-items: center;
+}

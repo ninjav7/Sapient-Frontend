@@ -1,6 +1,3 @@
-import { DateRangeStore } from '../store/DateRangeStore';
-import React, { useState, useEffect } from 'react';
-
 export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
     // Defs
     // m1 = "Start date" Month value
@@ -59,35 +56,23 @@ export const getFormattedTimeIntervalData = (data, startDate, endDate) => {
     return newArr;
 };
 
-//**Code Commented for future development
-// export const getFormattedTimeIntervalObjectData = (data, startDate, endDate) => {
+//High Charts Date Range
+export const fetchDateRange = (startDate, endDate) => {
+    let sdf = new Date(
+        `${startDate.getFullYear()}-${
+            startDate.getMonth() < 9 ? `0${startDate.getMonth() + 1}` : startDate.getMonth() + 1
+        }-${startDate.getDate() < 9 ? `0${startDate.getDate()}` : startDate.getDate()}`
+    );
+    let ed = endDate;
+    let OneAdd = new Date(ed.getTime() + 86400000);
+    let edf = new Date(
+        `${OneAdd.getFullYear()}-${OneAdd.getMonth() < 9 ? `0${OneAdd.getMonth() + 1}` : OneAdd.getMonth() + 1}-${
+            OneAdd.getDate() < 9 ? `0${OneAdd.getDate()}` : OneAdd.getDate()
+        }`
+    );
 
-//     let newDataSet = [];
-//     let newdata = data[0].data;
-
-//     let sd = startDate.toLocaleDateString()
-//     let sdf = new Date(sd);
-//     let m1 = sdf.getMonth() + 1;
-//     let st = sdf.getTime();
-//     let ed = endDate.toLocaleDateString()
-//     let edf = new Date(endDate.getFullYear() + "-" + (endDate.getMonth() + 1) + "-" + (endDate.getDate() + 1));
-//     let et = edf.getTime();
-
-//     let newArr = [];
-//     for (let i = st, j = 1; i <= et; i += 900000) {
-//         let tsd = new Date();
-//         if (newdata[j] !== undefined)
-//             tsd = new Date(newdata[j].x);
-//         if (tsd.getTime() === i) {
-//             let ntsd = new Date(i);
-//             newArr.push({ "x": ntsd.getTime(), "y": newdata[j].y })
-//             j++;
-//         }
-//         else {
-//             let ntsd = new Date(i);
-//             newArr.push({ "x": ntsd.getTime(), "y": "" })
-//         }
-//     }
-//     newDataSet.push({ name: "Energy", data: newArr })
-//     return newDataSet;
-// }
+    return {
+        minDate: sdf.getTime(),
+        maxDate: edf.getTime(),
+    };
+};
