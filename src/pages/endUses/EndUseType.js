@@ -509,7 +509,7 @@ const EndUseType = () => {
                         )}
                     </div> */}
 
-            {endUseType === 'hvac' && (
+            {/* {endUseType === 'hvac' && (
                 <>
                     {isEquipTypeChartLoading ? (
                         <div className="mt-4 energy-container-loader">
@@ -574,7 +574,7 @@ const EndUseType = () => {
                         </>
                     )}
                 </>
-            )}
+            )} */}
         </React.Fragment>
     );
 };
