@@ -213,6 +213,9 @@ const EquipChartModal = ({
                 if (activePage === 'equipment') {
                     setSelectedTab(1);
                 }
+                if (activePage === 'buildingOverview') {
+                    setSelectedTab(0);
+                }
                 handleChartClose();
                 fetchEquipmentData(arr);
             })
@@ -233,6 +236,9 @@ const EquipChartModal = ({
         }
         if (activePage === 'equipment') {
             setSelectedTab(1);
+        }
+        if (activePage === 'buildingOverview') {
+            setSelectedTab(0);
         }
         handleChartClose();
     };

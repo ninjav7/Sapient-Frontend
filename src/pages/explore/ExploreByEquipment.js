@@ -29,7 +29,6 @@ import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import '../../helpers/Linq';
-import { CSVLink } from 'react-csv';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -1215,37 +1214,6 @@ const ExploreByEquipment = () => {
             })
             .catch((error) => {});
     };
-
-    //Planned for future CSV
-    // const getCSVLinkData = () => {
-    //     let sData = [];
-    //     exploreTableData.map(function (obj) {
-    //         let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
-    //         sData.push([
-    //             obj.equipment_name,
-    //             (obj.consumption.now / 1000).toFixed(2) + 'kWh',
-    //             change,
-    //             obj.location,
-    //             obj.location_type,
-    //             obj.equipments_type,
-    //             obj.end_user,
-    //         ]);
-    //     });
-    //     let streamData = exploreTableData.length > 0 ? sData : [];
-
-    //     return [
-    //         [
-    //             'Name',
-    //             'Energy Consumption',
-    //             '% Change',
-    //             'Location',
-    //             'Location Type',
-    //             'Equipment Type',
-    //             'End Use Category',
-    //         ],
-    //         ...streamData,
-    //     ];
-    // };
 
     const headerProps = [
         {

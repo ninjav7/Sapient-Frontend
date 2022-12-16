@@ -26,6 +26,7 @@ import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/To
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import './style.css';
+import EquipChartModal from '../chartModal/EquipChartModal';
 
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -169,6 +170,13 @@ const BuildingOverview = () => {
 
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
+    //EquipChartModel
+    const [equipmentFilter, setEquipmentFilter] = useState({});
+    const [selectedModalTab, setSelectedModalTab] = useState(0);
+    const [showEquipmentChart, setShowEquipmentChart] = useState(false);
+    const handleChartOpen = () => setShowEquipmentChart(true);
+    const handleChartClose = () => setShowEquipmentChart(false);
+
     const fetchTrendBadgeType = (now, old) => {
         if (now > old) {
             return TRENDS_BADGE_TYPES.UPWARD_TREND;
@@ -190,6 +198,31 @@ const BuildingOverview = () => {
         history.push({
             pathname: `${path}/${bldgId}`,
         });
+    };
+    const builidingEquipmentsData = async () => {
+        let payload = apiRequestBody(startDate, endDate, timeZone);
+        await fetchBuildingEquipments(bldgId, payload)
+            .then((res) => {
+                let response = res.data[0].top_contributors;
+                let topEnergyData = [];
+                response.forEach((record) => {
+                    let obj = {
+                        link: '#',
+                        id: record?.equipment_id,
+                        label: record?.equipment_name,
+                        value: Math.round(record?.energy_consumption.now / 1000),
+                        unit: UNITS.KWH,
+                        badgePercentage: percentageHandler(
+                            record?.energy_consumption.now,
+                            record?.energy_consumption.old
+                        ),
+                        badgeType: fetchTrendBadgeType(record?.energy_consumption.now, record?.energy_consumption.old),
+                    };
+                    topEnergyData.push(obj);
+                });
+                setTopEnergyConsumptionData(topEnergyData);
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -222,34 +255,6 @@ const BuildingOverview = () => {
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
-                })
-                .catch((error) => {});
-        };
-
-        const builidingEquipmentsData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchBuildingEquipments(bldgId, payload)
-                .then((res) => {
-                    let response = res.data[0].top_contributors;
-                    let topEnergyData = [];
-                    response.forEach((record) => {
-                        let obj = {
-                            link: '#',
-                            label: record?.equipment_name,
-                            value: Math.round(record?.energy_consumption.now / 1000),
-                            unit: UNITS.KWH,
-                            badgePercentage: percentageHandler(
-                                record?.energy_consumption.now,
-                                record?.energy_consumption.old
-                            ),
-                            badgeType: fetchTrendBadgeType(
-                                record?.energy_consumption.now,
-                                record?.energy_consumption.old
-                            ),
-                        };
-                        topEnergyData.push(obj);
-                    });
-                    setTopEnergyConsumptionData(topEnergyData);
                 })
                 .catch((error) => {});
         };
@@ -420,6 +425,18 @@ const BuildingOverview = () => {
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
+    const handleClick = (row) => {
+        console.log(row);
+        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
+        console.log(arr);
+        setEquipmentFilter({
+            equipment_id: arr[0]?.id,
+            equipment_name: arr[0]?.label,
+        });
+        localStorage.setItem('exploreEquipName', arr[0]?.label);
+        handleChartOpen();
+    };
+
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -474,9 +491,20 @@ const BuildingOverview = () => {
                     heads={['Equipment', 'Energy', 'Change']}
                     rows={topEnergyConsumptionData}
                     className={'fit-container-style'}
+                    handleClick={handleClick}
                     widgetType="TopEnergyConsumersWidget"
                 />
             </div>
+
+            <EquipChartModal
+                showEquipmentChart={showEquipmentChart}
+                handleChartClose={handleChartClose}
+                equipmentFilter={equipmentFilter}
+                fetchEquipmentData={builidingEquipmentsData}
+                selectedTab={selectedModalTab}
+                setSelectedTab={setSelectedModalTab}
+                activePage="buildingOverview"
+            />
         </React.Fragment>
     );
 };
