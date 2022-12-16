@@ -24,6 +24,7 @@ import Select from 'react-select';
 import { Cookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import CreateEquipType from './equipment-type/CreateEquipType';
 
 const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }) => {
     let cookies = new Cookies();
@@ -285,9 +286,9 @@ const EquipmentTypes = () => {
 
     const [formValidation, setFormValidation] = useState(false);
 
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const [isAddEquipTypeModalOpen, setEquipTypeModal] = useState(false);
+    const closeAddEquipTypeModal = () => setEquipTypeModal(false);
+    const openAddEquipTypeModal = () => setEquipTypeModal(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [search, setSearch] = useState('');
@@ -519,7 +520,7 @@ const EquipmentTypes = () => {
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
                                     onClick={() => {
-                                        handleShow();
+                                        openAddEquipTypeModal();
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add Equipment Type
                                 </button>
@@ -564,76 +565,11 @@ const EquipmentTypes = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Add Equipment Type</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Name"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('name', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>End Use</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('end_use', e.target.value);
-                                }}>
-                                <option selected>Select End Use</option>
-                                {endUseData.map((record) => {
-                                    return <option value={record.end_user_id}>{record.name}</option>;
-                                })}
-                            </Input> */}
-                            {/* endUseDataNow */}
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select End Use"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={'Select End Use'}
-                                options={endUseDataNow}
-                                onChange={(e) => {
-                                    handleChange('end_use', e.value);
-                                }}
-                                className="basic-single font-weight-bold"
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
-                        <Button
-                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
-                            onClick={handleClose}>
-                            Cancel
-                        </Button>
-
-                        <Button
-                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
-                            onClick={() => {
-                                saveDeviceData();
-                                handleClose();
-                            }}
-                            disabled={!formValidation}>
-                            {isProcessing ? 'Adding...' : 'Add'}
-                        </Button>
-                    </div>
-                </Modal.Footer>
-            </Modal>
+            <CreateEquipType
+                isAddEquipTypeModalOpen={isAddEquipTypeModalOpen}
+                closeAddEquipTypeModal={closeAddEquipTypeModal}
+                fetchEquipTypeData={fetchEquipTypeData}
+            />
         </React.Fragment>
     );
 };
