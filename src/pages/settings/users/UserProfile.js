@@ -95,10 +95,12 @@ const UserProfile = () => {
                     setShow(false);
                 } else {
                     setLoadButton(false);
-                    getSingleUserDetailFunc();
                 }
+                getSingleUserDetailFunc();
+                setIsProcessing(false);
             })
             .catch((error) => {});
+        setIsProcessing(false);
     };
     const updateRolesPermission = async () => {
         await updateUserRolePermission(userObj)
