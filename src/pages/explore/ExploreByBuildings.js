@@ -645,7 +645,7 @@ const ExploreByBuildings = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <a
-                    className="typography-wrapper link"
+                    className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone);
                     }}>

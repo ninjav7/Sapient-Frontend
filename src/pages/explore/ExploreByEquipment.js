@@ -310,7 +310,7 @@ const ExploreByEquipment = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <a
-                    className="typography-wrapper link"
+                    className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         setEquipmentFilter({
                             equipment_id: row?.equipment_id,

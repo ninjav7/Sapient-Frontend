@@ -15,6 +15,8 @@ import {
 } from './services';
 import { Cookies } from 'react-cookie';
 import { useHistory, Link } from 'react-router-dom';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
@@ -47,6 +49,7 @@ const EquipChartModal = ({
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const [userPermission] = useAtom(userPermissionData);
 
     const history = useHistory();
 
@@ -482,18 +485,24 @@ const EquipChartModal = ({
                                 <Col lg={4}>
                                     <div className="equip-button-wrapper">
                                         <div>
-                                            <Button
-                                                label="Turn Off"
-                                                icon={
-                                                    <FontAwesomeIcon
-                                                        icon={faPowerOff}
-                                                        size="lg"
-                                                        style={{ color: 'red' }}
-                                                    />
-                                                }
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primaryDistructive}
-                                            />
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_buildings_permission
+                                                ?.edit ? (
+                                                <Button
+                                                    label="Turn Off"
+                                                    icon={
+                                                        <FontAwesomeIcon
+                                                            icon={faPowerOff}
+                                                            size="lg"
+                                                            style={{ color: 'red' }}
+                                                        />
+                                                    }
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primaryDistructive}
+                                                />
+                                            ) : (
+                                                <></>
+                                            )}
                                         </div>
 
                                         <div>
@@ -508,15 +517,21 @@ const EquipChartModal = ({
                                             />
                                         </div>
                                         <div>
-                                            <Button
-                                                label="Save"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                onClick={() => {
-                                                    handleSave();
-                                                }}
-                                                disabled={!isDataChanged}
-                                            />
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_buildings_permission
+                                                ?.edit ? (
+                                                <Button
+                                                    label="Save"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primary}
+                                                    onClick={() => {
+                                                        handleSave();
+                                                    }}
+                                                    disabled={!isDataChanged}
+                                                />
+                                            ) : (
+                                                <></>
+                                            )}
                                         </div>
                                     </div>
                                 </Col>
@@ -559,16 +574,22 @@ const EquipChartModal = ({
                                             />
                                         </div>
                                         <div>
-                                            <Button
-                                                label="Save"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                className="ml-4"
-                                                onClick={() => {
-                                                    handleSave();
-                                                }}
-                                                disabled={!isDataChanged}
-                                            />
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_buildings_permission
+                                                ?.edit ? (
+                                                <Button
+                                                    label="Save"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primary}
+                                                    className="ml-4"
+                                                    onClick={() => {
+                                                        handleSave();
+                                                    }}
+                                                    disabled={!isDataChanged}
+                                                />
+                                            ) : (
+                                                <></>
+                                            )}
                                         </div>
                                     </div>
                                 </Col>
@@ -611,16 +632,22 @@ const EquipChartModal = ({
                                             />
                                         </div>
                                         <div>
-                                            <Button
-                                                label="Save"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.primary}
-                                                className="ml-4"
-                                                onClick={() => {
-                                                    handleSave();
-                                                }}
-                                                disabled={!isDataChanged}
-                                            />
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_buildings_permission
+                                                ?.edit ? (
+                                                <Button
+                                                    label="Save"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.primary}
+                                                    className="ml-4"
+                                                    onClick={() => {
+                                                        handleSave();
+                                                    }}
+                                                    disabled={!isDataChanged}
+                                                />
+                                            ) : (
+                                                <></>
+                                            )}
                                         </div>
                                     </div>
                                 </Col>
@@ -829,15 +856,30 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Name
                                                     </Typography.Subheader>
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Enter Equipment Name"
-                                                        className="font-weight-bold"
-                                                        defaultValue={equipmentData?.equipments_name}
-                                                        onChange={(e) => {
-                                                            handleChange('name', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Enter Equipment Name"
+                                                            defaultValue={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Name Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_name
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -848,28 +890,44 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Type
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold"
-                                                        value={equipType}
-                                                        onChange={(e) => {
-                                                            handleEquipTypeChange(
-                                                                'equipment_type',
-                                                                e.target.value,
-                                                                'passive'
-                                                            );
-                                                        }}>
-                                                        <option selected>Select Type</option>
-                                                        {equipmentTypeData?.map((record) => {
-                                                            return (
-                                                                <option value={record?.equipment_id}>
-                                                                    {record?.equipment_type}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="exampleSelect"
+                                                            className="font-weight-bold"
+                                                            value={equipType}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'passive'
+                                                                );
+                                                            }}>
+                                                            <option selected>Select Type</option>
+                                                            {equipmentTypeData?.map((record) => {
+                                                                return (
+                                                                    <option value={record?.equipment_id}>
+                                                                        {record?.equipment_type}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Type Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_type
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -880,24 +938,40 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         End Use Category
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="endUsePop"
-                                                        className="font-weight-bold"
-                                                        onChange={(e) => {
-                                                            handleChange('end_use', e.target.value);
-                                                        }}
-                                                        value={equipmentData?.end_use_id}>
-                                                        <option selected>Select Category</option>
-                                                        {endUse?.map((record) => {
-                                                            return (
-                                                                <option value={record?.end_use_id}>
-                                                                    {record?.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="endUsePop"
+                                                            className="font-weight-bold"
+                                                            onChange={(e) => {
+                                                                handleChange('end_use', e.target.value);
+                                                            }}
+                                                            value={equipmentData?.end_use_id}>
+                                                            <option selected>Select Category</option>
+                                                            {endUse?.map((record) => {
+                                                                return (
+                                                                    <option value={record?.end_use_id}>
+                                                                        {record?.name}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No End Use Added"
+                                                            className="font-weight-bold"
+                                                            value={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.end_use_name
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -910,14 +984,28 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Location
                                                     </Typography.Subheader>
-                                                    <Select
-                                                        defaultValue={location}
-                                                        options={locationData}
-                                                        onChange={(e) => {
-                                                            handleChange('space_id', e.value);
-                                                        }}
-                                                        placeholder="Select Location"
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Select
+                                                            defaultValue={location}
+                                                            options={locationData}
+                                                            onChange={(e) => {
+                                                                handleChange('space_id', e.value);
+                                                            }}
+                                                            placeholder="Select Location"
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Location Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null ? equipmentData?.location : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Light}
@@ -936,14 +1024,26 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Tags
                                                     </Typography.Subheader>
-                                                    <TagsInput
-                                                        value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        onChange={(value) => {
-                                                            handleChange('tags', value);
-                                                        }}
-                                                        name="tag"
-                                                        placeHolder="+ Add Tag"
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <TagsInput
+                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                            onChange={(value) => {
+                                                                handleChange('tags', value);
+                                                            }}
+                                                            name="tag"
+                                                            placeHolder="+ Add Tag"
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Tags Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -956,17 +1056,31 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Notes
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="textarea"
-                                                        name="text"
-                                                        id="exampleText"
-                                                        rows="3"
-                                                        placeholder="Enter a Note..."
-                                                        defaultValue={equipmentData !== null ? equipmentData?.note : ''}
-                                                        onChange={(e) => {
-                                                            handleChange('note', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="textarea"
+                                                            name="text"
+                                                            id="exampleText"
+                                                            rows="3"
+                                                            placeholder="Enter a Note..."
+                                                            defaultValue={
+                                                                equipmentData !== null ? equipmentData?.note : ''
+                                                            }
+                                                            onChange={(e) => {
+                                                                handleChange('note', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Notes Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.note : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1164,15 +1278,31 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Name
                                                     </Typography.Subheader>
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Enter Equipment Name"
-                                                        className="font-weight-bold"
-                                                        defaultValue={equipmentData?.equipments_name}
-                                                        onChange={(e) => {
-                                                            handleChange('name', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Enter Equipment Name"
+                                                            className="font-weight-bold"
+                                                            defaultValue={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Name Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_name
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1183,28 +1313,44 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Type
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold disabled"
-                                                        value={equipType}
-                                                        onChange={(e) => {
-                                                            handleEquipTypeChange(
-                                                                'equipment_type',
-                                                                e.target.value,
-                                                                'passive'
-                                                            );
-                                                        }}>
-                                                        <option selected>Select Type</option>
-                                                        {equipmentTypeData?.map((record) => {
-                                                            return (
-                                                                <option value={record?.equipment_id}>
-                                                                    {record?.equipment_type}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="exampleSelect"
+                                                            className="font-weight-bold disabled"
+                                                            value={equipType}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'passive'
+                                                                );
+                                                            }}>
+                                                            <option selected>Select Type</option>
+                                                            {equipmentTypeData?.map((record) => {
+                                                                return (
+                                                                    <option value={record?.equipment_id}>
+                                                                        {record?.equipment_type}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Type Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_type
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={4}>
@@ -1215,24 +1361,40 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         End Use Category
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="endUsePop"
-                                                        className="font-weight-bold"
-                                                        onChange={(e) => {
-                                                            handleChange('end_use', e.target.value);
-                                                        }}
-                                                        value={equipmentData?.end_use_id}>
-                                                        <option selected>Select Category</option>
-                                                        {endUse?.map((record) => {
-                                                            return (
-                                                                <option value={record?.end_use_id}>
-                                                                    {record?.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="endUsePop"
+                                                            className="font-weight-bold"
+                                                            onChange={(e) => {
+                                                                handleChange('end_use', e.target.value);
+                                                            }}
+                                                            value={equipmentData?.end_use_id}>
+                                                            <option selected>Select Category</option>
+                                                            {endUse?.map((record) => {
+                                                                return (
+                                                                    <option value={record?.end_use_id}>
+                                                                        {record?.name}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No End Use Added"
+                                                            className="font-weight-bold"
+                                                            value={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.end_use_name
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1245,26 +1407,40 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Location
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold"
-                                                        onChange={(e) => {
-                                                            handleChange('space_id', e.target.value);
-                                                        }}
-                                                        value={location}>
-                                                        <option value="" selected>
-                                                            Select Location
-                                                        </option>
-                                                        {locationData?.map((record) => {
-                                                            return (
-                                                                <option value={record?.location_id}>
-                                                                    {record?.location_name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="exampleSelect"
+                                                            className="font-weight-bold"
+                                                            onChange={(e) => {
+                                                                handleChange('space_id', e.target.value);
+                                                            }}
+                                                            value={location}>
+                                                            <option value="" selected>
+                                                                Select Location
+                                                            </option>
+                                                            {locationData?.map((record) => {
+                                                                return (
+                                                                    <option value={record?.location_id}>
+                                                                        {record?.location_name}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Location Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null ? equipmentData?.location : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Light}
@@ -1283,14 +1459,26 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Tags
                                                     </Typography.Subheader>
-                                                    <TagsInput
-                                                        value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                        onChange={(value) => {
-                                                            handleChange('tags', value);
-                                                        }}
-                                                        name="tag"
-                                                        placeHolder="+ Add Tag"
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <TagsInput
+                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                            onChange={(value) => {
+                                                                handleChange('tags', value);
+                                                            }}
+                                                            name="tag"
+                                                            placeHolder="+ Add Tag"
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Tags Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1303,17 +1491,31 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Notes
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="textarea"
-                                                        name="text"
-                                                        id="exampleText"
-                                                        rows="3"
-                                                        placeholder="Enter a Note..."
-                                                        defaultValue={equipmentData !== null ? equipmentData?.note : ''}
-                                                        onChange={(e) => {
-                                                            handleChange('note', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="textarea"
+                                                            name="text"
+                                                            id="exampleText"
+                                                            rows="3"
+                                                            placeholder="Enter a Note..."
+                                                            defaultValue={
+                                                                equipmentData !== null ? equipmentData?.note : ''
+                                                            }
+                                                            onChange={(e) => {
+                                                                handleChange('note', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Notes Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.note : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1529,15 +1731,31 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Name
                                                     </Typography.Subheader>
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Enter Equipment Name"
-                                                        className="font-weight-bold"
-                                                        defaultValue={equipmentData?.equipments_name}
-                                                        onChange={(e) => {
-                                                            handleChange('name', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Enter Equipment Name"
+                                                            className="font-weight-bold"
+                                                            defaultValue={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Name Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_name
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                             <Col lg={6}>
@@ -1548,28 +1766,44 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Type
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold"
-                                                        value={equipType}
-                                                        onChange={(e) => {
-                                                            handleEquipTypeChange(
-                                                                'equipment_type',
-                                                                e.target.value,
-                                                                'active'
-                                                            );
-                                                        }}>
-                                                        <option selected>Select Type</option>
-                                                        {equipmentTypeData.map((record) => {
-                                                            return (
-                                                                <option value={record.equipment_id}>
-                                                                    {record.equipment_type}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="exampleSelect"
+                                                            className="font-weight-bold"
+                                                            value={equipType}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'active'
+                                                                );
+                                                            }}>
+                                                            <option selected>Select Type</option>
+                                                            {equipmentTypeData.map((record) => {
+                                                                return (
+                                                                    <option value={record.equipment_id}>
+                                                                        {record.equipment_type}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Equipment Type Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.equipments_type
+                                                                    : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1582,13 +1816,27 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Equipment Location
                                                     </Typography.Subheader>
-                                                    <Form.Control
-                                                        type="text"
-                                                        readOnly
-                                                        placeholder="Enter Location"
-                                                        className="font-weight-bold"
-                                                        value={equipmentData !== null ? equipmentData.location : ''}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Form.Control
+                                                            type="text"
+                                                            readOnly
+                                                            placeholder="Enter Location"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData.location : ''}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Location Added"
+                                                            className="font-weight-bold"
+                                                            defaultValue={
+                                                                equipmentData !== null ? equipmentData?.location : ''
+                                                            }
+                                                            disabled
+                                                        />
+                                                    )}
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Light}
@@ -1607,15 +1855,26 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Applied Rule
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="select"
-                                                        name="select"
-                                                        id="exampleSelect"
-                                                        className="font-weight-bold"
-                                                        disabled>
-                                                        <option selected>Desktop PC</option>
-                                                        <option>Refigerator</option>
-                                                    </Input>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="select"
+                                                            name="select"
+                                                            id="exampleSelect"
+                                                            className="font-weight-bold"
+                                                            disabled>
+                                                            <option selected>Desktop PC</option>
+                                                            <option>Refigerator</option>
+                                                        </Input>
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Rule Applied Added"
+                                                            className="font-weight-bold"
+                                                            disabled
+                                                        />
+                                                    )}
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Light}
@@ -1634,14 +1893,26 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Tags
                                                     </Typography.Subheader>
-                                                    <TagsInput
-                                                        value={equipmentData !== null ? equipmentData.tags : ''}
-                                                        onChange={(value) => {
-                                                            handleChange('tags', value);
-                                                        }}
-                                                        name="tag"
-                                                        placeHolder="+ Add Tag"
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <TagsInput
+                                                            value={equipmentData !== null ? equipmentData.tags : ''}
+                                                            onChange={(value) => {
+                                                                handleChange('tags', value);
+                                                            }}
+                                                            name="tag"
+                                                            placeHolder="+ Add Tag"
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Tags Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
@@ -1654,17 +1925,29 @@ const EquipChartModal = ({
                                                         className="text-muted mb-1">
                                                         Notes
                                                     </Typography.Subheader>
-                                                    <Input
-                                                        type="textarea"
-                                                        name="text"
-                                                        id="exampleText"
-                                                        rows="3"
-                                                        placeholder="Enter a Note..."
-                                                        value={equipmentData !== null ? equipmentData?.note : ''}
-                                                        onChange={(e) => {
-                                                            handleChange('note', e.target.value);
-                                                        }}
-                                                    />
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Input
+                                                            type="textarea"
+                                                            name="text"
+                                                            id="exampleText"
+                                                            rows="3"
+                                                            placeholder="Enter a Note..."
+                                                            value={equipmentData !== null ? equipmentData?.note : ''}
+                                                            onChange={(e) => {
+                                                                handleChange('note', e.target.value);
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="No Notes Added"
+                                                            className="font-weight-bold"
+                                                            value={equipmentData !== null ? equipmentData?.note : ''}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
