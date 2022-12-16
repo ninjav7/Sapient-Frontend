@@ -223,12 +223,15 @@ const EquipChartModal = ({
     };
 
     const handleCloseWithoutSave = () => {
+        let arr = apiRequestBody(startDate, endDate, timeZone);
         setEquipResult({});
         setEquipmentData({});
         setCloseFlag(true);
         setDataChanged(false);
         setSelectedUnit(metric[0].unit);
         setConsumption(metric[0].value);
+        setDeviceData([]);
+        setSeriesData([]);
         setSelectedConsumptionLabel(metric[0].Consumption);
         setUpdateEqipmentData({});
         if (activePage === 'explore') {
@@ -459,1214 +462,780 @@ const EquipChartModal = ({
     }, [equipmentTypeData]);
 
     return (
-        <Modal
-            show={showEquipmentChart}
-            onHide={handleChartClose}
-            dialogClassName="modal-container-style"
-            centered
-            backdrop="static"
-            keyboard={false}>
-            <>
-                <Modal.Body className="p-4">
-                    {equipmentData?.device_type === 'active' ? (
-                        <>
-                            <Row>
-                                <Col lg={12}>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        Type={Typography.Types.Light}
-                                        className="text-muted">
-                                        {equipmentData?.location}
-                                    </Typography.Subheader>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={8}>
-                                    <div>
-                                        <Typography.Header size={Typography.Sizes.md}>
-                                            {equipmentData?.equipments_name}
-                                        </Typography.Header>
-                                    </div>
-                                </Col>
-                                <Col lg={4}>
-                                    <div className="equip-button-wrapper">
-                                        <div>
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_buildings_permission
-                                                ?.edit ? (
-                                                <Button
-                                                    label="Turn Off"
-                                                    icon={
-                                                        <FontAwesomeIcon
-                                                            icon={faPowerOff}
-                                                            size="lg"
-                                                            style={{ color: 'red' }}
-                                                        />
-                                                    }
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primaryDistructive}
-                                                />
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <Button
-                                                label="Cancel"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                className="mr-4 ml-4"
-                                                onClick={() => {
-                                                    handleCloseWithoutSave();
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_buildings_permission
-                                                ?.edit ? (
-                                                <Button
-                                                    label="Save"
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primary}
-                                                    onClick={() => {
-                                                        handleSave();
-                                                    }}
-                                                    disabled={!isDataChanged}
-                                                />
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Col>
-                            </Row>
-                        </>
-                    ) : (
-                        ''
-                    )}
-
-                    {equipmentData?.device_type === 'passive' ? (
-                        <>
-                            <Row>
-                                <Col lg={12}>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        Type={Typography.Types.Light}
-                                        className="text-muted">
-                                        {equipmentData?.location}
-                                    </Typography.Subheader>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={9}>
-                                    <div>
-                                        <Typography.Header size={Typography.Sizes.md}>
-                                            {equipmentData?.equipments_name}
-                                        </Typography.Header>
-                                    </div>
-                                </Col>
-                                <Col lg={3}>
-                                    <div className="equip-button-wrapper">
-                                        <div>
-                                            <Button
-                                                label="Cancel"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                onClick={() => {
-                                                    handleCloseWithoutSave();
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_buildings_permission
-                                                ?.edit ? (
-                                                <Button
-                                                    label="Save"
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primary}
-                                                    className="ml-4"
-                                                    onClick={() => {
-                                                        handleSave();
-                                                    }}
-                                                    disabled={!isDataChanged}
-                                                />
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Col>
-                            </Row>
-                        </>
-                    ) : (
-                        ''
-                    )}
-
-                    {equipmentData?.device_type === '' ? (
-                        <>
-                            <Row>
-                                <Col lg={12}>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        Type={Typography.Types.Light}
-                                        className="text-muted">
-                                        {equipmentData?.location}
-                                    </Typography.Subheader>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={9}>
-                                    <div>
-                                        <Typography.Header size={Typography.Sizes.md}>
-                                            {equipmentData?.equipments_name}
-                                        </Typography.Header>
-                                    </div>
-                                </Col>
-                                <Col lg={3}>
-                                    <div className="equip-button-wrapper">
-                                        <div>
-                                            <Button
-                                                label="Cancel"
-                                                size={Button.Sizes.md}
-                                                type={Button.Type.secondaryGrey}
-                                                onClick={() => {
-                                                    handleCloseWithoutSave();
-                                                }}
-                                            />
-                                        </div>
-                                        <div>
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.account_buildings_permission
-                                                ?.edit ? (
-                                                <Button
-                                                    label="Save"
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.primary}
-                                                    className="ml-4"
-                                                    onClick={() => {
-                                                        handleSave();
-                                                    }}
-                                                    disabled={!isDataChanged}
-                                                />
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Col>
-                            </Row>
-                        </>
-                    ) : (
-                        ''
-                    )}
-
-                    <Row className="mt-2 mouse-pointer">
-                        <Col lg={1}>
-                            <span>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    Type={Typography.Types.Light}
-                                    className={selectedTab === 0 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'}
-                                    onClick={() => setSelectedTab(0)}>
-                                    Metrics
-                                </Typography.Subheader>
-                            </span>
-                        </Col>
-                        <Col lg={1}>
-                            <span>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    Type={Typography.Types.Light}
-                                    className={selectedTab === 1 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'}
-                                    onClick={() => setSelectedTab(1)}>
-                                    Configure
-                                </Typography.Subheader>
-                            </span>
-                        </Col>
-                        <Col lg={10}></Col>
-                    </Row>
-
-                    {selectedTab === 0 && (
-                        <Row className="mt-4">
-                            <Col lg={4}>
-                                <div className="ytd-container">
-                                    <div>
-                                        <div className="ytd-heading">
-                                            {`Total Consumption (${moment(startDate).format('MMM D')} to ${moment(
-                                                endDate
-                                            ).format('MMM D')})`}
-                                        </div>
-                                        {isYtdDataFetching ? (
-                                            <Skeleton count={1} />
-                                        ) : (
-                                            <div className="ytd-flex">
-                                                <span className="mr-1 ytd-value">
-                                                    {ytdData?.ytd?.ytd
-                                                        ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
-                                                        : 0}
-                                                </span>
-                                                <span className="ytd-unit">kWh</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className="ytd-heading">
-                                            {`Peak kW (${moment(startDate).format('MMM D')} to ${moment(endDate).format(
-                                                'MMM D'
-                                            )})`}
-                                        </div>
-                                        {isYtdDataFetching ? (
-                                            <Skeleton count={1} />
-                                        ) : (
-                                            <div className="ytd-flex">
-                                                {equipmentData?.device_type === 'active' ? (
-                                                    <span className="mr-1 ytd-value">
-                                                        {ytdData?.ytd_peak?.power
-                                                            ? formatConsumptionValue(ytdData?.ytd_peak?.power / 1000, 1)
-                                                            : 0}
-                                                    </span>
-                                                ) : (
-                                                    <span className="mr-1 ytd-value">
-                                                        {ytdData?.ytd_peak?.power
-                                                            ? formatConsumptionValue(
-                                                                  ytdData?.ytd_peak?.power / 1000000,
-                                                                  1
-                                                              )
-                                                            : 0}
-                                                    </span>
-                                                )}
-
-                                                {ytdData?.ytd_peak?.time_stamp ? (
-                                                    <span className="ytd-unit">
-                                                        {`kW @ ${moment
-                                                            .utc(ytdData?.ytd_peak?.time_stamp)
-                                                            .clone()
-                                                            .tz(timeZone)
-                                                            .format('MM/DD  H:mm')}`}
-                                                    </span>
-                                                ) : (
-                                                    <span className="ytd-unit">kW</span>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </Col>
-
-                            <Col lg={8}>
-                                <div className="equip-model">
-                                    <div className="pt-3">
+        <div>
+            <Modal
+                show={showEquipmentChart}
+                onHide={handleChartClose}
+                dialogClassName="modal-container-style"
+                centered
+                backdrop={false}>
+                <>
+                    <Modal.Body className="p-4">
+                        {equipmentData?.device_type === 'active' ? (
+                            <>
+                                <Row>
+                                    <Col lg={12}>
                                         <Typography.Subheader
                                             size={Typography.Sizes.md}
                                             Type={Typography.Types.Light}
-                                            className="ytd-heading">
-                                            Device : &nbsp;
-                                            <Link
-                                                style={{
-                                                    pointerEvents:
-                                                        equipmentData?.device_type === 'passive'
-                                                            ? equipBreakerLink?.length === 0
-                                                                ? 'none'
-                                                                : ''
-                                                            : equipmentData !== null
-                                                            ? equipmentData.device_id === ''
-                                                                ? 'none'
-                                                                : ''
-                                                            : 'none',
-                                                }}
-                                                target="_blank"
-                                                to={redirectToConfigDevicePageLink(
-                                                    equipmentData?.device_id,
-                                                    equipmentData?.device_type === 'passive'
-                                                        ? 'passive-device'
-                                                        : equipmentData?.device_type === 'active'
-                                                        ? 'active-device'
-                                                        : ''
-                                                )}>
-                                                <span
-                                                    className="buttonhover"
-                                                    style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
-                                                    {equipmentData?.device_mac}
-                                                    &nbsp;
-                                                    <FontAwesomeIcon
-                                                        icon={faArrowUpRightFromSquare}
-                                                        size="md"
-                                                        style={{ color: 'base-black' }}
-                                                    />
-                                                </span>
-                                            </Link>
+                                            className="text-muted">
+                                            {equipmentData?.location}
                                         </Typography.Subheader>
-                                    </div>
-                                    <div className="d-flex">
-                                        <div className="mr-2">
-                                            <Select
-                                                defaultValue={selectedConsumption}
-                                                options={metric}
-                                                onChange={(e) => {
-                                                    if (e.value === 'passive-power') {
-                                                        return;
-                                                    }
-                                                    setConsumption(e.value);
-                                                    handleUnitChange(e.value);
-                                                    handleConsumptionChange(e.value);
-                                                }}
-                                            />
-                                        </div>
-                                        <Header type="modal" />
-                                    </div>
-                                </div>
-
-                                {isEquipDataFetched ? (
-                                    <div className="loader-center-style">
-                                        <Spinner className="m-2" color={'primary'} />
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <LineChart
-                                            title={''}
-                                            subTitle={''}
-                                            tooltipUnit={selectedUnit}
-                                            tooltipLabel={selectedConsumptionLabel}
-                                            data={deviceData}
-                                            dateRange={fetchDateRange(startDate, endDate)}
-                                        />
-                                    </div>
-                                )}
-                            </Col>
-                        </Row>
-                    )}
-
-                    {selectedTab === 1 && (
-                        <>
-                            {equipmentData?.device_type === 'passive' ? (
-                                <Row className="mt-4">
+                                    </Col>
+                                </Row>
+                                <Row>
                                     <Col lg={8}>
-                                        <Row>
-                                            <Col lg={12} className="mb-2">
-                                                <Typography.Header
-                                                    size={Typography.Sizes.md}
-                                                    Type={Typography.Types.Regular}>
-                                                    Equipment Details
-                                                </Typography.Header>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Name
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Enter Equipment Name"
-                                                            defaultValue={equipmentData?.equipments_name}
-                                                            onChange={(e) => {
-                                                                handleChange('name', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Name Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_name
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Type
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="exampleSelect"
-                                                            className="font-weight-bold"
-                                                            value={equipType}
-                                                            onChange={(e) => {
-                                                                handleEquipTypeChange(
-                                                                    'equipment_type',
-                                                                    e.target.value,
-                                                                    'passive'
-                                                                );
-                                                            }}>
-                                                            <option selected>Select Type</option>
-                                                            {equipmentTypeData?.map((record) => {
-                                                                return (
-                                                                    <option value={record?.equipment_id}>
-                                                                        {record?.equipment_type}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Type Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_type
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        End Use Category
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="endUsePop"
-                                                            className="font-weight-bold"
-                                                            onChange={(e) => {
-                                                                handleChange('end_use', e.target.value);
-                                                            }}
-                                                            value={equipmentData?.end_use_id}>
-                                                            <option selected>Select Category</option>
-                                                            {endUse?.map((record) => {
-                                                                return (
-                                                                    <option value={record?.end_use_id}>
-                                                                        {record?.name}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No End Use Added"
-                                                            className="font-weight-bold"
-                                                            value={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.end_use_name
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Location
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Select
-                                                            defaultValue={location}
-                                                            options={locationData}
-                                                            onChange={(e) => {
-                                                                handleChange('space_id', e.value);
-                                                            }}
-                                                            placeholder="Select Location"
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Location Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null ? equipmentData?.location : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        Location this equipment is installed in.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Tags
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <TagsInput
-                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                            onChange={(value) => {
-                                                                handleChange('tags', value);
-                                                            }}
-                                                            name="tag"
-                                                            placeHolder="+ Add Tag"
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Tags Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Notes
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="textarea"
-                                                            name="text"
-                                                            id="exampleText"
-                                                            rows="3"
-                                                            placeholder="Enter a Note..."
-                                                            defaultValue={
-                                                                equipmentData !== null ? equipmentData?.note : ''
-                                                            }
-                                                            onChange={(e) => {
-                                                                handleChange('note', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Notes Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.note : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
+                                        <div>
+                                            <Typography.Header size={Typography.Sizes.md}>
+                                                {equipmentData?.equipments_name}
+                                            </Typography.Header>
+                                        </div>
                                     </Col>
                                     <Col lg={4}>
-                                        <div className="modal-right-container">
-                                            <div className="equip-panel-info">
-                                                {equipBreakerLink?.length === 0 ? (
-                                                    <div className="equip-breaker-style">
-                                                        <img src={DoubleBreakerUninked} alt="DoubleBreakerUninked" />
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        {equipBreakerLink?.length === 1 && (
-                                                            <div className="breaker-container-style">
-                                                                <div className="breaker-number-style-single">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style-single">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[1]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-single-style"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        {equipBreakerLink?.length === 2 && (
-                                                            <div className="breaker-container-style">
-                                                                <div className="breaker-number-style">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[0]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[1]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-double-style"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        {equipBreakerLink?.length === 3 && (
-                                                            <div className="breaker-container-style">
-                                                                <div className="breaker-number-style">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[2]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[0]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[1]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[2]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-triple-style"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                )}
-                                                <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.lg}
-                                                        Type={Typography.Types.Light}
-                                                        className="modal-right-card-title">
-                                                        Energy Monitoring
-                                                    </Typography.Subheader>
+                                        <div className="equip-button-wrapper">
+                                            <div>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
                                                     <Button
-                                                        label="View"
+                                                        label="Turn Off"
+                                                        icon={
+                                                            <FontAwesomeIcon
+                                                                icon={faPowerOff}
+                                                                size="lg"
+                                                                style={{ color: 'red' }}
+                                                            />
+                                                        }
                                                         size={Button.Sizes.md}
-                                                        type={Button.Type.secondaryGrey}
-                                                        onClick={() => {
-                                                            redirectToConfigDevicePage(
-                                                                equipmentData?.device_id,
-                                                                'passive-device'
-                                                            );
-                                                        }}
-                                                        disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                        type={Button.Type.primaryDistructive}
                                                     />
-                                                </div>
-                                                <div className="equip-breaker-container">
-                                                    <div className="equip-breaker-detail">
-                                                        <div className="phase-style">
-                                                            <Typography.Subheader
-                                                                size={Typography.Sizes.sm}
-                                                                Type={Typography.Types.Light}
-                                                                className="equip-breaker-header mb-1">
-                                                                Phases
-                                                            </Typography.Subheader>
-                                                            <Typography.Subheader
-                                                                size={Typography.Sizes.md}
-                                                                Type={Typography.Types.Light}
-                                                                className="equip-breaker-value float-left">
-                                                                {equipBreakerLink[0]?.breaker_type}
-                                                            </Typography.Subheader>
-                                                        </div>
-                                                        <div className="installed-style">
-                                                            <Typography.Subheader
-                                                                size={Typography.Sizes.sm}
-                                                                Type={Typography.Types.Light}
-                                                                className="equip-breaker-header mb-1">
-                                                                Installed at
-                                                            </Typography.Subheader>
-                                                            <Typography.Subheader
-                                                                size={Typography.Sizes.md}
-                                                                Type={Typography.Types.Light}
-                                                                className="equip-breaker-value box float-left">
-                                                                {equipBreakerLink?.length === 1 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                {equipBreakerLink?.length === 2 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                {equipBreakerLink?.length === 3 &&
-                                                                    `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
-                                                            </Typography.Subheader>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <Button
+                                                    label="Cancel"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    className="mr-4 ml-4"
+                                                    onClick={() => {
+                                                        handleCloseWithoutSave();
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
+                                                    <Button
+                                                        label="Save"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.primary}
+                                                        onClick={() => {
+                                                            handleSave();
+                                                        }}
+                                                        disabled={!isDataChanged}
+                                                    />
+                                                ) : (
+                                                    <></>
+                                                )}
                                             </div>
                                         </div>
                                     </Col>
                                 </Row>
-                            ) : (
-                                ''
-                            )}
+                            </>
+                        ) : (
+                            ''
+                        )}
 
-                            {equipmentData?.device_type === '' ? (
-                                <Row className="mt-4">
-                                    <Col lg={8}>
-                                        <Row>
-                                            <Col lg={12} className="mb-1">
-                                                <Typography.Header
-                                                    size={Typography.Sizes.md}
-                                                    Type={Typography.Types.Regular}>
-                                                    Equipment Details
-                                                </Typography.Header>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Name
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Enter Equipment Name"
-                                                            className="font-weight-bold"
-                                                            defaultValue={equipmentData?.equipments_name}
-                                                            onChange={(e) => {
-                                                                handleChange('name', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Name Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_name
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Type
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="exampleSelect"
-                                                            className="font-weight-bold disabled"
-                                                            value={equipType}
-                                                            onChange={(e) => {
-                                                                handleEquipTypeChange(
-                                                                    'equipment_type',
-                                                                    e.target.value,
-                                                                    'passive'
-                                                                );
-                                                            }}>
-                                                            <option selected>Select Type</option>
-                                                            {equipmentTypeData?.map((record) => {
-                                                                return (
-                                                                    <option value={record?.equipment_id}>
-                                                                        {record?.equipment_type}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Type Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_type
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                            <Col lg={4}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        End Use Category
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="endUsePop"
-                                                            className="font-weight-bold"
-                                                            onChange={(e) => {
-                                                                handleChange('end_use', e.target.value);
-                                                            }}
-                                                            value={equipmentData?.end_use_id}>
-                                                            <option selected>Select Category</option>
-                                                            {endUse?.map((record) => {
-                                                                return (
-                                                                    <option value={record?.end_use_id}>
-                                                                        {record?.name}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No End Use Added"
-                                                            className="font-weight-bold"
-                                                            value={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.end_use_name
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Location
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="exampleSelect"
-                                                            className="font-weight-bold"
-                                                            onChange={(e) => {
-                                                                handleChange('space_id', e.target.value);
-                                                            }}
-                                                            value={location}>
-                                                            <option value="" selected>
-                                                                Select Location
-                                                            </option>
-                                                            {locationData?.map((record) => {
-                                                                return (
-                                                                    <option value={record?.location_id}>
-                                                                        {record?.location_name}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Location Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null ? equipmentData?.location : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        Location this equipment is installed in.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Tags
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <TagsInput
-                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                            onChange={(value) => {
-                                                                handleChange('tags', value);
-                                                            }}
-                                                            name="tag"
-                                                            placeHolder="+ Add Tag"
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Tags Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Notes
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="textarea"
-                                                            name="text"
-                                                            id="exampleText"
-                                                            rows="3"
-                                                            placeholder="Enter a Note..."
-                                                            defaultValue={
-                                                                equipmentData !== null ? equipmentData?.note : ''
-                                                            }
-                                                            onChange={(e) => {
-                                                                handleChange('note', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Notes Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.note : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
+                        {equipmentData?.device_type === 'passive' ? (
+                            <>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            Type={Typography.Types.Light}
+                                            className="text-muted">
+                                            {equipmentData?.location}
+                                        </Typography.Subheader>
                                     </Col>
-                                    <Col lg={4}>
-                                        <div className="modal-right-container">
-                                            <div className="equip-panel-info">
-                                                {equipBreakerLink?.length === 0 ? (
-                                                    <div className="breaker-container-disabled-style">
-                                                        <div className="breaker-number-style">
-                                                            <div></div>
-                                                        </div>
-                                                        <div className="breaker-number-style-single">
-                                                            <div className="breaker-offline-style"></div>
-                                                        </div>
-                                                        <div className="breaker-voltage-style">
-                                                            <div></div>
-                                                            <div></div>
-                                                        </div>
-                                                        <div className="breaker-number-style">
-                                                            <div className="breaker-socket1-style-disbaled"></div>
-                                                            <div className="breaker-socket-single-style-disabled"></div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        {equipBreakerLink?.length === 1 && (
-                                                            <div className="breaker-container-disabled-style">
-                                                                <div className="breaker-number-style-single">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style-single">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[0]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-single-style-disabled"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        {equipBreakerLink?.length === 2 && (
-                                                            <div className="breaker-container-disabled-style">
-                                                                <div className="breaker-number-style">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[0]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[1]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-double-style-disabled"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        {equipBreakerLink?.length === 3 && (
-                                                            <div className="breaker-container-disabled-style">
-                                                                <div className="breaker-number-style">
-                                                                    <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                    <div>{equipBreakerLink[2]?.breaker_number}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[0]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[1]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                    <div
-                                                                        className={
-                                                                            equipBreakerLink[2]?.sensor_id === ''
-                                                                                ? 'breaker-offline-style'
-                                                                                : 'breaker-online-style'
-                                                                        }></div>
-                                                                </div>
-                                                                <div className="breaker-voltage-style">
-                                                                    <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                    <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                </div>
-                                                                <div className="breaker-number-style">
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket1-style"></div>
-                                                                    <div className="breaker-socket-triple-style-disabled"></div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                )}
-                                                <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.lg}
-                                                        Type={Typography.Types.Light}
-                                                        className="modal-right-card-title">
-                                                        Energy Monitoring
-                                                    </Typography.Subheader>
-
+                                </Row>
+                                <Row>
+                                    <Col lg={9}>
+                                        <div>
+                                            <Typography.Header size={Typography.Sizes.md}>
+                                                {equipmentData?.equipments_name}
+                                            </Typography.Header>
+                                        </div>
+                                    </Col>
+                                    <Col lg={3}>
+                                        <div className="equip-button-wrapper">
+                                            <div>
+                                                <Button
+                                                    label="Cancel"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => {
+                                                        handleCloseWithoutSave();
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
                                                     <Button
-                                                        label="View"
+                                                        label="Save"
                                                         size={Button.Sizes.md}
-                                                        type={Button.Type.secondaryGrey}
+                                                        type={Button.Type.primary}
+                                                        className="ml-4"
                                                         onClick={() => {
-                                                            redirectToConfigDevicePage(
-                                                                equipmentData?.device_id,
-                                                                'passive-device'
-                                                            );
+                                                            handleSave();
                                                         }}
-                                                        disabled
+                                                        disabled={!isDataChanged}
                                                     />
-                                                </div>
-                                                {equipBreakerLink?.length === 0 ? (
-                                                    <></>
                                                 ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </>
+                        ) : (
+                            ''
+                        )}
+
+                        {equipmentData?.device_type === '' ? (
+                            <>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            Type={Typography.Types.Light}
+                                            className="text-muted">
+                                            {equipmentData?.location}
+                                        </Typography.Subheader>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={9}>
+                                        <div>
+                                            <Typography.Header size={Typography.Sizes.md}>
+                                                {equipmentData?.equipments_name}
+                                            </Typography.Header>
+                                        </div>
+                                    </Col>
+                                    <Col lg={3}>
+                                        <div className="equip-button-wrapper">
+                                            <div>
+                                                <Button
+                                                    label="Cancel"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryGrey}
+                                                    onClick={() => {
+                                                        handleCloseWithoutSave();
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
+                                                    <Button
+                                                        label="Save"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.primary}
+                                                        className="ml-4"
+                                                        onClick={() => {
+                                                            handleSave();
+                                                        }}
+                                                        disabled={!isDataChanged}
+                                                    />
+                                                ) : (
+                                                    <></>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </>
+                        ) : (
+                            ''
+                        )}
+
+                        <Row className="mt-2 mouse-pointer">
+                            <Col lg={1}>
+                                <span>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        Type={Typography.Types.Light}
+                                        className={
+                                            selectedTab === 0 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'
+                                        }
+                                        onClick={() => setSelectedTab(0)}>
+                                        Metrics
+                                    </Typography.Subheader>
+                                </span>
+                            </Col>
+                            <Col lg={1}>
+                                <span>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        Type={Typography.Types.Light}
+                                        className={
+                                            selectedTab === 1 ? 'mr-3 ml-2 equip-tab-active' : 'mr-3 ml-2 equip-tab'
+                                        }
+                                        onClick={() => setSelectedTab(1)}>
+                                        Configure
+                                    </Typography.Subheader>
+                                </span>
+                            </Col>
+                            <Col lg={10}></Col>
+                        </Row>
+
+                        {selectedTab === 0 && (
+                            <Row className="mt-4">
+                                <Col lg={4}>
+                                    <div className="ytd-container">
+                                        <div>
+                                            <div className="ytd-heading">
+                                                {`Total Consumption (${moment(startDate).format('MMM D')} to ${moment(
+                                                    endDate
+                                                ).format('MMM D')})`}
+                                            </div>
+                                            {isYtdDataFetching ? (
+                                                <Skeleton count={1} />
+                                            ) : (
+                                                <div className="ytd-flex">
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd?.ytd
+                                                            ? formatConsumptionValue(ytdData?.ytd?.ytd / 1000, 0)
+                                                            : 0}
+                                                    </span>
+                                                    <span className="ytd-unit">kWh</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="ytd-heading">
+                                                {`Peak kW (${moment(startDate).format('MMM D')} to ${moment(
+                                                    endDate
+                                                ).format('MMM D')})`}
+                                            </div>
+                                            {isYtdDataFetching ? (
+                                                <Skeleton count={1} />
+                                            ) : (
+                                                <div className="ytd-flex">
+                                                    {equipmentData?.device_type === 'active' ? (
+                                                        <span className="mr-1 ytd-value">
+                                                            {ytdData?.ytd_peak?.power
+                                                                ? formatConsumptionValue(
+                                                                      ytdData?.ytd_peak?.power / 1000,
+                                                                      1
+                                                                  )
+                                                                : 0}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="mr-1 ytd-value">
+                                                            {ytdData?.ytd_peak?.power
+                                                                ? formatConsumptionValue(
+                                                                      ytdData?.ytd_peak?.power / 1000000,
+                                                                      1
+                                                                  )
+                                                                : 0}
+                                                        </span>
+                                                    )}
+
+                                                    {ytdData?.ytd_peak?.time_stamp ? (
+                                                        <span className="ytd-unit">
+                                                            {`kW @ ${moment
+                                                                .utc(ytdData?.ytd_peak?.time_stamp)
+                                                                .clone()
+                                                                .tz(timeZone)
+                                                                .format('MM/DD  H:mm')}`}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="ytd-unit">kW</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Col>
+
+                                <Col lg={8}>
+                                    <div className="equip-model">
+                                        <div className="pt-3">
+                                            <Typography.Subheader
+                                                size={Typography.Sizes.md}
+                                                Type={Typography.Types.Light}
+                                                className="ytd-heading">
+                                                Device : &nbsp;
+                                                <Link
+                                                    style={{
+                                                        pointerEvents:
+                                                            equipmentData?.device_type === 'passive'
+                                                                ? equipBreakerLink?.length === 0
+                                                                    ? 'none'
+                                                                    : ''
+                                                                : equipmentData !== null
+                                                                ? equipmentData.device_id === ''
+                                                                    ? 'none'
+                                                                    : ''
+                                                                : 'none',
+                                                    }}
+                                                    target="_blank"
+                                                    to={redirectToConfigDevicePageLink(
+                                                        equipmentData?.device_id,
+                                                        equipmentData?.device_type === 'passive'
+                                                            ? 'passive-device'
+                                                            : equipmentData?.device_type === 'active'
+                                                            ? 'active-device'
+                                                            : ''
+                                                    )}>
+                                                    <span
+                                                        className="buttonhover"
+                                                        style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
+                                                        {equipmentData?.device_mac}
+                                                        &nbsp;
+                                                        <FontAwesomeIcon
+                                                            icon={faArrowUpRightFromSquare}
+                                                            size="md"
+                                                            style={{ color: 'base-black' }}
+                                                        />
+                                                    </span>
+                                                </Link>
+                                            </Typography.Subheader>
+                                        </div>
+                                        <div className="d-flex">
+                                            <div className="mr-2">
+                                                <Select
+                                                    defaultValue={selectedConsumption}
+                                                    options={metric}
+                                                    onChange={(e) => {
+                                                        if (e.value === 'passive-power') {
+                                                            return;
+                                                        }
+                                                        setConsumption(e.value);
+                                                        handleUnitChange(e.value);
+                                                        handleConsumptionChange(e.value);
+                                                    }}
+                                                />
+                                            </div>
+                                            <Header type="modal" />
+                                        </div>
+                                    </div>
+
+                                    {isEquipDataFetched ? (
+                                        <div className="loader-center-style">
+                                            <Spinner className="m-2" color={'primary'} />
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <LineChart
+                                                title={''}
+                                                subTitle={''}
+                                                tooltipUnit={selectedUnit}
+                                                tooltipLabel={selectedConsumptionLabel}
+                                                data={deviceData}
+                                                dateRange={fetchDateRange(startDate, endDate)}
+                                            />
+                                        </div>
+                                    )}
+                                </Col>
+                            </Row>
+                        )}
+
+                        {selectedTab === 1 && (
+                            <>
+                                {equipmentData?.device_type === 'passive' ? (
+                                    <Row className="mt-4">
+                                        <Col lg={8}>
+                                            <Row>
+                                                <Col lg={12} className="mb-2">
+                                                    <Typography.Header
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Regular}>
+                                                        Equipment Details
+                                                    </Typography.Header>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Name
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="Enter Equipment Name"
+                                                                defaultValue={equipmentData?.equipments_name}
+                                                                onChange={(e) => {
+                                                                    handleChange('name', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Name Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_name
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Type
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="exampleSelect"
+                                                                className="font-weight-bold"
+                                                                value={equipType}
+                                                                onChange={(e) => {
+                                                                    handleEquipTypeChange(
+                                                                        'equipment_type',
+                                                                        e.target.value,
+                                                                        'passive'
+                                                                    );
+                                                                }}>
+                                                                <option selected>Select Type</option>
+                                                                {equipmentTypeData?.map((record) => {
+                                                                    return (
+                                                                        <option value={record?.equipment_id}>
+                                                                            {record?.equipment_type}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Type Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_type
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            End Use Category
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="endUsePop"
+                                                                className="font-weight-bold"
+                                                                onChange={(e) => {
+                                                                    handleChange('end_use', e.target.value);
+                                                                }}
+                                                                value={equipmentData?.end_use_id}>
+                                                                <option selected>Select Category</option>
+                                                                {endUse?.map((record) => {
+                                                                    return (
+                                                                        <option value={record?.end_use_id}>
+                                                                            {record?.name}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No End Use Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.end_use_name
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Location
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Select
+                                                                defaultValue={location}
+                                                                options={locationData}
+                                                                onChange={(e) => {
+                                                                    handleChange('space_id', e.value);
+                                                                }}
+                                                                placeholder="Select Location"
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Location Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.location
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mt-1">
+                                                            Location this equipment is installed in.
+                                                        </Typography.Subheader>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Tags
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <TagsInput
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.tags : ''
+                                                                }
+                                                                onChange={(value) => {
+                                                                    handleChange('tags', value);
+                                                                }}
+                                                                name="tag"
+                                                                placeHolder="+ Add Tag"
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Tags Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.tags : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Notes
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="textarea"
+                                                                name="text"
+                                                                id="exampleText"
+                                                                rows="3"
+                                                                placeholder="Enter a Note..."
+                                                                defaultValue={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                onChange={(e) => {
+                                                                    handleChange('note', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Notes Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                        <Col lg={4}>
+                                            <div className="modal-right-container">
+                                                <div className="equip-panel-info">
+                                                    {equipBreakerLink?.length === 0 ? (
+                                                        <div className="equip-breaker-style">
+                                                            <img
+                                                                src={DoubleBreakerUninked}
+                                                                alt="DoubleBreakerUninked"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {equipBreakerLink?.length === 1 && (
+                                                                <div className="breaker-container-style">
+                                                                    <div className="breaker-number-style-single">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style-single">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[1]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-single-style"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {equipBreakerLink?.length === 2 && (
+                                                                <div className="breaker-container-style">
+                                                                    <div className="breaker-number-style">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[0]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[1]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-double-style"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {equipBreakerLink?.length === 3 && (
+                                                                <div className="breaker-container-style">
+                                                                    <div className="breaker-number-style">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[2]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[0]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[1]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[2]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-triple-style"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.lg}
+                                                            Type={Typography.Types.Light}
+                                                            className="modal-right-card-title">
+                                                            Energy Monitoring
+                                                        </Typography.Subheader>
+                                                        <Button
+                                                            label="View"
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.secondaryGrey}
+                                                            onClick={() => {
+                                                                redirectToConfigDevicePage(
+                                                                    equipmentData?.device_id,
+                                                                    'passive-device'
+                                                                );
+                                                            }}
+                                                            disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                        />
+                                                    </div>
                                                     <div className="equip-breaker-container">
                                                         <div className="equip-breaker-detail">
                                                             <div className="phase-style">
@@ -1693,7 +1262,7 @@ const EquipChartModal = ({
                                                                 <Typography.Subheader
                                                                     size={Typography.Sizes.md}
                                                                     Type={Typography.Types.Light}
-                                                                    className="equip-breaker-value justify-content-between box float-left">
+                                                                    className="equip-breaker-value box float-left">
                                                                     {equipBreakerLink?.length === 1 &&
                                                                         `${equipBreakerLink[0]?.panel_name} 
                                                                         > Breaker ${equipBreakerLink[0]?.breaker_number}`}
@@ -1707,425 +1276,905 @@ const EquipChartModal = ({
                                                             </div>
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            ) : (
-                                ''
-                            )}
-
-                            {equipmentData?.device_type === 'active' ? (
-                                <Row className="mt-4">
-                                    <Col lg={8}>
-                                        <Row>
-                                            <Col lg={12} className="mb-1">
-                                                <Typography.Header
-                                                    size={Typography.Sizes.md}
-                                                    Type={Typography.Types.Regular}>
-                                                    Equipment Details
-                                                </Typography.Header>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={6}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Name
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Enter Equipment Name"
-                                                            className="font-weight-bold"
-                                                            defaultValue={equipmentData?.equipments_name}
-                                                            onChange={(e) => {
-                                                                handleChange('name', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Name Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_name
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                            <Col lg={6}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Type
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="exampleSelect"
-                                                            className="font-weight-bold"
-                                                            value={equipType}
-                                                            onChange={(e) => {
-                                                                handleEquipTypeChange(
-                                                                    'equipment_type',
-                                                                    e.target.value,
-                                                                    'active'
-                                                                );
-                                                            }}>
-                                                            <option selected>Select Type</option>
-                                                            {equipmentTypeData.map((record) => {
-                                                                return (
-                                                                    <option value={record.equipment_id}>
-                                                                        {record.equipment_type}
-                                                                    </option>
-                                                                );
-                                                            })}
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Equipment Type Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null
-                                                                    ? equipmentData?.equipments_type
-                                                                    : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Equipment Location
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Form.Control
-                                                            type="text"
-                                                            readOnly
-                                                            placeholder="Enter Location"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData.location : ''}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Location Added"
-                                                            className="font-weight-bold"
-                                                            defaultValue={
-                                                                equipmentData !== null ? equipmentData?.location : ''
-                                                            }
-                                                            disabled
-                                                        />
-                                                    )}
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        Location this equipment is installed in.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Applied Rule
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="select"
-                                                            name="select"
-                                                            id="exampleSelect"
-                                                            className="font-weight-bold"
-                                                            disabled>
-                                                            <option selected>Desktop PC</option>
-                                                            <option>Refigerator</option>
-                                                        </Input>
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Rule Applied Added"
-                                                            className="font-weight-bold"
-                                                            disabled
-                                                        />
-                                                    )}
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mt-1">
-                                                        The rule applied to this equipment to control when it is on.
-                                                    </Typography.Subheader>
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Tags
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <TagsInput
-                                                            value={equipmentData !== null ? equipmentData.tags : ''}
-                                                            onChange={(value) => {
-                                                                handleChange('tags', value);
-                                                            }}
-                                                            name="tag"
-                                                            placeHolder="+ Add Tag"
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Tags Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col lg={12}>
-                                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="text-muted mb-1">
-                                                        Notes
-                                                    </Typography.Subheader>
-                                                    {userPermission?.user_role === 'admin' ||
-                                                    userPermission?.permissions?.permissions
-                                                        ?.account_buildings_permission?.edit ? (
-                                                        <Input
-                                                            type="textarea"
-                                                            name="text"
-                                                            id="exampleText"
-                                                            rows="3"
-                                                            placeholder="Enter a Note..."
-                                                            value={equipmentData !== null ? equipmentData?.note : ''}
-                                                            onChange={(e) => {
-                                                                handleChange('note', e.target.value);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="No Notes Added"
-                                                            className="font-weight-bold"
-                                                            value={equipmentData !== null ? equipmentData?.note : ''}
-                                                            disabled
-                                                        />
-                                                    )}
-                                                </Form.Group>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                    <Col lg={4}>
-                                        <div className="modal-right-container">
-                                            <div className="equip-socket-container">
-                                                <div className="mt-2 sockets-slots-container">
-                                                    {sensors.map((record, index) => {
-                                                        return (
-                                                            <>
-                                                                {record.status && (
-                                                                    <div>
-                                                                        <div className="power-off-style-equip">
-                                                                            <FontAwesomeIcon
-                                                                                icon={faPowerOff}
-                                                                                size="lg"
-                                                                                color="#3C6DF5"
-                                                                            />
-                                                                        </div>
-                                                                        {record.equipment_type_id === '' ? (
-                                                                            <div className="socket-rect">
-                                                                                <img src={SocketLogo} alt="Socket" />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="online-socket-container-equip">
-                                                                                <img
-                                                                                    src={UnionLogo}
-                                                                                    alt="Union"
-                                                                                    className="union-icon-style"
-                                                                                    width="35vw"
-                                                                                />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-
-                                                                {!record.status && (
-                                                                    <div>
-                                                                        <div className="power-off-style-equip">
-                                                                            <FontAwesomeIcon
-                                                                                icon={faPowerOff}
-                                                                                size="lg"
-                                                                                color="#EAECF0"
-                                                                            />
-                                                                        </div>
-                                                                        {record.equipment_type_id === '' ? (
-                                                                            <div className="socket-rect">
-                                                                                <img src={SocketLogo} alt="Socket" />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="online-socket-container-equip">
-                                                                                <img
-                                                                                    src={UnionLogo}
-                                                                                    alt="Union"
-                                                                                    className="union-icon-style"
-                                                                                    width="35vw"
-                                                                                />
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </>
-                                                        );
-                                                    })}
                                                 </div>
                                             </div>
-                                            <div className="modal-right-card mt-2">
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.lg}
-                                                    Type={Typography.Types.Light}
-                                                    className="modal-right-card-title">
-                                                    Power Strip - Socket 2
-                                                </Typography.Subheader>
+                                        </Col>
+                                    </Row>
+                                ) : (
+                                    ''
+                                )}
 
-                                                <Button
-                                                    label="View Devices"
-                                                    size={Button.Sizes.md}
-                                                    type={Button.Type.secondaryGrey}
-                                                    onClick={() => {
-                                                        redirectToConfigDevicePage(
-                                                            equipmentData?.device_id,
-                                                            'active-device'
-                                                        );
-                                                    }}
-                                                    disabled={
-                                                        equipmentData !== null
-                                                            ? equipmentData.device_id === ''
-                                                                ? true
-                                                                : false
-                                                            : true
-                                                    }
-                                                />
+                                {equipmentData?.device_type === '' ? (
+                                    <Row className="mt-4">
+                                        <Col lg={8}>
+                                            <Row>
+                                                <Col lg={12} className="mb-1">
+                                                    <Typography.Header
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Regular}>
+                                                        Equipment Details
+                                                    </Typography.Header>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Name
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="Enter Equipment Name"
+                                                                className="font-weight-bold"
+                                                                defaultValue={equipmentData?.equipments_name}
+                                                                onChange={(e) => {
+                                                                    handleChange('name', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Name Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_name
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Type
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="exampleSelect"
+                                                                className="font-weight-bold disabled"
+                                                                value={equipType}
+                                                                onChange={(e) => {
+                                                                    handleEquipTypeChange(
+                                                                        'equipment_type',
+                                                                        e.target.value,
+                                                                        'passive'
+                                                                    );
+                                                                }}>
+                                                                <option selected>Select Type</option>
+                                                                {equipmentTypeData?.map((record) => {
+                                                                    return (
+                                                                        <option value={record?.equipment_id}>
+                                                                            {record?.equipment_type}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Type Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_type
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col lg={4}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            End Use Category
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="endUsePop"
+                                                                className="font-weight-bold"
+                                                                onChange={(e) => {
+                                                                    handleChange('end_use', e.target.value);
+                                                                }}
+                                                                value={equipmentData?.end_use_id}>
+                                                                <option selected>Select Category</option>
+                                                                {endUse?.map((record) => {
+                                                                    return (
+                                                                        <option value={record?.end_use_id}>
+                                                                            {record?.name}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No End Use Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.end_use_name
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Location
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="exampleSelect"
+                                                                className="font-weight-bold"
+                                                                onChange={(e) => {
+                                                                    handleChange('space_id', e.target.value);
+                                                                }}
+                                                                value={location}>
+                                                                <option value="" selected>
+                                                                    Select Location
+                                                                </option>
+                                                                {locationData?.map((record) => {
+                                                                    return (
+                                                                        <option value={record?.location_id}>
+                                                                            {record?.location_name}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Location Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.location
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mt-1">
+                                                            Location this equipment is installed in.
+                                                        </Typography.Subheader>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Tags
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <TagsInput
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.tags : ''
+                                                                }
+                                                                onChange={(value) => {
+                                                                    handleChange('tags', value);
+                                                                }}
+                                                                name="tag"
+                                                                placeHolder="+ Add Tag"
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Tags Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.tags : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Notes
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="textarea"
+                                                                name="text"
+                                                                id="exampleText"
+                                                                rows="3"
+                                                                placeholder="Enter a Note..."
+                                                                defaultValue={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                onChange={(e) => {
+                                                                    handleChange('note', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Notes Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                        <Col lg={4}>
+                                            <div className="modal-right-container">
+                                                <div className="equip-panel-info">
+                                                    {equipBreakerLink?.length === 0 ? (
+                                                        <div className="breaker-container-disabled-style">
+                                                            <div className="breaker-number-style">
+                                                                <div></div>
+                                                            </div>
+                                                            <div className="breaker-number-style-single">
+                                                                <div className="breaker-offline-style"></div>
+                                                            </div>
+                                                            <div className="breaker-voltage-style">
+                                                                <div></div>
+                                                                <div></div>
+                                                            </div>
+                                                            <div className="breaker-number-style">
+                                                                <div className="breaker-socket1-style-disbaled"></div>
+                                                                <div className="breaker-socket-single-style-disabled"></div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {equipBreakerLink?.length === 1 && (
+                                                                <div className="breaker-container-disabled-style">
+                                                                    <div className="breaker-number-style-single">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style-single">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[0]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-single-style-disabled"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {equipBreakerLink?.length === 2 && (
+                                                                <div className="breaker-container-disabled-style">
+                                                                    <div className="breaker-number-style">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[0]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[1]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-double-style-disabled"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {equipBreakerLink?.length === 3 && (
+                                                                <div className="breaker-container-disabled-style">
+                                                                    <div className="breaker-number-style">
+                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
+                                                                        <div>{equipBreakerLink[2]?.breaker_number}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[0]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[1]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                        <div
+                                                                            className={
+                                                                                equipBreakerLink[2]?.sensor_id === ''
+                                                                                    ? 'breaker-offline-style'
+                                                                                    : 'breaker-online-style'
+                                                                            }></div>
+                                                                    </div>
+                                                                    <div className="breaker-voltage-style">
+                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                    </div>
+                                                                    <div className="breaker-number-style">
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket1-style"></div>
+                                                                        <div className="breaker-socket-triple-style-disabled"></div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                    <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.lg}
+                                                            Type={Typography.Types.Light}
+                                                            className="modal-right-card-title">
+                                                            Energy Monitoring
+                                                        </Typography.Subheader>
+
+                                                        <Button
+                                                            label="View"
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.secondaryGrey}
+                                                            onClick={() => {
+                                                                redirectToConfigDevicePage(
+                                                                    equipmentData?.device_id,
+                                                                    'passive-device'
+                                                                );
+                                                            }}
+                                                            disabled
+                                                        />
+                                                    </div>
+                                                    {equipBreakerLink?.length === 0 ? (
+                                                        <></>
+                                                    ) : (
+                                                        <div className="equip-breaker-container">
+                                                            <div className="equip-breaker-detail">
+                                                                <div className="phase-style">
+                                                                    <Typography.Subheader
+                                                                        size={Typography.Sizes.sm}
+                                                                        Type={Typography.Types.Light}
+                                                                        className="equip-breaker-header mb-1">
+                                                                        Phases
+                                                                    </Typography.Subheader>
+                                                                    <Typography.Subheader
+                                                                        size={Typography.Sizes.md}
+                                                                        Type={Typography.Types.Light}
+                                                                        className="equip-breaker-value float-left">
+                                                                        {equipBreakerLink[0]?.breaker_type}
+                                                                    </Typography.Subheader>
+                                                                </div>
+                                                                <div className="installed-style">
+                                                                    <Typography.Subheader
+                                                                        size={Typography.Sizes.sm}
+                                                                        Type={Typography.Types.Light}
+                                                                        className="equip-breaker-header mb-1">
+                                                                        Installed at
+                                                                    </Typography.Subheader>
+                                                                    <Typography.Subheader
+                                                                        size={Typography.Sizes.md}
+                                                                        Type={Typography.Types.Light}
+                                                                        className="equip-breaker-value justify-content-between box float-left">
+                                                                        {equipBreakerLink?.length === 1 &&
+                                                                            `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                        {equipBreakerLink?.length === 2 &&
+                                                                            `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                        {equipBreakerLink?.length === 3 &&
+                                                                            `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                    </Typography.Subheader>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div>
-                                                {equipmentData !== null
-                                                    ? equipmentData.status === 'Online' && (
-                                                          <div className="icon-bg-pop-styling">
-                                                              ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                          </div>
-                                                      )
-                                                    : ''}
-                                                {equipmentData !== null
-                                                    ? equipmentData.status === 'Offline' && (
-                                                          <div className="icon-bg-pop-styling-slash">
-                                                              OFFLINE{' '}
-                                                              <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                          </div>
-                                                      )
-                                                    : ''}
-                                            </div>
-                                            <div className="mt-4 modal-right-group">
+                                        </Col>
+                                    </Row>
+                                ) : (
+                                    ''
+                                )}
+
+                                {equipmentData?.device_type === 'active' ? (
+                                    <Row className="mt-4">
+                                        <Col lg={8}>
+                                            <Row>
+                                                <Col lg={12} className="mb-1">
+                                                    <Typography.Header
+                                                        size={Typography.Sizes.md}
+                                                        Type={Typography.Types.Regular}>
+                                                        Equipment Details
+                                                    </Typography.Header>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={6}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Name
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="Enter Equipment Name"
+                                                                className="font-weight-bold"
+                                                                defaultValue={equipmentData?.equipments_name}
+                                                                onChange={(e) => {
+                                                                    handleChange('name', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Name Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_name
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col lg={6}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Type
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="exampleSelect"
+                                                                className="font-weight-bold"
+                                                                value={equipType}
+                                                                onChange={(e) => {
+                                                                    handleEquipTypeChange(
+                                                                        'equipment_type',
+                                                                        e.target.value,
+                                                                        'active'
+                                                                    );
+                                                                }}>
+                                                                <option selected>Select Type</option>
+                                                                {equipmentTypeData.map((record) => {
+                                                                    return (
+                                                                        <option value={record.equipment_id}>
+                                                                            {record.equipment_type}
+                                                                        </option>
+                                                                    );
+                                                                })}
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Equipment Type Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.equipments_type
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Equipment Location
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Form.Control
+                                                                type="text"
+                                                                readOnly
+                                                                placeholder="Enter Location"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData.location : ''
+                                                                }
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Location Added"
+                                                                className="font-weight-bold"
+                                                                defaultValue={
+                                                                    equipmentData !== null
+                                                                        ? equipmentData?.location
+                                                                        : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mt-1">
+                                                            Location this equipment is installed in.
+                                                        </Typography.Subheader>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Applied Rule
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="select"
+                                                                name="select"
+                                                                id="exampleSelect"
+                                                                className="font-weight-bold"
+                                                                disabled>
+                                                                <option selected>Desktop PC</option>
+                                                                <option>Refigerator</option>
+                                                            </Input>
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Rule Applied Added"
+                                                                className="font-weight-bold"
+                                                                disabled
+                                                            />
+                                                        )}
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mt-1">
+                                                            The rule applied to this equipment to control when it is on.
+                                                        </Typography.Subheader>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Tags
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <TagsInput
+                                                                value={equipmentData !== null ? equipmentData.tags : ''}
+                                                                onChange={(value) => {
+                                                                    handleChange('tags', value);
+                                                                }}
+                                                                name="tag"
+                                                                placeHolder="+ Add Tag"
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Tags Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.tags : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col lg={12}>
+                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.md}
+                                                            Type={Typography.Types.Light}
+                                                            className="text-muted mb-1">
+                                                            Notes
+                                                        </Typography.Subheader>
+                                                        {userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit ? (
+                                                            <Input
+                                                                type="textarea"
+                                                                name="text"
+                                                                id="exampleText"
+                                                                rows="3"
+                                                                placeholder="Enter a Note..."
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                onChange={(e) => {
+                                                                    handleChange('note', e.target.value);
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <Form.Control
+                                                                type="text"
+                                                                placeholder="No Notes Added"
+                                                                className="font-weight-bold"
+                                                                value={
+                                                                    equipmentData !== null ? equipmentData?.note : ''
+                                                                }
+                                                                disabled
+                                                            />
+                                                        )}
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                        <Col lg={4}>
+                                            <div className="modal-right-container">
+                                                <div className="equip-socket-container">
+                                                    <div className="mt-2 sockets-slots-container">
+                                                        {sensors.map((record, index) => {
+                                                            return (
+                                                                <>
+                                                                    {record.status && (
+                                                                        <div>
+                                                                            <div className="power-off-style-equip">
+                                                                                <FontAwesomeIcon
+                                                                                    icon={faPowerOff}
+                                                                                    size="lg"
+                                                                                    color="#3C6DF5"
+                                                                                />
+                                                                            </div>
+                                                                            {record.equipment_type_id === '' ? (
+                                                                                <div className="socket-rect">
+                                                                                    <img
+                                                                                        src={SocketLogo}
+                                                                                        alt="Socket"
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="online-socket-container-equip">
+                                                                                    <img
+                                                                                        src={UnionLogo}
+                                                                                        alt="Union"
+                                                                                        className="union-icon-style"
+                                                                                        width="35vw"
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {!record.status && (
+                                                                        <div>
+                                                                            <div className="power-off-style-equip">
+                                                                                <FontAwesomeIcon
+                                                                                    icon={faPowerOff}
+                                                                                    size="lg"
+                                                                                    color="#EAECF0"
+                                                                                />
+                                                                            </div>
+                                                                            {record.equipment_type_id === '' ? (
+                                                                                <div className="socket-rect">
+                                                                                    <img
+                                                                                        src={SocketLogo}
+                                                                                        alt="Socket"
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="online-socket-container-equip">
+                                                                                    <img
+                                                                                        src={UnionLogo}
+                                                                                        alt="Union"
+                                                                                        className="union-icon-style"
+                                                                                        width="35vw"
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                                <div className="modal-right-card mt-2">
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.lg}
+                                                        Type={Typography.Types.Light}
+                                                        className="modal-right-card-title">
+                                                        Power Strip - Socket 2
+                                                    </Typography.Subheader>
+
+                                                    <Button
+                                                        label="View Devices"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.secondaryGrey}
+                                                        onClick={() => {
+                                                            redirectToConfigDevicePage(
+                                                                equipmentData?.device_id,
+                                                                'active-device'
+                                                            );
+                                                        }}
+                                                        disabled={
+                                                            equipmentData !== null
+                                                                ? equipmentData.device_id === ''
+                                                                    ? true
+                                                                    : false
+                                                                : true
+                                                        }
+                                                    />
+                                                </div>
+                                                <div>
+                                                    {equipmentData !== null
+                                                        ? equipmentData.status === 'Online' && (
+                                                              <div className="icon-bg-pop-styling">
+                                                                  ONLINE{' '}
+                                                                  <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                              </div>
+                                                          )
+                                                        : ''}
+                                                    {equipmentData !== null
+                                                        ? equipmentData.status === 'Offline' && (
+                                                              <div className="icon-bg-pop-styling-slash">
+                                                                  OFFLINE{' '}
+                                                                  <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                              </div>
+                                                          )
+                                                        : ''}
+                                                </div>
+                                                <div className="mt-4 modal-right-group">
+                                                    <FormGroup>
+                                                        <div className="single-line-style">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.sm}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-title">
+                                                                MAC Address
+                                                            </Typography.Subheader>
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-subtitle mb-2 text-muted">
+                                                                {equipmentData !== null ? equipmentData.device_mac : ''}
+                                                            </Typography.Subheader>
+                                                        </div>
+                                                    </FormGroup>
+                                                    <FormGroup>
+                                                        <div className="single-line-style">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.sm}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-title">
+                                                                Device type
+                                                            </Typography.Subheader>
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-subtitle mb-2 text-muted">
+                                                                {equipmentData !== null
+                                                                    ? equipmentData?.device_type
+                                                                    : ''}
+                                                            </Typography.Subheader>
+                                                        </div>
+                                                    </FormGroup>
+                                                </div>
                                                 <FormGroup>
                                                     <div className="single-line-style">
                                                         <Typography.Subheader
                                                             size={Typography.Sizes.sm}
                                                             Type={Typography.Types.Light}
                                                             className="card-title">
-                                                            MAC Address
+                                                            Installed at
                                                         </Typography.Subheader>
                                                         <Typography.Subheader
                                                             size={Typography.Sizes.md}
                                                             Type={Typography.Types.Light}
                                                             className="card-subtitle mb-2 text-muted">
-                                                            {equipmentData !== null ? equipmentData.device_mac : ''}
-                                                        </Typography.Subheader>
-                                                    </div>
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <div className="single-line-style">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.sm}
-                                                            Type={Typography.Types.Light}
-                                                            className="card-title">
-                                                            Device type
-                                                        </Typography.Subheader>
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="card-subtitle mb-2 text-muted">
-                                                            {equipmentData !== null ? equipmentData?.device_type : ''}
+                                                            {equipmentData !== null ? equipmentData.location : ''}
                                                         </Typography.Subheader>
                                                     </div>
                                                 </FormGroup>
                                             </div>
-                                            <FormGroup>
-                                                <div className="single-line-style">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.sm}
-                                                        Type={Typography.Types.Light}
-                                                        className="card-title">
-                                                        Installed at
-                                                    </Typography.Subheader>
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Light}
-                                                        className="card-subtitle mb-2 text-muted">
-                                                        {equipmentData !== null ? equipmentData.location : ''}
-                                                    </Typography.Subheader>
-                                                </div>
-                                            </FormGroup>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            ) : (
-                                ''
-                            )}
-                        </>
-                    )}
-                </Modal.Body>
-            </>
-        </Modal>
+                                        </Col>
+                                    </Row>
+                                ) : (
+                                    ''
+                                )}
+                            </>
+                        )}
+                    </Modal.Body>
+                </>
+            </Modal>
+        </div>
     );
 };
 

@@ -426,9 +426,7 @@ const BuildingOverview = () => {
     }, [startEndDayCount]);
 
     const handleClick = (row) => {
-        console.log(row);
         let arr = topEnergyConsumptionData.filter((item) => item.label === row);
-        console.log(arr);
         setEquipmentFilter({
             equipment_id: arr[0]?.id,
             equipment_name: arr[0]?.label,
@@ -496,15 +494,17 @@ const BuildingOverview = () => {
                 />
             </div>
 
-            <EquipChartModal
-                showEquipmentChart={showEquipmentChart}
-                handleChartClose={handleChartClose}
-                equipmentFilter={equipmentFilter}
-                fetchEquipmentData={builidingEquipmentsData}
-                selectedTab={selectedModalTab}
-                setSelectedTab={setSelectedModalTab}
-                activePage="buildingOverview"
-            />
+            <div>
+                <EquipChartModal
+                    showEquipmentChart={showEquipmentChart}
+                    handleChartClose={handleChartClose}
+                    equipmentFilter={equipmentFilter}
+                    fetchEquipmentData={builidingEquipmentsData}
+                    selectedTab={selectedModalTab}
+                    setSelectedTab={setSelectedModalTab}
+                    activePage="buildingOverview"
+                />
+            </div>
         </React.Fragment>
     );
 };
