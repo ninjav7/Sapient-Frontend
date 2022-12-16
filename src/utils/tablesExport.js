@@ -1,4 +1,5 @@
 import { percentageHandler } from '../utils/helper';
+import { formatConsumptionValue } from '../helpers/helpers';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -193,9 +194,13 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
                     break;
                 case 'energy_density':
                     const densityData =
-                        tableData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
+                        tableData.length > 1 ? (tableRow.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
                     const preparedEnergyDestiny = `${parseInt(densityData)} kWh / sq. ft.`;
                     arr.push(preparedEnergyDestiny);
+                    break;
+                case 'square_footage':
+                    const squareFootage = formatConsumptionValue(tableRow.square_footage);
+                    arr.push(squareFootage);
                     break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);
@@ -211,10 +216,5 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
         csv += row.join(',');
         csv += '\n';
     });
-
-    let hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = `Compare_Buildings_${new Date().toISOString().split('T')[0]}.csv`;
-    hiddenElement.click();
+    return csv;
 };

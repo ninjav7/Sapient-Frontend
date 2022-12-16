@@ -1,13 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
-import { useHistory } from 'react-router-dom';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
-import { Row, Col, Card, CardBody, Table } from 'reactstrap';
-import { Search } from 'react-feather';
-import { Line } from 'rc-progress';
+import { Row, Col } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import { formatConsumptionValue } from '../../helpers/helpers';
+
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { fetchCompareBuildings } from '../compareBuildings/services';
+import { fetchCompareBuildings } from '../../services/compareBuildings';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
@@ -25,7 +26,6 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 
 import { primaryGray100, primaryGray800 } from '../../assets/scss/_colors.scss';
-import { TypographyLink } from '../../sharedComponents/typography/TypographyLink';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -49,25 +49,6 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -76,15 +57,10 @@ const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const [sortBy, setSortBy] = useState({});
-    const [filterOptions, setFilterOptions] = useState([]);
+    const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
-    const [floorTypeFilterString, setFloorTypeFilterString] = useState('');
-    const [spaceFilterString, setSpaceFilterString] = useState('');
-    const [spaceTypeFilterString, setSpaceTypeFilterString] = useState('');
-    const [tagsFilterString, setTagsTypeFilterString] = useState('');
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
 
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -132,14 +108,17 @@ const CompareBuildings = () => {
     const fetchcompareBuildingsData = async () => {
         setIsLoadingBuildingData(true);
         const sorting = sortBy.method &&
-        sortBy.name && {
-            order_by: sortBy.name,
-            sort_by: sortBy.method,
-        };
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?days=${daysCount}`;
+        let params = ``;
         if (sorting?.order_by && sorting?.sort_by) {
             params += `&order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
+        }
+        if (search.length) {
+            params += `?building_search=${search}`;
         }
         await fetchCompareBuildings(params, payload)
             .then((res) => {
@@ -154,15 +133,13 @@ const CompareBuildings = () => {
     const renderEnergyDensity = (row) => {
         const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
         return (
-            <div>
-                <td className="table-content-style">
-                    {parseInt(densityData)} kWh / sq. ft.
-                    <br />
-                    <div style={{ width: '100%', display: 'inline-block' }}>
-                        {row.energy_density === 0 && <TinyBarChart percent={0} />}
-                        {row.energy_density > 0 && <TinyBarChart percent={parseInt(densityData)} />}
-                    </div>
-                </td>
+            <div className="table-content-style" style={{ width: '100%' }}>
+                {parseInt(densityData)} kWh / sq. ft.
+                <br />
+                <div style={{ width: '100%', display: 'inline-block' }}>
+                    {row.energy_density === 0 && <TinyBarChart percent={0} />}
+                    {row.energy_density > 0 && <TinyBarChart percent={parseInt(densityData)} />}
+                </div>
             </div>
         );
     };
@@ -218,7 +195,7 @@ const CompareBuildings = () => {
     };
 
     const renderSquareFootage = (row) => {
-        return <div>{row.square_footage.toLocaleString()}</div>;
+        return <div>{formatConsumptionValue(row.square_footage)}</div>;
     };
 
     const headerProps = [
@@ -256,7 +233,7 @@ const CompareBuildings = () => {
     ];
 
     const handleDownloadCsv = async () => {
-        getCompareBuildingTableCSVExport(buildingsData, headerProps, topEnergyDensity);
+        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, headerProps, topEnergyDensity));
     };
 
     useEffect(() => {
@@ -265,15 +242,7 @@ const CompareBuildings = () => {
 
     useEffect(() => {
         fetchcompareBuildingsData();
-    }, [
-        search,
-        sortBy,
-        locationTypeFilterString,
-        floorTypeFilterString,
-        spaceFilterString,
-        spaceTypeFilterString,
-        tagsFilterString,
-    ]);
+    }, [search, sortBy]);
 
     useEffect(() => {
         if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
@@ -284,32 +253,27 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    {isLoadingBuildingData ? (
-                        <SkeletonLoading />
-                    ) : (
-                        <DataTableWidget
-                            isLoading={isLoadingBuildingData}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="equipment"
-                            onSearch={(query) => {
-                                setSearch(query);
-                            }}
-                            rows={buildingsData}
-                            searchResultRows={buildingsData}
-                            filterOptions={filterOptions}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                            disableColumnDragging={true}
-                            buttonGroupFilterOptions={[]}
-                            totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
+                    <DataTableWidget
+                        isLoading={isLoadingBuildingData}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="equipment"
+                        onSearch={(query) => {
+                            setSearch(query);
+                        }}
+                        rows={buildingsData}
+                        searchResultRows={buildingsData}
+                        onDownload={() => handleDownloadCsv()}
+                        headers={headerProps}
+                        disableColumnDragging={true}
+                        buttonGroupFilterOptions={[]}
+                        totalCount={(() => {
+                            if (search) {
+                                return totalItemsSearched;
+                            }
 
-                                return 0;
-                            })()}
-                        />
-                    )}
+                            return 0;
+                        })()}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

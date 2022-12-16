@@ -110,6 +110,7 @@ export const energyUsage = '/api/energy/energy/usage';
 export const compareBuildings = '/api/energy/energy/compare-buildings';
 
 //config settings
+export const getBuildings = '/api/config/get_buildings';
 export const createBuilding = '/api/config/create_building';
 export const generalBuilding = '/api/config/general/general-buildings';
 export const createDevice = '/api/config/devices/create_device';
