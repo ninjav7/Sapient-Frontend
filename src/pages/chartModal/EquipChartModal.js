@@ -468,7 +468,8 @@ const EquipChartModal = ({
                 onHide={handleChartClose}
                 dialogClassName="modal-container-style"
                 centered
-                backdrop={false}>
+                backdrop="static"
+                keyboard={false}>
                 <>
                     <Modal.Body className="p-4">
                         {equipmentData?.device_type === 'active' ? (

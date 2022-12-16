@@ -426,13 +426,13 @@ const BuildingOverview = () => {
     }, [startEndDayCount]);
 
     const handleClick = (row) => {
-        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
-        setEquipmentFilter({
-            equipment_id: arr[0]?.id,
-            equipment_name: arr[0]?.label,
-        });
-        localStorage.setItem('exploreEquipName', arr[0]?.label);
-        handleChartOpen();
+        // let arr = topEnergyConsumptionData.filter((item) => item.label === row);
+        // setEquipmentFilter({
+        //     equipment_id: arr[0]?.id,
+        //     equipment_name: arr[0]?.label,
+        // });
+        // localStorage.setItem('exploreEquipName', arr[0]?.label);
+        // handleChartOpen();
     };
 
     return (
