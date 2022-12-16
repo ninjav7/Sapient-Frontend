@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Select from 'react-select';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { saveEquipTypeData } from './services';
+import { saveEquipTypeData, getEndUseData } from './services';
+import Select from '../../../sharedComponents/form/select';
 
 const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData }) => {
     const defaultEquipTypeObj = {
+        is_active: true,
         name: '',
         end_use: '',
     };
@@ -16,6 +17,7 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     const [equipTypeData, setEquipTypeData] = useState(defaultEquipTypeObj);
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValidation, setFormValidation] = useState(false);
+    const [endUseData, setEndUseData] = useState([]);
 
     const buildingType = [
         { value: 'Office Building', label: 'Office Building' },
@@ -41,6 +43,25 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
         }
     };
 
+    const fetchEndUseData = async () => {
+        let response = await getEndUseData();
+        if (response?.data.length === 0) {
+            setEndUseData([]);
+            return;
+        }
+        let data = [];
+        response.data.sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        });
+        response.data.forEach((record) => {
+            data.push({
+                label: record?.name,
+                value: record?.end_user_id,
+            });
+        });
+        setEndUseData(data);
+    };
+
     useEffect(() => {
         if (equipTypeData.name.length > 0 && equipTypeData.end_use.length > 0) {
             setFormValidation(true);
@@ -48,6 +69,12 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
             setFormValidation(false);
         }
     }, [equipTypeData]);
+
+    useEffect(() => {
+        if (isAddEquipTypeModalOpen) {
+            fetchEndUseData();
+        }
+    }, [isAddEquipTypeModalOpen]);
 
     return (
         <Modal show={isAddEquipTypeModalOpen} onHide={closeAddEquipTypeModal} centered>
@@ -73,8 +100,8 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select End Use"
-                        options={buildingType}
-                        defaultValue={buildingType.filter((option) => option.value === equipTypeData?.end_use)}
+                        options={endUseData}
+                        defaultValue={endUseData.filter((option) => option.value === equipTypeData?.end_use)}
                         onChange={(e) => {
                             handleChange('end_use', e.value);
                         }}
