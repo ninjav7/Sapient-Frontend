@@ -34,6 +34,7 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, fetchBu
             setIsProcessing(true);
             await saveBuildingData(buildingData).then((res) => {
                 closeAddBuildingModal();
+                setBuildingData(defaultBuildingObj);
                 fetchBuildingData();
                 BuildingListStore.update((s) => {
                     s.fetchBuildingList = true;
