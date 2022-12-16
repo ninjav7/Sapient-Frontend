@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Select from 'react-select';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { saveBuildingData } from './services';
 import { BuildingListStore } from '../../../store/BuildingStore';
+import Select from '../../../sharedComponents/form/select';
 
 const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, fetchBuildingData }) => {
     const defaultBuildingObj = {

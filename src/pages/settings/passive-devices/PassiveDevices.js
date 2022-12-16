@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
+import { Row, Col, Card, Table } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -20,14 +8,13 @@ import {
     generalPassiveDevices,
     getLocation,
     createDevice,
-    generalGateway,
     searchDevices,
     updateDevice,
     deletePassiveDevice,
 } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -36,15 +23,17 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
-import ThreeDots from '../../../assets/images/threeDots.png';
 import { faEllipsisVertical, faPen, faTrash } from '@fortawesome/pro-regular-svg-icons';
-import Pen from '../../../assets/images/pen.png';
-import Delete from '../../../assets/images/delete.png';
 import { useAtom } from 'jotai';
 import { deviceId, identifier, passiveDeviceModal, userPermissionData } from '../../../store/globalState';
 import Select from 'react-select';
 import Dropdown from 'react-bootstrap/Dropdown';
 import './style.css';
+import Typography from '../../../sharedComponents/typography';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { Button } from '../../../sharedComponents/button';
+import Brick from '../../../sharedComponents/brick';
+import CreatePassiveDevice from './CreatePassiveDevice';
 
 const PassiveDevicesTable = ({
     deviceData,
@@ -52,13 +41,11 @@ const PassiveDevicesTable = ({
     previousPageData,
     paginationData,
     isDeviceProcessing,
-    setIsDeviceProcessing,
     selectedOptions,
     passiveDeviceDataWithFilter,
     pageSize,
     setPageSize,
     setIsEdit,
-    isEdit,
     setIsDelete,
 }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -127,288 +114,274 @@ const PassiveDevicesTable = ({
     return (
         <>
             <Card onMouseMove={handleMouseMove}>
-               
-                    <Table className="mt-4 mb-0 bordered table-hover">
-                        <thead>
-                            <tr className="mouse-pointer">
-                                {selectedOptions.some((record) => record.value === 'status') && (
-                                    <th className="active-device-header">
-                                        <div className="passive-device-flex">
-                                            <div>Status</div>
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'identifier') && (
-                                    <th
-                                        className="active-device-header"
-                                        onClick={() => setIdentifierOrder(!identifierOrder)}>
-                                        <div className="passive-device-flex">
-                                            <div>Identifier (MAC)</div>
-                                            {identifierOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'identifier')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'identifier')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'model') && (
-                                    <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
-                                        <div className="passive-device-flex">
-                                            <div>Model</div>
-                                            {modelOrder ? (
-                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div className="ml-2" onClick={() => handleColumnSort('dce', 'model')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'location') && (
-                                    <th
-                                        className="active-device-header"
-                                        onClick={() => setLocationOrder(!locationOrder)}>
-                                        <div className="passive-device-flex">
-                                            <div>Location</div>
-                                            {locationOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'location')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'location')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'sensors') && (
-                                    <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
-                                        <div className="passive-device-flex">
-                                            <div>Sensors</div>
-                                            {sensorOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'sensor_count')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'sensor_count')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
+                <Table className="mt-4 mb-0 bordered table-hover">
+                    <thead>
+                        <tr className="mouse-pointer">
+                            {selectedOptions.some((record) => record.value === 'status') && (
                                 <th className="active-device-header">
                                     <div className="passive-device-flex">
-                                        <div>Actions</div>
+                                        <div>Status</div>
                                     </div>
                                 </th>
-                            </tr>
-                        </thead>
-                        {isDeviceProcessing ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                <th
+                                    className="active-device-header"
+                                    onClick={() => setIdentifierOrder(!identifierOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Identifier (MAC)</div>
+                                        {identifierOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'identifier')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'identifier')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'model') && (
+                                <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Model</div>
+                                        {modelOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'location') && (
+                                <th className="active-device-header" onClick={() => setLocationOrder(!locationOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Location</div>
+                                        {locationOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('dce', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'sensors') && (
+                                <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Sensors</div>
+                                        {sensorOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('dce', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            <th className="active-device-header">
+                                <div className="passive-device-flex">
+                                    <div>Actions</div>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                    </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                            <tbody style={{ position: 'relative' }}>
-                                {deviceData.map((record, index) => {
-                                    return (
-                                        <>
-                                            <tr key={index} className="mouse-pointer">
-                                                {selectedOptions.some((record) => record.value === 'status') && (
-                                                    <td scope="row" className="text-center">
-                                                        {record.status ? (
-                                                            <div className="icon-bg-styling">
-                                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="icon-bg-styling-slash">
-                                                                <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                )}
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions
-                                                    ?.advanced_passive_device_permission?.edit ? (
-                                                    <Link
-                                                        to={{
-                                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody style={{ position: 'relative' }}>
+                            {deviceData.map((record, index) => {
+                                return (
+                                    <>
+                                        <tr key={index} className="mouse-pointer">
+                                            {selectedOptions.some((record) => record.value === 'status') && (
+                                                <td scope="row" className="text-center">
+                                                    {record.status ? (
+                                                        <div className="icon-bg-styling">
+                                                            <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="icon-bg-styling-slash">
+                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            )}
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.advanced_passive_device_permission
+                                                ?.edit ? (
+                                                <Link
+                                                    to={{
+                                                        pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                                    }}>
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'identifier'
+                                                    ) && (
+                                                        <td className="font-weight-bold panel-name">
+                                                            {record.identifier}
+                                                        </td>
+                                                    )}
+                                                </Link>
+                                            ) : (
+                                                <>
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'identifier'
+                                                    ) && (
+                                                        <td className="font-weight-bold panel-name">
+                                                            {record.identifier}
+                                                        </td>
+                                                    )}
+                                                </>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'model') && (
+                                                <td>{record.model.charAt(0).toUpperCase() + record.model.slice(1)}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'location') && (
+                                                <td>{record.location === '' ? ' - ' : record.location}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'sensors') && (
+                                                <td>{record.sensor_number}</td>
+                                            )}
+                                            <td>
+                                                <Dropdown className="float-end" align="end">
+                                                    <div
+                                                        onClick={() => {
+                                                            setToggleEdit(true);
+                                                            setSensorId(record?.identifier);
+                                                            setIdentifierVal(record?.identifier);
+                                                            setDeviceIdVal(record?.equipments_id);
+                                                            setModalVal(record?.model);
                                                         }}>
-                                                        {selectedOptions.some(
-                                                            (record) => record.value === 'identifier'
-                                                        ) && (
-                                                            <td className="font-weight-bold panel-name">
-                                                                {record.identifier}
-                                                            </td>
-                                                        )}
-                                                    </Link>
-                                                ) : (
-                                                    <>
-                                                        {selectedOptions.some(
-                                                            (record) => record.value === 'identifier'
-                                                        ) && (
-                                                            <td className="font-weight-bold panel-name">
-                                                                {record.identifier}
-                                                            </td>
-                                                        )}
-                                                    </>
-                                                )}
-                                                {selectedOptions.some((record) => record.value === 'model') && (
-                                                    <td>
-                                                        {record.model.charAt(0).toUpperCase() + record.model.slice(1)}
-                                                    </td>
-                                                )}
-                                                {selectedOptions.some((record) => record.value === 'location') && (
-                                                    <td>{record.location === '' ? ' - ' : record.location}</td>
-                                                )}
-                                                {selectedOptions.some((record) => record.value === 'sensors') && (
-                                                    <td>{record.sensor_number}</td>
-                                                )}
-                                                <td>
-                                                    <Dropdown className="float-end" align="end">
+                                                        <Dropdown.Toggle
+                                                            as="a"
+                                                            className="cursor-pointer arrow-none text-muted">
+                                                            <div className="triple-dot-style">
+                                                                <FontAwesomeIcon
+                                                                    icon={faEllipsisVertical}
+                                                                    color="#1D2939"
+                                                                    size="lg"
+                                                                />
+                                                            </div>
+                                                        </Dropdown.Toggle>
+                                                    </div>
+                                                    <Dropdown.Menu>
                                                         <div
                                                             onClick={() => {
-                                                                setToggleEdit(true);
-                                                                setSensorId(record?.identifier);
-                                                                setIdentifierVal(record?.identifier);
-                                                                setDeviceIdVal(record?.equipments_id);
-                                                                setModalVal(record?.model);
+                                                                setIsEdit(true);
                                                             }}>
-                                                            <Dropdown.Toggle
-                                                                as="a"
-                                                                className="cursor-pointer arrow-none text-muted">
-                                                                <div className="triple-dot-style">
-                                                                    <FontAwesomeIcon
-                                                                        icon={faEllipsisVertical}
-                                                                        color="#1D2939"
-                                                                        size="lg"
-                                                                    />
-                                                                </div>
-                                                            </Dropdown.Toggle>
+                                                            <Dropdown.Item>
+                                                                <FontAwesomeIcon
+                                                                    icon={faPen}
+                                                                    color="#1D2939"
+                                                                    size="lg"
+                                                                    className="mr-4"
+                                                                />
+                                                                Edit
+                                                            </Dropdown.Item>
                                                         </div>
-                                                        <Dropdown.Menu>
-                                                            <div
-                                                                onClick={() => {
-                                                                    setIsEdit(true);
-                                                                }}>
-                                                                <Dropdown.Item>
-                                                                    <FontAwesomeIcon
-                                                                        icon={faPen}
-                                                                        color="#1D2939"
-                                                                        size="lg"
-                                                                        className="mr-4"
-                                                                    />
-                                                                    Edit
-                                                                </Dropdown.Item>
-                                                            </div>
-                                                            <div
-                                                                onClick={() => {
-                                                                    setIsDelete(true);
-                                                                }}>
-                                                                <Dropdown.Item>
-                                                                    <FontAwesomeIcon
-                                                                        icon={faTrash}
-                                                                        color="#d92d20"
-                                                                        size="lg"
-                                                                        className="mr-4"
-                                                                    />
-                                                                    <span className="delete-btn-style">Delete</span>
-                                                                </Dropdown.Item>
-                                                            </div>
-                                                        </Dropdown.Menu>
-                                                    </Dropdown>
-                                                </td>
-                                            </tr>
-                                        </>
-                                    );
-                                })}
-                            </tbody>
-                        )}
-                    </Table>
+                                                        <div
+                                                            onClick={() => {
+                                                                setIsDelete(true);
+                                                            }}>
+                                                            <Dropdown.Item>
+                                                                <FontAwesomeIcon
+                                                                    icon={faTrash}
+                                                                    color="#d92d20"
+                                                                    size="lg"
+                                                                    className="mr-4"
+                                                                />
+                                                                <span className="delete-btn-style">Delete</span>
+                                                            </Dropdown.Item>
+                                                        </div>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                            </td>
+                                        </tr>
+                                    </>
+                                );
+                            })}
+                        </tbody>
+                    )}
+                </Table>
 
-                    <div className="page-button-style">
-                        <div>
-                            <button
-                                type="button"
-                                className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
-                                onClick={() => {
-                                    previousPageData(paginationData.pagination.previous);
-                                }}>
-                                Previous
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-md btn-light font-weight-bold mt-4"
-                                onClick={() => {
-                                    nextPageData(paginationData.pagination.next);
-                                }}>
-                                Next
-                            </button>
-                        </div>
-                        <div>
-                            <select
-                                value={pageSize}
-                                className="btn btn-md btn-light font-weight-bold mt-4"
-                                onChange={(e) => {
-                                    setPageSize(parseInt(e.target.value));
-                                    window.scrollTo(0, 0);
-                                }}>
-                                {[20, 50, 100].map((pageSize) => (
-                                    <option key={pageSize} value={pageSize} className="align-options-center">
-                                        Show {pageSize} devices
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                <div className="page-button-style">
+                    <div>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
                     </div>
-              
+                    <div>
+                        <select
+                            value={pageSize}
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onChange={(e) => {
+                                setPageSize(parseInt(e.target.value));
+                                window.scrollTo(0, 0);
+                            }}>
+                            {[20, 50, 100].map((pageSize) => (
+                                <option key={pageSize} value={pageSize} className="align-options-center">
+                                    Show {pageSize} devices
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </Card>
         </>
     );
@@ -439,101 +412,34 @@ const PassiveDevices = () => {
 
     const [selectedOptions, setSelectedOptions] = useState([]);
 
-    // Modal states
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    // Add Device Modal states
+    const [isAddDeviceModalOpen, setAddDeviceDeviceModal] = useState(false);
+    const closeAddDeviceModal = () => setAddDeviceDeviceModal(false);
+    const openAddDeviceModal = () => setAddDeviceDeviceModal(true);
 
     const [pageRefresh, setPageRefresh] = useState(false);
 
-    const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [duplicatePassiveDeviceData, setDuplicatePassiveDeviceData] = useState([]);
-    const [passiveDeviceModel, setPassiveDeviceModel] = useState([
-        {
-            value: 'hydra',
-            label: 'Hydra',
-        },
-        {
-            value: 'trident',
-            label: 'Trident',
-        },
-    ]);
+
     const [paginationData, setPaginationData] = useState({});
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
-    const [locationData, setLocationData] = useState([]);
-    const [createDeviceData, setCreateDeviceData] = useState({
-        device_type: 'passive',
-        mac_address: '',
-    });
-
-    useEffect(() => {
-        if (createDeviceData.mac_address.length > 0) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-    }, [createDeviceData]);
 
     const [search, setSearch] = useState('');
 
-    const [locationDataNow, setLocationDataNow] = useState([]);
-
-    const addLocationType = () => {
-        locationData.map((item) => {
-            setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
-        });
-    };
-
-    useEffect(() => {
-        if (locationData) {
-            setLocationDataNow([]);
-            addLocationType();
-        }
-    }, [locationData]);
-
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
-
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, createDeviceData);
-        obj[key] = value;
-        setCreateDeviceData(obj);
-    };
 
     const [isEdit, setIsEdit] = useState(false);
     const handleEditClose = () => setIsEdit(false);
 
     const [isDelete, setIsDelete] = useState(false);
     const handleDeleteClose = () => setIsDelete(false);
-
-    const saveDeviceData = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsProcessing(true);
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${createDevice}${params}`, createDeviceData, {
-                    headers: header,
-                })
-                .then((res) => {});
-
-            setPageRefresh(!pageRefresh);
-
-            setIsProcessing(false);
-        } catch (error) {
-            setIsProcessing(false);
-        }
-    };
 
     const passiveDeviceDataWithFilter = async (order, filterBy) => {
         try {
@@ -746,29 +652,11 @@ const PassiveDevices = () => {
         }
     };
 
-    const fetchLocationData = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                let response = res.data;
-                response.sort((a, b) => {
-                    return a.location_name.localeCompare(b.location_name);
-                });
-                setLocationData(response);
-            });
-        } catch (error) {}
-    };
-
     useEffect(() => {
         if (deviceSearch.length === 0) fetchPassiveDeviceData();
     }, [deviceSearch, pageSize]);
 
     useEffect(() => {
-        fetchLocationData();
         fetchPassiveDeviceData();
     }, [pageRefresh, bldgId]);
 
@@ -802,32 +690,35 @@ const PassiveDevices = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Passive Devices</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            {userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
-                                    onClick={() => {
-                                        handleShow();
-                                        setFormValidation(false);
-                                    }}>
-                                    <i className="uil uil-plus mr-1"></i>Add Passive Device
-                                </button>
-                            ) : (
-                                <></>
-                            )}
+                            <Typography.Header size={Typography.Sizes.lg}>Passive Devices</Typography.Header>
                         </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
+                            <div className="d-flex">
+                                <Button
+                                    label={'Add Passive Device'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        openAddDeviceModal();
+                                    }}
+                                    icon={<PlusSVG />}
+                                />
+                            </div>
+                        ) : (
+                            ''
+                        )}
                     </div>
                 </Col>
             </Row>
 
-            <Row className="mt-4">
+            <Brick sizeInRem={1.5} />
+
+            <Row>
                 <Col xl={3}>
                     <div class="input-group rounded">
                         <input
@@ -1012,24 +903,28 @@ const PassiveDevices = () => {
                         </button> */}
                     </Form>
                 </Modal.Body>
-                <Modal.Footer
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        flexWrap: 'nowrap',
-                    }}>
-                    <Button
-                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
-                        onClick={handleEditClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        style={{ width: '50%', backgroundColor: '#3A42EE', borderColor: '#3A42EE' }}
-                        onClick={() => {
-                            updateDeviceData();
-                        }}>
-                        Save
-                    </Button>
+                <Modal.Footer>
+                    <div className="d-flex justify-content-between w-100">
+                        <Button
+                            label="Cancel"
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryGrey}
+                            className="w-100"
+                            onClick={() => {
+                                handleEditClose();
+                            }}
+                        />
+
+                        <Button
+                            label={'Edit'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.primary}
+                            className="w-100"
+                            onClick={() => {
+                                updateDeviceData();
+                            }}
+                        />
+                    </div>
                 </Modal.Footer>
             </Modal>
 
@@ -1065,105 +960,11 @@ const PassiveDevices = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Create Passive Device</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Identifier"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('mac_address', e.target.value);
-                                    // setFormValidation(true);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Model</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('model', e.target.value);
-                                }}>
-                                <option selected>Select Model</option>
-                                {passiveDeviceModel.map((record) => {
-                                    return <option value={record.value}>{record.label}</option>;
-                                })}
-                            </Input> */}
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Model"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={'Select Model'}
-                                options={passiveDeviceModel}
-                                onChange={(e) => {
-                                    handleChange('model', e.value);
-                                }}
-                                className="basic-single font-weight-bold"
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Location</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('space_id', e.target.value);
-                                }}>
-                                <option selected>Select Location</option>
-                                {locationData.map((record) => {
-                                    return <option value={record.location_id}>{record.location_name}</option>;
-                                })}
-                            </Input> */}
-                            {/* locationDataNow */}
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Location"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={'Select Location'}
-                                options={locationDataNow}
-                                onChange={(e) => {
-                                    handleChange('space_id', e.value);
-                                }}
-                                className="basic-single font-weight-bold"
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
-                        <Button
-                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
-                            onClick={handleClose}>
-                            Cancel
-                        </Button>
-                        <Button
-                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
-                            onClick={() => {
-                                saveDeviceData();
-                                handleClose();
-                            }}
-                            disabled={!formValidation}>
-                            {isProcessing ? 'Adding...' : 'Add'}
-                        </Button>
-                    </div>
-                </Modal.Footer>
-            </Modal>
+            <CreatePassiveDevice
+                isAddDeviceModalOpen={isAddDeviceModalOpen}
+                closeAddDeviceModal={closeAddDeviceModal}
+                fetchPassiveDeviceData={fetchPassiveDeviceData}
+            />
         </React.Fragment>
     );
 };
