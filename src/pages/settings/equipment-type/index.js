@@ -146,7 +146,7 @@ const EquipmentType = () => {
     ];
 
     useEffect(() => {
-        fetchEquipTypeData(search);
+        fetchEquipTypeData(encodeURIComponent(search));
     }, [search]);
 
     useEffect(() => {
