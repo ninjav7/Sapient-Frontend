@@ -526,23 +526,25 @@ const EquipChartModal = ({
                                                     }}
                                                 />
                                             </div>
-                                            <div>
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit ? (
-                                                    <Button
-                                                        label="Save"
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.primary}
-                                                        onClick={() => {
-                                                            handleSave();
-                                                        }}
-                                                        disabled={!isDataChanged}
-                                                    />
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </div>
+                                            {selectedTab === 1 ? (
+                                                <div>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Button
+                                                            label="Save"
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.primary}
+                                                            onClick={() => {
+                                                                handleSave();
+                                                            }}
+                                                            disabled={!isDataChanged}
+                                                        />
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </div>
+                                            ) : null}
                                         </div>
                                     </Col>
                                 </Row>
@@ -583,24 +585,26 @@ const EquipChartModal = ({
                                                     }}
                                                 />
                                             </div>
-                                            <div>
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit ? (
-                                                    <Button
-                                                        label="Save"
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.primary}
-                                                        className="ml-4"
-                                                        onClick={() => {
-                                                            handleSave();
-                                                        }}
-                                                        disabled={!isDataChanged}
-                                                    />
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </div>
+                                            {selectedTab === 1 ? (
+                                                <div>
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions
+                                                        ?.account_buildings_permission?.edit ? (
+                                                        <Button
+                                                            label="Save"
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.primary}
+                                                            className="ml-4"
+                                                            onClick={() => {
+                                                                handleSave();
+                                                            }}
+                                                            disabled={!isDataChanged}
+                                                        />
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </div>
+                                            ) : null}
                                         </div>
                                     </Col>
                                 </Row>
