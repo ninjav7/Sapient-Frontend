@@ -6,7 +6,7 @@ export function saveBuildingData(payload) {
 }
 
 export function fetchBuildingList(search, sort_by, order_by, sqftAPIFlag, building_type, minVal, maxVal) {
-    let params = `?building_search=${search}&ordered_by=${order_by}&sort_by=${sort_by}`;
+    let params = `?building_search=${encodeURIComponent(search)}&ordered_by=${order_by}&sort_by=${sort_by}`;
     if (building_type) {
         let paramsToAppend = `&building_type=${building_type}`;
         params = params.concat(paramsToAppend);

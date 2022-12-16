@@ -36,19 +36,9 @@ const Control = () => {
     ]);
 
     const handleLogout = () => {
+        localStorage.clear();
         cookies.remove('user', { path: '/' });
-        const isAuthTokenValid = isUserAuthenticated();
-
-        logoutUser(history);
-
-        if (isAuthTokenValid) {
-            return <Redirect to="/" />;
-        } else {
-            localStorage.clear();
-
-            history.push('/account/login');
-            window.location.reload();
-        }
+        window.location.reload();
     };
 
     const handleSideNavChange = () => {
@@ -277,13 +267,6 @@ const Control = () => {
                         </button>
                     </div>
                 </div>
-
-                {/* <SearchModal /> */}
-                {/* <div className="navbar-icon-container float-right topbar-buttons">
-                    <button className="btn btn-sm float-right other-font-icon-style">
-                        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
-                    </button>
-                </div> */}
             </div>
 
             <button className="btn topbar-logout-btn" onClick={handleLogout}>

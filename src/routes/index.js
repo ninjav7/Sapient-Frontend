@@ -10,7 +10,7 @@ import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
-import EquipmentTypes from '../pages/settings/EquipmentTypes';
+import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
