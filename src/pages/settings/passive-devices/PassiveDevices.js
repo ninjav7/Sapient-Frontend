@@ -250,32 +250,15 @@ const PassiveDevicesTable = ({
                                                     )}
                                                 </td>
                                             )}
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.advanced_passive_device_permission
-                                                ?.edit ? (
-                                                <Link
-                                                    to={{
-                                                        pathname: `/settings/passive-devices/single/${record.equipments_id}`,
-                                                    }}>
-                                                    {selectedOptions.some(
-                                                        (record) => record.value === 'identifier'
-                                                    ) && (
-                                                        <td className="font-weight-bold panel-name">
-                                                            {record.identifier}
-                                                        </td>
-                                                    )}
-                                                </Link>
-                                            ) : (
-                                                <>
-                                                    {selectedOptions.some(
-                                                        (record) => record.value === 'identifier'
-                                                    ) && (
-                                                        <td className="font-weight-bold panel-name">
-                                                            {record.identifier}
-                                                        </td>
-                                                    )}
-                                                </>
-                                            )}
+                                            <Link
+                                                to={{
+                                                    pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                                }}>
+                                                {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                                )}
+                                            </Link>
+
                                             {selectedOptions.some((record) => record.value === 'model') && (
                                                 <td>{record.model.charAt(0).toUpperCase() + record.model.slice(1)}</td>
                                             )}
