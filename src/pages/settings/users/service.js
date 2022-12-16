@@ -5,6 +5,7 @@ import {
     vendorPermissions,
     getSingleUserDetail,
     updateSingleUserDetail,
+    updateUserRole,
 } from '../../../services/Network';
 
 export function inviteMemberUsers(payload, params) {
@@ -25,4 +26,8 @@ export function fetchSingleUserDetail(params) {
 
 export function updateSingleUserDetails(payload, params) {
     return axiosInstance.patch(`${updateSingleUserDetail}${params}`, payload).then((res) => res);
+}
+
+export function updateUserRolePermission(payload) {
+    return axiosInstance.patch(`${updateUserRole}`, payload).then((res) => res);
 }

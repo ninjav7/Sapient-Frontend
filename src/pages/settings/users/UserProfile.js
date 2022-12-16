@@ -8,7 +8,13 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
 import Brick from '../../../sharedComponents/brick';
-import { fetchSingleUserDetail, updateSingleUserDetails, updateVendorPermissions, inviteMemberUsers } from './service';
+import {
+    fetchSingleUserDetail,
+    updateSingleUserDetails,
+    updateVendorPermissions,
+    inviteMemberUsers,
+    updateUserRolePermission,
+} from './service';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
@@ -37,7 +43,8 @@ const UserProfile = () => {
     });
 
     const [userObj, setUserObj] = useState({
-        role: '',
+        user: userId,
+        permission_role: '',
     });
 
     const [userPermissionList, setUserPermissionList] = useState();
@@ -70,7 +77,6 @@ const UserProfile = () => {
         await fetchSingleUserDetail(params)
             .then((res) => {
                 setUserDetail(res?.data?.data?.user_details);
-                console.log(res?.data?.data?.permissions);
                 setUserPermissionList(res?.data?.data?.permissions);
             })
             .catch((error) => {});
@@ -86,17 +92,24 @@ const UserProfile = () => {
                 setUserDetail(res?.data?.data);
 
                 if (obj.is_active !== undefined) {
-                    setIsProcessing(false);
                     setShow(false);
                 } else {
                     setLoadButton(false);
+                    getSingleUserDetailFunc();
                 }
+            })
+            .catch((error) => {});
+    };
+    const updateRolesPermission = async () => {
+        await updateUserRolePermission(userObj)
+            .then((res) => {
+                setIsProcessing(false);
+                setShow(false);
+
                 getSingleUserDetailFunc();
             })
             .catch((error) => {
-                if (obj.is_active !== undefined) {
-                    setIsProcessing(false);
-                }
+                setIsProcessing(false);
             });
     };
 
@@ -114,7 +127,6 @@ const UserProfile = () => {
 
     useEffect(() => {
         if (userDetail) {
-            console.log(userDetail);
             setUpdateUserDetail({
                 first_name: userDetail?.first_name,
                 last_name: userDetail?.last_name,
@@ -285,8 +297,9 @@ const UserProfile = () => {
                                     label={loadButton ? 'Saving' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={() => {
+                                    onClick={async () => {
                                         updateSingleUserDetailFunc(updateUserDetail);
+                                        await updateRolesPermission();
                                     }}
                                     className="ml-2"
                                     disabled={!isEditing}
@@ -440,11 +453,13 @@ const UserProfile = () => {
                                                             options={rolesData}
                                                             isSearchable={false}
                                                             defaultValue={
-                                                                userObj.role == '' ? item?.permission_id : userObj.role
+                                                                userObj.permission_role == ''
+                                                                    ? item?.permission_id
+                                                                    : userObj.permission_role
                                                             }
                                                             onChange={(e) => {
                                                                 setIsEditing(true);
-                                                                handleChange('role', e.value);
+                                                                handleChange('permission_role', e.value);
                                                             }}
                                                         />
                                                     </div>

@@ -15,7 +15,6 @@ import { userPermissionData } from '../../../store/globalState';
 import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
-import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import moment from 'moment';
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -191,11 +190,11 @@ const Users = () => {
             <>
                 {userPermission?.user_role === 'admin' ||
                 userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                    <Link to={`/settings/users/user-profile/single/${row?._id}`}>
+                    <Link className="typography-wrapper link" to={`/settings/users/user-profile/single/${row?._id}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 ) : (
-                    <Link to={`/settings/users/user-profile/single/${row?._id}`}>
+                    <Link className="typography-wrapper link" to={`/settings/users/user-profile/single/${row?._id}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 )}
