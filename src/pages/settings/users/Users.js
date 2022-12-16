@@ -431,7 +431,6 @@ const Users = () => {
                             size={Button.Sizes.lg}
                             type={Button.Type.primary}
                             className="d-flex align-items-center button-container"
-                            disabled={!formValidation || isProcessing}
                             onClick={() => {
                                 setIsProcessing(true);
                                 saveUserData();
