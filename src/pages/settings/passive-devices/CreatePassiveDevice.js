@@ -62,6 +62,10 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
 
     const fetchLocationData = async () => {
         let response = await getLocationData(`/${bldgId}`);
+        if (response?.data.length === 0) {
+            setLocationData([]);
+            return;
+        }
         let data = [];
         response.data.sort((a, b) => {
             return a.location_name.localeCompare(b.location_name);
