@@ -52,6 +52,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
             let params = `?building_id=${bldgId}`;
             await savePassiveDeviceData(params, deviceData).then((res) => {
                 closeAddDeviceModal();
+                setDeviceData(defaultDeviceObj);
                 fetchPassiveDeviceData();
             });
             setIsProcessing(false);

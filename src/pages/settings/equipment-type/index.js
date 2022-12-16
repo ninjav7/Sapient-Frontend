@@ -54,18 +54,36 @@ const EquipmentType = () => {
 
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(false);
+    const [totalItems, setTotalItems] = useState(0);
+    const [selectedFilter, setSelectedFilter] = useState(0);
 
-    const fetchEquipTypeData = async (searchTxt) => {
+    const pageListSizes = [
+        {
+            label: '20 Rows',
+            value: '20',
+        },
+        {
+            label: '50 Rows',
+            value: '50',
+        },
+        {
+            label: '100 Rows',
+            value: '100',
+        },
+    ];
+
+    const fetchEquipTypeData = async (searchTxt, page_no, page_size) => {
         setDataFetching(true);
-        let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+        let params = `?page_size=${page_size}&page_no=${page_no}`;
         if (searchTxt) {
-            let searchParams = `&equipment_search=${searchTxt}`;
+            let searchParams = `&equipment_search=${encodeURIComponent(searchTxt)}`;
             params = params.concat(searchParams);
         }
         await getEquipTypeData(params)
             .then((res) => {
-                const response = res?.data?.data;
-                setEquipTypeData(response);
+                const response = res?.data;
+                setTotalItems(response?.total_data);
+                setEquipTypeData(response?.data);
                 setDataFetching(false);
             })
             .catch(() => {
@@ -83,7 +101,9 @@ const EquipmentType = () => {
     };
 
     const currentRow = () => {
-        return equipTypeData;
+        if (selectedFilter === 0) {
+            return equipTypeData;
+        }
     };
 
     const renderEquipTypeName = (row) => {
@@ -146,8 +166,8 @@ const EquipmentType = () => {
     ];
 
     useEffect(() => {
-        fetchEquipTypeData(encodeURIComponent(search));
-    }, [search]);
+        fetchEquipTypeData(search, pageNo, pageSize);
+    }, [search, pageNo, pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -205,13 +225,20 @@ const EquipmentType = () => {
                         id="equipmentType_list"
                         buttonGroupFilterOptions={[]}
                         onSearch={setSearch}
-                        onStatus={[]}
+                        onStatus={setSelectedFilter}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
-                        // filterOptions={filterOptions}
                         headers={headerProps}
+                        currentPage={pageNo}
+                        onChangePage={setPageNo}
+                        pageSize={pageSize}
+                        onPageSize={setPageSize}
+                        pageListSizes={pageListSizes}
                         totalCount={(() => {
+                            if (selectedFilter === 0) {
+                                return totalItems;
+                            }
                             return 0;
                         })()}
                     />

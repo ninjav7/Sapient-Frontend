@@ -35,6 +35,7 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
             setIsProcessing(true);
             await saveEquipTypeData(equipTypeData).then((res) => {
                 closeAddEquipTypeModal();
+                setEquipTypeData(defaultEquipTypeObj);
                 fetchEquipTypeData();
             });
             setIsProcessing(false);
