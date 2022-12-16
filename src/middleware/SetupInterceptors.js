@@ -22,6 +22,7 @@ const SetupInterceptors = () => {
                 cookies.remove('user', { path: '/' });
                 history.push('/account/login');
                 window.location.reload();
+                localStorage.clear();
             }
             // return Promise.reject(error);
         }
