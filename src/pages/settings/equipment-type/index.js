@@ -12,6 +12,8 @@ import { getEquipTypeData } from './services';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { getEquipTypeTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -147,9 +149,24 @@ const EquipmentType = () => {
         fetchEquipTypeData(search);
     }, [search]);
 
-    // useEffect(() => {
-    //     fetchEquipTypeData();
-    // }, []);
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Equipment Types',
+                        path: '/settings/equipment-types',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
