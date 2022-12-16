@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, CardBody } from 'reactstrap';
+import { Redirect } from 'react-router-dom';
+import { Col } from 'reactstrap';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import { FormGroup, Button, Alert, InputGroup } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';

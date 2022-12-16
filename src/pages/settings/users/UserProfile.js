@@ -5,12 +5,10 @@ import 'react-time-picker/dist/TimePicker.css';
 import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
 import Brick from '../../../sharedComponents/brick';
-import { BaseUrl, vendorPermissions, getSingleUserDetail, updateSingleUserDetail } from '../../../services/Network';
-import { fetchSingleUserDetail, updateSingleUserDetails, updateVendorPermissions } from './service';
-import axios from 'axios';
+import { fetchSingleUserDetail, updateSingleUserDetails, updateVendorPermissions, inviteMemberUsers } from './service';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
@@ -28,7 +26,6 @@ const UserProfile = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const [checked, setChecked] = useState(true);
     const [userDetail, setUserDetail] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [loadButton, setLoadButton] = useState(false);
@@ -69,35 +66,37 @@ const UserProfile = () => {
 
     // TODO:
     const getSingleUserDetailFunc = async () => {
-        let header = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-
-        await axios
-            .get(`${BaseUrl}${getSingleUserDetail}?member_user_id=${userId}`, { headers: header })
+        let params = `?member_user_id=${userId}`;
+        await fetchSingleUserDetail(params)
             .then((res) => {
                 setUserDetail(res?.data?.data?.user_details);
+                console.log(res?.data?.data?.permissions);
                 setUserPermissionList(res?.data?.data?.permissions);
-            });
+            })
+            .catch((error) => {});
     };
 
-    const updateSingleUserDetailFunc = async () => {
-        let header = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-
-        await axios
-            .patch(`${BaseUrl}${updateSingleUserDetail}?member_user_id=${userId}`, updateUserDetail, {
-                headers: header,
-            })
+    const updateSingleUserDetailFunc = async (obj) => {
+        if (obj.is_active !== undefined) {
+            setIsProcessing(true);
+        }
+        let params = `?member_user_id=${userId}`;
+        await updateSingleUserDetails(obj, params)
             .then((res) => {
                 setUserDetail(res?.data?.data);
-                setLoadButton(false);
+
+                if (obj.is_active !== undefined) {
+                    setIsProcessing(false);
+                    setShow(false);
+                } else {
+                    setLoadButton(false);
+                }
                 getSingleUserDetailFunc();
+            })
+            .catch((error) => {
+                if (obj.is_active !== undefined) {
+                    setIsProcessing(false);
+                }
             });
     };
 
@@ -115,6 +114,7 @@ const UserProfile = () => {
 
     useEffect(() => {
         if (userDetail) {
+            console.log(userDetail);
             setUpdateUserDetail({
                 first_name: userDetail?.first_name,
                 last_name: userDetail?.last_name,
@@ -129,14 +129,8 @@ const UserProfile = () => {
     const [buildingListData] = useAtom(buildingData);
 
     const getPermissionRoleFunc = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            await axios.post(`${BaseUrl}${vendorPermissions}`, {}, { headers }).then((res) => {
+        await updateVendorPermissions({}, '')
+            .then((res) => {
                 let response = res.data;
                 let arr = [];
                 response.data.map((el) => {
@@ -146,8 +140,8 @@ const UserProfile = () => {
                     });
                 });
                 setRolesData(arr);
-            });
-        } catch (error) {}
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -189,6 +183,20 @@ const UserProfile = () => {
             }
         }
     };
+    const resendInvite = async () => {
+        let userData = {
+            first_name: updateUserDetail?.first_name,
+            last_name: updateUserDetail?.last_name,
+            email: updateUserDetail?.email,
+            role: userPermissionList[0]?.permission_id,
+        };
+        let params = '?request_type=reinvite';
+        await inviteMemberUsers(userData, params)
+            .then((res) => {
+                let response = res.data;
+            })
+            .catch((error) => {});
+    };
 
     const deactivateUser = () => {
         if (userDetail?.is_verified === false) {
@@ -197,7 +205,7 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700 }}
+                        style={{ color: colorPalette.error700, cursor: 'pointer' }}
                         onClick={() => {
                             setDangerZoneText('Deactivate');
                             setShow(true);
@@ -208,7 +216,8 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex activate-container justify-content-center"
-                        style={{ color: colorPalette.primaryIndigo600 }}>
+                        style={{ color: colorPalette.primaryIndigo600, cursor: 'pointer' }}
+                        onClick={resendInvite}>
                         <FontAwesomeIcon icon={faShare} size="lg" style={{ color: colorPalette.primaryIndigo600 }} />
                         Resend Invitation
                     </Typography.Subheader>
@@ -220,7 +229,7 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700 }}
+                        style={{ color: colorPalette.error700, cursor: 'pointer' }}
                         onClick={() => {
                             setDangerZoneText('Deactivate');
                             setShow(true);
@@ -234,7 +243,7 @@ const UserProfile = () => {
                     <Typography.Subheader
                         size={Typography.Sizes.md}
                         className="d-flex activate-container justify-content-center"
-                        style={{ color: colorPalette.primaryIndigo600 }}
+                        style={{ color: colorPalette.primaryIndigo600, cursor: 'pointer' }}
                         onClick={() => {
                             setDangerZoneText('Activate');
                             setShow(true);
@@ -248,14 +257,6 @@ const UserProfile = () => {
                     </Typography.Subheader>
                 );
             }
-        }
-    };
-
-    const userStatusHandler = () => {
-        var answer = window.confirm("'Are you sure wants o delete!!!'");
-
-        if (answer) {
-            //some code
         }
     };
 
@@ -285,7 +286,7 @@ const UserProfile = () => {
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
                                     onClick={() => {
-                                        updateSingleUserDetailFunc();
+                                        updateSingleUserDetailFunc(updateUserDetail);
                                     }}
                                     className="ml-2"
                                     disabled={!isEditing}
@@ -507,23 +508,31 @@ const UserProfile = () => {
                             size={Button.Sizes.lg}
                             type={Button.Type.secondaryGrey}
                             onClick={() => setShow(false)}
-                            style={{ width: '8rem', justifyContent: 'center' }}
+                            className="buttonStyle"
                         />
                         {dangerZoneText === 'Deactivate' ? (
                             <Button
                                 label={isProcessing ? 'Deactivating...' : 'Deactivate'}
                                 size={Button.Sizes.lg}
                                 type={Button.Type.primaryDistructive}
-                                style={{ width: '8rem', justifyContent: 'center' }}
-                                onClick={() => {}}
+                                className="buttonStyle"
+                                onClick={() => {
+                                    updateSingleUserDetailFunc({
+                                        is_active: false,
+                                    });
+                                }}
                             />
                         ) : (
                             <Button
-                                label={isProcessing ? 'Deactivating...' : 'Activate'}
+                                label={isProcessing ? 'Activating...' : 'Activate'}
                                 size={Button.Sizes.lg}
                                 type={Button.Type.primary}
-                                style={{ width: '8rem', justifyContent: 'center' }}
-                                onClick={() => {}}
+                                className="buttonStyle"
+                                onClick={() => {
+                                    updateSingleUserDetailFunc({
+                                        is_active: true,
+                                    });
+                                }}
                             />
                         )}
                     </div>

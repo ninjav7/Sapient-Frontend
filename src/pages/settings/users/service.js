@@ -7,22 +7,22 @@ import {
     updateSingleUserDetail,
 } from '../../../services/Network';
 
-export function addMemberUsers(payload = {}, params) {
+export function inviteMemberUsers(payload, params) {
     return axiosInstance.post(`${addMemberUser}${params}`, payload).then((res) => res);
 }
 
-export function getMemberUserList(payload = {}, params) {
-    return axiosInstance.get(`${getMemberUser}${params}`, payload).then((res) => res);
+export function fetchMemberUserList(params) {
+    return axiosInstance.get(`${getMemberUser}${params}`).then((res) => res);
 }
 
-export function updateVendorPermissions(payload = {}, params) {
+export function updateVendorPermissions(payload, params) {
     return axiosInstance.post(`${vendorPermissions}${params}`, payload).then((res) => res);
 }
 
-export function fetchSingleUserDetail(payload = {}, params) {
-    return axiosInstance.get(`${getSingleUserDetail}${params}`, payload).then((res) => res);
+export function fetchSingleUserDetail(params) {
+    return axiosInstance.get(`${getSingleUserDetail}${params}`).then((res) => res);
 }
 
-export function updateSingleUserDetails(payload = {}, params) {
+export function updateSingleUserDetails(payload, params) {
     return axiosInstance.patch(`${updateSingleUserDetail}${params}`, payload).then((res) => res);
 }

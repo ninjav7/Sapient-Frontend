@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Link } from 'react-router-dom';
-
-import { Row, Col, Label, FormGroup, Alert, Button, InputGroup } from 'reactstrap';
+import { Col, FormGroup, Alert, Button, InputGroup } from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
@@ -12,7 +11,6 @@ import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import {} from '../../assets/images/login/building-1.jpg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
-
 class Login extends Component {
     _isMounted = false;
 

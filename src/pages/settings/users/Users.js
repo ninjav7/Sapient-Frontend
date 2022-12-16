@@ -3,9 +3,7 @@ import { Row, Col, Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import axios from 'axios';
-import { BaseUrl, addMemberUser, getMemberUser, vendorPermissions } from '../../../services/Network';
-import { inviteMemberUser, fetchMemberUserList, updateVendorPermissions } from './service';
+import { inviteMemberUsers, fetchMemberUserList, updateVendorPermissions } from './service';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -125,52 +123,37 @@ const Users = () => {
     };
 
     const getUsersList = async () => {
-        try {
-            setIsUserDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
+        setIsUserDataFetched(true);
 
-            let params = `?user_info=${userSearchInfo}`;
-            await axios.get(`${BaseUrl}${getMemberUser}${params}`, { headers }).then((res) => {
+        let params = `?user_info=${userSearchInfo}`;
+        await fetchMemberUserList(params)
+            .then((res) => {
                 let response = res.data;
                 setUserData(response.data);
                 setDataFetched(true);
+                setIsUserDataFetched(false);
+            })
+            .catch((error) => {
+                setDataFetched(true);
+                setIsUserDataFetched(false);
             });
-            setIsUserDataFetched(false);
-        } catch (error) {
-            setDataFetched(true);
-            setIsUserDataFetched(false);
-        }
     };
 
     const saveUserData = async () => {
-        try {
-            setIsProcessing(true);
+        setIsProcessing(true);
+        let userData = Object.assign({}, userObj);
+        let params = '?request_type=invite';
+        await inviteMemberUsers(userData, params)
+            .then((res) => {
+                let response = res.data;
+                getUsersList();
 
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let userData = Object.assign({}, userObj);
-            let params = '?request_type=invite';
-            await axios
-                .post(`${BaseUrl}${addMemberUser}${params}`, userData, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
-                    getUsersList();
-                });
-            setIsProcessing(false);
-            handleClose();
-        } catch (error) {
-            setIsProcessing(false);
-        }
+                setIsProcessing(false);
+                handleClose();
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
     };
 
     const debouncedFetchData = debounce(() => {
@@ -178,18 +161,12 @@ const Users = () => {
     }, 1000);
 
     const fetchRoles = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            await axios.post(`${BaseUrl}${vendorPermissions}`, {}, { headers }).then((res) => {
+        await updateVendorPermissions({}, '')
+            .then((res) => {
                 let response = res.data;
                 setRolesData(response.data);
-            });
-        } catch (error) {}
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -218,9 +195,9 @@ const Users = () => {
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
                     </Link>
                 ) : (
-                    <>
+                    <Link to={`/settings/users/user-profile/single/${row?._id}`}>
                         <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
-                    </>
+                    </Link>
                 )}
             </>
         );
