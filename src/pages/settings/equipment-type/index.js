@@ -1,24 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Input } from 'reactstrap';
-import axios from 'axios';
-import {
-    BaseUrl,
-    equipmentType,
-    getEquipmentType,
-    addEquipmentType,
-    updateEquipmentType,
-    getEndUseId,
-} from '../../../services/Network';
-import Modal from 'react-bootstrap/Modal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
-import { ComponentStore } from '../../../store/ComponentStore';
-import Form from 'react-bootstrap/Form';
+import { Row, Col } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { BuildingStore } from '../../../store/BuildingStore';
-import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import Select from 'react-select';
-import { Cookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import CreateEquipType from './CreateEquipType';
