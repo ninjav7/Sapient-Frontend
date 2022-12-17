@@ -28,7 +28,6 @@ import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import '../../helpers/Linq';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -318,7 +317,7 @@ const ExploreByEquipment = () => {
                         localStorage.setItem('exploreEquipName', row?.equipment_name);
                         handleChartOpen();
                     }}>
-                    {row.equipment_name}
+                    {row.equipment_name !== '' ? row.equipment_name : '-'}
                 </a>
                 <Brick sizeInPixels={3} />
             </div>
