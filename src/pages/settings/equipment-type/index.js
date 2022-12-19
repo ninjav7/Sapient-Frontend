@@ -72,7 +72,7 @@ const EquipmentType = () => {
         },
     ];
 
-    const fetchEquipTypeData = async (searchTxt, page_no, page_size) => {
+    const fetchEquipTypeData = async (searchTxt, page_no = 1, page_size = 20) => {
         setDataFetching(true);
         let params = `?page_size=${page_size}&page_no=${page_no}`;
         if (searchTxt) {
@@ -206,6 +206,7 @@ const EquipmentType = () => {
                                         openAddEquipTypeModal();
                                     }}
                                     icon={<PlusSVG />}
+                                    disbaled
                                 />
                             </div>
                         ) : (
