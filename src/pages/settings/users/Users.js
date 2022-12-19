@@ -102,6 +102,7 @@ const Users = () => {
         if (
             userObj.first_name.length > 0 &&
             userObj.last_name.length > 0 &&
+            userObj.role.length > 0 &&
             userObj.email.length > 0 &&
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)
         ) {
@@ -433,6 +434,7 @@ const Users = () => {
                                 setIsProcessing(true);
                                 saveUserData();
                             }}
+                            disabled={!formValidation}
                         />
                     </div>
                 </Modal.Footer>
