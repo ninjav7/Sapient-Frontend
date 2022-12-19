@@ -8,7 +8,7 @@ import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-valida
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
-import './auth.css';
+import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

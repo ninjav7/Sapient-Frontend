@@ -1,6 +1,6 @@
 import React from 'react';
 import { Row, Col } from 'reactstrap';
-import './auth.css';
+import './auth.scss';
 import Slide1 from '../../assets/images/login/building-1.jpg';
 import Slide2 from '../../assets/images/login/building-2.jpg';
 import Slide3 from '../../assets/images/login/building-3.jpg';

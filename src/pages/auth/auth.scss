@@ -1,3 +1,5 @@
+@import '../../assets/scss/colors';
+
 .auth-container{
     margin:0 auto !important;
     }
@@ -49,31 +51,31 @@ body{
 }
 
 h3{
-    color: white;
+    color: $base-white;
 }
 
 .text-mute{
-    color: #626B7F;
+    color: $primary-gray-550;
     font-weight: 500 !important;
     font-size: 0.75rem;
 }
 
 
 .text-muted{
-    color: #626B7F;
+    color: $primary-gray-550;
     font-weight: 500 !important;
     font-size: 0.75rem;
     padding-top: 0.75rem;
     
 }
 .alertPop{
-    background: #D1FADF !important;
-    border-color: #D1FADF !important;
-    color: #054F31 !important;
+    background: $success-100 !important;
+    border-color: $success-100 !important;
+    color: $success-1000 !important;
     border-radius: 4px;
 }
 .alertText{
-    color: #054F31;
+    color: $success-1000;
     font-weight: 600 !important;
     font-size: 1rem;
 }
