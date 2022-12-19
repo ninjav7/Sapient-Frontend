@@ -143,7 +143,7 @@ class Login extends Component {
                                         </AvGroup>
 
                                         <FormGroup>
-                                            <Button className="subButton" color="primary">
+                                            <Button className="sub-button" color="primary">
                                                 Sign In
                                             </Button>
                                         </FormGroup>
