@@ -170,7 +170,6 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
-<<<<<<< HEAD
 export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
     let dataToExport = [];
 
@@ -194,16 +193,30 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
                     }
                     break;
                 case 'energy_density':
-                    const densityData =
-                        tableData.length > 1 ? (tableRow.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
-                    const preparedEnergyDestiny = `${parseInt(densityData)} kWh / sq. ft.`;
+                    const preparedEnergyDestiny =`${(tableRow.energy_density).toFixed(2)} kWh / sq. ft.`;
                     arr.push(preparedEnergyDestiny);
                     break;
                 case 'square_footage':
                     const squareFootage = formatConsumptionValue(tableRow.square_footage);
                     arr.push(squareFootage);
                     break;
-=======
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getEquipTypeTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
@@ -212,7 +225,6 @@ export const getEquipTypeTableCSVExport = (tableData, columns) => {
 
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
->>>>>>> f558bb398de0ee7f1e7c726ad885af5ae2467bf6
                 default:
                     arr.push(tableRow[columns[i].accessor]);
                     break;
