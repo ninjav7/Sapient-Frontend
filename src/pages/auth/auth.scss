@@ -73,12 +73,14 @@ h3{
     padding-top: 0.75rem;
     
 }
+
 .alertPop{
     background: $success-100 !important;
     border-color: $success-100 !important;
     color: $success-1000 !important;
-    border-radius: 4px;
+    border-radius: 0.25rem;
 }
+
 .alertText{
     color: $success-1000;
     font-weight: 600 !important;
