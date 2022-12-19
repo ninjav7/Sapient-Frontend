@@ -46,6 +46,8 @@ const SkeletonLoading = () => (
 const Buildings = () => {
     const [userPermission] = useAtom(userPermissionData);
 
+    const [filtersValues, setFiltersValues] = useState({});
+
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
@@ -94,6 +96,18 @@ const Buildings = () => {
             .catch(() => {
                 setIsDataFetching(false);
             });
+    };
+
+    const resetBuildingFilter = () => {
+        setFiltersValues({
+            selectedFilters: [],
+        });
+        setFilterOptions([]);
+        setSelectedBuildingType([]);
+        setMinSqftVal(0);
+        setMaxSqftVal(maxVal);
+        setSqftAPIFlag('');
+        getFilters();
     };
 
     const handleBuildingClick = (record) => {
@@ -449,6 +463,7 @@ const Buildings = () => {
                         onDownload={() => handleDownloadCsv()}
                         filterOptions={filterOptions}
                         headers={headerProps}
+                        filters={filtersValues}
                         totalCount={(() => {
                             return 0;
                         })()}
@@ -459,7 +474,7 @@ const Buildings = () => {
             <CreateBuilding
                 isAddBuildingModalOpen={isAddBuildingModalOpen}
                 closeAddBuildingModal={closeAddBuildingModal}
-                fetchGeneralBuildingData={fetchGeneralBuildingData}
+                resetBuildingFilter={resetBuildingFilter}
             />
         </React.Fragment>
     );
