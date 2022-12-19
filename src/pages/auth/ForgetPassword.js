@@ -38,7 +38,6 @@ const ForgetPassword = () => {
             email: username,
         })
             .then((res) => {
-                console.log(res);
                 let response = res.data;
                 setIsLoading(false);
                 setTitleText('Success');

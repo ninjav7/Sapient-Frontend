@@ -48,7 +48,6 @@ function* login({ payload: { username, password } }) {
 
     try {
         const response = yield call(fetchJSON, `${BaseUrl}${signin}`, options);
-        console.log(response);
         if (response.success === false) {
             localStorage.setItem('login_success', false);
             localStorage.setItem('failed_message', response.message);
