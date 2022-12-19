@@ -4,18 +4,20 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { saveBuildingData } from './services';
+import { saveEquipTypeData, getEndUseData } from './services';
 import Select from '../../../sharedComponents/form/select';
 
-const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBuildingFilter }) => {
-    const defaultBuildingObj = {
-        building_name: '',
-        building_type: '',
+const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData }) => {
+    const defaultEquipTypeObj = {
+        is_active: true,
+        name: '',
+        end_use: '',
     };
 
-    const [buildingData, setBuildingData] = useState(defaultBuildingObj);
+    const [equipTypeData, setEquipTypeData] = useState(defaultEquipTypeObj);
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValidation, setFormValidation] = useState(false);
+    const [endUseData, setEndUseData] = useState([]);
 
     const buildingType = [
         { value: 'Office Building', label: 'Office Building' },
@@ -23,18 +25,18 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
     ];
 
     const handleChange = (key, value) => {
-        let obj = Object.assign({}, buildingData);
+        let obj = Object.assign({}, equipTypeData);
         obj[key] = value;
-        setBuildingData(obj);
+        setEquipTypeData(obj);
     };
 
-    const saveBuildingDetails = async () => {
+    const saveEquipTypeDetails = async () => {
         try {
             setIsProcessing(true);
-            await saveBuildingData(buildingData).then((res) => {
-                closeAddBuildingModal();
-                setBuildingData(defaultBuildingObj);
-                resetBuildingFilter();
+            await saveEquipTypeData(equipTypeData).then((res) => {
+                closeAddEquipTypeModal();
+                setEquipTypeData(defaultEquipTypeObj);
+                fetchEquipTypeData();
             });
             setIsProcessing(false);
         } catch (error) {
@@ -42,26 +44,51 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
         }
     };
 
+    const fetchEndUseData = async () => {
+        let response = await getEndUseData();
+        if (response?.data.length === 0) {
+            setEndUseData([]);
+            return;
+        }
+        let data = [];
+        response.data.sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        });
+        response.data.forEach((record) => {
+            data.push({
+                label: record?.name,
+                value: record?.end_user_id,
+            });
+        });
+        setEndUseData(data);
+    };
+
     useEffect(() => {
-        if (buildingData.building_name.length > 3 && buildingData?.building_type.length > 0) {
+        if (equipTypeData.name.length > 0 && equipTypeData.end_use.length > 0) {
             setFormValidation(true);
         } else {
             setFormValidation(false);
         }
-    }, [buildingData]);
+    }, [equipTypeData]);
+
+    useEffect(() => {
+        if (isAddEquipTypeModalOpen) {
+            fetchEndUseData();
+        }
+    }, [isAddEquipTypeModalOpen]);
 
     return (
-        <Modal show={isAddBuildingModalOpen} onHide={closeAddBuildingModal} centered>
+        <Modal show={isAddEquipTypeModalOpen} onHide={closeAddEquipTypeModal} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Add Building</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Add Equipment Type</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
                 <InputTooltip
-                    label="Building Name"
-                    placeholder="Enter Building Name"
+                    label="Name"
+                    placeholder="Enter Name"
                     onChange={(e) => {
-                        handleChange('building_name', e.target.value.trim());
+                        handleChange('name', e.target.value.trim());
                     }}
                     error={null}
                     labelSize={Typography.Sizes.md}
@@ -70,14 +97,14 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
                 <Brick sizeInRem={1.5} />
 
                 <div>
-                    <Typography.Body size={Typography.Sizes.md}>Building Type</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>End Use</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
-                        placeholder="Select Building Type"
-                        options={buildingType}
-                        defaultValue={buildingType.filter((option) => option.value === buildingData?.type)}
+                        placeholder="Select End Use"
+                        options={endUseData}
+                        defaultValue={endUseData.filter((option) => option.value === equipTypeData?.end_use)}
                         onChange={(e) => {
-                            handleChange('building_type', e.value);
+                            handleChange('end_use', e.value);
                         }}
                         isSearchable={true}
                     />
@@ -92,19 +119,19 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
                         type={Button.Type.secondaryGrey}
                         className="w-100"
                         onClick={() => {
-                            setBuildingData(defaultBuildingObj);
-                            closeAddBuildingModal();
+                            setEquipTypeData(defaultEquipTypeObj);
+                            closeAddEquipTypeModal();
                         }}
                     />
 
                     <Button
-                        label={isProcessing ? 'Creating...' : 'Create'}
+                        label={isProcessing ? 'Adding...' : 'Add Equipment Type'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={!formValidation || isProcessing}
                         onClick={() => {
-                            saveBuildingDetails();
+                            saveEquipTypeDetails();
                         }}
                     />
                 </div>
@@ -115,4 +142,4 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
     );
 };
 
-export default CreateBuilding;
+export default CreateEquipType;

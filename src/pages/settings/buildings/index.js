@@ -46,6 +46,8 @@ const SkeletonLoading = () => (
 const Buildings = () => {
     const [userPermission] = useAtom(userPermissionData);
 
+    const [filtersValues, setFiltersValues] = useState({});
+
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
 
@@ -96,6 +98,18 @@ const Buildings = () => {
             });
     };
 
+    const resetBuildingFilter = () => {
+        setFiltersValues({
+            selectedFilters: [],
+        });
+        setFilterOptions([]);
+        setSelectedBuildingType([]);
+        setMinSqftVal(0);
+        setMaxSqftVal(maxVal);
+        setSqftAPIFlag('');
+        getFilters();
+    };
+
     const handleBuildingClick = (record) => {
         localStorage.setItem('buildingId', record.building_id);
         localStorage.setItem('buildingName', record.building_name);
@@ -109,21 +123,14 @@ const Buildings = () => {
 
     const renderBldgName = (row) => {
         return (
-            <>
-                {userPermission?.user_role === 'admin' ||
-                userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                    <Link
-                        className="typography-wrapper link"
-                        to={`${internalRoute[0]}`}
-                        onClick={() => {
-                            handleBuildingClick(row);
-                        }}>
-                        {row?.building_name === '' ? '-' : row?.building_name}
-                    </Link>
-                ) : (
-                    <div className="typography-wrapper link">{row?.building_name}</div>
-                )}
-            </>
+            <Link
+                className="typography-wrapper link"
+                to={`${internalRoute[0]}`}
+                onClick={() => {
+                    handleBuildingClick(row);
+                }}>
+                {row?.building_name === '' ? '-' : row?.building_name}
+            </Link>
         );
     };
 
@@ -456,6 +463,7 @@ const Buildings = () => {
                         onDownload={() => handleDownloadCsv()}
                         filterOptions={filterOptions}
                         headers={headerProps}
+                        filters={filtersValues}
                         totalCount={(() => {
                             return 0;
                         })()}
@@ -466,7 +474,7 @@ const Buildings = () => {
             <CreateBuilding
                 isAddBuildingModalOpen={isAddBuildingModalOpen}
                 closeAddBuildingModal={closeAddBuildingModal}
-                fetchGeneralBuildingData={fetchGeneralBuildingData}
+                resetBuildingFilter={resetBuildingFilter}
             />
         </React.Fragment>
     );

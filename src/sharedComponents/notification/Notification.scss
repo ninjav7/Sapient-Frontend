@@ -1,0 +1,149 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.notification {
+    &-wrapper {
+        padding: 0.9375rem 0.875rem 1.125rem 1.125rem;
+        border-radius: 0.25rem;
+    }
+
+    &-body {
+        display: flex;
+    }
+
+    &-action-buttons-container {
+        margin-top: 0.625rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    &-action-button {
+        box-shadow: none !important;
+        border: 0 !important;
+        padding: 0 !important;
+        background: none !important;
+    }
+
+    &-titles-container {
+        margin-top: 0.0625rem;
+    }
+
+    &-icon {
+        &-container {
+            width: 2.125rem;
+        }
+
+        width: 1.25rem;
+
+        &.success {
+            &.internal-icon {
+                width: 1.5rem;
+                margin-left: -0.1875rem;
+            }
+        }
+
+        &.warning {
+            &.internal-icon {
+                width: 1.5rem;
+                margin-left: -0.125rem;
+            }
+        }
+
+        //alert icon colors
+        &.alert-icon {
+            &.error {
+                path {
+                    fill: $error-600;
+                }
+            }
+
+            &.warning {
+                path {
+                    fill: $warning-600;
+                }
+            }
+
+            &.info {
+                path {
+                    fill: $primary-gray-600;
+                }
+            }
+
+            &.success {
+                path {
+                    fill: $success-600;
+                }
+            }
+        }
+
+        //snack bar icon colors
+        &.snack-bar-icon {
+            &.error {
+                path {
+                    fill: $error-25;
+                }
+            }
+
+            &.warning {
+                path {
+                    fill: $base-white;
+                }
+            }
+
+            &.info {
+                path {
+                    fill: $base-white;
+                }
+            }
+
+            &.success {
+                path {
+                    fill: $base-white;
+                }
+            }
+        }
+    }
+
+    &-btn-close {
+        &:hover {
+            opacity: 0.5;
+        }
+
+        &-icon {
+            width: 0.75rem;
+            height: 0.75rem;
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+        }
+    }
+
+    //snackbar
+    &-snackbar-wrapper {
+        min-width: 20rem;
+        position: fixed;
+        left: 0.75rem;
+        bottom: 0.75rem;
+        transition: opacity 300ms ease-out, transform 300ms ease-out;
+
+        .notification-snackbar:not(:last-child) {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* CSSTransition classNames logic */
+    &-snackbar-enter {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    &-snackbar-exit-active {
+        transform: scale(0.9);
+        opacity: 0;
+        transition: opacity 400ms, transform 400ms;
+    }
+
+    &-snackbar-enter-active {
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 400ms, transform 400ms;
+    }
+}

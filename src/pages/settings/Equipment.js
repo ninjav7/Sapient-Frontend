@@ -71,15 +71,6 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
-            <th>
-                <Skeleton count={5} />
-            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -413,7 +404,7 @@ const Equipment = () => {
     };
     const renderEquipmentsName = (row) => {
         return (
-            <div onClick={() => handleOpenEditEquipment(row)} className="equipment-name-cell">
+            <div onClick={() => handleOpenEditEquipment(row)} className="typography-wrapper link mouse-pointer">
                 {row.equipments_name}
             </div>
         );
@@ -669,8 +660,20 @@ const Equipment = () => {
                             isDeletable={(row) => handleAbleToDeleteRow(row)}
                             searchResultRows={generalEquipmentData}
                             filterOptions={filterOptions}
-                            onDeleteRow={(event, id, row) => handleDeleteRowClicked(row)}
-                            onEditRow={(record, id, row) => handleOpenEditEquipment(row)}
+                            onDeleteRow={
+                                userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                    ? (event, id, row) => handleDeleteRowClicked(row)
+                                    : null
+                            }
+                            onEditRow={
+                                userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                    ? (record, id, row) => handleOpenEditEquipment(row)
+                                    : null
+                            }
+                            // onDeleteRow={null}
+                            // onEditRow={null}
                             onDownload={() => handleDownloadCsv()}
                             headers={headerProps}
                             buttonGroupFilterOptions={[]}

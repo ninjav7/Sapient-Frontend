@@ -170,6 +170,7 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
+<<<<<<< HEAD
 export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
     let dataToExport = [];
 
@@ -202,6 +203,16 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
                     const squareFootage = formatConsumptionValue(tableRow.square_footage);
                     arr.push(squareFootage);
                     break;
+=======
+export const getEquipTypeTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+>>>>>>> f558bb398de0ee7f1e7c726ad885af5ae2467bf6
                 default:
                     arr.push(tableRow[columns[i].accessor]);
                     break;
