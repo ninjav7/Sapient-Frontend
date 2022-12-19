@@ -11,7 +11,7 @@ export const SNACKBAR_DURATION = 4000;
 // Context used by the hook useNotification() and HoC withSnackbar()
 export const NotificationContext = createContext({});
 
-const SnackBar = memo(({ duration = SNACKBAR_DURATION, id, closeSnackbar, ...props }) => {
+const SnackBar = memo(({ duration = SNACKBAR_DURATION, id, closeSnackbar, closeManually, ...props }) => {
     const [stateOpen, setStateOpen] = useState(false);
 
     const handleClose = useCallback(() => {
@@ -24,6 +24,10 @@ const SnackBar = memo(({ duration = SNACKBAR_DURATION, id, closeSnackbar, ...pro
 
     useEffect(() => {
         setStateOpen(true);
+
+        if (closeManually) {
+            return;
+        }
 
         // Sets timeout to close the snackbar
         const timerId = +setTimeout(handleClose, duration);
