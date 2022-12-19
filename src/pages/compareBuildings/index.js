@@ -59,18 +59,11 @@ const CompareBuildings = () => {
     const [sortBy, setSortBy] = useState({});
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
-    const [topEnergyDensity, setTopEnergyDensity] = useState(1);
+    const [topEnergyDensity, setTopEnergyDensity] = useState();
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
 
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    useEffect(() => {
-        if (!buildingsData.length > 0) {
-            return;
-        }
-        let topVal = buildingsData[0].energy_density;
-        setTopEnergyDensity(topVal);
-    }, [buildingsData]);
     const [isLoadingBuildingData, setIsLoadingBuildingData] = useState([]);
     let entryPoint = '';
 
@@ -115,7 +108,7 @@ const CompareBuildings = () => {
         let payload = apiRequestBody(startDate, endDate, timeZone);
         let params = ``;
         if (sorting?.order_by && sorting?.sort_by) {
-            params += `&order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
+            params += `?order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
         }
         if (search.length) {
             params += `?building_search=${search}`;
@@ -123,6 +116,8 @@ const CompareBuildings = () => {
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
+                let topVal = Math.max(...response?.data.map(o => o.energy_density))
+                setTopEnergyDensity(topVal);
                 setBuildingsData(response?.data);
                 setIsLoadingBuildingData(false);
             })
@@ -134,11 +129,11 @@ const CompareBuildings = () => {
         const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
         return (
             <div className="table-content-style" style={{ width: '100%' }}>
-                {parseInt(densityData)} kWh / sq. ft.
+                {(row.energy_density).toFixed(2)} kWh / sq. ft.
                 <br />
                 <div style={{ width: '100%', display: 'inline-block' }}>
                     {row.energy_density === 0 && <TinyBarChart percent={0} />}
-                    {row.energy_density > 0 && <TinyBarChart percent={parseInt(densityData)} />}
+                    {row.energy_density > 0 && <TinyBarChart percent={densityData} />}
                 </div>
             </div>
         );
@@ -222,7 +217,6 @@ const CompareBuildings = () => {
             name: '% Change',
             accessor: 'energy_consumption',
             callbackValue: renderChangeEnergy,
-            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sq. Ft.',
@@ -253,27 +247,31 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    <DataTableWidget
-                        isLoading={isLoadingBuildingData}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="equipment"
-                        onSearch={(query) => {
-                            setSearch(query);
-                        }}
-                        rows={buildingsData}
-                        searchResultRows={buildingsData}
-                        onDownload={() => handleDownloadCsv()}
-                        headers={headerProps}
-                        disableColumnDragging={true}
-                        buttonGroupFilterOptions={[]}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
+                    {buildingsData.length ? (
+                        <DataTableWidget
+                            isLoading={isLoadingBuildingData}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="equipment"
+                            onSearch={(query) => {
+                                setSearch(query);
+                            }}
+                            rows={buildingsData}
+                            searchResultRows={buildingsData}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
+                            disableColumnDragging={true}
+                            buttonGroupFilterOptions={[]}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            })()}
+                        />
+                    ) : (
+                        <SkeletonLoading />
+                    )}
                 </Col>
             </Row>
         </React.Fragment>
