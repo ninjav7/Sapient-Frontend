@@ -1,212 +1,239 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
-import { isUserAuthenticated } from '../../helpers/authUtils';
-import { FormGroup, Button, Alert, InputGroup } from 'reactstrap';
-import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
+import { FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
+import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
+import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import { BaseUrl, UpdateUserPassword } from '../../services/Network';
+import Input from '../../sharedComponents/form/input/Input';
 
-class Confirm extends Component {
-    _isMounted = false;
+const Confirm = () => {
+    const history = useHistory();
+    const [_isMounted, set_isMounted] = useState(false);
+    const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [titleText, setTitleText] = useState('Set Password');
+    const [showReset, setShowReset] = useState(false);
+    const [redirectToLogin, setRedirectToLogin] = useState(false);
+    const [matchError, setMatchError] = useState(false);
+    const [passwordError, setPasswordError] = useState(false);
+    const [cpasswordError, setCPasswordError] = useState(false);
+    const [password, setPassword] = useState('');
+    const [cpassword, setCPassword] = useState('');
+    const [passwordType, setPasswordType] = useState('password');
+    const [cPasswordType, setCPasswordType] = useState('password');
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            passwordResetSuccessful: false,
-            isLoading: false,
-            titleText: 'Set Password',
-            showReset: false,
-            redirectToLogin: false,
-            matchError: false,
-            password: '',
-            cpassword: '',
-        };
-    }
-
-    componentDidMount() {
-        this._isMounted = true;
+    useEffect(() => {
+        set_isMounted(true);
         document.body.classList.add('authentication-bg');
-    }
 
-    componentWillUnmount() {
-        this._isMounted = false;
-        document.body.classList.remove('authentication-bg');
-    }
+        return () => {
+            set_isMounted(false);
+            document.body.classList.remove('authentication-bg');
+        };
+    }, []);
 
-    handleValidSubmit = async (event, values) => {
-        if (values?.password !== values?.cpassword) {
-            this.setState({ matchError: true });
+    const handleValidSubmit = async () => {
+        let ct = 0;
+        if (password === '') {
+            setPasswordError(true);
+            ct++;
+        }
+        if (cpassword === '') {
+            setCPasswordError(true);
+            ct++;
+        }
+        if (ct === 0) {
+            if (password !== cpassword) {
+                setMatchError(true);
+                return;
+            }
+            try {
+                setIsLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${this.props.match.params.token}`,
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${UpdateUserPassword}`,
+                        {
+                            password: password,
+                            confirm_password: cpassword,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        setIsLoading(false);
+                        setPasswordResetSuccessful(true);
+                        setTitleText('Success');
+                        setShowReset(true);
+                    });
+            } catch (error) {
+                setIsLoading(false);
+            }
+        } else {
             return;
         }
-        try {
-            this.setState({ isLoading: true });
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${this.props.match.params.token}`,
-            };
-            await axios
-                .post(
-                    `${BaseUrl}${UpdateUserPassword}`,
-                    {
-                        password: values?.password,
-                        confirm_password: values?.cpassword,
-                    },
-                    { headers }
-                )
-                .then((res) => {
-                    let response = res.data;
-                    this.setState({
-                        isLoading: false,
-                        passwordResetSuccessful: true,
-                        titleText: 'Success',
-                        showReset: true,
-                    });
-                });
-        } catch (error) {
-            this.setState({ isLoading: false });
-        }
     };
 
-    /**
-     * Redirect to root
-     */
-    renderRedirectToRoot = () => {
-        const isAuthTokenValid = isUserAuthenticated();
-        if (isAuthTokenValid) {
-            return <Redirect to="/" />;
-        } else if (this.state.redirectToLogin) {
-            return <Redirect to="/account/login" />;
+    useEffect(() => {
+        if (redirectToLogin) {
+            history.push('/account/login');
         }
-    };
+    }, [redirectToLogin]);
 
-    render() {
-        const isAuthTokenValid = isUserAuthenticated();
-        return (
-            <React.Fragment>
-                {this.renderRedirectToRoot()}
+    return (
+        <React.Fragment>
+            {_isMounted && (
+                <Holder
+                    rightContent={
+                        <>
+                            {isLoading && <Loader />}
+                            <Col lg={8}>
+                                <div className="logoContainer">
+                                    <a href="/">
+                                        <LogoSVG className="logoDesign" />
+                                    </a>
+                                    <Typography.Header size={Typography.Sizes.sm} className="text-muted">
+                                        {titleText}
+                                    </Typography.Header>
+                                </div>
+                                {showReset ? (
+                                    <>
+                                        <Alert color="success" className="alertPop" isOpen={true}>
+                                            <div>
+                                                <Typography.Subheader className="alertText">
+                                                    <FontAwesomeIcon
+                                                        icon={faCircleCheck}
+                                                        size="lg"
+                                                        className="ml-2 mr-2"
+                                                        style={{ marginRight: '4px', color: 'green' }}
+                                                    />
+                                                    Password Set
+                                                </Typography.Subheader>
+                                            </div>
+                                        </Alert>
+                                        <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
+                                            You have successfully set your password. You may now log in to the Sapient
+                                            Energy Portal.
+                                        </Typography.Subheader>
 
-                {(this._isMounted || !isAuthTokenValid) && (
-                    <Holder
-                        rightContent={
-                            <>
-                                {this.state.isLoading && <Loader />}
-                                <Col lg={8}>
-                                    <div className="logoContainer">
-                                        <a href="/">
-                                            <LogoSVG className="logoDesign" />
-                                        </a>
-                                        <Typography.Header size={Typography.Sizes.sm} className="text-muted">
-                                            {this.state.titleText}
-                                        </Typography.Header>
-                                    </div>
-                                    {this.state.showReset ? (
-                                        <>
-                                            <Alert color="success" className="alertPop" isOpen={true}>
-                                                <div>
-                                                    <Typography.Subheader className="alertText">
-                                                        <FontAwesomeIcon
-                                                            icon={faCircleCheck}
-                                                            size="lg"
-                                                            className="ml-2 mr-2"
-                                                            style={{ marginRight: '4px', color: 'green' }}
-                                                        />
-                                                        Password Set
-                                                    </Typography.Subheader>
-                                                </div>
+                                        <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
+                                            <Button
+                                                color="primary"
+                                                className="btn-block"
+                                                onClick={async () => {
+                                                    setRedirectToLogin(true);
+                                                }}>
+                                                Go to Login
+                                            </Button>
+                                        </FormGroup>
+                                    </>
+                                ) : (
+                                    <>
+                                        {matchError && (
+                                            <Alert color="danger" isOpen={matchError ? true : false}>
+                                                <div>Password and Confirm Password Not Matched</div>
                                             </Alert>
-                                            <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
-                                                You have successfully set your password. You may now log in to the
-                                                Sapient Energy Portal.
-                                            </Typography.Subheader>
+                                        )}
 
-                                            <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
+                                        <form className="authentication-form">
+                                            <FormGroup className="mb-3 pt-5">
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className="text-mute mb-1">
+                                                    Password
+                                                </Typography.Subheader>
+
+                                                <Input
+                                                    placeholder="Enter your password"
+                                                    type={passwordType}
+                                                    error={passwordError ? 'Password is Required' : null}
+                                                    elementEnd={
+                                                        passwordType === 'password' ? (
+                                                            <EyeSVG
+                                                                onClick={() => {
+                                                                    setPasswordType('text');
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <EyeSlashSVG
+                                                                onClick={() => {
+                                                                    setPasswordType('password');
+                                                                }}
+                                                            />
+                                                        )
+                                                    }
+                                                    onChange={(e) => {
+                                                        setPassword(e.target.value.trim());
+                                                    }}
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={password}
+                                                />
+                                            </FormGroup>
+                                            <FormGroup className="mb-3 pt-5">
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className="text-mute mb-1">
+                                                    Confirm Password
+                                                </Typography.Subheader>
+
+                                                <Input
+                                                    placeholder="Enter your password"
+                                                    type={cPasswordType}
+                                                    error={cpasswordError ? 'Confirm Password is Required' : null}
+                                                    elementEnd={
+                                                        cPasswordType === 'password' ? (
+                                                            <EyeSVG
+                                                                onClick={() => {
+                                                                    setCPasswordType('text');
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <EyeSlashSVG
+                                                                onClick={() => {
+                                                                    setCPasswordType('password');
+                                                                }}
+                                                            />
+                                                        )
+                                                    }
+                                                    onChange={(e) => {
+                                                        setCPassword(e.target.value.trim());
+                                                    }}
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={cpassword}
+                                                />
+                                            </FormGroup>
+                                            <FormGroup>
                                                 <Button
+                                                    className="sub-button"
                                                     color="primary"
-                                                    className="btn-block"
-                                                    onClick={async () => {
-                                                        this.setState({ redirectToLogin: true });
-                                                        await this.renderRedirectToRoot();
-                                                    }}>
-                                                    Go to Login
+                                                    onClick={handleValidSubmit}>
+                                                    Set Password
                                                 </Button>
                                             </FormGroup>
-                                        </>
-                                    ) : (
-                                        <>
-                                            {this.state.matchError && (
-                                                <Alert color="danger" isOpen={this.state.matchError ? true : false}>
-                                                    <div>Password and Confirm Password Not Matched</div>
-                                                </Alert>
-                                            )}
-
-                                            <AvForm
-                                                onValidSubmit={this.handleValidSubmit}
-                                                className="authentication-form"
-                                                autoComplete="off">
-                                                <AvGroup className="">
-                                                    <Typography.Header className="text-mute mb-2">
-                                                        New Password
-                                                    </Typography.Header>
-
-                                                    <InputGroup>
-                                                        <AvInput
-                                                            type="password"
-                                                            name="password"
-                                                            id="password"
-                                                            placeholder="Enter your password"
-                                                            value={this.state.password}
-                                                            required
-                                                        />
-                                                    </InputGroup>
-                                                    <Typography.Subheader className="mt-2 mb-4">
-                                                        Use 8 or more characters with a mix of letters, numbers &
-                                                        symbols
-                                                    </Typography.Subheader>
-                                                    <AvFeedback>This field is invalid</AvFeedback>
-                                                </AvGroup>
-                                                <AvGroup className="">
-                                                    <Typography.Header className=" text-mute mb-2">
-                                                        Confirm New Password
-                                                    </Typography.Header>
-                                                    <InputGroup>
-                                                        <AvInput
-                                                            type="password"
-                                                            name="cpassword"
-                                                            id="cpassword"
-                                                            placeholder="Enter your password"
-                                                            value={this.state.cpassword}
-                                                            required
-                                                        />
-                                                    </InputGroup>
-                                                    <AvFeedback>This field is invalid</AvFeedback>
-                                                </AvGroup>
-
-                                                <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
-                                                    <Button color="primary" className="btn-block">
-                                                        Set Password
-                                                    </Button>
-                                                </FormGroup>
-                                            </AvForm>
-                                        </>
-                                    )}
-                                </Col>
-                            </>
-                        }
-                    />
-                )}
-            </React.Fragment>
-        );
-    }
-}
+                                        </form>
+                                    </>
+                                )}
+                            </Col>
+                        </>
+                    }
+                />
+            )}
+        </React.Fragment>
+    );
+};
 
 export default connect()(Confirm);
