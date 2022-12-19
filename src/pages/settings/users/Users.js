@@ -291,9 +291,7 @@ const Users = () => {
                                         handleShow();
                                     }}
                                 />
-                            ) : (
-                                <></>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </Col>
