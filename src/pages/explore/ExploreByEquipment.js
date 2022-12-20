@@ -148,7 +148,6 @@ const ExploreByEquipment = () => {
             setFiltersValues({
                 selectedFilters: [],
             });
-
             setSeriesData([]);
             setConAPIFlag('');
             setPerAPIFlag('');
@@ -420,6 +419,9 @@ const ExploreByEquipment = () => {
                             : filters.data.data.max_change
                     )
                 );
+            } else {
+                setFilterData({});
+                setFilterOptions([]);
             }
 
             setIsExploreDataLoading(false);

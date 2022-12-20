@@ -5,10 +5,9 @@ import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { saveBuildingData } from './services';
-import { BuildingListStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
 
-const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, fetchBuildingData }) => {
+const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBuildingFilter }) => {
     const defaultBuildingObj = {
         building_name: '',
         building_type: '',
@@ -35,10 +34,7 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, fetchBu
             await saveBuildingData(buildingData).then((res) => {
                 closeAddBuildingModal();
                 setBuildingData(defaultBuildingObj);
-                fetchBuildingData();
-                BuildingListStore.update((s) => {
-                    s.fetchBuildingList = true;
-                });
+                resetBuildingFilter();
             });
             setIsProcessing(false);
         } catch (error) {

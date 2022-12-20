@@ -1,184 +1,165 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, Link } from 'react-router-dom';
-
-import {
-    Container,
-    Row,
-    Col,
-    Card,
-    CardBody,
-    FormGroup,
-    Button,
-    Alert,
-    Label,
-    InputGroup,
-    InputGroupAddon,
-} from 'reactstrap';
-import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
-import { Mail } from 'react-feather';
-
-import { isUserAuthenticated } from '../../helpers/authUtils';
+import { useHistory } from 'react-router-dom';
+import { Col, FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
-// import logo from '../../assets/images/logo.png';
+import Holder from './Holder';
+import Typography from '../../sharedComponents/typography';
+import './auth.scss';
+import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
+import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import { forgotPassword } from './service';
 
-class ForgetPassword extends Component {
-    _isMounted = false;
+const ForgetPassword = () => {
+    const history = useHistory();
+    const [_isMounted, set_isMounted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [titleText, setTitleText] = useState('Reset Password');
+    const [showReset, setShowReset] = useState(false);
+    const [redirectToLogin, setRedirectToLogin] = useState(false);
+    const [username, setUsername] = useState('');
+    const [error, setError] = useState(false);
 
-    constructor(props) {
-        super(props);
-
-        this.handleValidSubmit = this.handleValidSubmit.bind(this);
-        this.onDismiss = this.onDismiss.bind(this);
-        this.state = {
-            passwordResetSuccessful: false,
-            isLoading: false,
-        };
-    }
-
-    componentDidMount() {
-        this._isMounted = true;
+    useEffect(() => {
+        set_isMounted(true);
         document.body.classList.add('authentication-bg');
-    }
 
-    componentWillUnmount() {
-        this._isMounted = false;
-        document.body.classList.remove('authentication-bg');
-    }
+        return () => {
+            set_isMounted(false);
+            document.body.classList.remove('authentication-bg');
+        };
+    }, []);
 
-    /**
-     * On error dismiss
-     */
-    onDismiss() {
-        this.setState({ passwordResetSuccessful: false });
-    }
-
-    /**
-     * Handles the submit
-     */
-    handleValidSubmit = (event, values) => {
-        this.setState({ isLoading: true });
-
-        // You can make actual api call to register here
-
-        window.setTimeout(() => {
-            this.setState({ isLoading: false, passwordResetSuccessful: true });
-        }, 1000);
+    const handleValidSubmit = async () => {
+        setIsLoading(true);
+        await forgotPassword({
+            email: username,
+        })
+            .then((res) => {
+                let response = res.data;
+                setIsLoading(false);
+                setTitleText('Success');
+                setShowReset(true);
+            })
+            .catch((error) => {
+                console.log('error', error);
+                setIsLoading(false);
+            });
     };
 
-    /**
-     * Redirect to root
-     */
-    renderRedirectToRoot = () => {
-        const isAuthTokenValid = isUserAuthenticated();
-        if (isAuthTokenValid) {
-            return <Redirect to="/" />;
+    useEffect(() => {
+        if (redirectToLogin) {
+            history.push('/account/login');
         }
-    };
+    }, [redirectToLogin]);
 
-    render() {
-        const isAuthTokenValid = isUserAuthenticated();
-        return (
-            <React.Fragment>
-                {this.renderRedirectToRoot()}
+    return (
+        <React.Fragment>
+            {_isMounted && (
+                <Holder
+                    rightContent={
+                        <>
+                            {isLoading && <Loader />}
+                            <Col lg={8}>
+                                <div className="logoContainer">
+                                    <a href="/">
+                                        <LogoSVG className="logoDesign" />
+                                    </a>
+                                    <Typography.Header size={Typography.Sizes.sm} className="text-muted">
+                                        {titleText}
+                                    </Typography.Header>
+                                </div>
+                                {showReset ? (
+                                    <>
+                                        <Alert color="success" className="alertPop" isOpen={true}>
+                                            <div>
+                                                <Typography.Subheader size={Typography.Sizes.md} className="alertText">
+                                                    <FontAwesomeIcon
+                                                        icon={faCircleCheck}
+                                                        size="lg"
+                                                        className="ml-2 mr-2"
+                                                        style={{ marginRight: '4px', color: 'green' }}
+                                                    />
+                                                    Request Sent
+                                                </Typography.Subheader>
+                                            </div>
+                                        </Alert>
+                                        <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
+                                            If a login is associated with your email, an email will be sent with
+                                            instructions on how to reset your password.
+                                        </Typography.Subheader>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            className="text-mute mt-4 mb-5">
+                                            It may take a few minutes for the email to be delivered.
+                                        </Typography.Subheader>
 
-                {(this._isMounted || !isAuthTokenValid) && (
-                    <div className="account-pages my-5">
-                        <Container>
-                            <Row className="justify-content-center">
-                                <Col xl={10}>
-                                    <Card className="">
-                                        <CardBody className="p-0">
-                                            <Row>
-                                                <Col md={6} className="p-5 position-relative">
-                                                    {/* preloader */}
-                                                    {this.state.isLoading && <Loader />}
+                                        <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
+                                            <Button
+                                                color="primary"
+                                                className="btn-block"
+                                                onClick={async () => {
+                                                    setRedirectToLogin(true);
+                                                }}>
+                                                Go to Login
+                                            </Button>
+                                        </FormGroup>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography.Subheader size={Typography.Sizes.md} className="text-mute">
+                                            Please enter the email associated with your account.
+                                        </Typography.Subheader>
+                                        <Typography.Subheader
+                                            size={Typography.Sizes.md}
+                                            className="text-mute mt-4 mb-5">
+                                            Instructions on resetting your password will be sent to the email
+                                        </Typography.Subheader>
 
-                                                    <div className="mx-auto mb-5">
-                                                        <a href="/">
-                                                            {/* <img src={logo} alt="" height="24" /> */}
-                                                            <h3 className="d-inline align-middle ml-1 text-logo">
-                                                                Sapient
-                                                            </h3>
-                                                        </a>
-                                                    </div>
+                                        {error && (
+                                            <Alert color="danger" isOpen={error ? true : false}>
+                                                <div>{this.props.error}</div>
+                                            </Alert>
+                                        )}
 
-                                                    <h6 className="h5 mb-0 mt-4">Reset Password</h6>
-                                                    <p className="text-muted mt-1 mb-4">
-                                                        Enter your email address and we'll send you an email with
-                                                        instructions to reset your password.
-                                                    </p>
+                                        <form className="authentication-form">
+                                            <FormGroup>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className="text-mute mb-1">
+                                                    Email
+                                                </Typography.Subheader>
 
-                                                    {this.props.error && (
-                                                        <Alert color="danger" isOpen={this.props.error ? true : false}>
-                                                            <div>{this.props.error}</div>
-                                                        </Alert>
-                                                    )}
+                                                <InputTooltip
+                                                    placeholder="hello@Sapient.industries"
+                                                    onChange={(e) => {
+                                                        setUsername(e.target.value.trim());
+                                                    }}
+                                                    labelSize={Typography.Sizes.md}
+                                                    value={username}
+                                                />
+                                            </FormGroup>
 
-                                                    <AvForm
-                                                        onValidSubmit={this.handleValidSubmit}
-                                                        className="authentication-form">
-                                                        <AvGroup className="">
-                                                            <Label for="email">Email Address</Label>
-                                                            <InputGroup>
-                                                                <InputGroupAddon addonType="prepend">
-                                                                    <span className="input-group-text">
-                                                                        <Mail className="icon-dual" />
-                                                                    </span>
-                                                                </InputGroupAddon>
-                                                                <AvInput
-                                                                    type="text"
-                                                                    name="email"
-                                                                    id="email"
-                                                                    placeholder="hello@Sapient.com"
-                                                                    value={this.state.email}
-                                                                    required
-                                                                />
-                                                            </InputGroup>
-
-                                                            <AvFeedback>This field is invalid</AvFeedback>
-                                                        </AvGroup>
-
-                                                        <FormGroup className="form-group mb-0 text-center">
-                                                            <Button color="primary" className="btn-block">
-                                                                Submit
-                                                            </Button>
-                                                        </FormGroup>
-                                                    </AvForm>
-                                                </Col>
-
-                                                <Col md={6} className="d-none d-md-inline-block">
-                                                    <div className="auth-page-sidebar">
-                                                        <div className="overlay"></div>
-                                                        <div className="auth-user-testimonial">
-                                                            {/* <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p> */}
-                                                            {/* <p className="lead">"It's a elegent templete. I love it very much!"</p> */}
-                                                            {/* <p>- Admin User</p> */}
-                                                        </div>
-                                                    </div>
-                                                </Col>
-                                            </Row>
-                                        </CardBody>
-                                    </Card>
-                                </Col>
-                            </Row>
-
-                            <Row className="mt-1">
-                                <Col className="col-12 text-center">
-                                    <p className="texttext-muted">
-                                        Back to{' '}
-                                        <Link to="/account/login" className="text-primary font-weight-bold ml-1">
-                                            Login
-                                        </Link>
-                                    </p>
-                                </Col>
-                            </Row>
-                        </Container>
-                    </div>
-                )}
-            </React.Fragment>
-        );
-    }
-}
+                                            <FormGroup>
+                                                <Button
+                                                    className="sub-button"
+                                                    color="primary"
+                                                    onClick={handleValidSubmit}>
+                                                    Reset Password
+                                                </Button>
+                                            </FormGroup>
+                                        </form>
+                                    </>
+                                )}
+                            </Col>
+                        </>
+                    }
+                />
+            )}
+        </React.Fragment>
+    );
+};
 
 export default connect()(ForgetPassword);

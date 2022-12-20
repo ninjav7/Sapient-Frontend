@@ -4,12 +4,14 @@ $base-background: #fdfeff;
 
 
 $success: #d1fadf;
+$success-25: #F6FEF9;
 $success-50: #ecfdf3;
 $success-100: #d1fadf;
 $success-600: #039855;
 $success-700: #027a48;
 $success-700: #027a48;
 $success-800: #05603a;
+$success-900: #054F31;
 
 $sapient-specific-hvac: #66a4ce;
 $sapient-specific-lighting: #fbe384;
@@ -95,9 +97,14 @@ $error-500: #f04438;
 $error-600: #d92d20;
 $error-700: #b42318;
 $error-800: #912018;
+$error-900: #7A271A;
 
+$warning-25: #FFFCF5;
 $warning-100: #fef0c7;
+$warning-200: #f9eabd;
+$warning-600: #DC6803;
 $warning-700: #B54708;
+$warning-900: #7A2E0E;
 
 $primary-indigo-25: #f5f8ff;
 $primary-indigo-50: #eef4ff;
@@ -166,10 +173,12 @@ $secondary-purple-600: #6b08db;
     secondaryPurple600: $secondary-purple-600;
 
     success: $success;
+    success25: $success-25;
     success100: $success-100;
     success600: $success-600;
     success700: $success-700;
     success800: $success-800;
+    success900: $success-900;
 
     sapientSpecificHvac: $sapient-specific-hvac;
     sapientSpecificLighting: $sapient-specific-lighting;
@@ -255,6 +264,11 @@ $secondary-purple-600: #6b08db;
     error600: $error-600;
     error700: $error-700;
     error800: $error-800;
+    error900: $error-900;
 
+    warning25: $warning-25;
+    warning100: $warning-100;
+    warning600: $warning-600;
     warning700: $warning-700;
+    warning900: $warning-900;
 }

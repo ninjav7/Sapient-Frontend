@@ -27,7 +27,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('HH:00')}`;
+                    return `${moment(timestamp).format('HH:00')}`;
                 },
             },
             tickAmount: 8,
@@ -41,7 +41,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('MM/DD HH:00')}`;
+                    return `${moment(timestamp).format('MM/DD HH:00')}`;
                 },
             },
             tickAmount: daysCount * 4,
@@ -55,7 +55,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('MM/DD HH:00')}`;
+                    return `${moment(timestamp).format('MM/DD HH:00')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -75,7 +75,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -95,7 +95,7 @@ export const xaxisFilters = (daysCount, timezone) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment.utc(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,

@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
@@ -284,6 +285,13 @@ const xaxisCategoryByHour = [
     '11PM',
 ];
 
+// @TODO Perhabs will be deleted
+const renderElementIfValid = (element) => {
+    if (React.isValidElement(element)) {
+        return React.cloneElement(element, { ...element?.props });
+    }
+};
+
 export {
     generateID,
     kFormatter,
@@ -296,4 +304,5 @@ export {
     xaxisFilters,
     formatConsumptionValue,
     xaxisCategoryByHour,
+    renderElementIfValid,
 };
