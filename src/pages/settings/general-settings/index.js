@@ -4,6 +4,7 @@ import axios from 'axios';
 import moment from 'moment';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
+import { userPermissionData } from '../../../store/globalState';
 import { BaseUrl, generalBldgDelete } from '../../../services/Network';
 import { BuildingStore, BuildingListStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -27,18 +28,13 @@ import './styles.scss';
 const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
-    const [operatingHours, setOperatingHours] = useState([]);
-    const [allbuildingData, setAllBuildingData] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
     const [checked, setChecked] = useState(generalDateTimeData.time_format);
-    const [generalOperatingData, setGeneralOperatingData] = useState({});
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date(`January 31 1980 12:50`));
-    const [value, onChange] = useState('10:00');
     const [render, setRender] = useState(false);
     const [activeToggle, setActiveToggle] = useState(false);
     const [weekToggle, setWeekToggle] = useState({});
@@ -63,11 +59,8 @@ const GeneralBuildingSettings = () => {
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
-
     const [textLocation, settextLocation] = useState('');
-
     const [timeZone, setTimeZone] = useState('');
-
     const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
@@ -364,12 +357,10 @@ const GeneralBuildingSettings = () => {
     };
 
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
-        const time1 = moment(date).format('HH:00');
-
         const data = {
             [day]: {
                 time_range: {
-                    [type1]: time1,
+                    [type1]: date?.value,
                 },
             },
         };
@@ -378,7 +369,7 @@ const GeneralBuildingSettings = () => {
     const handleTimeValueChange = (date, key) => {
         setTimeValue({
             ...timeValue,
-            [key]: timeZone === '24' ? moment(date)?.format('HH:00') : moment(date)?.format('h:00 a'),
+            [key]: date?.value,
         });
     };
 
@@ -566,29 +557,33 @@ const GeneralBuildingSettings = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>General Building Settings</Typography.Header>
                         </div>
-                        <div>
-                            <div className="d-flex">
-                                <Button
-                                    label="Cancel"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                    onClick={() => {
-                                        setIsEditing(false);
-                                        fetchBuildingData();
-                                    }}
-                                />
-                                <Button
-                                    label={loadButton ? 'Saving' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={() => {
-                                        saveBuildingSettings();
-                                    }}
-                                    className="ml-2"
-                                    disabled={loadButton}
-                                />
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                            <div>
+                                <div className="d-flex">
+                                    <Button
+                                        label="Cancel"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={() => {
+                                            setIsEditing(false);
+                                            fetchBuildingData();
+                                        }}
+                                    />
+                                    <Button
+                                        label={loadButton ? 'Saving' : 'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={() => {
+                                            saveBuildingSettings();
+                                            setIsEditing(false);
+                                        }}
+                                        className="ml-2"
+                                        disabled={loadButton}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
@@ -618,16 +613,28 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    <Switch
-                                        onChange={() => {
-                                            handleSwitchChange();
-                                        }}
-                                        checked={buildingDetails.active}
-                                        onColor={colorPalette.datavizBlue600}
-                                        uncheckedIcon={false}
-                                        checkedIcon={false}
-                                        className="react-switch"
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Switch
+                                            onChange={() => {
+                                                handleSwitchChange();
+                                            }}
+                                            checked={buildingDetails.active}
+                                            onColor={colorPalette.datavizBlue600}
+                                            uncheckedIcon={false}
+                                            checkedIcon={false}
+                                            className="react-switch"
+                                        />
+                                    ) : (
+                                        <Switch
+                                            onChange={() => {}}
+                                            checked={buildingDetails.active}
+                                            onColor={colorPalette.datavizBlue600}
+                                            className="react-switch"
+                                            uncheckedIcon={false}
+                                            checkedIcon={false}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -644,16 +651,27 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        placeholder="Enter Building Name"
-                                        onChange={(e) => {
-                                            localStorage.setItem('generalBuildingName', e.target.value);
-                                            handleBldgSettingChanges('name', e.target.value);
-                                        }}
-                                        className="w-100"
-                                        value={buildingDetails?.name}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Enter Building Name"
+                                            onChange={(e) => {
+                                                localStorage.setItem('generalBuildingName', e.target.value);
+                                                handleBldgSettingChanges('name', e.target.value);
+                                            }}
+                                            className="w-100"
+                                            value={buildingDetails?.name}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Building Name Not Added"
+                                            className="w-100"
+                                            value={buildingDetails?.name}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -668,19 +686,30 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    <Select
-                                        id="endUseSelect"
-                                        placeholder="Select Building Type"
-                                        name="select"
-                                        isSearchable={true}
-                                        defaultValue={buildingDetails.building_type}
-                                        options={buildingType}
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('building_type', e.value);
-                                            localStorage.setItem('generalBuildingType', e.value);
-                                        }}
-                                        className="w-100"
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Select
+                                            id="endUseSelect"
+                                            placeholder="Select Building Type"
+                                            name="select"
+                                            isSearchable={true}
+                                            defaultValue={buildingDetails.building_type}
+                                            options={buildingType}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('building_type', e.value);
+                                                localStorage.setItem('generalBuildingType', e.value);
+                                            }}
+                                            className="w-100"
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Building Type Not Added"
+                                            className="w-100"
+                                            value={buildingDetails.building_type}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -697,16 +726,27 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        placeholder="Enter Square Footage"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('square_footage', +e.target.value);
-                                            localStorage.setItem('generalSquareFootage', e.target.value);
-                                        }}
-                                        className="w-100"
-                                        value={buildingDetails?.square_footage}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Enter Square Footage"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('square_footage', +e.target.value);
+                                                localStorage.setItem('generalSquareFootage', e.target.value);
+                                            }}
+                                            className="w-100"
+                                            value={buildingDetails?.square_footage}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Building Size Not Added"
+                                            className="w-100"
+                                            value={buildingDetails.square_footage}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </CardBody>
@@ -732,33 +772,55 @@ const GeneralBuildingSettings = () => {
                         <CardBody>
                             <div className="row">
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        label="Street Address"
-                                        placeholder="Enter Address 1"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('street_address', e.value);
-                                            settextLocation(e.value);
-                                            if (getResponseOfPlaces) {
-                                                setopenDropdown(true);
-                                            }
-                                        }}
-                                        className="w-100"
-                                        value={selectedPlaceLabel || buildingAddress?.street_address}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            label="Street Address"
+                                            placeholder="Enter Address 1"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('street_address', e.value);
+                                                settextLocation(e.value);
+                                                if (getResponseOfPlaces) {
+                                                    setopenDropdown(true);
+                                                }
+                                            }}
+                                            className="w-100"
+                                            value={selectedPlaceLabel || buildingAddress?.street_address}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Address Not Added"
+                                            className="w-100"
+                                            value={selectedPlaceLabel || buildingAddress?.street_address}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        label="Address 2 (optional)"
-                                        placeholder="Enter Address 2 (optional)"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('address_2', e.value);
-                                            localStorage.setItem('generalStreetAddress2', e.value);
-                                        }}
-                                        className="w-100"
-                                        value={buildingAddress?.address_2}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            label="Address 2 (optional)"
+                                            placeholder="Enter Address 2 (optional)"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('address_2', e.value);
+                                                localStorage.setItem('generalStreetAddress2', e.value);
+                                            }}
+                                            className="w-100"
+                                            value={buildingAddress?.address_2}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Address Not Added"
+                                            className="w-100"
+                                            value={buildingAddress?.address_2}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -766,48 +828,84 @@ const GeneralBuildingSettings = () => {
 
                             <div className="row">
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        label="City"
-                                        placeholder="Enter City"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('city', e.value);
-                                            localStorage.setItem(
-                                                'generalCity',
-                                                totalSelectedData?.properties?.locality
-                                            );
-                                        }}
-                                        className="w-100"
-                                        value={totalSelectedData?.properties?.locality || buildingAddress?.city}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            label="City"
+                                            placeholder="Enter City"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('city', e.value);
+                                                localStorage.setItem(
+                                                    'generalCity',
+                                                    totalSelectedData?.properties?.locality
+                                                );
+                                            }}
+                                            className="w-100"
+                                            value={totalSelectedData?.properties?.locality || buildingAddress?.city}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="City is Not Added"
+                                            className="w-100"
+                                            value={totalSelectedData?.properties?.locality || buildingAddress?.city}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
-                                        label="State"
-                                        placeholder="Select State"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('state', e.value);
-                                            localStorage.setItem('generalState', totalSelectedData?.properties?.region);
-                                        }}
-                                        className="w-100"
-                                        value={totalSelectedData?.properties?.region || buildingAddress?.state}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="text"
+                                            label="State"
+                                            placeholder="Select State"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('state', e.value);
+                                                localStorage.setItem(
+                                                    'generalState',
+                                                    totalSelectedData?.properties?.region
+                                                );
+                                            }}
+                                            className="w-100"
+                                            value={totalSelectedData?.properties?.region || buildingAddress?.state}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="State is Not Added"
+                                            className="w-100"
+                                            value={totalSelectedData?.properties?.region || buildingAddress?.state}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
 
                                 <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="number"
-                                        label="Zip"
-                                        placeholder="Enter Zip Code"
-                                        onChange={(e) => {
-                                            handleBldgSettingChanges('zip_code', +e.target.value);
-                                            localStorage.setItem('generalZipCode', +e.target.value);
-                                        }}
-                                        className="w-100"
-                                        value={buildingAddress?.zip_code}
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Inputs
+                                            type="string"
+                                            label="Zip"
+                                            placeholder="Enter Zip Code"
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('zip_code', e.target.value);
+                                                localStorage.setItem('generalZipCode', e.target.value);
+                                            }}
+                                            className="w-100"
+                                            value={buildingAddress?.zip_code}
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="Zip is Not Added"
+                                            className="w-100"
+                                            value={buildingAddress?.zip_code}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </CardBody>
@@ -836,11 +934,22 @@ const GeneralBuildingSettings = () => {
                                     <Typography.Subheader size={Typography.Sizes.md}>TimeZone</Typography.Subheader>
                                 </div>
                                 <div className="col">
-                                    <TimezoneSelect
-                                        value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
-                                        onChange={setSelectedTimezone}
-                                        className="react-select-wrapper w-100"
-                                    />
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <TimezoneSelect
+                                            value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
+                                            onChange={setSelectedTimezone}
+                                            className="react-select-wrapper w-100"
+                                        />
+                                    ) : (
+                                        <Inputs
+                                            type="text"
+                                            placeholder="No timezone Selected"
+                                            className="w-100"
+                                            value={buildingDetails?.timezone ? buildingDetails?.timezone : ''}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -853,26 +962,38 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Subheader>
                                 </div>
                                 <div className="col">
-                                    <Switch
-                                        onChange={(e) => {
-                                            handleDateTimeSwitch();
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                        <Switch
+                                            onChange={(e) => {
+                                                handleDateTimeSwitch();
 
-                                            if (e) {
-                                                setTimeZone('24');
-                                                localStorage.setItem('generaltimeZone', '24');
-                                            }
+                                                if (e) {
+                                                    setTimeZone('24');
+                                                    localStorage.setItem('generaltimeZone', '24');
+                                                }
 
-                                            if (!e) {
-                                                setTimeZone('12');
-                                                localStorage.setItem('generaltimeZone', '12');
-                                            }
-                                        }}
-                                        checked={buildingDetails.time_format}
-                                        onColor={colorPalette.datavizBlue600}
-                                        uncheckedIcon={false}
-                                        checkedIcon={false}
-                                        className="react-switch"
-                                    />
+                                                if (!e) {
+                                                    setTimeZone('12');
+                                                    localStorage.setItem('generaltimeZone', '12');
+                                                }
+                                            }}
+                                            checked={buildingDetails.time_format}
+                                            onColor={colorPalette.datavizBlue600}
+                                            uncheckedIcon={false}
+                                            checkedIcon={false}
+                                            className="react-switch"
+                                        />
+                                    ) : (
+                                        <Switch
+                                            onChange={() => {}}
+                                            checked={buildingDetails.time_format}
+                                            onColor={colorPalette.datavizBlue600}
+                                            className="react-switch"
+                                            uncheckedIcon={false}
+                                            checkedIcon={false}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </CardBody>
@@ -900,158 +1021,235 @@ const GeneralBuildingSettings = () => {
                                 <div className="ml-3">
                                     <>
                                         {/* Monday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['mon']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('mon', e);
-                                                setSwitchPhrace({ ...switchPhrase, mon: e });
-                                            }}
-                                            weekDay={'Mon'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
-                                                handleTimeValueChange(date, 'monFrom');
-                                            }}
-                                            startTime={timeValue?.monFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
-                                                handleTimeValueChange(date, 'monTo');
-                                            }}
-                                            endTime={timeValue?.monTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['mon']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('mon', e);
+                                                    setSwitchPhrace({ ...switchPhrase, mon: e });
+                                                }}
+                                                weekDay={'Mon'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'monFrom');
+                                                }}
+                                                startTime={timeValue?.monFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'monTo');
+                                                }}
+                                                endTime={timeValue?.monTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['mon']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Mon'}
+                                                startTime={timeValue?.monFrom}
+                                                endTime={timeValue?.monTo}
+                                            />
+                                        )}
 
                                         {/* Tuesday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['tue']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('tue', e);
-                                                setSwitchPhrace({ ...switchPhrase, tue: e });
-                                            }}
-                                            weekDay={'Tue'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
-                                                handleTimeValueChange(date, 'tueFrom');
-                                            }}
-                                            startTime={timeValue?.tueFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
-                                                handleTimeValueChange(date, 'tueTo');
-                                            }}
-                                            endTime={timeValue?.tueTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['tue']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('tue', e);
+                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                }}
+                                                weekDay={'Tue'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'tueFrom');
+                                                }}
+                                                startTime={timeValue?.tueFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'tueTo');
+                                                }}
+                                                endTime={timeValue?.tueTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['tue']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Tue'}
+                                                startTime={timeValue?.tueFrom}
+                                                endTime={timeValue?.tueTo}
+                                            />
+                                        )}
 
                                         {/* Wednesday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['wed']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('wed', e);
-                                                setSwitchPhrace({ ...switchPhrase, wed: e });
-                                            }}
-                                            weekDay={'Wed'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
-                                                handleTimeValueChange(date, 'wedFrom');
-                                            }}
-                                            startTime={timeValue?.wedFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
-                                                handleTimeValueChange(date, 'wedTo');
-                                            }}
-                                            endTime={timeValue?.wedTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['wed']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('wed', e);
+                                                    setSwitchPhrace({ ...switchPhrase, wed: e });
+                                                }}
+                                                weekDay={'Wed'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'wedFrom');
+                                                }}
+                                                startTime={timeValue?.wedFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'wedTo');
+                                                }}
+                                                endTime={timeValue?.wedTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['wed']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Wed'}
+                                                startTime={timeValue?.wedFrom}
+                                                endTime={timeValue?.wedTo}
+                                            />
+                                        )}
 
                                         {/* Thursday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['thu']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('thu', e);
-                                                setSwitchPhrace({ ...switchPhrase, thu: e });
-                                            }}
-                                            weekDay={'Thu'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
-                                                handleTimeValueChange(date, 'thuFrom');
-                                            }}
-                                            startTime={timeValue?.thuFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
-                                                handleTimeValueChange(date, 'thuTo');
-                                            }}
-                                            endTime={timeValue?.thuTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['thu']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('thu', e);
+                                                    setSwitchPhrace({ ...switchPhrase, thu: e });
+                                                }}
+                                                weekDay={'Thu'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'thuFrom');
+                                                }}
+                                                startTime={timeValue?.thuFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'thuTo');
+                                                }}
+                                                endTime={timeValue?.thuTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['thu']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Thu'}
+                                                startTime={timeValue?.thuFrom}
+                                                endTime={timeValue?.thuTo}
+                                            />
+                                        )}
 
                                         {/* Friday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['fri']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('fri', e);
-                                                setSwitchPhrace({ ...switchPhrase, fri: e });
-                                            }}
-                                            weekDay={'Fri'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
-                                                handleTimeValueChange(date, 'friFrom');
-                                            }}
-                                            startTime={timeValue?.friFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
-                                                handleTimeValueChange(date, 'friTo');
-                                            }}
-                                            endTime={timeValue?.friTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['fri']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('fri', e);
+                                                    setSwitchPhrace({ ...switchPhrase, fri: e });
+                                                }}
+                                                weekDay={'Fri'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'friFrom');
+                                                }}
+                                                startTime={timeValue?.friFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'friTo');
+                                                }}
+                                                endTime={timeValue?.friTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['fri']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Fri'}
+                                                startTime={timeValue?.friFrom}
+                                                endTime={timeValue?.friTo}
+                                            />
+                                        )}
 
                                         {/* Saturday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['sat']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('sat', e);
-                                                setSwitchPhrace({ ...switchPhrase, sat: e });
-                                            }}
-                                            weekDay={'Sat'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
-                                                handleTimeValueChange(date, 'satFrom');
-                                            }}
-                                            startTime={timeValue?.satFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
-                                                handleTimeValueChange(date, 'satTo');
-                                            }}
-                                            endTime={timeValue?.satTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['sat']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('sat', e);
+                                                    setSwitchPhrace({ ...switchPhrase, sat: e });
+                                                }}
+                                                weekDay={'Sat'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'satFrom');
+                                                }}
+                                                startTime={timeValue?.satFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'satTo');
+                                                }}
+                                                endTime={timeValue?.satTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['sat']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Sat'}
+                                                startTime={timeValue?.satFrom}
+                                                endTime={timeValue?.satTo}
+                                            />
+                                        )}
 
                                         {/* Sunday */}
-
-                                        <OperatingHours
-                                            timeZone={timeZone}
-                                            isOperating={!weekToggle['sun']}
-                                            onSwitchToggle={(e) => {
-                                                checkDateTimeHandler('sun', e);
-                                                setSwitchPhrace({ ...switchPhrase, tue: e });
-                                            }}
-                                            weekDay={'Sun'}
-                                            onStartTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
-                                                handleTimeValueChange(date, 'sunFrom');
-                                            }}
-                                            startTime={timeValue?.sunFrom}
-                                            onEndTimeChange={(date) => {
-                                                operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
-                                                handleTimeValueChange(date, 'sunTo');
-                                            }}
-                                            endTime={timeValue?.sunTo}
-                                        />
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['sun']}
+                                                onSwitchToggle={(e) => {
+                                                    checkDateTimeHandler('sun', e);
+                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                }}
+                                                weekDay={'Sun'}
+                                                onStartTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
+                                                    handleTimeValueChange(date, 'sunFrom');
+                                                }}
+                                                startTime={timeValue?.sunFrom}
+                                                onEndTimeChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
+                                                    handleTimeValueChange(date, 'sunTo');
+                                                }}
+                                                endTime={timeValue?.sunTo}
+                                            />
+                                        ) : (
+                                            <OperatingHours
+                                                timeZone={timeZone}
+                                                isOperating={!weekToggle['sun']}
+                                                onSwitchToggle={(e) => {}}
+                                                weekDay={'Sun'}
+                                                startTime={timeValue?.sunFrom}
+                                                endTime={timeValue?.sunTo}
+                                            />
+                                        )}
                                     </>
                                 </div>
                             </Row>
@@ -1062,33 +1260,36 @@ const GeneralBuildingSettings = () => {
 
             <Brick sizeInRem={2} />
 
-            <Row>
-                <Col lg={9}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    Danger Zone
-                                </Typography.Subheader>
-                            </div>
-                        </CardHeader>
+            {userPermission?.user_role === 'admin' ||
+            userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
+                <Row>
+                    <Col lg={9}>
+                        <div className="custom-card">
+                            <CardHeader>
+                                <div>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        style={{ color: colorPalette.primaryGray550 }}>
+                                        Danger Zone
+                                    </Typography.Subheader>
+                                </div>
+                            </CardHeader>
 
-                        <CardBody>
-                            <div>
-                                <Button
-                                    label="Delete Building"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryDistructive}
-                                    // onClick={deleteBuildingHandler} -- Will be enabled once API is ready
-                                    icon={<DeleteSVG />}
-                                />
-                            </div>
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
+                            <CardBody>
+                                <div>
+                                    <Button
+                                        label="Delete Building"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
+                                        // onClick={deleteBuildingHandler} -- Will be enabled once API is ready
+                                        icon={<DeleteSVG />}
+                                    />
+                                </div>
+                            </CardBody>
+                        </div>
+                    </Col>
+                </Row>
+            ) : null}
         </React.Fragment>
     );
 };
