@@ -61,35 +61,6 @@
     border-radius: 4px;
 }
 
-.sensors-row-content {
-    display: flex;
-    column-gap: 0.25rem;
-    justify-content: flex-start;
-}
-
-.tags-row-content {
-    display: flex;
-    column-gap: 0.25rem;
-    justify-content: flex-start;
-}
-
-.tags-tooltip .arrow::before {
-    border-top-color: white !important;
-}
-
-
-.tags-tooltip .tooltip-inner {
-    background: white;
-    box-shadow: 0rem .0625rem .1875rem rgba(0, 0, 0, 0.01), 0rem .0625rem .125rem rgba(0, 0, 0, 0.06);
-
-    max-width: 250px;
-    flex-wrap: wrap;
-    display: flex;
-    justify-content: flex-start;
-    column-gap: .3125rem;
-    row-gap: .3125rem;
-}
-
 .modal-add-equipment label {
     font-weight: 400;
 }
@@ -100,10 +71,6 @@
     width: 100%;
     gap: 0.25rem;
     justify-content: space-between;
-}
-
-.add-equipment-footer-column {
-    width: 50%;
 }
 
 .equipment-name-cell {

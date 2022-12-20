@@ -1,33 +1,33 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
 import { UncontrolledTooltip } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
-import { BuildingStore } from '../../store/BuildingStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import Button from '../../sharedComponents/button/Button';
-import { getEquipmentTableCSVExport } from '../../utils/tablesExport';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import Button from '../../../sharedComponents/button/Button';
+import { getEquipmentTableCSVExport } from '../../../utils/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
-import Select from '../../sharedComponents/form/select';
+import Select from '../../../sharedComponents/form/select';
 
 import _ from 'lodash';
 
-import { Badge } from '../../sharedComponents/badge';
-import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
+import { Badge } from '../../../sharedComponents/badge';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 
-import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../store/globalState';
+import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../../store/globalState';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
-import EquipChartModal from '../../pages/chartModal/EquipChartModal';
-import './style.css';
+import { userPermissionData } from '../../../store/globalState';
+import EquipChartModal from '../../chartModal/EquipChartModal';
+import './style.scss';
 import {
     getEqupmentDataRequest,
     deleteEquipmentRequest,
@@ -36,9 +36,9 @@ import {
     getEndUseDataRequest,
     getLocationDataRequest,
     getMetadataRequest,
-} from '../../services/equipment';
-import { primaryGray100 } from '../../assets/scss/_colors.scss';
-import Input from '../../sharedComponents/form/input/Input';
+} from '../../../services/equipment';
+import { primaryGray100 } from '../../../assets/scss/_colors.scss';
+import Input from '../../../sharedComponents/form/input/Input';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
