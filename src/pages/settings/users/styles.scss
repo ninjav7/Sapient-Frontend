@@ -1,0 +1,78 @@
+@import '../../../assets/scss/colors';
+
+.active-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2.25rem;
+    background: $success-50;
+    border: 0.0625rem solid $success-100;
+    border-radius: 1rem;
+}
+
+.inactive-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2.25rem;
+    background: $primary-gray-100;
+    border: 0.0625rem solid $primary-gray-200;
+    border-radius: 1rem;
+    justify-content: center;
+}
+
+.modal-active-deactive {
+    max-width: 21.875rem !important;
+    max-height: 12.625rem !important;
+    height: 12.625rem !important; 
+}
+.pending-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2rem;
+    background: $warning-100;
+    border: 0.0625rem solid $warning-200;
+    border-radius: 1rem;
+    justify-content: center;
+}
+
+.deactivate-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 12rem;
+    height: 2.25rem;
+    background: $error-50;
+    border: 0.0625rem solid $error-100;
+    border-radius: 0.25rem;
+    justify-content: center;
+}
+
+.activate-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 12rem;
+    height: 2.25rem;
+    background: $primary-indigo-50;
+    border: 0.0625rem solid $primary-indigo-100;
+    border-radius: 0.25rem;
+}
+
+.button-container {
+    padding: 0.5rem;
+    gap: 1rem;
+    width: 14rem;
+    height: 2.5rem;
+    justify-content: center;
+}
+
+.add-user-model{
+    height:15.875rem;
+}
+
+.buttonStyle{
+    width: 8rem;
+    justify-content: center;
+}
+
+

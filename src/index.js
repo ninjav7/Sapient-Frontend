@@ -6,15 +6,18 @@ import { Provider } from 'react-redux';
 import { configureStore } from './redux/store';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { NotificationProvider } from './sharedComponents/notification/NotificationProvider';
 
 const queryClient = new QueryClient();
 
 ReactDOM.render(
     <QueryClientProvider client={queryClient}>
         <Provider store={configureStore()}>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
+            <NotificationProvider>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </NotificationProvider>
         </Provider>
     </QueryClientProvider>,
     document.getElementById('root')

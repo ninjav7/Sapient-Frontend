@@ -15,6 +15,7 @@ import {
     forgetPasswordFailed,
     logoutUser,
 } from './actions';
+import { UserStore } from '../../store/UserStore';
 
 /**
  * Sets the session
@@ -22,11 +23,10 @@ import {
  */
 const setSession = (user) => {
     let cookies = new Cookies();
-    if (user){
-        localStorage.setItem("accountName", user?.account_id);
+    if (user) {
+        localStorage.setItem('accountName', user?.account_id);
         cookies.set('user', JSON.stringify(user), { path: '/' });
-    } 
-    else cookies.remove('user', { path: '/' });
+    } else cookies.remove('user', { path: '/' });
 };
 /**
  * Login the user
@@ -51,12 +51,20 @@ function* login({ payload: { username, password } }) {
         if (response.success === false) {
             localStorage.setItem('login_success', false);
             localStorage.setItem('failed_message', response.message);
+            UserStore.update((s) => {
+                s.message = response.message;
+                s.loginSuccess = false;
+            });
         } else {
+            UserStore.update((s) => {
+                s.loginSuccess = true;
+            });
             localStorage.setItem('login_success', true);
         }
         setSession(response.data);
         yield put(loginUserSuccess(response.data));
     } catch (error) {
+        console.log('error ', error);
         let message;
         switch (error.status) {
             case 500:

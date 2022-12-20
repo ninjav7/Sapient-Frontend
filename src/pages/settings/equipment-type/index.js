@@ -206,7 +206,7 @@ const EquipmentType = () => {
                                         openAddEquipTypeModal();
                                     }}
                                     icon={<PlusSVG />}
-                                    disabled
+                                    disbaled
                                 />
                             </div>
                         ) : (
