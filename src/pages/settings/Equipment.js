@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
+import { UncontrolledTooltip } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -252,12 +253,31 @@ const Equipment = () => {
             </div>
         );
     });
+
     const renderTags = useCallback((row) => {
+        const slicedArr = row.tags.slice(1);
         return (
-            <div className="sensors-row-content">
-                {row.tags.map((el) => {
-                    return <Badge text={<span className="gray-950">{el}</span>} />;
-                })}
+            <div className="tags-row-content">
+                <Badge text={<span className="gray-950">{row.tags[0] ? row.tags[0] : 'none'}</span>} />
+                {slicedArr?.length > 0 ? (
+                    <>
+                        <Badge
+                            text={
+                                <span className="gray-950" id={`tags-badge-${row.equipments_id}`}>
+                                    +{slicedArr.length} more
+                                </span>
+                            }
+                        />
+                        <UncontrolledTooltip
+                            placement="top"
+                            target={`tags-badge-${row.equipments_id}`}
+                            className="tags-tooltip">
+                            {slicedArr.map((el) => {
+                                return <Badge text={<span className="gray-950">{el}</span>} />;
+                            })}
+                        </UncontrolledTooltip>
+                    </>
+                ) : null}
             </div>
         );
     });
