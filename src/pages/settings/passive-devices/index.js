@@ -19,6 +19,8 @@ import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
 import { getPassiveDeviceData } from './services';
+import DeletePassiveDevice from './DeletePassiveDevice';
+import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -27,6 +29,10 @@ import './style.css';
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
+            <th>
+                <Skeleton count={10} />
+            </th>
+
             <th>
                 <Skeleton count={10} />
             </th>
@@ -67,6 +73,18 @@ const PassiveDevices = () => {
     const closeAddDeviceModal = () => setAddDeviceDeviceModal(false);
     const openAddDeviceModal = () => setAddDeviceDeviceModal(true);
 
+    // Edit Device Modal states
+    const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
+    const closeEditDeviceModal = () => setEditDeviceDeviceModal(false);
+    const openEditDeviceModal = () => setEditDeviceDeviceModal(true);
+
+    // Delete Device Modal states
+    const [isDeleteDeviceModalOpen, setDeleteDeviceDeviceModal] = useState(false);
+    const closeDeleteDeviceModal = () => setDeleteDeviceDeviceModal(false);
+    const openDeleteDeviceModal = () => setDeleteDeviceDeviceModal(true);
+
+    const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
+
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
 
@@ -76,18 +94,16 @@ const PassiveDevices = () => {
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
-    const [isEdit, setIsEdit] = useState(false);
-    const handleEditClose = () => setIsEdit(false);
-
-    const [isDelete, setIsDelete] = useState(false);
-    const handleDeleteClose = () => setIsDelete(false);
-
     const fetchDefaultPassiveDeviceData = async () => {
         setIsDataFetching(true);
         let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
         await getPassiveDeviceData(params)
             .then((res) => {
                 const responseData = res?.data;
+                setSearch('');
+                setPageNo(1);
+                setPageSize(20);
+                setDeviceStatus(0);
                 setPassiveDeviceData(responseData?.data);
                 setTotalItems(responseData?.total_data);
                 setIsDataFetching(false);
@@ -139,6 +155,20 @@ const PassiveDevices = () => {
         history.push({
             pathname: `/settings/passive-devices/single/${el.equipments_id}`,
         });
+    };
+
+    const handleDeviceEdit = (record) => {
+        setSelectedPassiveDevice(record);
+        openEditDeviceModal();
+    };
+
+    const handleDeviceDelete = (record) => {
+        setSelectedPassiveDevice(record);
+        openDeleteDeviceModal();
+    };
+
+    const handleAbleToDeleteRow = (row) => {
+        return true;
     };
 
     const handleDownloadCsv = async () => {
@@ -295,7 +325,10 @@ const PassiveDevices = () => {
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         id="passive_devices_list"
-                        onSearch={setSearch}
+                        onSearch={(query) => {
+                            setPageNo(1);
+                            setSearch(query);
+                        }}
                         onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
@@ -306,6 +339,9 @@ const PassiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        onEditRow={(record, id, row) => handleDeviceEdit(row)}
+                        onDeleteRow={(record, id, row) => handleDeviceDelete(row)}
+                        isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
@@ -319,6 +355,20 @@ const PassiveDevices = () => {
             <CreatePassiveDevice
                 isAddDeviceModalOpen={isAddDeviceModalOpen}
                 closeAddDeviceModal={closeAddDeviceModal}
+                fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
+            />
+
+            <EditPassiveDevice
+                isEditDeviceModalOpen={isEditDeviceModalOpen}
+                closeEditDeviceModal={closeEditDeviceModal}
+                selectedPassiveDevice={selectedPassiveDevice}
+                fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
+            />
+
+            <DeletePassiveDevice
+                isDeleteDeviceModalOpen={isDeleteDeviceModalOpen}
+                closeDeleteDeviceModal={closeDeleteDeviceModal}
+                selectedPassiveDevice={selectedPassiveDevice}
                 fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
             />
         </React.Fragment>

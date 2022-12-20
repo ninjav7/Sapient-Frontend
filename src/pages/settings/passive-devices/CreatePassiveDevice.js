@@ -100,7 +100,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
     }, [isAddDeviceModalOpen]);
 
     return (
-        <Modal show={isAddDeviceModalOpen} onHide={closeAddDeviceModal} centered>
+        <Modal show={isAddDeviceModalOpen} onHide={closeAddDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Create Passive Device</Typography.Header>
 

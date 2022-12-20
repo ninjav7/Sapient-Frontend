@@ -209,8 +209,10 @@ export const apiRequestBody = (start_date, end_date, time_zone) => {
 };
 
 export const isInputLetterOrNumber = (inputtxt) => {
-    const letterNumber = /^[0-9a-zA-Z]+$/;
-    return inputtxt.match(letterNumber) ? true : false;
+    if (inputtxt) {
+        const letterNumber = /^[0-9a-zA-Z]+$/;
+        return inputtxt.match(letterNumber) ? true : false;
+    }
 };
 
 export const pageListSizes = [
