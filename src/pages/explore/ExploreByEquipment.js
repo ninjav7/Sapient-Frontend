@@ -388,6 +388,7 @@ const ExploreByEquipment = () => {
         (async () => {
             setIsExploreDataLoading(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
+
             if (filters?.data?.data !== null) {
                 setFilterData(filters.data.data);
                 setTopVal(
@@ -422,6 +423,10 @@ const ExploreByEquipment = () => {
             } else {
                 setFilterData({});
                 setFilterOptions([]);
+                set_minConValue(0);
+                set_maxConValue(0);
+                set_minPerValue(0);
+                set_maxPerValue(0);
             }
 
             setIsExploreDataLoading(false);
@@ -835,194 +840,200 @@ const ExploreByEquipment = () => {
     }, [perAPIFlag]);
     useEffect(() => {
         if ((minConValue !== maxConValue && maxConValue !== 0) || (minPerValue !== maxPerValue && maxPerValue !== 0)) {
-            const filterOptionsFetched = [
-                {
-                    label: 'Energy Consumption',
-                    value: 'consumption',
-                    placeholder: 'All Consumptions',
-                    filterType: FILTER_TYPES.RANGE_SELECTOR,
-                    filterOptions: [minConValue, maxConValue],
-                    componentProps: {
-                        prefix: ' kWh',
-                        title: 'Consumption',
-                        min: bottomConsumption,
-                        max: topConsumption + 1,
-                        range: [minConValue, maxConValue],
-                        withTrendsFilter: false,
-                    },
-                    onClose: function onClose(options) {
-                        set_minConValue(options[0]);
-                        set_maxConValue(options[1]);
-                        setPageNo(1);
-                        setConAPIFlag(options[0] + options[1]);
-                    },
-                    onDelete: () => {
-                        set_minConValue(bottomConsumption);
-                        set_maxConValue(topConsumption);
-                        setConAPIFlag('');
-                    },
-                },
-                {
-                    label: '% Change',
-                    value: 'change',
-                    placeholder: 'All % Change',
-                    filterType: FILTER_TYPES.RANGE_SELECTOR,
-                    filterOptions: [minPerValue, maxPerValue],
-                    componentProps: {
-                        prefix: ' %',
-                        title: '% Change',
-                        min: bottomVal,
-                        max: topVal + 1,
-                        range: [minPerValue, maxPerValue],
-                        withTrendsFilter: true,
-                        currentButtonId: currentButtonId,
-                        handleButtonClick: function handleButtonClick() {
-                            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-                                args[_key] = arguments[_key];
-                                if (args[0] === 0) {
-                                    setIsOpened(true);
-                                    setCurrentButtonId(0);
-                                    set_minPerValue(bottomPerChange);
-                                    set_maxPerValue(topPerChange);
-                                    setBottomVal(bottomPerChange);
-                                    setTopVal(topPerChange);
-                                }
-                                if (args[0] === 1) {
-                                    setIsOpened(true);
-                                    setCurrentButtonId(1);
-                                    if (bottomPerChange < 0) {
-                                        setBottomVal(bottomPerChange);
-                                        setTopVal(neutralPerChange);
-                                        set_minPerValue(bottomPerChange);
-                                        set_maxPerValue(neutralPerChange);
-                                    } else if (bottomPerChange >= 0) {
-                                        setBottomVal(neutralPerChange);
-                                        setTopVal(neutralPerChange + 1);
-                                        set_minPerValue(neutralPerChange);
-                                        set_maxPerValue(neutralPerChange);
-                                    }
-                                }
-                                if (args[0] === 2) {
-                                    setIsOpened(true);
-                                    setCurrentButtonId(2);
-                                    if (topPerChange > 0) {
-                                        setBottomVal(neutralPerChange);
-                                        setTopVal(topPerChange);
-                                        set_minPerValue(neutralPerChange);
-                                        set_maxPerValue(topPerChange);
-                                    } else if (bottomPerChange >= 0) {
-                                        setBottomVal(neutralPerChange);
-                                        setTopVal(neutralPerChange + 1);
-                                        set_minPerValue(neutralPerChange);
-                                        set_maxPerValue(neutralPerChange);
-                                    }
-                                }
-                            }
+            if (Object.keys(filterData).length !== 0) {
+                const filterOptionsFetched = [
+                    {
+                        label: 'Energy Consumption',
+                        value: 'consumption',
+                        placeholder: 'All Consumptions',
+                        filterType: FILTER_TYPES.RANGE_SELECTOR,
+                        filterOptions: [minConValue, maxConValue],
+                        componentProps: {
+                            prefix: ' kWh',
+                            title: 'Consumption',
+                            min: bottomConsumption,
+                            max: topConsumption + 1,
+                            range: [minConValue, maxConValue],
+                            withTrendsFilter: false,
+                        },
+                        onClose: function onClose(options) {
+                            set_minConValue(options[0]);
+                            set_maxConValue(options[1]);
+                            setPageNo(1);
+                            setConAPIFlag(options[0] + options[1]);
+                        },
+                        onDelete: () => {
+                            set_minConValue(bottomConsumption);
+                            set_maxConValue(topConsumption);
+                            setConAPIFlag('');
                         },
                     },
-                    isOpened: isopened,
-                    onClose: function onClose(options) {
-                        setIsOpened(false);
-                        set_minPerValue(options[0]);
-                        set_maxPerValue(options[1]);
-                        setPageNo(1);
-                        setPerAPIFlag(options[0] + options[1]);
-                    },
-                    onDelete: () => {
-                        set_minPerValue(bottomPerChange);
-                        set_maxPerValue(topPerChange);
-                        setPerAPIFlag('');
-                    },
-                },
-                // {
-                //     label: 'Location',
-                //     value: 'spaces',
-                //     placeholder: 'All Locations',
-                //     filterType: FILTER_TYPES.MULTISELECT,
-                //     filterOptions: filterData.spaces.map((filterItem) => ({
-                //         value: filterItem.space_id,
-                //         label: filterItem.space_name,
-                //     })),
-                //     onClose: (options) => {},
-                //     onDelete: () => {
-                //         setSelectedLocation([]);
-                //     },
-                // },
-                {
-                    label: 'Equipment Type',
-                    value: 'equipments_type',
-                    placeholder: 'All Equipment Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.equipments_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
-                    })),
-                    onChange: function onChange(options) {},
-                    onClose: (options) => {
-                        let opt = options;
-                        if (opt.length !== 0) {
-                            let equipIds = [];
-                            for (let i = 0; i < opt.length; i++) {
-                                equipIds.push(opt[i].value);
-                            }
+                    {
+                        label: '% Change',
+                        value: 'change',
+                        placeholder: 'All % Change',
+                        filterType: FILTER_TYPES.RANGE_SELECTOR,
+                        filterOptions: [minPerValue, maxPerValue],
+                        componentProps: {
+                            prefix: ' %',
+                            title: '% Change',
+                            min: bottomVal,
+                            max: topVal + 1,
+                            range: [minPerValue, maxPerValue],
+                            withTrendsFilter: true,
+                            currentButtonId: currentButtonId,
+                            handleButtonClick: function handleButtonClick() {
+                                for (
+                                    var _len = arguments.length, args = new Array(_len), _key = 0;
+                                    _key < _len;
+                                    _key++
+                                ) {
+                                    args[_key] = arguments[_key];
+                                    if (args[0] === 0) {
+                                        setIsOpened(true);
+                                        setCurrentButtonId(0);
+                                        set_minPerValue(bottomPerChange);
+                                        set_maxPerValue(topPerChange);
+                                        setBottomVal(bottomPerChange);
+                                        setTopVal(topPerChange);
+                                    }
+                                    if (args[0] === 1) {
+                                        setIsOpened(true);
+                                        setCurrentButtonId(1);
+                                        if (bottomPerChange < 0) {
+                                            setBottomVal(bottomPerChange);
+                                            setTopVal(neutralPerChange);
+                                            set_minPerValue(bottomPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        } else if (bottomPerChange >= 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(neutralPerChange + 1);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        }
+                                    }
+                                    if (args[0] === 2) {
+                                        setIsOpened(true);
+                                        setCurrentButtonId(2);
+                                        if (topPerChange > 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(topPerChange);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(topPerChange);
+                                        } else if (bottomPerChange >= 0) {
+                                            setBottomVal(neutralPerChange);
+                                            setTopVal(neutralPerChange + 1);
+                                            set_minPerValue(neutralPerChange);
+                                            set_maxPerValue(neutralPerChange);
+                                        }
+                                    }
+                                }
+                            },
+                        },
+                        isOpened: isopened,
+                        onClose: function onClose(options) {
+                            setIsOpened(false);
+                            set_minPerValue(options[0]);
+                            set_maxPerValue(options[1]);
                             setPageNo(1);
-                            setSelectedEquipType(equipIds);
-                        }
+                            setPerAPIFlag(options[0] + options[1]);
+                        },
+                        onDelete: () => {
+                            set_minPerValue(bottomPerChange);
+                            set_maxPerValue(topPerChange);
+                            setPerAPIFlag('');
+                        },
                     },
-                    onDelete: (options) => {
-                        setSelectedEquipType([]);
-                    },
-                },
-                {
-                    label: 'End Uses',
-                    value: 'end_users',
-                    placeholder: 'All End Uses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.end_users.map((filterItem) => ({
-                        value: filterItem.end_use_id,
-                        label: filterItem.end_use_name,
-                    })),
-                    onClose: (options) => {
-                        let opt = options;
-                        if (opt.length !== 0) {
-                            let endUseIds = [];
-                            for (let i = 0; i < opt.length; i++) {
-                                endUseIds.push(opt[i].value);
+                    // {
+                    //     label: 'Location',
+                    //     value: 'spaces',
+                    //     placeholder: 'All Locations',
+                    //     filterType: FILTER_TYPES.MULTISELECT,
+                    //     filterOptions: filterData.spaces.map((filterItem) => ({
+                    //         value: filterItem.space_id,
+                    //         label: filterItem.space_name,
+                    //     })),
+                    //     onClose: (options) => {},
+                    //     onDelete: () => {
+                    //         setSelectedLocation([]);
+                    //     },
+                    // },
+                    {
+                        label: 'Equipment Type',
+                        value: 'equipments_type',
+                        placeholder: 'All Equipment Types',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filterData.equipments_type.map((filterItem) => ({
+                            value: filterItem.equipment_type_id,
+                            label: filterItem.equipment_type_name,
+                        })),
+                        onChange: function onChange(options) {},
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let equipIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    equipIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedEquipType(equipIds);
                             }
-                            setPageNo(1);
-                            setSelectedEndUse(endUseIds);
-                        }
+                        },
+                        onDelete: (options) => {
+                            setSelectedEquipType([]);
+                        },
                     },
-                    onDelete: () => {
-                        setSelectedEndUse([]);
-                    },
-                },
-                {
-                    label: 'Space Type',
-                    value: 'location_types',
-                    placeholder: 'All Space Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterData.location_types.map((filterItem) => ({
-                        value: filterItem.location_type_id,
-                        label: filterItem.location_types_name,
-                    })),
-                    onClose: (options) => {
-                        let opt = options;
-                        if (opt.length !== 0) {
-                            let spaceIds = [];
-                            for (let i = 0; i < opt.length; i++) {
-                                spaceIds.push(opt[i].value);
+                    {
+                        label: 'End Uses',
+                        value: 'end_users',
+                        placeholder: 'All End Uses',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filterData.end_users.map((filterItem) => ({
+                            value: filterItem.end_use_id,
+                            label: filterItem.end_use_name,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let endUseIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    endUseIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedEndUse(endUseIds);
                             }
-                            setPageNo(1);
-                            setSelectedSpaceType(spaceIds);
-                        }
+                        },
+                        onDelete: () => {
+                            setSelectedEndUse([]);
+                        },
                     },
-                    onDelete: () => {
-                        setSelectedSpaceType([]);
+                    {
+                        label: 'Space Type',
+                        value: 'location_types',
+                        placeholder: 'All Space Types',
+                        filterType: FILTER_TYPES.MULTISELECT,
+                        filterOptions: filterData.location_types.map((filterItem) => ({
+                            value: filterItem.location_type_id,
+                            label: filterItem.location_types_name,
+                        })),
+                        onClose: (options) => {
+                            let opt = options;
+                            if (opt.length !== 0) {
+                                let spaceIds = [];
+                                for (let i = 0; i < opt.length; i++) {
+                                    spaceIds.push(opt[i].value);
+                                }
+                                setPageNo(1);
+                                setSelectedSpaceType(spaceIds);
+                            }
+                        },
+                        onDelete: () => {
+                            setSelectedSpaceType([]);
+                        },
                     },
-                },
-            ];
-            setFilterOptions(filterOptionsFetched);
+                ];
+                setFilterOptions(filterOptionsFetched);
+            }
         }
     }, [minConValue, maxConValue, minPerValue, maxPerValue]);
 
