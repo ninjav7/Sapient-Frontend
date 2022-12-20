@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
-import Typography from '../../sharedComponents/typography';
+import Typography from '../../../sharedComponents/typography';
 import { UncontrolledTooltip } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../../store/ComponentStore';
