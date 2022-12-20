@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import moment from 'moment';
+import Typography from '../../sharedComponents/typography';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -404,9 +405,12 @@ const Equipment = () => {
     };
     const renderEquipmentsName = (row) => {
         return (
-            <div onClick={() => handleOpenEditEquipment(row)} className="typography-wrapper link mouse-pointer">
+            <Typography.Link
+                size={Typography.Sizes.md}
+                className="mouse-pointer"
+                onClick={() => handleOpenEditEquipment(row)}>
                 {row.equipments_name}
-            </div>
+            </Typography.Link>
         );
     };
 
