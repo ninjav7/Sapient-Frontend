@@ -386,11 +386,9 @@ const ExploreByEquipment = () => {
     useEffect(() => {}, [selectedEquipType, selectedEndUse, selectedSpaceType]);
 
     useEffect(() => {
-        console.log('building ');
         (async () => {
             setIsExploreDataLoading(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
-            console.log('filters ', filters?.data?.data);
             if (filters?.data?.data !== null) {
                 setFilterData(filters.data.data);
                 setTopVal(
@@ -423,7 +421,6 @@ const ExploreByEquipment = () => {
                     )
                 );
             } else {
-                console.log('Null condition');
                 setFilterData({});
                 setFilterOptions([]);
             }
@@ -839,7 +836,6 @@ const ExploreByEquipment = () => {
     }, [perAPIFlag]);
     useEffect(() => {
         if ((minConValue !== maxConValue && maxConValue !== 0) || (minPerValue !== maxPerValue && maxPerValue !== 0)) {
-            console.log('Consumption changes');
             const filterOptionsFetched = [
                 {
                     label: 'Energy Consumption',
