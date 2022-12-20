@@ -84,6 +84,23 @@ export const Default = () => (
                 onClose={() => alert('close')}
                 icon={<DownloadSVG />}
             />
+            <Brick />
+            <Notification
+                type={Notification.Types.success}
+                component={Notification.ComponentTypes.alert}
+                title="Closes automatically after 4s wqew"
+                description="Description text"
+                closeAutomatically={true}
+            />
+            <Brick />
+            <Notification
+                type={Notification.Types.success}
+                component={Notification.ComponentTypes.alert}
+                title="Closes automatically after 4s wqew"
+                description="Description text"
+                closeAutomatically={true}
+                isShownCloseBtn={false}
+            />
         </div>
     </>
 );

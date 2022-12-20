@@ -43,6 +43,12 @@ export const NotificationDemo = ({ actionButtons }) => {
                 Click to see success snackbar
             </Button>
             <Brick />
+
+            <Button
+                onClick={() => openSnackbar({ ...mockData, type: Notification.Types.success, closeManually: true })}>
+                Doesn't close automatically because of 'closeManually="{'{true}'}" prop
+            </Button>
+            <Brick />
         </div>
     );
 };

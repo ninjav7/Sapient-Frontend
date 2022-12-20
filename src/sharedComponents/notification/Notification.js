@@ -24,6 +24,8 @@ const IconMap = {
     success: CircleCheckSVG,
 };
 
+export const ALERT_DURATION = 4000;
+
 const Notification = (props) => {
     const {
         title,
@@ -35,6 +37,8 @@ const Notification = (props) => {
         type,
         isShownCloseBtn,
         closeByCloseBtn = true,
+        duration = ALERT_DURATION,
+        closeAutomatically,
     } = props;
 
     const [isShown, setIsShown] = useState(props.isShown);
@@ -46,6 +50,16 @@ const Notification = (props) => {
     const handleClose = useCallback((event) => {
         onClose && onClose(event);
         closeByCloseBtn && setIsShown(false);
+    }, []);
+
+    useEffect(() => {
+        if (!closeAutomatically) {
+            return;
+        }
+
+        // Sets timeout to close the alert
+        const timerId = +setTimeout(handleClose, duration);
+        return () => clearTimeout(timerId);
     }, []);
 
     if (!isShown) {
@@ -162,6 +176,8 @@ Notification.propTypes = {
     isShown: PropTypes.bool,
     isShownCloseBtn: PropTypes.bool,
     closeByCloseBtn: PropTypes.bool,
+    closeAutomatically: PropTypes.bool,
+    duration: PropTypes.number,
 };
 
 Notification.defaultProps = {
