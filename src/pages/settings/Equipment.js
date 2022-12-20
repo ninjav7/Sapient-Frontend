@@ -405,7 +405,7 @@ const Equipment = () => {
     const renderEquipmentsName = (row) => {
         return (
             <div onClick={() => handleOpenEditEquipment(row)} className="typography-wrapper link mouse-pointer">
-                {row.equipments_name !== '' ? row.equipments_name : '-'}
+                {row.equipments_name}
             </div>
         );
     };
