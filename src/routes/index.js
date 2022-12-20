@@ -9,7 +9,7 @@ import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
-import Equipment from '../pages/settings/Equipment';
+import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';

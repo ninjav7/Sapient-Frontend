@@ -831,9 +831,7 @@ const EquipChartModal = ({
                                     </div>
 
                                     {isEquipDataFetched ? (
-                                        <div className="loader-center-style">
-                                            <Spinner className="m-2" color={'primary'} />
-                                        </div>
+                                        <></>
                                     ) : (
                                         <div>
                                             <LineChart
