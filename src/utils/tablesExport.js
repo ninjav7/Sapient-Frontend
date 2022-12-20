@@ -246,9 +246,7 @@ export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
     columns.forEach((element) => {
-        if (element.accessor === 'sensor_number') {
-            element.name = 'Sensors [In Use]';
-        }
+        if (element.accessor === 'sensor_number') element.name = 'Sensors [In Use]';
     });
 
     tableData.forEach((tableRow) => {
@@ -262,6 +260,24 @@ export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
                     const replaceWith = ' out of ';
                     const result = name.split(search).join(replaceWith);
                     arr.push(result);
+                    break;
+
+                case 'status':
+                    const status = tableRow['status'];
+                    const data = status ? 'Online' : 'Offline';
+                    arr.push(data);
+                    break;
+
+                case 'model':
+                    const model = tableRow['model'];
+                    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+                    arr.push(modelName);
+                    break;
+
+                case 'location':
+                    const locationData = tableRow['location'];
+                    const locationName = locationData === '' ? '-' : locationData;
+                    arr.push(locationName);
                     break;
 
                 default:

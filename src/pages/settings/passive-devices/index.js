@@ -108,25 +108,14 @@ const PassiveDevices = () => {
     ) => {
         setIsDataFetching(true);
 
-        if (ordered_by === 'status') {
-            ordered_by = 'stat';
-        }
-        if (ordered_by === 'sensor_number') {
-            ordered_by = 'sensor_count';
-        }
+        if (ordered_by === 'status') ordered_by = 'stat';
+        if (ordered_by === 'sensor_number') ordered_by = 'sensor_count';
 
         let params = `?building_id=${bldg_id}&page_no=${page_no}&page_size=${page_size}&ordered_by=${ordered_by}`;
 
-        if (search_txt) {
-            params = params.concat(`&device_search=${encodeURIComponent(search_txt)}`);
-        }
-        if (sort_by) {
-            params = params.concat(`&sort_by=${sort_by}`);
-        }
-
-        if (device_status !== 0) {
-            params = params.concat(`&stat=${device_status === 1 ? 'true' : 'false'}`);
-        }
+        if (search_txt) params = params.concat(`&device_search=${encodeURIComponent(search_txt)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (device_status !== 0) params = params.concat(`&stat=${device_status === 1 ? 'true' : 'false'}`);
 
         await getPassiveDeviceData(params)
             .then((res) => {
