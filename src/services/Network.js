@@ -27,24 +27,27 @@ export const updateUtilityBill = '/api/config/utility_bills';
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
 export const getFiltersForBuildings = '/api/config/general/general-buildings-filter';
-export const singleBuildingDetail = '/api/config/general/building-details';
 export const generalBldgDelete = '/api/config/general/delete_building';
 
 //user roles
 export const updateAccount = '/api/user_role/user/update-user';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
+export const vendorPermissions = '/api/user_role/user-permission-role/vendor-permissions';
 
 // user permission and roles
-export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const addMemberUser = '/api/user_role/user-permission-role/invite-reset-user';
+export const forgotUserPassword = '/api/user_role/user-permission-role/forgot-user-password';
 export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const UpdateUserPassword = '/api/user_role/user-permission-role/user-update-password';
 export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
 export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
 export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
 export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
-export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
+export const getSingleUserDetail = '/api/user_role/user-permission-role/user-info';
 export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
 export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
+export const updateUserRole = '/api/user_role/user-permission-role/update-user-role';
 export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions';
 
 // Search

@@ -64,7 +64,7 @@ const EquipChartModal = ({
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+        { value: 'mAh', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -250,13 +250,13 @@ const EquipChartModal = ({
         setIsEquipDataFetched(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
         let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
-            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+            selectedConsumption === 'mAh' ? '&detailed=true' : ''
         }`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let response = res.data;
 
-                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                if (selectedConsumption === 'mAh') {
                     let exploreData = [];
 
                     let data = response.data;

@@ -1,3 +1,6 @@
+import { percentageHandler } from '../utils/helper';
+import { formatConsumptionValue } from '../helpers/helpers';
+
 export const getTableHeadersList = (record) => {
     let arr = [];
     record.forEach((element) => {
@@ -150,6 +153,53 @@ export const getBuildingsTableCSVExport = (tableData, columns) => {
                     arr.push(`${size} Sq.Ft.`);
                     break;
 
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'total_consumption':
+                    const preparedConsumption = parseInt(tableRow.total_consumption / 1000);
+                    arr.push(`${preparedConsumption} kWh`);
+                    break;
+                case 'energy_consumption':
+                    const diffPercentage = percentageHandler(
+                        tableRow.energy_consumption.now,
+                        tableRow.energy_consumption.old
+                    );
+                    {
+                        tableRow.energy_consumption.now >= tableRow.energy_consumption.old
+                            ? arr.push(`+${diffPercentage}%`)
+                            : arr.push(`-${diffPercentage}%`);
+                    }
+                    break;
+                case 'energy_density':
+                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh / sq. ft.`;
+                    arr.push(preparedEnergyDestiny);
+                    break;
+                case 'square_footage':
+                    const squareFootage = formatConsumptionValue(tableRow.square_footage);
+                    arr.push(squareFootage);
+                    break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);
                     break;

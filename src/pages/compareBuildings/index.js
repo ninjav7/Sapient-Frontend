@@ -1,610 +1,76 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
-import { useHistory } from 'react-router-dom';
-import { Row, Col, Card, CardBody, Table } from 'reactstrap';
-import { Search } from 'react-feather';
-import { Line } from 'rc-progress';
+import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import { Row, Col } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import { formatConsumptionValue } from '../../helpers/helpers';
+
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { fetchCompareBuildings } from '../compareBuildings/services';
+import { fetchCompareBuildings } from '../../services/compareBuildings';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
-import { Cookies } from 'react-cookie';
-import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
+import Typography from '../../sharedComponents/typography';
+import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
+import { Badge } from '../../sharedComponents/badge';
+import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
+
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
 import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 
-const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter, isBuildingDataFetched }) => {
-    const history = useHistory();
-    const [topEnergyDensity, setTopEnergyDensity] = useState(1);
-    const [topHVACConsumption, setTopHVACConsumption] = useState(1);
-    const [nameOrder, setNameOrder] = useState(false);
-    const [densityOrder, setDensityOrder] = useState(false);
-    const [totalOrder, setTotalOrder] = useState(false);
-    const [squareFtOrder, setSquareFtOrder] = useState(false);
+import { primaryGray100, primaryGray800 } from '../../assets/scss/_colors.scss';
 
-    const handleColumnSort = (order, columnName) => {
-        if (columnName === 'building_name') {
-            setDensityOrder(false);
-            setTotalOrder(false);
-            setSquareFtOrder(false);
-        }
-        if (columnName === 'energy_density') {
-            setNameOrder(false);
-            setTotalOrder(false);
-            setSquareFtOrder(false);
-        }
-        if (columnName === 'total_consumption') {
-            setDensityOrder(false);
-            setNameOrder(false);
-            setSquareFtOrder(false);
-        }
-        if (columnName === 'square_footage') {
-            setDensityOrder(false);
-            setTotalOrder(false);
-            setNameOrder(false);
-        }
+const SkeletonLoading = () => (
+    <SkeletonTheme color={primaryGray100} height={35}>
+        <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-        buildingDataWithFilter(order, columnName);
-    };
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-    const handleBuildingClick = (record) => {
-        localStorage.setItem('buildingId', record.building_id);
-        localStorage.setItem('buildingName', record.building_name);
-        localStorage.setItem('buildingTimeZone', record.timezone);
-        BuildingStore.update((s) => {
-            s.BldgId = record.building_id;
-            s.BldgName = record.building_name;
-            s.BldgTimeZone = record.timezone;
-        });
-        history.push({
-            pathname: `/energy/building/overview/${record.building_id}`,
-        });
-    };
-    
-    useEffect(() => {
-        if (!buildingsData.length > 0) {
-            return;
-        }
-        let topVal = buildingsData[0].energy_density;
-        setTopEnergyDensity(topVal);
-    }, [buildingsData]);
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-    return (
-        <Card>
-                <Table className="mt-4 mb-0 bordered">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            {selectedOptions.some((record) => record.value === 'name') && (
-                                <th className="table-heading-style" onClick={() => setNameOrder(!nameOrder)}>
-                                    <div className="active-device-flex">
-                                        <div
-                                            style={{
-                                                border: 'none',
-                                                backgroundColor: 'white',
-                                                fontWeight: 'bolder',
-                                                fontSize: '16px',
-                                            }}>
-                                            Name
-                                        </div>
-                                        {nameOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'building_name')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'building_name')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'density') && (
-                                <th className="table-heading-style" onClick={() => setDensityOrder(!densityOrder)}>
-                                    <div className="active-device-flex">
-                                        <div
-                                            style={{
-                                                border: 'none',
-                                                backgroundColor: 'white',
-                                                fontWeight: 'bolder',
-                                                fontSize: '16px',
-                                            }}>
-                                            Energy Density{' '}
-                                        </div>
-                                        {densityOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'energy_density')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'energy_density')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'per_change') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>
-                                        % Change
-                                    </button>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'hvac') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>
-                                        HVAC Consumption
-                                    </button>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'hvac_per') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>
-                                        % Change
-                                    </button>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'total') && (
-                                <th className="table-heading-style" onClick={() => setTotalOrder(!totalOrder)}>
-                                    <div className="active-device-flex">
-                                        <div
-                                            style={{
-                                                border: 'none',
-                                                backgroundColor: 'white',
-                                                fontWeight: 'bolder',
-                                                fontSize: '16px',
-                                            }}>
-                                            Total Consumption{' '}
-                                        </div>
-                                        {totalOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'total_consumption')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'total_consumption')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'total_per') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>
-                                        % Change
-                                    </button>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'sq_ft') && (
-                                <th className="table-heading-style" onClick={() => setSquareFtOrder(!squareFtOrder)}>
-                                    <div className="active-device-flex">
-                                        <div
-                                            style={{
-                                                border: 'none',
-                                                backgroundColor: 'white',
-                                                fontWeight: 'bolder',
-                                                fontSize: '16px',
-                                            }}>
-                                            Sq. Ft.{' '}
-                                        </div>
-                                        {squareFtOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'square_footage')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'square_footage')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                        </tr>
-                    </thead>
-                    {isBuildingDataFetched ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {buildingsData.map((record, index) => {
-                                return (
-                                    <tr key={record.building_id} className="mouse-pointer">
-                                        {selectedOptions.some((record) => record.value === 'name') && (
-                                            <th scope="row">
-                                                    <div
-                                                        className="buildings-name"
-                                                        onClick={() => handleBuildingClick(record)}
-                                                        >
-                                                        {record.building_name}
-                                                    </div>
-                                                <span className="badge badge-soft-secondary mr-2">Office</span>
-                                            </th>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'density') && (
-                                            <td className="table-content-style">
-                                                {parseInt(record.energy_density / 1000)} kWh / sq. ft.
-                                                <br />
-                                                <div style={{ width: '100%', display: 'inline-block' }}>
-                                                    {index === 0 && record.energy_density === 0 && (
-                                                        <Line
-                                                            percent={0}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#D14065`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 0 && record.energy_density > 0 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#D14065`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 1 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#DF5775`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 2 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#EB6E87`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 3 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#EB6E87`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 4 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#FC9EAC`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 5 && (
-                                                        <Line
-                                                            percent={parseInt(
-                                                                (record.energy_density / topEnergyDensity) * 100
-                                                            )}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#FFCFD6`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                </div>
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'per_change') && (
-                                            <td>
-                                                {record.energy_consumption.now >= record.energy_consumption.old ? (
-                                                    <button
-                                                        className="button-danger text-danger btn-font-style"
-                                                        style={{ width: 'auto', marginBottom: '4px' }}>
-                                                        <i className="uil uil-arrow-growth">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.energy_consumption.now,
-                                                                    record.energy_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        className="button-success text-success btn-font-style"
-                                                        style={{ width: 'auto' }}>
-                                                        <i className="uil uil-chart-down">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.energy_consumption.now,
-                                                                    record.energy_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                )}
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'hvac') && (
-                                            <td className="table-content-style">
-                                                {parseInt(record.hvac_consumption.now)} kWh / sq. ft.sq. ft.
-                                                <br />
-                                                <div style={{ width: '100%', display: 'inline-block' }}>
-                                                    {index === 0 && record.hvac_consumption.now === 0 && (
-                                                        <Line
-                                                            percent={0}
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#D14065`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 0 && record.hvac_consumption.now > 0 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#D14065`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 1 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#DF5775`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 2 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#EB6E87`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 3 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#EB6E87`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 4 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#FC9EAC`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                    {index === 5 && (
-                                                        <Line
-                                                            percent={
-                                                                parseInt(
-                                                                    record.hvac_consumption.now / topHVACConsumption
-                                                                ) * 100
-                                                            }
-                                                            strokeWidth="3"
-                                                            trailWidth="3"
-                                                            strokeColor={`#FFCFD6`}
-                                                            strokeLinecap="round"
-                                                        />
-                                                    )}
-                                                </div>
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'hvac_per') && (
-                                            <td>
-                                                {record.hvac_consumption.now >= record.hvac_consumption.old ? (
-                                                    <button
-                                                        className="button-danger text-danger btn-font-style"
-                                                        style={{ width: 'auto', marginBottom: '4px' }}>
-                                                        <i className="uil uil-arrow-growth">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.hvac_consumption.now,
-                                                                    record.hvac_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        className="button-success text-success btn-font-style"
-                                                        style={{ width: 'auto' }}>
-                                                        <i className="uil uil-chart-down">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.hvac_consumption.now,
-                                                                    record.hvac_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                )}
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'total') && (
-                                            <td className="value-style">
-                                                {parseInt(record.total_consumption / 1000)}
-                                                kWh
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'total_per') && (
-                                            <td>
-                                                {record.total_consumption >= record.energy_consumption.old ? (
-                                                    <button
-                                                        className="button-danger text-danger btn-font-style"
-                                                        style={{ width: 'auto', marginBottom: '4px' }}>
-                                                        <i className="uil uil-arrow-growth">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.total_consumption,
-                                                                    record.energy_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        className="button-success text-success btn-font-style"
-                                                        style={{ width: 'auto' }}>
-                                                        <i className="uil uil-chart-down">
-                                                            <strong>
-                                                                {percentageHandler(
-                                                                    record.total_consumption,
-                                                                    record.energy_consumption.old
-                                                                )}
-                                                                %
-                                                            </strong>
-                                                        </i>
-                                                    </button>
-                                                )}
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'sq_ft') && (
-                                            <td className="value-style">
-                                                {record.square_footage?.toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
-                                                })}
-                                            </td>
-                                        )}
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
-        </Card>
-    );
-};
+            <th>
+                <Skeleton count={5} />
+            </th>
+        </tr>
+    </SkeletonTheme>
+);
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const [sortBy, setSortBy] = useState({});
+    const { download } = useCSVDownload();
+    const [search, setSearch] = useState('');
+    const [topEnergyDensity, setTopEnergyDensity] = useState();
+    const [totalItemsSearched, setTotalItemsSearched] = useState(0);
+
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    const [isBuildingDataFetched, setIsBuildingDataFetched] = useState([]);
-    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState([]);
     let entryPoint = '';
+
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -630,126 +96,182 @@ const CompareBuildings = () => {
             });
         };
         updateBreadcrumbStore();
-
-        let arr = [
-            { label: 'Name', value: 'name' },
-            { label: 'Energy Density', value: 'density' },
-            //{ label: '% Change', value: 'per_change' },
-            //{ label: 'HVAC Consumption', value: 'hvac' },
-            //{ label: 'HVAC % change', value: 'hvac_per' },
-            { label: 'Total Consumption', value: 'total' },
-            { label: 'Total % change', value: 'total_per' },
-            { label: 'Sq. ft.', value: 'sq_ft' },
-            // { label: 'Monitored Load', value: 'load' },
-        ];
-        setSelectedOptions(arr);
     }, []);
 
-    const compareBuildingsData = async () => {
-        setIsBuildingDataFetched(true);
+    const fetchcompareBuildingsData = async () => {
+        setIsLoadingBuildingData(true);
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?days=${daysCount}`;
-        await fetchCompareBuildings(params, payload)
-            .then((res) => {
-                let response = res?.data;
-                setBuildingsData(response?.data);
-                setIsBuildingDataFetched(false);
-            })
-            .catch((error) => {
-                setIsBuildingDataFetched(false);
-            });
-    };
-
-    useEffect(() => {
-        compareBuildingsData();
-    }, [daysCount]);
-
-    const buildingDataWithFilter = async (order, filterBy) => {
-        setIsBuildingDataFetched(true);
-        let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = '';
-        if (buildingInput.length > 1) {
-            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}&building_search=${buildingInput}`;
-        } else {
-            params = `?days=${daysCount}&order_by=${filterBy}&sort_by=${order}`;
+        let params = ``;
+        if (sorting?.order_by && sorting?.sort_by) {
+            params += `?order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
+        }
+        if (search.length) {
+            params += `?building_search=${search}`;
         }
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
+                let topVal = Math.max(...response?.data.map(o => o.energy_density))
+                setTopEnergyDensity(topVal);
                 setBuildingsData(response?.data);
-                setIsBuildingDataFetched(false);
+                setIsLoadingBuildingData(false);
             })
             .catch((error) => {
-                setIsBuildingDataFetched(false);
+                setIsLoadingBuildingData(false);
             });
     };
+    const renderEnergyDensity = (row) => {
+        const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
+        return (
+            <div className="table-content-style" style={{ width: '100%' }}>
+                {(row.energy_density).toFixed(2)} kWh / sq. ft.
+                <br />
+                <div style={{ width: '100%', display: 'inline-block' }}>
+                    {row.energy_density === 0 && <TinyBarChart percent={0} />}
+                    {row.energy_density > 0 && <TinyBarChart percent={densityData} />}
+                </div>
+            </div>
+        );
+    };
+    const renderName = (row) => {
+        return (
+            <>
+                <Link
+                    to={{
+                        pathname: `/energy/building/overview/${row.building_id}`,
+                    }}>
+                    <Typography.Link
+                        size={Typography.Sizes.md}
+                        as="a"
+                        target="_blank"
+                        onClick={() => {
+                            localStorage.setItem('building_Id', row.building_id);
+                            localStorage.setItem('building_Name', row.building_name);
+                            BuildingStore.update((s) => {
+                                s.BldgId = row.building_id;
+                                s.BldgName = row.building_name;
+                            });
+                        }}>
+                        {row.building_name}
+                    </Typography.Link>
+                </Link>
+                <div className="mt-1 w-50">
+                    <Badge text="Office" />
+                </div>
+            </>
+        );
+    };
 
-    const [buildingInput, setBuildingInput] = useState('');
+    const renderTotalConsumption = (row) => {
+        return (
+            <Typography.Body size={Typography.Sizes.md}>
+                {parseInt(row.total_consumption / 1000)}
+                {` kWh`}
+            </Typography.Body>
+        );
+    };
+
+    const renderChangeEnergy = (row) => {
+        const diffPercentage = percentageHandler(row.energy_consumption.now, row.energy_consumption.old);
+        return (
+            <div>
+                {row.energy_consumption.now >= row.energy_consumption.old ? (
+                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                ) : (
+                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                )}
+            </div>
+        );
+    };
+
+    const renderSquareFootage = (row) => {
+        return <div>{formatConsumptionValue(row.square_footage)}</div>;
+    };
+
+    const headerProps = [
+        {
+            name: 'Name',
+            accessor: 'building_name',
+            callbackValue: renderName,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Energy Density',
+            accessor: 'energy_density',
+            callbackValue: renderEnergyDensity,
+
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Total Consumption',
+            accessor: 'total_consumption',
+            callbackValue: renderTotalConsumption,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: '% Change',
+            accessor: 'energy_consumption',
+            callbackValue: renderChangeEnergy,
+        },
+        {
+            name: 'Sq. Ft.',
+            accessor: 'square_footage',
+            callbackValue: renderSquareFootage,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+    ];
+
+    const handleDownloadCsv = async () => {
+        download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, headerProps, topEnergyDensity));
+    };
 
     useEffect(() => {
-        if (buildingInput === '' && entryPoint !== 'entered') compareBuildingsData();
-    }, [buildingInput]);
+        fetchcompareBuildingsData();
+    }, [daysCount]);
+
+    useEffect(() => {
+        fetchcompareBuildingsData();
+    }, [search, sortBy]);
+
+    useEffect(() => {
+        if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
+    }, [search]);
 
     return (
         <React.Fragment>
             <Header title="Compare Buildings" type="page" />
-
             <Row className="mt-4">
-                <Col xl={3}>
-                    <div className="input-group rounded">
-                        <input
-                            type="search"
-                            className="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                            onChange={(e) => {
-                                setBuildingInput(e.target.value);
+                <Col lg={12}>
+                    {buildingsData.length ? (
+                        <DataTableWidget
+                            isLoading={isLoadingBuildingData}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="equipment"
+                            onSearch={(query) => {
+                                setSearch(query);
                             }}
-                        />
-                        <span
-                            className="input-group-text border-0"
-                            id="search-addon"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => {
-                                if (buildingInput.length >= 1) {
-                                    buildingDataWithFilter('ace', 'building_name');
+                            rows={buildingsData}
+                            searchResultRows={buildingsData}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
+                            disableColumnDragging={true}
+                            buttonGroupFilterOptions={[]}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
                                 }
-                                if (buildingInput.length === 0) {
-                                    compareBuildingsData();
-                                }
-                            }}>
-                            <Search className="icon-sm" />
-                        </span>
-                    </div>
-                </Col>
-                {/* <Col xl={9}>
-                    <button type="button" className="btn btn-white d-inline ml-2">
-                        <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
-                    <div className="float-right">
-                        <MultiSelect
-                            options={tableColumnOptions}
-                            value={selectedOptions}
-                            onChange={setSelectedOptions}
-                            labelledBy="Columns"
-                            className="column-filter-styling"
-                            valueRenderer={() => {
-                                return 'Columns';
-                            }}
-                            ClearSelectedIcon={null}
+
+                                return 0;
+                            })()}
                         />
-                    </div>
-                </Col> */}
-            </Row>
-            <Row>
-                <Col xl={12}>
-                    <BuildingTable
-                        buildingsData={buildingsData}
-                        selectedOptions={selectedOptions}
-                        buildingDataWithFilter={buildingDataWithFilter}
-                        isBuildingDataFetched={isBuildingDataFetched}
-                    />
+                    ) : (
+                        <SkeletonLoading />
+                    )}
                 </Col>
             </Row>
         </React.Fragment>

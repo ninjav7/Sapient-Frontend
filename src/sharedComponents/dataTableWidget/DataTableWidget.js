@@ -256,7 +256,7 @@ const DataTableWidget = (props) => {
                         onDeleteFilter={handleDeleteFilter}
                     />
                     <div className="ml-auto data-table-widget-action-button-wrapper">
-                        <DraggableColumns onSortEnd={onSortEnd} headers={headers} />
+                        {!props.disableColumnDragging && <DraggableColumns onSortEnd={onSortEnd} headers={headers} />}
                         {props.onDownload && <DownloadButton onClick={props.onDownload} />}
                     </div>
                 </div>
@@ -406,6 +406,7 @@ DataTableWidget.propTypes = {
     status: PropTypes.number,
     rows: PropTypes.array.isRequired,
     searchResultRows: PropTypes.array.isRequired,
+    disableColumnDragging: PropTypes.bool,
     filterOptions: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string.isRequired,
