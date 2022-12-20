@@ -27,6 +27,7 @@ const chartsBaseConfig = ({
     },
 
     legend: {
+        enabled: true,
         align: onMoreDetail ? 'left' : 'center',
         useHTML: true,
         labelFormat: renderComponents(

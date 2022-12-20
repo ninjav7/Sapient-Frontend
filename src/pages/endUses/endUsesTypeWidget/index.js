@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import StackedBarChart from './StackedBarChart';
 import { UNITS } from '../../../constants/units';
+import StackedColumnChart from '../../../sharedComponents/stackedColumnChart/StackedColumnChart';
 import './style.scss';
 
 const EndUsesCategory = ({ endUsesData }) => {
@@ -25,16 +25,25 @@ const EndUsesCategory = ({ endUsesData }) => {
     );
 };
 
-const EndUsesTypeWidget = ({ endUsesData, barChartOptions, barChartData }) => {
+const EndUsesTypeWidget = ({ endUsesData, stackedColumnChartData, stackedColumnChartCategories }) => {
     return (
         <>
-            <div className="enduse-type-widget-wrapper mt-4">
+            <div className="enduse-type-widget-wrapper">
                 <div className="p-3">
                     <EndUsesCategory endUsesData={endUsesData} />
                 </div>
 
-                <div className="pr-2 pb-3">
-                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
+                <div>
+                    <StackedColumnChart
+                        style={{ width: 'auto', border: '0rem' }}
+                        colors={['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5']}
+                        categories={stackedColumnChartCategories}
+                        tooltipUnit={UNITS.KWH}
+                        series={stackedColumnChartData}
+                        legends={{
+                            enabled: false,
+                        }}
+                    />
                 </div>
             </div>
         </>
@@ -51,18 +60,8 @@ EndUsesTypeWidget.propTypes = {
             name: PropTypes.string.isRequired,
         })
     ).isRequired,
-    barChartOptions: PropTypes.object.isRequired,
-    barChartData: PropTypes.arrayOf(
-        PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            data: PropTypes.arrayOf(
-                PropTypes.shape({
-                    x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-                    y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-                }).isRequired
-            ),
-        })
-    ).isRequired,
+    stackedColumnChartData: PropTypes.array.isRequired,
+    stackedColumnChartCategories: PropTypes.array.isRequired,
 };
 
 EndUsesCategory.propTypes = {

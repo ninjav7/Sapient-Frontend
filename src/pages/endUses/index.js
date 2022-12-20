@@ -17,6 +17,7 @@ import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import { fetchTrendType } from './utils';
 import EndUsesTypeWidget from './endUsesTypeWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
+import Brick from '../../sharedComponents/brick';
 
 const EndUsesPage = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -28,132 +29,11 @@ const EndUsesPage = () => {
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const [barChartOptions, setBarChartOptions] = useState({
-        chart: {
-            type: 'bar',
-            height: 400,
-            stacked: true,
-            toolbar: {
-                show: true,
-            },
-            animations: {
-                enabled: false,
-            },
-            zoom: {
-                enabled: false,
-            },
-        },
-        colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '20%',
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            show: false,
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(
-                        seriesX[0][dataPointIndex]
-                    )
-                        .tz(timeZone)
-                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            0
-                        )} kWh </td></tr>`;
-                }
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).tz(timeZone).format('M/DD');
-                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
-                    return `${weekText} ${dateText}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = val.toFixed(0);
-                    return `${print}`;
-                },
-            },
-        },
-        states: {
-            hover: {
-                filter: 'none',
-            },
-        },
-        legend: {
-            show: false,
-            position: 'top',
-            horizontalAlign: 'center',
-        },
-        grid: {
-            borderColor: '#f1f3fa',
-        },
-    });
-
-    const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
+
+    const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
+    const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
 
     const history = useHistory();
 
@@ -163,17 +43,6 @@ const EndUsesPage = () => {
             pathname: `/energy/end-uses/${endUse}/${bldgId}`,
         });
     };
-
-    useEffect(() => {
-        if (endUsesData.length === 0) {
-            return;
-        }
-        let categories = [];
-        endUsesData.forEach((record) => {
-            categories.push(record.color);
-        });
-        setBarChartOptions({ ...barChartOptions, colors: categories });
-    }, [endUsesData]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -290,14 +159,23 @@ const EndUsesPage = () => {
                 .then((res) => {
                     let responseData = res?.data;
 
-                    // Working loop with ApexChart
-                    responseData.forEach((endUse) => {
-                        endUse.data.forEach((record) => {
-                            record.y = parseInt(record.y / 1000);
+                    const formattedTimestamp = [];
+                    const formattedData = responseData.map((record, index) => {
+                        let obj = {
+                            name: record?.name,
+                            data: [],
+                        };
+                        record.data.forEach((el) => {
+                            if (index === 0) {
+                                formattedTimestamp.push(el?.time_stamp);
+                            }
+                            obj.data.push(el?.consumption / 1000);
                         });
+                        return obj;
                     });
 
-                    setBarChartData(responseData);
+                    setStackedColumnChartCategories(formattedTimestamp);
+                    setStackedColumnChartData(formattedData);
                     setIsEndUsesChartLoading(false);
                 })
                 .catch((error) => {
@@ -309,28 +187,25 @@ const EndUsesPage = () => {
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
 
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        setBarChartOptions({ ...barChartOptions, xaxis: xaxisObj });
-    }, [daysCount]);
-
     return (
         <React.Fragment>
             <Header title="End Uses" type="page" />
 
+            <Brick sizeInRem={1.5} />
+
             <EndUsesTypeWidget
                 endUsesData={endUsesData}
-                barChartOptions={barChartOptions}
-                barChartData={barChartData}
+                stackedColumnChartData={stackedColumnChartData}
+                stackedColumnChartCategories={stackedColumnChartCategories}
             />
 
-            <div className="mt-4">
-                <TopEndUsesWidget
-                    title="Top Systems by Usage"
-                    subtitle="Click explore to see more energy usage details."
-                    data={topEndUsesData}
-                />
-            </div>
+            <Brick sizeInRem={1.5} />
+
+            <TopEndUsesWidget
+                title="Top Systems by Usage"
+                subtitle="Click explore to see more energy usage details."
+                data={topEndUsesData}
+            />
         </React.Fragment>
     );
 };
