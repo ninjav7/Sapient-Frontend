@@ -34,8 +34,8 @@ export function fetchExploreBuildingList(
         };
     if (perAPIFlag !== '')
         obj['change'] = {
-            gte: minPerValue - 0.5,
-            lte: maxPerValue + 0.5,
+            gte: minPerValue - 0.01,
+            lte: maxPerValue + 0.01,
         };
     if (sqftAPIFlag !== '')
         obj['sq_ft_range'] = {
@@ -95,8 +95,8 @@ export function fetchExploreEquipmentList(
         };
     if (perAPIFlag !== '')
         payload['change'] = {
-            gte: Number(minPerValue) - 0.5,
-            lte: Number(maxPerValue) + 0.5,
+            gte: Number(minPerValue) - 0.01,
+            lte: Number(maxPerValue) + 0.01,
         };
     if (selectedLocation.length !== 0) payload['location'] = selectedLocation;
     if (selectedEquipType.length !== 0) payload['equipment_types'] = selectedEquipType;

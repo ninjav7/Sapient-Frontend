@@ -16,7 +16,7 @@ import axios from 'axios';
 import { BaseUrl, UpdateUserPassword } from '../../services/Network';
 import Input from '../../sharedComponents/form/input/Input';
 
-const Confirm = () => {
+const Confirm = (props) => {
     const history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
     const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
@@ -62,7 +62,7 @@ const Confirm = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    Authorization: `Bearer ${this.props.match.params.token}`,
+                    Authorization: `Bearer ${props.match.params.token}`,
                 };
                 await axios
                     .post(
