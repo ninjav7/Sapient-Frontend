@@ -191,3 +191,42 @@ export const getEquipTypeTableCSVExport = (tableData, columns) => {
     });
     return csv;
 };
+
+export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    columns.forEach((element) => {
+        if (element.accessor === 'sensor_number') {
+            element.name = 'Sensors [In Use]';
+        }
+    });
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'sensor_number':
+                    const name = tableRow['sensor_number'];
+                    const search = '/';
+                    const replaceWith = ' out of ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
