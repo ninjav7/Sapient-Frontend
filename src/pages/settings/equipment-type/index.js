@@ -37,9 +37,9 @@ const SkeletonLoading = () => (
                 <Skeleton count={10} />
             </th>
 
-            <th>
+            {/* <th>
                 <Skeleton count={10} />
-            </th>
+            </th> */}
         </tr>
     </SkeletonTheme>
 );
@@ -99,6 +99,8 @@ const EquipmentType = () => {
         sort_by
     ) => {
         setDataFetching(true);
+
+        if (ordered_by === 'status') ordered_by = 'equipment_type';
 
         let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
 
@@ -192,7 +194,7 @@ const EquipmentType = () => {
     ];
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined || 'status' ? 'equipment_type' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'equipment_type' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
         fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
