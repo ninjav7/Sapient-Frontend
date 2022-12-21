@@ -251,7 +251,7 @@ const CompareBuildings = () => {
                         <DataTableWidget
                             isLoading={isLoadingBuildingData}
                             isLoadingComponent={<SkeletonLoading />}
-                            id="equipment"
+                            id="compare-building"
                             onSearch={(query) => {
                                 setSearch(query);
                             }}
