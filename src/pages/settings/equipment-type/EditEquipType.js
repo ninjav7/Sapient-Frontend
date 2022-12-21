@@ -86,8 +86,11 @@ const EditEquipType = ({
     }, [isEditEquipTypeModalOpen]);
 
     useEffect(() => {
+        if (!isEditEquipTypeModalOpen) {
+            return;
+        }
         setEquipTypeData(selectedEquipType);
-    }, [selectedEquipType]);
+    }, [isEditEquipTypeModalOpen]);
 
     return (
         <Modal
