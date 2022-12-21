@@ -8,7 +8,7 @@ import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 // settings
 import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/utilityBills';
-import Layout from '../pages/settings/layout/Layout';
+import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
