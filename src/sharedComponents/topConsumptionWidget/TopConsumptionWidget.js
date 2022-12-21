@@ -9,7 +9,6 @@ import { UNITS } from '../../constants/units';
 
 import './TopConsumptionWidget.scss';
 import { Button } from '../button';
-import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
 import { formatConsumptionValue } from '../../helpers/helpers';
 
 const TopConsumptionWidget = ({
@@ -45,7 +44,7 @@ const TopConsumptionWidget = ({
                         <div>
                             <Button
                                 label={label}
-                                type={Button.Type.link}
+                                size={Button.Sizes.md}                                type={Button.Type.link}
                                 className="typography-wrapper link mouse-pointer"
                                 onClick={() => {
                                     handleClick(label);
