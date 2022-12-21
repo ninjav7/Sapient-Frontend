@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, Input } from 'reactstrap';
 import axios from 'axios';
-import {
-    BaseUrl,
-    equipmentType,
-    getEquipmentType,
-    addEquipmentType,
-    updateEquipmentType,
-    getEndUseId,
-} from '../../services/Network';
+import { BaseUrl, equipmentType, addEquipmentType, updateEquipmentType, getEndUseId } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
