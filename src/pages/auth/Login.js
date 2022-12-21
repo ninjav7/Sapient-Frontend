@@ -1,229 +1,174 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, Link } from 'react-router-dom';
-
-import {
-    Container,
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Label,
-    FormGroup,
-    Button,
-    Alert,
-    InputGroup,
-    InputGroupAddon,
-} from 'reactstrap';
-import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
-import { Mail, Lock } from 'react-feather';
-
+import { Link, useHistory } from 'react-router-dom';
+import { Col, FormGroup, Alert, Button } from 'reactstrap';
 import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
-// import logo from '../../assets/images/logo.png';
-import { BaseUrl, login } from '../../services/Network';
-import './auth.css';
-import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
-import LogoImage from '../../assets/images/login.jpg';
+import './auth.scss';
+import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
+import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
+import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
+import Typography from '../../sharedComponents/typography';
+import Holder from './Holder';
+import Input from '../../sharedComponents/form/input/Input';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import { UserStore } from '../../store/UserStore';
 
-class Login extends Component {
-    _isMounted = false;
+const Login = (props) => {
+    const history = useHistory();
+    const [_isMounted, set_isMounted] = useState(false);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState(false);
+    const [message, setMessage] = useState('');
+    const [isAuthTokenValid, setisAuthTokenValid] = useState();
+    const loginSuccess = UserStore.useState((s) => s.loginSuccess);
+    const failedMessage = UserStore.useState((s) => s.message);
+    const [passwordType, setPasswordType] = useState('password');
+    const [passwordError, setPasswordError] = useState(false);
+    const [emailError, setEmailError] = useState(false);
 
-    constructor(props) {
-        super(props);
-
-        this.handleValidSubmit = this.handleValidSubmit.bind(this);
-        this.state = {
-            username: '',
-            password: '',
-            error: false,
-            message: '',
-        };
-    }
-
-    componentDidMount() {
-        this._isMounted = true;
-
+    useEffect(() => {
+        set_isMounted(true);
         document.body.classList.add('authentication-bg');
-    }
 
-    componentWillUnmount() {
-        this._isMounted = false;
-        document.body.classList.remove('authentication-bg');
-    }
+        renderRedirectToRoot();
+        return () => {
+            set_isMounted(false);
+            document.body.classList.remove('authentication-bg');
+        };
+    }, []);
+    useEffect(() => {
+        if (loginSuccess === false) {
+            setError(true);
+            setMessage(failedMessage);
+        }
+    }, [loginSuccess, message]);
 
-    /**
-     * Handles the submit
-     */
-    handleValidSubmit = (event, values) => {
-        this.props.loginUser(values.username.trim(), values.password.trim(), this.props.history);
-        if (values.username === '' || values.password === '') {
+    const handleValidSubmit = async () => {
+        let ct = 0;
+        if (username === '') {
+            setEmailError(true);
+            ct++;
+        }
+        if (password === '') {
+            setPasswordError(true);
+            ct++;
+        }
+        if (ct === 0) {
+            props.loginUser(username.trim(), password.trim(), props.history);
+        } else {
+            return;
         }
     };
 
-    /**
-     * Redirect to root
-     */
-    renderRedirectToRoot = () => {
-        const isAuthTokenValid = isUserAuthenticated();
-        if (isAuthTokenValid) {
-            return <Redirect to="/" />;
+    const renderRedirectToRoot = () => {
+        const isAuthTknValid = isUserAuthenticated();
+        setisAuthTokenValid(isAuthTknValid);
+        if (isAuthTknValid) {
+            history.push('/');
         }
     };
 
-    render() {
-        let error = false;
-        let message = '';
-        const isAuthTokenValid = isUserAuthenticated();
-        if (localStorage.getItem('login_success') === 'false') {
-            error = true;
-            message = localStorage.getItem('failed_message');
-            localStorage.removeItem('login_success');
-            localStorage.removeItem('failed_message');
-        }
-        return (
-            <React.Fragment>
-                {this.renderRedirectToRoot()}
+    return (
+        <React.Fragment>
+            {(_isMounted || !isAuthTokenValid) && (
+                <Holder
+                    rightContent={
+                        <>
+                            {props.loading && <Loader />}
 
-                {(this._isMounted || !isAuthTokenValid) && (
-                    <div
-                        className="authbackground"
-                        style={{
-                            height: '100vh',
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundImage: '../../assets/images/login.jpg',
-                        }}>
-                        <div style={{ height: '100%', width: '100%', paddingTop: '100px' }}>
-                            <div style={{ width: '100%', height: '630px', display: 'flex', justifyContent: 'center' }}>
-                                <div
-                                    style={{
-                                        width: '32%',
-                                        height: '100%',
-                                        backgroundColor: 'white',
-                                        boxShadow: '0px 3px 14px -1px rgba(0,0,0,0.75)',
-                                        borderRadius: '10px',
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                    }}>
-                                    <div style={{ width: '70%' }}>
-                                        {/* preloader */}
-                                        {this.props.loading && <Loader />}
-
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                height: '90%',
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                marginBottom: '50px',
-                                                // alignItems: 'center',
-                                            }}>
-                                            <a href="/">
-                                                {/* <img src={logo} alt="" height="24" /> */}
-                                                <LogoSVG />
-                                                {/* <h3 className="d-inline align-middle ml-1 text-logo">Sapient</h3> */}
-                                            </a>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                            <h6>Please sign in below</h6>
-                                        </div>
-
-                                        {this.props.error && (
-                                            <Alert color="danger" isOpen={this.props.error ? true : false}>
-                                                <div>{this.props.error}</div>
-                                            </Alert>
-                                        )}
-                                        {error && (
-                                            <Alert color="danger" isOpen={error ? true : false}>
-                                                <div>{message}</div>
-                                            </Alert>
-                                        )}
-                                        <AvForm
-                                            onValidSubmit={this.handleValidSubmit}
-                                            className="authentication-form"
-                                            autoComplete="off">
-                                            <AvGroup className="">
-                                                <Label for="username">Email</Label>
-                                                <InputGroup>
-                                                    <AvInput
-                                                        type="text"
-                                                        name="username"
-                                                        id="username"
-                                                        placeholder="hello@Sapient.com"
-                                                        value={this.state.username}
-                                                        required
-                                                    />
-                                                </InputGroup>
-
-                                                <AvFeedback>This field is invalid</AvFeedback>
-                                            </AvGroup>
-
-                                            <AvGroup className="mb-3">
-                                                <Label for="password">Password</Label>
-
-                                                <InputGroup>
-                                                    <AvInput
-                                                        type="password"
-                                                        name="password"
-                                                        id="password"
-                                                        placeholder="Enter your password"
-                                                        value={this.state.password}
-                                                        required
-                                                    />
-                                                </InputGroup>
-                                                <AvFeedback>This field is invalid</AvFeedback>
-                                                <Link
-                                                    to="#"
-                                                    className="float-right  ml-1 text-primary font-weight-bold"
-                                                    style={{ marginTop: '30px' }}>
-                                                    Forgot Password?
-                                                </Link>
-                                            </AvGroup>
-
-                                            <div
-                                                style={{
-                                                    width: '100%',
-                                                    marginTop: '80px',
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                }}>
-                                                <FormGroup>
-                                                    <Button style={{ width: '100px' }} color="primary">
-                                                        Sign In
-                                                    </Button>
-                                                </FormGroup>
-                                            </div>
-
-                                            <Row className="">
-                                                <Col className="col-12 text-center">
-                                                    <p className="text-muted">
-                                                        Don't have an account? {/* /account/register */}
-                                                        <Link to="#" className="text-primary font-weight-bold ml-1">
-                                                            Request Account
-                                                        </Link>
-                                                    </p>
-                                                </Col>
-                                            </Row>
-                                        </AvForm>
-                                    </div>
+                            <Col lg={8}>
+                                <div className="logoContainer">
+                                    <a href="/">
+                                        <LogoSVG className="logoDesign" />
+                                    </a>
+                                    <Typography.Header size={Typography.Sizes.sm} className="text-muted">
+                                        Sign in
+                                    </Typography.Header>
                                 </div>
-                            </div>
-                            {/* <p>
-                                <strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <br />{' '}
-                                <strong>Password:</strong> Test@123
-                            </p> */}
-                        </div>
-                    </div>
-                )}
-            </React.Fragment>
-        );
-    }
-}
+
+                                {props.error && (
+                                    <Alert color="danger" isOpen={props.error ? true : false}>
+                                        <div>{props.error}</div>
+                                    </Alert>
+                                )}
+                                {error && (
+                                    <Alert color="danger" isOpen={error ? true : false}>
+                                        <div>{message}</div>
+                                    </Alert>
+                                )}
+
+                                <form className="authentication-form">
+                                    <FormGroup>
+                                        <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
+                                            Email
+                                        </Typography.Subheader>
+
+                                        <InputTooltip
+                                            placeholder="hello@Sapient.industries"
+                                            error={emailError ? 'Please Enter a Valid Email' : null}
+                                            onChange={(e) => {
+                                                setUsername(e.target.value.trim());
+                                            }}
+                                            labelSize={Typography.Sizes.md}
+                                            value={username}
+                                        />
+                                    </FormGroup>
+
+                                    <FormGroup className="mb-3 pt-5">
+                                        <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
+                                            Password
+                                        </Typography.Subheader>
+
+                                        <Input
+                                            placeholder="Enter your password"
+                                            error={passwordError ? 'Password is required' : null}
+                                            type={passwordType}
+                                            elementEnd={
+                                                passwordType === 'password' ? (
+                                                    <EyeSVG
+                                                        onClick={() => {
+                                                            setPasswordType('text');
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <EyeSlashSVG
+                                                        onClick={() => {
+                                                            setPasswordType('password');
+                                                        }}
+                                                    />
+                                                )
+                                            }
+                                            onChange={(e) => {
+                                                setPassword(e.target.value.trim());
+                                            }}
+                                            labelSize={Typography.Sizes.md}
+                                            value={password}
+                                        />
+                                        <Link
+                                            to="/account/forget-password"
+                                            className="float-right  ml-1 text-primary font-weight-bold"
+                                            style={{ marginTop: '1.875rem' }}>
+                                            Forgot Password?
+                                        </Link>
+                                    </FormGroup>
+
+                                    <FormGroup>
+                                        <Button className="sub-button" color="primary" onClick={handleValidSubmit}>
+                                            Sign In
+                                        </Button>
+                                    </FormGroup>
+                                </form>
+                            </Col>
+                        </>
+                    }
+                />
+            )}
+        </React.Fragment>
+    );
+};
 
 const mapStateToProps = (state) => {
     const { user, loading, error } = state.Auth;

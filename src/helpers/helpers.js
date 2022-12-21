@@ -207,3 +207,25 @@ export const apiRequestBody = (start_date, end_date, time_zone) => {
         tz_info: time_zone,
     };
 };
+
+export const isInputLetterOrNumber = (inputtxt) => {
+    if (inputtxt) {
+        const letterNumber = /^[0-9a-zA-Z]+$/;
+        return inputtxt.match(letterNumber) ? true : false;
+    }
+};
+
+export const pageListSizes = [
+    {
+        label: '20 Rows',
+        value: '20',
+    },
+    {
+        label: '50 Rows',
+        value: '50',
+    },
+    {
+        label: '100 Rows',
+        value: '100',
+    },
+];

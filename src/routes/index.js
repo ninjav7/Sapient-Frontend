@@ -6,24 +6,23 @@ import * as FeatherIcon from 'react-feather';
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
 // settings
-import General from '../pages/settings/General';
+import General from '../pages/settings/general-settings';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
-import Equipment from '../pages/settings/Equipment';
-import EquipmentTypes from '../pages/settings/EquipmentTypes';
+import Equipment from '../pages/settings/equipment/Equipment';
+import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
-import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import ActiveDevices from '../pages/settings/active-devices';
 import Provision from '../pages/settings/active-devices/Provision';
-import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
+import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
-import Buildings from '../pages/settings/Buildings';
-import Users from '../pages/settings/Users';
-import UserProfile from '../pages/settings/UserProfile';
-import UserProfileNew from '../pages/settings/UserProfileNew';
+import Buildings from '../pages/settings/buildings';
+import Users from '../pages/settings/users/Users';
+import UserProfile from '../pages/settings/users/UserProfile';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
 import SingleRoleNew from '../pages/settings/SingleRoleNew';
@@ -37,9 +36,8 @@ const PlugRules = React.lazy(() => import('../pages/controls/PlugRules'));
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
-const Register = React.lazy(() => import('../pages/auth/Register'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
-const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
+const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
 // apps
@@ -519,7 +517,7 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users',
+            path: '/settings/users/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
@@ -545,15 +543,7 @@ const settingsRoutes = {
         },
 
         {
-            path: '/settings/user-profile/single/:userId',
-            name: 'Users',
-            component: UserProfileNew,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'account',
-        },
-        {
-            path: '/settings/user-profile',
+            path: '/settings/users/user-profile/single/:userId/',
             name: 'Users',
             component: UserProfile,
             route: PrivateRoute,
@@ -653,27 +643,20 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        // {
-        //     path: '/account/register',
-        //     name: 'Register',
-        //     component: Register,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/confirm',
-        //     name: 'Confirm',
-        //     component: Confirm,
-        //     route: Route,
-        //     visibility: true,
-        // },
-        // {
-        //     path: '/account/forget-password',
-        //     name: 'Forget Password',
-        //     component: ForgetPassword,
-        //     route: Route,
-        //     visibility: true,
-        // },
+        {
+            path: '/account/update-password/:id/:token',
+            name: 'Update Password',
+            component: UpdatePassword,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/forget-password',
+            name: 'Forget Password',
+            component: ForgetPassword,
+            route: Route,
+            visibility: true,
+        },
         {
             path: '/*',
             name: 'Error 404',

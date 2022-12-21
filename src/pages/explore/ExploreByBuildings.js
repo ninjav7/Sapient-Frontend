@@ -27,6 +27,7 @@ import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { getAverageValue } from '../../helpers/AveragePercent';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -62,7 +63,6 @@ const ExploreByBuildings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    // New Refactor Declarations
     const isLoadingRef = useRef(false);
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -83,16 +83,16 @@ const ExploreByBuildings = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
     const [selectedBuildingId, setSelectedBuildingId] = useState('');
     const [seriesData, setSeriesData] = useState([]);
     const [allBuildingData, setAllBuildingData] = useState([]);
-    const [seriesLineData, setSeriesLineData] = useState([]);
 
     let entryPoint = '';
+    let top = '';
+    let bottom = '';
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(0);
     const [bottomEnergyConsumption, setBottomEnergyConsumption] = useState(0);
     const [topPerChange, setTopPerChange] = useState(0);
@@ -128,7 +128,6 @@ const ExploreByBuildings = () => {
                 arr.push(selectedIds[i]);
             }
             setSeriesData([]);
-            setSeriesLineData([]);
             setSelectedAllBuildingId(arr);
         } else {
             setSelectedBuildingId('');
@@ -189,7 +188,6 @@ const ExploreByBuildings = () => {
                 if (entryPoint === 'entered') {
                     totalBuildingId.length = 0;
                     setSeriesData([]);
-                    setSeriesLineData([]);
                 }
                 let responseData = res.data;
                 setAllBuildingList(responseData);
@@ -218,6 +216,11 @@ const ExploreByBuildings = () => {
                     if (Number(ele.square_footage) > topSqft) topSqft = ele.square_footage;
                     if (Number(ele.square_footage) < bottomSqft) bottomSqft = ele.square_footage;
                 });
+                top = topConsumption / 1000;
+                bottom = bottomConsumption / 1000;
+                if (top === bottom) {
+                    bottom = 0;
+                }
                 set_minConValue(Math.abs(Math.round(bottomConsumption / 1000)));
                 setBottomEnergyConsumption(Math.abs(Math.round(bottomConsumption / 1000)));
                 set_maxConValue(
@@ -642,7 +645,7 @@ const ExploreByBuildings = () => {
         return (
             <div style={{ fontSize: 0 }}>
                 <a
-                    className="typography-wrapper link"
+                    className="typography-wrapper link mouse-pointer"
                     onClick={() => {
                         redirectToExploreEquipPage(row?.building_id, row?.building_name, row?.timezone);
                     }}>
@@ -664,7 +667,7 @@ const ExploreByBuildings = () => {
                     {Math.round(row.consumption.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={Math.round((row.consumption.now / topEnergyConsumption) * 100)} />
+                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottom, top)} />
             </>
         );
     };
@@ -728,7 +731,6 @@ const ExploreByBuildings = () => {
                     if (entryPoint === 'entered') {
                         totalBuildingId.length = 0;
                         setSeriesData([]);
-                        setSeriesLineData([]);
                     }
                     let responseData = res.data;
                     setTotalItemsSearched(responseData.length);
@@ -778,7 +780,6 @@ const ExploreByBuildings = () => {
                 return item.id !== build?.building_id;
             });
             setSeriesData(arr1);
-            setSeriesLineData(arr1);
             setBuildIdNow('');
         }
         if (value === 'false') {
@@ -874,7 +875,6 @@ const ExploreByBuildings = () => {
             return;
         }
         setSeriesData(allBuildingData);
-        setSeriesLineData(allBuildingData);
     }, [allBuildingData]);
 
     const headerProps = [
@@ -918,7 +918,7 @@ const ExploreByBuildings = () => {
             <Row>
                 <div className="explore-data-table-style p-2 mb-2">
                     {isExploreChartDataLoading ? (
-                        <div className="loader-center-style" style={{ height: '25rem' }}></div>
+                        <></>
                     ) : (
                         <>
                             <ExploreChart

@@ -22,7 +22,7 @@ export const portfolioRoutes = ['/energy/portfolio/overview', '/energy/compare-b
 export const accountRoutes = [
     '/settings/account',
     '/settings/buildings',
-    '/settings/users',
+    '/settings/users/users',
     '/settings/roles',
     '/settings/equipment-types',
 ];

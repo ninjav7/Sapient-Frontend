@@ -381,38 +381,39 @@ const EndUseType = () => {
                 });
         };
 
-        const equipmentUsageDataFetch = async () => {
-            setIsEquipTypeChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchEndUsesEquipmentUsage(bldgId, endUseTypeRequest, payload)
-                .then((res) => {
-                    let data = res.data;
-                    let equipTypeName = [];
-                    let equipTypeUsage = [];
+        // Planned for Future Enable of this integration
+        // const equipmentUsageDataFetch = async () => {
+        //     setIsEquipTypeChartLoading(true);
+        //     let payload = apiRequestBody(startDate, endDate, timeZone);
+        //     await fetchEndUsesEquipmentUsage(bldgId, endUseTypeRequest, payload)
+        //         .then((res) => {
+        //             let data = res.data;
+        //             let equipTypeName = [];
+        //             let equipTypeUsage = [];
 
-                    data.map((record, index) => {
-                        equipTypeName.push(record.name);
-                        equipTypeUsage.push((record.consumption.now / 1000).toFixed(2));
-                    });
+        //             data.map((record, index) => {
+        //                 equipTypeName.push(record.name);
+        //                 equipTypeUsage.push((record.consumption.now / 1000).toFixed(2));
+        //             });
 
-                    let xaxisData = {
-                        categories: equipTypeName,
-                        axisBorder: {
-                            color: '#d6ddea',
-                        },
-                        axisTicks: {
-                            color: '#d6ddea',
-                        },
-                    };
+        //             let xaxisData = {
+        //                 categories: equipTypeName,
+        //                 axisBorder: {
+        //                     color: '#d6ddea',
+        //                 },
+        //                 axisTicks: {
+        //                     color: '#d6ddea',
+        //                 },
+        //             };
 
-                    setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
-                    setHvacUsageData(data);
-                    setIsEquipTypeChartLoading(false);
-                })
-                .catch((error) => {
-                    setIsEquipTypeChartLoading(false);
-                });
-        };
+        //             setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
+        //             setHvacUsageData(data);
+        //             setIsEquipTypeChartLoading(false);
+        //         })
+        //         .catch((error) => {
+        //             setIsEquipTypeChartLoading(false);
+        //         });
+        // };
 
         const plugUsageDataFetch = async () => {
             setIsPlugLoadChartLoading(true);
@@ -442,7 +443,7 @@ const EndUseType = () => {
         };
 
         endUsesDataFetch();
-        equipmentUsageDataFetch();
+        // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch();
     }, [startDate, endDate, endUseType, bldgId]);
 
@@ -508,7 +509,7 @@ const EndUseType = () => {
                         )}
                     </div> */}
 
-            {endUseType === 'hvac' && (
+            {/* {endUseType === 'hvac' && (
                 <>
                     {isEquipTypeChartLoading ? (
                         <div className="mt-4 energy-container-loader">
@@ -573,7 +574,7 @@ const EndUseType = () => {
                         </>
                     )}
                 </>
-            )}
+            )} */}
         </React.Fragment>
     );
 };

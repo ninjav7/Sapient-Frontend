@@ -22,7 +22,7 @@ const Control = () => {
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
         '/settings/buildings',
-        '/settings/users',
+        '/settings/users/users',
         '/settings/roles',
         '/settings/equipment-types',
     ]);
@@ -36,28 +36,18 @@ const Control = () => {
     ]);
 
     const handleLogout = () => {
+        localStorage.clear();
         cookies.remove('user', { path: '/' });
-        const isAuthTokenValid = isUserAuthenticated();
-
-        logoutUser(history);
-
-        if (isAuthTokenValid) {
-            return <Redirect to="/" />;
-        } else {
-            localStorage.clear();
-
-            history.push('/account/login');
-            window.location.reload();
-        }
+        window.location.reload();
     };
 
-    const handleSideNavChange = (routeType) => {
-        if (routeType === 'account-settings') {
+    const handleSideNavChange = () => {
+        if (accountRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'account';
             });
         }
-        if (routeType === 'building-settings') {
+        if (configRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
@@ -92,7 +82,7 @@ const Control = () => {
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/users';
+                        return current !== '/settings/users/users';
                     })
                 );
             }
@@ -133,14 +123,14 @@ const Control = () => {
 
             if (
                 userPermission?.permissions?.permissions?.account_user_permission?.view &&
-                !accountRoutes.includes('/settings/users')
+                !accountRoutes.includes('/settings/users/users')
             ) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setAccountRoutes((el) => [...el, '/settings/users']);
+                setAccountRoutes((el) => [...el, '/settings/users/users']);
             }
 
             if (
@@ -262,29 +252,21 @@ const Control = () => {
             <div className="topbar-buttons-wrapper">
                 <div className="topbar-buttons">
                     <div
-                        className={`float-right ${
+                        className={`float-right h-100 ${
                             pageType === 'settings' ? 'navbar-icon-container-active ' : 'navbar-icon-container'
-                        }`}
-                        style={{ height: '100%' }}>
+                        }`}>
                         <button
                             className={`btn btn-sm float-right ${
                                 pageType === 'settings' ? 'other-font-icon-style-active' : 'other-font-icon-style'
                             }`}
                             onClick={() => {
-                                handleSideNavChange('building-settings');
+                                handleSideNavChange();
                                 handleRouteChange();
                             }}>
                             <FontAwesomeIcon icon={faGear} size="lg" />
                         </button>
                     </div>
                 </div>
-
-                {/* <SearchModal /> */}
-                {/* <div className="navbar-icon-container float-right topbar-buttons">
-                    <button className="btn btn-sm float-right other-font-icon-style">
-                        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
-                    </button>
-                </div> */}
             </div>
 
             <button className="btn topbar-logout-btn" onClick={handleLogout}>

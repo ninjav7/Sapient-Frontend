@@ -9,7 +9,6 @@ import { UNITS } from '../../constants/units';
 
 import './TopConsumptionWidget.scss';
 import { Button } from '../button';
-import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
 import { formatConsumptionValue } from '../../helpers/helpers';
 
 const TopConsumptionWidget = ({
@@ -28,17 +27,6 @@ const TopConsumptionWidget = ({
                     {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
                     {subtitle && <Typography.Body size={Typography.Sizes.xs}>{subtitle}</Typography.Body>}
                 </div>
-
-                {handleClick && (
-                    <Button
-                        onClick={handleClick}
-                        className="ml-4"
-                        label="Explore"
-                        size={Button.Sizes.md}
-                        type={Button.Type.secondaryGrey}
-                        icon={<TelescopeSVG />}
-                    />
-                )}
             </div>
 
             <Brick sizeInRem={1.5} />
@@ -54,9 +42,14 @@ const TopConsumptionWidget = ({
                 {rows.map(({ link, label, value, unit, badgePercentage, badgeType }, index) => (
                     <div className={`${widgetType}-table-row`} key={index}>
                         <div>
-                            <Link className="typography-wrapper link" to={link}>
-                                {label}
-                            </Link>
+                            <Button
+                                label={label}
+                                size={Button.Sizes.md}                                type={Button.Type.link}
+                                className="typography-wrapper link mouse-pointer"
+                                onClick={() => {
+                                    handleClick(label);
+                                }}
+                            />
                         </div>
                         <div>
                             <Typography.Body

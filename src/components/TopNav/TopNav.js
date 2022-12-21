@@ -27,10 +27,14 @@ const TopNav = () => {
 
     useEffect(() => {
         const getBuildingData = async (isActive) => {
-            await fetchBuildingsList(isActive).then((res) => {
-                let data = res.data;
-                setBuildingListData(data);
-            });
+            await fetchBuildingsList(isActive)
+                .then((res) => {
+                    let data = res.data;
+                    setBuildingListData(data);
+                })
+                .catch(() => {
+                    setBuildingListData([]);
+                });
         };
 
         getBuildingData(activeBldgList);

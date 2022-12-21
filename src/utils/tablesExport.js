@@ -1,3 +1,6 @@
+import { percentageHandler } from '../utils/helper';
+import { formatConsumptionValue } from '../helpers/helpers';
+
 export const getTableHeadersList = (record) => {
     let arr = [];
     record.forEach((element) => {
@@ -120,6 +123,233 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
         }
         dataToExport.push(arr);
     });
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getBuildingsTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'building_name':
+                    const name = tableRow['building_name'];
+                    const search = ',';
+                    const replaceWith = ' ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'building_size':
+                    const size = tableRow['building_size'];
+                    arr.push(`${size} Sq.Ft.`);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDensity) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'total_consumption':
+                    const preparedConsumption = parseInt(tableRow.total_consumption / 1000);
+                    arr.push(`${preparedConsumption} kWh`);
+                    break;
+                case 'energy_consumption':
+                    const diffPercentage = percentageHandler(
+                        tableRow.energy_consumption.now,
+                        tableRow.energy_consumption.old
+                    );
+                    {
+                        tableRow.energy_consumption.now >= tableRow.energy_consumption.old
+                            ? arr.push(`+${diffPercentage}%`)
+                            : arr.push(`-${diffPercentage}%`);
+                    }
+                    break;
+                case 'energy_density':
+                    const preparedEnergyDestiny = `${tableRow.energy_density.toFixed(2)} kWh / sq. ft.`;
+                    arr.push(preparedEnergyDestiny);
+                    break;
+                case 'square_footage':
+                    const squareFootage = formatConsumptionValue(tableRow.square_footage);
+                    arr.push(squareFootage);
+                    break;
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getEquipTypeTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    columns.forEach((element) => {
+        if (element.accessor === 'sensor_number') element.name = 'Sensors [In Use]';
+    });
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'sensor_number':
+                    const name = tableRow['sensor_number'];
+                    const search = '/';
+                    const replaceWith = ' out of ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'status':
+                    const status = tableRow['status'];
+                    const data = status ? 'Online' : 'Offline';
+                    arr.push(data);
+                    break;
+
+                case 'model':
+                    const model = tableRow['model'];
+                    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+                    arr.push(modelName);
+                    break;
+
+                case 'location':
+                    const locationData = tableRow['location'];
+                    const locationName = locationData === '' ? '-' : locationData;
+                    arr.push(locationName);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getActiveDeviceTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    columns.forEach((element) => {
+        if (element.accessor === 'sensor_count') element.name = 'Sensors [In Use]';
+    });
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'sensor_count':
+                    const name = tableRow['sensor_number'];
+                    const search = '/';
+                    const replaceWith = ' out of ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'status':
+                    const status = tableRow['status'];
+                    const data = status ? 'Online' : 'Offline';
+                    arr.push(data);
+                    break;
+
+                case 'model':
+                    const model = tableRow['model'];
+                    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+                    arr.push(modelName);
+                    break;
+
+                case 'location':
+                    const locationData = tableRow['location'];
+                    const locationName = locationData === '' ? '-' : locationData;
+                    arr.push(locationName);
+                    break;
+
+                case 'hardware_version':
+                    const hardwareData = tableRow['hardware_version'];
+                    console.log(hardwareData);
+                    const hardwareName = hardwareData === '' ? '-' : String(hardwareData);
+                    arr.push(hardwareName);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
     let csv = `${getTableHeadersList(columns)}\n`;
 
     dataToExport.forEach(function (row) {

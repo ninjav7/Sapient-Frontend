@@ -33,7 +33,7 @@ const UserTable = ({ userData }) => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users',
+                        path: '/settings/users/users',
                         active: true,
                     },
                 ];
@@ -65,7 +65,7 @@ const UserTable = ({ userData }) => {
                                     <td className="font-weight-bold panel-name">
                                         <Link
                                             to={{
-                                                pathname: `/settings/user-profile`,
+                                                pathname: `/settings/users/user-profile`,
                                             }}>
                                             <a>{record.name}</a>
                                         </Link>

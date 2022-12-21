@@ -33,6 +33,7 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
             enabled: true,
             align: 'left',
             useHTML: true,
+            itemDistance: 0,
             labelFormatter: function () {
                 let color = hexToRgb(this.color);
                 if (!this.visible) {

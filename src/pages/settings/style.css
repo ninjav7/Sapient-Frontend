@@ -5,10 +5,12 @@
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05) !important;
     border-radius: 8px !important;
 }
+
 .button-wrapper {
     display: flex;
     flex-direction: row;
 }
+
 .icon-bg-pop-styling {
     align-items: center;
     padding: 2px 6px;
@@ -26,6 +28,7 @@
     border: 1px solid #039855;
     border-radius: 24px;
 }
+
 .icon-bg-pop-styling-slash {
     align-items: center;
     padding: 2px 6px;
@@ -43,6 +46,7 @@
     border: 1px solid rgb(240, 28, 28);
     border-radius: 24px;
 }
+
 .grey-container {
     margin-top: 1rem;
     padding: 1rem;
@@ -56,14 +60,11 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 4px;
 }
-.sensors-row-content {
-    display: flex;
-    column-gap: 0.25rem;
-    justify-content: flex-start;
-}
+
 .modal-add-equipment label {
     font-weight: 400;
 }
+
 .add-equipment-footer {
     display: flex;
     width: '100%';
@@ -71,15 +72,12 @@
     gap: 0.25rem;
     justify-content: space-between;
 }
-.add-equipment-footer-column {
-    width: 50%;
-}
 
 .equipment-name-cell {
     cursor: pointer;
 }
 
-.equipment-page>.page-title{
+.equipment-page>.page-title {
     margin-bottom: 1rem;
 }
 
@@ -96,6 +94,7 @@
     background-color: #ffffff;
     width: 100%;
 }
+
 .white-container {
     clear: both;
     margin-top: 1rem;
@@ -110,6 +109,7 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 4px;
 }
+
 .pic-container {
     background: #ffffff;
     /* Gray/200 (borders) */
@@ -120,6 +120,7 @@
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 4px;
 }
+
 .singleline-toggle-switch {
     /* float: right; */
     height: 10px;
@@ -318,25 +319,10 @@
     flex-direction: column;
 }
 
-/* .container-single-content:hover { */
-/* background: #f3f4f7; */
-/* font-weight: 700; */
-/* background-image: url('../../assets/icon/pencil.png'); */
-/* background-repeat: no-repeat; */
-/* background-position: 225px 10px; */
-/* } */
 .hover-image-delete:hover {
     background: #f3f4f7;
     background-image: url('../../assets/icon/pencil.png');
 }
-
-/* .container-single-content:active {
-    background: #f2f4f7;
-    font-weight: 700;
-    background-image: url('../../assets/icon/arrow.svg');
-    background-repeat: no-repeat;
-    background-position: 225px 10px;
-} */
 
 .container-single-content {
     padding-top: 5px;
@@ -570,7 +556,7 @@
 .buildings-name {
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 14px;
     line-height: 17px;
     display: flex;
@@ -755,6 +741,7 @@
     display: flex;
     justify-content: space-between;
 }
+
 .chart-border-style {
     background: #ffffff;
     border: 1px solid #eaecf0;
