@@ -19,13 +19,13 @@ import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
-import AccountSettings from '../pages/settings/AccountSettings';
+import AccountSettings from '../pages/settings/account-settings';
 import Buildings from '../pages/settings/buildings';
-import Users from '../pages/settings/users/Users';
+import Users from '../pages/settings/users';
 import UserProfile from '../pages/settings/users/UserProfile';
-import Roles from '../pages/settings/Roles';
-import SingleRole from '../pages/settings/SingleRole';
-import SingleRoleNew from '../pages/settings/SingleRoleNew';
+import Roles from '../pages/settings/roles/Roles';
+import SingleRole from '../pages/settings/roles/SingleRole';
+import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 
 import { userPermissionData } from '../store/globalState';
 import { useAtom } from 'jotai';
@@ -517,7 +517,7 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users/users',
+            path: '/settings/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
