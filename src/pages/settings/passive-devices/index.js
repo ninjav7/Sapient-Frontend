@@ -314,9 +314,7 @@ const PassiveDevices = () => {
                                     icon={<PlusSVG />}
                                 />
                             </div>
-                        ) : (
-                            ''
-                        )}
+                        ) : null}
                     </div>
                 </Col>
             </Row>
