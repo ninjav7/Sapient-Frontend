@@ -229,7 +229,7 @@ const EquipmentType = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Equipment Types</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ? (
+                        {/* {userPermission?.user_role === 'admin' ? (
                             <div className="d-flex">
                                 <Button
                                     label={'Add Equipment Type'}
@@ -241,7 +241,7 @@ const EquipmentType = () => {
                                     icon={<PlusSVG />}
                                 />
                             </div>
-                        ) : null}
+                        ) : null} */}
                     </div>
                 </Col>
             </Row>
@@ -269,13 +269,13 @@ const EquipmentType = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) =>
-                            row?.status.toLowerCase() === 'system' ? null : handleEdit(row)
-                        }
-                        onDeleteRow={(record, id, row) =>
-                            row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
-                        }
-                        isDeletable={(row) => handleAbleToDeleteRow(row)}
+                        // onEditRow={(record, id, row) =>
+                        //     row?.status.toLowerCase() === 'system' ? null : handleEdit(row)
+                        // }
+                        // onDeleteRow={(record, id, row) =>
+                        //     row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                        // }
+                        // isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
