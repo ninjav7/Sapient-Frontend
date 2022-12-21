@@ -7,8 +7,8 @@ import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
 // settings
 import General from '../pages/settings/general-settings';
-import UtilityBills from '../pages/settings/UtilityBills';
-import Layout from '../pages/settings/Layout';
+import UtilityBills from '../pages/settings/utilityBills';
+import Layout from '../pages/settings/layout/Layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
@@ -18,12 +18,12 @@ import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
-import Gateways from '../pages/settings/Gateways';
+import Gateways from '../pages/settings/gateways';
 import AccountSettings from '../pages/settings/account-settings';
 import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/users';
 import UserProfile from '../pages/settings/users/UserProfile';
-import Roles from '../pages/settings/roles/Roles';
+import Roles from '../pages/settings/roles';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 
