@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-beta.azurewebsites.net';
+export const BaseUrl = 'https://sapient-dev-v2.azurewebsites.net';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
