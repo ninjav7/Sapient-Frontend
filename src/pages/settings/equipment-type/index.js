@@ -15,10 +15,16 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { pageListSizes } from '../../../helpers/helpers';
+import EditEquipType from './EditEquipType';
+import DeleteEquipType from './DeleteEquipType';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
+            <th>
+                <Skeleton count={10} />
+            </th>
+
             <th>
                 <Skeleton count={10} />
             </th>
@@ -41,12 +47,25 @@ const SkeletonLoading = () => (
 const EquipmentType = () => {
     const [userPermission] = useAtom(userPermissionData);
 
+    // Add EquipType Modal states
     const [isAddEquipTypeModalOpen, setEquipTypeModal] = useState(false);
     const closeAddEquipTypeModal = () => setEquipTypeModal(false);
     const openAddEquipTypeModal = () => setEquipTypeModal(true);
 
+    // Edit EquipType Modal states
+    const [isEditEquipTypeModalOpen, setEditEquipTypeModal] = useState(false);
+    const closeEditEquipTypeModal = () => setEditEquipTypeModal(false);
+    const openEditEquipTypeModal = () => setEditEquipTypeModal(true);
+
+    // Delete EquipType Modal states
+    const [isDeleteEquipTypeModalOpen, setDeleteEquipTypeModal] = useState(false);
+    const closeDeleteEquipTypeModal = () => setDeleteEquipTypeModal(false);
+    const openDeleteEquipTypeModal = () => setDeleteEquipTypeModal(true);
+
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
+
+    const [selectedEquipType, setSelectedEquipType] = useState({});
 
     const { download } = useCSVDownload();
 
@@ -58,7 +77,27 @@ const EquipmentType = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
 
-    const fetchEquipTypeData = async (searchTxt, page_no = 1, page_size = 20, ordered_by, sort_by) => {
+    const handleEdit = (record) => {
+        setSelectedEquipType(record);
+        openEditEquipTypeModal();
+    };
+
+    const handleDelete = (record) => {
+        setSelectedEquipType(record);
+        openDeleteEquipTypeModal();
+    };
+
+    const handleAbleToDeleteRow = (row) => {
+        return row?.status === 'SYSTEM' ? false : true;
+    };
+
+    const fetchEquipTypeData = async (
+        searchTxt,
+        page_no = 1,
+        page_size = 20,
+        ordered_by = 'equipment_type',
+        sort_by
+    ) => {
         setDataFetching(true);
 
         let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
@@ -230,6 +269,9 @@ const EquipmentType = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        onEditRow={(record, id, row) => handleEdit(row)}
+                        onDeleteRow={(record, id, row) => handleDelete(row)}
+                        isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
@@ -244,6 +286,20 @@ const EquipmentType = () => {
                 isAddEquipTypeModalOpen={isAddEquipTypeModalOpen}
                 closeAddEquipTypeModal={closeAddEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
+            />
+
+            <EditEquipType
+                isEditEquipTypeModalOpen={isEditEquipTypeModalOpen}
+                closeEditEquipTypeModal={closeEditEquipTypeModal}
+                fetchEquipTypeData={fetchEquipTypeData}
+                selectedEquipType={selectedEquipType}
+            />
+
+            <DeleteEquipType
+                isDeleteEquipTypeModalOpen={isDeleteEquipTypeModalOpen}
+                closeDeleteEquipTypeModal={closeDeleteEquipTypeModal}
+                fetchEquipTypeData={fetchEquipTypeData}
+                selectedEquipType={selectedEquipType}
             />
         </React.Fragment>
     );

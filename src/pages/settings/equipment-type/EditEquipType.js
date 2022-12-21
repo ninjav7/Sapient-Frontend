@@ -4,14 +4,18 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { saveEquipTypeData, getEndUseData } from './services';
+import { getEndUseData, updateEquipTypeData } from './services';
 import Select from '../../../sharedComponents/form/select';
 
-const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData }) => {
+const EditEquipType = ({
+    isEditEquipTypeModalOpen,
+    closeEditEquipTypeModal,
+    fetchEquipTypeData,
+    selectedEquipType,
+}) => {
     const defaultEquipTypeObj = {
-        is_active: true,
-        name: '',
-        end_use: '',
+        equipment_type: '',
+        end_use_id: '',
     };
 
     const [equipTypeData, setEquipTypeData] = useState(defaultEquipTypeObj);
@@ -25,18 +29,23 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
         setEquipTypeData(obj);
     };
 
-    const saveEquipTypeDetails = async () => {
-        try {
-            setIsProcessing(true);
-            await saveEquipTypeData(equipTypeData).then((res) => {
-                closeAddEquipTypeModal();
+    const updateEquipTypeDetails = async () => {
+        setIsProcessing(true);
+        const obj = {
+            eqt_id: equipTypeData?.equipment_id,
+            name: equipTypeData?.equipment_type,
+            end_use: equipTypeData?.end_use_id,
+        };
+        await updateEquipTypeData(obj)
+            .then((res) => {
+                closeEditEquipTypeModal();
                 setEquipTypeData(defaultEquipTypeObj);
+                setIsProcessing(false);
                 fetchEquipTypeData();
+            })
+            .catch(() => {
+                setIsProcessing(false);
             });
-            setIsProcessing(false);
-        } catch (error) {
-            setIsProcessing(false);
-        }
     };
 
     const fetchEndUseData = async () => {
@@ -59,7 +68,12 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     };
 
     useEffect(() => {
-        if (equipTypeData.name.length > 0 && equipTypeData.end_use.length > 0) {
+        if (
+            (selectedEquipType?.equipment_type !== equipTypeData?.equipment_type ||
+                selectedEquipType?.end_use_id !== equipTypeData?.end_use_id) &&
+            equipTypeData?.end_use_id.length > 0 &&
+            equipTypeData?.equipment_type.length > 0
+        ) {
             setFormValidation(true);
         } else {
             setFormValidation(false);
@@ -67,20 +81,23 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     }, [equipTypeData]);
 
     useEffect(() => {
-        if (isAddEquipTypeModalOpen) {
-            fetchEndUseData();
-        }
-    }, [isAddEquipTypeModalOpen]);
+        if (isEditEquipTypeModalOpen) fetchEndUseData();
+    }, [isEditEquipTypeModalOpen]);
+
+    useEffect(() => {
+        console.log('selectedEquipType => ', selectedEquipType);
+        setEquipTypeData(selectedEquipType);
+    }, [selectedEquipType]);
 
     return (
         <Modal
-            show={isAddEquipTypeModalOpen}
-            onHide={closeAddEquipTypeModal}
+            show={isEditEquipTypeModalOpen}
+            onHide={closeEditEquipTypeModal}
             backdrop="static"
             keyboard={false}
             centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Add Equipment Type</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Edit Equipment Type</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
@@ -88,10 +105,11 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                     label="Name"
                     placeholder="Enter Name"
                     onChange={(e) => {
-                        handleChange('name', e.target.value.trim());
+                        handleChange('equipment_type', e.target.value.trim());
                     }}
                     error={null}
                     labelSize={Typography.Sizes.md}
+                    value={equipTypeData?.equipment_type}
                 />
 
                 <Brick sizeInRem={1.5} />
@@ -102,9 +120,9 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                     <Select
                         placeholder="Select End Use"
                         options={endUseData}
-                        defaultValue={endUseData.filter((option) => option.value === equipTypeData?.end_use)}
+                        defaultValue={equipTypeData?.end_use_id}
                         onChange={(e) => {
-                            handleChange('end_use', e.value);
+                            handleChange('end_use_id', e.value);
                         }}
                         isSearchable={true}
                     />
@@ -120,18 +138,18 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                         className="w-100"
                         onClick={() => {
                             setEquipTypeData(defaultEquipTypeObj);
-                            closeAddEquipTypeModal();
+                            closeEditEquipTypeModal();
                         }}
                     />
 
                     <Button
-                        label={isProcessing ? 'Adding...' : 'Add Equipment Type'}
+                        label={isProcessing ? 'Updating...' : 'Update Equipment Type'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={!formValidation || isProcessing}
                         onClick={() => {
-                            saveEquipTypeDetails();
+                            updateEquipTypeDetails();
                         }}
                     />
                 </div>
@@ -142,4 +160,4 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     );
 };
 
-export default CreateEquipType;
+export default EditEquipType;
