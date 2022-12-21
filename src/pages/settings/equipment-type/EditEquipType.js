@@ -72,7 +72,8 @@ const EditEquipType = ({
             (selectedEquipType?.equipment_type !== equipTypeData?.equipment_type ||
                 selectedEquipType?.end_use_id !== equipTypeData?.end_use_id) &&
             equipTypeData?.end_use_id.length > 0 &&
-            equipTypeData?.equipment_type.length > 0
+            equipTypeData?.equipment_type.length > 0 &&
+            selectedEquipType?.status.toLowerCase() !== 'system'
         ) {
             setFormValidation(true);
         } else {

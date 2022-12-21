@@ -88,7 +88,7 @@ const EquipmentType = () => {
     };
 
     const handleAbleToDeleteRow = (row) => {
-        return row?.status === 'SYSTEM' ? false : true;
+        return row?.status.toLowerCase() === 'system' ? false : true;
     };
 
     const fetchEquipTypeData = async (
