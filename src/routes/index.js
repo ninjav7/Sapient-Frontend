@@ -15,7 +15,7 @@ import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
 import Provision from '../pages/settings/active-devices/Provision';
-import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
+import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';

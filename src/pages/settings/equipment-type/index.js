@@ -14,6 +14,7 @@ import { getEquipTypeTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { pageListSizes } from '../../../helpers/helpers';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -56,21 +57,6 @@ const EquipmentType = () => {
     const [isDataFetching, setDataFetching] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
-
-    const pageListSizes = [
-        {
-            label: '20 Rows',
-            value: '20',
-        },
-        {
-            label: '50 Rows',
-            value: '50',
-        },
-        {
-            label: '100 Rows',
-            value: '100',
-        },
-    ];
 
     const fetchEquipTypeData = async (searchTxt, page_no = 1, page_size = 20) => {
         setDataFetching(true);
@@ -206,7 +192,7 @@ const EquipmentType = () => {
                                         openAddEquipTypeModal();
                                     }}
                                     icon={<PlusSVG />}
-                                    disbaled
+                                    disabled
                                 />
                             </div>
                         ) : (
