@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col } from 'reactstrap';
-import { Link } from 'react-router-dom';
 import { formatConsumptionValue } from '../../helpers/helpers';
 
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { useHistory } from 'react-router-dom';
 
 import { ComponentStore } from '../../store/ComponentStore';
 import { fetchCompareBuildings } from '../../services/compareBuildings';
@@ -57,6 +57,7 @@ const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const [sortBy, setSortBy] = useState({});
+    const history = useHistory();
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
     const [topEnergyDensity, setTopEnergyDensity] = useState();
@@ -88,7 +89,7 @@ const CompareBuildings = () => {
             });
 
             localStorage.setItem('building_Id', 'portfolio');
-            localStorage.setItem('building_Name', 'Portfolio');
+            localStorage.setItem('buildingName', 'Portfolio');
 
             BuildingStore.update((s) => {
                 s.Building_Id = 'portfolio';
@@ -116,7 +117,7 @@ const CompareBuildings = () => {
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
-                let topVal = Math.max(...response?.data.map(o => o.energy_density))
+                let topVal = Math.max(...response?.data.map((o) => o.energy_density));
                 setTopEnergyDensity(topVal);
                 setBuildingsData(response?.data);
                 setIsLoadingBuildingData(false);
@@ -129,7 +130,7 @@ const CompareBuildings = () => {
         const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
         return (
             <div className="table-content-style" style={{ width: '100%' }}>
-                {(row.energy_density).toFixed(2)} kWh / sq. ft.
+                {row.energy_density.toFixed(2)} kWh / sq. ft.
                 <br />
                 <div style={{ width: '100%', display: 'inline-block' }}>
                     {row.energy_density === 0 && <TinyBarChart percent={0} />}
@@ -141,25 +142,24 @@ const CompareBuildings = () => {
     const renderName = (row) => {
         return (
             <>
-                <Link
-                    to={{
-                        pathname: `/energy/building/overview/${row.building_id}`,
+                <Typography.Link
+                    size={Typography.Sizes.md}
+                    className="mouse-pointer"
+                    onClick={() => {
+                        localStorage.setItem('building_Id', row.building_id);
+                        localStorage.setItem('buildingName', row.building_name);
+                        localStorage.setItem('buildingTimeZone', row.timezone);
+                        BuildingStore.update((s) => {
+                            s.BldgId = row.building_id;
+                            s.BldgTimeZone = row.timezone;
+                            s.BldgName = row.building_name;
+                        });
+                        history.push({
+                            pathname: `/energy/building/overview/${row.building_id}`,
+                        });
                     }}>
-                    <Typography.Link
-                        size={Typography.Sizes.md}
-                        as="a"
-                        target="_blank"
-                        onClick={() => {
-                            localStorage.setItem('building_Id', row.building_id);
-                            localStorage.setItem('building_Name', row.building_name);
-                            BuildingStore.update((s) => {
-                                s.BldgId = row.building_id;
-                                s.BldgName = row.building_name;
-                            });
-                        }}>
-                        {row.building_name}
-                    </Typography.Link>
-                </Link>
+                    {row.building_name}
+                </Typography.Link>
                 <div className="mt-1 w-50">
                     <Badge text="Office" />
                 </div>

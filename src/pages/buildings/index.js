@@ -5,7 +5,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { apiRequestBody, convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
-import { useHistory } from 'react-router-dom';
+import { useHistory,useParams } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchOverallEndUse,
@@ -29,7 +29,8 @@ import './style.css';
 import EquipChartModal from '../chartModal/EquipChartModal';
 
 const BuildingOverview = () => {
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const params = useParams();
+    const bldgId = params.bldgId;
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
 
