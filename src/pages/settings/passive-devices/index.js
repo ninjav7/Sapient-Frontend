@@ -271,6 +271,10 @@ const PassiveDevices = () => {
     }, [search, pageNo, pageSize, sortBy, deviceStatus, bldgId]);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
+
+    useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
