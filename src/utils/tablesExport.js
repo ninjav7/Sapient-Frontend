@@ -296,3 +296,65 @@ export const getPassiveDeviceTableCSVExport = (tableData, columns) => {
     });
     return csv;
 };
+
+export const getActiveDeviceTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    columns.forEach((element) => {
+        if (element.accessor === 'sensor_count') element.name = 'Sensors [In Use]';
+    });
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'sensor_count':
+                    const name = tableRow['sensor_number'];
+                    const search = '/';
+                    const replaceWith = ' out of ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'status':
+                    const status = tableRow['status'];
+                    const data = status ? 'Online' : 'Offline';
+                    arr.push(data);
+                    break;
+
+                case 'model':
+                    const model = tableRow['model'];
+                    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+                    arr.push(modelName);
+                    break;
+
+                case 'location':
+                    const locationData = tableRow['location'];
+                    const locationName = locationData === '' ? '-' : locationData;
+                    arr.push(locationName);
+                    break;
+
+                case 'hardware_version':
+                    const hardwareData = tableRow['hardware_version'];
+                    console.log(hardwareData);
+                    const hardwareName = hardwareData === '' ? '-' : String(hardwareData);
+                    arr.push(hardwareName);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
