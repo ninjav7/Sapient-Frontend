@@ -75,6 +75,7 @@ const chartsBaseConfig = ({
     xAxis: {
         categories: categories,
         crosshair: true,
+        tickAmount: 10,
         labels: {
             format: renderComponents(
                 <Typography.Subheader

@@ -40,9 +40,6 @@ const EndUsesTypeWidget = ({ endUsesData, stackedColumnChartData, stackedColumnC
                         categories={stackedColumnChartCategories}
                         tooltipUnit={UNITS.KWH}
                         series={stackedColumnChartData}
-                        legends={{
-                            enabled: false,
-                        }}
                     />
                 </div>
             </div>
