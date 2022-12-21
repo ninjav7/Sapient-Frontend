@@ -51,7 +51,7 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
     }, [buildingData]);
 
     return (
-        <Modal show={isAddBuildingModalOpen} onHide={closeAddBuildingModal} centered>
+        <Modal show={isAddBuildingModalOpen} onHide={closeAddBuildingModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Add Building</Typography.Header>
 

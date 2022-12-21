@@ -241,9 +241,9 @@ const GeneralBuildingSettings = () => {
     const handleDateTimeSwitch = () => {
         let obj = buildingDetails;
 
-        obj.active = !buildingDetails.active;
+        obj.time_format = !buildingDetails.time_format;
 
-        handleBldgSettingChanges('time_format', obj.active);
+        handleBldgSettingChanges('time_format', obj.time_format);
     };
 
     const handleBldgSettingChanges = (key, value) => {
