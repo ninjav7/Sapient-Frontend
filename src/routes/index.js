@@ -13,7 +13,7 @@ import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
-import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import ActiveDevices from '../pages/settings/active-devices';
 import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
