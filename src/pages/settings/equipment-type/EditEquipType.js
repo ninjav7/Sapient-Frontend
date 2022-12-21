@@ -86,7 +86,6 @@ const EditEquipType = ({
     }, [isEditEquipTypeModalOpen]);
 
     useEffect(() => {
-        console.log('selectedEquipType => ', selectedEquipType);
         setEquipTypeData(selectedEquipType);
     }, [selectedEquipType]);
 
