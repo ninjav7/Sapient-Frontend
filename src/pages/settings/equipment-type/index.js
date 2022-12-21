@@ -269,8 +269,12 @@ const EquipmentType = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) => handleEdit(row)}
-                        onDeleteRow={(record, id, row) => handleDelete(row)}
+                        onEditRow={(record, id, row) =>
+                            row?.status.toLowerCase() === 'system' ? null : handleEdit(row)
+                        }
+                        onDeleteRow={(record, id, row) =>
+                            row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                        }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
