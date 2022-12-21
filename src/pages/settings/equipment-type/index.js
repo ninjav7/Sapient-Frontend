@@ -58,13 +58,14 @@ const EquipmentType = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
 
-    const fetchEquipTypeData = async (searchTxt, page_no = 1, page_size = 20) => {
+    const fetchEquipTypeData = async (searchTxt, page_no = 1, page_size = 20, ordered_by, sort_by) => {
         setDataFetching(true);
-        let params = `?page_size=${page_size}&page_no=${page_no}`;
-        if (searchTxt) {
-            let searchParams = `&equipment_search=${encodeURIComponent(searchTxt)}`;
-            params = params.concat(searchParams);
-        }
+
+        let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
+
+        if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+
         await getEquipTypeData(params)
             .then((res) => {
                 const response = res?.data;
@@ -152,8 +153,15 @@ const EquipmentType = () => {
     ];
 
     useEffect(() => {
-        fetchEquipTypeData(search, pageNo, pageSize);
-    }, [search, pageNo, pageSize]);
+        const ordered_by = sortBy.name === undefined || 'status' ? 'equipment_type' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+
+        fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
+    }, [search, pageNo, pageSize, sortBy]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -192,12 +200,9 @@ const EquipmentType = () => {
                                         openAddEquipTypeModal();
                                     }}
                                     icon={<PlusSVG />}
-                                    disabled
                                 />
                             </div>
-                        ) : (
-                            ''
-                        )}
+                        ) : null}
                     </div>
                 </Col>
             </Row>
@@ -211,7 +216,10 @@ const EquipmentType = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="equipmentType_list"
                         buttonGroupFilterOptions={[]}
-                        onSearch={setSearch}
+                        onSearch={(query) => {
+                            setPageNo(1);
+                            setSearch(query);
+                        }}
                         onStatus={setSelectedFilter}
                         rows={currentRow()}
                         searchResultRows={currentRow()}

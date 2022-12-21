@@ -78,7 +78,12 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     }, [isAddEquipTypeModalOpen]);
 
     return (
-        <Modal show={isAddEquipTypeModalOpen} onHide={closeAddEquipTypeModal} centered>
+        <Modal
+            show={isAddEquipTypeModalOpen}
+            onHide={closeAddEquipTypeModal}
+            backdrop="static"
+            keyboard={false}
+            centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Add Equipment Type</Typography.Header>
 
