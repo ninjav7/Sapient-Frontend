@@ -77,6 +77,7 @@ const ActiveDevices = () => {
     const [sortBy, setSortBy] = useState({});
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
+    const [deviceStatus, setDeviceStatus] = useState(0);
 
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -94,23 +95,15 @@ const ActiveDevices = () => {
             setOnlineDeviceData([]);
             setOfflineDeviceData([]);
             setActiveDeviceData([]);
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=${sort_by}&ordered_by=${ordered_by}&device_search=${search}`;
+            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
+            if (search) params = params.concat(`&device_search=${encodeURIComponent(search)}`);
+            if (deviceStatus !== 0) params = params.concat(`&stat=${deviceStatus === 1 ? 'true' : 'false'}`);
             await getActiveDeviceData(params)
                 .then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
-                    const sampleData = response.data;
                     setTotalItems(response?.total_data);
-
-                    let onlineData = [];
-                    let offlineData = [];
-
-                    response.data.forEach((record) => {
-                        record.status ? onlineData.push(record) : offlineData.push(record);
-                    });
-
-                    setOnlineDeviceData(onlineData);
-                    setOfflineDeviceData(offlineData);
+                    setDeviceStatus(0);
                     setIsDeviceProcessing(false);
                 })
                 .catch(() => {
@@ -119,7 +112,7 @@ const ActiveDevices = () => {
         };
 
         fetchActiveDeviceData();
-    }, [search, sortBy, pageNo, pageSize, bldgId]);
+    }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -141,7 +134,6 @@ const ActiveDevices = () => {
     }, []);
 
     const currentRow = () => {
-        // if (selectedFilter === 0) {
         return activeDeviceData;
     };
 
@@ -207,7 +199,7 @@ const ActiveDevices = () => {
     const renderFirmwareVersion = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.firmware_version === '' ? '-' : row?.firmware_version}
+                v{row?.firmware_version === '' ? '-' : row?.firmware_version}
             </Typography.Body>
         );
     };
@@ -217,7 +209,7 @@ const ActiveDevices = () => {
             <Badge
                 text={
                     <Typography.Body size={Typography.Sizes.md}>
-                        {row?.hardware_version === '' ? '-' : row?.hardware_version}
+                        v{row?.hardware_version === '' ? '-' : row?.hardware_version}
                     </Typography.Body>
                 }
             />
@@ -308,6 +300,7 @@ const ActiveDevices = () => {
                             setPageNo(1);
                             setSearch(query);
                         }}
+                        onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
