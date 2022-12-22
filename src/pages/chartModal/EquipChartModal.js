@@ -36,6 +36,7 @@ import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
+import { deviceType } from 'react-device-detect';
 //import Input from '../../sharedComponents/form/input/Input';
 
 const EquipChartModal = ({
@@ -64,7 +65,7 @@ const EquipChartModal = ({
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-        { value: 'mAh', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -249,14 +250,16 @@ const EquipChartModal = ({
     const fetchEquipmentChart = async (equipId, equiName) => {
         setIsEquipDataFetched(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000${
-            selectedConsumption === 'mAh' ? '&detailed=true' : ''
-        }`;
+        let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=${
+            selectedConsumption === 'rmsCurrentMilliAmps' && equipmentData?.device_type === 'active'
+                ? 'mAh'
+                : selectedConsumption
+        }&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let response = res.data;
 
-                if (selectedConsumption === 'mAh') {
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
                     let exploreData = [];
 
                     let data = response.data;

@@ -31,10 +31,13 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import Select from 'react-select';
 import { apiRequestBody } from '../../../helpers/helpers';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../../store/globalState';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const [userPermission] = useAtom(userPermissionData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -430,28 +433,33 @@ const IndividualActiveDevice = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div>
-                                <Link to="/settings/active-devices">
-                                    <button type="button" className="btn btn-default passive-cancel-style">
-                                        Cancel
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                                <div>
+                                    <Link to="/settings/active-devices">
+                                        <button type="button" className="btn btn-default passive-cancel-style">
+                                            Cancel
+                                        </button>
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary passive-save-style ml-2"
+                                        onClick={() => {
+                                            updateActiveDeviceData();
+                                            history.push('/settings/active-devices');
+                                        }}
+                                        disabled={
+                                            activeLocationId === 'Select location' ||
+                                            activeLocationId === activeData?.location_id
+                                                ? true
+                                                : false
+                                        }>
+                                        Save
                                     </button>
-                                </Link>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary passive-save-style ml-2"
-                                    onClick={() => {
-                                        updateActiveDeviceData();
-                                        history.push('/settings/active-devices');
-                                    }}
-                                    disabled={
-                                        activeLocationId === 'Select location' ||
-                                        activeLocationId === activeData?.location_id
-                                            ? true
-                                            : false
-                                    }>
-                                    Save
-                                </button>
-                            </div>
+                                </div>
+                            ) : (
+                                ''
+                            )}
                         </div>
                         <div className="mt-2 single-passive-tabs-style">
                             <span className="mr-3 single-passive-tab-active">Configure</span>
@@ -472,22 +480,38 @@ const IndividualActiveDevice = () => {
                                     {isLocationFetched ? (
                                         <Skeleton count={1} height={35} />
                                     ) : (
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                setActiveLocationId(e.target.value);
-                                            }}
-                                            value={activeLocationId}>
-                                            <option>Select Location</option>
-                                            {locationData.map((record, index) => {
-                                                return (
-                                                    <option value={record?.location_id}>{record?.location_name}</option>
-                                                );
-                                            })}
-                                        </Input>
+                                        <>
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.advanced_passive_device_permission
+                                                ?.edit ? (
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold"
+                                                    onChange={(e) => {
+                                                        setActiveLocationId(e.target.value);
+                                                    }}
+                                                    value={activeLocationId}>
+                                                    <option>Select Location</option>
+                                                    {locationData.map((record, index) => {
+                                                        return (
+                                                            <option value={record?.location_id}>
+                                                                {record?.location_name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Input>
+                                            ) : (
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="No Location Added"
+                                                    className="font-weight-bold"
+                                                    defaultValue={activeData?.location ? activeData?.location : ''}
+                                                    disabled
+                                                />
+                                            )}
+                                        </>
                                     )}
 
                                     <Form.Label className="device-sub-label-style mt-1">
