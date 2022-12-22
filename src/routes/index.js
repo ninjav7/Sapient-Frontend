@@ -517,6 +517,15 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
+            path: '/settings/users/user-profile/single/:userId/',
+            name: 'Users Profile',
+            component: UserProfile,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+
+        {
             path: '/settings/users',
             name: 'Users',
             component: Users,
@@ -542,14 +551,6 @@ const settingsRoutes = {
             parent: 'account',
         },
 
-        {
-            path: '/settings/users/user-profile/single/:userId/',
-            name: 'Users',
-            component: UserProfile,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'account',
-        },
         // {
         //     path: '/settings/roles',
         //     name: 'Roles',
