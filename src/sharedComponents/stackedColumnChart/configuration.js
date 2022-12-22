@@ -12,6 +12,7 @@ const options = (props) => {
         onMoreDetail: props.onMoreDetail,
         tooltipUnit: props.tooltipUnit,
         isLegendsEnabled: props.isLegendsEnabled,
+        yAxisWithAssignMeasure: false
     });
 
     return _.merge(
