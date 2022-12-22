@@ -1,6 +1,7 @@
+import _ from 'lodash';
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
 
-const options = (props) => ({
+const options = (props) => (_.merge({
     ...chartsBaseConfig({
         columnType: 'column',
         chartHeight: props.chartHeight || 341,
@@ -16,6 +17,6 @@ const options = (props) => ({
             stacking: 'normal',
         },
     },
-});
+}, props.restChartProps));
 
 export { options };

@@ -36,4 +36,14 @@ Default.args = {
             data: [20, 52, 16, 33],
         },
     ],
+    // You can overwrite base config we used for chart, pls refer to Official Highcharts doc.
+    restChartProps: {
+        xAxis: {
+            labels: {
+                // enabled: false
+            },
+            max: 0,
+            min: 99,
+        }
+    }
 };
