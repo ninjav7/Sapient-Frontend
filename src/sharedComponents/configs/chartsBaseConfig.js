@@ -12,6 +12,7 @@ const chartsBaseConfig = ({
     categories,
     tooltipUnit,
     yAxisWithAssignMeasure = true,
+    isLegendsEnabled = true
 }) => ({
     chart: {
         type: columnType,
@@ -26,7 +27,7 @@ const chartsBaseConfig = ({
         text: '',
     },
 
-    legend: {
+    legend: isLegendsEnabled ? {
         align: onMoreDetail ? 'left' : 'center',
         useHTML: true,
         labelFormat: renderComponents(
@@ -40,6 +41,8 @@ const chartsBaseConfig = ({
         itemMarginTop: 22,
         x: -5,
         symbolWidth: 10,
+    } : {
+        enabled: false
     },
 
     tooltip: {

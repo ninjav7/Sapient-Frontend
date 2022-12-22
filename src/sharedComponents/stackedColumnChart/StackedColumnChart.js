@@ -104,6 +104,10 @@ StackedColumnChart.propTypes = {
     tooltipUnit: PropTypes.string,
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     restChartProps: PropTypes.object,
+    isLegendsEnabled: PropTypes.bool,
+    xAxisCallBackValue: PropTypes.func,
+    tooltipCallBackValue: PropTypes.func,
+    timeZone: PropTypes.string,
 };
 
 export default StackedColumnChart;
