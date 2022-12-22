@@ -8,6 +8,29 @@
         border-radius: 0.5rem;
         padding: 1rem 1rem 0.3125rem 1rem;
         position: relative;
+
+        .highcharts-legend-item {
+            margin-top: -0.25rem;
+            .highcharts-point {
+                width: 0.5rem;
+                height: 0.5rem;
+            }
+        }
+
+        .chart-tooltip {
+            @extend .box-shadow-lg;
+            padding: 0.4375rem 0.8125rem;
+            background: $base-white;
+
+            border-radius: 0.25rem;
+            overflow: hidden;
+
+            border: 0.0625rem solid $primary-gray-450;
+
+            td + td {
+                padding-left: 1rem !important;
+            }
+        }
     }
 
     &-more-detail {
@@ -15,4 +38,16 @@
         bottom: 1rem;
         right: 0.5rem;
     }
+    &-download-button {
+        padding: 0 !important;
+        height: 2.25rem;
+        width: 2.25rem;
+        justify-content: center;
+        &.button svg path {
+            fill: $primary-gray-800;
+        }
+    }
+    
+    
 }
+
