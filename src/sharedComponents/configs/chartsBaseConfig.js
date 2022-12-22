@@ -12,6 +12,7 @@ const chartsBaseConfig = ({
     categories,
     tooltipUnit,
     yAxisWithAssignMeasure = true,
+    isLegendsEnabled = true,
 }) => ({
     chart: {
         type: columnType,
@@ -26,22 +27,25 @@ const chartsBaseConfig = ({
         text: '',
     },
 
-    legend: {
-        enabled: true,
-        align: onMoreDetail ? 'left' : 'center',
-        useHTML: true,
-        labelFormat: renderComponents(
-            <Typography.Subheader
-                size={Typography.Sizes.sm}
-                className="gray-550"
-                style={{ fill: colorPalette.primaryGray550 }}>
-                {'{name}'}
-            </Typography.Subheader>
-        ),
-        itemMarginTop: 22,
-        x: -5,
-        symbolWidth: 10,
-    },
+    legend: isLegendsEnabled
+        ? {
+              align: onMoreDetail ? 'left' : 'center',
+              useHTML: true,
+              labelFormat: renderComponents(
+                  <Typography.Subheader
+                      size={Typography.Sizes.sm}
+                      className="gray-550"
+                      style={{ fill: colorPalette.primaryGray550 }}>
+                      {'{name}'}
+                  </Typography.Subheader>
+              ),
+              itemMarginTop: 22,
+              x: -5,
+              symbolWidth: 10,
+          }
+        : {
+              enabled: false,
+          },
 
     tooltip: {
         headerFormat: `<div class="chart-tooltip">${renderComponents(
