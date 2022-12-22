@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Cookies } from 'react-cookie';
-import { Redirect, useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUserAuthenticated } from '../../helpers/authUtils';
-import { logoutUser } from '../../redux/actions';
 import { faGear } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { useAtom } from 'jotai';
