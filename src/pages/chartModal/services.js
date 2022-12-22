@@ -7,8 +7,8 @@ import {
     getMetadata,
 } from '../../services/Network';
 
-export function updateListSensor() {
-    return axiosInstance.get(`${listSensor}`).then((res) => {
+export function updateListSensor(params) {
+    return axiosInstance.get(`${listSensor}${params}`).then((res) => {
         return res;
     });
 }
