@@ -317,8 +317,8 @@ export const getActiveDeviceTableCSVExport = (tableData, columns) => {
                     arr.push(result);
                     break;
 
-                case 'status':
-                    const status = tableRow['status'];
+                case 'stat':
+                    const status = tableRow['stat'];
                     const data = status ? 'Online' : 'Offline';
                     arr.push(data);
                     break;
@@ -337,7 +337,6 @@ export const getActiveDeviceTableCSVExport = (tableData, columns) => {
 
                 case 'hardware_version':
                     const hardwareData = tableRow['hardware_version'];
-                    console.log(hardwareData);
                     const hardwareName = hardwareData === '' ? '-' : String(hardwareData);
                     arr.push(hardwareName);
                     break;
