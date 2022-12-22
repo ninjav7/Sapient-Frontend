@@ -1,7 +1,7 @@
 export const routesForAccountSettings = [
     '/settings/account',
     '/settings/buildings',
-    '/settings/users/users',
+    '/settings/users',
     '/settings/roles',
     '/settings/equipment-types',
     '/energy/portfolio/overview',

@@ -7,8 +7,8 @@ import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
 // settings
 import General from '../pages/settings/general-settings';
-import UtilityBills from '../pages/settings/UtilityBills';
-import Layout from '../pages/settings/Layout';
+import UtilityBills from '../pages/settings/utilityBills';
+import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels/Panels';
@@ -18,14 +18,14 @@ import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
-import Gateways from '../pages/settings/Gateways';
-import AccountSettings from '../pages/settings/AccountSettings';
+import Gateways from '../pages/settings/gateways';
+import AccountSettings from '../pages/settings/account-settings';
 import Buildings from '../pages/settings/buildings';
-import Users from '../pages/settings/users/Users';
+import Users from '../pages/settings/users';
 import UserProfile from '../pages/settings/users/UserProfile';
-import Roles from '../pages/settings/Roles';
-import SingleRole from '../pages/settings/SingleRole';
-import SingleRoleNew from '../pages/settings/SingleRoleNew';
+import Roles from '../pages/settings/roles';
+import SingleRole from '../pages/settings/roles/SingleRole';
+import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 
 import { userPermissionData } from '../store/globalState';
 import { useAtom } from 'jotai';
@@ -517,7 +517,16 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/users/users',
+            path: '/settings/users/user-profile/single/:userId/',
+            name: 'Users Profile',
+            component: UserProfile,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+
+        {
+            path: '/settings/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
@@ -542,14 +551,6 @@ const settingsRoutes = {
             parent: 'account',
         },
 
-        {
-            path: '/settings/users/user-profile/single/:userId/',
-            name: 'Users',
-            component: UserProfile,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'account',
-        },
         // {
         //     path: '/settings/roles',
         //     name: 'Roles',
