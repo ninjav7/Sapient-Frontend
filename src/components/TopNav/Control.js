@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Cookies } from 'react-cookie';
-import { Redirect, useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isUserAuthenticated } from '../../helpers/authUtils';
-import { logoutUser } from '../../redux/actions';
 import { faGear } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { useAtom } from 'jotai';
@@ -22,7 +20,7 @@ const Control = () => {
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
         '/settings/buildings',
-        '/settings/users/users',
+        '/settings/users',
         '/settings/roles',
         '/settings/equipment-types',
     ]);
@@ -82,7 +80,7 @@ const Control = () => {
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
-                        return current !== '/settings/users/users';
+                        return current !== '/settings/users';
                     })
                 );
             }
@@ -123,14 +121,14 @@ const Control = () => {
 
             if (
                 userPermission?.permissions?.permissions?.account_user_permission?.view &&
-                !accountRoutes.includes('/settings/users/users')
+                !accountRoutes.includes('/settings/users')
             ) {
                 setAccountRoutes((el) =>
                     el.filter((current) => {
                         return current !== '/settings/equipment-types';
                     })
                 );
-                setAccountRoutes((el) => [...el, '/settings/users/users']);
+                setAccountRoutes((el) => [...el, '/settings/users']);
             }
 
             if (

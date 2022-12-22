@@ -17,6 +17,7 @@ import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import moment from 'moment';
+import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
@@ -59,6 +60,7 @@ const Users = () => {
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const history = useHistory();
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
@@ -175,6 +177,12 @@ const Users = () => {
     useEffect(() => {
         debouncedFetchData();
     }, [bldgId, userSearchInfo]);
+
+    const handleClick = (row) => {
+        history.push({
+            pathname: `/settings/users/user-profile/single/${row?._id}`,
+        });
+    };
 
     useEffect(() => {
         if (generatedUserId === '') {
