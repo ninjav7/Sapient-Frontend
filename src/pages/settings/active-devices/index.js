@@ -103,14 +103,12 @@ const ActiveDevices = () => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
                     setTotalItems(response?.total_data);
-                    setDeviceStatus(0);
                     setIsDeviceProcessing(false);
                 })
                 .catch(() => {
                     setIsDeviceProcessing(false);
                 });
         };
-
         fetchActiveDeviceData();
     }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId]);
 
@@ -219,7 +217,7 @@ const ActiveDevices = () => {
     const headerProps = [
         {
             name: 'Status',
-            accessor: 'status',
+            accessor: 'stat',
             callbackValue: renderDeviceStatus,
             onSort: (method, name) => setSortBy({ method, name }),
         },
