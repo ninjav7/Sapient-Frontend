@@ -434,7 +434,7 @@ const EquipChartModal = ({
 
         if (equipmentData !== null) {
             if (equipmentData?.device_type !== 'passive') {
-                fetchActiveDeviceSensorData();
+                // fetchActiveDeviceSensorData();
             }
         }
     }, [equipmentData]);
