@@ -318,7 +318,6 @@ const IndividualActiveDevice = () => {
                 .then((res) => {
                     setDeviceData([]);
                     setSeriesData([]);
-
                     let response = res.data;
 
                     let data = response;
@@ -328,15 +327,15 @@ const IndividualActiveDevice = () => {
                     let NulledData = [];
                     data.map((ele) => {
                         if (ele?.consumption === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
                         } else {
                             if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                 NulledData.push({
-                                    x: moment.utc(new Date(ele.time_stamp)),
+                                    x: new Date(ele.time_stamp).getTime(),
                                     y: ele.consumption / UNIT_DIVIDER,
                                 });
                             } else {
-                                NulledData.push({ x: new Date(ele.time).getTime(), y: ele.consumption });
+                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
                             }
                         }
                     });
