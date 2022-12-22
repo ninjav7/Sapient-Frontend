@@ -241,20 +241,26 @@ const PlugRules = () => {
             },
         };
 
-        await fetchPlugRules(activeBuildingId, params).then((res) => {
-            if (res.status) {
-                setSkeletonLoading(false);
-            }
-            let response = res.data;
-            setPlugRuleData(response.data);
-            let onlineData = [];
-            let offlineData = [];
-            response.data.forEach((record) => {
-                record.is_active ? onlineData.push(record) : offlineData.push(record);
+        await fetchPlugRules(activeBuildingId, params)
+            .then((res) => {
+                if (res.status) {
+                    setSkeletonLoading(false);
+                }
+                let response = res.data;
+                setPlugRuleData(response.data);
+                let onlineData = [];
+                let offlineData = [];
+                response.data.forEach((record) => {
+                    record.is_active ? onlineData.push(record) : offlineData.push(record);
+                });
+                setOnlinePlugRuleData(onlineData);
+                setOfflinePlugRuleData(offlineData);
+            })
+            .catch((e) => {
+                setPlugRuleData([]);
+                setOnlinePlugRuleData([]);
+                setOfflinePlugRuleData([]);
             });
-            setOnlinePlugRuleData(onlineData);
-            setOfflinePlugRuleData(offlineData);
-        });
     };
 
     useEffect(() => {

@@ -24,6 +24,18 @@ const NavLinks = () => {
     const CONTROL_TAB = '/control/plug-rules';
     const EXPLORE_TAB = '/explore-page/by-buildings';
 
+    const routeToControlPage = () => {
+        history.push({
+            pathname: `/control/plug-rules`,
+        });
+    };
+
+    const routeToPortfolioPage = () => {
+        history.push({
+            pathname: `/energy/portfolio/overview`,
+        });
+    };
+
     const configRoutes = [
         '/settings/general',
         '/settings/layout',
@@ -35,15 +47,18 @@ const NavLinks = () => {
 
     const handleEnergyClick = () => {
         let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+
         if (!bldgObj?.active) {
-            history.push({
-                pathname: `/energy/portfolio/overview`,
-            });
+            routeToPortfolioPage();
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
         }
 
-        if (configRoutes.includes(location.pathname) || location.pathname.includes('/explore-page/by-equipment')) {
+        if (
+            configRoutes.includes(location.pathname) ||
+            location.pathname.includes('/explore-page/by-equipment') ||
+            location.pathname.includes('/control/plug-rules')
+        ) {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
             });
@@ -61,24 +76,24 @@ const NavLinks = () => {
             return;
         }
 
-        history.push({
-            pathname: `/energy/portfolio/overview`,
-        });
+        routeToPortfolioPage();
         updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
     };
 
     const handleControlClick = () => {
         let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
-        if (!bldgObj?.active) {
-            history.push({
-                pathname: `/energy/portfolio/overview`,
-            });
-            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
-            return;
+        if (bldgObj) {
+            if (!bldgObj?.active) {
+                routeToPortfolioPage();
+                updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+                return;
+            } else {
+                routeToControlPage();
+                return;
+            }
+        } else {
+            routeToControlPage();
         }
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
     };
 
     const handleExploreClick = () => {
@@ -94,7 +109,8 @@ const NavLinks = () => {
             configRoutes.includes(location.pathname) ||
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
-            location.pathname.includes('/energy/time-of-day')
+            location.pathname.includes('/energy/time-of-day') ||
+            location.pathname.includes('/control/plug-rules')
         ) {
             history.push({
                 pathname: `/explore-page/by-equipment/${bldgId}`,
