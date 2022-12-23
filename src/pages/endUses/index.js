@@ -6,7 +6,7 @@ import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, xaxisLabelsCount, xaxisLabelsFormat } from '../../helpers/helpers';
+import { apiRequestBody } from '../../helpers/helpers';
 import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
@@ -16,6 +16,7 @@ import { fetchTrendType } from './utils';
 import EndUsesTypeWidget from './endUsesTypeWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import Brick from '../../sharedComponents/brick';
+import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 
 const EndUsesPage = () => {
     const history = useHistory();
