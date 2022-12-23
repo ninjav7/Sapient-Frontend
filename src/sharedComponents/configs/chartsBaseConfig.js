@@ -13,6 +13,7 @@ const chartsBaseConfig = ({
     tooltipUnit,
     yAxisWithAssignMeasure = true,
     isLegendsEnabled = true,
+    tooltipValuesKey = '{point.y:.1f}',
 }) => ({
     chart: {
         type: columnType,
@@ -60,7 +61,7 @@ const chartsBaseConfig = ({
                 </Typography.Header>
             ).replace('content', '<span style="color:{series.color};">{series.name}:</span>')}
             </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
-                <Typography.Header size={Typography.Sizes.xs}>{'{point.y:.1f}'}</Typography.Header>
+                <Typography.Header size={Typography.Sizes.xs}>{tooltipValuesKey}</Typography.Header>
             )}${renderComponents(
             <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.sm}>
                 {tooltipUnit}

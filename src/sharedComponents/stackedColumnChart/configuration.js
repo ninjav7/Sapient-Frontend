@@ -12,7 +12,8 @@ const options = (props) => {
         onMoreDetail: props.onMoreDetail,
         tooltipUnit: props.tooltipUnit,
         isLegendsEnabled: props.isLegendsEnabled,
-        yAxisWithAssignMeasure: false
+        yAxisWithAssignMeasure: false,
+        tooltipValuesKey: '{point.y}',
     });
 
     return _.merge(
