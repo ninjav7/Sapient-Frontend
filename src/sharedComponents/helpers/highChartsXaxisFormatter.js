@@ -82,5 +82,5 @@ export const xaxisLabelsFormat = (daysCount) => {
     if (daysCount >= 91 && daysCount <= 181) return 'MM/DD';
 
     // >6 Months
-    if (daysCount >= 182) return 'MMM';
+    if (daysCount >= 182) return `MMM 'YY`;
 };

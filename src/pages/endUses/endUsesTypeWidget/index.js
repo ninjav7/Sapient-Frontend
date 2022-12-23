@@ -37,7 +37,7 @@ const EndUsesTypeWidget = ({
     daysCount,
 }) => {
     const formatXaxis = ({ value }) => {
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`${dateFormat}`);
+        return moment.utc(value).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
