@@ -34,13 +34,18 @@ const EndUsesTypeWidget = ({
     xAxisObj,
     timeZone,
     dateFormat,
+    daysCount,
 }) => {
     const formatXaxis = ({ value }) => {
-        return moment(value).tz(timeZone).format(dateFormat);
+        return daysCount >= 182
+            ? moment(value).add(1, 'months').tz(timeZone).format(`MMM`)
+            : moment(value).tz(timeZone).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
-        return moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+        return daysCount >= 182
+            ? moment(value).add(1, 'months').tz(timeZone).format(`MMM D 'YY @ hh:mm A`)
+            : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
     };
 
     return (

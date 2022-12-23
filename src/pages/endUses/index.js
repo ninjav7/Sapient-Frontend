@@ -240,6 +240,7 @@ const EndUsesPage = () => {
                 xAxisObj={xAxisObj}
                 timeZone={timeZone}
                 dateFormat={dateFormat}
+                daysCount={daysCount}
             />
 
             <Brick sizeInRem={1.5} />
