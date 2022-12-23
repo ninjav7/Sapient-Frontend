@@ -63,6 +63,25 @@ const EndUsesPage = () => {
     };
 
     useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
         if (startDate === null) {
             return;
         }
@@ -205,25 +224,6 @@ const EndUsesPage = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount);
     }, [daysCount]);
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'End Uses',
-                        path: '/energy/end-uses',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
 
     return (
         <React.Fragment>
