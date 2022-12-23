@@ -52,7 +52,15 @@ const SkeletonLoading = () => (
 const Users = () => {
     // Modal states
     const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setUserObj({
+            first_name: '',
+            last_name: '',
+            email: '',
+            role: '',
+        });
+        setShow(false);
+    };
     const handleShow = () => setShow(true);
     const [userPermission] = useAtom(userPermissionData);
 
@@ -86,7 +94,7 @@ const Users = () => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users/users',
+                        path: '/settings/users',
                         active: true,
                     },
                 ];
@@ -351,7 +359,7 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered>
                 <Modal.Header>
                     <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
                 </Modal.Header>
