@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { UNITS } from '../../../constants/units';
+import moment from 'moment';
 import StackedColumnChart from '../../../sharedComponents/stackedColumnChart/StackedColumnChart';
 import './style.scss';
 
@@ -25,7 +26,23 @@ const EndUsesCategory = ({ endUsesData }) => {
     );
 };
 
-const EndUsesTypeWidget = ({ endUsesData, stackedColumnChartData, stackedColumnChartCategories }) => {
+const EndUsesTypeWidget = ({
+    endUsesData,
+    stackedColumnChartData,
+    stackedColumnChartCategories,
+    endUseCategories,
+    xAxisObj,
+    timeZone,
+    dateFormat,
+}) => {
+    const formatXaxis = ({ value }) => {
+        return moment(value).tz(timeZone).format(dateFormat);
+    };
+
+    const toolTipFormatter = ({ value }) => {
+        return moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+    };
+
     return (
         <>
             <div className="enduse-type-widget-wrapper">
@@ -36,10 +53,15 @@ const EndUsesTypeWidget = ({ endUsesData, stackedColumnChartData, stackedColumnC
                 <div>
                     <StackedColumnChart
                         style={{ width: 'auto', border: '0rem' }}
-                        colors={['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5']}
+                        colors={endUseCategories}
                         categories={stackedColumnChartCategories}
                         tooltipUnit={UNITS.KWH}
                         series={stackedColumnChartData}
+                        isLegendsEnabled={false}
+                        timeZone={timeZone}
+                        xAxisCallBackValue={formatXaxis}
+                        restChartProps={xAxisObj}
+                        tooltipCallBackValue={toolTipFormatter}
                     />
                 </div>
             </div>

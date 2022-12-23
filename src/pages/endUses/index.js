@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import 'moment-timezone';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -8,7 +6,7 @@ import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, xaxisLabelsCount, xaxisLabelsFormat } from '../../helpers/helpers';
 import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
@@ -20,8 +18,11 @@ import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import Brick from '../../sharedComponents/brick';
 
 const EndUsesPage = () => {
+    const history = useHistory();
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -32,10 +33,27 @@ const EndUsesPage = () => {
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
 
+    const [endUseCategories, setEndUseCategories] = useState([]);
     const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
     const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
 
-    const history = useHistory();
+    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+
+    const [xAxisObj, setXAxisObj] = useState({
+        xAxis: {
+            tickPositioner: function () {
+                var positions = [],
+                    tick = Math.floor(this.dataMin),
+                    increment = Math.ceil((this.dataMax - this.dataMin) / 4);
+                if (this.dataMax !== null && this.dataMin !== null) {
+                    for (tick; tick - increment <= this.dataMax; tick += increment) {
+                        positions.push(tick);
+                    }
+                }
+                return positions;
+            },
+        },
+    });
 
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
@@ -43,25 +61,6 @@ const EndUsesPage = () => {
             pathname: `/energy/end-uses/${endUse}/${bldgId}`,
         });
     };
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'End Uses',
-                        path: '/energy/end-uses',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
 
     useEffect(() => {
         if (startDate === null) {
@@ -154,26 +153,31 @@ const EndUsesPage = () => {
 
         const endUsesChartDataFetch = async () => {
             setIsEndUsesChartLoading(true);
+            setStackedColumnChartData([]);
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUsesChart(bldgId, payload)
                 .then((res) => {
                     let responseData = res?.data;
 
                     const formattedTimestamp = [];
+                    const endUseColors = [];
+
                     const formattedData = responseData.map((record, index) => {
                         let obj = {
                             name: record?.name,
                             data: [],
                         };
+                        endUseColors.push(COLOR_SCHEME_BY_DEVICE[record?.name]);
                         record.data.forEach((el) => {
-                            if (index === 0) {
-                                formattedTimestamp.push(el?.time_stamp);
-                            }
-                            obj.data.push(el?.consumption / 1000);
+                            if (index === 0) formattedTimestamp.push(el?.time_stamp);
+                            obj.data.push(
+                                isNaN(el?.consumption) ? el?.consumption : Math.round(el?.consumption / 1000)
+                            );
                         });
                         return obj;
                     });
 
+                    setEndUseCategories(endUseColors);
                     setStackedColumnChartCategories(formattedTimestamp);
                     setStackedColumnChartData(formattedData);
                     setIsEndUsesChartLoading(false);
@@ -187,6 +191,40 @@ const EndUsesPage = () => {
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
 
+    useEffect(() => {
+        const getXaxisForDaysSelected = (days_count) => {
+            const xaxisObj = xaxisLabelsCount(days_count);
+            setXAxisObj(xaxisObj);
+        };
+
+        const getFormattedChartDates = (days_count) => {
+            const date_format = xaxisLabelsFormat(days_count);
+            setDateFormat(date_format);
+        };
+
+        getXaxisForDaysSelected(daysCount);
+        getFormattedChartDates(daysCount);
+    }, [daysCount]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
             <Header title="End Uses" type="page" />
@@ -197,6 +235,10 @@ const EndUsesPage = () => {
                 endUsesData={endUsesData}
                 stackedColumnChartData={stackedColumnChartData}
                 stackedColumnChartCategories={stackedColumnChartCategories}
+                endUseCategories={endUseCategories}
+                xAxisObj={xAxisObj}
+                timeZone={timeZone}
+                dateFormat={dateFormat}
             />
 
             <Brick sizeInRem={1.5} />
