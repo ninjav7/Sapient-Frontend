@@ -434,7 +434,7 @@ const ExploreByEquipment = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
-        if (conAPIFlag !== '' || selectedEndUse.length !== 0) {
+        if (conAPIFlag !== '') {
             (async () => {
                 const filters = await fetchExploreFilter(
                     bldgId,
@@ -644,7 +644,7 @@ const ExploreByEquipment = () => {
                 setFilterOptions(filterOptionsFetched);
             })();
         }
-    }, [conAPIFlag, selectedEndUse]);
+    }, [conAPIFlag]);
 
     useEffect(() => {
         if (perAPIFlag !== '') {
