@@ -180,7 +180,7 @@ const PlugRule = () => {
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-    
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -953,7 +953,7 @@ const PlugRule = () => {
     };
 
     const renderTagCell = (row) => {
-        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className='ml-1'/>);
+        return (row.tag || []).map((tag, key) => <Badge text={tag} key={key} className="ml-1" />);
     };
 
     const renderLastUsedCell = (row, childrenTemplate) => {
@@ -1138,7 +1138,6 @@ const PlugRule = () => {
         };
 
         search && fetchAllData();
-        
     }, [
         search,
         equpimentTypeFilterString,

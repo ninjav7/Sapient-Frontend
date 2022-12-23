@@ -100,6 +100,8 @@ const EquipmentType = () => {
     ) => {
         setDataFetching(true);
 
+        if (ordered_by === 'status') ordered_by = 'equipment_type';
+
         let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
 
         if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
@@ -192,7 +194,7 @@ const EquipmentType = () => {
     ];
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined || 'status' ? 'equipment_type' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'equipment_type' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
         fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);

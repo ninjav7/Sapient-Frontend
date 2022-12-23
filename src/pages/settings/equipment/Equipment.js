@@ -429,7 +429,7 @@ const Equipment = () => {
                 size={Typography.Sizes.md}
                 className="mouse-pointer"
                 onClick={() => handleOpenEditEquipment(row)}>
-                {row.equipments_name}
+                {row.equipments_name !== '' ? row.equipments_name : '-'}
             </Typography.Link>
         );
     };
