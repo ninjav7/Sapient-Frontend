@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import 'moment-timezone';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -8,7 +6,7 @@ import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody } from '../../helpers/helpers';
 import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
@@ -17,10 +15,15 @@ import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import { fetchTrendType } from './utils';
 import EndUsesTypeWidget from './endUsesTypeWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
+import Brick from '../../sharedComponents/brick';
+import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 
 const EndUsesPage = () => {
+    const history = useHistory();
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
@@ -28,134 +31,30 @@ const EndUsesPage = () => {
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const [barChartOptions, setBarChartOptions] = useState({
-        chart: {
-            type: 'bar',
-            height: 400,
-            stacked: true,
-            toolbar: {
-                show: true,
-            },
-            animations: {
-                enabled: false,
-            },
-            zoom: {
-                enabled: false,
-            },
-        },
-        colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '20%',
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            show: false,
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment(
-                        seriesX[0][dataPointIndex]
-                    )
-                        .tz(timeZone)
-                        .format(`MMM D 'YY @ hh:mm A`)}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            0
-                        )} kWh </td></tr>`;
-                }
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).tz(timeZone).format('M/DD');
-                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
-                    return `${weekText} ${dateText}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = val.toFixed(0);
-                    return `${print}`;
-                },
-            },
-        },
-        states: {
-            hover: {
-                filter: 'none',
-            },
-        },
-        legend: {
-            show: false,
-            position: 'top',
-            horizontalAlign: 'center',
-        },
-        grid: {
-            borderColor: '#f1f3fa',
-        },
-    });
-
-    const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
 
-    const history = useHistory();
+    const [endUseCategories, setEndUseCategories] = useState([]);
+    const [stackedColumnChartCategories, setStackedColumnChartCategories] = useState([]);
+    const [stackedColumnChartData, setStackedColumnChartData] = useState([]);
+
+    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+
+    const [xAxisObj, setXAxisObj] = useState({
+        xAxis: {
+            tickPositioner: function () {
+                var positions = [],
+                    tick = Math.floor(this.dataMin),
+                    increment = Math.ceil((this.dataMax - this.dataMin) / 4);
+                if (this.dataMax !== null && this.dataMin !== null) {
+                    for (tick; tick - increment <= this.dataMax; tick += increment) {
+                        positions.push(tick);
+                    }
+                }
+                return positions;
+            },
+        },
+    });
 
     const redirectToEndUse = (endUseType) => {
         let endUse = endUseType.toLowerCase();
@@ -163,17 +62,6 @@ const EndUsesPage = () => {
             pathname: `/energy/end-uses/${endUse}/${bldgId}`,
         });
     };
-
-    useEffect(() => {
-        if (endUsesData.length === 0) {
-            return;
-        }
-        let categories = [];
-        endUsesData.forEach((record) => {
-            categories.push(record.color);
-        });
-        setBarChartOptions({ ...barChartOptions, colors: categories });
-    }, [endUsesData]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -285,19 +173,33 @@ const EndUsesPage = () => {
 
         const endUsesChartDataFetch = async () => {
             setIsEndUsesChartLoading(true);
+            setStackedColumnChartData([]);
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUsesChart(bldgId, payload)
                 .then((res) => {
                     let responseData = res?.data;
 
-                    // Working loop with ApexChart
-                    responseData.forEach((endUse) => {
-                        endUse.data.forEach((record) => {
-                            record.y = parseInt(record.y / 1000);
+                    const formattedTimestamp = [];
+                    const endUseColors = [];
+
+                    const formattedData = responseData.map((record, index) => {
+                        let obj = {
+                            name: record?.name,
+                            data: [],
+                        };
+                        endUseColors.push(COLOR_SCHEME_BY_DEVICE[record?.name]);
+                        record.data.forEach((el) => {
+                            if (index === 0) formattedTimestamp.push(el?.time_stamp);
+                            obj.data.push(
+                                isNaN(el?.consumption) ? el?.consumption : Math.round(el?.consumption / 1000)
+                            );
                         });
+                        return obj;
                     });
 
-                    setBarChartData(responseData);
+                    setEndUseCategories(endUseColors);
+                    setStackedColumnChartCategories(formattedTimestamp);
+                    setStackedColumnChartData(formattedData);
                     setIsEndUsesChartLoading(false);
                 })
                 .catch((error) => {
@@ -310,27 +212,44 @@ const EndUsesPage = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        setBarChartOptions({ ...barChartOptions, xaxis: xaxisObj });
+        const getXaxisForDaysSelected = (days_count) => {
+            const xaxisObj = xaxisLabelsCount(days_count);
+            setXAxisObj(xaxisObj);
+        };
+
+        const getFormattedChartDates = (days_count) => {
+            const date_format = xaxisLabelsFormat(days_count);
+            setDateFormat(date_format);
+        };
+
+        getXaxisForDaysSelected(daysCount);
+        getFormattedChartDates(daysCount);
     }, [daysCount]);
 
     return (
         <React.Fragment>
             <Header title="End Uses" type="page" />
 
+            <Brick sizeInRem={1.5} />
+
             <EndUsesTypeWidget
                 endUsesData={endUsesData}
-                barChartOptions={barChartOptions}
-                barChartData={barChartData}
+                stackedColumnChartData={stackedColumnChartData}
+                stackedColumnChartCategories={stackedColumnChartCategories}
+                endUseCategories={endUseCategories}
+                xAxisObj={xAxisObj}
+                timeZone={timeZone}
+                dateFormat={dateFormat}
+                daysCount={daysCount}
             />
 
-            <div className="mt-4">
-                <TopEndUsesWidget
-                    title="Top Systems by Usage"
-                    subtitle="Click explore to see more energy usage details."
-                    data={topEndUsesData}
-                />
-            </div>
+            <Brick sizeInRem={1.5} />
+
+            <TopEndUsesWidget
+                title="Top Systems by Usage"
+                subtitle="Click explore to see more energy usage details."
+                data={topEndUsesData}
+            />
         </React.Fragment>
     );
 };
