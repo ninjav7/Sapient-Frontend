@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Button, Card, CardHeader, CardBody } from 'reactstrap';
+import { Row, Col, Label, Input, FormGroup, Card, CardHeader, CardBody } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -31,8 +31,14 @@ import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-ico
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
+import './styles.scss';
 import './panel-style.css';
-import Select from 'react-select';
+import Select from '../../../sharedComponents/form/select';
+import Typography from '../../../sharedComponents/typography';
+import { Button } from '../../../sharedComponents/button';
+import Brick from '../../../sharedComponents/brick';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import { panelType } from './utils';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -101,17 +107,6 @@ const EditBreakerPanel = () => {
     const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
     const [locationDataList, setLocationDataList] = useState([]);
-
-    const panelType = [
-        {
-            name: 'Distribution',
-            value: 'distribution',
-        },
-        {
-            name: 'Disconnect',
-            value: 'disconnect',
-        },
-    ];
 
     const disconnectBreaker = [
         {
@@ -446,6 +441,12 @@ const EditBreakerPanel = () => {
     const triggerBreakerAPI = () => {
         LoadingStore.update((s) => {
             s.isBreakerDataFetched = true;
+        });
+    };
+
+    const onCancelClick = () => {
+        history.push({
+            pathname: `/settings/panels`,
         });
     };
 
@@ -846,243 +847,144 @@ const EditBreakerPanel = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container" xl={10}>
-                    <span className="heading-style">Edit Panel</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Edit Panel</Typography.Header>
+                        </div>
                         {panelDataFetched ? (
-                            <Skeleton count={1} height={40} width={150} />
+                            <Skeleton count={1} height={35} width={135} />
                         ) : (
-                            <div className="ml-2">
-                                <Link to="/settings/panels">
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-2">
-                                        Cancel
-                                    </button>
-                                </Link>
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
+                            <div className="d-flex">
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={onCancelClick}
+                                />
+                                <Button
+                                    label={isProcessing ? 'Saving' : 'Save'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={savePanelData}
+                                    className="ml-2"
                                     disabled={comparePanelData(panel, fetchedPanelResponse)}
-                                    onClick={() => {
-                                        savePanelData();
-                                    }}>
-                                    {isProcessing ? 'Saving...' : 'Save'}
-                                </button>
+                                />
                             </div>
                         )}
                     </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col xl={10}>
-                    <div className="panel-first-row-style mt-4">
-                        <FormGroup>
-                            <Label for="panelName" className="card-title">
-                                Name
-                            </Label>
-                            {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
-                            ) : (
-                                <Input
-                                    type="text"
-                                    name="panelName"
-                                    id="panelName"
-                                    placeholder="Panel Name"
-                                    onChange={(e) => {
-                                        handleChange('panel_name', e.target.value);
-                                    }}
-                                    className="font-weight-bold"
-                                    value={panel.panel_name}
-                                />
-                            )}
-                        </FormGroup>
+                <Col lg={10}>
+                    <div className="edit-panel-custom-grid">
+                        <div>
+                            <InputTooltip
+                                label="Name"
+                                placeholder="Enter Panel Name"
+                                onChange={(e) => {
+                                    handleChange('panel_name', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={panel?.panel_name}
+                            />
+                        </div>
 
-                        <FormGroup>
-                            <Label for="userState" className="card-title">
-                                Parent Panel
-                            </Label>
-                            {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
-                            ) : (
-                                <Select
-                                    name="state"
-                                    id="userState"
-                                    isSearchable={true}
-                                    defaultValue={'Select Parent Panel'}
-                                    options={parentPanel}
-                                    onChange={(e) => {
-                                        handleChange('parent_id', e.value);
-                                    }}
-                                    value={parentPanel.filter((option) => option.value === panel.parent_id)}
-                                    className="font-weight-bold dropdownScrollaleDisable"
-                                    menuPlacement="auto"
-                                    menuPosition="fixed"
-                                    menuShouldBlockScroll={true}
-                                />
-                            )}
-                        </FormGroup>
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <Select
+                                placeholder="Select Parent Panel"
+                                options={parentPanel}
+                                currentValue={parentPanel.filter((option) => option.value === panel?.parent_id)}
+                                onChange={(e) => {
+                                    handleChange('parent_id', e.value);
+                                }}
+                                isSearchable={true}
+                            />
+                        </div>
 
-                        <FormGroup>
-                            <Label for="location" className="card-title">
-                                Location
-                            </Label>
-                            {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
-                            ) : (
-                                // <Input
-                                //     type="select"
-                                //     name="state"
-                                //     id="userState"
-                                //     className="font-weight-bold"
-                                //     onChange={(e) => {
-                                //         if (e.target.value === 'Select Location') {
-                                //             return;
-                                //         }
-                                //         handleChange('location_id', e.target.value);
-                                //     }}
-                                //     value={panel.location_id}>
-                                //     <option>Select Location</option>
-                                //     {locationDataList.map((record) => {
-                                //         return <option value={record.location_id}>{record.location_name}</option>;
-                                //     })}
-                                // </Input>
-                                <Select
-                                    name="state"
-                                    id="userState"
-                                    isSearchable={true}
-                                    defaultValue={'Select Location Type'}
-                                    options={location}
-                                    value={location.filter((option) => option.value === panel.location_id)}
-                                    onChange={(e) => {
-                                        handleChange('location_id', e.value);
-                                    }}
-                                    className="font-weight-bold dropdownScrollaleDisable"
-                                    menuPlacement="auto"
-                                    menuPosition="fixed"
-                                    menuShouldBlockScroll={true}
-                                />
-                            )}
-                        </FormGroup>
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <Select
+                                placeholder="Select Location"
+                                options={location}
+                                currentValue={location.filter((option) => option.value === panel?.location_id)}
+                                onChange={(e) => {
+                                    handleChange('location_id', e.value);
+                                }}
+                                isSearchable={true}
+                            />
+                        </div>
                     </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col xl={10}>
-                    <div className="panel-container-style mt-4">
-                        <Row className="panel-header-styling ml-1 mr-1">
-                            <div className="panel-header-filter">
-                                <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
-                                            Type
-                                        </Label>
-                                        {panelDataFetched ? (
-                                            <Form>
-                                                <Skeleton count={1} height={40} width={150} />
-                                            </Form>
-                                        ) : (
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="fields-disabled-style"
-                                                onChange={(e) => {
-                                                    setActivePanelType(e.target.value);
-                                                }}
-                                                disabled={true}
-                                                value={panel.panel_type}>
-                                                {panelType.map((record) => {
-                                                    return <option value={record.value}>{record.name}</option>;
-                                                })}
-                                            </Input>
-                                        )}
-                                    </FormGroup>
+                <Col lg={10}>
+                    <div className="panel-container-style">
+                        <Brick sizeInRem={2} />
+
+                        <div className="d-flex justify-content-between pl-4 pr-4">
+                            <div className="d-flex">
+                                <div className="mr-2">
+                                    <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    <Select
+                                        placeholder="Select Panel Types"
+                                        options={panelType}
+                                        currentValue={panelType.filter((option) => option.value === panel?.panel_type)}
+                                        onChange={(e) => {
+                                            setActivePanelType(e.target.value);
+                                        }}
+                                        isSearchable={true}
+                                        disabled={true}
+                                    />
                                 </div>
-                                <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
-                                            Number of Breakers
-                                        </Label>
-                                        {panelDataFetched ? (
-                                            <Form>
-                                                <Skeleton count={1} height={40} width={150} />
-                                            </Form>
-                                        ) : (
-                                            <>
-                                                {activePanelType === 'distribution' ? (
-                                                    <Input
-                                                        type="number"
-                                                        name="breakers"
-                                                        id="breakers"
-                                                        // value={panel.breakers_linked}
-                                                        value={breakersData?.length}
-                                                        onChange={(e) => {
-                                                            if (normalCount > parseInt(e.target.value)) {
-                                                                removeBreakersFromList();
-                                                            }
-                                                            if (normalCount < parseInt(e.target.value)) {
-                                                                addBreakersToList(e.target.value);
-                                                            }
-                                                            setNormalCount(parseInt(e.target.value));
-                                                        }}
-                                                        className="breaker-no-width fields-disabled-style"
-                                                        disabled={true}
-                                                    />
-                                                ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
-                                                        id="userState"
-                                                        className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        // value={panel.breakers}
-                                                        value={breakersData?.length}
-                                                        onChange={(e) => {
-                                                            handleDisconnectBreakers(
-                                                                disconnectBreakerCount,
-                                                                parseInt(e.target.value)
-                                                            );
-                                                            setDisconnectBreakerCount(parseInt(e.target.value));
-                                                        }}
-                                                        disabled={true}>
-                                                        {disconnectBreaker.map((record) => {
-                                                            return <option value={record.value}>{record.name}</option>;
-                                                        })}
-                                                    </Input>
-                                                )}
-                                            </>
-                                        )}
-                                    </FormGroup>
+                                <div className="ml-2">
+                                    <InputTooltip
+                                        type="number"
+                                        label="Number of Breakers"
+                                        placeholder="Enter Breakers"
+                                        onChange={(e) => {
+                                            if (normalCount > parseInt(e.target.value)) {
+                                                removeBreakersFromList();
+                                            }
+                                            if (normalCount < parseInt(e.target.value)) {
+                                                addBreakersToList(e.target.value);
+                                            }
+                                            setNormalCount(parseInt(e.target.value));
+                                        }}
+                                        labelSize={Typography.Sizes.md}
+                                        value={breakersData?.length}
+                                        disabled
+                                    />
                                 </div>
                             </div>
-                            <div className="float-right m-4">
-                                {panelDataFetched ? (
-                                    <Form>
-                                        <Skeleton count={1} height={40} width={150} />
-                                    </Form>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="btn btn-md btn-secondary font-weight-bold"
-                                        onClick={() => {
-                                            setIsEditable(!isEditable);
-                                            BreakersStore.update((s) => {
-                                                s.isEditable = !isEditable;
-                                            });
-                                        }}>
-                                        {isEditable ? 'Done Editing' : 'Edit Layout'}
-                                    </button>
-                                )}
+                            <div>
+                                <Button
+                                    label={isEditable ? 'Done Editing' : 'Edit Layout'}
+                                    size={Button.Sizes.lg}
+                                    type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
+                                    className="w-100"
+                                    onClick={() => {
+                                        setIsEditable(!isEditable);
+                                        BreakersStore.update((s) => {
+                                            s.isEditable = !isEditable;
+                                        });
+                                    }}
+                                />
                             </div>
-                        </Row>
+                        </div>
+
+                        <Brick sizeInRem={2.5} />
 
                         {isLoading && (
                             <Row>
@@ -1233,7 +1135,7 @@ const EditBreakerPanel = () => {
             </Row>
 
             <Row className="mt-4">
-                <Col xl={10}>
+                <Col lg={10}>
                     <Card className="custom-card">
                         <CardHeader>
                             <h5 className="danger-zone-style">Danger Zone</h5>
@@ -1310,17 +1212,17 @@ const EditBreakerPanel = () => {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleMainClose}>
+                    <button variant="light" onClick={handleMainClose}>
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         variant="primary"
                         onClick={() => {
                             updateChangesToPanel();
                             handleMainClose();
                         }}>
                         Save
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
 
@@ -1338,17 +1240,17 @@ const EditBreakerPanel = () => {
                     <div className="panel-edit-model-row-style ml-2 mr-2"></div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
+                    <button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         variant="primary"
                         onClick={() => {
                             unLinkAllBreakers();
                         }}
                         className="unlink-reset-style">
                         {isResetting ? 'Resetting' : 'Reset'}
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
 
@@ -1369,17 +1271,17 @@ const EditBreakerPanel = () => {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleDeletePanelAlertClose} className="unlink-cancel-style">
+                    <button variant="light" onClick={handleDeletePanelAlertClose} className="unlink-cancel-style">
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         variant="primary"
                         onClick={() => {
                             deletePanelBreakers();
                         }}
                         className="unlink-reset-style">
                         {isDeleting ? 'Deleting' : 'Delete'}
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>
