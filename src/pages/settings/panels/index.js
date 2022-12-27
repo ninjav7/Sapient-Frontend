@@ -15,7 +15,7 @@ import { pageListSizes } from '../../../helpers/helpers';
 import { useHistory } from 'react-router-dom';
 import { getPanelsTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
-import AddPanelModel from './AddPanelModel';
+import CreatePanel from './CreatePanel';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
@@ -57,9 +57,9 @@ const Panels = () => {
     const [sortBy, setSortBy] = useState({});
 
     // Edit Sensor Panel model state
-    const [showPanelModel, setShowPanelModel] = useState(false);
-    const closeAddPanelModel = () => setShowPanelModel(false);
-    const openAddPanelModel = () => setShowPanelModel(true);
+    const [isCreatePanelModalOpen, setShowPanelModel] = useState(false);
+    const closeCreatePanelModel = () => setShowPanelModel(false);
+    const openCreatePanelModel = () => setShowPanelModel(true);
 
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
@@ -238,7 +238,7 @@ const Panels = () => {
                                     label={'Add Panel'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={openAddPanelModel}
+                                    onClick={openCreatePanelModel}
                                     icon={<PlusSVG />}
                                 />
                             </div>
@@ -279,11 +279,10 @@ const Panels = () => {
                 </Col>
             </Row>
 
-            <AddPanelModel
-                showPanelModel={showPanelModel}
-                closeAddPanelModel={closeAddPanelModel}
-                panelData={panelsData}
-                // locationData={locationData}
+            <CreatePanel
+                isCreatePanelModalOpen={isCreatePanelModalOpen}
+                closeCreatePanelModel={closeCreatePanelModel}
+                fetchPanelsDataWithFilter={fetchPanelsDataWithFilter}
             />
         </React.Fragment>
     );
