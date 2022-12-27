@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { getBezierPath, getEdgeCenter } from 'react-flow-renderer';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
@@ -9,6 +7,8 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { setProcessing, breakerLinkingAlerts } from './utils';
+import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
+import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
 import './panel-style.css';
 
 const foreignObjectSize = 30;
@@ -593,21 +593,21 @@ export default function CustomEdge({
                     {/* When Source & Target Breaker not linked */}
                     {!sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
                         <button className="unlink_button_style" onClick={linkBreakers}>
-                            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
+                            <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is not linked & Target Breaker linked */}
                     {!sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
                         <button className="unlink_button_style" onClick={linkBreakers}>
-                            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
+                            <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is linked & Target Breaker not linked */}
                     {sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
                         <button className="unlink_button_style" onClick={linkBreakers}>
-                            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
+                            <UnlinkSVG />
                         </button>
                     )}
 
@@ -616,12 +616,12 @@ export default function CustomEdge({
                         <>
                             {isBothBreakerLinked() && (
                                 <button className="link_button_style" onClick={unlinkBreakers}>
-                                    <FontAwesomeIcon icon={faLinkHorizontal} color="#444CE7" size="md" />
+                                    <LinkSVG />
                                 </button>
                             )}
                             {!isBothBreakerLinked() && (
                                 <button className="unlink_button_style" onClick={linkBreakers}>
-                                    <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
+                                    <UnlinkSVG />
                                 </button>
                             )}
                         </>

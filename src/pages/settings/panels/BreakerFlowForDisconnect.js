@@ -12,6 +12,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import '../style.css';
 import './panel-style.css';
 
@@ -887,9 +888,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         tripleBreakerData?.data?.device_id
                                                     );
                                                 }}>
-                                                <div className="edit-icon-bg-styling mr-2">
-                                                    <i className="uil uil-pen"></i>
-                                                </div>
+                                                <PenSVG className="mr-2" />
 
                                                 <span className="font-weight-bold edit-btn-styling">Edit</span>
                                             </div>
@@ -924,9 +923,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         tripleBreakerData?.data?.device_id
                                                     );
                                                 }}>
-                                                <div className="edit-icon-bg-styling mr-2">
-                                                    <i className="uil uil-pen"></i>
-                                                </div>
+                                                <PenSVG className="mr-2" />
 
                                                 <span className="font-weight-bold edit-btn-styling">Edit</span>
                                             </div>
