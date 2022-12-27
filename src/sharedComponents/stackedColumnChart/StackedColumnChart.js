@@ -50,7 +50,7 @@ const StackedColumnChart = (props) => {
                     <Typography.Body size={Typography.Sizes.xs}>{props.subTitle}</Typography.Body>
                 </div>
                 <DropDownIcon
-                    classNameButton="column-chart-download-button"
+                    classNameButton="stacked-column-chart-download-button"
                     options={[
                         {
                             name: DOWNLOAD_TYPES.downloadSVG,
@@ -103,6 +103,11 @@ StackedColumnChart.propTypes = {
     chartHeight: PropTypes.number,
     tooltipUnit: PropTypes.string,
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+    restChartProps: PropTypes.object,
+    isLegendsEnabled: PropTypes.bool,
+    xAxisCallBackValue: PropTypes.func,
+    tooltipCallBackValue: PropTypes.func,
+    timeZone: PropTypes.string,
 };
 
 export default StackedColumnChart;

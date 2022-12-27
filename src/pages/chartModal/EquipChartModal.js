@@ -36,8 +36,6 @@ import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
-import { deviceType } from 'react-device-detect';
-//import Input from '../../sharedComponents/form/input/Input';
 
 const EquipChartModal = ({
     showEquipmentChart,
