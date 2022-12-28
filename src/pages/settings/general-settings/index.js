@@ -19,7 +19,7 @@ import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Brick from '../../../sharedComponents/brick';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import { updateGeneralBuildingChange } from './services';
+import { updateGeneralBuildingChange, updateBuildingTypes } from './services';
 import OperatingHours from './OperatingHours';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
@@ -44,17 +44,7 @@ const GeneralBuildingSettings = () => {
         total_paid: 0,
     });
 
-    const buildingType = [
-        {
-            label: 'Office Building',
-            value: 'Office Building',
-        },
-        {
-            label: 'Residential Building',
-            value: 'Residential Building',
-        },
-    ];
-
+    const [buildingType, setBuildingType] = useState({});
     const [bldgData, setBldgData] = useState({});
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
@@ -167,6 +157,7 @@ const GeneralBuildingSettings = () => {
                 localStorage.removeItem('generalState');
                 localStorage.removeItem('generalStreetAddress');
                 localStorage.removeItem('generalBuildingName');
+                localStorage.removeItem('generalBuildingType');
                 localStorage.removeItem('generaltimeZone');
                 localStorage.removeItem('generalZipCode');
                 BuildingListStore.update((s) => {
@@ -693,12 +684,12 @@ const GeneralBuildingSettings = () => {
                                             placeholder="Select Building Type"
                                             name="select"
                                             isSearchable={true}
-                                            defaultValue={buildingDetails.building_type}
-                                            options={buildingType}
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('building_type', e.value);
-                                                localStorage.setItem('generalBuildingType', e.value);
-                                            }}
+                                            defaultValue={buildingDetails?.building_type}
+                                            // options={buildingType}
+                                            // onChange={(e) => {
+                                            //     handleBldgSettingChanges('building_type', e.value);
+                                            //     localStorage.setItem('generalBuildingType', e.value);
+                                            // }}
                                             className="w-100"
                                         />
                                     ) : (
@@ -706,7 +697,7 @@ const GeneralBuildingSettings = () => {
                                             type="text"
                                             placeholder="Building Type Not Added"
                                             className="w-100"
-                                            value={buildingDetails.building_type}
+                                            value={buildingDetails?.building_type}
                                             disabled
                                         />
                                     )}
