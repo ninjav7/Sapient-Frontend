@@ -9,6 +9,7 @@ import {
     getLocation,
     generalEquipments,
     generalPassiveDevices,
+    updateLinkBreakers,
 } from '../../../services/Network';
 
 export function getPanelsData(params) {
@@ -45,4 +46,8 @@ export function getEquipmentsList(params, payload = {}) {
 
 export function getPassiveDeviceList(params) {
     return axiosInstance.get(`${generalPassiveDevices}${params}`).then((res) => res);
+}
+
+export function updateBreakersLink(params, payload) {
+    return axiosInstance.post(`${updateLinkBreakers}${params}`, payload).then((res) => res);
 }

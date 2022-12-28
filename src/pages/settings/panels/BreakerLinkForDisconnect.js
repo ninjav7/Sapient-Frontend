@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getBezierPath, getEdgeCenter } from 'react-flow-renderer';
-import axios from 'axios';
-import { Cookies } from 'react-cookie';
-import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { setProcessing, breakerLinkingAlerts } from './utils';
 import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
 import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
+import { updateBreakersLink } from './services';
 import './panel-style.css';
 
 const foreignObjectSize = 30;
@@ -40,9 +38,6 @@ export default function CustomEdge({
     });
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
 
     const disconnectBreakerLinkData = BreakersStore.useState((s) => s.disconnectBreakerLinkData);
     const disconnectedBreakersData = BreakersStore.useState((s) => s.disconnectedBreakersData);
@@ -147,45 +142,27 @@ export default function CustomEdge({
     };
 
     const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
-                .then((res) => {
-                    let response = res?.data;
-                    triggerBreakerAPI();
-                });
-        } catch (error) {
-            setProcessing(false);
-        }
+        const params = `?building_id=${bldgId}`;
+        const payload = [breakerObjOne, breakerObjTwo];
+        await updateBreakersLink(params, payload)
+            .then((res) => {
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setProcessing(false);
+            });
     };
 
     const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
-                    headers,
-                })
-                .then((res) => {
-                    let response = res?.data;
-                    triggerBreakerAPI();
-                });
-        } catch (error) {
-            setProcessing(false);
-        }
+        const params = `?building_id=${bldgId}`;
+        const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
+        await updateBreakersLink(params, payload)
+            .then((res) => {
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setProcessing(false);
+            });
     };
 
     const linkBreakers = () => {
