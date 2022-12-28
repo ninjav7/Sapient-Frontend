@@ -139,7 +139,7 @@ const Buildings = () => {
             <Badge
                 text={
                     <Typography.Body size={Typography.Sizes.md} className="gray-950">
-                        {row?.building_type === 'Office Building' ? 'Office' : 'Residential'}
+                        {row?.building_type === '' ? '-' : row?.building_type}
                     </Typography.Body>
                 }
             />
@@ -258,17 +258,17 @@ const Buildings = () => {
         const responseData = await getFiltersForBuildingsRequest();
         const filterData = responseData[0];
 
-        let building_type = [];
+        // let building_type = [];
 
-        filterData.building_type.forEach((filterItem) => {
-            let obj = {
-                value: filterItem,
-                label: filterItem,
-            };
-            building_type.push(obj);
-        });
+        // filterData.building_type.forEach((filterItem) => {
+        //     let obj = {
+        //         value: filterItem,
+        //         label: filterItem,
+        //     };
+        //     building_type.push(obj);
+        // });
 
-        setBuildingTypeList(building_type);
+        setBuildingTypeList(filterData?.building_type);
         setMinVal(filterData?.building_size_min);
         setMaxVal(filterData?.building_size_max);
         setMinSqftVal(filterData?.building_size_min);
@@ -348,19 +348,20 @@ const Buildings = () => {
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: buildingTypeList,
-                    onClose: (options) => {
-                        let opt = options;
-                        if (opt.length !== 0) {
-                            let buildingType = [];
-                            for (let i = 0; i < opt.length; i++) {
-                                buildingType.push(opt[i].value);
-                            }
-                            setSelectedBuildingType(buildingType);
-                        }
-                    },
-                    onDelete: () => {
-                        setSelectedBuildingType([]);
-                    },
+                    //Commented Future Use
+                    // onClose: (options) => {
+                    //     let opt = options;
+                    //     if (opt.length !== 0) {
+                    //         let buildingType = [];
+                    //         for (let i = 0; i < opt.length; i++) {
+                    //             buildingType.push(opt[i].value);
+                    //         }
+                    //         setSelectedBuildingType(buildingType);
+                    //     }
+                    // },
+                    // onDelete: () => {
+                    //     setSelectedBuildingType([]);
+                    // },
                 },
                 {
                     label: 'Square Footage',
@@ -461,7 +462,7 @@ const Buildings = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
-                        filterOptions={filterOptions}
+                        // filterOptions={filterOptions}
                         headers={headerProps}
                         filters={filtersValues}
                         totalCount={(() => {
