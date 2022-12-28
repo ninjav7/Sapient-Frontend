@@ -258,16 +258,6 @@ const Buildings = () => {
         const responseData = await getFiltersForBuildingsRequest();
         const filterData = responseData[0];
 
-        // let building_type = [];
-
-        // filterData.building_type.forEach((filterItem) => {
-        //     let obj = {
-        //         value: filterItem,
-        //         label: filterItem,
-        //     };
-        //     building_type.push(obj);
-        // });
-
         setBuildingTypeList(filterData?.building_type);
         setMinVal(filterData?.building_size_min);
         setMaxVal(filterData?.building_size_max);
@@ -348,7 +338,7 @@ const Buildings = () => {
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: buildingTypeList,
-                    //Commented Future Use
+                    //Commented For Future Use
                     // onClose: (options) => {
                     //     let opt = options;
                     //     if (opt.length !== 0) {
