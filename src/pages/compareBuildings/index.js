@@ -158,10 +158,10 @@ const CompareBuildings = () => {
                             pathname: `/energy/building/overview/${row.building_id}`,
                         });
                     }}>
-                    {row.building_name}
+                    {row.building_name !== '' ? row.building_name : '-'}
                 </Typography.Link>
                 <div className="mt-1 w-50">
-                    <Badge text="Office" />
+                    <Badge text={row.building_type || '-'} />
                 </div>
             </>
         );
