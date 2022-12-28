@@ -2,20 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import axios from 'axios';
 import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import {
-    BaseUrl,
-    getLocation,
-    generalPanels,
-    generalPassiveDevices,
-    getBreakers,
-    updatePanel,
-    generalEquipments,
-} from '../../../services/Network';
-import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
@@ -29,9 +18,18 @@ import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { panelType } from './utils';
+import { comparePanelData, panelType } from './utils';
 import DeletePanel from './DeletePanel';
-import { deleteCurrentPanel, resetAllBreakers } from './services';
+import {
+    deleteCurrentPanel,
+    getBreakersList,
+    getEquipmentsList,
+    getLocationData,
+    getPanelsData,
+    getPassiveDeviceList,
+    resetAllBreakers,
+    updatePanelDetails,
+} from './services';
 import UnlinkBreakers from './UnlinkBreakers';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -51,8 +49,6 @@ const edgeTypes = {
 };
 
 const EditBreakerPanel = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const history = useHistory();
 
     const { panelId } = useParams();
@@ -352,42 +348,41 @@ const EditBreakerPanel = () => {
         }
     };
 
-    // Compare Panel Objs to Enable Save Button
-    const comparePanelData = (obj1, obj2) => {
-        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    const getTargetBreakerId = (targetBreakerNo) => {
+        let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
+        return targetObj?.id;
+    };
+
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
+    };
+
+    const onCancelClick = () => {
+        history.push({
+            pathname: `/settings/panels`,
+        });
     };
 
     const savePanelData = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let panelObj = {
-                name: panel.panel_name,
-                parent_panel: panel.parent_id,
-                space_id: panel.location_id,
-            };
-
-            setIsProcessing(true);
-            let params = `?panel_id=${panelId}`;
-            await axios
-                .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
+        setIsProcessing(true);
+        const params = `?panel_id=${panelId}`;
+        const panelObj = {
+            name: panel?.panel_name,
+            parent_panel: panel?.parent_id,
+            space_id: panel?.location_id,
+        };
+        await updatePanelDetails(params, panelObj)
+            .then((res) => {
+                setIsProcessing(false);
+                history.push({
+                    pathname: `/settings/panels`,
                 });
-            setIsProcessing(false);
-
-            history.push({
-                pathname: `/settings/panels`,
+            })
+            .catch(() => {
+                setIsProcessing(false);
             });
-        } catch (error) {
-            setIsProcessing(false);
-        }
     };
 
     const unLinkAllBreakers = async () => {
@@ -422,42 +417,119 @@ const EditBreakerPanel = () => {
             });
     };
 
-    const getTargetBreakerId = (targetBreakerNo) => {
-        let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
-        return targetObj?.id;
-    };
-
-    const triggerBreakerAPI = () => {
+    const fetchBreakersData = async (panel_id, bldg_id) => {
+        setBreakerDataFetched(true);
         LoadingStore.update((s) => {
-            s.isBreakerDataFetched = true;
+            s.isLoading = true;
         });
+        const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
+        await getBreakersList(params)
+            .then((res) => {
+                const response = res?.data?.data;
+                setBreakersData(response);
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
+            })
+            .catch(() => {
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
+            });
     };
 
-    const onCancelClick = () => {
-        history.push({
-            pathname: `/settings/panels`,
-        });
+    const fetchEquipmentData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}&occupancy_filter=true`;
+        await getEquipmentsList(params)
+            .then((res) => {
+                const responseData = res?.data?.data;
+                const equipArray = [];
+                responseData.forEach((record) => {
+                    if (record.equipments_name === '') {
+                        return;
+                    }
+                    const obj = {
+                        label: record.equipments_name,
+                        value: record.equipments_id,
+                        breakerId: record.breaker_id,
+                    };
+                    equipArray.push(obj);
+                });
+                setEquipmentData(equipArray);
+                BreakersStore.update((s) => {
+                    s.equipmentData = equipArray;
+                });
+            })
+            .catch(() => {});
     };
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Panels',
-                        path: '/settings/panels',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
+    const fetchSinglePanelData = async (panel_id, bldg_id) => {
+        setIsPanelDataFetched(true);
+        const params = `?building_id=${bldg_id}&panel_id=${panel_id}`;
+        await getPanelsData(params)
+            .then((res) => {
+                const response = res?.data;
+                setActivePanelType(response?.panel_type);
+                setNormalCount(response?.breakers);
+                setPanel(response);
+                BreakersStore.update((s) => {
+                    s.panelData = response;
+                });
+                setFetchedPanelResponse(response);
+                setIsPanelDataFetched(false);
+            })
+            .catch(() => {
+                setIsPanelDataFetched(false);
             });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-            window.scrollTo(0, 0);
-        };
-        updateBreadcrumbStore();
-    }, []);
+    };
+
+    const fetchPanelsData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}`;
+        await getPanelsData(params)
+            .then((res) => {
+                let response = res?.data;
+                setPanelsDataList(response);
+            })
+            .catch(() => {});
+    };
+
+    const fetchPassiveDeviceData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}&page_no=1&page_size=150`;
+        await getPassiveDeviceList(params)
+            .then((res) => {
+                const responseData = res?.data?.data;
+                const newArray = [];
+                responseData.forEach((record) => {
+                    const obj = {
+                        label: record?.identifier,
+                        value: record?.equipments_id,
+                    };
+                    newArray.push(obj);
+                });
+                setPassiveDeviceData(newArray);
+                BreakersStore.update((s) => {
+                    s.passiveDeviceData = newArray;
+                });
+                BreakersStore.update((s) => {
+                    s.totalPassiveDeviceCount = res?.data?.total_data;
+                });
+            })
+            .catch(() => {});
+    };
+
+    const fetchLocationData = async (bldg_id) => {
+        const params = `/${bldg_id}`;
+        await getLocationData(params)
+            .then((res) => {
+                const responseData = res?.data;
+                responseData.length === 0 ? setLocationDataList([]) : setLocationDataList(responseData);
+            })
+            .catch(() => {});
+    };
 
     useEffect(() => {
         BreadcrumbStore.update((bs) => {
@@ -494,227 +566,18 @@ const EditBreakerPanel = () => {
         if (!isBreakerApiTrigerred) {
             return;
         }
-        const fetchBreakersData = async () => {
-            try {
-                setBreakerDataFetched(true);
-                LoadingStore.update((s) => {
-                    s.isLoading = true;
-                });
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
 
-                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
-
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    setBreakersData(response);
-                    setBreakerDataFetched(false);
-                    LoadingStore.update((s) => {
-                        s.isBreakerDataFetched = false;
-                        s.isLoading = false;
-                    });
-                });
-            } catch (error) {
-                setBreakerDataFetched(false);
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
-            }
-        };
-        const fetchEquipmentData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let equipArray = [];
-                    responseData.forEach((record) => {
-                        if (record.equipments_name === '') {
-                            return;
-                        }
-                        let obj = {
-                            label: record.equipments_name,
-                            value: record.equipments_id,
-                            breakerId: record.breaker_id,
-                        };
-                        equipArray.push(obj);
-                    });
-                    setEquipmentData(equipArray);
-                    BreakersStore.update((s) => {
-                        s.equipmentData = equipArray;
-                    });
-                });
-            } catch (error) {}
-        };
-        fetchBreakersData();
-        fetchEquipmentData();
+        fetchBreakersData(panelId, bldgId);
+        fetchEquipmentData(bldgId);
     }, [isBreakerApiTrigerred]);
 
     useEffect(() => {
-        const fetchSinglePanelData = async () => {
-            try {
-                setIsPanelDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActivePanelType(response.panel_type);
-                    setNormalCount(response.breakers);
-                    setPanel(response);
-                    BreakersStore.update((s) => {
-                        s.panelData = response;
-                    });
-                    setFetchedPanelResponse(response);
-                    setIsPanelDataFetched(false);
-                });
-            } catch (error) {
-                setIsPanelDataFetched(false);
-            }
-        };
-
-        const fetchBreakersData = async () => {
-            try {
-                setBreakerDataFetched(true);
-                LoadingStore.update((s) => {
-                    s.isLoading = true;
-                });
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
-
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    setBreakersData(response);
-                    setBreakerDataFetched(false);
-                    LoadingStore.update((s) => {
-                        s.isBreakerDataFetched = false;
-                        s.isLoading = false;
-                    });
-                });
-            } catch (error) {
-                setBreakerDataFetched(false);
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
-            }
-        };
-
-        const fetchPanelsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPanelsDataList(response);
-                });
-            } catch (error) {}
-        };
-
-        const fetchEquipmentData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let equipArray = [];
-                    responseData.forEach((record) => {
-                        if (record.equipments_name === '') {
-                            return;
-                        }
-                        let obj = {
-                            label: record.equipments_name,
-                            value: record.equipments_id,
-                            breakerId: record.breaker_id,
-                        };
-                        equipArray.push(obj);
-                    });
-                    setEquipmentData(equipArray);
-                    BreakersStore.update((s) => {
-                        s.equipmentData = equipArray;
-                    });
-                });
-            } catch (error) {}
-        };
-
-        const fetchPassiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&page_size=150&page_no=1`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let newArray = [];
-                    responseData.forEach((record) => {
-                        let obj = {
-                            label: record.identifier,
-                            value: record.equipments_id,
-                        };
-                        newArray.push(obj);
-                    });
-                    setPassiveDeviceData(newArray);
-                    BreakersStore.update((s) => {
-                        s.passiveDeviceData = newArray;
-                    });
-                    BreakersStore.update((s) => {
-                        s.totalPassiveDeviceCount = res?.data?.total_data;
-                    });
-                });
-            } catch (error) {}
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationDataList(res.data);
-                });
-            } catch (error) {}
-        };
-
-        fetchSinglePanelData();
-        fetchBreakersData();
-        fetchPanelsData();
-        fetchPassiveDeviceData();
-        fetchLocationData();
-        fetchEquipmentData();
+        fetchSinglePanelData(panelId, bldgId);
+        fetchBreakersData(panelId, bldgId);
+        fetchEquipmentData(bldgId);
+        fetchPanelsData(bldgId);
+        fetchPassiveDeviceData(bldgId);
+        fetchLocationData(bldgId);
     }, [panelId]);
 
     useEffect(() => {
@@ -833,6 +696,26 @@ const EditBreakerPanel = () => {
             s.disconnectBreakerLinkData = disconnectBreakerLinks;
         });
     }, [breakersData]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: '/settings/panels',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+            window.scrollTo(0, 0);
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
@@ -959,7 +842,7 @@ const EditBreakerPanel = () => {
                                 <div className="ml-2">
                                     <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
                                     <Brick sizeInRem={0.25} />
-                                    {panelDataFetched ? (
+                                    {panelDataFetched || isLoading ? (
                                         <Skeleton count={1} height={35} width={225} />
                                     ) : (
                                         <InputTooltip

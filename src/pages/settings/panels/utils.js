@@ -42,3 +42,7 @@ export const voltsOption = [
     { value: '480', label: '480' },
     { value: '600', label: '600' },
 ];
+
+export const comparePanelData = (obj1, obj2) => {
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+};
