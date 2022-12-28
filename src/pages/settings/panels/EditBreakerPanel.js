@@ -39,6 +39,9 @@ import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { panelType } from './utils';
+import colorPalette from '../../../assets/scss/_colors.scss';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -883,43 +886,56 @@ const EditBreakerPanel = () => {
                 <Col lg={10}>
                     <div className="edit-panel-custom-grid">
                         <div>
-                            <InputTooltip
-                                label="Name"
-                                placeholder="Enter Panel Name"
-                                onChange={(e) => {
-                                    handleChange('panel_name', e.target.value);
-                                }}
-                                labelSize={Typography.Sizes.md}
-                                value={panel?.panel_name}
-                            />
+                            <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {panelDataFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <InputTooltip
+                                    placeholder="Enter Panel Name"
+                                    onChange={(e) => {
+                                        handleChange('panel_name', e.target.value);
+                                    }}
+                                    labelSize={Typography.Sizes.md}
+                                    value={panel?.panel_name}
+                                />
+                            )}
                         </div>
 
                         <div>
                             <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
                             <Brick sizeInRem={0.25} />
-                            <Select
-                                placeholder="Select Parent Panel"
-                                options={parentPanel}
-                                currentValue={parentPanel.filter((option) => option.value === panel?.parent_id)}
-                                onChange={(e) => {
-                                    handleChange('parent_id', e.value);
-                                }}
-                                isSearchable={true}
-                            />
+                            {panelDataFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Parent Panel"
+                                    options={parentPanel}
+                                    currentValue={parentPanel.filter((option) => option.value === panel?.parent_id)}
+                                    onChange={(e) => {
+                                        handleChange('parent_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                />
+                            )}
                         </div>
 
                         <div>
                             <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
                             <Brick sizeInRem={0.25} />
-                            <Select
-                                placeholder="Select Location"
-                                options={location}
-                                currentValue={location.filter((option) => option.value === panel?.location_id)}
-                                onChange={(e) => {
-                                    handleChange('location_id', e.value);
-                                }}
-                                isSearchable={true}
-                            />
+                            {panelDataFetched ? (
+                                <Skeleton count={1} height={35} width={475} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Location"
+                                    options={location}
+                                    currentValue={location.filter((option) => option.value === panel?.location_id)}
+                                    onChange={(e) => {
+                                        handleChange('location_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                />
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -937,35 +953,46 @@ const EditBreakerPanel = () => {
                                 <div className="mr-2">
                                     <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
                                     <Brick sizeInRem={0.25} />
-                                    <Select
-                                        placeholder="Select Panel Types"
-                                        options={panelType}
-                                        currentValue={panelType.filter((option) => option.value === panel?.panel_type)}
-                                        onChange={(e) => {
-                                            setActivePanelType(e.target.value);
-                                        }}
-                                        isSearchable={true}
-                                        disabled={true}
-                                    />
+                                    {panelDataFetched ? (
+                                        <Skeleton count={1} height={35} width={125} />
+                                    ) : (
+                                        <Select
+                                            placeholder="Select Panel Types"
+                                            options={panelType}
+                                            currentValue={panelType.filter(
+                                                (option) => option.value === panel?.panel_type
+                                            )}
+                                            onChange={(e) => {
+                                                setActivePanelType(e.target.value);
+                                            }}
+                                            isSearchable={true}
+                                            disabled={true}
+                                        />
+                                    )}
                                 </div>
                                 <div className="ml-2">
-                                    <InputTooltip
-                                        type="number"
-                                        label="Number of Breakers"
-                                        placeholder="Enter Breakers"
-                                        onChange={(e) => {
-                                            if (normalCount > parseInt(e.target.value)) {
-                                                removeBreakersFromList();
-                                            }
-                                            if (normalCount < parseInt(e.target.value)) {
-                                                addBreakersToList(e.target.value);
-                                            }
-                                            setNormalCount(parseInt(e.target.value));
-                                        }}
-                                        labelSize={Typography.Sizes.md}
-                                        value={breakersData?.length}
-                                        disabled
-                                    />
+                                    <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    {panelDataFetched ? (
+                                        <Skeleton count={1} height={35} width={225} />
+                                    ) : (
+                                        <InputTooltip
+                                            type="number"
+                                            placeholder="Enter Breakers"
+                                            onChange={(e) => {
+                                                if (normalCount > parseInt(e.target.value)) {
+                                                    removeBreakersFromList();
+                                                }
+                                                if (normalCount < parseInt(e.target.value)) {
+                                                    addBreakersToList(e.target.value);
+                                                }
+                                                setNormalCount(parseInt(e.target.value));
+                                            }}
+                                            labelSize={Typography.Sizes.md}
+                                            value={breakersData?.length}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
                             <div>
@@ -1100,72 +1127,68 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <Card className="custom-card ml-4 mr-4">
+                        <div className="custom-card ml-4 mr-4">
                             <CardHeader>
-                                <h5 className="danger-zone-style">Danger Zone</h5>
+                                <div>
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        style={{ color: colorPalette.primaryGray550 }}>
+                                        Danger Zone
+                                    </Typography.Subheader>
+                                </div>
                             </CardHeader>
 
                             <CardBody>
-                                {isLoading ? (
-                                    <Form>
-                                        <Skeleton count={1} height={40} width={150} />
-                                    </Form>
-                                ) : (
-                                    <Form>
-                                        <FormGroup>
-                                            <button
-                                                type="button"
-                                                onClick={handleUnlinkAlertShow}
-                                                className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
-                                                <FontAwesomeIcon
-                                                    icon={faLinkHorizontalSlash}
-                                                    color="#FFFFFF"
-                                                    size="md"
-                                                    className="mr-2"
-                                                />
-                                                Unlink All Breakers
-                                            </button>
-                                        </FormGroup>
-                                    </Form>
-                                )}
+                                <div>
+                                    {isLoading ? (
+                                        <Skeleton count={1} height={40} width={125} />
+                                    ) : (
+                                        <Button
+                                            label="Unlink All Breakers"
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.secondaryDistructive}
+                                            onClick={handleUnlinkAlertShow}
+                                            icon={<UnlinkOldSVG />}
+                                        />
+                                    )}
+                                </div>
                             </CardBody>
-                        </Card>
+                        </div>
                     </div>
                 </Col>
             </Row>
 
-            <Row className="mt-4">
+            <Brick sizeInRem={2} />
+
+            <Row>
                 <Col lg={10}>
-                    <Card className="custom-card">
+                    <div className="custom-card">
                         <CardHeader>
-                            <h5 className="danger-zone-style">Danger Zone</h5>
+                            <div>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    style={{ color: colorPalette.primaryGray550 }}>
+                                    Danger Zone
+                                </Typography.Subheader>
+                            </div>
                         </CardHeader>
 
                         <CardBody>
-                            {isLoading ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={150} />
-                                </Form>
-                            ) : (
-                                <Form>
-                                    <FormGroup>
-                                        <button
-                                            type="button"
-                                            onClick={handleDeletePanelAlertShow}
-                                            className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
-                                            <FontAwesomeIcon
-                                                icon={faTrash}
-                                                color="#FFFFFF"
-                                                size="md"
-                                                className="mr-2"
-                                            />
-                                            Delete Panel
-                                        </button>
-                                    </FormGroup>
-                                </Form>
-                            )}
+                            <div>
+                                {isLoading ? (
+                                    <Skeleton count={1} height={40} width={125} />
+                                ) : (
+                                    <Button
+                                        label="Delete Panel"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
+                                        onClick={handleDeletePanelAlertShow}
+                                        icon={<DeleteSVG />}
+                                    />
+                                )}
+                            </div>
                         </CardBody>
-                    </Card>
+                    </div>
                 </Col>
             </Row>
 
