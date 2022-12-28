@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Card, CardHeader, CardBody } from 'reactstrap';
+import { Row, Col, Input } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import {
@@ -14,8 +14,6 @@ import {
     getBreakers,
     updatePanel,
     generalEquipments,
-    resetBreakers,
-    deletePanel,
 } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -26,22 +24,20 @@ import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakerFlowForDistribution';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import '../style.css';
-import './styles.scss';
-import './panel-style.css';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { panelType } from './utils';
-import colorPalette from '../../../assets/scss/_colors.scss';
-import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
+import DeletePanel from './DeletePanel';
+import { deleteCurrentPanel, resetAllBreakers } from './services';
+import UnlinkBreakers from './UnlinkBreakers';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import '../style.css';
+import './styles.scss';
+import './panel-style.css';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -395,45 +391,35 @@ const EditBreakerPanel = () => {
     };
 
     const unLinkAllBreakers = async () => {
-        try {
-            setIsResetting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
+        setIsResetting(true);
+        const params = `?panel_id=${panelId}`;
+        const payload = { panel_id: panelId };
+        await resetAllBreakers(params, payload)
+            .then((res) => {
                 setIsResetting(false);
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
                 triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsResetting(false);
             });
-        } catch (error) {
-            setIsResetting(false);
-        }
     };
 
-    const deletePanelBreakers = async () => {
-        try {
-            setIsDeleting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?panel_id=${panelId}`;
-            await axios.delete(`${BaseUrl}${deletePanel}${params}`, { headers }).then((res) => {
-                let response = res.data;
+    const deletePanel = async () => {
+        setIsDeleting(true);
+        const params = `?panel_id=${panelId}`;
+        await deleteCurrentPanel(params)
+            .then((res) => {
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
                 history.push({
                     pathname: `/settings/panels`,
                 });
+            })
+            .catch(() => {
+                setIsDeleting(false);
             });
-        } catch (error) {
-            setIsDeleting(false);
-        }
     };
 
     const getTargetBreakerId = (targetBreakerNo) => {
@@ -1127,70 +1113,28 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <div className="custom-card ml-4 mr-4">
-                            <CardHeader>
-                                <div>
-                                    <Typography.Subheader
-                                        size={Typography.Sizes.md}
-                                        style={{ color: colorPalette.primaryGray550 }}>
-                                        Danger Zone
-                                    </Typography.Subheader>
-                                </div>
-                            </CardHeader>
-
-                            <CardBody>
-                                <div>
-                                    {isLoading ? (
-                                        <Skeleton count={1} height={40} width={125} />
-                                    ) : (
-                                        <Button
-                                            label="Unlink All Breakers"
-                                            size={Button.Sizes.md}
-                                            type={Button.Type.secondaryDistructive}
-                                            onClick={handleUnlinkAlertShow}
-                                            icon={<UnlinkOldSVG />}
-                                        />
-                                    )}
-                                </div>
-                            </CardBody>
-                        </div>
+                        <UnlinkBreakers
+                            isResetting={isResetting}
+                            isLoading={isLoading}
+                            showUnlinkAlert={showUnlinkAlert}
+                            handleUnlinkAlertShow={handleUnlinkAlertShow}
+                            handleUnlinkAlertClose={handleUnlinkAlertClose}
+                            unLinkAllBreakers={unLinkAllBreakers}
+                        />
                     </div>
                 </Col>
             </Row>
 
             <Brick sizeInRem={2} />
 
-            <Row>
-                <Col lg={10}>
-                    <div className="custom-card">
-                        <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    Danger Zone
-                                </Typography.Subheader>
-                            </div>
-                        </CardHeader>
-
-                        <CardBody>
-                            <div>
-                                {isLoading ? (
-                                    <Skeleton count={1} height={40} width={125} />
-                                ) : (
-                                    <Button
-                                        label="Delete Panel"
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryDistructive}
-                                        onClick={handleDeletePanelAlertShow}
-                                        icon={<DeleteSVG />}
-                                    />
-                                )}
-                            </div>
-                        </CardBody>
-                    </div>
-                </Col>
-            </Row>
+            <DeletePanel
+                isDeleting={isDeleting}
+                isLoading={isLoading}
+                showDeletePanelAlert={showDeletePanelAlert}
+                handleDeletePanelAlertShow={handleDeletePanelAlertShow}
+                handleDeletePanelAlertClose={handleDeletePanelAlertClose}
+                deletePanel={deletePanel}
+            />
 
             <Modal show={showMain} onHide={handleMainClose} centered backdrop="static" keyboard={false}>
                 <Modal.Body>
@@ -1245,65 +1189,6 @@ const EditBreakerPanel = () => {
                             handleMainClose();
                         }}>
                         Save
-                    </button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink All Breakers</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">
-                            Are you sure you want to unlink all breakers on this panel?
-                        </div>
-                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
-                        Cancel
-                    </button>
-                    <button
-                        variant="primary"
-                        onClick={() => {
-                            unLinkAllBreakers();
-                        }}
-                        className="unlink-reset-style">
-                        {isResetting ? 'Resetting' : 'Reset'}
-                    </button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal
-                show={showDeletePanelAlert}
-                onHide={handleDeletePanelAlertClose}
-                centered
-                backdrop="static"
-                keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Panel</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">
-                            Are you sure you want to delete the Panel and the Panel Inputs it contains?
-                        </div>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button variant="light" onClick={handleDeletePanelAlertClose} className="unlink-cancel-style">
-                        Cancel
-                    </button>
-                    <button
-                        variant="primary"
-                        onClick={() => {
-                            deletePanelBreakers();
-                        }}
-                        className="unlink-reset-style">
-                        {isDeleting ? 'Deleting' : 'Delete'}
                     </button>
                 </Modal.Footer>
             </Modal>
