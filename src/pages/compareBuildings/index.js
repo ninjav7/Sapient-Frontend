@@ -232,11 +232,7 @@ const CompareBuildings = () => {
 
     useEffect(() => {
         fetchcompareBuildingsData();
-    }, [daysCount]);
-
-    useEffect(() => {
-        fetchcompareBuildingsData();
-    }, [search, sortBy]);
+    }, [search, sortBy, daysCount]);
 
     useEffect(() => {
         if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
