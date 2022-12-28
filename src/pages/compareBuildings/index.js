@@ -117,9 +117,9 @@ const CompareBuildings = () => {
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
-                let topVal = Math.max(...response?.data.map((o) => o.energy_density));
+                let topVal = Math.max(...response.map((o) => o.energy_density));
                 setTopEnergyDensity(topVal);
-                setBuildingsData(response?.data);
+                setBuildingsData(response);
                 setIsLoadingBuildingData(false);
             })
             .catch((error) => {
