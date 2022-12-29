@@ -191,7 +191,7 @@ const BuildingOverview = () => {
             return 0;
         }
         let percentage = Math.round(((value - min) / (max - min)) * 100);
-        return Math.round(percentage);
+        return isNaN(percentage) ? 0 : Math.round(percentage);
     };
 
     const handleRouteChange = (path) => {

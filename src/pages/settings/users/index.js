@@ -17,6 +17,7 @@ import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import moment from 'moment';
+import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
@@ -51,7 +52,15 @@ const SkeletonLoading = () => (
 const Users = () => {
     // Modal states
     const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setUserObj({
+            first_name: '',
+            last_name: '',
+            email: '',
+            role: '',
+        });
+        setShow(false);
+    };
     const handleShow = () => setShow(true);
     const [userPermission] = useAtom(userPermissionData);
 
@@ -59,6 +68,7 @@ const Users = () => {
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const history = useHistory();
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
@@ -84,7 +94,7 @@ const Users = () => {
                 let newList = [
                     {
                         label: 'Users',
-                        path: '/settings/users/users',
+                        path: '/settings/users',
                         active: true,
                     },
                 ];
@@ -175,6 +185,12 @@ const Users = () => {
     useEffect(() => {
         debouncedFetchData();
     }, [bldgId, userSearchInfo]);
+
+    const handleClick = (row) => {
+        history.push({
+            pathname: `/settings/users/user-profile/single/${row?._id}`,
+        });
+    };
 
     useEffect(() => {
         if (generatedUserId === '') {
@@ -343,7 +359,7 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered>
                 <Modal.Header>
                     <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
                 </Modal.Header>

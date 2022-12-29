@@ -989,7 +989,7 @@ const TimeOfDay = () => {
                 <Header title="Time of Day" type="page" />
             </div>
 
-            <div className="custom-time-of-day-grid mt-4 mb-4">
+            <div className="custom-time-of-day-grid mt-4 mb-3">
                 <div>
                     <EndUseTotals
                         series={donutChartData}
