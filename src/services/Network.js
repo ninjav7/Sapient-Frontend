@@ -107,6 +107,7 @@ export const deleteBreaker = '/api/config/panels/delete/breaker';
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
 export const energyUsage = '/api/energy/energy/usage';
+export const getBuildingTypes = '/api/config/building-types';
 
 // compare-buildings
 export const compareBuildings = '/api/energy/energy/compare-buildings';

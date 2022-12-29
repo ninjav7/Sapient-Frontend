@@ -256,8 +256,7 @@ const Buildings = () => {
 
     const getFilters = async () => {
         const responseData = await getFiltersForBuildingsRequest();
-        const filterData = responseData[0];
-
+        const filterData = responseData.data[0];
         setBuildingTypeList(filterData?.building_type);
         setMinVal(filterData?.building_size_min);
         setMaxVal(filterData?.building_size_max);
@@ -337,21 +336,23 @@ const Buildings = () => {
                     value: 'building_type',
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: buildingTypeList,
-                    //Commented For Future Use
-                    // onClose: (options) => {
-                    //     let opt = options;
-                    //     if (opt.length !== 0) {
-                    //         let buildingType = [];
-                    //         for (let i = 0; i < opt.length; i++) {
-                    //             buildingType.push(opt[i].value);
-                    //         }
-                    //         setSelectedBuildingType(buildingType);
-                    //     }
-                    // },
-                    // onDelete: () => {
-                    //     setSelectedBuildingType([]);
-                    // },
+                    filterOptions: buildingTypeList.map((filterItem) => ({
+                        value: filterItem.building_type_id,
+                        label: filterItem.building_type,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let buildingType = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                buildingType.push(opt[i].value);
+                            }
+                            setSelectedBuildingType(buildingType);
+                        }
+                    },
+                    onDelete: () => {
+                        setSelectedBuildingType([]);
+                    },
                 },
                 {
                     label: 'Square Footage',
@@ -452,7 +453,7 @@ const Buildings = () => {
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
-                        // filterOptions={filterOptions}
+                        filterOptions={filterOptions}
                         headers={headerProps}
                         filters={filtersValues}
                         totalCount={(() => {
