@@ -1,5 +1,5 @@
 import axiosInstance from '../../../services/axiosInstance';
-import { createBuilding, generalBuilding, getFiltersForBuildings } from '../../../services/Network';
+import { createBuilding, generalBuilding, getFiltersForBuildings, getBuildingTypes } from '../../../services/Network';
 
 export function saveBuildingData(payload) {
     return axiosInstance.post(`${createBuilding}`, payload).then((res) => res);
@@ -23,4 +23,8 @@ export function getFiltersForBuildingsRequest(args) {
     return axiosInstance.get(`${getFiltersForBuildings}`).then((res) => {
         return res.data;
     });
+}
+
+export function updateBuildingTypes() {
+    return axiosInstance.get(`${getBuildingTypes}`).then((res) => res);
 }

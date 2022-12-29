@@ -44,7 +44,7 @@ const GeneralBuildingSettings = () => {
         total_paid: 0,
     });
 
-    const [buildingType, setBuildingType] = useState({});
+    const [buildingType, setBuildingType] = useState([]);
     const [bldgData, setBldgData] = useState({});
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
@@ -143,6 +143,22 @@ const GeneralBuildingSettings = () => {
         },
     };
 
+    const fetchBuildingType = async () => {
+        await updateBuildingTypes()
+            .then((res) => {
+                let response = res.data.data;
+                let arr = [];
+                response.data.map((el) => {
+                    arr.push({
+                        label: el.building_type,
+                        value: el.building_type_id,
+                    });
+                });
+                setBuildingType(arr);
+            })
+            .catch((error) => {});
+    };
+
     const saveBuildingSettings = async () => {
         setLoadButton(true);
         const params = `/${bldgId}`;
@@ -186,6 +202,7 @@ const GeneralBuildingSettings = () => {
                 let buildingDetailsObj = {
                     name: data.building_name,
                     building_type: data.building_type,
+                    building_type_id: data.building_type_id,
                     square_footage: data.building_size,
                     active: data.active,
                     timezone: data.timezone,
@@ -254,11 +271,11 @@ const GeneralBuildingSettings = () => {
             setBuildingDetails(obj);
         }
 
-        if (key === 'building_type') {
+        if (key === 'building_type_id') {
             let obj = Object.assign({}, buildingDetails);
-
+            let arr = buildingType.filter((ele) => ele.value === value);
             obj[key] = value;
-
+            obj['building_type'] = arr[0]?.label;
             setBuildingDetails(obj);
         }
 
@@ -400,6 +417,10 @@ const GeneralBuildingSettings = () => {
             setTimeZone('12');
         }
     }, [bldgData]);
+
+    useEffect(() => {
+        fetchBuildingType();
+    }, []);
 
     useEffect(() => {
         if (selectedTimezone?.value) {
@@ -684,12 +705,12 @@ const GeneralBuildingSettings = () => {
                                             placeholder="Select Building Type"
                                             name="select"
                                             isSearchable={true}
-                                            defaultValue={buildingDetails?.building_type}
-                                            // options={buildingType}
-                                            // onChange={(e) => {
-                                            //     handleBldgSettingChanges('building_type', e.value);
-                                            //     localStorage.setItem('generalBuildingType', e.value);
-                                            // }}
+                                            defaultValue={buildingDetails?.building_type_id}
+                                            options={buildingType}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('building_type_id', e.value);
+                                                localStorage.setItem('generalBuildingType', e.value);
+                                            }}
                                             className="w-100"
                                         />
                                     ) : (

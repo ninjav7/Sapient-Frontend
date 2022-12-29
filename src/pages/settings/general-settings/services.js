@@ -6,5 +6,5 @@ export function updateGeneralBuildingChange(payload = {}, params) {
 }
 
 export function updateBuildingTypes() {
-    return axiosInstance.patch(`${getBuildingTypes}`).then((res) => res);
+    return axiosInstance.get(`${getBuildingTypes}`).then((res) => res);
 }
