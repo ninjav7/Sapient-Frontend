@@ -4,28 +4,45 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { saveBuildingData } from './services';
+import { saveBuildingData, updateBuildingTypes } from './services';
 import Select from '../../../sharedComponents/form/select';
 
 const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBuildingFilter }) => {
     const defaultBuildingObj = {
         building_name: '',
         building_type: '',
+        building_type_id: '',
     };
 
     const [buildingData, setBuildingData] = useState(defaultBuildingObj);
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValidation, setFormValidation] = useState(false);
-
-    const buildingType = [
-        { value: 'Office Building', label: 'Office Building' },
-        { value: 'Residential Building', label: 'Residential Building' },
-    ];
+    const [buildingType, setBuildingType] = useState([]);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, buildingData);
+        if (key === 'building_type_id') {
+            let arr = buildingType.filter((ele) => ele.value === value);
+            obj['building_type'] = arr[0]?.label;
+        }
         obj[key] = value;
         setBuildingData(obj);
+    };
+
+    const fetchBuildingType = async () => {
+        await updateBuildingTypes()
+            .then((res) => {
+                let response = res.data.data;
+                let arr = [];
+                response.data.map((el) => {
+                    arr.push({
+                        label: el.building_type,
+                        value: el.building_type_id,
+                    });
+                });
+                setBuildingType(arr);
+            })
+            .catch((error) => {});
     };
 
     const saveBuildingDetails = async () => {
@@ -43,12 +60,16 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
     };
 
     useEffect(() => {
-        if (buildingData.building_name.length > 3 && buildingData?.building_type.length > 0) {
+        if (buildingData.building_name.length > 3 && buildingData?.building_type_id.length > 0) {
             setFormValidation(true);
         } else {
             setFormValidation(false);
         }
     }, [buildingData]);
+
+    useEffect(() => {
+        fetchBuildingType();
+    }, []);
 
     return (
         <Modal show={isAddBuildingModalOpen} onHide={closeAddBuildingModal} backdrop="static" keyboard={false} centered>
@@ -75,9 +96,8 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
                     <Select
                         placeholder="Select Building Type"
                         options={buildingType}
-                        defaultValue={buildingType.filter((option) => option.value === buildingData?.type)}
                         onChange={(e) => {
-                            handleChange('building_type', e.value);
+                            handleChange('building_type_id', e.value);
                         }}
                         isSearchable={true}
                     />

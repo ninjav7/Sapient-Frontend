@@ -117,9 +117,9 @@ const CompareBuildings = () => {
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
-                let topVal = Math.max(...response?.data.map((o) => o.energy_density));
+                let topVal = Math.max(...response.map((o) => o.energy_density));
                 setTopEnergyDensity(topVal);
-                setBuildingsData(response?.data);
+                setBuildingsData(response);
                 setIsLoadingBuildingData(false);
             })
             .catch((error) => {
@@ -158,10 +158,10 @@ const CompareBuildings = () => {
                             pathname: `/energy/building/overview/${row.building_id}`,
                         });
                     }}>
-                    {row.building_name}
+                    {row.building_name !== '' ? row.building_name : '-'}
                 </Typography.Link>
                 <div className="mt-1 w-50">
-                    <Badge text="Office" />
+                    <Badge text={row.building_type || '-'} />
                 </div>
             </>
         );
@@ -232,11 +232,7 @@ const CompareBuildings = () => {
 
     useEffect(() => {
         fetchcompareBuildingsData();
-    }, [daysCount]);
-
-    useEffect(() => {
-        fetchcompareBuildingsData();
-    }, [search, sortBy]);
+    }, [search, sortBy, daysCount]);
 
     useEffect(() => {
         if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
