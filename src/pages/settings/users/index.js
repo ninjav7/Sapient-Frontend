@@ -138,7 +138,8 @@ const Users = () => {
         let params = `?user_info=${userSearchInfo}`;
         await fetchMemberUserList(params)
             .then((res) => {
-                let response = res.data;
+                let response = res.data.data;
+                console.log(response);
                 setUserData(response.data);
                 setDataFetched(true);
                 setIsUserDataFetched(false);
