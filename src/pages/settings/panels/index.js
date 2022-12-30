@@ -94,6 +94,8 @@ const Panels = () => {
         setPanelsData([]);
         setDataFetching(true);
 
+        if (ordered_by === 'breakers_linked') ordered_by = 'panel_name';
+
         let params = `?building_id=${bldgId}&page_no=${page_no}&page_size=${page_size}&ordered_by=${ordered_by}`;
 
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
