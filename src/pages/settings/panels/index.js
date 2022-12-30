@@ -42,6 +42,10 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={10} />
             </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -157,6 +161,10 @@ const Panels = () => {
         );
     };
 
+    const renderPanelVoltage = (row) => {
+        return <Typography.Body size={Typography.Sizes.md}>{row?.voltage ? row?.voltage : '-'}</Typography.Body>;
+    };
+
     const headerProps = [
         {
             name: 'Name',
@@ -186,6 +194,12 @@ const Panels = () => {
             name: 'Type',
             accessor: 'panel_type',
             callbackValue: renderPanelType,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Panel Voltage',
+            accessor: 'voltage',
+            callbackValue: renderPanelVoltage,
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
