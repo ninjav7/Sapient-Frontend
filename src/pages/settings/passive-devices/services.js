@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import axiosInstance from '../../../services/axiosInstance';
 import {
     createDevice,
@@ -5,6 +6,7 @@ import {
     generalPassiveDevices,
     updateDevice,
     deletePassiveDevice,
+    getFiltersForEquipment,
 } from '../../../services/Network';
 
 export function savePassiveDeviceData(params, payload) {
@@ -25,4 +27,26 @@ export function updatePassiveDeviceData(params, payload) {
 
 export function deletePassiveDeviceData(params) {
     return axiosInstance.delete(`${deletePassiveDevice}${params}`).then((res) => res);
+}
+
+export function fetchPassiveFilter(args) {
+    const macAddressArr = args?.deviceMacAddress;
+    const macAddressQuery = macAddressArr ? macAddressArr.join('+') : null;
+
+    return axiosInstance
+        .get(`${getFiltersForEquipment}`, {
+            params: _.pickBy(
+                {
+                    query_collection: 'devices',
+                    device_type: 'passive',
+                    building_id: args.bldgId,
+                    mac_address: macAddressQuery,
+                    device_model: args.deviceModelString,
+                },
+                _.identity
+            ),
+        })
+        .then((res) => {
+            return res.data;
+        });
 }

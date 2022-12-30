@@ -14,11 +14,12 @@ import Brick from '../../../sharedComponents/brick';
 import CreatePassiveDevice from './CreatePassiveDevice';
 import { pageListSizes } from '../../../helpers/helpers';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData } from './services';
+import { getPassiveDeviceData, fetchPassiveFilter } from './services';
 import DeletePassiveDevice from './DeletePassiveDevice';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
@@ -94,6 +95,14 @@ const PassiveDevices = () => {
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
+    const [deviceMacAddress, setDeviceMacAddress] = useState('');
+    const [deviceModelString, setDeviceModelString] = useState('');
+    const [sensorString, setSensorString] = useState('');
+    const [selectedDeviceModel, setSelectedDeviceModel] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState([]);
+
     const fetchDefaultPassiveDeviceData = async () => {
         setIsDataFetching(true);
         let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
@@ -144,6 +153,122 @@ const PassiveDevices = () => {
                 setIsDataFetching(false);
             });
     };
+
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
+
+    const filterLabelHandler = (setter, options) => {
+        setter(options.map(({ label }) => label));
+        setPageNo(1);
+    };
+
+    const getFilters = async () => {
+        const filters = await fetchPassiveFilter({
+            bldgId,
+            deviceMacAddress,
+            deviceModelString,
+        });
+        console.log(filters.data);
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'Device ID',
+                    value: 'identifier',
+                    placeholder: 'All Device IDs',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.deviceIdentifier.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setDeviceIdFilterString, options);
+                        filterLabelHandler(setDeviceMacAddress, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setDeviceIdFilterString('');
+                        setDeviceMacAddress('');
+                    },
+                },
+                {
+                    label: 'Models',
+                    value: 'model',
+                    placeholder: 'All Models',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.model.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setDeviceModelString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setDeviceModelString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_number',
+                    placeholder: 'ALL Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setSensorString, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setSensorString('');
+                    },
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+        // const filterData = responseData.data[0];
+        // console.log(responseData);
+        // console.log(filterData);
+        // setDeviceModel(filterData?.device_model);
+    };
+
+    useEffect(() => {
+        getFilters();
+        console.log('Filters');
+    }, [bldgId, deviceModelString, sensorString, deviceMacAddress, deviceIdFilterString]);
+
+    // useEffect(() => {
+    //     if (selectedDeviceModel.length !== 0) {
+    //         console.log(filterOptionsFetched);
+    //         const filterOptionsFetched = [
+    //             {
+    //                 label: 'Modal',
+    //                 value: 'device_model',
+    //                 placeholder: 'All Device Model',
+    //                 filterType: FILTER_TYPES.MULTISELECT,
+    //                 filterOptions: deviceModel.map((filterItem) => ({
+    //                     value: filterItem.device_model,
+    //                 })),
+    //                 onClose: (options) => {
+    //                     let opt = options;
+    //                     if (opt.length !== 0) {
+    //                         let deviceModel = [];
+    //                         for (let i = 0; i < opt.length; i++) {
+    //                             deviceModel.push(opt[i].value);
+    //                         }
+    //                         setSelectedDeviceModel(deviceModel);
+    //                     }
+    //                 },
+    //                 onDelete: () => {
+    //                     setSelectedDeviceModel([]);
+    //                 },
+    //             },
+    //         ];
+    //         setFilterOptions(filterOptionsFetched);
+    //     }
+    // }, [deviceModel]);
 
     const currentRow = () => {
         if (selectedFilter === 0) {
@@ -334,6 +459,7 @@ const PassiveDevices = () => {
                         onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
                         currentPage={pageNo}

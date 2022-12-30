@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { getActiveDeviceData } from './services';
+import { getActiveDeviceData, fetchActiveFilter } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -17,6 +17,7 @@ import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
@@ -87,6 +88,16 @@ const ActiveDevices = () => {
     const [selectedFilter, setSelectedFilter] = useState(0);
     const [userPermission] = useAtom(userPermissionData);
 
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
+    const [deviceMacAddress, setDeviceMacAddress] = useState('');
+    const [deviceModelString, setDeviceModelString] = useState('');
+    const [sensorString, setSensorString] = useState('');
+    const [firmWareString, setFirmWareString] = useState('');
+    const [hardWareString, setHardWareString] = useState('');
+    const [selectedDeviceModel, setSelectedDeviceModel] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState([]);
+
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
@@ -111,6 +122,131 @@ const ActiveDevices = () => {
         };
         fetchActiveDeviceData();
     }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId]);
+
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
+
+    const filterLabelHandler = (setter, options) => {
+        setter(options.map(({ label }) => label));
+        setPageNo(1);
+    };
+
+    const getFilters = async () => {
+        const filters = await fetchActiveFilter({
+            bldgId,
+            deviceMacAddress,
+            deviceModelString,
+            firmWareString,
+            hardWareString,
+        });
+        console.log(filters.data);
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'Device ID',
+                    value: 'identifier',
+                    placeholder: 'All Device IDs',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.deviceIdentifier.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setDeviceIdFilterString, options);
+                        filterLabelHandler(setDeviceMacAddress, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setDeviceIdFilterString('');
+                        setDeviceMacAddress('');
+                    },
+                },
+                {
+                    label: 'Models',
+                    value: 'model',
+                    placeholder: 'All Models',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.model.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setDeviceModelString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setDeviceModelString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_number',
+                    placeholder: 'ALL Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setSensorString, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setSensorString('');
+                    },
+                },
+                {
+                    label: 'FirmWare Version',
+                    value: 'firmware_version',
+                    placeholder: 'ALL FirmWare Version',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.firmware_version.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setFirmWareString, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setFirmWareString('');
+                    },
+                },
+                {
+                    label: 'HardWare Version',
+                    value: 'hardware_version',
+                    placeholder: 'ALL HardWare Version',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.hardware_version.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        filterHandler(setHardWareString, options);
+                    },
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setHardWareString('');
+                    },
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+    };
+
+    useEffect(() => {
+        getFilters();
+        console.log('Filters');
+    }, [
+        bldgId,
+        deviceModelString,
+        sensorString,
+        deviceMacAddress,
+        deviceIdFilterString,
+        firmWareString,
+        hardWareString,
+    ]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -301,6 +437,7 @@ const ActiveDevices = () => {
                         onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
                         currentPage={pageNo}
