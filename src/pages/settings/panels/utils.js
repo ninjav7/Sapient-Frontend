@@ -10,6 +10,22 @@ export const breakerLinkingAlerts = (numberOne, numberTwo) => {
     alert(`Breaker ${numberOne} & Breaker ${numberTwo} cannot be linked!`);
 };
 
+export const diffEquipLinkingAlerts = () => {
+    alert(`Breaker cannot be linked due to different Equipment configuration!`);
+};
+
+export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
+    let diff = false;
+    if (sourceBreakerObj?.data?.equipment_link[0] && targetBreakerObj?.data?.equipment_link[0]) {
+        if (sourceBreakerObj?.data?.equipment_link[0] !== targetBreakerObj?.data?.equipment_link[0]) {
+            diff = true;
+        }
+    } else {
+        diff = false;
+    }
+    return diff;
+};
+
 export const panelType = [
     {
         label: 'Distribution',
