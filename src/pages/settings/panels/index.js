@@ -303,7 +303,6 @@ const Panels = () => {
             <CreatePanel
                 isCreatePanelModalOpen={isCreatePanelModalOpen}
                 closeCreatePanelModel={closeCreatePanelModel}
-                fetchPanelsDataWithFilter={fetchPanelsDataWithFilter}
             />
         </React.Fragment>
     );

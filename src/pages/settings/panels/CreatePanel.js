@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import { useHistory } from 'react-router-dom';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
@@ -9,7 +10,8 @@ import Select from '../../../sharedComponents/form/select';
 import { addNewPanel, getLocationData, getPanelsData } from './services';
 import { disconnectBreaker, panelType, voltsOption } from './utils';
 
-const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel, fetchPanelsDataWithFilter }) => {
+const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
+    const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const defaultPanelObj = {
@@ -46,10 +48,16 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel, fetchPanel
         let params = `?building_id=${bldgId}`;
         await addNewPanel(params, panelObj)
             .then((res) => {
+                const panelId = res?.data?.id;
+                console.log('SSR panelId => ', panelId);
                 closeCreatePanelModel();
                 setPanelObj(defaultPanelObj);
-                fetchPanelsDataWithFilter(bldgId);
                 setIsProcessing(false);
+                if (panelId !== '') {
+                    history.push({
+                        pathname: `/settings/panels/edit-panel/${panelId}`,
+                    });
+                }
             })
             .catch(() => {
                 setIsProcessing(false);
