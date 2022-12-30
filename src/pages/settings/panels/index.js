@@ -81,7 +81,7 @@ const Panels = () => {
         let params = `?building_id=${bldgId}`;
         await getPanelsData(params)
             .then((res) => {
-                const responseData = res?.data;
+                const responseData = res?.data?.data?.data;
                 setPanelsData(responseData);
                 setDataFetching(false);
             })
@@ -90,18 +90,20 @@ const Panels = () => {
             });
     };
 
-    const fetchPanelsDataWithFilter = async (bldgId, search_txt) => {
+    const fetchPanelsDataWithFilter = async (bldgId, search_txt, page_no = 1, page_size = 20, ordered_by, sort_by) => {
         setPanelsData([]);
         setDataFetching(true);
 
-        let params = `?building_id=${bldgId}`;
+        let params = `?building_id=${bldgId}&page_no=${page_no}&page_size=${page_size}&ordered_by=${ordered_by}`;
 
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         if (search_txt) params = params.concat(`&panel_search=${encodeURIComponent(search_txt)}`);
 
         await getPanelsData(params)
             .then((res) => {
-                const responseData = res?.data;
-                setPanelsData(responseData);
+                const responseData = res?.data?.data;
+                setPanelsData(responseData?.data);
+                setTotalItems(responseData?.total_data);
                 setDataFetching(false);
             })
             .catch(() => {
@@ -119,7 +121,7 @@ const Panels = () => {
         let params = `?building_id=${bldgId}`;
         await getPanelsData(params)
             .then((res) => {
-                const responseData = res?.data;
+                const responseData = res?.data?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);
                 download('Panels_List', csvData);
             })
@@ -211,8 +213,11 @@ const Panels = () => {
     };
 
     useEffect(() => {
-        fetchPanelsDataWithFilter(bldgId, search);
-    }, [bldgId, search]);
+        const ordered_by = sortBy.name === undefined ? 'panel_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+
+        fetchPanelsDataWithFilter(bldgId, search, pageNo, pageSize, ordered_by, sort_by);
+    }, [bldgId, search, pageNo, pageSize, sortBy]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
