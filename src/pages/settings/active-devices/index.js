@@ -78,25 +78,42 @@ const ActiveDevices = () => {
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
     const [userPermission] = useAtom(userPermissionData);
 
-    const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
-    const [deviceMacAddress, setDeviceMacAddress] = useState('');
-    const [deviceModelString, setDeviceModelString] = useState('');
-    const [sensorString, setSensorString] = useState('');
-    const [firmWareString, setFirmWareString] = useState('');
-    const [hardWareString, setHardWareString] = useState('');
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
+    const [deviceModelString, setDeviceModelString] = useState([]);
+    const [sensorString, setSensorString] = useState([]);
+    const [firmWareString, setFirmWareString] = useState([]);
+    const [hardWareString, setHardWareString] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
-    const [selectedOption, setSelectedOption] = useState([]);
 
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
-            const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
-            const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+            const sorting = sortBy.method &&
+                sortBy.name && {
+                    order_by: sortBy.name,
+                    sort_by: sortBy.method,
+                };
+            let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+            let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+            let sensorSelected = encodeURIComponent(sensorString.join('+'));
+            let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+            let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
             setIsDeviceProcessing(true);
             setActiveDeviceData([]);
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
-            if (search) params = params.concat(`&device_search=${encodeURIComponent(search)}`);
-            if (deviceStatus !== 0) params = params.concat(`&stat=${deviceStatus === 1 ? 'true' : 'false'}`);
-            await getActiveDeviceData(params)
+            await getActiveDeviceData(
+                pageNo,
+                pageSize,
+                bldgId,
+                search,
+                deviceStatus,
+                {
+                    ...sorting,
+                },
+                macAddressSelected,
+                deviceModelSelected,
+                sensorSelected,
+                firmwareSelected,
+                hardwareSelected
+            )
                 .then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -108,25 +125,31 @@ const ActiveDevices = () => {
                 });
         };
         fetchActiveDeviceData();
-    }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId]);
-
-    const filterHandler = (setter, options) => {
-        setter(options.map(({ value }) => value));
-        setPageNo(1);
-    };
-
-    const filterLabelHandler = (setter, options) => {
-        setter(options.map(({ label }) => label));
-        setPageNo(1);
-    };
+    }, [
+        search,
+        sortBy,
+        pageNo,
+        pageSize,
+        deviceStatus,
+        bldgId,
+        deviceIdFilterString,
+        deviceModelString,
+        sensorString,
+        firmWareString,
+        hardWareString,
+    ]);
 
     const getFilters = async () => {
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+        let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
         const filters = await fetchActiveFilter({
             bldgId,
-            deviceMacAddress,
-            deviceModelString,
-            firmWareString,
-            hardWareString,
+            macAddressSelected,
+            deviceModelSelected,
+            firmwareSelected,
+            hardwareSelected,
         });
         filters.data.forEach((filterOptions) => {
             const filterOptionsFetched = [
@@ -140,13 +163,17 @@ const ActiveDevices = () => {
                         label: filterItem,
                     })),
                     onClose: (options) => {
-                        filterHandler(setDeviceIdFilterString, options);
-                        filterLabelHandler(setDeviceMacAddress, options);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let macAddress = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                macAddress.push(opt[i].value);
+                            }
+                            setDeviceIdFilterString(macAddress);
+                        }
                     },
                     onDelete: () => {
-                        setSelectedOption([]);
-                        setDeviceIdFilterString('');
-                        setDeviceMacAddress('');
+                        setDeviceIdFilterString([]);
                     },
                 },
                 {
@@ -158,10 +185,18 @@ const ActiveDevices = () => {
                         value: filterItem,
                         label: filterItem,
                     })),
-                    onClose: (options) => filterHandler(setDeviceModelString, options),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let deviceModel = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                deviceModel.push(opt[i].value);
+                            }
+                            setDeviceModelString(deviceModel);
+                        }
+                    },
                     onDelete: () => {
-                        setSelectedOption([]);
-                        setDeviceModelString('');
+                        setDeviceModelString([]);
                     },
                 },
                 {
@@ -174,11 +209,17 @@ const ActiveDevices = () => {
                         label: filterItem,
                     })),
                     onClose: (options) => {
-                        filterHandler(setSensorString, options);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSensorString(sensors);
+                        }
                     },
                     onDelete: () => {
-                        setSelectedOption([]);
-                        setSensorString('');
+                        setSensorString([]);
                     },
                 },
                 {
@@ -191,11 +232,17 @@ const ActiveDevices = () => {
                         label: filterItem,
                     })),
                     onClose: (options) => {
-                        filterHandler(setFirmWareString, options);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let firmwares = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                firmwares.push(opt[i].value);
+                            }
+                            setFirmWareString(firmwares);
+                        }
                     },
                     onDelete: () => {
-                        setSelectedOption([]);
-                        setFirmWareString('');
+                        setFirmWareString([]);
                     },
                 },
                 {
@@ -208,11 +255,17 @@ const ActiveDevices = () => {
                         label: filterItem,
                     })),
                     onClose: (options) => {
-                        filterHandler(setHardWareString, options);
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let hardwares = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                hardwares.push(opt[i].value);
+                            }
+                            setHardWareString(hardwares);
+                        }
                     },
                     onDelete: () => {
-                        setSelectedOption([]);
-                        setHardWareString('');
+                        setHardWareString([]);
                     },
                 },
             ];
@@ -223,15 +276,7 @@ const ActiveDevices = () => {
 
     useEffect(() => {
         getFilters();
-    }, [
-        bldgId,
-        deviceModelString,
-        sensorString,
-        deviceMacAddress,
-        deviceIdFilterString,
-        firmWareString,
-        hardWareString,
-    ]);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
