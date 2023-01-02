@@ -65,6 +65,7 @@ const SkeletonLoading = () => (
 
 const ActiveDevices = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -72,12 +73,9 @@ const ActiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [deviceStatus, setDeviceStatus] = useState(0);
-
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
-    const [userPermission] = useAtom(userPermissionData);
-
     const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
     const [deviceModelString, setDeviceModelString] = useState([]);
     const [sensorString, setSensorString] = useState([]);
