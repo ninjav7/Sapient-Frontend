@@ -99,7 +99,6 @@ const PassiveDevices = () => {
     const [deviceMacAddress, setDeviceMacAddress] = useState('');
     const [deviceModelString, setDeviceModelString] = useState('');
     const [sensorString, setSensorString] = useState('');
-    const [selectedDeviceModel, setSelectedDeviceModel] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState([]);
 
@@ -170,7 +169,6 @@ const PassiveDevices = () => {
             deviceMacAddress,
             deviceModelString,
         });
-        console.log(filters.data);
         filters.data.forEach((filterOptions) => {
             const filterOptionsFetched = [
                 {
@@ -228,47 +226,11 @@ const PassiveDevices = () => {
 
             setFilterOptions(filterOptionsFetched);
         });
-        // const filterData = responseData.data[0];
-        // console.log(responseData);
-        // console.log(filterData);
-        // setDeviceModel(filterData?.device_model);
     };
 
     useEffect(() => {
         getFilters();
-        console.log('Filters');
     }, [bldgId, deviceModelString, sensorString, deviceMacAddress, deviceIdFilterString]);
-
-    // useEffect(() => {
-    //     if (selectedDeviceModel.length !== 0) {
-    //         console.log(filterOptionsFetched);
-    //         const filterOptionsFetched = [
-    //             {
-    //                 label: 'Modal',
-    //                 value: 'device_model',
-    //                 placeholder: 'All Device Model',
-    //                 filterType: FILTER_TYPES.MULTISELECT,
-    //                 filterOptions: deviceModel.map((filterItem) => ({
-    //                     value: filterItem.device_model,
-    //                 })),
-    //                 onClose: (options) => {
-    //                     let opt = options;
-    //                     if (opt.length !== 0) {
-    //                         let deviceModel = [];
-    //                         for (let i = 0; i < opt.length; i++) {
-    //                             deviceModel.push(opt[i].value);
-    //                         }
-    //                         setSelectedDeviceModel(deviceModel);
-    //                     }
-    //                 },
-    //                 onDelete: () => {
-    //                     setSelectedDeviceModel([]);
-    //                 },
-    //             },
-    //         ];
-    //         setFilterOptions(filterOptionsFetched);
-    //     }
-    // }, [deviceModel]);
 
     const currentRow = () => {
         if (selectedFilter === 0) {

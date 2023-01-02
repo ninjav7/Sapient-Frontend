@@ -21,7 +21,7 @@ export function fetchActiveFilter(args) {
                     query_collection: 'devices',
                     device_type: 'active',
                     building_id: args.bldgId,
-                    mac_address: args.mac_address,
+                    mac_address: macAddressQuery,
                     device_model: args.deviceModelString,
                     firmware_version: args.firmWareString,
                     hardware_version: args.hardWareString,

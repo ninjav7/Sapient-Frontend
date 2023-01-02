@@ -6,7 +6,6 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
@@ -65,13 +64,7 @@ const SkeletonLoading = () => (
 );
 
 const ActiveDevices = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    // Modal states
-    const [show, setShow] = useState(false);
-    const handleShow = () => setShow(true);
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -82,10 +75,7 @@ const ActiveDevices = () => {
 
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
-    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
-    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
-    const [selectedFilter, setSelectedFilter] = useState(0);
     const [userPermission] = useAtom(userPermissionData);
 
     const [deviceIdFilterString, setDeviceIdFilterString] = useState('');
@@ -94,7 +84,6 @@ const ActiveDevices = () => {
     const [sensorString, setSensorString] = useState('');
     const [firmWareString, setFirmWareString] = useState('');
     const [hardWareString, setHardWareString] = useState('');
-    const [selectedDeviceModel, setSelectedDeviceModel] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState([]);
 
@@ -103,8 +92,6 @@ const ActiveDevices = () => {
             const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
             const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
             setIsDeviceProcessing(true);
-            setOnlineDeviceData([]);
-            setOfflineDeviceData([]);
             setActiveDeviceData([]);
             let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
             if (search) params = params.concat(`&device_search=${encodeURIComponent(search)}`);
@@ -141,15 +128,14 @@ const ActiveDevices = () => {
             firmWareString,
             hardWareString,
         });
-        console.log(filters.data);
         filters.data.forEach((filterOptions) => {
             const filterOptionsFetched = [
                 {
-                    label: 'Device ID',
+                    label: 'Identifier',
                     value: 'identifier',
-                    placeholder: 'All Device IDs',
+                    placeholder: 'All Identifiers',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.deviceIdentifier.map((filterItem) => ({
+                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
                         value: filterItem,
                         label: filterItem,
                     })),
@@ -181,7 +167,7 @@ const ActiveDevices = () => {
                 {
                     label: 'Sensors',
                     value: 'sensor_number',
-                    placeholder: 'ALL Sensors',
+                    placeholder: 'All Sensors',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: filterOptions.sensor_count.map((filterItem) => ({
                         value: filterItem,
@@ -198,7 +184,7 @@ const ActiveDevices = () => {
                 {
                     label: 'FirmWare Version',
                     value: 'firmware_version',
-                    placeholder: 'ALL FirmWare Version',
+                    placeholder: 'All FirmWare Version',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: filterOptions.firmware_version.map((filterItem) => ({
                         value: filterItem,
@@ -215,7 +201,7 @@ const ActiveDevices = () => {
                 {
                     label: 'HardWare Version',
                     value: 'hardware_version',
-                    placeholder: 'ALL HardWare Version',
+                    placeholder: 'All HardWare Version',
                     filterType: FILTER_TYPES.MULTISELECT,
                     filterOptions: filterOptions.hardware_version.map((filterItem) => ({
                         value: filterItem,
@@ -237,7 +223,6 @@ const ActiveDevices = () => {
 
     useEffect(() => {
         getFilters();
-        console.log('Filters');
     }, [
         bldgId,
         deviceModelString,
