@@ -139,7 +139,6 @@ const Users = () => {
         await fetchMemberUserList(params)
             .then((res) => {
                 let response = res.data.data;
-                console.log(response);
                 setUserData(response.data);
                 setDataFetched(true);
                 setIsUserDataFetched(false);
