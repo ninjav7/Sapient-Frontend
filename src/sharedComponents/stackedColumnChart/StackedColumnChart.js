@@ -10,11 +10,14 @@ import Button from '../button/Button';
 import Typography from '../typography';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import Brick from '../brick';
+import Select from '../form/select';
 
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { ReactComponent as BurgerIcon } from '../../assets/icon/burger.svg';
 import { options } from './configuration';
+import { stringOrNumberPropTypes } from '../helpers/helper';
 import { DOWNLOAD_TYPES } from '../constants';
+import { UNITS } from '../../constants/units';
 
 import './StackedColumnChart.scss';
 
@@ -34,7 +37,6 @@ const StackedColumnChart = (props) => {
                 chartComponentRef.current.chart.exportChart({ type: 'image/png' });
                 break;
             case DOWNLOAD_TYPES.downloadCSV:
-                console.log('csv');
                 chartComponentRef.current.chart.downloadCSV();
                 break;
             default:
@@ -49,26 +51,46 @@ const StackedColumnChart = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{props.subTitle}</Typography.Body>
                 </div>
-                <DropDownIcon
-                    classNameButton="stacked-column-chart-download-button"
-                    options={[
-                        {
-                            name: DOWNLOAD_TYPES.downloadSVG,
-                            label: 'Download SVG',
-                        },
-                        {
-                            name: DOWNLOAD_TYPES.downloadPNG,
-                            label: 'Download PNG',
-                        },
-                        {
-                            name: DOWNLOAD_TYPES.downloadCSV,
-                            label: 'Download CSV',
-                        },
-                    ]}
-                    label={''}
-                    triggerButtonIcon={<BurgerIcon />}
-                    handleClick={handleDropDownOptionClicked}
-                />
+                <div className="d-flex stacked-column-chart-actions">
+                    <div className="stacked-column-chart-unit-wrapper">
+                        {props.unitInfo?.title && (
+                            <Typography.Body size={Typography.Sizes.xs}>{props.unitInfo.title}</Typography.Body>
+                        )}
+                        {props.unitInfo?.value && (
+                            <Typography.Header size={Typography.Sizes.md} className="stacked-column-chart-unit-value">
+                                {props.unitInfo.value}
+                                {props.unitInfo?.unit && (
+                                    <Typography.Body
+                                        size={Typography.Sizes.xs}
+                                        className="Bold base-black d-inline-block stacked-column-chart-unit-text">
+                                        {props.unitInfo.unit}
+                                    </Typography.Body>
+                                )}
+                            </Typography.Header>
+                        )}
+                    </div>
+                    {props.selectUnit && <Select {...props.selectUnit} className="stacked-column-chart-select-unit" />}
+                    <DropDownIcon
+                        classNameButton="stacked-column-chart-download-button"
+                        options={[
+                            {
+                                name: DOWNLOAD_TYPES.downloadSVG,
+                                label: 'Download SVG',
+                            },
+                            {
+                                name: DOWNLOAD_TYPES.downloadPNG,
+                                label: 'Download PNG',
+                            },
+                            {
+                                name: DOWNLOAD_TYPES.downloadCSV,
+                                label: 'Download CSV',
+                            },
+                        ]}
+                        label={''}
+                        triggerButtonIcon={<BurgerIcon />}
+                        handleClick={handleDropDownOptionClicked}
+                    />
+                </div>
             </div>
             <Brick sizeInRem={1.5} />
 
@@ -108,6 +130,13 @@ StackedColumnChart.propTypes = {
     xAxisCallBackValue: PropTypes.func,
     tooltipCallBackValue: PropTypes.func,
     timeZone: PropTypes.string,
+    // Props for select
+    selectUnit: PropTypes.object,
+    unitInfo: PropTypes.shape({
+        title: PropTypes.string,
+        unit: PropTypes.oneOf(Object.values(UNITS)),
+        value: stringOrNumberPropTypes,
+    }),
 };
 
 export default StackedColumnChart;

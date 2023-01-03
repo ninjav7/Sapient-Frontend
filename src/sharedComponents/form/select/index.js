@@ -145,6 +145,7 @@ Select.propTypes = {
             value: stringOrNumberPropTypes.isRequired,
             supportText: PropTypes.string,
             img: PropTypes.node,
+            icon: PropTypes.node,
             iconForSelected: PropTypes.node,
             labelChart: PropTypes.string,
             percentLabel: stringOrNumberPropTypes,
