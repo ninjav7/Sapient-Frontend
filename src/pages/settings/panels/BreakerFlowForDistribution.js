@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Input, FormGroup, Button } from 'reactstrap';
+import { Input, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import {
-    BaseUrl,
-    listSensor,
-    updateBreakers,
-    generalPassiveDevices,
-    resetBreakers,
-    deleteBreaker,
-    searchDevices,
-} from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices, searchDevices } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { Handle } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
@@ -20,11 +12,18 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import Brick from '../../../sharedComponents/brick';
+import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
+import Typography from '../../../sharedComponents/typography';
+import UnlinkBreaker from './UnlinkBreaker';
+import { getBreakerDeleted, resetAllBreakers } from './services';
+import DeleteBreaker from './DeleteBreaker';
 import '../style.css';
 import './panel-style.css';
+import './styles.scss';
 
 const DistributedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
@@ -234,59 +233,53 @@ const DistributedBreakerComponent = ({ data, id }) => {
     };
 
     const unLinkCurrentBreaker = async () => {
-        try {
-            let breakersList = [];
-            setIsResetting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            if (breakerData.breakerType === 1) {
-                breakersList.push(id);
-            }
-            if (breakerData.breakerType === 2) {
-                breakersList.push(id);
-                breakersList.push(doubleBreakerData.id);
-            }
-            if (breakerData.breakerType === 3) {
-                breakersList.push(id);
-                breakersList.push(doubleBreakerData.id);
-                breakersList.push(tripleBreakerData.id);
-            }
+        setIsResetting(true);
 
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${resetBreakers}${params}`, { breaker_id: breakersList }, { headers })
-                .then((res) => {
-                    setIsResetting(false);
-                    window.scrollTo(0, 0);
-                    handleUnlinkAlertClose();
-                    triggerBreakerAPI();
-                });
-        } catch (error) {
-            setIsResetting(false);
+        let breakersList = [];
+
+        if (breakerData.breakerType === 1) {
+            breakersList.push(id);
         }
+        if (breakerData.breakerType === 2) {
+            breakersList.push(id);
+            breakersList.push(doubleBreakerData.id);
+        }
+        if (breakerData.breakerType === 3) {
+            breakersList.push(id);
+            breakersList.push(doubleBreakerData.id);
+            breakersList.push(tripleBreakerData.id);
+        }
+
+        let params = `?building_id=${bldgId}`;
+        let payload = { breaker_id: breakersList };
+
+        await resetAllBreakers(params, payload)
+            .then((res) => {
+                setIsResetting(false);
+                window.scrollTo(0, 0);
+                handleUnlinkAlertClose();
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsResetting(false);
+            });
     };
 
     const deleteCurrentBreaker = async () => {
-        try {
-            setIsDeleting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?breaker_id=${id}`;
-            await axios.delete(`${BaseUrl}${deleteBreaker}${params}`, { headers }).then((res) => {
-                let response = res.data;
+        setIsDeleting(true);
+
+        let params = `?breaker_id=${id}`;
+
+        await getBreakerDeleted(params)
+            .then((res) => {
                 setIsDeleting(false);
+                window.scrollTo(0, 0);
                 handleDeleteAlertClose();
                 triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsDeleting(false);
             });
-        } catch (error) {
-            setIsDeleting(false);
-        }
     };
 
     const fetchAllSensorData = (deviceOne, deviceTwo, deviceThree) => {
@@ -1474,184 +1467,97 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                 />
                             </Form.Group>
 
-                            <div className="edit-form-breaker ml-2 mr-2 mb-3" />
+                            <Brick sizeInRem={0.25} />
+                            <div className="edit-form-breaker ml-2 mr-2" />
+                            <Brick sizeInRem={1} />
 
-                            <FormGroup>
-                                <div className="unlink-delete-breaker ml-2 mr-2">
-                                    <button
-                                        type="button"
+                            <div className="d-flex justify-content-between ml-2 mr-2">
+                                <div>
+                                    <Button
+                                        label="Unlink Breaker"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
                                         onClick={() => {
                                             handleEditBreakerClose();
                                             handleUnlinkAlertShow();
                                         }}
-                                        className="btn btn-md btn-danger font-weight-bold unlink-breaker-style">
-                                        <FontAwesomeIcon
-                                            icon={faLinkHorizontalSlash}
-                                            color="#B42318"
-                                            size="md"
-                                            className="mr-2"
-                                        />
-                                        Unlink Breaker
-                                    </button>
-                                    {distributedBreakersData.length !== breakerData.breaker_number ? (
-                                        <button
-                                            type="button"
-                                            className="btn btn-md btn-danger font-weight-bold disabled-breaker-style"
-                                            disabled>
-                                            <FontAwesomeIcon
-                                                icon={faTrash}
-                                                color="#FDA29B"
-                                                size="md"
-                                                className="mr-2"
-                                            />
-                                            Delete Breaker
-                                        </button>
-                                    ) : (
-                                        <>
-                                            {breakerData.breakerType === 2 || breakerData.breakerType === 3 ? (
-                                                <>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-md btn-danger font-weight-bold disabled-breaker-style"
-                                                        disabled>
-                                                        <FontAwesomeIcon
-                                                            icon={faTrash}
-                                                            color="#FDA29B"
-                                                            size="md"
-                                                            className="mr-2"
-                                                        />
-                                                        Delete Breaker
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-md btn-danger font-weight-bold unlink-breaker-style"
-                                                    onClick={() => {
-                                                        handleEditBreakerClose();
-                                                        handleDeleteAlertShow();
-                                                    }}>
-                                                    <FontAwesomeIcon
-                                                        icon={faTrash}
-                                                        color="#B42318"
-                                                        size="md"
-                                                        className="mr-2"
-                                                    />
-                                                    Delete Breaker
-                                                </button>
-                                            )}
-                                        </>
-                                    )}
+                                        icon={<UnlinkOldSVG />}
+                                    />
                                 </div>
-                                {distributedBreakersData.length === breakerData.breaker_number && (
-                                    <>
-                                        {(breakerData.breakerType === 2 || breakerData.breakerType === 3) && (
-                                            <div className="grouped-breaker-warn mt-2 mr-2">
-                                                Grouped breakers cannot be deleted
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </FormGroup>
+                                <div>
+                                    <Button
+                                        label="Delete Breaker"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
+                                        onClick={() => {
+                                            handleEditBreakerClose();
+                                            handleDeleteAlertShow();
+                                        }}
+                                        icon={<DeleteSVG />}
+                                        disabled={
+                                            distributedBreakersData.length !== breakerData.breaker_number ||
+                                            breakerData.breakerType === 2 ||
+                                            breakerData.breakerType === 3
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {distributedBreakersData.length === breakerData.breaker_number &&
+                            (breakerData.breakerType === 2 || breakerData.breakerType === 3) ? (
+                                <div className="float-right mr-2">
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
+                                        Grouped breakers cannot be deleted
+                                    </Typography.Body>
+                                </div>
+                            ) : null}
                         </Form>
                     </Modal.Body>
                 </>
 
-                <Modal.Footer>
+                <Modal.Footer className="ml-2 mr-2 mb-2">
                     <Button
-                        variant="light"
+                        label="Cancel"
+                        size={Button.Sizes.md}
+                        type={Button.Type.secondaryGrey}
                         onClick={() => {
                             handleEditBreakerClose();
                             setBreakerData(Object.assign({}, singleBreaker));
                             setDoubleBreakerData(Object.assign({}, doubleBreaker));
                             setTripleBreakerData(Object.assign({}, tripleBreaker));
                             setLinkedSensors([]);
-                        }}>
-                        Cancel
-                    </Button>
+                        }}
+                    />
                     <Button
-                        variant="primary"
+                        label={isProcessing ? 'Saving...' : 'Save'}
+                        size={Button.Sizes.md}
+                        type={Button.Type.primary}
                         onClick={() => {
-                            if (breakerData.breakerType === 1) {
-                                saveBreakerData();
-                            }
-                            if (breakerData.breakerType === 2) {
-                                saveDoubleBreakerData();
-                            }
-                            if (breakerData.breakerType === 3) {
-                                saveTripleBreakerData();
-                            }
-                        }}>
-                        {isProcessing ? 'Saving...' : 'Save'}
-                    </Button>
+                            if (breakerData.breakerType === 1) saveBreakerData();
+                            if (breakerData.breakerType === 2) saveDoubleBreakerData();
+                            if (breakerData.breakerType === 3) saveTripleBreakerData();
+                        }}
+                        disabled={isProcessing}
+                    />
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink Breaker</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">Are you sure you want to unlink this breaker?</div>
-                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="light"
-                        onClick={() => {
-                            handleUnlinkAlertClose();
-                            handleEditBreakerShow();
-                        }}
-                        className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            unLinkCurrentBreaker();
-                        }}
-                        className="unlink-reset-style">
-                        {isResetting ? 'Resetting' : 'Reset'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <UnlinkBreaker
+                showUnlinkAlert={showUnlinkAlert}
+                handleUnlinkAlertClose={handleUnlinkAlertClose}
+                handleEditBreakerShow={handleEditBreakerShow}
+                isResetting={isResetting}
+                unLinkCurrentBreaker={unLinkCurrentBreaker}
+            />
 
-            <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Breaker</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">Are you sure you want to delete the Breaker?</div>
-                        <div className="unlink-alert-styling">
-                            This will remove the breaker from the panel and is not recoverable.
-                        </div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button
-                        variant="light"
-                        onClick={() => {
-                            handleDeleteAlertClose();
-                            handleEditBreakerShow();
-                        }}
-                        className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            deleteCurrentBreaker();
-                        }}
-                        className="unlink-reset-style">
-                        {isDeleting ? 'Deleting' : 'Delete'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            <DeleteBreaker
+                showDeleteAlert={showDeleteAlert}
+                handleDeleteAlertClose={handleDeleteAlertClose}
+                handleEditBreakerShow={handleEditBreakerShow}
+                isDeleting={isDeleting}
+                deleteCurrentBreaker={deleteCurrentBreaker}
+            />
         </React.Fragment>
     );
 };

@@ -1,5 +1,11 @@
+@import '../../../assets/scss/colors';
+
 .edit-panel-custom-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 2fr;
     gap: 1rem;
+}
+
+.txt-warn-color{
+    color: $error-500 !important;
 }

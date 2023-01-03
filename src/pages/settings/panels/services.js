@@ -10,6 +10,7 @@ import {
     generalEquipments,
     generalPassiveDevices,
     updateLinkBreakers,
+    deleteBreaker,
 } from '../../../services/Network';
 
 export function getPanelsData(params) {
@@ -26,6 +27,10 @@ export function addNewPanel(params, payload) {
 
 export function deleteCurrentPanel(params) {
     return axiosInstance.delete(`${deletePanel}${params}`).then((res) => res);
+}
+
+export function getBreakerDeleted(params) {
+    return axiosInstance.delete(`${deleteBreaker}${params}`).then((res) => res);
 }
 
 export function resetAllBreakers(params, payload) {
