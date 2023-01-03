@@ -338,12 +338,6 @@ const PassiveDevices = () => {
         },
     ];
 
-    // useEffect(() => {
-    //     const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
-    //     const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
-    //     fetchPassiveDeviceData(bldgId, search, pageNo, pageSize, ordered_by, sort_by, deviceStatus);
-    // }, [search, pageNo, pageSize, sortBy, deviceStatus, bldgId]);
-
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
