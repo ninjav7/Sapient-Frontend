@@ -193,7 +193,7 @@ const PassiveDevices = () => {
                     value: 'sensor_number',
                     placeholder: 'ALL Sensors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+                    filterOptions: filterOptions.sensor_number.map((filterItem) => ({
                         value: filterItem,
                         label: filterItem,
                     })),
