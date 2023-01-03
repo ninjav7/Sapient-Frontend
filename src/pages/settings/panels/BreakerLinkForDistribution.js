@@ -3,7 +3,13 @@ import { getBezierPath, getEdgeCenter } from 'react-flow-renderer';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
-import { setProcessing, breakerLinkingAlerts, diffEquipLinkingAlerts, validateConfiguredEquip } from './utils';
+import {
+    setProcessing,
+    breakerLinkingAlerts,
+    diffEquipLinkingAlerts,
+    validateConfiguredEquip,
+    getEquipmentForBreaker,
+} from './utils';
 import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
 import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
 import { updateBreakersLink } from './services';
@@ -175,23 +181,6 @@ export default function CustomEdge({
             .catch(() => {
                 setProcessing(false);
             });
-    };
-
-    const getEquipmentForBreaker = (breakers) => {
-        let equipmentId = '';
-        const [breakerOne, breakerTwo] = breakers;
-
-        if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 0) {
-            equipmentId = '';
-        }
-        if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 1) {
-            equipmentId = breakerTwo?.data?.equipment_link[0];
-        }
-        if (breakerOne?.data?.equipment_link.length === 1 && breakerTwo?.data?.equipment_link.length === 0) {
-            equipmentId = breakerOne?.data?.equipment_link[0];
-        }
-
-        return equipmentId;
     };
 
     const linkBreakers = () => {

@@ -59,6 +59,23 @@ export const voltsOption = [
     { value: '600', label: '600' },
 ];
 
+export const getEquipmentForBreaker = (breakers) => {
+    let equipmentId = '';
+    const [breakerOne, breakerTwo] = breakers;
+
+    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 0) {
+        equipmentId = '';
+    }
+    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 1) {
+        equipmentId = breakerTwo?.data?.equipment_link[0];
+    }
+    if (breakerOne?.data?.equipment_link.length === 1 && breakerTwo?.data?.equipment_link.length === 0) {
+        equipmentId = breakerOne?.data?.equipment_link[0];
+    }
+
+    return equipmentId;
+};
+
 export const comparePanelData = (obj1, obj2) => {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
