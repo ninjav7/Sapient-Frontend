@@ -139,7 +139,7 @@ const Buildings = () => {
             <Badge
                 text={
                     <Typography.Body size={Typography.Sizes.md} className="gray-950">
-                        {row?.building_type === 'Office Building' ? 'Office' : 'Residential'}
+                        {row?.building_type === '' ? '-' : row?.building_type}
                     </Typography.Body>
                 }
             />
@@ -256,19 +256,8 @@ const Buildings = () => {
 
     const getFilters = async () => {
         const responseData = await getFiltersForBuildingsRequest();
-        const filterData = responseData[0];
-
-        let building_type = [];
-
-        filterData.building_type.forEach((filterItem) => {
-            let obj = {
-                value: filterItem,
-                label: filterItem,
-            };
-            building_type.push(obj);
-        });
-
-        setBuildingTypeList(building_type);
+        const filterData = responseData.data[0];
+        setBuildingTypeList(filterData?.building_type);
         setMinVal(filterData?.building_size_min);
         setMaxVal(filterData?.building_size_max);
         setMinSqftVal(filterData?.building_size_min);
@@ -347,7 +336,10 @@ const Buildings = () => {
                     value: 'building_type',
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: buildingTypeList,
+                    filterOptions: buildingTypeList.map((filterItem) => ({
+                        value: filterItem.building_type_id,
+                        label: filterItem.building_type,
+                    })),
                     onClose: (options) => {
                         let opt = options;
                         if (opt.length !== 0) {

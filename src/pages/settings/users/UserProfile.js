@@ -15,8 +15,6 @@ import {
     inviteMemberUsers,
     updateUserRolePermission,
 } from './service';
-import { useAtom } from 'jotai';
-import { buildingData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
@@ -140,7 +138,6 @@ const UserProfile = () => {
     }, [userDetail]);
 
     const [rolesData, setRolesData] = useState([]);
-    const [buildingListData] = useAtom(buildingData);
 
     const getPermissionRoleFunc = async () => {
         await updateVendorPermissions({}, '')
@@ -160,7 +157,7 @@ const UserProfile = () => {
 
     useEffect(() => {
         getPermissionRoleFunc();
-    }, [buildingListData]);
+    }, []);
 
     const renderStatus = () => {
         if (userDetail?.is_verified === false) {

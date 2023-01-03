@@ -14,11 +14,12 @@ import Brick from '../../../sharedComponents/brick';
 import CreatePassiveDevice from './CreatePassiveDevice';
 import { pageListSizes } from '../../../helpers/helpers';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData } from './services';
+import { getPassiveDeviceData, fetchPassiveFilter } from './services';
 import DeletePassiveDevice from './DeletePassiveDevice';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
@@ -57,16 +58,17 @@ const SkeletonLoading = () => (
 );
 
 const PassiveDevices = () => {
-    const [userPermission] = useAtom(userPermissionData);
-    const { download } = useCSVDownload();
-
     const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [userPermission] = useAtom(userPermissionData);
 
+    const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
-
     const [deviceStatus, setDeviceStatus] = useState(0);
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Add Device Modal states
     const [isAddDeviceModalOpen, setAddDeviceDeviceModal] = useState(false);
@@ -84,56 +86,37 @@ const PassiveDevices = () => {
     const openDeleteDeviceModal = () => setDeleteDeviceDeviceModal(true);
 
     const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
-
-    const [pageNo, setPageNo] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
-
-    const [totalItems, setTotalItems] = useState(0);
-    const [selectedFilter, setSelectedFilter] = useState(0);
-
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
+    const [deviceModelString, setDeviceModelString] = useState([]);
+    const [sensorString, setSensorString] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
 
-    const fetchDefaultPassiveDeviceData = async () => {
+    const fetchPassiveDeviceData = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let sensorSelected = encodeURIComponent(sensorString.join('+'));
         setIsDataFetching(true);
-        let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
-        await getPassiveDeviceData(params)
-            .then((res) => {
-                const responseData = res?.data;
-                setSearch('');
-                setPageNo(1);
-                setPageSize(20);
-                setDeviceStatus(0);
-                setPassiveDeviceData(responseData?.data);
-                setTotalItems(responseData?.total_data);
-                setIsDataFetching(false);
-            })
-            .catch(() => {
-                setIsDataFetching(false);
-            });
-    };
-
-    const fetchPassiveDeviceDataWithFilter = async (
-        bldg_id,
-        search_txt,
-        page_no = 1,
-        page_size = 20,
-        ordered_by,
-        sort_by,
-        device_status
-    ) => {
-        setIsDataFetching(true);
-
-        if (ordered_by === 'status') ordered_by = 'stat';
-        if (ordered_by === 'sensor_number') ordered_by = 'sensor_count';
-
-        let params = `?building_id=${bldg_id}&page_no=${page_no}&page_size=${page_size}&ordered_by=${ordered_by}`;
-
-        if (search_txt) params = params.concat(`&device_search=${encodeURIComponent(search_txt)}`);
-        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        if (device_status !== 0) params = params.concat(`&stat=${device_status === 1 ? 'true' : 'false'}`);
-
-        await getPassiveDeviceData(params)
+        setPassiveDeviceData([]);
+        await getPassiveDeviceData(
+            pageNo,
+            pageSize,
+            bldgId,
+            search,
+            deviceStatus,
+            {
+                ...sorting,
+            },
+            macAddressSelected,
+            deviceModelSelected,
+            sensorSelected
+        )
             .then((res) => {
                 const responseData = res?.data;
                 setPassiveDeviceData(responseData?.data);
@@ -144,11 +127,102 @@ const PassiveDevices = () => {
                 setIsDataFetching(false);
             });
     };
+
+    useEffect(() => {
+        fetchPassiveDeviceData();
+    }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId, deviceIdFilterString, deviceModelString, sensorString]);
+
+    const getFilters = async () => {
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        const filters = await fetchPassiveFilter({
+            bldgId,
+            macAddressSelected,
+            deviceModelSelected,
+        });
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'Device ID',
+                    value: 'identifier',
+                    placeholder: 'All Device IDs',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.deviceIdentifier.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let macAddress = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                macAddress.push(opt[i].value);
+                            }
+                            setDeviceIdFilterString(macAddress);
+                        }
+                    },
+                    onDelete: () => {
+                        setDeviceIdFilterString([]);
+                    },
+                },
+                {
+                    label: 'Models',
+                    value: 'model',
+                    placeholder: 'All Models',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.model.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let deviceModel = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                deviceModel.push(opt[i].value);
+                            }
+                            setDeviceModelString(deviceModel);
+                        }
+                    },
+                    onDelete: () => {
+                        setDeviceModelString([]);
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_number',
+                    placeholder: 'ALL Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.sensor_number.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSensorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSensorString([]);
+                    },
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+    };
+
+    useEffect(() => {
+        getFilters();
+    }, [bldgId]);
 
     const currentRow = () => {
-        if (selectedFilter === 0) {
-            return passiveDeviceData;
-        }
+        return passiveDeviceData;
     };
 
     const handleClick = (el) => {
@@ -265,12 +339,6 @@ const PassiveDevices = () => {
     ];
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
-        fetchPassiveDeviceDataWithFilter(bldgId, search, pageNo, pageSize, ordered_by, sort_by, deviceStatus);
-    }, [search, pageNo, pageSize, sortBy, deviceStatus, bldgId]);
-
-    useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
@@ -334,6 +402,7 @@ const PassiveDevices = () => {
                         onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
                         currentPage={pageNo}
@@ -345,10 +414,7 @@ const PassiveDevices = () => {
                         onDeleteRow={(record, id, row) => handleDeviceDelete(row)}
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
-                            if (selectedFilter === 0) {
-                                return totalItems;
-                            }
-                            return 0;
+                            return totalItems;
                         })()}
                     />
                 </Col>
@@ -357,21 +423,21 @@ const PassiveDevices = () => {
             <CreatePassiveDevice
                 isAddDeviceModalOpen={isAddDeviceModalOpen}
                 closeAddDeviceModal={closeAddDeviceModal}
-                fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
+                fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
             <EditPassiveDevice
                 isEditDeviceModalOpen={isEditDeviceModalOpen}
                 closeEditDeviceModal={closeEditDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
-                fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
+                fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
             <DeletePassiveDevice
                 isDeleteDeviceModalOpen={isDeleteDeviceModalOpen}
                 closeDeleteDeviceModal={closeDeleteDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
-                fetchPassiveDeviceData={fetchDefaultPassiveDeviceData}
+                fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
         </React.Fragment>
     );

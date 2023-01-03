@@ -10,7 +10,7 @@ import Brick from '../../brick';
 
 import { selectAllOption } from './constants';
 import { DROPDOWN_INPUT_TYPES } from './index';
-import { conditionalClass, defaultSearch, optionClasses } from './helpers';
+import { conditionalClass, optionClasses } from './helpers';
 
 import { ReactComponent as CheckedSVG } from '../../assets/icons/checked-big.svg';
 import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
@@ -124,13 +124,13 @@ export const Option = (props) => {
 
 export const ValueContainerSingle = ({ children, ...props }) => {
     // We do this because react-select automatically deletes selected value during search.
-    const { label } = props.getValue()[0] || {};
+    const { label, ...propsSelected } = props.getValue()[0] || {};
 
     return (
         <components.ValueContainer {...props}>
             {!!props.selectProps.inputValue && (
                 <>
-                    <SingleValue {...props} data={{}} children={label} />
+                    <SingleValue {...props} data={propsSelected} children={label} />
                 </>
             )}
 

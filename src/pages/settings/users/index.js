@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { inviteMemberUsers, fetchMemberUserList, updateVendorPermissions } from './service';
-import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import '../style.css';
@@ -12,7 +11,6 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
-import debounce from 'lodash.debounce';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
@@ -22,6 +20,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { pageListSizes } from '../../../helpers/helpers';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -72,14 +71,15 @@ const Users = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [generatedUserId, setGeneratedUserId] = useState('');
 
     const [userData, setUserData] = useState([]);
-    const [dataFetched, setDataFetched] = useState(false);
 
     const [userSearchInfo, setUserSearchInfo] = useState('');
+    const [sortBy, setSortBy] = useState({});
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
     const [rolesData, setRolesData] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
 
     const [userObj, setUserObj] = useState({
         first_name: '',
@@ -133,21 +133,26 @@ const Users = () => {
     };
 
     const getUsersList = async () => {
+        const ordered_by = sortBy.name === undefined ? 'name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
         setIsUserDataFetched(true);
 
-        let params = `?user_info=${userSearchInfo}`;
+        let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
         await fetchMemberUserList(params)
             .then((res) => {
                 let response = res.data;
-                setUserData(response.data);
-                setDataFetched(true);
+                setUserData(response.data?.data);
+                setTotalItems(response?.data?.total_users);
                 setIsUserDataFetched(false);
             })
             .catch((error) => {
-                setDataFetched(true);
                 setIsUserDataFetched(false);
             });
     };
+
+    useEffect(() => {
+        getUsersList();
+    }, [userSearchInfo, sortBy, pageNo, pageSize]);
 
     const saveUserData = async () => {
         setIsProcessing(true);
@@ -166,10 +171,6 @@ const Users = () => {
             });
     };
 
-    const debouncedFetchData = debounce(() => {
-        getUsersList();
-    }, 1000);
-
     const fetchRoles = async () => {
         await updateVendorPermissions({}, '')
             .then((res) => {
@@ -182,22 +183,6 @@ const Users = () => {
     useEffect(() => {
         fetchRoles();
     }, []);
-    useEffect(() => {
-        debouncedFetchData();
-    }, [bldgId, userSearchInfo]);
-
-    const handleClick = (row) => {
-        history.push({
-            pathname: `/settings/users/user-profile/single/${row?._id}`,
-        });
-    };
-
-    useEffect(() => {
-        if (generatedUserId === '') {
-            return;
-        }
-        getUsersList();
-    }, [generatedUserId]);
 
     const currentRow = () => {
         return userData;
@@ -321,7 +306,10 @@ const Users = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="users"
                         buttonGroupFilterOptions={[]}
-                        onSearch={setUserSearchInfo}
+                        onSearch={(query) => {
+                            setPageNo(1);
+                            setUserSearchInfo(query);
+                        }}
                         onStatus={[]}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
@@ -330,30 +318,40 @@ const Users = () => {
                                 name: 'Name',
                                 accessor: 'name',
                                 callbackValue: renderName,
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Email',
                                 accessor: 'email',
                                 callbackValue: renderEmail,
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Role',
                                 accessor: 'role',
                                 callbackValue: renderRole,
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'status',
                                 accessor: 'status',
                                 callbackValue: renderStatus,
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'Last Active',
                                 accessor: 'last_active',
                                 callbackValue: renderLastActive,
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                         ]}
+                        currentPage={pageNo}
+                        onChangePage={setPageNo}
+                        pageSize={pageSize}
+                        onPageSize={setPageSize}
+                        pageListSizes={pageListSizes}
                         totalCount={(() => {
-                            return 0;
+                            return totalItems;
                         })()}
                     />
                 </Col>

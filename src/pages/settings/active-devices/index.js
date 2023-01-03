@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { getActiveDeviceData } from './services';
+import { getActiveDeviceData, fetchActiveFilter } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
@@ -17,6 +16,7 @@ import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
@@ -64,13 +64,8 @@ const SkeletonLoading = () => (
 );
 
 const ActiveDevices = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    // Modal states
-    const [show, setShow] = useState(false);
-    const handleShow = () => setShow(true);
+    const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
     const [search, setSearch] = useState('');
@@ -78,27 +73,45 @@ const ActiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [deviceStatus, setDeviceStatus] = useState(0);
-
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
-    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
-    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
-    const [selectedFilter, setSelectedFilter] = useState(0);
-    const [userPermission] = useAtom(userPermissionData);
+    const [deviceIdFilterString, setDeviceIdFilterString] = useState([]);
+    const [deviceModelString, setDeviceModelString] = useState([]);
+    const [sensorString, setSensorString] = useState([]);
+    const [firmWareString, setFirmWareString] = useState([]);
+    const [hardWareString, setHardWareString] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
 
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
-            const ordered_by = sortBy.name === undefined ? 'identifier' : sortBy.name;
-            const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+            const sorting = sortBy.method &&
+                sortBy.name && {
+                    order_by: sortBy.name,
+                    sort_by: sortBy.method,
+                };
+            let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+            let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+            let sensorSelected = encodeURIComponent(sensorString.join('+'));
+            let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+            let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
             setIsDeviceProcessing(true);
-            setOnlineDeviceData([]);
-            setOfflineDeviceData([]);
             setActiveDeviceData([]);
-            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
-            if (search) params = params.concat(`&device_search=${encodeURIComponent(search)}`);
-            if (deviceStatus !== 0) params = params.concat(`&stat=${deviceStatus === 1 ? 'true' : 'false'}`);
-            await getActiveDeviceData(params)
+            await getActiveDeviceData(
+                pageNo,
+                pageSize,
+                bldgId,
+                search,
+                deviceStatus,
+                {
+                    ...sorting,
+                },
+                macAddressSelected,
+                deviceModelSelected,
+                sensorSelected,
+                firmwareSelected,
+                hardwareSelected
+            )
                 .then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -110,7 +123,158 @@ const ActiveDevices = () => {
                 });
         };
         fetchActiveDeviceData();
-    }, [search, sortBy, pageNo, pageSize, deviceStatus, bldgId]);
+    }, [
+        search,
+        sortBy,
+        pageNo,
+        pageSize,
+        deviceStatus,
+        bldgId,
+        deviceIdFilterString,
+        deviceModelString,
+        sensorString,
+        firmWareString,
+        hardWareString,
+    ]);
+
+    const getFilters = async () => {
+        let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        let firmwareSelected = encodeURIComponent(firmWareString.join('+'));
+        let hardwareSelected = encodeURIComponent(hardWareString.join('+'));
+        const filters = await fetchActiveFilter({
+            bldgId,
+            macAddressSelected,
+            deviceModelSelected,
+            firmwareSelected,
+            hardwareSelected,
+        });
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'Identifier',
+                    value: 'identifier',
+                    placeholder: 'All Identifiers',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let macAddress = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                macAddress.push(opt[i].value);
+                            }
+                            setDeviceIdFilterString(macAddress);
+                        }
+                    },
+                    onDelete: () => {
+                        setDeviceIdFilterString([]);
+                    },
+                },
+                {
+                    label: 'Models',
+                    value: 'model',
+                    placeholder: 'All Models',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.model.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let deviceModel = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                deviceModel.push(opt[i].value);
+                            }
+                            setDeviceModelString(deviceModel);
+                        }
+                    },
+                    onDelete: () => {
+                        setDeviceModelString([]);
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_number',
+                    placeholder: 'All Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.sensor_number.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let sensors = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                sensors.push(opt[i].value);
+                            }
+                            setSensorString(sensors);
+                        }
+                    },
+                    onDelete: () => {
+                        setSensorString([]);
+                    },
+                },
+                {
+                    label: 'FirmWare Version',
+                    value: 'firmware_version',
+                    placeholder: 'All FirmWare Version',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.firmware_version.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let firmwares = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                firmwares.push(opt[i].value);
+                            }
+                            setFirmWareString(firmwares);
+                        }
+                    },
+                    onDelete: () => {
+                        setFirmWareString([]);
+                    },
+                },
+                {
+                    label: 'HardWare Version',
+                    value: 'hardware_version',
+                    placeholder: 'All HardWare Version',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.hardware_version.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let hardwares = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                hardwares.push(opt[i].value);
+                            }
+                            setHardWareString(hardwares);
+                        }
+                    },
+                    onDelete: () => {
+                        setHardWareString([]);
+                    },
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+    };
+
+    useEffect(() => {
+        getFilters();
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -261,32 +425,33 @@ const ActiveDevices = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Link
-                                to={{
-                                    pathname: `/settings/active-devices/provision`,
-                                }}>
-                                {userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
+                        </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                            <div className="d-flex">
+                                <Link
+                                    to={{
+                                        pathname: `/settings/active-devices/provision`,
+                                    }}>
                                     <Button
                                         label={'Add Active Device'}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         icon={<PlusSVG />}
                                     />
-                                ) : null}
-                            </Link>
-                        </div>
+                                </Link>
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
 
-            <Brick sizeInRem={2} />
+            <Brick sizeInRem={1.5} />
 
             <Row>
                 <Col lg={12}>
@@ -301,6 +466,7 @@ const ActiveDevices = () => {
                         onStatus={setDeviceStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
                         currentPage={pageNo}
