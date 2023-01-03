@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { saveBuildingData, updateBuildingTypes } from './services';
 import Select from '../../../sharedComponents/form/select';
+import { BuildingListStore } from '../../../store/BuildingStore';
 
 const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBuildingFilter }) => {
     const defaultBuildingObj = {
@@ -46,17 +47,20 @@ const CreateBuilding = ({ isAddBuildingModalOpen, closeAddBuildingModal, resetBu
     };
 
     const saveBuildingDetails = async () => {
-        try {
-            setIsProcessing(true);
-            await saveBuildingData(buildingData).then((res) => {
+        setIsProcessing(true);
+        await saveBuildingData(buildingData)
+            .then((res) => {
                 closeAddBuildingModal();
                 setBuildingData(defaultBuildingObj);
                 resetBuildingFilter();
+                BuildingListStore.update((s) => {
+                    s.fetchBuildingList = true;
+                });
+                setIsProcessing(false);
+            })
+            .catch((e) => {
+                setIsProcessing(false);
             });
-            setIsProcessing(false);
-        } catch (error) {
-            setIsProcessing(false);
-        }
     };
 
     useEffect(() => {
