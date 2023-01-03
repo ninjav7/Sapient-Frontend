@@ -357,3 +357,57 @@ export const getActiveDeviceTableCSVExport = (tableData, columns) => {
     });
     return csv;
 };
+
+export const getPanelsTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    columns.forEach((element) => {
+        if (element.accessor === 'breakers_linked') element.name = 'Breakers Linked';
+    });
+
+    tableData.forEach((tableRow) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'breakers_linked':
+                    const linked_breakers = tableRow['breakers_linked'];
+                    const total_breakers = tableRow['breakers'];
+                    const results = `${linked_breakers} out of ${total_breakers}`;
+                    arr.push(results);
+                    break;
+
+                case 'panel_type':
+                    const panel = tableRow['panel_type'];
+                    const panelType = panel.charAt(0).toUpperCase() + panel.slice(1);
+                    arr.push(panelType);
+                    break;
+
+                case 'location':
+                    const locationData = tableRow['location'];
+                    const locationName = locationData === '' ? '-' : locationData;
+                    arr.push(locationName);
+                    break;
+
+                case 'parent':
+                    const parentPanel = tableRow['parent'];
+                    const parentPanelName = parentPanel ? parentPanel : '-';
+                    arr.push(parentPanelName);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};

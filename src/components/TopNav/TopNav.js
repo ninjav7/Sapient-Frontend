@@ -8,7 +8,7 @@ import { buildingData, userPermissionData } from '../../store/globalState';
 import { BuildingListStore } from '../../store/BuildingStore';
 import { fetchBuildingsList } from '../../services/buildings';
 import { fetchPermissions } from '../../services/permissions';
-import { accountRoutes, configChildRoutes, configRoutes } from '../SecondaryTopNavBar/utils';
+import { accountChildRoutes, accountRoutes, configChildRoutes, configRoutes } from '../SecondaryTopNavBar/utils';
 import '../style.css';
 
 const TopNav = () => {
@@ -42,7 +42,15 @@ const TopNav = () => {
 
     useEffect(() => {
         const checkCurrentRoute = (path) => {
-            if (accountRoutes.includes(path) || configRoutes.includes(path) || configChildRoutes.includes(path)) {
+            if (
+                accountRoutes.includes(path) ||
+                configRoutes.includes(path) ||
+                path.includes(configChildRoutes[0]) ||
+                path.includes(configChildRoutes[1]) ||
+                path.includes(configChildRoutes[2]) ||
+                path.includes(configChildRoutes[3]) ||
+                path.includes(accountChildRoutes[0])
+            ) {
                 setActiveBldgList(true);
             } else {
                 setActiveBldgList(false);

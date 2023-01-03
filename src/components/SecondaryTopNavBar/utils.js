@@ -27,6 +27,8 @@ export const accountRoutes = [
     '/settings/equipment-types',
 ];
 
+export const accountChildRoutes = ['/users/user-profile/single'];
+
 export const buildingRoutes = ['/energy/building/overview', '/energy/end-uses', '/energy/time-of-day'];
 
 export const updateBuildingStore = (bldgId, bldgName, bldgTimeZone) => {

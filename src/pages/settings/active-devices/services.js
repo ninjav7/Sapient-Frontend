@@ -23,7 +23,7 @@ export function getActiveDeviceData(
     let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
     if (deviceStatus !== 0) params = params.concat(`&stat=${deviceStatus === 1 ? 'true' : 'false'}`);
     if (getParams.order_by && getParams.sort_by) {
-        params += `&order_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
+        params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
     }
     if (macAddressFilterString.length) {
         params += `&identifier=${macAddressFilterString}`;
@@ -32,7 +32,7 @@ export function getActiveDeviceData(
         params += `&model=${deviceModelString}`;
     }
     if (sensorString.length) {
-        params += `&sensor_count=${sensorString}`;
+        params += `&sensor_number=${sensorString}`;
     }
     if (firmWareString.length) {
         params += `&firmware_version=${firmWareString}`;
