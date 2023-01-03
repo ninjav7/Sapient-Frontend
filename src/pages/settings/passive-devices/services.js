@@ -49,7 +49,7 @@ export function getPassiveDeviceData(
         params += `&model=${deviceModelString}`;
     }
     if (sensorString.length) {
-        params += `&sensor_count=${sensorString}`;
+        params += `&sensor_number=${sensorString}`;
     }
     return axiosInstance.get(`${generalPassiveDevices}${params}`).then((res) => res);
 }
