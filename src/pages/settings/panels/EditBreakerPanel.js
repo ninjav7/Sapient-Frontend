@@ -1,23 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Button, Card, CardHeader, CardBody } from 'reactstrap';
+import { Row, Col, Input } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import axios from 'axios';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import {
-    BaseUrl,
-    getLocation,
-    generalPanels,
-    generalPassiveDevices,
-    getBreakers,
-    updatePanel,
-    generalEquipments,
-    resetBreakers,
-    deletePanel,
-} from '../../../services/Network';
-import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
@@ -26,13 +13,29 @@ import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakerFlowForDistribution';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import Select from '../../../sharedComponents/form/select';
+import Typography from '../../../sharedComponents/typography';
+import { Button } from '../../../sharedComponents/button';
+import Brick from '../../../sharedComponents/brick';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import { comparePanelData, panelType } from './utils';
+import DeletePanel from './DeletePanel';
+import {
+    deleteCurrentPanel,
+    getBreakersList,
+    getEquipmentsList,
+    getLocationData,
+    getPanelsData,
+    getPassiveDeviceList,
+    resetAllBreakers,
+    updatePanelDetails,
+} from './services';
+import UnlinkAllBreakers from './UnlinkAllBreakers';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
+import './styles.scss';
 import './panel-style.css';
-import Select from 'react-select';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -46,8 +49,6 @@ const edgeTypes = {
 };
 
 const EditBreakerPanel = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const history = useHistory();
 
     const { panelId } = useParams();
@@ -101,17 +102,6 @@ const EditBreakerPanel = () => {
     const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
     const [locationDataList, setLocationDataList] = useState([]);
-
-    const panelType = [
-        {
-            name: 'Distribution',
-            value: 'distribution',
-        },
-        {
-            name: 'Disconnect',
-            value: 'disconnect',
-        },
-    ];
 
     const disconnectBreaker = [
         {
@@ -358,86 +348,6 @@ const EditBreakerPanel = () => {
         }
     };
 
-    // Compare Panel Objs to Enable Save Button
-    const comparePanelData = (obj1, obj2) => {
-        return JSON.stringify(obj1) === JSON.stringify(obj2);
-    };
-
-    const savePanelData = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let panelObj = {
-                name: panel.panel_name,
-                parent_panel: panel.parent_id,
-                space_id: panel.location_id,
-            };
-
-            setIsProcessing(true);
-            let params = `?panel_id=${panelId}`;
-            await axios
-                .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
-                });
-            setIsProcessing(false);
-
-            history.push({
-                pathname: `/settings/panels`,
-            });
-        } catch (error) {
-            setIsProcessing(false);
-        }
-    };
-
-    const unLinkAllBreakers = async () => {
-        try {
-            setIsResetting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
-                setIsResetting(false);
-                window.scrollTo(0, 0);
-                handleUnlinkAlertClose();
-                triggerBreakerAPI();
-            });
-        } catch (error) {
-            setIsResetting(false);
-        }
-    };
-
-    const deletePanelBreakers = async () => {
-        try {
-            setIsDeleting(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?panel_id=${panelId}`;
-            await axios.delete(`${BaseUrl}${deletePanel}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setIsDeleting(false);
-                handleDeletePanelAlertClose();
-                history.push({
-                    pathname: `/settings/panels`,
-                });
-            });
-        } catch (error) {
-            setIsDeleting(false);
-        }
-    };
-
     const getTargetBreakerId = (targetBreakerNo) => {
         let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
         return targetObj?.id;
@@ -449,25 +359,177 @@ const EditBreakerPanel = () => {
         });
     };
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Panels',
-                        path: '/settings/panels',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-            window.scrollTo(0, 0);
+    const onCancelClick = () => {
+        history.push({
+            pathname: `/settings/panels`,
+        });
+    };
+
+    const savePanelData = async () => {
+        setIsProcessing(true);
+        const params = `?panel_id=${panelId}`;
+        const panelObj = {
+            name: panel?.panel_name,
+            parent_panel: panel?.parent_id,
+            space_id: panel?.location_id,
         };
-        updateBreadcrumbStore();
-    }, []);
+        await updatePanelDetails(params, panelObj)
+            .then((res) => {
+                setIsProcessing(false);
+                history.push({
+                    pathname: `/settings/panels`,
+                });
+            })
+            .catch(() => {
+                setIsProcessing(false);
+            });
+    };
+
+    const unLinkAllBreakers = async () => {
+        setIsResetting(true);
+        const params = `?panel_id=${panelId}`;
+        const payload = { panel_id: panelId };
+        await resetAllBreakers(params, payload)
+            .then((res) => {
+                setIsResetting(false);
+                window.scrollTo(0, 0);
+                handleUnlinkAlertClose();
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsResetting(false);
+            });
+    };
+
+    const deletePanel = async () => {
+        setIsDeleting(true);
+        const params = `?panel_id=${panelId}`;
+        await deleteCurrentPanel(params)
+            .then((res) => {
+                setIsDeleting(false);
+                handleDeletePanelAlertClose();
+                history.push({
+                    pathname: `/settings/panels`,
+                });
+            })
+            .catch(() => {
+                setIsDeleting(false);
+            });
+    };
+
+    const fetchBreakersData = async (panel_id, bldg_id) => {
+        setBreakerDataFetched(true);
+        LoadingStore.update((s) => {
+            s.isLoading = true;
+        });
+        const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
+        await getBreakersList(params)
+            .then((res) => {
+                const response = res?.data?.data;
+                setBreakersData(response);
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
+            })
+            .catch(() => {
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                    s.isLoading = false;
+                });
+            });
+    };
+
+    const fetchEquipmentData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}&occupancy_filter=true`;
+        await getEquipmentsList(params)
+            .then((res) => {
+                const responseData = res?.data?.data;
+                const equipArray = [];
+                responseData.forEach((record) => {
+                    if (record.equipments_name === '') {
+                        return;
+                    }
+                    const obj = {
+                        label: record.equipments_name,
+                        value: record.equipments_id,
+                        breakerId: record.breaker_id,
+                    };
+                    equipArray.push(obj);
+                });
+                setEquipmentData(equipArray);
+                BreakersStore.update((s) => {
+                    s.equipmentData = equipArray;
+                });
+            })
+            .catch(() => {});
+    };
+
+    const fetchSinglePanelData = async (panel_id, bldg_id) => {
+        setIsPanelDataFetched(true);
+        const params = `?building_id=${bldg_id}&panel_id=${panel_id}`;
+        await getPanelsData(params)
+            .then((res) => {
+                const response = res?.data;
+                setActivePanelType(response?.panel_type);
+                setNormalCount(response?.breakers);
+                setPanel(response);
+                BreakersStore.update((s) => {
+                    s.panelData = response;
+                });
+                setFetchedPanelResponse(response);
+                setIsPanelDataFetched(false);
+            })
+            .catch(() => {
+                setIsPanelDataFetched(false);
+            });
+    };
+
+    const fetchPanelsData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}`;
+        await getPanelsData(params)
+            .then((res) => {
+                let response = res?.data?.data;
+                setPanelsDataList(response);
+            })
+            .catch(() => {});
+    };
+
+    const fetchPassiveDeviceData = async (bldg_id) => {
+        const params = `?building_id=${bldg_id}&page_no=1&page_size=150`;
+        await getPassiveDeviceList(params)
+            .then((res) => {
+                const responseData = res?.data?.data;
+                const newArray = [];
+                responseData.forEach((record) => {
+                    const obj = {
+                        label: record?.identifier,
+                        value: record?.equipments_id,
+                    };
+                    newArray.push(obj);
+                });
+                setPassiveDeviceData(newArray);
+                BreakersStore.update((s) => {
+                    s.passiveDeviceData = newArray;
+                });
+                BreakersStore.update((s) => {
+                    s.totalPassiveDeviceCount = res?.data?.total_data;
+                });
+            })
+            .catch(() => {});
+    };
+
+    const fetchLocationData = async (bldg_id) => {
+        const params = `/${bldg_id}`;
+        await getLocationData(params)
+            .then((res) => {
+                const responseData = res?.data;
+                responseData.length === 0 ? setLocationDataList([]) : setLocationDataList(responseData);
+            })
+            .catch(() => {});
+    };
 
     useEffect(() => {
         BreadcrumbStore.update((bs) => {
@@ -504,227 +566,18 @@ const EditBreakerPanel = () => {
         if (!isBreakerApiTrigerred) {
             return;
         }
-        const fetchBreakersData = async () => {
-            try {
-                setBreakerDataFetched(true);
-                LoadingStore.update((s) => {
-                    s.isLoading = true;
-                });
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
 
-                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
-
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    setBreakersData(response);
-                    setBreakerDataFetched(false);
-                    LoadingStore.update((s) => {
-                        s.isBreakerDataFetched = false;
-                        s.isLoading = false;
-                    });
-                });
-            } catch (error) {
-                setBreakerDataFetched(false);
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
-            }
-        };
-        const fetchEquipmentData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let equipArray = [];
-                    responseData.forEach((record) => {
-                        if (record.equipments_name === '') {
-                            return;
-                        }
-                        let obj = {
-                            label: record.equipments_name,
-                            value: record.equipments_id,
-                            breakerId: record.breaker_id,
-                        };
-                        equipArray.push(obj);
-                    });
-                    setEquipmentData(equipArray);
-                    BreakersStore.update((s) => {
-                        s.equipmentData = equipArray;
-                    });
-                });
-            } catch (error) {}
-        };
-        fetchBreakersData();
-        fetchEquipmentData();
+        fetchBreakersData(panelId, bldgId);
+        fetchEquipmentData(bldgId);
     }, [isBreakerApiTrigerred]);
 
     useEffect(() => {
-        const fetchSinglePanelData = async () => {
-            try {
-                setIsPanelDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActivePanelType(response.panel_type);
-                    setNormalCount(response.breakers);
-                    setPanel(response);
-                    BreakersStore.update((s) => {
-                        s.panelData = response;
-                    });
-                    setFetchedPanelResponse(response);
-                    setIsPanelDataFetched(false);
-                });
-            } catch (error) {
-                setIsPanelDataFetched(false);
-            }
-        };
-
-        const fetchBreakersData = async () => {
-            try {
-                setBreakerDataFetched(true);
-                LoadingStore.update((s) => {
-                    s.isLoading = true;
-                });
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
-
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    setBreakersData(response);
-                    setBreakerDataFetched(false);
-                    LoadingStore.update((s) => {
-                        s.isBreakerDataFetched = false;
-                        s.isLoading = false;
-                    });
-                });
-            } catch (error) {
-                setBreakerDataFetched(false);
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
-            }
-        };
-
-        const fetchPanelsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPanelsDataList(response);
-                });
-            } catch (error) {}
-        };
-
-        const fetchEquipmentData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&occupancy_filter=true`;
-                await axios.post(`${BaseUrl}${generalEquipments}${params}`, {}, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let equipArray = [];
-                    responseData.forEach((record) => {
-                        if (record.equipments_name === '') {
-                            return;
-                        }
-                        let obj = {
-                            label: record.equipments_name,
-                            value: record.equipments_id,
-                            breakerId: record.breaker_id,
-                        };
-                        equipArray.push(obj);
-                    });
-                    setEquipmentData(equipArray);
-                    BreakersStore.update((s) => {
-                        s.equipmentData = equipArray;
-                    });
-                });
-            } catch (error) {}
-        };
-
-        const fetchPassiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&page_size=150&page_no=1`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let responseData = res.data.data;
-                    let newArray = [];
-                    responseData.forEach((record) => {
-                        let obj = {
-                            label: record.identifier,
-                            value: record.equipments_id,
-                        };
-                        newArray.push(obj);
-                    });
-                    setPassiveDeviceData(newArray);
-                    BreakersStore.update((s) => {
-                        s.passiveDeviceData = newArray;
-                    });
-                    BreakersStore.update((s) => {
-                        s.totalPassiveDeviceCount = res?.data?.total_data;
-                    });
-                });
-            } catch (error) {}
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationDataList(res.data);
-                });
-            } catch (error) {}
-        };
-
-        fetchSinglePanelData();
-        fetchBreakersData();
-        fetchPanelsData();
-        fetchPassiveDeviceData();
-        fetchLocationData();
-        fetchEquipmentData();
+        fetchSinglePanelData(panelId, bldgId);
+        fetchBreakersData(panelId, bldgId);
+        fetchEquipmentData(bldgId);
+        fetchPanelsData(bldgId);
+        fetchPassiveDeviceData(bldgId);
+        fetchLocationData(bldgId);
     }, [panelId]);
 
     useEffect(() => {
@@ -844,245 +697,190 @@ const EditBreakerPanel = () => {
         });
     }, [breakersData]);
 
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: '/settings/panels',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+            window.scrollTo(0, 0);
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container" xl={10}>
-                    <span className="heading-style">Edit Panel</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Edit Panel</Typography.Header>
+                        </div>
                         {panelDataFetched ? (
-                            <Skeleton count={1} height={40} width={150} />
+                            <Skeleton count={1} height={35} width={135} />
                         ) : (
-                            <div className="ml-2">
-                                <Link to="/settings/panels">
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-2">
-                                        Cancel
-                                    </button>
-                                </Link>
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
+                            <div className="d-flex">
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={onCancelClick}
+                                />
+                                <Button
+                                    label={isProcessing ? 'Saving' : 'Save'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={savePanelData}
+                                    className="ml-2"
                                     disabled={comparePanelData(panel, fetchedPanelResponse)}
-                                    onClick={() => {
-                                        savePanelData();
-                                    }}>
-                                    {isProcessing ? 'Saving...' : 'Save'}
-                                </button>
+                                />
                             </div>
                         )}
                     </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col xl={10}>
-                    <div className="panel-first-row-style mt-4">
-                        <FormGroup>
-                            <Label for="panelName" className="card-title">
-                                Name
-                            </Label>
+                <Col lg={10}>
+                    <div className="edit-panel-custom-grid">
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                            <Brick sizeInRem={0.25} />
                             {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
+                                <Skeleton count={1} height={35} width={250} />
                             ) : (
-                                <Input
-                                    type="text"
-                                    name="panelName"
-                                    id="panelName"
-                                    placeholder="Panel Name"
+                                <InputTooltip
+                                    placeholder="Enter Panel Name"
                                     onChange={(e) => {
                                         handleChange('panel_name', e.target.value);
                                     }}
-                                    className="font-weight-bold"
-                                    value={panel.panel_name}
+                                    labelSize={Typography.Sizes.md}
+                                    value={panel?.panel_name}
                                 />
                             )}
-                        </FormGroup>
+                        </div>
 
-                        <FormGroup>
-                            <Label for="userState" className="card-title">
-                                Parent Panel
-                            </Label>
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
+                            <Brick sizeInRem={0.25} />
                             {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
+                                <Skeleton count={1} height={35} width={250} />
                             ) : (
                                 <Select
-                                    name="state"
-                                    id="userState"
-                                    isSearchable={true}
-                                    defaultValue={'Select Parent Panel'}
+                                    placeholder="Select Parent Panel"
                                     options={parentPanel}
+                                    currentValue={parentPanel.filter((option) => option.value === panel?.parent_id)}
                                     onChange={(e) => {
                                         handleChange('parent_id', e.value);
                                     }}
-                                    value={parentPanel.filter((option) => option.value === panel.parent_id)}
-                                    className="font-weight-bold dropdownScrollaleDisable"
-                                    menuPlacement="auto"
-                                    menuPosition="fixed"
-                                    menuShouldBlockScroll={true}
+                                    isSearchable={true}
                                 />
                             )}
-                        </FormGroup>
+                        </div>
 
-                        <FormGroup>
-                            <Label for="location" className="card-title">
-                                Location
-                            </Label>
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                            <Brick sizeInRem={0.25} />
                             {panelDataFetched ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={250} />
-                                </Form>
+                                <Skeleton count={1} height={35} width={475} />
                             ) : (
-                                // <Input
-                                //     type="select"
-                                //     name="state"
-                                //     id="userState"
-                                //     className="font-weight-bold"
-                                //     onChange={(e) => {
-                                //         if (e.target.value === 'Select Location') {
-                                //             return;
-                                //         }
-                                //         handleChange('location_id', e.target.value);
-                                //     }}
-                                //     value={panel.location_id}>
-                                //     <option>Select Location</option>
-                                //     {locationDataList.map((record) => {
-                                //         return <option value={record.location_id}>{record.location_name}</option>;
-                                //     })}
-                                // </Input>
                                 <Select
-                                    name="state"
-                                    id="userState"
-                                    isSearchable={true}
-                                    defaultValue={'Select Location Type'}
+                                    placeholder="Select Location"
                                     options={location}
-                                    value={location.filter((option) => option.value === panel.location_id)}
+                                    currentValue={location.filter((option) => option.value === panel?.location_id)}
                                     onChange={(e) => {
                                         handleChange('location_id', e.value);
                                     }}
-                                    className="font-weight-bold dropdownScrollaleDisable"
-                                    menuPlacement="auto"
-                                    menuPosition="fixed"
-                                    menuShouldBlockScroll={true}
+                                    isSearchable={true}
                                 />
                             )}
-                        </FormGroup>
+                        </div>
                     </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col xl={10}>
-                    <div className="panel-container-style mt-4">
-                        <Row className="panel-header-styling ml-1 mr-1">
-                            <div className="panel-header-filter">
-                                <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
-                                            Type
-                                        </Label>
-                                        {panelDataFetched ? (
-                                            <Form>
-                                                <Skeleton count={1} height={40} width={150} />
-                                            </Form>
-                                        ) : (
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="fields-disabled-style"
-                                                onChange={(e) => {
-                                                    setActivePanelType(e.target.value);
-                                                }}
-                                                disabled={true}
-                                                value={panel.panel_type}>
-                                                {panelType.map((record) => {
-                                                    return <option value={record.value}>{record.name}</option>;
-                                                })}
-                                            </Input>
-                                        )}
-                                    </FormGroup>
+                <Col lg={10}>
+                    <div className="panel-container-style">
+                        <Brick sizeInRem={2} />
+
+                        <div className="d-flex justify-content-between pl-4 pr-4">
+                            <div className="d-flex">
+                                <div className="mr-2">
+                                    <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    {panelDataFetched ? (
+                                        <Skeleton count={1} height={35} width={125} />
+                                    ) : (
+                                        <Select
+                                            placeholder="Select Panel Types"
+                                            options={panelType}
+                                            currentValue={panelType.filter(
+                                                (option) => option.value === panel?.panel_type
+                                            )}
+                                            onChange={(e) => {
+                                                setActivePanelType(e.target.value);
+                                            }}
+                                            isSearchable={true}
+                                            disabled={true}
+                                        />
+                                    )}
                                 </div>
-                                <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
-                                            Number of Breakers
-                                        </Label>
-                                        {panelDataFetched ? (
-                                            <Form>
-                                                <Skeleton count={1} height={40} width={150} />
-                                            </Form>
-                                        ) : (
-                                            <>
-                                                {activePanelType === 'distribution' ? (
-                                                    <Input
-                                                        type="number"
-                                                        name="breakers"
-                                                        id="breakers"
-                                                        // value={panel.breakers_linked}
-                                                        value={breakersData?.length}
-                                                        onChange={(e) => {
-                                                            if (normalCount > parseInt(e.target.value)) {
-                                                                removeBreakersFromList();
-                                                            }
-                                                            if (normalCount < parseInt(e.target.value)) {
-                                                                addBreakersToList(e.target.value);
-                                                            }
-                                                            setNormalCount(parseInt(e.target.value));
-                                                        }}
-                                                        className="breaker-no-width fields-disabled-style"
-                                                        disabled={true}
-                                                    />
-                                                ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
-                                                        id="userState"
-                                                        className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        // value={panel.breakers}
-                                                        value={breakersData?.length}
-                                                        onChange={(e) => {
-                                                            handleDisconnectBreakers(
-                                                                disconnectBreakerCount,
-                                                                parseInt(e.target.value)
-                                                            );
-                                                            setDisconnectBreakerCount(parseInt(e.target.value));
-                                                        }}
-                                                        disabled={true}>
-                                                        {disconnectBreaker.map((record) => {
-                                                            return <option value={record.value}>{record.name}</option>;
-                                                        })}
-                                                    </Input>
-                                                )}
-                                            </>
-                                        )}
-                                    </FormGroup>
+                                <div className="ml-2">
+                                    <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
+                                    <Brick sizeInRem={0.25} />
+                                    {panelDataFetched || isLoading ? (
+                                        <Skeleton count={1} height={35} width={225} />
+                                    ) : (
+                                        <InputTooltip
+                                            type="number"
+                                            placeholder="Enter Breakers"
+                                            onChange={(e) => {
+                                                if (normalCount > parseInt(e.target.value)) {
+                                                    removeBreakersFromList();
+                                                }
+                                                if (normalCount < parseInt(e.target.value)) {
+                                                    addBreakersToList(e.target.value);
+                                                }
+                                                setNormalCount(parseInt(e.target.value));
+                                            }}
+                                            labelSize={Typography.Sizes.md}
+                                            value={breakersData?.length}
+                                            disabled
+                                        />
+                                    )}
                                 </div>
                             </div>
-                            <div className="float-right m-4">
-                                {panelDataFetched ? (
-                                    <Form>
-                                        <Skeleton count={1} height={40} width={150} />
-                                    </Form>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="btn btn-md btn-secondary font-weight-bold"
-                                        onClick={() => {
-                                            setIsEditable(!isEditable);
-                                            BreakersStore.update((s) => {
-                                                s.isEditable = !isEditable;
-                                            });
-                                        }}>
-                                        {isEditable ? 'Done Editing' : 'Edit Layout'}
-                                    </button>
-                                )}
+                            <div>
+                                <Button
+                                    label={isEditable ? 'Done Editing' : 'Edit Layout'}
+                                    size={Button.Sizes.lg}
+                                    type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
+                                    className="w-100"
+                                    onClick={() => {
+                                        setIsEditable(!isEditable);
+                                        BreakersStore.update((s) => {
+                                            s.isEditable = !isEditable;
+                                        });
+                                    }}
+                                />
                             </div>
-                        </Row>
+                        </div>
+
+                        <Brick sizeInRem={2.5} />
 
                         {isLoading && (
                             <Row>
@@ -1198,74 +996,28 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <Card className="custom-card ml-4 mr-4">
-                            <CardHeader>
-                                <h5 className="danger-zone-style">Danger Zone</h5>
-                            </CardHeader>
-
-                            <CardBody>
-                                {isLoading ? (
-                                    <Form>
-                                        <Skeleton count={1} height={40} width={150} />
-                                    </Form>
-                                ) : (
-                                    <Form>
-                                        <FormGroup>
-                                            <button
-                                                type="button"
-                                                onClick={handleUnlinkAlertShow}
-                                                className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
-                                                <FontAwesomeIcon
-                                                    icon={faLinkHorizontalSlash}
-                                                    color="#FFFFFF"
-                                                    size="md"
-                                                    className="mr-2"
-                                                />
-                                                Unlink All Breakers
-                                            </button>
-                                        </FormGroup>
-                                    </Form>
-                                )}
-                            </CardBody>
-                        </Card>
+                        <UnlinkAllBreakers
+                            isResetting={isResetting}
+                            isLoading={isLoading}
+                            showUnlinkAlert={showUnlinkAlert}
+                            handleUnlinkAlertShow={handleUnlinkAlertShow}
+                            handleUnlinkAlertClose={handleUnlinkAlertClose}
+                            unLinkAllBreakers={unLinkAllBreakers}
+                        />
                     </div>
                 </Col>
             </Row>
 
-            <Row className="mt-4">
-                <Col xl={10}>
-                    <Card className="custom-card">
-                        <CardHeader>
-                            <h5 className="danger-zone-style">Danger Zone</h5>
-                        </CardHeader>
+            <Brick sizeInRem={2} />
 
-                        <CardBody>
-                            {isLoading ? (
-                                <Form>
-                                    <Skeleton count={1} height={40} width={150} />
-                                </Form>
-                            ) : (
-                                <Form>
-                                    <FormGroup>
-                                        <button
-                                            type="button"
-                                            onClick={handleDeletePanelAlertShow}
-                                            className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
-                                            <FontAwesomeIcon
-                                                icon={faTrash}
-                                                color="#FFFFFF"
-                                                size="md"
-                                                className="mr-2"
-                                            />
-                                            Delete Panel
-                                        </button>
-                                    </FormGroup>
-                                </Form>
-                            )}
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
+            <DeletePanel
+                isDeleting={isDeleting}
+                isLoading={isLoading}
+                showDeletePanelAlert={showDeletePanelAlert}
+                handleDeletePanelAlertShow={handleDeletePanelAlertShow}
+                handleDeletePanelAlertClose={handleDeletePanelAlertClose}
+                deletePanel={deletePanel}
+            />
 
             <Modal show={showMain} onHide={handleMainClose} centered backdrop="static" keyboard={false}>
                 <Modal.Body>
@@ -1310,76 +1062,17 @@ const EditBreakerPanel = () => {
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleMainClose}>
+                    <button variant="light" onClick={handleMainClose}>
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         variant="primary"
                         onClick={() => {
                             updateChangesToPanel();
                             handleMainClose();
                         }}>
                         Save
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink All Breakers</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">
-                            Are you sure you want to unlink all breakers on this panel?
-                        </div>
-                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
-                    </div>
-                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            unLinkAllBreakers();
-                        }}
-                        className="unlink-reset-style">
-                        {isResetting ? 'Resetting' : 'Reset'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal
-                show={showDeletePanelAlert}
-                onHide={handleDeletePanelAlertClose}
-                centered
-                backdrop="static"
-                keyboard={false}>
-                <Modal.Body>
-                    <div className="mb-4">
-                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Panel</h5>
-                    </div>
-                    <div className="m-2">
-                        <div className="unlink-alert-styling mb-1">
-                            Are you sure you want to delete the Panel and the Panel Inputs it contains?
-                        </div>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleDeletePanelAlertClose} className="unlink-cancel-style">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            deletePanelBreakers();
-                        }}
-                        className="unlink-reset-style">
-                        {isDeleting ? 'Deleting' : 'Delete'}
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

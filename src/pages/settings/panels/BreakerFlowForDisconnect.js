@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Input, FormGroup, Button } from 'reactstrap';
+import React, { useState, useEffect } from 'react';
+import { Input, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -12,8 +12,18 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
+import { Button } from '../../../sharedComponents/button';
+import Brick from '../../../sharedComponents/brick';
+import Typography from '../../../sharedComponents/typography';
 import '../style.css';
 import './panel-style.css';
+import './styles.scss';
+import UnlinkBreaker from './UnlinkBreaker';
+import DeleteBreaker from './DeleteBreaker';
+import { getBreakerDeleted, resetAllBreakers } from './services';
 
 const DisconnectedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
@@ -35,12 +45,24 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [tripleBreakerChanges, setTripleBreakerChanges] = useState({});
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
     const handleEditBreakerClose = () => setShowEditBreaker(false);
     const handleEditBreakerShow = () => setShowEditBreaker(true);
+
+    // Unlink Alert Modal
+    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
+    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
+    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+
+    // Delete Alert Modal
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
+    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
 
     const [sensorData, setSensorData] = useState([]);
     const [doubleSensorData, setDoubleSensorData] = useState([]);
@@ -149,6 +171,56 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 setIsSensorDataFetchedForTriple(false);
             }
         }
+    };
+
+    const unLinkCurrentBreaker = async () => {
+        setIsResetting(true);
+
+        let breakersList = [];
+
+        if (breakerData.breakerType === 1) {
+            breakersList.push(id);
+        }
+        if (breakerData.breakerType === 2) {
+            breakersList.push(id);
+            breakersList.push(doubleBreakerData.id);
+        }
+        if (breakerData.breakerType === 3) {
+            breakersList.push(id);
+            breakersList.push(doubleBreakerData.id);
+            breakersList.push(tripleBreakerData.id);
+        }
+
+        let params = `?building_id=${bldgId}`;
+        let payload = { breaker_id: breakersList };
+
+        await resetAllBreakers(params, payload)
+            .then((res) => {
+                setIsResetting(false);
+                window.scrollTo(0, 0);
+                handleUnlinkAlertClose();
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsResetting(false);
+            });
+    };
+
+    const deleteCurrentBreaker = async () => {
+        setIsDeleting(true);
+
+        let params = `?breaker_id=${id}`;
+
+        await getBreakerDeleted(params)
+            .then((res) => {
+                setIsDeleting(false);
+                window.scrollTo(0, 0);
+                handleDeleteAlertClose();
+                triggerBreakerAPI();
+            })
+            .catch(() => {
+                setIsDeleting(false);
+            });
     };
 
     const fetchAllSensorData = (deviceOne, deviceTwo, deviceThree) => {
@@ -887,9 +959,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         tripleBreakerData?.data?.device_id
                                                     );
                                                 }}>
-                                                <div className="edit-icon-bg-styling mr-2">
-                                                    <i className="uil uil-pen"></i>
-                                                </div>
+                                                <PenSVG className="mr-2" />
 
                                                 <span className="font-weight-bold edit-btn-styling">Edit</span>
                                             </div>
@@ -924,9 +994,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         tripleBreakerData?.data?.device_id
                                                     );
                                                 }}>
-                                                <div className="edit-icon-bg-styling mr-2">
-                                                    <i className="uil uil-pen"></i>
-                                                </div>
+                                                <PenSVG className="mr-2" />
 
                                                 <span className="font-weight-bold edit-btn-styling">Edit</span>
                                             </div>
@@ -1395,39 +1463,98 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     isOptionDisabled={(option) => option.breakerId !== ''}
                                 />
                             </Form.Group>
+
+                            <Brick sizeInRem={0.25} />
+                            <div className="edit-form-breaker ml-2 mr-2" />
+                            <Brick sizeInRem={1} />
+
+                            <div className="d-flex justify-content-between ml-2 mr-2">
+                                <div>
+                                    <Button
+                                        label="Unlink Breaker"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
+                                        onClick={() => {
+                                            handleEditBreakerClose();
+                                            handleUnlinkAlertShow();
+                                        }}
+                                        icon={<UnlinkOldSVG />}
+                                    />
+                                </div>
+                                <div>
+                                    <Button
+                                        label="Delete Breaker"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryDistructive}
+                                        onClick={() => {
+                                            handleEditBreakerClose();
+                                            handleDeleteAlertShow();
+                                        }}
+                                        icon={<DeleteSVG />}
+                                        disabled={
+                                            disconnectedBreakersData.length !== breakerData.breaker_number ||
+                                            breakerData.breakerType === 2 ||
+                                            breakerData.breakerType === 3
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            {disconnectedBreakersData.length === breakerData.breaker_number &&
+                            (breakerData.breakerType === 2 || breakerData.breakerType === 3) ? (
+                                <div className="float-right mr-2">
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
+                                        Grouped breakers cannot be deleted
+                                    </Typography.Body>
+                                </div>
+                            ) : null}
                         </Form>
                     </Modal.Body>
                 </>
 
-                <Modal.Footer>
+                <Modal.Footer className="ml-2 mr-2 mb-2">
                     <Button
-                        variant="light"
+                        label="Cancel"
+                        size={Button.Sizes.md}
+                        type={Button.Type.secondaryGrey}
                         onClick={() => {
                             handleEditBreakerClose();
                             setBreakerData(Object.assign({}, singleBreaker));
                             setDoubleBreakerData(Object.assign({}, doubleBreaker));
                             setTripleBreakerData(Object.assign({}, tripleBreaker));
                             setLinkedSensors([]);
-                        }}>
-                        Cancel
-                    </Button>
+                        }}
+                    />
                     <Button
-                        variant="primary"
+                        label={isProcessing ? 'Saving...' : 'Save'}
+                        size={Button.Sizes.md}
+                        type={Button.Type.primary}
                         onClick={() => {
-                            if (breakerData.breakerType === 1) {
-                                saveBreakerData();
-                            }
-                            if (breakerData.breakerType === 2) {
-                                saveDoubleBreakerData();
-                            }
-                            if (breakerData.breakerType === 3) {
-                                saveTripleBreakerData();
-                            }
-                        }}>
-                        {isProcessing ? 'Saving...' : 'Save'}
-                    </Button>
+                            if (breakerData.breakerType === 1) saveBreakerData();
+                            if (breakerData.breakerType === 2) saveDoubleBreakerData();
+                            if (breakerData.breakerType === 3) saveTripleBreakerData();
+                        }}
+                        disabled={isProcessing}
+                    />
                 </Modal.Footer>
             </Modal>
+
+            <UnlinkBreaker
+                showUnlinkAlert={showUnlinkAlert}
+                handleUnlinkAlertClose={handleUnlinkAlertClose}
+                handleEditBreakerShow={handleEditBreakerShow}
+                isResetting={isResetting}
+                unLinkCurrentBreaker={unLinkCurrentBreaker}
+            />
+
+            <DeleteBreaker
+                showDeleteAlert={showDeleteAlert}
+                handleDeleteAlertClose={handleDeleteAlertClose}
+                handleEditBreakerShow={handleEditBreakerShow}
+                isDeleting={isDeleting}
+                deleteCurrentBreaker={deleteCurrentBreaker}
+            />
         </React.Fragment>
     );
 };
