@@ -18,7 +18,12 @@ Default.args = {
     onMoreDetail: () => alert(),
     colors: ['#E2AD5B', '#44B87F', '#5E94E4', '#B863CF'],
     //Categories should be timestamps
-    categories: ['0', '2', '4', '6', '8', '9', '10', '12', '14', '16', '18', '30'],
+    categories: [
+        '2022-11-28T00:30:00+00:00',
+        '2022-11-28T01:30:00+00:00',
+        '2022-11-28T02:30:00+00:00',
+        '2022-11-28T04:30:00+00:00',
+    ],
     tooltipUnit: UNITS.KWH,
     series: [
         {
@@ -42,10 +47,11 @@ Default.args = {
     // tooltipCallBackValue: ({value}) => {
     //     return  moment(value).format(`MMM D 'YY @ hh:mm A`);
     // },
+
     //callback to xAxis points
-    // xAxisCallBackValue:({value}) => {
-    //     return moment(value).format('YY MM h:s')
-    // },
+    xAxisCallBackValue: ({ value }) => {
+        return moment(value).format('MM/DD H:00 A');
+    },
 
     //For tooltip timezone
     // timeZone: 'en',
@@ -56,8 +62,19 @@ Default.args = {
             labels: {
                 // enabled: false
             },
-            max: 0,
-            min: 99,
         },
+    },
+    selectUnit: {
+        placeholder: 'Select unit...',
+        defaultValue: `Energy (${UNITS.KWH})`,
+        options: [
+            { label: `Energy (${UNITS.KWH})`, value: `Energy (${UNITS.KWH})` },
+            { label: `Square (${UNITS.KWH_SQ_FT})`, value: `Square (${UNITS.KWH_SQ_FT})` },
+        ],
+    },
+    unitInfo: {
+        unit: UNITS.KWH,
+        value: '11,441',
+        title: 'Estimated Energy Savings',
     },
 };

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import Select, { DROPDOWN_INPUT_TYPES } from '../form/select';
 import Typography from '../typography';
+import { Option } from '../form/select/customComponents';
 
 import { removeProps, stringOrNumberPropTypes } from '../helpers/helper';
-
 import './BuildingSwitcher.scss';
 
 const createGroup = (groupName, options, setValue) => {
@@ -42,9 +42,9 @@ const defaultSearch = (data, value) => {
     }
 
     return (Array.isArray(data) ? data : []).reduce((acc, item) => {
-        const { props, type } = item;
+        const { props } = item;
 
-        if (type.name === 'Option') {
+        if (Option === item.type) {
             const found = String(extractValueForOption(props.data?.label)).toLowerCase().includes(value.toLowerCase());
 
             if (found) {
@@ -95,6 +95,7 @@ const BuildingSwitcher = (props) => {
                     },
                 }}
                 searchNoResults="No buildings found"
+                filterOption={useCallback(() => true, [])}
             />
         </div>
     );
