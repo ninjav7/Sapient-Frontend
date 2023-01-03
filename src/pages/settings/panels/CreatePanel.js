@@ -86,12 +86,12 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
     const fetchPanelsData = async () => {
         const params = `?building_id=${bldgId}`;
         const response = await getPanelsData(params);
-        if (response?.data?.data?.data.length === 0) {
+        if (response?.data?.data.length === 0) {
             setPanelsData([]);
             return;
         }
         let data = [];
-        response.data.data.data.forEach((record) => {
+        response.data.data.forEach((record) => {
             data.push({
                 label: record?.panel_name,
                 value: record?.panel_id,

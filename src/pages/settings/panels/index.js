@@ -74,22 +74,6 @@ const Panels = () => {
     const [panelsData, setPanelsData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(true);
 
-    const fetchPanelsData = async () => {
-        setPanelsData([]);
-        setDataFetching(true);
-
-        let params = `?building_id=${bldgId}`;
-        await getPanelsData(params)
-            .then((res) => {
-                const responseData = res?.data?.data?.data;
-                setPanelsData(responseData);
-                setDataFetching(false);
-            })
-            .catch(() => {
-                setDataFetching(false);
-            });
-    };
-
     const fetchPanelsDataWithFilter = async (bldgId, search_txt, page_no = 1, page_size = 20, ordered_by, sort_by) => {
         setPanelsData([]);
         setDataFetching(true);
@@ -103,7 +87,7 @@ const Panels = () => {
 
         await getPanelsData(params)
             .then((res) => {
-                const responseData = res?.data?.data;
+                const responseData = res?.data;
                 setPanelsData(responseData?.data);
                 setTotalItems(responseData?.total_data);
                 setDataFetching(false);
@@ -123,7 +107,7 @@ const Panels = () => {
         let params = `?building_id=${bldgId}`;
         await getPanelsData(params)
             .then((res) => {
-                const responseData = res?.data?.data?.data;
+                const responseData = res?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);
                 download('Panels_List', csvData);
             })

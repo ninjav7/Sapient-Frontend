@@ -491,7 +491,7 @@ const EditBreakerPanel = () => {
         const params = `?building_id=${bldg_id}`;
         await getPanelsData(params)
             .then((res) => {
-                let response = res?.data?.data?.data;
+                let response = res?.data?.data;
                 setPanelsDataList(response);
             })
             .catch(() => {});
