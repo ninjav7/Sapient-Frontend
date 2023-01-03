@@ -425,32 +425,33 @@ const ActiveDevices = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Link
-                                to={{
-                                    pathname: `/settings/active-devices/provision`,
-                                }}>
-                                {userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                            <Typography.Header size={Typography.Sizes.lg}>Active Devices</Typography.Header>
+                        </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                            <div className="d-flex">
+                                <Link
+                                    to={{
+                                        pathname: `/settings/active-devices/provision`,
+                                    }}>
                                     <Button
                                         label={'Add Active Device'}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         icon={<PlusSVG />}
                                     />
-                                ) : null}
-                            </Link>
-                        </div>
+                                </Link>
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
 
-            <Brick sizeInRem={2} />
+            <Brick sizeInRem={1.5} />
 
             <Row>
                 <Col lg={12}>
