@@ -10,7 +10,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 
-const UnlinkBreakers = ({
+const UnlinkAllBreakers = ({
     isResetting,
     isLoading,
     showUnlinkAlert,
@@ -77,4 +77,4 @@ const UnlinkBreakers = ({
     );
 };
 
-export default UnlinkBreakers;
+export default UnlinkAllBreakers;

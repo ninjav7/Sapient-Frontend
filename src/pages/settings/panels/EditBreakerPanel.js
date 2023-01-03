@@ -30,7 +30,7 @@ import {
     resetAllBreakers,
     updatePanelDetails,
 } from './services';
-import UnlinkBreakers from './UnlinkBreakers';
+import UnlinkAllBreakers from './UnlinkAllBreakers';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
@@ -996,7 +996,7 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <UnlinkBreakers
+                        <UnlinkAllBreakers
                             isResetting={isResetting}
                             isLoading={isLoading}
                             showUnlinkAlert={showUnlinkAlert}
