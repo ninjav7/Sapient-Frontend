@@ -32,7 +32,7 @@ export function getActiveDeviceData(
         params += `&model=${deviceModelString}`;
     }
     if (sensorString.length) {
-        params += `&sensor_count=${sensorString}`;
+        params += `&sensor_number=${sensorString}`;
     }
     if (firmWareString.length) {
         params += `&firmware_version=${firmWareString}`;

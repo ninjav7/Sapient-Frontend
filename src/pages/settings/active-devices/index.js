@@ -202,7 +202,7 @@ const ActiveDevices = () => {
                     value: 'sensor_number',
                     placeholder: 'All Sensors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+                    filterOptions: filterOptions.sensor_number.map((filterItem) => ({
                         value: filterItem,
                         label: filterItem,
                     })),
