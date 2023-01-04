@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { ButtonGroup } from '../../buttonGroup';
 import { ReactComponent as WifiSVG } from '../../assets/icons/wifi.svg';
 import { ReactComponent as WifiSlashSVG } from '../../assets/icons/wifislash.svg';
@@ -8,18 +8,23 @@ const STATUS_FILTER_OPTIONS = [
     { label: 'All Statuses' },
     { label: 'Online', icon: <WifiSVG /> },
     { label: 'Offline', icon: <WifiSlashSVG /> },
-    { label: '' },
 ];
 
 const StatusFilter = (props) => {
-    const { widgetProps } = useContext(DataTableWidgetContext);
+    const {
+        widgetProps: { onStatus, status, buttonGroupFilterOptions },
+    } = useContext(DataTableWidgetContext);
+
+    const handlerClick = useCallback((id) => {
+        onStatus(id, buttonGroupFilterOptions ? buttonGroupFilterOptions[id].label : STATUS_FILTER_OPTIONS[id].label);
+    }, []);
 
     return (
         <ButtonGroup
-            currentButtonId={widgetProps.status || 0}
-            buttons={widgetProps.buttonGroupFilterOptions || STATUS_FILTER_OPTIONS}
+            currentButtonId={status || 0}
+            buttons={buttonGroupFilterOptions || STATUS_FILTER_OPTIONS}
             {...props}
-            handleButtonClick={(id) => widgetProps.onStatus(id, STATUS_FILTER_OPTIONS[id].label)}
+            handleButtonClick={handlerClick}
         />
     );
 };
