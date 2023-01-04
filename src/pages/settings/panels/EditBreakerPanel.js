@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import { useAtom } from 'jotai';
 import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -19,6 +20,7 @@ import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { comparePanelData, panelType } from './utils';
+import { userPermissionData } from '../../../store/globalState';
 import DeletePanel from './DeletePanel';
 import {
     deleteCurrentPanel,
@@ -50,6 +52,7 @@ const edgeTypes = {
 
 const EditBreakerPanel = () => {
     const history = useHistory();
+    const [userPermission] = useAtom(userPermissionData);
 
     const { panelId } = useParams();
 
@@ -731,20 +734,27 @@ const EditBreakerPanel = () => {
                             <Skeleton count={1} height={35} width={135} />
                         ) : (
                             <div className="d-flex">
-                                <Button
-                                    label="Cancel"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                    onClick={onCancelClick}
-                                />
-                                <Button
-                                    label={isProcessing ? 'Saving' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={savePanelData}
-                                    className="ml-2"
-                                    disabled={comparePanelData(panel, fetchedPanelResponse)}
-                                />
+                                <div>
+                                    <Button
+                                        label="Cancel"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={onCancelClick}
+                                    />
+                                </div>
+                                <div>
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                                        <Button
+                                            label={isProcessing ? 'Saving' : 'Save'}
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.primary}
+                                            onClick={savePanelData}
+                                            className="ml-2"
+                                            disabled={comparePanelData(panel, fetchedPanelResponse)}
+                                        />
+                                    ) : null}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -769,6 +779,10 @@ const EditBreakerPanel = () => {
                                     }}
                                     labelSize={Typography.Sizes.md}
                                     value={panel?.panel_name}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -787,6 +801,10 @@ const EditBreakerPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -805,6 +823,10 @@ const EditBreakerPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -880,17 +902,20 @@ const EditBreakerPanel = () => {
                                 </div>
                             )}
                             <div>
-                                <Button
-                                    label={isEditable ? 'Done Editing' : 'Edit Layout'}
-                                    size={Button.Sizes.lg}
-                                    type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
-                                    className="w-100"
-                                    onClick={() => {
-                                        BreakersStore.update((s) => {
-                                            s.isEditable = !isEditable;
-                                        });
-                                    }}
-                                />
+                                {userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                                    <Button
+                                        label={isEditable ? 'Done Editing' : 'Edit Layout'}
+                                        size={Button.Sizes.lg}
+                                        type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
+                                        className="w-100"
+                                        onClick={() => {
+                                            BreakersStore.update((s) => {
+                                                s.isEditable = !isEditable;
+                                            });
+                                        }}
+                                    />
+                                ) : null}
                             </div>
                         </div>
 
