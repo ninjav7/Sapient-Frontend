@@ -817,52 +817,65 @@ const EditBreakerPanel = () => {
                         <Brick sizeInRem={2} />
 
                         <div className="d-flex justify-content-between pl-4 pr-4">
-                            <div className="d-flex">
-                                <div className="mr-2">
-                                    <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    {panelDataFetched ? (
-                                        <Skeleton count={1} height={35} width={125} />
-                                    ) : (
-                                        <Select
-                                            placeholder="Select Panel Types"
-                                            options={panelType}
-                                            currentValue={panelType.filter(
-                                                (option) => option.value === panel?.panel_type
-                                            )}
-                                            onChange={(e) => {
-                                                setActivePanelType(e.target.value);
-                                            }}
-                                            isSearchable={true}
-                                            disabled={true}
-                                        />
-                                    )}
+                            {isEditable ? (
+                                <div className="d-flex">
+                                    <div className="mr-2">
+                                        <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        {panelDataFetched ? (
+                                            <Skeleton count={1} height={35} width={125} />
+                                        ) : (
+                                            <Select
+                                                placeholder="Select Panel Types"
+                                                options={panelType}
+                                                currentValue={panelType.filter(
+                                                    (option) => option.value === panel?.panel_type
+                                                )}
+                                                onChange={(e) => {
+                                                    setActivePanelType(e.target.value);
+                                                }}
+                                                isSearchable={true}
+                                                disabled={true}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="ml-2">
+                                        <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        {panelDataFetched || isLoading ? (
+                                            <Skeleton count={1} height={35} width={225} />
+                                        ) : (
+                                            <InputTooltip
+                                                type="number"
+                                                placeholder="Enter Breakers"
+                                                onChange={(e) => {
+                                                    if (normalCount > parseInt(e.target.value)) {
+                                                        removeBreakersFromList();
+                                                    }
+                                                    if (normalCount < parseInt(e.target.value)) {
+                                                        addBreakersToList(e.target.value);
+                                                    }
+                                                    setNormalCount(parseInt(e.target.value));
+                                                }}
+                                                labelSize={Typography.Sizes.md}
+                                                value={breakersData?.length}
+                                                disabled
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="ml-2">
-                                    <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
+                            ) : (
+                                <div className="d-flex align-items-center">
                                     {panelDataFetched || isLoading ? (
                                         <Skeleton count={1} height={35} width={225} />
                                     ) : (
-                                        <InputTooltip
-                                            type="number"
-                                            placeholder="Enter Breakers"
-                                            onChange={(e) => {
-                                                if (normalCount > parseInt(e.target.value)) {
-                                                    removeBreakersFromList();
-                                                }
-                                                if (normalCount < parseInt(e.target.value)) {
-                                                    addBreakersToList(e.target.value);
-                                                }
-                                                setNormalCount(parseInt(e.target.value));
-                                            }}
-                                            labelSize={Typography.Sizes.md}
-                                            value={breakersData?.length}
-                                            disabled
-                                        />
+                                        <Typography.Header
+                                            size={
+                                                Typography.Sizes.md
+                                            }>{`${breakersData?.length} Breakers`}</Typography.Header>
                                     )}
                                 </div>
-                            </div>
+                            )}
                             <div>
                                 <Button
                                     label={isEditable ? 'Done Editing' : 'Edit Layout'}

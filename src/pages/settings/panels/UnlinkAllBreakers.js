@@ -32,7 +32,7 @@ const UnlinkAllBreakers = ({
                 <CardBody>
                     <div>
                         {isLoading ? (
-                            <Skeleton count={1} height={40} width={125} />
+                            <Skeleton count={1} height={40} width={225} />
                         ) : (
                             <Button
                                 label="Reset all Equipment & Device Links"
