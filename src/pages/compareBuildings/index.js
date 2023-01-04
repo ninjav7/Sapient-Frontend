@@ -201,7 +201,7 @@ const CompareBuildings = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
-            name: 'Energy Density',
+            name: 'Average Consumption / sq. ft.',
             accessor: 'energy_density',
             callbackValue: renderEnergyDensity,
 
