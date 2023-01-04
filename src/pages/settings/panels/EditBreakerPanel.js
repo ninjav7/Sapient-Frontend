@@ -76,6 +76,7 @@ const EditBreakerPanel = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+    const isEditable = BreakersStore.useState((s) => s.isEditable);
     const isLoading = LoadingStore.useState((s) => s.isLoading);
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -147,8 +148,6 @@ const EditBreakerPanel = () => {
             addLocationData();
         }
     }, [locationDataList]);
-
-    const [isEditable, setIsEditable] = useState(true);
 
     const [dynamicDistributeHeight, setDynamicDistributeHeight] = useState(300);
     const [dynamicDisconnectHeight, setDynamicDisconnectHeight] = useState(300);
@@ -871,7 +870,6 @@ const EditBreakerPanel = () => {
                                     type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
                                     className="w-100"
                                     onClick={() => {
-                                        setIsEditable(!isEditable);
                                         BreakersStore.update((s) => {
                                             s.isEditable = !isEditable;
                                         });

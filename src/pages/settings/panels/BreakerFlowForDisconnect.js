@@ -1471,7 +1471,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                             <div className="d-flex justify-content-between ml-2 mr-2">
                                 <div>
                                     <Button
-                                        label="Unlink Breaker"
+                                        label="Reset Configuration"
                                         size={Button.Sizes.md}
                                         type={Button.Type.secondaryDistructive}
                                         onClick={() => {
