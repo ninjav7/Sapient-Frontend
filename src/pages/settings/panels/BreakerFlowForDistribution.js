@@ -914,100 +914,97 @@ const DistributedBreakerComponent = ({ data, id }) => {
                 </>
             )}
 
-            <FormGroup className="form-group row m-1 mb-4">
-                <div className="breaker-container">
-                    <div className="sub-breaker-style">
-                        <div className="breaker-content-middle">
-                            <div className="breaker-index">{breakerData.breaker_number}</div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="dot-status"></div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="breaker-content">
-                                <span>{breakerData.rated_amps === 0 ? '' : `${breakerData.rated_amps}A`}</span>
-                                <span>{breakerData.voltage === '' ? '' : `${breakerData.voltage}V`}</span>
-                            </div>
-                        </div>
-                        {!(breakerData.equipment_link.length === 0) ? (
-                            <>
-                                <div className="breaker-equipName-style">
-                                    <h6 className=" ml-3 breaker-equip-name">
-                                        {findEquipmentName(breakerData.equipment_link[0])}
-                                    </h6>
-                                </div>
-                                {!(
-                                    (breakerData.breaker_level === 'triple-breaker' &&
-                                        breakerData.panel_voltage === '120/240') ||
-                                    (breakerData.breaker_level === 'double-breaker' &&
-                                        breakerData.panel_voltage === '600')
-                                ) && (
-                                    <>
-                                        {isEditable && (
-                                            <div
-                                                className="breaker-content-middle"
-                                                onClick={() => {
-                                                    handleEditBreakerShow();
-                                                    if (
-                                                        data?.sensor_id === '' &&
-                                                        doubleBreakerData?.data?.device_id === '' &&
-                                                        tripleBreakerData?.data?.device_id === ''
-                                                    ) {
-                                                        return;
-                                                    }
-                                                    fetchAllSensorData(
-                                                        data?.device_id,
-                                                        doubleBreakerData?.data?.device_id,
-                                                        tripleBreakerData?.data?.device_id
-                                                    );
-                                                }}>
-                                                <PenSVG className="mr-2" />
-
-                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {!(
-                                    (breakerData.breaker_level === 'triple-breaker' &&
-                                        breakerData.panel_voltage === '120/240') ||
-                                    (breakerData.breaker_level === 'double-breaker' &&
-                                        breakerData.panel_voltage === '600')
-                                ) && (
-                                    <>
-                                        {isEditable && (
-                                            <div
-                                                className="breaker-content-middle"
-                                                onClick={() => {
-                                                    handleEditBreakerShow();
-                                                    if (
-                                                        data?.sensor_id === '' &&
-                                                        doubleBreakerData?.data?.device_id === '' &&
-                                                        tripleBreakerData?.data?.device_id === ''
-                                                    ) {
-                                                        return;
-                                                    }
-                                                    fetchAllSensorData(
-                                                        data?.device_id,
-                                                        doubleBreakerData?.data?.device_id,
-                                                        tripleBreakerData?.data?.device_id
-                                                    );
-                                                }}>
-                                                <PenSVG className="mr-2" />
-
-                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </>
-                        )}
+            <div className="breaker-container m-1 mb-4">
+                <div className="sub-breaker-style">
+                    <div className="breaker-content-middle">
+                        <div className="breaker-index">{breakerData?.breaker_number}</div>
                     </div>
+                    <div className="breaker-content-middle">
+                        <div className="dot-status"></div>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="breaker-content">
+                            <div>{breakerData.rated_amps ? `${breakerData.rated_amps}A` : `0A`}</div>
+                            <span>{breakerData.voltage ? `${breakerData.voltage}V` : `0V`}</span>
+                        </div>
+                    </div>
+                    {!(breakerData.equipment_link.length === 0) ? (
+                        <>
+                            <div className="breaker-equipName-style">
+                                <h6
+                                    className="ml-3 breaker-equip-name"
+                                    style={{ width: !isEditable ? '11rem' : '6.5rem' }}>
+                                    {findEquipmentName(breakerData.equipment_link[0])}
+                                </h6>
+                            </div>
+                            {!(
+                                (breakerData.breaker_level === 'triple-breaker' &&
+                                    breakerData.panel_voltage === '120/240') ||
+                                (breakerData.breaker_level === 'double-breaker' && breakerData.panel_voltage === '600')
+                            ) && (
+                                <>
+                                    {isEditable && (
+                                        <div
+                                            className="breaker-content-middle"
+                                            onClick={() => {
+                                                handleEditBreakerShow();
+                                                if (
+                                                    data?.sensor_id === '' &&
+                                                    doubleBreakerData?.data?.device_id === '' &&
+                                                    tripleBreakerData?.data?.device_id === ''
+                                                ) {
+                                                    return;
+                                                }
+                                                fetchAllSensorData(
+                                                    data?.device_id,
+                                                    doubleBreakerData?.data?.device_id,
+                                                    tripleBreakerData?.data?.device_id
+                                                );
+                                            }}>
+                                            <PenSVG className="mr-2" />
+                                            <div className="font-weight-bold edit-btn-styling">Edit</div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            {!(
+                                (breakerData.breaker_level === 'triple-breaker' &&
+                                    breakerData.panel_voltage === '120/240') ||
+                                (breakerData.breaker_level === 'double-breaker' && breakerData.panel_voltage === '600')
+                            ) && (
+                                <>
+                                    {isEditable && (
+                                        <div
+                                            className="breaker-content-middle"
+                                            onClick={() => {
+                                                handleEditBreakerShow();
+                                                if (
+                                                    data?.sensor_id === '' &&
+                                                    doubleBreakerData?.data?.device_id === '' &&
+                                                    tripleBreakerData?.data?.device_id === ''
+                                                ) {
+                                                    return;
+                                                }
+                                                fetchAllSensorData(
+                                                    data?.device_id,
+                                                    doubleBreakerData?.data?.device_id,
+                                                    tripleBreakerData?.data?.device_id
+                                                );
+                                            }}>
+                                            <PenSVG className="mr-2" />
+
+                                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </>
+                    )}
                 </div>
-            </FormGroup>
+            </div>
 
             <Modal show={showEditBreaker} onHide={handleEditBreakerClose} centered backdrop="static" keyboard={false}>
                 <>

@@ -697,7 +697,7 @@ const EditBreakerPanel = () => {
     }, [breakersData]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
+        const pageDefaultGlobalState = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
@@ -711,9 +711,12 @@ const EditBreakerPanel = () => {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
+            BreakersStore.update((bs) => {
+                bs.isEditable = false;
+            });
             window.scrollTo(0, 0);
         };
-        updateBreadcrumbStore();
+        pageDefaultGlobalState();
     }, []);
 
     return (
@@ -949,39 +952,21 @@ const EditBreakerPanel = () => {
 
                                 {!panelDataFetched && (
                                     <div className="row m-4">
-                                        {isEditable && (
-                                            <ReactFlow
-                                                nodes={distributedBreakersNodes}
-                                                edges={distributedBreakersEdges}
-                                                onNodesChange={onNodesChange}
-                                                onEdgesChange={onEdgesChange}
-                                                onConnect={onConnect}
-                                                nodeTypes={nodeTypes}
-                                                edgeTypes={edgeTypes}
-                                                style={reactFlowDistributeStyle}
-                                                zoomOnScroll={false}
-                                                panOnScroll={false}
-                                                preventScrolling={false}
-                                                onPaneScroll={false}
-                                                panOnDrag={false}
-                                            />
-                                        )}
-                                        {!isEditable && (
-                                            <ReactFlow
-                                                nodes={distributedBreakersNodes}
-                                                onNodesChange={onNodesChange}
-                                                onEdgesChange={onEdgesChange}
-                                                onConnect={onConnect}
-                                                nodeTypes={nodeTypes}
-                                                edgeTypes={edgeTypes}
-                                                style={reactFlowDistributeStyle}
-                                                zoomOnScroll={false}
-                                                panOnScroll={false}
-                                                preventScrolling={false}
-                                                onPaneScroll={false}
-                                                panOnDrag={false}
-                                            />
-                                        )}
+                                        <ReactFlow
+                                            nodes={distributedBreakersNodes}
+                                            edges={distributedBreakersEdges}
+                                            onNodesChange={onNodesChange}
+                                            onEdgesChange={onEdgesChange}
+                                            onConnect={onConnect}
+                                            nodeTypes={nodeTypes}
+                                            edgeTypes={edgeTypes}
+                                            style={reactFlowDistributeStyle}
+                                            zoomOnScroll={false}
+                                            panOnScroll={false}
+                                            preventScrolling={false}
+                                            onPaneScroll={false}
+                                            panOnDrag={false}
+                                        />
                                     </div>
                                 )}
                             </>
@@ -1007,28 +992,32 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <UnlinkAllBreakers
-                            isResetting={isResetting}
-                            isLoading={isLoading}
-                            showUnlinkAlert={showUnlinkAlert}
-                            handleUnlinkAlertShow={handleUnlinkAlertShow}
-                            handleUnlinkAlertClose={handleUnlinkAlertClose}
-                            unLinkAllBreakers={unLinkAllBreakers}
-                        />
+                        {isEditable && (
+                            <UnlinkAllBreakers
+                                isResetting={isResetting}
+                                isLoading={isLoading}
+                                showUnlinkAlert={showUnlinkAlert}
+                                handleUnlinkAlertShow={handleUnlinkAlertShow}
+                                handleUnlinkAlertClose={handleUnlinkAlertClose}
+                                unLinkAllBreakers={unLinkAllBreakers}
+                            />
+                        )}
                     </div>
                 </Col>
             </Row>
 
-            <Brick sizeInRem={2} />
+            {isEditable && <Brick sizeInRem={2} />}
 
-            <DeletePanel
-                isDeleting={isDeleting}
-                isLoading={isLoading}
-                showDeletePanelAlert={showDeletePanelAlert}
-                handleDeletePanelAlertShow={handleDeletePanelAlertShow}
-                handleDeletePanelAlertClose={handleDeletePanelAlertClose}
-                deletePanel={deletePanel}
-            />
+            {isEditable && (
+                <DeletePanel
+                    isDeleting={isDeleting}
+                    isLoading={isLoading}
+                    showDeletePanelAlert={showDeletePanelAlert}
+                    handleDeletePanelAlertShow={handleDeletePanelAlertShow}
+                    handleDeletePanelAlertClose={handleDeletePanelAlertClose}
+                    deletePanel={deletePanel}
+                />
+            )}
 
             <Modal show={showMain} onHide={handleMainClose} centered backdrop="static" keyboard={false}>
                 <Modal.Body>
