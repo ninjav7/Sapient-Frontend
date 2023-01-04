@@ -49,7 +49,6 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
         await addNewPanel(params, panelObj)
             .then((res) => {
                 const panelId = res?.data?.id;
-                console.log('SSR panelId => ', panelId);
                 closeCreatePanelModel();
                 setPanelObj(defaultPanelObj);
                 setIsProcessing(false);

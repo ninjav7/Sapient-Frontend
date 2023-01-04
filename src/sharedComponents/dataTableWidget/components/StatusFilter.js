@@ -8,6 +8,7 @@ const STATUS_FILTER_OPTIONS = [
     { label: 'All Statuses' },
     { label: 'Online', icon: <WifiSVG /> },
     { label: 'Offline', icon: <WifiSlashSVG /> },
+    { label: '' },
 ];
 
 const StatusFilter = (props) => {
