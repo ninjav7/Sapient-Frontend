@@ -10,8 +10,8 @@ export const breakerLinkingAlerts = (numberOne, numberTwo) => {
     alert(`Breaker ${numberOne} & Breaker ${numberTwo} cannot be linked!`);
 };
 
-export const diffEquipLinkingAlerts = () => {
-    alert(`Breaker cannot be linked due to different Equipment configuration!`);
+export const unableLinkingAlerts = () => {
+    alert(`Breaker cannot be linked due to different Device/Equipment configuration!`);
 };
 
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
@@ -74,6 +74,20 @@ export const getEquipmentForBreaker = (breakers) => {
     }
 
     return equipmentId;
+};
+
+export const validateDeviceForBreaker = (deviceList) => {
+    let isLinkable = false;
+
+    const uniqueList = Array.from(new Set(deviceList));
+
+    if (uniqueList.length === 1) isLinkable = true;
+    if (uniqueList.length === 2) {
+        isLinkable = uniqueList.includes('');
+    }
+    if (uniqueList.length > 2) isLinkable = false;
+
+    return isLinkable;
 };
 
 export const comparePanelData = (obj1, obj2) => {
