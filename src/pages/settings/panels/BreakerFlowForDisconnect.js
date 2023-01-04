@@ -930,7 +930,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         {!(breakerData.equipment_link.length === 0) ? (
                             <>
                                 <div className="breaker-equipName-style">
-                                    <h6 className=" ml-3 breaker-equip-name">
+                                    <h6
+                                        className=" ml-3 breaker-equip-name"
+                                        style={{ width: !isEditable ? '11rem' : '6.5rem' }}>
                                         {findEquipmentName(breakerData.equipment_link[0])}
                                     </h6>
                                 </div>
@@ -1471,7 +1473,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                             <div className="d-flex justify-content-between ml-2 mr-2">
                                 <div>
                                     <Button
-                                        label="Unlink Breaker"
+                                        label="Reset Configuration"
                                         size={Button.Sizes.md}
                                         type={Button.Type.secondaryDistructive}
                                         onClick={() => {

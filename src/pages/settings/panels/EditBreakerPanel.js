@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import { useAtom } from 'jotai';
 import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -19,6 +20,7 @@ import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { comparePanelData, panelType } from './utils';
+import { userPermissionData } from '../../../store/globalState';
 import DeletePanel from './DeletePanel';
 import {
     deleteCurrentPanel,
@@ -50,6 +52,7 @@ const edgeTypes = {
 
 const EditBreakerPanel = () => {
     const history = useHistory();
+    const [userPermission] = useAtom(userPermissionData);
 
     const { panelId } = useParams();
 
@@ -76,6 +79,7 @@ const EditBreakerPanel = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+    const isEditable = BreakersStore.useState((s) => s.isEditable);
     const isLoading = LoadingStore.useState((s) => s.isLoading);
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -147,8 +151,6 @@ const EditBreakerPanel = () => {
             addLocationData();
         }
     }, [locationDataList]);
-
-    const [isEditable, setIsEditable] = useState(true);
 
     const [dynamicDistributeHeight, setDynamicDistributeHeight] = useState(300);
     const [dynamicDisconnectHeight, setDynamicDisconnectHeight] = useState(300);
@@ -698,7 +700,7 @@ const EditBreakerPanel = () => {
     }, [breakersData]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
+        const pageDefaultGlobalState = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
@@ -712,9 +714,12 @@ const EditBreakerPanel = () => {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
+            BreakersStore.update((bs) => {
+                bs.isEditable = false;
+            });
             window.scrollTo(0, 0);
         };
-        updateBreadcrumbStore();
+        pageDefaultGlobalState();
     }, []);
 
     return (
@@ -729,20 +734,27 @@ const EditBreakerPanel = () => {
                             <Skeleton count={1} height={35} width={135} />
                         ) : (
                             <div className="d-flex">
-                                <Button
-                                    label="Cancel"
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.secondaryGrey}
-                                    onClick={onCancelClick}
-                                />
-                                <Button
-                                    label={isProcessing ? 'Saving' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={savePanelData}
-                                    className="ml-2"
-                                    disabled={comparePanelData(panel, fetchedPanelResponse)}
-                                />
+                                <div>
+                                    <Button
+                                        label="Cancel"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.secondaryGrey}
+                                        onClick={onCancelClick}
+                                    />
+                                </div>
+                                <div>
+                                    {userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                                        <Button
+                                            label={isProcessing ? 'Saving' : 'Save'}
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.primary}
+                                            onClick={savePanelData}
+                                            className="ml-2"
+                                            disabled={comparePanelData(panel, fetchedPanelResponse)}
+                                        />
+                                    ) : null}
+                                </div>
                             </div>
                         )}
                     </div>
@@ -767,6 +779,10 @@ const EditBreakerPanel = () => {
                                     }}
                                     labelSize={Typography.Sizes.md}
                                     value={panel?.panel_name}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -785,6 +801,10 @@ const EditBreakerPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -803,6 +823,10 @@ const EditBreakerPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
+                                    disabled={
+                                        !userPermission?.user_role === 'admin' ||
+                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                    }
                                 />
                             )}
                         </div>
@@ -818,65 +842,80 @@ const EditBreakerPanel = () => {
                         <Brick sizeInRem={2} />
 
                         <div className="d-flex justify-content-between pl-4 pr-4">
-                            <div className="d-flex">
-                                <div className="mr-2">
-                                    <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
-                                    {panelDataFetched ? (
-                                        <Skeleton count={1} height={35} width={125} />
-                                    ) : (
-                                        <Select
-                                            placeholder="Select Panel Types"
-                                            options={panelType}
-                                            currentValue={panelType.filter(
-                                                (option) => option.value === panel?.panel_type
-                                            )}
-                                            onChange={(e) => {
-                                                setActivePanelType(e.target.value);
-                                            }}
-                                            isSearchable={true}
-                                            disabled={true}
-                                        />
-                                    )}
+                            {isEditable ? (
+                                <div className="d-flex">
+                                    <div className="mr-2">
+                                        <Typography.Body size={Typography.Sizes.md}>Types</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        {panelDataFetched ? (
+                                            <Skeleton count={1} height={35} width={125} />
+                                        ) : (
+                                            <Select
+                                                placeholder="Select Panel Types"
+                                                options={panelType}
+                                                currentValue={panelType.filter(
+                                                    (option) => option.value === panel?.panel_type
+                                                )}
+                                                onChange={(e) => {
+                                                    setActivePanelType(e.target.value);
+                                                }}
+                                                isSearchable={true}
+                                                disabled={true}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="ml-2">
+                                        <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
+                                        <Brick sizeInRem={0.25} />
+                                        {panelDataFetched || isLoading ? (
+                                            <Skeleton count={1} height={35} width={225} />
+                                        ) : (
+                                            <InputTooltip
+                                                type="number"
+                                                placeholder="Enter Breakers"
+                                                onChange={(e) => {
+                                                    if (normalCount > parseInt(e.target.value)) {
+                                                        removeBreakersFromList();
+                                                    }
+                                                    if (normalCount < parseInt(e.target.value)) {
+                                                        addBreakersToList(e.target.value);
+                                                    }
+                                                    setNormalCount(parseInt(e.target.value));
+                                                }}
+                                                labelSize={Typography.Sizes.md}
+                                                value={breakersData?.length}
+                                                disabled
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="ml-2">
-                                    <Typography.Body size={Typography.Sizes.md}>Number of Breakers</Typography.Body>
-                                    <Brick sizeInRem={0.25} />
+                            ) : (
+                                <div className="d-flex align-items-center">
                                     {panelDataFetched || isLoading ? (
                                         <Skeleton count={1} height={35} width={225} />
                                     ) : (
-                                        <InputTooltip
-                                            type="number"
-                                            placeholder="Enter Breakers"
-                                            onChange={(e) => {
-                                                if (normalCount > parseInt(e.target.value)) {
-                                                    removeBreakersFromList();
-                                                }
-                                                if (normalCount < parseInt(e.target.value)) {
-                                                    addBreakersToList(e.target.value);
-                                                }
-                                                setNormalCount(parseInt(e.target.value));
-                                            }}
-                                            labelSize={Typography.Sizes.md}
-                                            value={breakersData?.length}
-                                            disabled
-                                        />
+                                        <Typography.Header
+                                            size={
+                                                Typography.Sizes.md
+                                            }>{`${breakersData?.length} Breakers`}</Typography.Header>
                                     )}
                                 </div>
-                            </div>
+                            )}
                             <div>
-                                <Button
-                                    label={isEditable ? 'Done Editing' : 'Edit Layout'}
-                                    size={Button.Sizes.lg}
-                                    type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
-                                    className="w-100"
-                                    onClick={() => {
-                                        setIsEditable(!isEditable);
-                                        BreakersStore.update((s) => {
-                                            s.isEditable = !isEditable;
-                                        });
-                                    }}
-                                />
+                                {userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                                    <Button
+                                        label={isEditable ? 'Done Editing' : 'Edit Layout'}
+                                        size={Button.Sizes.lg}
+                                        type={isEditable ? Button.Type.secondary : Button.Type.secondaryGrey}
+                                        className="w-100"
+                                        onClick={() => {
+                                            BreakersStore.update((s) => {
+                                                s.isEditable = !isEditable;
+                                            });
+                                        }}
+                                    />
+                                ) : null}
                             </div>
                         </div>
 
@@ -938,39 +977,21 @@ const EditBreakerPanel = () => {
 
                                 {!panelDataFetched && (
                                     <div className="row m-4">
-                                        {isEditable && (
-                                            <ReactFlow
-                                                nodes={distributedBreakersNodes}
-                                                edges={distributedBreakersEdges}
-                                                onNodesChange={onNodesChange}
-                                                onEdgesChange={onEdgesChange}
-                                                onConnect={onConnect}
-                                                nodeTypes={nodeTypes}
-                                                edgeTypes={edgeTypes}
-                                                style={reactFlowDistributeStyle}
-                                                zoomOnScroll={false}
-                                                panOnScroll={false}
-                                                preventScrolling={false}
-                                                onPaneScroll={false}
-                                                panOnDrag={false}
-                                            />
-                                        )}
-                                        {!isEditable && (
-                                            <ReactFlow
-                                                nodes={distributedBreakersNodes}
-                                                onNodesChange={onNodesChange}
-                                                onEdgesChange={onEdgesChange}
-                                                onConnect={onConnect}
-                                                nodeTypes={nodeTypes}
-                                                edgeTypes={edgeTypes}
-                                                style={reactFlowDistributeStyle}
-                                                zoomOnScroll={false}
-                                                panOnScroll={false}
-                                                preventScrolling={false}
-                                                onPaneScroll={false}
-                                                panOnDrag={false}
-                                            />
-                                        )}
+                                        <ReactFlow
+                                            nodes={distributedBreakersNodes}
+                                            edges={distributedBreakersEdges}
+                                            onNodesChange={onNodesChange}
+                                            onEdgesChange={onEdgesChange}
+                                            onConnect={onConnect}
+                                            nodeTypes={nodeTypes}
+                                            edgeTypes={edgeTypes}
+                                            style={reactFlowDistributeStyle}
+                                            zoomOnScroll={false}
+                                            panOnScroll={false}
+                                            preventScrolling={false}
+                                            onPaneScroll={false}
+                                            panOnDrag={false}
+                                        />
                                     </div>
                                 )}
                             </>
@@ -996,28 +1017,32 @@ const EditBreakerPanel = () => {
                             </div>
                         )}
 
-                        <UnlinkAllBreakers
-                            isResetting={isResetting}
-                            isLoading={isLoading}
-                            showUnlinkAlert={showUnlinkAlert}
-                            handleUnlinkAlertShow={handleUnlinkAlertShow}
-                            handleUnlinkAlertClose={handleUnlinkAlertClose}
-                            unLinkAllBreakers={unLinkAllBreakers}
-                        />
+                        {isEditable && (
+                            <UnlinkAllBreakers
+                                isResetting={isResetting}
+                                isLoading={isLoading}
+                                showUnlinkAlert={showUnlinkAlert}
+                                handleUnlinkAlertShow={handleUnlinkAlertShow}
+                                handleUnlinkAlertClose={handleUnlinkAlertClose}
+                                unLinkAllBreakers={unLinkAllBreakers}
+                            />
+                        )}
                     </div>
                 </Col>
             </Row>
 
-            <Brick sizeInRem={2} />
+            {isEditable && <Brick sizeInRem={2} />}
 
-            <DeletePanel
-                isDeleting={isDeleting}
-                isLoading={isLoading}
-                showDeletePanelAlert={showDeletePanelAlert}
-                handleDeletePanelAlertShow={handleDeletePanelAlertShow}
-                handleDeletePanelAlertClose={handleDeletePanelAlertClose}
-                deletePanel={deletePanel}
-            />
+            {isEditable && (
+                <DeletePanel
+                    isDeleting={isDeleting}
+                    isLoading={isLoading}
+                    showDeletePanelAlert={showDeletePanelAlert}
+                    handleDeletePanelAlertShow={handleDeletePanelAlertShow}
+                    handleDeletePanelAlertClose={handleDeletePanelAlertClose}
+                    deletePanel={deletePanel}
+                />
+            )}
 
             <Modal show={showMain} onHide={handleMainClose} centered backdrop="static" keyboard={false}>
                 <Modal.Body>
