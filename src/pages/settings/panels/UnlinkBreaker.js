@@ -14,10 +14,10 @@ const UnlinkBreaker = ({
     return (
         <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
             <Modal.Body className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Unlink Breaker</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Reset Configuration</Typography.Header>
                 <Brick sizeInRem={1.5} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    Are you sure you want to unlink this breaker?
+                    Are you sure you want to reset the configuration of this breaker?
                 </Typography.Body>
                 <Typography.Body size={Typography.Sizes.lg}>
                     All links to equipment and sensors will be lost.

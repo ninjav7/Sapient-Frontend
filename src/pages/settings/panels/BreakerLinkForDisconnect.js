@@ -47,6 +47,7 @@ export default function CustomEdge({
 
     const disconnectBreakerLinkData = BreakersStore.useState((s) => s.disconnectBreakerLinkData);
     const disconnectedBreakersData = BreakersStore.useState((s) => s.disconnectedBreakersData);
+    const isEditable = BreakersStore.useState((s) => s.isEditable);
     const panelData = BreakersStore.useState((s) => s.panelData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
@@ -752,21 +753,42 @@ export default function CustomEdge({
                 <body>
                     {/* When Source & Target Breaker not linked */}
                     {!sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is not linked & Target Breaker linked */}
                     {!sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is linked & Target Breaker not linked */}
                     {sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
@@ -775,12 +797,26 @@ export default function CustomEdge({
                     {sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
                         <>
                             {isBothBreakerLinked() && (
-                                <button className="link_button_style" onClick={unlinkBreakers}>
+                                <button
+                                    className="link_button_style"
+                                    onClick={() => {
+                                        if (!isEditable) {
+                                            return;
+                                        }
+                                        unlinkBreakers();
+                                    }}>
                                     <LinkSVG />
                                 </button>
                             )}
                             {!isBothBreakerLinked() && (
-                                <button className="unlink_button_style" onClick={linkBreakers}>
+                                <button
+                                    className="unlink_button_style"
+                                    onClick={() => {
+                                        if (!isEditable) {
+                                            return;
+                                        }
+                                        linkBreakers();
+                                    }}>
                                     <UnlinkSVG />
                                 </button>
                             )}
