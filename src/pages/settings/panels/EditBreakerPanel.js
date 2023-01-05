@@ -27,7 +27,7 @@ import {
     getBreakersList,
     getEquipmentsList,
     getLocationData,
-    getPanelsData,
+    getPanelsList,
     getPassiveDeviceList,
     resetAllBreakers,
     updatePanelDetails,
@@ -472,7 +472,7 @@ const EditBreakerPanel = () => {
     const fetchSinglePanelData = async (panel_id, bldg_id) => {
         setIsPanelDataFetched(true);
         const params = `?building_id=${bldg_id}&panel_id=${panel_id}`;
-        await getPanelsData(params)
+        await getPanelsList(params)
             .then((res) => {
                 const response = res?.data;
                 setActivePanelType(response?.panel_type);
@@ -491,7 +491,7 @@ const EditBreakerPanel = () => {
 
     const fetchPanelsData = async (bldg_id) => {
         const params = `?building_id=${bldg_id}`;
-        await getPanelsData(params)
+        await getPanelsList(params)
             .then((res) => {
                 let response = res?.data?.data;
                 setPanelsDataList(response);
@@ -764,7 +764,7 @@ const EditBreakerPanel = () => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={10}>
+                <Col lg={11}>
                     <div className="edit-panel-custom-grid">
                         <div>
                             <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
@@ -837,7 +837,7 @@ const EditBreakerPanel = () => {
             <Brick sizeInRem={2} />
 
             <Row>
-                <Col lg={10}>
+                <Col lg={11}>
                     <div className="panel-container-style">
                         <Brick sizeInRem={2} />
 

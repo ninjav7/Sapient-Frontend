@@ -3,7 +3,7 @@ import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { fetchPanelsFilter, getPanelsData } from './services';
+import { fetchPanelsFilter, getPanelsData, getPanelsList } from './services';
 import Brick from '../../../sharedComponents/brick';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
@@ -131,7 +131,7 @@ const Panels = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getPanelsData(params)
+        await getPanelsList(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);

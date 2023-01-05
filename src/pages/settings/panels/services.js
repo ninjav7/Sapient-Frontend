@@ -96,3 +96,8 @@ export function fetchPanelsFilter(args) {
             return res.data;
         });
 }
+
+// This Service is created to fetch Panel List without Filters
+export function getPanelsList(params) {
+    return axiosInstance.get(`${generalPanels}${params}`).then((res) => res);
+}
