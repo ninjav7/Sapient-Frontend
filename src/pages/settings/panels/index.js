@@ -225,8 +225,6 @@ const Panels = () => {
     };
 
     const getFilters = async () => {
-        // let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
-        // let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
         const filters = await fetchPanelsFilter({
             bldgId,
         });
