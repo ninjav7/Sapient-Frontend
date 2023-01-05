@@ -3,7 +3,7 @@ import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { getPanelsData } from './services';
+import { fetchPanelsFilter, getPanelsData } from './services';
 import Brick from '../../../sharedComponents/brick';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
@@ -19,6 +19,7 @@ import CreatePanel from './CreatePanel';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -74,18 +75,43 @@ const Panels = () => {
     const [panelsData, setPanelsData] = useState([]);
     const [isDataFetching, setDataFetching] = useState(true);
 
-    const fetchPanelsDataWithFilter = async (bldgId, search_txt, page_no = 1, page_size = 20, ordered_by, sort_by) => {
+    const [filterOptions, setFilterOptions] = useState([]);
+    const [panelType, setPanelType] = useState([]);
+    const [parentPanel, setParentPanel] = useState([]);
+    const [locationId, setLocationId] = useState([]);
+    const [breakersCount, setBreakersCount] = useState([]);
+    const [panelVoltages, setPanelVoltages] = useState([]);
+
+    const fetchPanelsDataWithFilter = async () => {
         setPanelsData([]);
         setDataFetching(true);
 
-        if (ordered_by === 'breakers_linked') ordered_by = 'panel_name';
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
 
-        let params = `?building_id=${bldgId}&page_no=${page_no}&page_size=${page_size}&ordered_by=${ordered_by}`;
+        const panelTypeSelected = encodeURIComponent(panelType.join('+'));
+        const parentPanelSelected = encodeURIComponent(parentPanel.join('+'));
+        const locationIdSelected = encodeURIComponent(locationId.join('+'));
+        const breakerCountSelected = encodeURIComponent(breakersCount.join('+'));
+        const panelVoltageSelected = encodeURIComponent(panelVoltages.join('+'));
 
-        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
-        if (search_txt) params = params.concat(`&panel_search=${encodeURIComponent(search_txt)}`);
-
-        await getPanelsData(params)
+        await getPanelsData(
+            bldgId,
+            search,
+            pageNo,
+            pageSize,
+            {
+                ...sorting,
+            },
+            panelTypeSelected,
+            parentPanelSelected,
+            locationIdSelected,
+            breakerCountSelected,
+            panelVoltageSelected
+        )
             .then((res) => {
                 const responseData = res?.data;
                 setPanelsData(responseData?.data);
@@ -198,16 +224,145 @@ const Panels = () => {
         }
     };
 
-    useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'panel_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+    const getFilters = async () => {
+        // let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
+        // let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
+        const filters = await fetchPanelsFilter({
+            bldgId,
+        });
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'Type',
+                    value: 'panel_type',
+                    placeholder: 'All Panel Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.panel_type.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem.charAt(0).toUpperCase() + filterItem.slice(1),
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let panel_type = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                panel_type.push(opt[i].value);
+                            }
+                            setPanelType(panel_type);
+                        }
+                    },
+                    onDelete: () => {
+                        setPanelType([]);
+                    },
+                },
+                {
+                    label: 'Location',
+                    value: 'location',
+                    placeholder: 'All Locations',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.location.map((filterItem) => ({
+                        value: filterItem?.location_id,
+                        label: filterItem?.location_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let location_name = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                location_name.push(opt[i].value);
+                            }
+                            setLocationId(location_name);
+                        }
+                    },
+                    onDelete: () => {
+                        setLocationId([]);
+                    },
+                },
+                {
+                    label: 'Parent',
+                    value: 'parent',
+                    placeholder: 'All Parent Panels',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.parent_panel.map((filterItem) => ({
+                        value: filterItem?.parent_panel_id,
+                        label: filterItem?.parent_panel_name,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let parent_panel = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                parent_panel.push(opt[i].value);
+                            }
+                            setParentPanel(parent_panel);
+                        }
+                    },
+                    onDelete: () => {
+                        setParentPanel([]);
+                    },
+                },
+                {
+                    label: 'Breakers',
+                    value: 'breakers_linked',
+                    placeholder: 'All Breakers',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.breakers_linked.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let breakers_count = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                breakers_count.push(opt[i].value);
+                            }
+                            setBreakersCount(breakers_count);
+                        }
+                    },
+                    onDelete: () => {
+                        setBreakersCount([]);
+                    },
+                },
+                {
+                    label: 'Voltage',
+                    value: 'voltage',
+                    placeholder: 'All Voltages',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.voltage.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => {
+                        let opt = options;
+                        if (opt.length !== 0) {
+                            let panel_volts = [];
+                            for (let i = 0; i < opt.length; i++) {
+                                panel_volts.push(opt[i].value);
+                            }
+                            setPanelVoltages(panel_volts);
+                        }
+                    },
+                    onDelete: () => {
+                        setPanelVoltages([]);
+                    },
+                },
+            ];
+            setFilterOptions(filterOptionsFetched);
+        });
+    };
 
-        fetchPanelsDataWithFilter(bldgId, search, pageNo, pageSize, ordered_by, sort_by);
-    }, [bldgId, search, pageNo, pageSize, sortBy]);
+    useEffect(() => {
+        fetchPanelsDataWithFilter();
+    }, [bldgId, search, pageNo, pageSize, sortBy, panelType, parentPanel, locationId, breakersCount, panelVoltages]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
+
+    useEffect(() => {
+        getFilters();
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -267,6 +422,7 @@ const Panels = () => {
                         }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
+                        filterOptions={filterOptions}
                         onDownload={handleDownloadCsv}
                         headers={headerProps}
                         currentPage={pageNo}
