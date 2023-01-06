@@ -86,6 +86,7 @@ const EquipmentType = () => {
     const [minEquipCount, setMinEquipCount] = useState(0);
     const [maxEquipCount, setMaxEquipCount] = useState(0);
     const [filterData, setFilterData] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState(0);
 
     const handleEdit = (record) => {
         setSelectedEquipType(record);
@@ -114,10 +115,16 @@ const EquipmentType = () => {
         if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         if (endUseIds.length) {
-            params += `&end_use=${endUseIds}`;
+            params += `&end_use_id=${endUseIds}`;
         }
         if (equipCountAPIFlag !== '') {
             params += `&equipment_count_min=${minEquipCount}&equipment_count_max=${maxEquipCount}`;
+        }
+        if (selectedStatus == 2) {
+            params += `&status=Custom`;
+        }
+        if (selectedStatus == 1) {
+            params += `&status=System`;
         }
 
         await getEquipTypeData(params)
@@ -287,7 +294,7 @@ const EquipmentType = () => {
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
         fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
-    }, [search, pageNo, pageSize, sortBy, EndUseString, equipCountAPIFlag]);
+    }, [search, pageNo, pageSize, sortBy, EndUseString, equipCountAPIFlag, selectedStatus]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -351,7 +358,7 @@ const EquipmentType = () => {
                             setSearch(query);
                         }}
                         buttonGroupFilterOptions={[{ label: 'All' }, { label: 'System' }, { label: 'Custom' }]}
-                        onStatus={setSelectedFilter}
+                        onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
