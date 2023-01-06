@@ -137,8 +137,8 @@ const Users = () => {
     };
 
     const getUsersList = async () => {
-        const ordered_by = sortBy.name === undefined ? 'name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'name' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
         setIsUserDataFetched(true);
         let roleIds = encodeURIComponent(permissionRoleIds.join('+'));
 
@@ -242,6 +242,10 @@ const Users = () => {
     useEffect(() => {
         fetchRoles();
     }, []);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
 
     const currentRow = () => {
         return userData;
@@ -375,7 +379,11 @@ const Users = () => {
                             { label: 'Pending' },
                         ]}
                         filterOptions={filterOptions}
-                        onStatus={setSelectedStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setSelectedStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         headers={[

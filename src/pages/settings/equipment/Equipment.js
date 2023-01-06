@@ -240,17 +240,23 @@ const Equipment = () => {
     const renderSensors = useCallback((row) => {
         return (
             <div className="sensors-row-content">
-                {row.sensor_number.map((el) => {
-                    return (
-                        <Badge
-                            text={
-                                <span className="gray-950">
-                                    {el}/{row.total_sensor}
-                                </span>
-                            }
-                        />
-                    );
-                })}
+                {row.sensor_number.length === 0 ? (
+                    <Typography.Body>-</Typography.Body>
+                ) : (
+                    <>
+                        {row.sensor_number.map((el) => {
+                            return (
+                                <Badge
+                                    text={
+                                        <span className="gray-950">
+                                            {el}/{row.total_sensor}
+                                        </span>
+                                    }
+                                />
+                            );
+                        })}
+                    </>
+                )}
             </div>
         );
     });
@@ -413,7 +419,11 @@ const Equipment = () => {
     };
 
     const renderEndUseCategory = (row) => {
-        return <div>{preparedEndUseData[row.end_use_id]}</div>;
+        return (
+            <Typography.Body size={Typography.Sizes.md}>
+                {row.end_use_name !== '' ? row.end_use_name : '-'}
+            </Typography.Body>
+        );
     };
 
     const handleOpenEditEquipment = (row) => {
@@ -569,7 +579,7 @@ const Equipment = () => {
         },
         {
             name: 'End Use Category',
-            accessor: 'end_use_id',
+            accessor: 'end_use_name',
             callbackValue: renderEndUseCategory,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -669,54 +679,48 @@ const Equipment = () => {
             </Row>
             <Row>
                 <Col lg={12}>
-                    {isLoadingEndUseData ? (
-                        <SkeletonLoading />
-                    ) : (
-                        <DataTableWidget
-                            isLoading={isEquipDataFetched || isLoadingEndUseData}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="equipment"
-                            onSearch={(query) => {
-                                setPageNo(1);
-                                setSearch(query);
-                            }}
-                            rows={currentRow()}
-                            isDeletable={(row) => handleAbleToDeleteRow(row)}
-                            searchResultRows={generalEquipmentData}
-                            filterOptions={filterOptions}
-                            onDeleteRow={
-                                userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                    ? (event, id, row) => handleDeleteRowClicked(row)
-                                    : null
+                    <DataTableWidget
+                        isLoading={isEquipDataFetched || isLoadingEndUseData}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="equipment"
+                        onSearch={(query) => {
+                            setPageNo(1);
+                            setSearch(query);
+                        }}
+                        rows={currentRow()}
+                        isDeletable={(row) => handleAbleToDeleteRow(row)}
+                        searchResultRows={generalEquipmentData}
+                        filterOptions={filterOptions}
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (event, id, row) => handleDeleteRowClicked(row)
+                                : null
+                        }
+                        onEditRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleOpenEditEquipment(row)
+                                : null
+                        }
+                        onDownload={() => handleDownloadCsv()}
+                        headers={headerProps}
+                        buttonGroupFilterOptions={[]}
+                        onPageSize={setPageSize}
+                        onChangePage={setPageNo}
+                        pageSize={pageSize}
+                        currentPage={pageNo}
+                        totalCount={(() => {
+                            if (search) {
+                                return totalItemsSearched;
                             }
-                            onEditRow={
-                                userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                    ? (record, id, row) => handleOpenEditEquipment(row)
-                                    : null
+                            if (selectedTab === 0) {
+                                return totalItems;
                             }
-                            // onDeleteRow={null}
-                            // onEditRow={null}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                            buttonGroupFilterOptions={[]}
-                            onPageSize={setPageSize}
-                            onChangePage={setPageNo}
-                            pageSize={pageSize}
-                            currentPage={pageNo}
-                            totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
-                                if (selectedTab === 0) {
-                                    return totalItems;
-                                }
 
-                                return 0;
-                            })()}
-                        />
-                    )}
+                            return 0;
+                        })()}
+                    />
                 </Col>
             </Row>
             <Modal

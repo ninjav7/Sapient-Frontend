@@ -56,10 +56,6 @@ const IndividualActiveDevice = () => {
     const handleEquipmentClose = () => setShowEquipment(false);
     const handleEquipmentShow = () => setShowEquipment(true);
 
-    // Edit states
-    const [showEdit, setShowEdit] = useState(false);
-    const handleEditClose = () => setShowEdit(false);
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
@@ -655,19 +651,25 @@ const IndividualActiveDevice = () => {
                                                     }}
                                                     className="mouse-pointer"
                                                 />
-                                                <Button
-                                                    type="button"
-                                                    className="btn btn-default passive-edit-style"
-                                                    onClick={() => {
-                                                        fetchEquipmentTypeData();
-                                                        setSelectedEquipTypeId(record.equipment_type_id);
-                                                        setNewEquipTypeID(record.equipment_type_id);
-                                                        setNewEquipTypeValue(record.equipment_type);
-                                                        setSelectedSensorId(record.id);
-                                                        handleEquipmentShow();
-                                                    }}>
-                                                    Edit
-                                                </Button>
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions
+                                                    ?.advanced_passive_device_permission?.edit ? (
+                                                    <Button
+                                                        type="button"
+                                                        className="btn btn-default passive-edit-style"
+                                                        onClick={() => {
+                                                            fetchEquipmentTypeData();
+                                                            setSelectedEquipTypeId(record.equipment_type_id);
+                                                            setNewEquipTypeID(record.equipment_type_id);
+                                                            setNewEquipTypeValue(record.equipment_type);
+                                                            setSelectedSensorId(record.id);
+                                                            handleEquipmentShow();
+                                                        }}>
+                                                        Edit
+                                                    </Button>
+                                                ) : (
+                                                    <></>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -704,57 +706,6 @@ const IndividualActiveDevice = () => {
                 daysCount={daysCount}
                 deviceType="active"
             />
-
-            <Modal show={showEdit} onHide={handleEditClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Select Breaker</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Panel</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Select Panel"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('panel', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Breaker</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('breaker', e.target.value);
-                                }}>
-                                <option selected>Select Breaker</option>
-                                {breakerModal.map((record) => {
-                                    return <option value={record.value}>{record.label}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleEditClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            handleEditClose();
-                        }}>
-                        Save
-                    </Button>
-                </Modal.Footer>
-            </Modal>
 
             <Modal show={showEquipment} onHide={handleEquipmentClose} centered>
                 <Modal.Header>

@@ -163,8 +163,8 @@ const ExploreByBuildings = () => {
     }, []);
 
     const exploreDataFetch = async () => {
-        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         isLoadingRef.current = true;
         setIsExploreDataLoading(true);
         const value = apiRequestBody(startDate, endDate, timeZone);

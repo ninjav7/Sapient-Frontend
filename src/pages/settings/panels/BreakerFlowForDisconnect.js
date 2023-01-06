@@ -1484,21 +1484,23 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     />
                                 </div>
                                 <div>
-                                    <Button
-                                        label="Delete Breaker"
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryDistructive}
-                                        onClick={() => {
-                                            handleEditBreakerClose();
-                                            handleDeleteAlertShow();
-                                        }}
-                                        icon={<DeleteSVG />}
-                                        disabled={
-                                            disconnectedBreakersData.length !== breakerData.breaker_number ||
-                                            breakerData.breakerType === 2 ||
-                                            breakerData.breakerType === 3
-                                        }
-                                    />
+                                    {disconnectedBreakersData.length === breakerData.breaker_number && (
+                                        <Button
+                                            label="Delete Breaker"
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.secondaryDistructive}
+                                            onClick={() => {
+                                                handleEditBreakerClose();
+                                                handleDeleteAlertShow();
+                                            }}
+                                            icon={<DeleteSVG />}
+                                            disabled={
+                                                disconnectedBreakersData.length !== breakerData.breaker_number ||
+                                                breakerData.breakerType === 2 ||
+                                                breakerData.breakerType === 3
+                                            }
+                                        />
+                                    )}
                                 </div>
                             </div>
 

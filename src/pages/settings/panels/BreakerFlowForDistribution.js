@@ -1481,22 +1481,25 @@ const DistributedBreakerComponent = ({ data, id }) => {
                                         icon={<UnlinkOldSVG />}
                                     />
                                 </div>
+
                                 <div>
-                                    <Button
-                                        label="Delete Breaker"
-                                        size={Button.Sizes.md}
-                                        type={Button.Type.secondaryDistructive}
-                                        onClick={() => {
-                                            handleEditBreakerClose();
-                                            handleDeleteAlertShow();
-                                        }}
-                                        icon={<DeleteSVG />}
-                                        disabled={
-                                            distributedBreakersData.length !== breakerData.breaker_number ||
-                                            breakerData.breakerType === 2 ||
-                                            breakerData.breakerType === 3
-                                        }
-                                    />
+                                    {distributedBreakersData.length === breakerData.breaker_number && (
+                                        <Button
+                                            label="Delete Breaker"
+                                            size={Button.Sizes.md}
+                                            type={Button.Type.secondaryDistructive}
+                                            onClick={() => {
+                                                handleEditBreakerClose();
+                                                handleDeleteAlertShow();
+                                            }}
+                                            icon={<DeleteSVG />}
+                                            disabled={
+                                                distributedBreakersData.length !== breakerData.breaker_number ||
+                                                breakerData.breakerType === 2 ||
+                                                breakerData.breakerType === 3
+                                            }
+                                        />
+                                    )}
                                 </div>
                             </div>
 

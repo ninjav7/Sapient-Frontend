@@ -87,8 +87,8 @@ const ActiveDevices = () => {
         const fetchActiveDeviceData = async () => {
             const sorting = sortBy.method &&
                 sortBy.name && {
-                    order_by: sortBy.name,
-                    sort_by: sortBy.method,
+                    order_by: sortBy.name === undefined ? 'identifier' : sortBy.name,
+                    sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
                 };
             let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
             let deviceModelSelected = encodeURIComponent(deviceModelString.join('+'));
@@ -175,7 +175,7 @@ const ActiveDevices = () => {
                     },
                 },
                 {
-                    label: 'Models',
+                    label: 'Model',
                     value: 'model',
                     placeholder: 'All Models',
                     filterType: FILTER_TYPES.MULTISELECT,
@@ -275,6 +275,10 @@ const ActiveDevices = () => {
     useEffect(() => {
         getFilters();
     }, [bldgId]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -463,7 +467,11 @@ const ActiveDevices = () => {
                             setPageNo(1);
                             setSearch(query);
                         }}
-                        onStatus={setDeviceStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setDeviceStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
