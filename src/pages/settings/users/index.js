@@ -3,7 +3,7 @@ import { Row, Col, Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { inviteMemberUsers, fetchMemberUserList, updateVendorPermissions } from './service';
+import { inviteMemberUsers, fetchMemberUserList, updateVendorPermissions, fetchUserFilters } from './service';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import '../style.css';
@@ -14,6 +14,7 @@ import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
@@ -80,6 +81,9 @@ const Users = () => {
     const [pageSize, setPageSize] = useState(20);
     const [rolesData, setRolesData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
+    const [selectedStatus, setSelectedStatus] = useState(0);
+    const [filterOptions, setFilterOptions] = useState([]);
+    const [permissionRoleIds, setPermissionRoleIds] = useState([]);
 
     const [userObj, setUserObj] = useState({
         first_name: '',
@@ -136,8 +140,22 @@ const Users = () => {
         const ordered_by = sortBy.name === undefined ? 'name' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
         setIsUserDataFetched(true);
+        let roleIds = encodeURIComponent(permissionRoleIds.join('+'));
 
         let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
+        if (selectedStatus == 3) {
+            params += `&is_verified=false`;
+        }
+        if (selectedStatus == 2) {
+            params += `&user_state=false&is_verified=true`;
+        }
+        if (selectedStatus == 1) {
+            params += `&user_state=true&is_verified=true`;
+        }
+        if (roleIds.length) {
+            params += `&permission_role_id=${roleIds}`;
+        }
+
         await fetchMemberUserList(params)
             .then((res) => {
                 let response = res.data;
@@ -150,9 +168,50 @@ const Users = () => {
             });
     };
 
+    const getUserFilterData = async () => {
+        let params = `?user_info=${userSearchInfo}`;
+        await fetchUserFilters(params)
+            .then((res) => {
+                let response = res.data;
+                response.data.forEach((filterOptions) => {
+                    const filterOptionsFetched = [
+                        {
+                            label: 'Roles',
+                            value: 'role',
+                            placeholder: 'All Roles',
+                            filterType: FILTER_TYPES.MULTISELECT,
+                            filterOptions: filterOptions.permission_roles.map((filterItem) => ({
+                                value: filterItem?.permission_id,
+                                label: filterItem?.permission_name,
+                            })),
+                            onClose: (options) => {
+                                let opt = options;
+                                if (opt.length !== 0) {
+                                    let perIds = [];
+                                    for (let i = 0; i < opt.length; i++) {
+                                        perIds.push(opt[i].value);
+                                    }
+                                    setPermissionRoleIds(perIds);
+                                }
+                            },
+                            onDelete: () => {
+                                setPermissionRoleIds([]);
+                            },
+                        },
+                    ];
+                    setFilterOptions(filterOptionsFetched);
+                });
+            })
+            .catch((error) => {});
+    };
+
     useEffect(() => {
         getUsersList();
-    }, [userSearchInfo, sortBy, pageNo, pageSize]);
+    }, [userSearchInfo, sortBy, pageNo, pageSize, permissionRoleIds, selectedStatus]);
+
+    useEffect(() => {
+        getUserFilterData();
+    }, [userSearchInfo]);
 
     const saveUserData = async () => {
         setIsProcessing(true);
@@ -305,12 +364,18 @@ const Users = () => {
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
                         id="users"
-                        buttonGroupFilterOptions={[]}
                         onSearch={(query) => {
                             setPageNo(1);
                             setUserSearchInfo(query);
                         }}
-                        onStatus={[]}
+                        buttonGroupFilterOptions={[
+                            { label: 'All' },
+                            { label: 'Active' },
+                            { label: 'Inactive' },
+                            { label: 'Pending' },
+                        ]}
+                        filterOptions={filterOptions}
+                        onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         headers={[
@@ -399,7 +464,7 @@ const Users = () => {
                             <Typography.Subheader className="mb-1">Email Address</Typography.Subheader>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Email"
+                                placeholder="Enter Sapient Email"
                                 onChange={(e) => {
                                     handleChange('email', e.target.value);
                                 }}
@@ -430,7 +495,7 @@ const Users = () => {
                 <Modal.Footer>
                     <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
                         <Button
-                            label="Cancle"
+                            label="Cancel"
                             size={Button.Sizes.lg}
                             type={Button.Type.secondaryGrey}
                             className="d-flex align-items-center button-container"

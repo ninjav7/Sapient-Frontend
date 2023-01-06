@@ -25,6 +25,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare } from '@fortawesome/pro-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
+import CompareRoles from './CompareRoles';
 
 const UserProfile = () => {
     let cookies = new Cookies();
@@ -33,6 +34,7 @@ const UserProfile = () => {
     const [userDetail, setUserDetail] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [loadButton, setLoadButton] = useState(false);
+    const [showCompareRoles, setShowCompareRoles] = useState(false);
     const { userId } = useParams();
     const [updateUserDetail, setUpdateUserDetail] = useState({
         first_name: '',
@@ -434,13 +436,36 @@ const UserProfile = () => {
                                     {userPermissionList?.map((item) => {
                                         return (
                                             <>
-                                                <div>
-                                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                                <div className="row ml-2">
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        style={{ paddingTop: '0.5rem' }}>
                                                         {item?.permission_name}
                                                     </Typography.Subheader>
+                                                    <Button
+                                                        label="Compare Roles"
+                                                        size={Button.Sizes.md}
+                                                        type={Button.Type.link}
+                                                        onClick={() => {
+                                                            setShowCompareRoles(true);
+                                                        }}
+                                                    />
 
-                                                    <Brick sizeInRem={1} />
+                                                    {/* <Typography.Link
+                                                        size={Typography.Sizes.md}
+                                                        href={() => {
+                                                            setShowCompareRoles(true);
+                                                        }}
+                                                        as="a"
+                                                        target="_blank"
+                                                        style={{
+                                                            marginLeft: '1rem',
+                                                        }}>
+                                                        {' '}
+                                                        Compare Roles
+                                                    </Typography.Link> */}
                                                 </div>
+                                                <Brick sizeInRem={1} />
                                                 <div className="row d-flex align-items-center">
                                                     <div className="col">
                                                         <Select
@@ -496,6 +521,7 @@ const UserProfile = () => {
                     </div>
                 </Col>
             </Row>
+            <CompareRoles show={showCompareRoles} setShow={setShowCompareRoles} />
             <Modal
                 show={show}
                 onHide={() => {
