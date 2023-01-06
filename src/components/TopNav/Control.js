@@ -8,6 +8,7 @@ import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
+import { BuildingStore } from '../../store/BuildingStore';
 
 const Control = () => {
     const location = useLocation();
@@ -15,6 +16,7 @@ const Control = () => {
     const cookies = new Cookies();
 
     const [userPermission] = useAtom(userPermissionData);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [pageType, setPageType] = useState('');
 
     const [accountRoutes, setAccountRoutes] = useState([
@@ -55,7 +57,15 @@ const Control = () => {
     const handleRouteChange = () => {
         let currentPath = location.pathname;
         let pathName = '';
-        routesForAccountSettings.includes(currentPath) ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
+
+        if (currentPath.includes('/control/plug-rules')) {
+            bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
+        } else {
+            routesForAccountSettings.includes(currentPath)
+                ? (pathName = accountRoutes[0])
+                : (pathName = configRoutes[0]);
+        }
+
         history.push({
             pathname: `${pathName}`,
         });
