@@ -235,13 +235,17 @@ const PlugRules = () => {
     }, [buildingListData]);
 
     const fetchPlugRuleData = async () => {
-        const params = {
+        const searchParams = {
             params: {
                 rule_search: search,
             },
         };
 
-        await fetchPlugRules(activeBuildingId, params)
+        let params = '';
+
+        if (activeBuildingId !== 'portfolio') params = `?building_id=${activeBuildingId}`;
+
+        await fetchPlugRules(params, searchParams)
             .then((res) => {
                 if (res.status) {
                     setSkeletonLoading(false);

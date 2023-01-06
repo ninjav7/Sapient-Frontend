@@ -15,8 +15,8 @@ import {
     getSensorLastUsed,
 } from './Network';
 
-export function fetchPlugRules(activeBuildingId, params) {
-    return axiosInstance.get(`${listPlugRules}?building_id=${activeBuildingId}`, params).then((res) => {
+export function fetchPlugRules(params, searchParams) {
+    return axiosInstance.get(`${listPlugRules}${params}`, searchParams).then((res) => {
         return res;
     });
 }
@@ -101,7 +101,6 @@ export function getFiltersForSensorsRequest(args) {
             return res.data;
         });
 }
-
 
 export function getUnlinkedSocketRules(
     pageSize,
