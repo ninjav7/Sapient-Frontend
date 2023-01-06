@@ -9,5 +9,5 @@ export const BreakersStore = new Store({
     breakerLinkData: [],
     disconnectBreakerLinkData: [],
     panelData: {},
-    isEditable: true,
+    isEditable: false,
 });

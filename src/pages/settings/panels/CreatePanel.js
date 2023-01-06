@@ -7,7 +7,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
-import { addNewPanel, getLocationData, getPanelsData } from './services';
+import { addNewPanel, getLocationData, getPanelsList } from './services';
 import { disconnectBreaker, panelType, voltsOption } from './utils';
 
 const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
@@ -49,7 +49,6 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
         await addNewPanel(params, panelObj)
             .then((res) => {
                 const panelId = res?.data?.id;
-                console.log('SSR panelId => ', panelId);
                 closeCreatePanelModel();
                 setPanelObj(defaultPanelObj);
                 setIsProcessing(false);
@@ -85,7 +84,7 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
 
     const fetchPanelsData = async () => {
         const params = `?building_id=${bldgId}`;
-        const response = await getPanelsData(params);
+        const response = await getPanelsList(params);
         if (response?.data?.data.length === 0) {
             setPanelsData([]);
             return;

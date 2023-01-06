@@ -6,6 +6,7 @@ import {
     getSingleUserDetail,
     updateSingleUserDetail,
     updateUserRole,
+    getUserFilters,
 } from '../../../services/Network';
 
 export function inviteMemberUsers(payload, params) {
@@ -14,6 +15,10 @@ export function inviteMemberUsers(payload, params) {
 
 export function fetchMemberUserList(params) {
     return axiosInstance.get(`${getMemberUser}${params}`).then((res) => res);
+}
+
+export function fetchUserFilters(params) {
+    return axiosInstance.get(`${getUserFilters}${params}`).then((res) => res);
 }
 
 export function updateVendorPermissions(payload, params) {

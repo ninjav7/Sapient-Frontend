@@ -39,6 +39,7 @@ export const vendorPermissions = '/api/user_role/user-permission-role/vendor-per
 export const addMemberUser = '/api/user_role/user-permission-role/invite-reset-user';
 export const forgotUserPassword = '/api/user_role/user-permission-role/forgot-user-password';
 export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const getUserFilters = '/api/user_role/user-permission-role/users-filter';
 export const UpdateUserPassword = '/api/user_role/user-permission-role/user-update-password';
 export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
 export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';

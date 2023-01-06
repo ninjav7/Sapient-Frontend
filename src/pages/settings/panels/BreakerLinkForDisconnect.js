@@ -6,9 +6,10 @@ import { LoadingStore } from '../../../store/LoadingStore';
 import {
     setProcessing,
     breakerLinkingAlerts,
-    diffEquipLinkingAlerts,
+    unableLinkingAlerts,
     getEquipmentForBreaker,
     validateConfiguredEquip,
+    validateDeviceForBreaker,
 } from './utils';
 import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
 import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
@@ -47,6 +48,7 @@ export default function CustomEdge({
 
     const disconnectBreakerLinkData = BreakersStore.useState((s) => s.disconnectBreakerLinkData);
     const disconnectedBreakersData = BreakersStore.useState((s) => s.disconnectedBreakersData);
+    const isEditable = BreakersStore.useState((s) => s.isEditable);
     const panelData = BreakersStore.useState((s) => s.panelData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
@@ -210,6 +212,17 @@ export default function CustomEdge({
                         return;
                     }
 
+                    const isLinkable = validateDeviceForBreaker([
+                        sourceBreakerObj?.data?.device_id,
+                        targetBreakerObj?.data?.device_id,
+                        thirdBreakerObj?.data?.device_id,
+                    ]);
+
+                    if (!isLinkable) {
+                        unableLinkingAlerts();
+                        return;
+                    }
+
                     let breakerOneEquip = sourceBreakerObj?.data?.equipment_link[0]
                         ? sourceBreakerObj?.data?.equipment_link[0]
                         : '';
@@ -228,7 +241,7 @@ export default function CustomEdge({
                         if (configuredEquip.length === 1) {
                             equipmentID = configuredEquip[0];
                         } else {
-                            diffEquipLinkingAlerts();
+                            unableLinkingAlerts();
                             return;
                         }
                     }
@@ -297,6 +310,17 @@ export default function CustomEdge({
                         return;
                     }
 
+                    const isLinkable = validateDeviceForBreaker([
+                        parentBreakerObj?.data?.device_id,
+                        sourceBreakerObj?.data?.device_id,
+                        targetBreakerObj?.data?.device_id,
+                    ]);
+
+                    if (!isLinkable) {
+                        unableLinkingAlerts();
+                        return;
+                    }
+
                     let breakerOneEquip = parentBreakerObj?.data?.equipment_link[0]
                         ? parentBreakerObj?.data?.equipment_link[0]
                         : '';
@@ -315,7 +339,7 @@ export default function CustomEdge({
                         if (configuredEquip.length === 1) {
                             equipmentID = configuredEquip[0];
                         } else {
-                            diffEquipLinkingAlerts();
+                            unableLinkingAlerts();
                             return;
                         }
                     }
@@ -356,10 +380,20 @@ export default function CustomEdge({
                 }
             }
 
+            const isLinkable = validateDeviceForBreaker([
+                sourceBreakerObj?.data?.device_id,
+                targetBreakerObj?.data?.device_id,
+            ]);
+
+            if (!isLinkable) {
+                unableLinkingAlerts();
+                return;
+            }
+
             const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
             if (isEquipDiff) {
-                diffEquipLinkingAlerts();
+                unableLinkingAlerts();
                 return;
             }
 
@@ -409,10 +443,21 @@ export default function CustomEdge({
                     (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
+                const isLinkable = validateDeviceForBreaker([
+                    parentBreakerObj?.data?.device_id,
+                    sourceBreakerObj?.data?.device_id,
+                    targetBreakerObj?.data?.device_id,
+                ]);
+
+                if (!isLinkable) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
                 const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    diffEquipLinkingAlerts();
+                    unableLinkingAlerts();
                     return;
                 }
 
@@ -459,10 +504,21 @@ export default function CustomEdge({
                     (record) => record?.data.parentBreaker === targetBreakerObj?.id
                 );
 
+                const isLinkable = validateDeviceForBreaker([
+                    sourceBreakerObj?.data?.device_id,
+                    targetBreakerObj?.data?.device_id,
+                    thirdBreakerObj?.data?.device_id,
+                ]);
+
+                if (!isLinkable) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
                 const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    diffEquipLinkingAlerts();
+                    unableLinkingAlerts();
                     return;
                 }
 
@@ -752,21 +808,42 @@ export default function CustomEdge({
                 <body>
                     {/* When Source & Target Breaker not linked */}
                     {!sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is not linked & Target Breaker linked */}
                     {!sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
 
                     {/* When Source Breaker is linked & Target Breaker not linked */}
                     {sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
-                        <button className="unlink_button_style" onClick={linkBreakers}>
+                        <button
+                            className="unlink_button_style"
+                            onClick={() => {
+                                if (!isEditable) {
+                                    return;
+                                }
+                                linkBreakers();
+                            }}>
                             <UnlinkSVG />
                         </button>
                     )}
@@ -775,12 +852,26 @@ export default function CustomEdge({
                     {sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
                         <>
                             {isBothBreakerLinked() && (
-                                <button className="link_button_style" onClick={unlinkBreakers}>
+                                <button
+                                    className="link_button_style"
+                                    onClick={() => {
+                                        if (!isEditable) {
+                                            return;
+                                        }
+                                        unlinkBreakers();
+                                    }}>
                                     <LinkSVG />
                                 </button>
                             )}
                             {!isBothBreakerLinked() && (
-                                <button className="unlink_button_style" onClick={linkBreakers}>
+                                <button
+                                    className="unlink_button_style"
+                                    onClick={() => {
+                                        if (!isEditable) {
+                                            return;
+                                        }
+                                        linkBreakers();
+                                    }}>
                                     <UnlinkSVG />
                                 </button>
                             )}

@@ -32,10 +32,10 @@ const UnlinkAllBreakers = ({
                 <CardBody>
                     <div>
                         {isLoading ? (
-                            <Skeleton count={1} height={40} width={125} />
+                            <Skeleton count={1} height={40} width={225} />
                         ) : (
                             <Button
-                                label="Unlink All Breakers"
+                                label="Reset all Equipment & Device Links"
                                 size={Button.Sizes.md}
                                 type={Button.Type.secondaryDistructive}
                                 onClick={handleUnlinkAlertShow}
@@ -48,10 +48,10 @@ const UnlinkAllBreakers = ({
 
             <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
                 <Modal.Body className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>Unlink All Breakers</Typography.Header>
+                    <Typography.Header size={Typography.Sizes.lg}>Reset Configuration</Typography.Header>
                     <Brick sizeInRem={1.5} />
                     <Typography.Body size={Typography.Sizes.lg}>
-                        Are you sure you want to unlink all breakers on this panel?
+                        Are you sure you want to reset the configuration of these breakers?
                     </Typography.Body>
                     <Typography.Body size={Typography.Sizes.lg}>
                         All links to equipment and sensors will be lost.
