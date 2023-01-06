@@ -780,8 +780,10 @@ const EditBreakerPanel = () => {
                                     labelSize={Typography.Sizes.md}
                                     value={panel?.panel_name}
                                     disabled={
-                                        !userPermission?.user_role === 'admin' ||
-                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
                                     }
                                 />
                             )}
@@ -802,8 +804,10 @@ const EditBreakerPanel = () => {
                                     }}
                                     isSearchable={true}
                                     disabled={
-                                        !userPermission?.user_role === 'admin' ||
-                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
                                     }
                                 />
                             )}
@@ -824,8 +828,10 @@ const EditBreakerPanel = () => {
                                     }}
                                     isSearchable={true}
                                     disabled={
-                                        !userPermission?.user_role === 'admin' ||
-                                        !userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
                                     }
                                 />
                             )}
