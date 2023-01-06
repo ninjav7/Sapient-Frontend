@@ -96,6 +96,7 @@
     &-filters {
         display: flex;
         gap: 0.8rem;
+        flex-wrap: wrap;
 
         .react-select-wrapper {
             min-width: auto;

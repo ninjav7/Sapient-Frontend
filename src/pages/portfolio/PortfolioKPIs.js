@@ -44,8 +44,8 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }, i
                     unit={KPI_UNITS.KWH_SQ_FT}
                     tooltipText={
                         daysCount > 1
-                            ? `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} days.`
-                            : `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} day.`
+                        ? `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} days.`
+                        : `Energy density (kWh / sq. ft) across all your buildings for the past ${daysCount} day.`
                     }
                     tooltipId="avg-eng-dnty"
                     type={
