@@ -243,31 +243,27 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    {buildingsData.length ? (
-                        <DataTableWidget
-                            isLoading={isLoadingBuildingData}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="compare-building"
-                            onSearch={(query) => {
-                                setSearch(query);
-                            }}
-                            rows={buildingsData}
-                            searchResultRows={buildingsData}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                            disableColumnDragging={true}
-                            buttonGroupFilterOptions={[]}
-                            totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
+                    <DataTableWidget
+                        isLoading={isLoadingBuildingData}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="compare-building"
+                        onSearch={(query) => {
+                            setSearch(query);
+                        }}
+                        rows={buildingsData}
+                        searchResultRows={buildingsData}
+                        onDownload={() => handleDownloadCsv()}
+                        headers={headerProps}
+                        disableColumnDragging={true}
+                        buttonGroupFilterOptions={[]}
+                        totalCount={(() => {
+                            if (search) {
+                                return totalItemsSearched;
+                            }
 
-                                return 0;
-                            })()}
-                        />
-                    ) : (
-                        <SkeletonLoading />
-                    )}
+                            return 0;
+                        })()}
+                    />
                 </Col>
             </Row>
         </React.Fragment>
