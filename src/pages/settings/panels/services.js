@@ -28,7 +28,7 @@ export function getPanelsData(
     panelVoltageSelected
 ) {
     const searchData = encodeURIComponent(search);
-    let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
+    let params = `?building_id=${bldgId}&panel_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
 
     if (getParams.order_by && getParams.sort_by)
         params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
