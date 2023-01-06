@@ -195,8 +195,8 @@ const ExploreByEquipment = () => {
     }, [equipIdNow]);
 
     const exploreDataFetch = async (bodyVal) => {
-        const ordered_by = sortBy.name === undefined ? 'consumption' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'consumption' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'dce' : sortBy.method;
         setIsExploreDataLoading(true);
 
         await fetchExploreEquipmentList(
@@ -1267,6 +1267,10 @@ const ExploreByEquipment = () => {
             onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pageNo, pageSize]);
 
     return (
         <>
