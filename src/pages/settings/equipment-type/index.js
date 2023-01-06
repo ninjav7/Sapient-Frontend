@@ -8,7 +8,7 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import { getEquipTypeData } from './services';
+import { getEquipTypeData, fetchEquipmentTypeFilter } from './services';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { getEquipTypeTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
@@ -17,6 +17,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { pageListSizes } from '../../../helpers/helpers';
 import EditEquipType from './EditEquipType';
 import DeleteEquipType from './DeleteEquipType';
+import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -66,6 +67,7 @@ const EquipmentType = () => {
     const [sortBy, setSortBy] = useState({});
 
     const [selectedEquipType, setSelectedEquipType] = useState({});
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const { download } = useCSVDownload();
 
@@ -76,6 +78,15 @@ const EquipmentType = () => {
     const [isDataFetching, setDataFetching] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
     const [selectedFilter, setSelectedFilter] = useState(0);
+    const [EndUseString, SetEndUseString] = useState([]);
+
+    const [equipCountAPIFlag, setEquipCountAPIFlag] = useState('');
+    const [minVal, setMinVal] = useState(0);
+    const [maxVal, setMaxVal] = useState(0);
+    const [minEquipCount, setMinEquipCount] = useState(0);
+    const [maxEquipCount, setMaxEquipCount] = useState(0);
+    const [filterData, setFilterData] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState(0);
 
     const handleEdit = (record) => {
         setSelectedEquipType(record);
@@ -98,14 +109,23 @@ const EquipmentType = () => {
         ordered_by = 'equipment_type',
         sort_by
     ) => {
+        let endUseIds = encodeURIComponent(EndUseString.join('+'));
         setDataFetching(true);
-
-        if (ordered_by === 'status') ordered_by = 'equipment_type';
-
         let params = `?page_size=${page_size}&page_no=${page_no}&ordered_by=${ordered_by}`;
-
         if (searchTxt) params = params.concat(`&equipment_search=${encodeURIComponent(searchTxt)}`);
         if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
+        if (endUseIds.length) {
+            params += `&end_use_id=${endUseIds}`;
+        }
+        if (equipCountAPIFlag !== '') {
+            params += `&equipment_count_min=${minEquipCount}&equipment_count_max=${maxEquipCount}`;
+        }
+        if (selectedStatus == 2) {
+            params += `&status=Custom`;
+        }
+        if (selectedStatus == 1) {
+            params += `&status=System`;
+        }
 
         await getEquipTypeData(params)
             .then((res) => {
@@ -118,6 +138,82 @@ const EquipmentType = () => {
                 setDataFetching(false);
             });
     };
+
+    const getFilters = async () => {
+        let EndUseSelected = encodeURIComponent(EndUseString.join('+'));
+        const filters = await fetchEquipmentTypeFilter({
+            EndUseSelected,
+        });
+        setFilterData(filters.data);
+        setMinVal(filters?.data[0]?.equipment_linked_min);
+        setMaxVal(filters?.data[0]?.equipment_linked_max);
+        setMinEquipCount(filters?.data[0]?.equipment_linked_min);
+        setMaxEquipCount(filters?.data[0]?.equipment_linked_max);
+    };
+
+    useEffect(() => {
+        if (minEquipCount !== maxEquipCount && maxEquipCount !== 0) {
+            if (Object.keys(filterData).length !== 0) {
+                filterData.forEach((filterOptions) => {
+                    const filterOptionsFetched = [
+                        {
+                            label: 'End Use',
+                            value: 'identifier',
+                            placeholder: 'All End Uses',
+                            filterType: FILTER_TYPES.MULTISELECT,
+                            filterOptions: filterOptions.end_use.map((filterItem) => ({
+                                value: filterItem?.end_use_id,
+                                label: filterItem?.end_use_name,
+                            })),
+                            onClose: (options) => {
+                                let opt = options;
+                                if (opt.length !== 0) {
+                                    let endUses = [];
+                                    for (let i = 0; i < opt.length; i++) {
+                                        endUses.push(opt[i].value);
+                                    }
+                                    SetEndUseString(endUses);
+                                }
+                            },
+                            onDelete: () => {
+                                SetEndUseString([]);
+                            },
+                        },
+                        {
+                            label: 'Equipment Count',
+                            value: 'equipment_count',
+                            placeholder: 'All Equipment Count',
+                            filterType: FILTER_TYPES.RANGE_SELECTOR,
+                            filterOptions: [minEquipCount, maxEquipCount],
+                            componentProps: {
+                                prefix: '',
+                                title: 'Equipment Count',
+                                min: minVal,
+                                max: maxVal,
+                                range: [minEquipCount, maxEquipCount],
+                                withTrendsFilter: false,
+                            },
+                            onClose: function onClose(options) {
+                                setMinEquipCount(options[0]);
+                                setMaxEquipCount(options[1]);
+                                setEquipCountAPIFlag(options[0] + options[1]);
+                            },
+                            onDelete: () => {
+                                setMinEquipCount(0);
+                                setMaxEquipCount(maxVal);
+                                setEquipCountAPIFlag('');
+                            },
+                        },
+                    ];
+                    setFilterOptions(filterOptionsFetched);
+                });
+            }
+        }
+    }, [minEquipCount, maxEquipCount]);
+
+    useEffect(() => {
+        getFilters();
+    }, [search]);
 
     const handleDownloadCsv = async () => {
         await getEquipTypeData()
@@ -198,7 +294,7 @@ const EquipmentType = () => {
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
         fetchEquipTypeData(search, pageNo, pageSize, ordered_by, sort_by);
-    }, [search, pageNo, pageSize, sortBy]);
+    }, [search, pageNo, pageSize, sortBy, EndUseString, equipCountAPIFlag, selectedStatus]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -231,7 +327,8 @@ const EquipmentType = () => {
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>Equipment Types</Typography.Header>
                         </div>
-                        {userPermission?.user_role === 'admin' ? (
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
                             <div className="d-flex">
                                 <Button
                                     label={'Add Equipment Type'}
@@ -256,26 +353,38 @@ const EquipmentType = () => {
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
                         id="equipmentType_list"
-                        buttonGroupFilterOptions={[]}
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
                         }}
-                        onStatus={setSelectedFilter}
+                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'System' }, { label: 'Custom' }]}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setSelectedStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}
                         headers={headerProps}
+                        filterOptions={filterOptions}
                         currentPage={pageNo}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) =>
-                            row?.status.toLowerCase() === 'system' ? null : handleEdit(row)
+                        onEditRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => (row?.status.toLowerCase() === 'system' ? null : handleEdit(row))
+                                : null
                         }
-                        onDeleteRow={(record, id, row) =>
-                            row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) =>
+                                      row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                                : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {

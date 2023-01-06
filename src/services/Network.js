@@ -122,6 +122,7 @@ export const kasaLinkAccount = '/api/config/kasa/link_account';
 export const kasaUnLinkAccount = '/api/config/kasa/unlink_account';
 export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 export const getMetadata = '/api/config/metadata';
+export const getMetadataFilter = '/api/config/metadata-filter';
 
 // kasa accounts
 export const get_kasa_devices = '/api/config/kasa/get_devices';

@@ -399,7 +399,11 @@ const PassiveDevices = () => {
                             setPageNo(1);
                             setSearch(query);
                         }}
-                        onStatus={setDeviceStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setDeviceStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
@@ -410,8 +414,18 @@ const PassiveDevices = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) => handleDeviceEdit(row)}
-                        onDeleteRow={(record, id, row) => handleDeviceDelete(row)}
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleDeviceDelete(row)
+                                : null
+                        }
+                        onEditRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleDeviceEdit(row)
+                                : null
+                        }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             return totalItems;
