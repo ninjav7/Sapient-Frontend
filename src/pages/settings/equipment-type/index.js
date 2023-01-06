@@ -358,7 +358,11 @@ const EquipmentType = () => {
                             setSearch(query);
                         }}
                         buttonGroupFilterOptions={[{ label: 'All' }, { label: 'System' }, { label: 'Custom' }]}
-                        onStatus={setSelectedStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setSelectedStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         onDownload={() => handleDownloadCsv()}

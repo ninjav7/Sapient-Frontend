@@ -379,7 +379,11 @@ const Users = () => {
                             { label: 'Pending' },
                         ]}
                         filterOptions={filterOptions}
-                        onStatus={setSelectedStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setSelectedStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         headers={[

@@ -399,7 +399,11 @@ const PassiveDevices = () => {
                             setPageNo(1);
                             setSearch(query);
                         }}
-                        onStatus={setDeviceStatus}
+                        onStatus={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
+                            setDeviceStatus(query);
+                        }}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         filterOptions={filterOptions}
