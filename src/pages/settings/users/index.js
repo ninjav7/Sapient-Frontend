@@ -464,7 +464,7 @@ const Users = () => {
                             <Typography.Subheader className="mb-1">Email Address</Typography.Subheader>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Email"
+                                placeholder="Enter Sapient Email"
                                 onChange={(e) => {
                                     handleChange('email', e.target.value);
                                 }}
@@ -495,7 +495,7 @@ const Users = () => {
                 <Modal.Footer>
                     <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
                         <Button
-                            label="Cancle"
+                            label="Cancel"
                             size={Button.Sizes.lg}
                             type={Button.Type.secondaryGrey}
                             className="d-flex align-items-center button-container"

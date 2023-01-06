@@ -24,8 +24,15 @@
 .modal-active-deactive {
     max-width: 21.875rem !important;
     max-height: 12.625rem !important;
-    height: 12.625rem !important; 
+    height: 12.625rem !important;
 }
+
+.modal-role-compare {
+    max-width: 56.25rem !important;
+    max-height: 19.375rem !important;
+    height: 19.375rem !important; 
+}
+
 .pending-container {
     padding: 0.5rem;
     gap: 0.5rem;
@@ -75,4 +82,36 @@
     justify-content: center;
 }
 
+.edit-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2.25rem;
+    background: $success-50;
+    border: 0.0625rem solid $success-50;
+    border-radius: 1rem;
+    color:$success-700,
+}
+
+.view-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2.25rem;
+    background: $view-50;
+    border: 0.0625rem solid $view-50;
+    border-radius: 1rem;
+    color:$view-700;
+}
+
+.no-access-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 9rem;
+    height: 2.25rem;
+    background: $dataviz-red-50;
+    border: 0.0625rem solid $dataviz-red-50;
+    border-radius: 1rem;
+
+}
 

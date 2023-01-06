@@ -166,7 +166,7 @@ const PassiveDevices = () => {
                     },
                 },
                 {
-                    label: 'Models',
+                    label: 'Model',
                     value: 'model',
                     placeholder: 'All Models',
                     filterType: FILTER_TYPES.MULTISELECT,

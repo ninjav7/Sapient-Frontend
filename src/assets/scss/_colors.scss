@@ -137,6 +137,10 @@ $primary-gray-1000: #202020;
 
 $secondary-purple-600: #6b08db;
 
+$view-50:#F0F9FF;
+$view-700:#026AA2;
+
+
 :export {
     baseWhite: $base-white;
     baseBlack: $base-black;
@@ -271,4 +275,7 @@ $secondary-purple-600: #6b08db;
     warning600: $warning-600;
     warning700: $warning-700;
     warning900: $warning-900;
+
+    view50: $view-50;
+    view700: $view-700;
 }
