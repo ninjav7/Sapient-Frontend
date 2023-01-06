@@ -3,8 +3,9 @@ import { Row, Col } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { fetchPanelsFilter, getPanelsData, getPanelsList } from './services';
+import { deleteCurrentPanel, fetchPanelsFilter, getPanelsData, getPanelsList } from './services';
 import Brick from '../../../sharedComponents/brick';
+import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
@@ -47,6 +48,10 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={10} />
             </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -66,6 +71,13 @@ const Panels = () => {
     const closeCreatePanelModel = () => setShowPanelModel(false);
     const openCreatePanelModel = () => setShowPanelModel(true);
 
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Delete Panel Modal
+    const [showDeletePanelAlert, setShowDeletePanelAlert] = useState(false);
+    const handleDeletePanelAlertClose = () => setShowDeletePanelAlert(false);
+    const handleDeletePanelAlertShow = () => setShowDeletePanelAlert(true);
+
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
 
@@ -81,6 +93,8 @@ const Panels = () => {
     const [locationId, setLocationId] = useState([]);
     const [breakersCount, setBreakersCount] = useState([]);
     const [panelVoltages, setPanelVoltages] = useState([]);
+
+    const [panelToDelete, setPanelToDelete] = useState('');
 
     const fetchPanelsDataWithFilter = async () => {
         setPanelsData([]);
@@ -138,6 +152,21 @@ const Panels = () => {
                 download('Panels_List', csvData);
             })
             .catch(() => {});
+    };
+
+    const deletePanel = async (panelId) => {
+        setIsDeleting(true);
+        const params = `?panel_id=${panelId}`;
+        await deleteCurrentPanel(params)
+            .then((res) => {
+                setIsDeleting(false);
+                handleDeletePanelAlertClose();
+                fetchPanelsDataWithFilter();
+                window.scrollTo(0, 0);
+            })
+            .catch(() => {
+                setIsDeleting(false);
+            });
     };
 
     const renderPanelName = (row) => {
@@ -222,6 +251,18 @@ const Panels = () => {
         if (selectedFilter === 0) {
             return panelsData;
         }
+    };
+
+    const handlePanelDelete = (record) => {
+        setPanelToDelete(record?.panel_id);
+        handleDeletePanelAlertShow();
+    };
+
+    const handleAbleToDeleteRow = () => {
+        return (
+            userPermission?.user_role === 'admin' ||
+            userPermission?.permissions?.permissions?.building_panels_permission?.delete
+        );
     };
 
     const getFilters = async () => {
@@ -404,9 +445,7 @@ const Panels = () => {
                     </div>
                 </Col>
             </Row>
-
             <Brick sizeInRem={1.5} />
-
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
@@ -428,6 +467,9 @@ const Panels = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        onEditRow={(record, id, row) => handleClick(row)}
+                        onDeleteRow={(record, id, row) => handlePanelDelete(row)}
+                        isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
@@ -437,11 +479,41 @@ const Panels = () => {
                     />
                 </Col>
             </Row>
-
             <CreatePanel
                 isCreatePanelModalOpen={isCreatePanelModalOpen}
                 closeCreatePanelModel={closeCreatePanelModel}
             />
+            <Modal
+                show={showDeletePanelAlert}
+                onHide={handleDeletePanelAlertClose}
+                centered
+                backdrop="static"
+                keyboard={false}>
+                <Modal.Body className="p-4">
+                    <Typography.Header size={Typography.Sizes.lg}>Delete Panel</Typography.Header>
+                    <Brick sizeInRem={1.5} />
+                    <Typography.Body size={Typography.Sizes.lg}>
+                        Are you sure you want to delete the Panel and the Panel Inputs it contains?
+                    </Typography.Body>
+                </Modal.Body>
+                <Modal.Footer className="pb-4 pr-4">
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        onClick={handleDeletePanelAlertClose}
+                    />
+                    <Button
+                        label={isDeleting ? 'Deleting' : 'Delete'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primaryDistructive}
+                        disabled={isDeleting}
+                        onClick={() => {
+                            deletePanel(panelToDelete);
+                        }}
+                    />
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };

@@ -76,7 +76,7 @@ export const getEquipmentForBreaker = (breakers) => {
     return equipmentId;
 };
 
-export const validateDeviceForBreaker = (deviceList) => {
+export const validateDevicesForBreaker = (deviceList) => {
     let isLinkable = false;
 
     const uniqueList = Array.from(new Set(deviceList));
@@ -87,7 +87,7 @@ export const validateDeviceForBreaker = (deviceList) => {
     }
     if (uniqueList.length > 2) isLinkable = false;
 
-    return isLinkable;
+    return { isLinkable, uniqueList };
 };
 
 export const comparePanelData = (obj1, obj2) => {

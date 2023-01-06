@@ -9,7 +9,7 @@ import {
     unableLinkingAlerts,
     validateConfiguredEquip,
     getEquipmentForBreaker,
-    validateDeviceForBreaker,
+    validateDevicesForBreaker,
 } from './utils';
 import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
 import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
@@ -232,7 +232,7 @@ export default function CustomEdge({
                     return;
                 }
 
-                const isLinkable = validateDeviceForBreaker([
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
                     sourceBreakerObj?.data?.device_id,
                     targetBreakerObj?.data?.device_id,
                     thirdBreakerObj?.data?.device_id,
@@ -242,6 +242,11 @@ export default function CustomEdge({
                     unableLinkingAlerts();
                     return;
                 }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
 
                 let breakerOneEquip = sourceBreakerObj?.data?.equipment_link[0]
                     ? sourceBreakerObj?.data?.equipment_link[0]
@@ -276,6 +281,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -286,6 +292,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -296,12 +303,13 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
 
-            const isLinkable = validateDeviceForBreaker([
+            const { isLinkable, uniqueList } = validateDevicesForBreaker([
                 sourceBreakerObj?.data?.device_id,
                 targetBreakerObj?.data?.device_id,
             ]);
@@ -310,6 +318,11 @@ export default function CustomEdge({
                 unableLinkingAlerts();
                 return;
             }
+
+            let deviceID = '';
+
+            if (uniqueList.length === 1) deviceID = uniqueList[0];
+            if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
 
             const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
@@ -330,6 +343,7 @@ export default function CustomEdge({
                 parent_breaker: '',
                 is_linked: true,
                 equipment_id: equipmentID,
+                device_id: deviceID,
             };
 
             let breakerObjTwo = {
@@ -340,6 +354,7 @@ export default function CustomEdge({
                 parent_breaker: sourceBreakerObj.id,
                 is_linked: true,
                 equipment_id: equipmentID,
+                device_id: deviceID,
             };
             linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
         }
@@ -363,7 +378,7 @@ export default function CustomEdge({
                     (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
-                const isLinkable = validateDeviceForBreaker([
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
                     parentBreakerObj?.data?.device_id,
                     sourceBreakerObj?.data?.device_id,
                     targetBreakerObj?.data?.device_id,
@@ -373,6 +388,11 @@ export default function CustomEdge({
                     unableLinkingAlerts();
                     return;
                 }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
 
                 const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
 
@@ -393,6 +413,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -403,6 +424,7 @@ export default function CustomEdge({
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -413,6 +435,7 @@ export default function CustomEdge({
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
@@ -424,7 +447,7 @@ export default function CustomEdge({
                     (record) => record?.data.parentBreaker === targetBreakerObj?.id
                 );
 
-                const isLinkable = validateDeviceForBreaker([
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
                     sourceBreakerObj?.data?.device_id,
                     targetBreakerObj?.data?.device_id,
                     thirdBreakerObj?.data?.device_id,
@@ -434,6 +457,11 @@ export default function CustomEdge({
                     unableLinkingAlerts();
                     return;
                 }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
 
                 const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
@@ -454,6 +482,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -464,6 +493,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -474,6 +504,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
