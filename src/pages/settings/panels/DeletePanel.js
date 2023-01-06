@@ -12,7 +12,7 @@ import '../style.css';
 
 const DeletePanel = ({
     isDeleting,
-    isLoading,
+    isLoading = false,
     showDeletePanelAlert,
     handleDeletePanelAlertShow,
     handleDeletePanelAlertClose,
