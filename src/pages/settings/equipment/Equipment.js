@@ -245,7 +245,6 @@ const Equipment = () => {
                 ) : (
                     <>
                         {row.sensor_number.map((el) => {
-                            console.log(el, row.total_sensor);
                             return (
                                 <Badge
                                     text={
