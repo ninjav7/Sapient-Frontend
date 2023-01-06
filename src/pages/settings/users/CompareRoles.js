@@ -21,7 +21,7 @@ const CompareRoles = ({ show, setShow }) => {
             explore: 'View',
         },
         {
-            role: 'Settings & Connfiguration Admin',
+            role: 'Settings & Configuration Admin',
             setting: 'Edit',
             administration: 'No access',
             energy: 'View',

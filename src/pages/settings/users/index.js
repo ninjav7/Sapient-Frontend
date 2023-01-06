@@ -118,14 +118,14 @@ const Users = () => {
             userObj.last_name.length > 0 &&
             userObj.role.length > 0 &&
             userObj.email.length > 0 &&
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)
         ) {
             setFormValidation(true);
         }
     }, [userObj]);
 
     useEffect(() => {
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)) {
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)) {
             setFormValidation(false);
         }
     }, [userObj]);
