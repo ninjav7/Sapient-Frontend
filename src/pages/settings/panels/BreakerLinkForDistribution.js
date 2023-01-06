@@ -281,7 +281,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -292,7 +292,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -303,7 +303,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
@@ -343,7 +343,7 @@ export default function CustomEdge({
                 parent_breaker: '',
                 is_linked: true,
                 equipment_id: equipmentID,
-                device_link: deviceID,
+                device_id: deviceID,
             };
 
             let breakerObjTwo = {
@@ -354,7 +354,7 @@ export default function CustomEdge({
                 parent_breaker: sourceBreakerObj.id,
                 is_linked: true,
                 equipment_id: equipmentID,
-                device_link: deviceID,
+                device_id: deviceID,
             };
             linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
         }
@@ -413,7 +413,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -424,7 +424,7 @@ export default function CustomEdge({
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -435,7 +435,7 @@ export default function CustomEdge({
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
@@ -482,7 +482,7 @@ export default function CustomEdge({
                     parent_breaker: '',
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjTwo = {
@@ -493,7 +493,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
 
                 let breakerObjThree = {
@@ -504,7 +504,7 @@ export default function CustomEdge({
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
                     equipment_id: equipmentID,
-                    device_link: deviceID,
+                    device_id: deviceID,
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
