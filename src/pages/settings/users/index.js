@@ -15,7 +15,9 @@ import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import 'moment-timezone';
 import moment from 'moment';
+import { timeZone } from '../../../utils/helper';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
@@ -118,14 +120,14 @@ const Users = () => {
             userObj.last_name.length > 0 &&
             userObj.role.length > 0 &&
             userObj.email.length > 0 &&
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)
         ) {
             setFormValidation(true);
         }
     }, [userObj]);
 
     useEffect(() => {
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)) {
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)) {
             setFormValidation(false);
         }
     }, [userObj]);
@@ -142,7 +144,7 @@ const Users = () => {
         setIsUserDataFetched(true);
         let roleIds = encodeURIComponent(permissionRoleIds.join('+'));
 
-        let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
+        let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}&timezone=${timeZone}`;
         if (selectedStatus == 3) {
             params += `&is_verified=false`;
         }
@@ -323,7 +325,7 @@ const Users = () => {
         let dt = '';
         if (isValidDate(new Date(row?.last_login))) {
             let last_dt = new Date(row?.last_login);
-            dt = moment(last_dt).format(`MMM D 'YY @ hh:mm A`);
+            dt = moment.utc(last_dt).format(`MMM D 'YY @ hh:mm A`);
         } else {
             dt = row?.last_login;
         }
