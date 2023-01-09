@@ -40,6 +40,8 @@ import {
 } from '../../../services/equipment';
 import { primaryGray100 } from '../../../assets/scss/_colors.scss';
 import Input from '../../../sharedComponents/form/input/Input';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import Brick from '../../../sharedComponents/brick';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -649,34 +651,37 @@ const Equipment = () => {
     };
 
     return (
-        <div className="equipment-page">
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Equipment</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+        <div>
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Equipment</Typography.Header>
+                        </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.building_equipment_permission?.create ? (
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                    setCreateEquipmentData({
-                                        name: '',
-                                        equipment_type: '',
-                                        end_use: '',
-                                        space_id: '',
-                                    });
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Equipment
-                            </button>
-                        ) : (
-                            <></>
-                        )}
+                            <div className="d-flex">
+                                <Button
+                                    label={'Add Equipment'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        handleShow();
+                                        setCreateEquipmentData({
+                                            name: '',
+                                            equipment_type: '',
+                                            end_use: '',
+                                            space_id: '',
+                                        });
+                                    }}
+                                    icon={<PlusSVG />}
+                                />
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
+            <Brick sizeInRem={1.5} />
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
