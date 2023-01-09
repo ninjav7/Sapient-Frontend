@@ -15,6 +15,9 @@ import {
     inviteMemberUsers,
     updateUserRolePermission,
 } from './service';
+import 'moment-timezone';
+import moment from 'moment';
+import { timeZone } from '../../../utils/helper';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
@@ -73,7 +76,7 @@ const UserProfile = () => {
 
     // TODO:
     const getSingleUserDetailFunc = async () => {
-        let params = `?member_user_id=${userId}`;
+        let params = `?member_user_id=${userId}&timezone=${timeZone}`;
         await fetchSingleUserDetail(params)
             .then((res) => {
                 setUserDetail(res?.data?.data?.user_details);
