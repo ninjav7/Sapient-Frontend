@@ -63,6 +63,18 @@
     background: $primary-indigo-50;
     border: 0.0625rem solid $primary-indigo-100;
     border-radius: 0.25rem;
+    opacity: 1;
+}
+
+.blur-activate-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 12rem;
+    height: 2.25rem;
+    background: $primary-indigo-50;
+    border: 0.0625rem solid $primary-indigo-100;
+    border-radius: 0.25rem;
+    opacity: 0.4;
 }
 
 .button-container {
@@ -112,6 +124,12 @@
     background: $dataviz-red-50;
     border: 0.0625rem solid $dataviz-red-50;
     border-radius: 1rem;
+}
 
+.send-container {
+    padding: 0.5rem;
+    gap: 0.5rem;
+    width: 15rem;
+    height: 2.25rem;
 }
 
