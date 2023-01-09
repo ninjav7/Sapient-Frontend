@@ -7,6 +7,8 @@ import SideNav from '../components/SideNav/SideNav';
 import TopNav from '../components/TopNav/TopNav';
 import { useLocation } from 'react-router-dom';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
+import { Notification } from '../sharedComponents/notification/Notification';
+import { UserStore } from '../store/UserStore';
 
 const loading = () => <div className="text-center"></div>;
 
@@ -14,7 +16,9 @@ const HorizontalLayout = (props) => {
     const children = props.children || null;
     const location = useLocation();
     const [showSideNav, setShowSideNav] = useState(true);
-
+    const showNotification = UserStore.useState((s) => s.showNotification);
+    const notificationMessage = UserStore.useState((s) => s.notificationMessage);
+    const notificationType = UserStore.useState((s) => s.notificationType);
     useEffect(() => {
         if (!location.pathname.includes('/explore-page/')) {
             setShowSideNav(true);
@@ -28,6 +32,11 @@ const HorizontalLayout = (props) => {
         }
     }, [location]);
 
+    const updateNotification = () => {
+        UserStore.update((s) => {
+            s.showNotification = false;
+        });
+    };
     return (
         <React.Fragment>
             <div id="wrapper">
@@ -59,6 +68,22 @@ const HorizontalLayout = (props) => {
                             </Suspense>
                         </div>
                     )}
+                    {showNotification ? (
+                        <div style={{ position: 'fixed', width: '300px', top: '710px' }}>
+                            <Notification
+                                type={
+                                    notificationType === 'success'
+                                        ? Notification.Types.success
+                                        : Notification.Types.error
+                                }
+                                component={Notification.ComponentTypes.alert}
+                                description={notificationMessage}
+                                onClose={() => {
+                                    updateNotification();
+                                }}
+                            />
+                        </div>
+                    ) : null}
                 </div>
             </div>
         </React.Fragment>

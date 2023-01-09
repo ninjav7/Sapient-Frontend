@@ -9,6 +9,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { UserStore } from '../../../store/UserStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
@@ -120,14 +121,14 @@ const Users = () => {
             userObj.last_name.length > 0 &&
             userObj.role.length > 0 &&
             userObj.email.length > 0 &&
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userObj.email)
         ) {
             setFormValidation(true);
         }
     }, [userObj]);
 
     useEffect(() => {
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{10,11})+$/.test(userObj.email)) {
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userObj.email)) {
             setFormValidation(false);
         }
     }, [userObj]);
@@ -223,7 +224,19 @@ const Users = () => {
             .then((res) => {
                 let response = res.data;
                 getUsersList();
-
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Invite has been sent';
+                        s.notificationType = 'success';
+                    });
+                } else if (response?.success == false) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'User Already Exist';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsProcessing(false);
                 handleClose();
             })
@@ -323,11 +336,11 @@ const Users = () => {
 
     const renderLastActive = (row) => {
         let dt = '';
-        if (isValidDate(new Date(row?.last_login))) {
+        if (isValidDate(new Date(row?.last_login)) && row?.last_login != null) {
             let last_dt = new Date(row?.last_login);
             dt = moment.utc(last_dt).format(`MMM D 'YY @ hh:mm A`);
         } else {
-            dt = row?.last_login;
+            dt = 'Never';
         }
         return <Typography.Body size={Typography.Sizes.sm}>{dt}</Typography.Body>;
     };

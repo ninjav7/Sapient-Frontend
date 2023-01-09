@@ -66,6 +66,7 @@
         "react-bootstrap-table2-toolkit": "^2.1.0",
         "react-chartjs-2": "^4.1.0",
         "react-cookie": "^4.0.1",
+        "react-countdown": "^2.3.5",
         "react-csv": "^2.2.2",
         "react-datepicker": "^4.7.0",
         "react-dates": "^21.8.0",
