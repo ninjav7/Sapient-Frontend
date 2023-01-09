@@ -5,11 +5,11 @@ import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import { deletePassiveDeviceData } from './services';
 
-const DeletePassiveDevice = ({
+const DeletePassiveAlert = ({
     isDeleteDeviceModalOpen,
     closeDeleteDeviceModal,
     selectedPassiveDevice,
-    fetchPassiveDeviceData,
+    nextActionAfterDeletion,
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [deviceId, setDeviceId] = useState('');
@@ -21,7 +21,8 @@ const DeletePassiveDevice = ({
             .then((res) => {
                 closeDeleteDeviceModal();
                 setDeviceId('');
-                fetchPassiveDeviceData();
+                console.log('SSR Deletion Successful!');
+                nextActionAfterDeletion();
                 setIsProcessing(false);
             })
             .catch(() => {
@@ -30,9 +31,7 @@ const DeletePassiveDevice = ({
     };
 
     useEffect(() => {
-        if (isDeleteDeviceModalOpen) {
-            setDeviceId(selectedPassiveDevice?.equipments_id);
-        }
+        if (isDeleteDeviceModalOpen) setDeviceId(selectedPassiveDevice?.equipments_id);
     }, [isDeleteDeviceModalOpen]);
 
     return (
@@ -70,4 +69,4 @@ const DeletePassiveDevice = ({
     );
 };
 
-export default DeletePassiveDevice;
+export default DeletePassiveAlert;

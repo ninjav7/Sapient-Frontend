@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
@@ -27,6 +28,9 @@ import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
 import { useAtom } from 'jotai';
 import { apiRequestBody } from '../../../helpers/helpers';
+import DeleteDevice from './DeleteDevice';
+import { deletePassiveDeviceData } from './services';
+import Brick from '../../../sharedComponents/brick';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
@@ -51,6 +55,12 @@ const IndividualPassiveDevice = () => {
     const handleBreakerClose = () => setShowBreaker(false);
     const handleBreakerShow = () => setShowBreaker(true);
 
+    // Delete Passive Device Modal
+    const [showDeleteModal, setShowDelete] = useState(false);
+    const closeDeleteAlert = () => setShowDelete(false);
+    const showDeleteAlert = () => setShowDelete(true);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     // Edit Sensor Panel model state
     const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
     const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
@@ -58,6 +68,7 @@ const IndividualPassiveDevice = () => {
 
     const [passiveData, setPassiveData] = useState({});
     const [locationData, setLocationData] = useState([]);
+    const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -203,6 +214,10 @@ const IndividualPassiveDevice = () => {
         }
     };
 
+    const redirectToPassivePage = () => {
+        history.push({ pathname: `/settings/passive-devices/` });
+    };
+
     useEffect(() => {
         const fetchSinglePassiveDevice = async () => {
             try {
@@ -300,6 +315,7 @@ const IndividualPassiveDevice = () => {
             ];
             bs.items = newList;
         });
+        if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
 
     return (
@@ -530,6 +546,16 @@ const IndividualPassiveDevice = () => {
                         )}
                     </div>
                 </div>
+
+                <Brick sizeInRem={2} />
+
+                <DeleteDevice
+                    showDeleteModal={showDeleteModal}
+                    showDeleteAlert={showDeleteAlert}
+                    closeDeleteAlert={closeDeleteAlert}
+                    redirectToPassivePage={redirectToPassivePage}
+                    selectedPassiveDevice={selectedPassiveDevice}
+                />
             </div>
 
             <DeviceChartModel

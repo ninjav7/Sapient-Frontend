@@ -20,7 +20,7 @@ import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
 import { getPassiveDeviceData, fetchPassiveFilter } from './services';
-import DeletePassiveDevice from './DeletePassiveDevice';
+import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
@@ -447,11 +447,11 @@ const PassiveDevices = () => {
                 fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
-            <DeletePassiveDevice
+            <DeletePassiveAlert
                 isDeleteDeviceModalOpen={isDeleteDeviceModalOpen}
                 closeDeleteDeviceModal={closeDeleteDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
-                fetchPassiveDeviceData={fetchPassiveDeviceData}
+                nextActionAfterDeletion={fetchPassiveDeviceData}
             />
         </React.Fragment>
     );
