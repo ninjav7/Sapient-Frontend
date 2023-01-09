@@ -232,8 +232,7 @@ const PassiveDevices = () => {
     };
 
     const handleDeviceEdit = (record) => {
-        setSelectedPassiveDevice(record);
-        openEditDeviceModal();
+        handleClick(record);
     };
 
     const handleDeviceDelete = (record) => {

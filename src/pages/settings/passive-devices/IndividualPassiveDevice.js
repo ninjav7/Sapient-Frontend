@@ -29,8 +29,12 @@ import './style.css';
 import { useAtom } from 'jotai';
 import { apiRequestBody } from '../../../helpers/helpers';
 import DeleteDevice from './DeleteDevice';
-import { deletePassiveDeviceData } from './services';
 import Brick from '../../../sharedComponents/brick';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import './styles.scss';
+import Typography from '../../../sharedComponents/typography';
+import EditPassiveDevice from './EditPassiveDevice';
+import { getSinglePassiveDevice } from './services';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
@@ -65,6 +69,11 @@ const IndividualPassiveDevice = () => {
     const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
     const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
     const openEditSensorPanelModel = () => setShowEditSensorPanel(true);
+
+    // Edit Device Modal states
+    const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
+    const closeEditDeviceModal = () => setEditDeviceDeviceModal(false);
+    const openEditDeviceModal = () => setEditDeviceDeviceModal(true);
 
     const [passiveData, setPassiveData] = useState({});
     const [locationData, setLocationData] = useState([]);
@@ -218,24 +227,19 @@ const IndividualPassiveDevice = () => {
         history.push({ pathname: `/settings/passive-devices/` });
     };
 
-    useEffect(() => {
-        const fetchSinglePassiveDevice = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data.data[0];
-                    setPassiveData(response);
-                    setActiveLocationId(response.location_id);
-                    localStorage.setItem('identifier', response.identifier);
-                });
-            } catch (error) {}
-        };
+    const fetchPassiveDevice = async () => {
+        let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
+        await getSinglePassiveDevice(params)
+            .then((res) => {
+                let response = res?.data?.data[0];
+                setPassiveData(response);
+                setActiveLocationId(response?.location_id);
+                localStorage.setItem('identifier', response.identifier);
+            })
+            .catch(() => {});
+    };
 
+    useEffect(() => {
         const fetchActiveDeviceSensorData = async () => {
             try {
                 setIsFetchingSensorData(true);
@@ -275,7 +279,7 @@ const IndividualPassiveDevice = () => {
                 setIsLocationFetched(false);
             }
         };
-        fetchSinglePassiveDevice();
+        fetchPassiveDevice();
         fetchActiveDeviceSensorData();
         fetchLocationData();
     }, [deviceId]);
@@ -419,35 +423,50 @@ const IndividualPassiveDevice = () => {
                                     </Form.Label>
                                 </Form.Group>
                             </div>
-                            <div className="single-passive-grid">
+                            <div className="device-container">
                                 <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Identifier
-                                    </h6>
-                                    <h6 className="passive-device-value">{passiveData?.identifier}</h6>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.sm}>
+                                            Device ID (MAC)
+                                        </Typography.Subheader>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            {passiveData?.identifier}
+                                        </Typography.Subheader>
+                                    </div>
+                                    <Brick sizeInRem={1} />
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.sm}>
+                                            Firmware Version
+                                        </Typography.Subheader>
+                                        <Typography.Subheader size={Typography.Sizes.md}>v1.2</Typography.Subheader>
+                                    </div>
                                 </div>
+
                                 <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Device Model
-                                    </h6>
-                                    <h6 className="passive-device-value">
-                                        {passiveData?.model &&
-                                            passiveData?.model.charAt(0).toUpperCase() + passiveData?.model.slice(1)}
-                                    </h6>
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.sm}>
+                                            Device Model
+                                        </Typography.Subheader>
+                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                            {passiveData?.model &&
+                                                passiveData?.model.charAt(0).toUpperCase() +
+                                                    passiveData?.model.slice(1)}
+                                        </Typography.Subheader>
+                                    </div>
+                                    <Brick sizeInRem={1} />
+                                    <div>
+                                        <Typography.Subheader size={Typography.Sizes.sm}>
+                                            Device Version
+                                        </Typography.Subheader>
+                                        <Typography.Subheader size={Typography.Sizes.md}>v2</Typography.Subheader>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="single-passive-grid">
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Firmware Version
-                                    </h6>
-                                    <h6 className="passive-device-value">v1.2</h6>
-                                </div>
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Device Version
-                                    </h6>
-                                    <h6 className="passive-device-value">v2</h6>
+
+                                <div
+                                    className="d-flex justify-content-between align-items-start mouse-pointer"
+                                    onClick={openEditDeviceModal}>
+                                    <PenSVG className="mr-2" />
+                                    <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
                                 </div>
                             </div>
                         </div>
@@ -600,6 +619,13 @@ const IndividualPassiveDevice = () => {
                 editSenorModelRefresh={editSenorModelRefresh}
                 setEditSenorModelRefresh={setEditSenorModelRefresh}
                 bldgId={bldgId}
+            />
+
+            <EditPassiveDevice
+                isEditDeviceModalOpen={isEditDeviceModalOpen}
+                closeEditDeviceModal={closeEditDeviceModal}
+                passiveDeviceData={passiveData}
+                fetchPassiveDevice={fetchPassiveDevice}
             />
         </>
     );

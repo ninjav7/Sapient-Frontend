@@ -1,0 +1,12 @@
+@import '../../../assets/scss/colors';
+
+.device-container {
+    padding: 1rem;
+    display: inline-block;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.55fr 1.20fr 0.25fr;
+}

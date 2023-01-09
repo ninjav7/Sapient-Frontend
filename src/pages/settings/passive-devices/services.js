@@ -72,3 +72,7 @@ export function fetchPassiveFilter(args) {
             return res.data;
         });
 }
+
+export function getSinglePassiveDevice(params) {
+    return axiosInstance.get(`${generalPassiveDevices}${params}`).then((res) => res);
+}
