@@ -46,3 +46,9 @@
     background-color: #f9fafb;
     padding-left: 0em !important;
 }
+
+.notification {
+    position: 'fixed';
+    width: 18.75rem;
+    top: 44.375rem;
+}

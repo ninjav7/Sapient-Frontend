@@ -211,9 +211,12 @@ const UserProfile = () => {
     };
 
     const renderer = ({ hours, minutes, seconds, completed }) => {
+        if (minutes === 0 && seconds === 0) {
+            setShowResendIn(false);
+        }
         return (
             <span>
-                {minutes}:{seconds}
+                {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
             </span>
         );
     };
@@ -230,6 +233,7 @@ const UserProfile = () => {
             .then((res) => {
                 let response = res.data;
                 if (response?.success) {
+                    getSingleUserDetailFunc();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Invite has been sent';
