@@ -42,6 +42,7 @@ import { primaryGray100 } from '../../../assets/scss/_colors.scss';
 import Input from '../../../sharedComponents/form/input/Input';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Brick from '../../../sharedComponents/brick';
+import AddEquipment from './AddEquipment';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -190,19 +191,6 @@ const Equipment = () => {
         setCreateEquipmentData(obj);
     };
 
-    const saveDeviceData = async () => {
-        setIsProcessing(true);
-        await addNewEquipment(bldgId, createEquipmentData)
-            .then((res) => {
-                fetchEquipmentData();
-                handleClose();
-                setIsProcessing(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
-    };
-
     const renderLocation = useCallback((row, childrenTemplate) => {
         const location = [row.installed_floor, row.installed_space];
 
@@ -341,6 +329,7 @@ const Equipment = () => {
             .catch((error) => {
                 setIsEquipDataFetched(false);
                 isLoadingRef.current = false;
+                handleChartClose();
             });
     };
 
@@ -762,91 +751,6 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show} onHide={handleClose} centered className="modal-add-equipment">
-                <Modal.Header>
-                    <Modal.Title>Add Equipment</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Name</Form.Label>
-                            <Input
-                                type="text"
-                                placeholder="Enter Equipment Name"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('name', e.target.value);
-                                }}
-                                value={createEquipmentData?.name}
-                                autoFocus
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Type</Form.Label>
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Equipment Type"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.equipment_type}
-                                options={equipmentTypeDataAll}
-                                onChange={(e) => {
-                                    handleChange('equipment_type', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>End Use Category</Form.Label>
-                            <Select
-                                id="endUseSelect"
-                                placeholder="Selected End Use"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.end_use}
-                                options={endUseDataNow}
-                                onChange={(e) => {
-                                    handleChange('end_use', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Location</Form.Label>
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Equipment Location"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.space_id}
-                                options={locationDataNow}
-                                onChange={(e) => {
-                                    handleChange('space_id', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div className="add-equipment-footer">
-                        <Button
-                            label="Cancel"
-                            size={Button.Sizes.lg}
-                            type={Button.Type.secondaryGrey}
-                            onClick={() => handleClose()}
-                        />
-                        <Button
-                            label={isProcessing ? 'Creating...' : 'Create'}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            onClick={() => {
-                                saveDeviceData();
-                            }}
-                        />
-                    </div>
-                </Modal.Footer>
-            </Modal>
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
@@ -855,6 +759,18 @@ const Equipment = () => {
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
                 activePage="equipment"
+            />
+
+            <AddEquipment
+                isAddEquipModalOpen={show}
+                closeModal={handleClose}
+                equipmentTypeDataAll={equipmentTypeDataAll}
+                endUseDataNow={endUseDataNow}
+                locationDataNow={locationDataNow}
+                isProcessing={isProcessing}
+                setIsProcessing={setIsProcessing}
+                fetchEquipmentData={fetchEquipmentData}
+                bldgId={bldgId}
             />
         </div>
     );
