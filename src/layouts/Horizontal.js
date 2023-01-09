@@ -69,7 +69,7 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
                     {showNotification ? (
-                        <div className="notification">
+                        <div style={{ position: 'fixed', width: '18.75rem', top: '44.375rem' }}>
                             <Notification
                                 type={
                                     notificationType === 'success'
