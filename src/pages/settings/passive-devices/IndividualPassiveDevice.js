@@ -31,6 +31,7 @@ import {
 } from './services';
 import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
+import { UserStore } from '../../../store/UserStore';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -198,8 +199,17 @@ const IndividualPassiveDevice = () => {
 
         await updatePassiveDevice(params, payload)
             .then((res) => {
+                const response = res?.data;
                 setSensorAPIRefresh(!sensorAPIRefresh);
                 setIsProcessing(false);
+                fetchPassiveDevice();
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Device Updated!';
+                        s.notificationType = 'success';
+                    });
+                }
             })
             .catch(() => {
                 setIsProcessing(false);
@@ -277,10 +287,6 @@ const IndividualPassiveDevice = () => {
     };
 
     useEffect(() => {
-        console.log('SSR activeLocationId :>> ', activeLocationId);
-    });
-
-    useEffect(() => {
         fetchPassiveDevice();
         fetchPassiveDeviceSensorData();
         fetchLocationData();
@@ -349,7 +355,7 @@ const IndividualPassiveDevice = () => {
                                         onClick={updatePassiveDeviceData}
                                         className="ml-2"
                                         disabled={
-                                            activeLocationId === 'Select location' ||
+                                            activeLocationId === '' ||
                                             isProcessing ||
                                             activeLocationId === passiveData?.location_id
                                                 ? true
