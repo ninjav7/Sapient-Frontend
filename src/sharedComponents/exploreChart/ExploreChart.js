@@ -10,7 +10,7 @@ import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
-import EmptyExploreChart from '../emptyExploreChart/EmptyExploreChart';
+import EmptyExploreChart from './components/emptyExploreChart/EmptyExploreChart';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);

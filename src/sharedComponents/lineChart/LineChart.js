@@ -10,7 +10,7 @@ import Typography from '../typography';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
-import EmptyLineChart from '../emptyLineChart/EmptyLineChart';
+import EmptyLineChart from './components/emptyLineChart/EmptyLineChart';
 import { options, PLOT_BANDS_TYPE } from './constants';
 import { DOWNLOAD_TYPES } from '../constants';
 import colors from '../../assets/scss/_colors.scss';

@@ -1,10 +1,10 @@
 import React from 'react';
 import './emptyExploreChart.scss';
 
-import { ReactComponent as EmptyChartLine } from '../assets/icons/emptyChartLine.svg';
-import { ReactComponent as ZoomedChartArea } from '../assets/icons/zoomed-chart-area.svg';
+import { ReactComponent as EmptyChartLine } from '../../../assets/icons/emptyChartLine.svg';
+import { ReactComponent as ZoomedChartArea } from '../../../assets/icons/zoomed-chart-area.svg';
 
-import Typography from '../typography';
+import Typography from '../../../typography';
 
 const emptyExploreChart = () => {
     const mockedYAxis = ['0', '6k', '12k', '18k', '24k', '30k', '36k'].reverse();

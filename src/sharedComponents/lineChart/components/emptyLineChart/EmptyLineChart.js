@@ -1,11 +1,11 @@
 import React from 'react';
 import './EmptyLineChart.scss';
 
-import { ReactComponent as EmptyChartLine } from '../../sharedComponents/assets/icons/emptyChartLine.svg';
-import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
+import { ReactComponent as EmptyChartLine } from '../../../assets/icons/emptyChartLine.svg';
+import { ReactComponent as ArrowSVG } from '../../../../assets/icon/arrow.svg';
 
-import Button from '../button/Button';
-import Typography from '../typography';
+import Button from '../../../button/Button';
+import Typography from '../../../typography';
 
 const EmptyLineChart = () => {
     const mockedYAxis = ['0', '6k', '12k', '18k', '24k', '30k', '36k'].reverse();
