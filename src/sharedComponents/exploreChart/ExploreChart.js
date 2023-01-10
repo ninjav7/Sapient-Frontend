@@ -10,6 +10,7 @@ import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
+import EmptyExploreChart from '../emptyExploreChart/EmptyExploreChart';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
@@ -17,7 +18,7 @@ HighchartsData(Highcharts);
 const ExploreChart = (props) => {
     const chartComponentRef = useRef(null);
 
-    const { data, title, subTitle, dateRange, tooltipUnit, tooltipLabel } = props;
+    const { data, title, subTitle, dateRange, tooltipUnit, tooltipLabel, isLoadingData } = props;
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -42,7 +43,7 @@ const ExploreChart = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
-                <div>
+                <div style={{ 'pointer-events': isLoadingData && 'none' }}>
                     <DropDownIcon
                         options={[
                             {
@@ -64,12 +65,16 @@ const ExploreChart = (props) => {
                     />
                 </div>
             </div>
-            <HighchartsReact
-                highcharts={Highcharts}
-                constructorType={'stockChart'}
-                options={options({ data, dateRange, tooltipUnit, tooltipLabel })}
-                ref={chartComponentRef}
-            />
+            {isLoadingData ? (
+                <EmptyExploreChart />
+            ) : (
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    constructorType={'stockChart'}
+                    options={options({ data, dateRange, tooltipUnit, tooltipLabel })}
+                    ref={chartComponentRef}
+                />
+            )}
         </div>
     );
 };
