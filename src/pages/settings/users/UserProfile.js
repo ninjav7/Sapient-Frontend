@@ -5,6 +5,7 @@ import 'react-time-picker/dist/TimePicker.css';
 import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { UserStore } from '../../../store/UserStore';
 import { useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
 import Brick from '../../../sharedComponents/brick';
@@ -15,6 +16,9 @@ import {
     inviteMemberUsers,
     updateUserRolePermission,
 } from './service';
+import 'moment-timezone';
+import moment from 'moment';
+import { timeZone } from '../../../utils/helper';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
@@ -26,6 +30,7 @@ import { faShare } from '@fortawesome/pro-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 import CompareRoles from './CompareRoles';
+import Countdown from 'react-countdown';
 
 const UserProfile = () => {
     let cookies = new Cookies();
@@ -50,6 +55,7 @@ const UserProfile = () => {
     const [userPermissionList, setUserPermissionList] = useState();
     const [show, setShow] = useState(false);
     const [dangerZoneText, setDangerZoneText] = useState('');
+    const [showResendIn, setShowResendIn] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
@@ -73,10 +79,17 @@ const UserProfile = () => {
 
     // TODO:
     const getSingleUserDetailFunc = async () => {
-        let params = `?member_user_id=${userId}`;
+        let params = `?member_user_id=${userId}&timezone=${timeZone}`;
         await fetchSingleUserDetail(params)
             .then((res) => {
                 setUserDetail(res?.data?.data?.user_details);
+                let time = res?.data?.data?.user_details?.last_invite_at;
+                var d = new Date(time);
+                if (!(d.getTime() + 3600000 < Date.now() && d.getTime() < Date.now())) {
+                    setShowResendIn(true);
+                } else {
+                    setShowResendIn(false);
+                }
                 setUserPermissionList(res?.data?.data?.permissions);
             })
             .catch((error) => {});
@@ -196,6 +209,18 @@ const UserProfile = () => {
             }
         }
     };
+
+    const renderer = ({ hours, minutes, seconds, completed }) => {
+        if (minutes === 0 && seconds === 0) {
+            setShowResendIn(false);
+        }
+        return (
+            <span>
+                {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+            </span>
+        );
+    };
+
     const resendInvite = async () => {
         let userData = {
             first_name: updateUserDetail?.first_name,
@@ -207,6 +232,14 @@ const UserProfile = () => {
         await inviteMemberUsers(userData, params)
             .then((res) => {
                 let response = res.data;
+                if (response?.success) {
+                    getSingleUserDetailFunc();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Invite has been sent';
+                        s.notificationType = 'success';
+                    });
+                }
             })
             .catch((error) => {});
     };
@@ -228,12 +261,28 @@ const UserProfile = () => {
                     </Typography.Subheader>
                     <Typography.Subheader
                         size={Typography.Sizes.md}
-                        className="d-flex activate-container justify-content-center"
+                        className={`d-flex ${
+                            showResendIn ? 'blur-activate-container' : 'activate-container'
+                        } justify-content-center`}
                         style={{ color: colorPalette.primaryIndigo600, cursor: 'pointer' }}
-                        onClick={resendInvite}>
+                        onClick={resendInvite}
+                        disabled={showResendIn}>
                         <FontAwesomeIcon icon={faShare} size="lg" style={{ color: colorPalette.primaryIndigo600 }} />
                         Resend Invitation
                     </Typography.Subheader>
+                    {showResendIn ? (
+                        <Typography.Subheader
+                            size={Typography.Sizes.md}
+                            type={Typography.Types.Regular}
+                            className="d-flex send-container justify-content-center"
+                            style={{ color: colorPalette.primaryGray550 }}>
+                            Send new invitation in&nbsp;
+                            <Countdown
+                                date={new Date(userDetail?.last_invite_at).getTime() + 3600000}
+                                renderer={renderer}
+                            />
+                        </Typography.Subheader>
+                    ) : null}
                 </>
             );
         } else {

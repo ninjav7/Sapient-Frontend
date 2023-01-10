@@ -9,13 +9,16 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { UserStore } from '../../../store/UserStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import 'moment-timezone';
 import moment from 'moment';
+import { timeZone } from '../../../utils/helper';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
@@ -142,7 +145,7 @@ const Users = () => {
         setIsUserDataFetched(true);
         let roleIds = encodeURIComponent(permissionRoleIds.join('+'));
 
-        let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}`;
+        let params = `?user_info=${userSearchInfo}&page_size=${pageSize}&page_no=${pageNo}&sort_by=${sort_by}&ordered_by=${ordered_by}&timezone=${timeZone}`;
         if (selectedStatus == 3) {
             params += `&is_verified=false`;
         }
@@ -221,7 +224,19 @@ const Users = () => {
             .then((res) => {
                 let response = res.data;
                 getUsersList();
-
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Invite has been sent';
+                        s.notificationType = 'success';
+                    });
+                } else if (response?.success == false) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'User Already Exist';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsProcessing(false);
                 handleClose();
             })
@@ -321,11 +336,11 @@ const Users = () => {
 
     const renderLastActive = (row) => {
         let dt = '';
-        if (isValidDate(new Date(row?.last_login))) {
+        if (isValidDate(new Date(row?.last_login)) && row?.last_login != null) {
             let last_dt = new Date(row?.last_login);
-            dt = moment(last_dt).format(`MMM D 'YY @ hh:mm A`);
+            dt = moment.utc(last_dt).format(`MMM D 'YY @ hh:mm A`);
         } else {
-            dt = row?.last_login;
+            dt = 'Never';
         }
         return <Typography.Body size={Typography.Sizes.sm}>{dt}</Typography.Body>;
     };
