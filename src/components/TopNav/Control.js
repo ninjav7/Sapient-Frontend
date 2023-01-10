@@ -9,6 +9,7 @@ import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
+import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
 
 const Control = () => {
     const location = useLocation();
@@ -46,11 +47,13 @@ const Control = () => {
             ComponentStore.update((s) => {
                 s.parent = 'account';
             });
+            return;
         }
         if (configRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
+            return;
         }
     };
 
@@ -61,7 +64,7 @@ const Control = () => {
         if (currentPath.includes('/control/plug-rules')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
         } else {
-            routesForAccountSettings.includes(currentPath)
+            routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
                 ? (pathName = accountRoutes[0])
                 : (pathName = configRoutes[0]);
         }
