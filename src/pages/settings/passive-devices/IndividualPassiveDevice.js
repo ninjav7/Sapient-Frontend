@@ -4,12 +4,11 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import moment from 'moment';
 import axios from 'axios';
 import {
     BaseUrl,
-    generalPassiveDevices,
     getLocation,
     sensorGraphData,
     listSensor,
@@ -34,7 +33,13 @@ import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import './styles.scss';
 import Typography from '../../../sharedComponents/typography';
 import EditPassiveDevice from './EditPassiveDevice';
-import { getSinglePassiveDevice } from './services';
+import {
+    getLocationData,
+    getPassiveDeviceSensors,
+    getSensorGraphData,
+    getSinglePassiveDevice,
+    updatePassiveDevice,
+} from './services';
 import { Button } from '../../../sharedComponents/button';
 
 const IndividualPassiveDevice = () => {
@@ -51,6 +56,7 @@ const IndividualPassiveDevice = () => {
 
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
+
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
@@ -64,7 +70,6 @@ const IndividualPassiveDevice = () => {
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Edit Sensor Panel model state
     const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
@@ -82,12 +87,9 @@ const IndividualPassiveDevice = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const [currentRecord, setCurrentRecord] = useState({});
     const [sensorObj, setSensorObj] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [equipmentId, setEquipmentId] = useState('');
     const [breakerId, setBreakerId] = useState('');
     const [sensors, setSensors] = useState([]);
     const [sensorData, setSensorData] = useState([]);
@@ -116,6 +118,7 @@ const IndividualPassiveDevice = () => {
     const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
     const [searchSensor, setSearchSensor] = useState('');
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
+
     const handleSearchChange = (e) => {
         setSearchSensor(e.target.value);
     };
@@ -153,75 +156,62 @@ const IndividualPassiveDevice = () => {
     };
 
     const fetchSensorGraphData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsSensorChartLoading(true);
-            let params = `?sensor_id=${
-                id === sensorId ? sensorId : id
-            }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    setDeviceData([]);
-                    setSeriesData([]);
-                    let response = res.data;
-                    let data = response;
-                    let exploreData = [];
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+        setIsSensorChartLoading(true);
+
+        let params = `?sensor_id=${
+            id === sensorId ? sensorId : id
+        }&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        await getSensorGraphData(params, payload)
+            .then((res) => {
+                setDeviceData([]);
+                setSeriesData([]);
+                let response = res.data;
+                let data = response;
+                let exploreData = [];
+                let NulledData = [];
+                data.map((ele) => {
+                    if (ele?.consumption === '') {
+                        NulledData.push({ x: moment.utc(new Date(ele?.time_stamp)), y: null });
+                    } else {
+                        if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                            NulledData.push({
+                                x: moment.utc(new Date(ele?.time_stamp)),
+                                y: ele?.consumption / UNIT_DIVIDER,
+                            });
                         } else {
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                NulledData.push({
-                                    x: moment.utc(new Date(ele?.time_stamp)),
-                                    y: ele?.consumption / UNIT_DIVIDER,
-                                });
-                            } else {
-                                NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
-                            }
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
                         }
-                    });
-                    let recordToInsert = {
-                        data: NulledData,
-                        name: getRequiredConsumptionLabel(selectedConsumption),
-                    };
-                    setDeviceData([recordToInsert]);
-                    setIsSensorChartLoading(false);
+                    }
                 });
-        } catch (error) {
-            setIsSensorChartLoading(false);
-        }
+                let recordToInsert = {
+                    data: NulledData,
+                    name: getRequiredConsumptionLabel(selectedConsumption),
+                };
+                setDeviceData([recordToInsert]);
+                setIsSensorChartLoading(false);
+            })
+            .catch(() => {
+                setIsSensorChartLoading(false);
+            });
     };
 
-    const updateActiveDeviceData = async () => {
-        if (passiveData?.equipments_id) {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${passiveData?.equipments_id}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
-                        {
-                            location_id: activeLocationId,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setSensorAPIRefresh(!sensorAPIRefresh);
-                    });
-            } catch (error) {}
+    const updatePassiveDeviceData = async () => {
+        if (!passiveData?.equipments_id) {
+            return;
         }
+        const params = `?device_id=${passiveData?.equipments_id}`;
+        const payload = {
+            location_id: activeLocationId,
+        };
+
+        await updatePassiveDevice(params, payload)
+            .then((res) => {
+                setSensorAPIRefresh(!sensorAPIRefresh);
+            })
+            .catch(() => {});
     };
 
     const redirectToPassivePage = () => {
@@ -240,48 +230,39 @@ const IndividualPassiveDevice = () => {
             .catch(() => {});
     };
 
-    useEffect(() => {
-        const fetchActiveDeviceSensorData = async () => {
-            try {
-                setIsFetchingSensorData(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${deviceId}`;
-                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setSensors(response);
-                });
+    const fetchPassiveDeviceSensorData = async () => {
+        setIsFetchingSensorData(true);
+        let params = `?device_id=${deviceId}`;
+        await getPassiveDeviceSensors(params)
+            .then((res) => {
+                let response = res.data;
+                setSensors(response);
                 setIsFetchingSensorData(false);
-            } catch (error) {
+            })
+            .catch(() => {
                 setIsFetchingSensorData(false);
-            }
-        };
+            });
+    };
 
-        const fetchLocationData = async () => {
-            try {
-                setIsLocationFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => {
-                        return a.location_name.localeCompare(b.location_name);
-                    });
-                    setLocationData(response);
+    const fetchLocationData = async () => {
+        setIsLocationFetched(true);
+        await getLocationData(`/${bldgId}`)
+            .then((res) => {
+                let response = res.data;
+                response.sort((a, b) => {
+                    return a.location_name.localeCompare(b.location_name);
                 });
+                setLocationData(response);
                 setIsLocationFetched(false);
-            } catch (error) {
+            })
+            .catch(() => {
                 setIsLocationFetched(false);
-            }
-        };
+            });
+    };
+
+    useEffect(() => {
         fetchPassiveDevice();
-        fetchActiveDeviceSensorData();
+        fetchPassiveDeviceSensorData();
         fetchLocationData();
     }, [deviceId]);
 
@@ -323,12 +304,6 @@ const IndividualPassiveDevice = () => {
         if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
 
-    const onCancelClick = () => {
-        history.push({
-            pathname: `/settings/passive-devices`,
-        });
-    };
-
     return (
         <React.Fragment>
             <Row>
@@ -356,7 +331,7 @@ const IndividualPassiveDevice = () => {
                                     label="Cancel"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    onClick={onCancelClick}
+                                    onClick={redirectToPassivePage}
                                 />
                             </div>
                             <div>
@@ -366,9 +341,7 @@ const IndividualPassiveDevice = () => {
                                         label={'Save'}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
-                                        onClick={() => {
-                                            updateActiveDeviceData();
-                                        }}
+                                        onClick={updatePassiveDeviceData}
                                         className="ml-2"
                                         disabled={
                                             activeLocationId === 'Select location' ||

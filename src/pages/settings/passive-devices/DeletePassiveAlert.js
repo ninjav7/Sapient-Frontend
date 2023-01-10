@@ -60,9 +60,7 @@ const DeletePassiveAlert = ({
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
                     disabled={isProcessing}
-                    onClick={() => {
-                        deletePassiveDevice();
-                    }}
+                    onClick={deletePassiveDevice}
                 />
             </Modal.Footer>
         </Modal>

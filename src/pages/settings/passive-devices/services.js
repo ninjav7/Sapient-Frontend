@@ -7,6 +7,9 @@ import {
     updateDevice,
     deletePassiveDevice,
     getFiltersForEquipment,
+    sensorGraphData,
+    updateActivePassiveDevice,
+    listSensor,
 } from '../../../services/Network';
 
 export function savePassiveDeviceData(params, payload) {
@@ -75,4 +78,16 @@ export function fetchPassiveFilter(args) {
 
 export function getSinglePassiveDevice(params) {
     return axiosInstance.get(`${generalPassiveDevices}${params}`).then((res) => res);
+}
+
+export function getSensorGraphData(params, payload) {
+    return axiosInstance.post(`${sensorGraphData}${params}`, payload).then((res) => res);
+}
+
+export function updatePassiveDevice(params, payload) {
+    return axiosInstance.post(`${updateActivePassiveDevice}${params}`, payload).then((res) => res);
+}
+
+export function getPassiveDeviceSensors(params) {
+    return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
 }
