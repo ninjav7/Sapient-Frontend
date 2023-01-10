@@ -27,6 +27,9 @@ import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import './style.css';
 import EquipChartModal from '../chartModal/EquipChartModal';
+import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import Brick from '../../sharedComponents/brick';
+import colors from '../../assets/scss/_colors.scss';
 
 const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -55,6 +58,8 @@ const BuildingOverview = () => {
     });
 
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
+    const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
@@ -380,13 +385,24 @@ const BuildingOverview = () => {
                             data: [],
                         },
                     ];
+                    let energyCategories = [];
+                    let energyData = [
+                        {
+                            name: 'Energy',
+                            data: [],
+                        },
+                    ];
                     response.forEach((record) => {
                         newArray[0].data.push({
                             x: record?.x,
                             y: Math.round(record?.y / 1000),
                         });
+                        energyCategories.push(record?.x);
+                        energyData[0].data.push(Math.round(record?.y / 1000));
                     });
                     setBuildingConsumptionChartData(newArray);
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
                     setIsEnergyConsumptionDataLoading(false);
                 })
                 .catch((error) => {
@@ -435,6 +451,11 @@ const BuildingOverview = () => {
         handleChartOpen();
     };
 
+    useEffect(() => {
+        console.log('SSR energyConsumptionsData', energyConsumptionsData);
+        console.log('SSR energyConsumptionsCategories', energyConsumptionsCategories);
+    });
+
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -481,6 +502,18 @@ const BuildingOverview = () => {
                         className="mt-4"
                         handleRouteChange={() => handleRouteChange('/energy/end-uses')}
                         showRouteBtn={true}
+                    />
+
+                    <Brick sizeInRem={1.5} />
+
+                    <ColumnChart
+                        title="Total Energy Consumption"
+                        subTitle="Hourly Energy Consumption (kWh)"
+                        onMoreDetail={() => handleRouteChange('/energy/end-uses')}
+                        colors={[colors.datavizMain2]}
+                        categories={energyConsumptionsCategories}
+                        tooltipUnit={UNITS.KWH}
+                        series={energyConsumptionsData}
                     />
                 </div>
 
