@@ -18,3 +18,13 @@
     border-bottom: 0.0625rem solid $primary-gray-200;
     padding: 2rem 2rem 0rem 2rem;
 }
+
+.active-tab-style{
+    border-bottom: 0.125rem solid $dataviz-blue-500;
+    color: $dataviz-blue-500 !important;
+    width: fit-content;
+}
+
+.passive-container{
+    padding: 2rem;
+}
