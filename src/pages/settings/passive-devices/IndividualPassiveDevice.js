@@ -35,6 +35,7 @@ import './styles.scss';
 import Typography from '../../../sharedComponents/typography';
 import EditPassiveDevice from './EditPassiveDevice';
 import { getSinglePassiveDevice } from './services';
+import { Button } from '../../../sharedComponents/button';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
@@ -322,8 +323,63 @@ const IndividualPassiveDevice = () => {
         if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
 
+    const onCancelClick = () => {
+        history.push({
+            pathname: `/settings/passive-devices`,
+        });
+    };
+
     return (
-        <>
+        <React.Fragment>
+            <Row>
+                <Col lg={12}>
+                    <div className="passive-header-wrapper d-flex justify-content-between">
+                        <div>
+                            <Typography.Subheader size={Typography.Sizes.md}>Passive Device</Typography.Subheader>
+                            <div className="d-flex">
+                                <Typography.Subheader size={Typography.Sizes.md} className="mr-2">
+                                    {passiveData?.identifier}
+                                </Typography.Subheader>
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {`${sensors.length} Sensors`}
+                                </Typography.Subheader>
+                            </div>
+                            <div className="typography-wrapper link mouse-pointer">Configure</div>
+                        </div>
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={onCancelClick}
+                                />
+                            </div>
+                            <div>
+                                {userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                                    <Button
+                                        label={'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={() => {
+                                            updateActiveDeviceData();
+                                        }}
+                                        className="ml-2"
+                                        disabled={
+                                            activeLocationId === 'Select location' ||
+                                            activeLocationId === passiveData?.location_id
+                                                ? true
+                                                : false
+                                        }
+                                    />
+                                ) : null}
+                            </div>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+
             <div>
                 <div>
                     <div className="single-passive-container">
@@ -350,7 +406,7 @@ const IndividualPassiveDevice = () => {
                                         className="btn btn-primary passive-save-style ml-2"
                                         onClick={() => {
                                             updateActiveDeviceData();
-                                            history.push('/settings/passive-devices');
+                                            history.push('');
                                         }}
                                         disabled={
                                             activeLocationId === 'Select location' ||
@@ -627,7 +683,7 @@ const IndividualPassiveDevice = () => {
                 passiveDeviceData={passiveData}
                 fetchPassiveDevice={fetchPassiveDevice}
             />
-        </>
+        </React.Fragment>
     );
 };
 
