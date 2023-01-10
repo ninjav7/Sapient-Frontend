@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import Form from 'react-bootstrap/Form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { useParams, useHistory } from 'react-router-dom';
 import moment from 'moment';
-import axios from 'axios';
-import {
-    BaseUrl,
-    getLocation,
-    sensorGraphData,
-    listSensor,
-    updateActivePassiveDevice,
-} from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { userPermissionData } from '../../../store/globalState';
-import { Input } from 'reactstrap';
-import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
@@ -30,6 +17,8 @@ import { apiRequestBody } from '../../../helpers/helpers';
 import DeleteDevice from './DeleteDevice';
 import Brick from '../../../sharedComponents/brick';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
+import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 import './styles.scss';
 import Typography from '../../../sharedComponents/typography';
 import EditPassiveDevice from './EditPassiveDevice';
@@ -41,11 +30,9 @@ import {
     updatePassiveDevice,
 } from './services';
 import { Button } from '../../../sharedComponents/button';
+import Select from '../../../sharedComponents/form/select';
 
 const IndividualPassiveDevice = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const [userPermission] = useAtom(userPermissionData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
@@ -97,6 +84,7 @@ const IndividualPassiveDevice = () => {
     const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeLocationId, setActiveLocationId] = useState('');
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
 
     const [seriesData, setSeriesData] = useState([]);
@@ -202,6 +190,7 @@ const IndividualPassiveDevice = () => {
         if (!passiveData?.equipments_id) {
             return;
         }
+        setIsProcessing(true);
         const params = `?device_id=${passiveData?.equipments_id}`;
         const payload = {
             location_id: activeLocationId,
@@ -210,12 +199,15 @@ const IndividualPassiveDevice = () => {
         await updatePassiveDevice(params, payload)
             .then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
+                setIsProcessing(false);
             })
-            .catch(() => {});
+            .catch(() => {
+                setIsProcessing(false);
+            });
     };
 
     const redirectToPassivePage = () => {
-        history.push({ pathname: `/settings/passive-devices/` });
+        history.push({ pathname: `/settings/passive-devices` });
     };
 
     const fetchPassiveDevice = async () => {
@@ -248,11 +240,19 @@ const IndividualPassiveDevice = () => {
         setIsLocationFetched(true);
         await getLocationData(`/${bldgId}`)
             .then((res) => {
-                let response = res.data;
+                let response = res?.data;
                 response.sort((a, b) => {
                     return a.location_name.localeCompare(b.location_name);
                 });
-                setLocationData(response);
+                let locationList = [];
+                response.forEach((el) => {
+                    let obj = {
+                        label: el?.location_name,
+                        value: el?.location_id,
+                    };
+                    locationList.push(obj);
+                });
+                setLocationData(locationList);
                 setIsLocationFetched(false);
             })
             .catch(() => {
@@ -260,30 +260,31 @@ const IndividualPassiveDevice = () => {
             });
     };
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Passive Devices',
+                    path: '/settings/passive-devices',
+                    active: false,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
+    };
+
+    useEffect(() => {
+        console.log('SSR activeLocationId :>> ', activeLocationId);
+    });
+
     useEffect(() => {
         fetchPassiveDevice();
         fetchPassiveDeviceSensorData();
         fetchLocationData();
     }, [deviceId]);
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Passive Devices',
-                        path: '/settings/passive-devices',
-                        active: false,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
 
     useEffect(() => {
         BreadcrumbStore.update((bs) => {
@@ -304,6 +305,10 @@ const IndividualPassiveDevice = () => {
         if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
 
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
             <Row>
@@ -314,7 +319,7 @@ const IndividualPassiveDevice = () => {
                                 Passive Device
                             </Typography.Subheader>
                             <div className="d-flex align-items-center">
-                                <Typography.Header size={Typography.Sizes.sm} className="mr-2">
+                                <Typography.Header size={Typography.Sizes.md} className="mr-2">
                                     {passiveData?.identifier}
                                 </Typography.Header>
                                 <Typography.Body size={Typography.Sizes.sm} className="font-weight-bold">
@@ -338,13 +343,14 @@ const IndividualPassiveDevice = () => {
                                 {userPermission?.user_role === 'admin' ||
                                 userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
                                     <Button
-                                        label={'Save'}
+                                        label={isProcessing ? 'Saving' : 'Save'}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         onClick={updatePassiveDeviceData}
                                         className="ml-2"
                                         disabled={
                                             activeLocationId === 'Select location' ||
+                                            isProcessing ||
                                             activeLocationId === passiveData?.location_id
                                                 ? true
                                                 : false
@@ -359,119 +365,102 @@ const IndividualPassiveDevice = () => {
 
             <Row className="passive-container">
                 <Col lg={4}>
-                    <h5 className="device-title">Device Details</h5>
-                    <div className="mt-4">
-                        <div>
-                            <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
-                                <Form.Label className="device-label-style">Installed Location</Form.Label>
+                    <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
 
-                                {isLocationFetched ? (
-                                    <Skeleton count={1} height={35} />
-                                ) : (
-                                    <>
-                                        {userPermission?.user_role === 'admin' ||
+                    <Brick sizeInRem={1.5} />
+
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.sm}>Installed Location</Typography.Subheader>
+                        <Brick sizeInRem={0.25} />
+                        {isLocationFetched || isProcessing ? (
+                            <Skeleton count={1} height={35} />
+                        ) : (
+                            <Select
+                                placeholder="Select Location"
+                                options={locationData}
+                                currentValue={locationData.filter((option) => option.value === activeLocationId)}
+                                onChange={(e) => setActiveLocationId(e.value)}
+                                isSearchable={true}
+                                disabled={
+                                    !(
+                                        userPermission?.user_role === 'admin' ||
                                         userPermission?.permissions?.permissions?.advanced_passive_device_permission
-                                            ?.edit ? (
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    setActiveLocationId(e.target.value);
-                                                }}
-                                                value={activeLocationId}>
-                                                <option>Select Location</option>
-                                                {locationData.map((record, index) => {
-                                                    return (
-                                                        <option value={record?.location_id}>
-                                                            {record?.location_name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        ) : (
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="No Location Added"
-                                                className="font-weight-bold"
-                                                defaultValue={passiveData !== null ? passiveData?.location : ''}
-                                                disabled
-                                            />
-                                        )}
-                                    </>
-                                )}
+                                            ?.edit
+                                    )
+                                }
+                            />
+                        )}
+                        <Brick sizeInRem={0.25} />
+                        <Typography.Body size={Typography.Sizes.sm}>Location this device is installed.</Typography.Body>
+                    </div>
 
-                                <Form.Label className="device-sub-label-style mt-1">
-                                    Location this device is installed in.
-                                </Form.Label>
-                            </Form.Group>
+                    <Brick sizeInRem={1.5} />
+
+                    <div className="device-container">
+                        <div>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Identifier</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {passiveData?.identifier}
+                                </Typography.Subheader>
+                            </div>
+                            <Brick sizeInRem={1} />
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Firmware Version</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>v1.2</Typography.Subheader>
+                            </div>
                         </div>
-                        <div className="device-container">
-                            <div>
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.sm}>
-                                        Device ID (MAC)
-                                    </Typography.Subheader>
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {passiveData?.identifier}
-                                    </Typography.Subheader>
-                                </div>
-                                <Brick sizeInRem={1} />
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.sm}>
-                                        Firmware Version
-                                    </Typography.Subheader>
-                                    <Typography.Subheader size={Typography.Sizes.md}>v1.2</Typography.Subheader>
-                                </div>
-                            </div>
 
+                        <div>
                             <div>
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.sm}>Device Model</Typography.Subheader>
-                                    <Typography.Subheader size={Typography.Sizes.md}>
-                                        {passiveData?.model &&
-                                            passiveData?.model.charAt(0).toUpperCase() + passiveData?.model.slice(1)}
-                                    </Typography.Subheader>
-                                </div>
-                                <Brick sizeInRem={1} />
-                                <div>
-                                    <Typography.Subheader size={Typography.Sizes.sm}>
-                                        Device Version
-                                    </Typography.Subheader>
-                                    <Typography.Subheader size={Typography.Sizes.md}>v2</Typography.Subheader>
-                                </div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Device Model</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {passiveData?.model &&
+                                        passiveData?.model.charAt(0).toUpperCase() + passiveData?.model.slice(1)}
+                                </Typography.Subheader>
                             </div>
+                            <Brick sizeInRem={1} />
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Device Version</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>v2</Typography.Subheader>
+                            </div>
+                        </div>
 
-                            <div
-                                className="d-flex justify-content-between align-items-start mouse-pointer"
-                                onClick={openEditDeviceModal}>
-                                <PenSVG className="mr-2" />
-                                <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
-                            </div>
+                        <div
+                            className="d-flex justify-content-between align-items-start mouse-pointer"
+                            onClick={openEditDeviceModal}>
+                            <PenSVG className="mr-2" />
+                            <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
                         </div>
                     </div>
                 </Col>
+
                 <Col lg={8}>
-                    <h5 className="device-title">Sensors ({sensors.length})</h5>
-                    <div className="mt-2">
-                        <div className="active-sensor-header">
-                            <div className="search-container mr-2">
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                <input
-                                    className="search-box ml-2"
-                                    type="search"
-                                    name="search"
-                                    placeholder="Search..."
-                                    value={searchSensor}
-                                    onChange={handleSearchChange}
-                                />
-                            </div>
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}>{`Sensors (${sensors.length})`}</Typography.Subheader>
+                    <Brick sizeInRem={0.5} />
+                    <div className="active-sensor-header">
+                        <div className="search-container mr-2">
+                            <SearchSVG className="mb-1" />
+                            <input
+                                className="search-box ml-2"
+                                type="search"
+                                name="search"
+                                placeholder="Search"
+                                value={searchSensor}
+                                onChange={handleSearchChange}
+                            />
                         </div>
                     </div>
 
+                    <Brick sizeInRem={0.25} />
+
                     {isFetchingSensorData ? (
-                        <div className="mt-4">
+                        <div>
                             <Skeleton count={8} height={40} />
                         </div>
                     ) : (
@@ -479,54 +468,46 @@ const IndividualPassiveDevice = () => {
                             {filtered.map((record, index) => {
                                 return (
                                     <>
-                                        {record.equipment_id === '' && record.breaker_id === '' ? (
-                                            <div className="sensor-container-style-notAttached mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{record.index}</span>
-                                                    <span className="sensor-data-title">Not Attached</span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <FontAwesomeIcon
-                                                        icon={faChartMixed}
-                                                        size="md"
-                                                        onClick={() => {
-                                                            handleChartShow(record.id);
-                                                        }}
-                                                        className="mouse-pointer"
-                                                    />
-                                                    {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
-                                                    {/* <button
-                                                            type="button"
-                                                            className="btn btn-default passive-edit-style"
-                                                            onClick={() => {
-                                                                handleBreakerShow();
-                                                                setCurrentRecord(record);
-                                                                setCurrentIndex(index);
-                                                                setEquipmentId(record.equipment_id);
-                                                                setSensorObj(record);
-                                                                setBreakerId(record?.breaker_id);
-                                                            }}>
-                                                            Edit
-                                                        </button> */}
-                                                </div>
+                                        <Brick sizeInRem={0.75} />
+
+                                        <div
+                                            className={`d-flex justify-content-between sensor-container ${
+                                                record?.equipment_id === '' && record?.breaker_id === ''
+                                                    ? 'sensor-unattach'
+                                                    : ''
+                                            }`}>
+                                            <div className="d-flex align-items-center mouse-pointer">
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className="sensor-index mr-4">
+                                                    {record?.index}
+                                                </Typography.Subheader>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className={`mr-4 ${
+                                                        record?.equipment_id === '' && record?.breaker_id === ''
+                                                            ? 'sensor-index'
+                                                            : ''
+                                                    }`}>
+                                                    {record?.equipment_id === '' && record?.breaker_id === ''
+                                                        ? 'Not Attached'
+                                                        : record?.breaker_link}
+                                                </Typography.Subheader>
+                                                {record?.equipment_id !== '' && record?.breaker_id !== '' && (
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        className="sensor-equip">
+                                                        {record?.equipment}
+                                                    </Typography.Subheader>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className="sensor-container-style mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{record.index}</span>
-                                                    <span className="sensor-data-title">{record.breaker_link}</span>
-                                                    <span className="sensor-data-device">{record.equipment}</span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <FontAwesomeIcon
-                                                        icon={faChartMixed}
-                                                        size="md"
-                                                        onClick={() => {
-                                                            handleChartShow(record.id);
-                                                        }}
-                                                    />
-                                                    {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
-                                                    {/* <button
+                                            <div className="d-flex align-items-center">
+                                                <ChartSVG
+                                                    onClick={() => handleChartShow(record?.id)}
+                                                    className="mouse-pointer"
+                                                />
+                                                {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                {/* <button
                                                             type="button"
                                                             className="btn btn-default passive-edit-style"
                                                             onClick={() => {
@@ -536,9 +517,8 @@ const IndividualPassiveDevice = () => {
                                                             }}>
                                                             Edit
                                                         </button> */}
-                                                </div>
                                             </div>
-                                        )}
+                                        </div>
                                     </>
                                 );
                             })}
@@ -547,17 +527,15 @@ const IndividualPassiveDevice = () => {
                 </Col>
             </Row>
 
-            <Row className="passive-container">
-                <Col lg={12}>
-                    <DeleteDevice
-                        showDeleteModal={showDeleteModal}
-                        showDeleteAlert={showDeleteAlert}
-                        closeDeleteAlert={closeDeleteAlert}
-                        redirectToPassivePage={redirectToPassivePage}
-                        selectedPassiveDevice={selectedPassiveDevice}
-                    />
-                </Col>
-            </Row>
+            <div className="passive-container">
+                <DeleteDevice
+                    showDeleteModal={showDeleteModal}
+                    showDeleteAlert={showDeleteAlert}
+                    closeDeleteAlert={closeDeleteAlert}
+                    redirectToPassivePage={redirectToPassivePage}
+                    selectedPassiveDevice={selectedPassiveDevice}
+                />
+            </div>
 
             <DeviceChartModel
                 showChart={showChart}

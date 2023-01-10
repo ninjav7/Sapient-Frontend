@@ -8,7 +8,7 @@
     border-radius: 0.5rem;
     width: 100%;
     display: grid;
-    grid-template-columns: 1.55fr 1.20fr 0.25fr;
+    grid-template-columns: 1.55fr 1.2fr 0.25fr;
 }
 
 .passive-header-wrapper {
@@ -19,12 +19,44 @@
     padding: 2rem 2rem 0rem 2rem;
 }
 
-.active-tab-style{
+.active-tab-style {
     border-bottom: 0.125rem solid $dataviz-blue-500;
     color: $dataviz-blue-500 !important;
     width: fit-content;
 }
 
-.passive-container{
-    padding: 2rem;
+.passive-container {
+    padding: 2rem 2rem 0rem 2rem;
+}
+
+.sensor-container {
+    padding: 1rem;
+    height: 2.75rem;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.25rem;
+}
+
+.sensor-container {
+    padding: 1rem;
+    height: 2.75rem;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.25rem;
+}
+
+.sensor-unattach {
+    background: $primary-gray-50;
+    border: 0.0625rem solid $primary-gray-200;
+}
+
+.sensor-index {
+    color: $primary-gray-450 !important;
+}
+
+.sensor-equip {
+    border-bottom: 0.125rem solid $dataviz-blue-500;
+    color: $dataviz-blue-500 !important;
 }

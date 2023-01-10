@@ -38,9 +38,9 @@ const DeleteDevice = ({
                                     <Skeleton count={1} height={40} width={125} />
                                 ) : (
                                     <Button
-                                        label="Delete Device"
+                                        label="Delete Passive Device"
                                         size={Button.Sizes.md}
-                                        type={Button.Type.secondaryDistructive}
+                                        type={Button.Type.primaryDistructive}
                                         onClick={showDeleteAlert}
                                         icon={<DeleteSVG />}
                                     />
