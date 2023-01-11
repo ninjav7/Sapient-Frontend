@@ -334,9 +334,11 @@ const IndividualPassiveDevice = () => {
                                 <Typography.Header size={Typography.Sizes.md} className="mr-2">
                                     {passiveData?.identifier}
                                 </Typography.Header>
-                                <Typography.Body size={Typography.Sizes.sm} className="font-weight-bold">
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    className="d-flex align-items-center mt-1">
                                     {`${sensors.length} Sensors`}
-                                </Typography.Body>
+                                </Typography.Subheader>
                             </div>
                             <Typography.Subheader
                                 size={Typography.Sizes.md}

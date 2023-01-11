@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
@@ -21,7 +22,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
-import { Button, Input } from 'reactstrap';
+import { Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
@@ -29,10 +30,15 @@ import Skeleton from 'react-loading-skeleton';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
-import Select from 'react-select';
 import { apiRequestBody } from '../../../helpers/helpers';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
+import Typography from '../../../sharedComponents/typography';
+import { Button } from '../../../sharedComponents/button';
+import '../passive-devices/styles.scss';
+import Brick from '../../../sharedComponents/brick';
+import { getLocationData } from '../passive-devices/services';
+import Select from '../../../sharedComponents/form/select';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -73,6 +79,7 @@ const IndividualActiveDevice = () => {
     const [selectedSensorId, setSelectedSensorId] = useState('');
     const [newEquipTypeID, setNewEquipTypeID] = useState('');
     const [newEquipTypeValue, setNewEquipTypeValue] = useState([]);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
@@ -171,6 +178,30 @@ const IndividualActiveDevice = () => {
         setShowChart(true);
     };
 
+    const fetchLocationData = async () => {
+        setIsLocationFetched(true);
+        await getLocationData(`/${bldgId}`)
+            .then((res) => {
+                let response = res?.data;
+                response.sort((a, b) => {
+                    return a.location_name.localeCompare(b.location_name);
+                });
+                let locationList = [];
+                response.forEach((el) => {
+                    let obj = {
+                        label: el?.location_name,
+                        value: el?.location_id,
+                    };
+                    locationList.push(obj);
+                });
+                setLocationData(locationList);
+                setIsLocationFetched(false);
+            })
+            .catch(() => {
+                setIsLocationFetched(false);
+            });
+    };
+
     useEffect(() => {
         if (showChart) {
             return;
@@ -210,29 +241,6 @@ const IndividualActiveDevice = () => {
                     setIsFetchingSensorData(false);
                 });
             } catch (error) {}
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                setIsLocationFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    let response = res.data;
-
-                    response.sort((a, b) => {
-                        return a.location_name.localeCompare(b.location_name);
-                    });
-
-                    setLocationData(response);
-                    setIsLocationFetched(false);
-                });
-            } catch (error) {
-                setIsLocationFetched(false);
-            }
         };
 
         fetchSingleActiveDevice();
@@ -385,9 +393,14 @@ const IndividualActiveDevice = () => {
         } catch (error) {}
     };
 
+    const redirectToActivePage = () => {
+        history.push({ pathname: `/settings/active-devices` });
+    };
+
     const updateActiveDeviceData = async () => {
         if (activeData.equipments_id) {
             try {
+                setIsProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -404,282 +417,278 @@ const IndividualActiveDevice = () => {
                     )
                     .then((res) => {
                         setSensorAPIRefresh(!sensorAPIRefresh);
+                        redirectToActivePage();
+                        setIsProcessing(false);
                     });
-            } catch (error) {}
+            } catch (error) {
+                setIsProcessing(false);
+            }
         }
     };
 
     return (
-        <>
-            <div>
-                <div>
-                    <div className="single-passive-container">
-                        <div className="passive-page-header">
-                            <div>
-                                <div className="mb-1">
-                                    <span className="passive-device-style">Active Device</span>
-                                </div>
-                                <div>
-                                    <span className="passive-device-name">
-                                        {activeData?.description ? activeData?.description : ''}
-                                    </span>
-                                    <span className="passive-sensor-count">
-                                        {activeData?.identifier ? activeData?.identifier : ''}
-                                    </span>
-                                </div>
+        <React.Fragment>
+            <Row>
+                <Col lg={12}>
+                    <div className="passive-header-wrapper d-flex justify-content-between">
+                        <div className="d-flex flex-column">
+                            <Typography.Subheader size={Typography.Sizes.sm} className="font-weight-bold">
+                                Active Device
+                            </Typography.Subheader>
+                            <div className="d-flex">
+                                <Typography.Header size={Typography.Sizes.md} className="mr-2">
+                                    {activeData?.model === 'KP115' && 'Smart Mini Plug'}
+                                    {activeData?.model === 'HS300' && 'Power Strip'}
+                                </Typography.Header>
+                                <Typography.Subheader
+                                    size={Typography.Sizes.md}
+                                    className="d-flex align-items-center mt-1">
+                                    {activeData?.identifier}
+                                </Typography.Subheader>
                             </div>
-                            {userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
-                                <div>
-                                    <Link to="/settings/active-devices">
-                                        <button type="button" className="btn btn-default passive-cancel-style">
-                                            Cancel
-                                        </button>
-                                    </Link>
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary passive-save-style ml-2"
-                                        onClick={() => {
-                                            updateActiveDeviceData();
-                                            history.push('/settings/active-devices');
-                                        }}
+                        </div>
+                        <div className="d-flex">
+                            <div>
+                                <Button
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={redirectToActivePage}
+                                />
+                            </div>
+                            <div>
+                                {userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                                    <Button
+                                        label={isProcessing ? 'Saving' : 'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={updateActiveDeviceData}
+                                        className="ml-2"
                                         disabled={
                                             activeLocationId === 'Select location' ||
+                                            isProcessing ||
                                             activeLocationId === activeData?.location_id
                                                 ? true
                                                 : false
-                                        }>
-                                        Save
-                                    </button>
-                                </div>
-                            ) : (
-                                ''
-                            )}
-                        </div>
-                        <div className="mt-2 single-passive-tabs-style">
-                            <span className="mr-3 single-passive-tab-active">Configure</span>
-                            {/* Commented for future use as part of PLT-533  */}
-                            {/* <span className="mr-3 single-passive-tab">History</span> */}
+                                        }
+                                    />
+                                ) : null}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </Col>
+            </Row>
 
-                {/* <div className="container"> */}
-                <div className="row mt-4">
-                    <div className="col-4">
-                        <h5 className="device-title">Device Details</h5>
-                        <div className="mt-4">
+            <Row className="passive-container">
+                <Col lg={4}>
+                    <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
+
+                    <Brick sizeInRem={1.5} />
+
+                    <div>
+                        <Typography.Subheader size={Typography.Sizes.sm}>Installed Location</Typography.Subheader>
+                        <Brick sizeInRem={0.25} />
+                        {isLocationFetched || isProcessing ? (
+                            <Skeleton count={1} height={35} />
+                        ) : (
+                            <Select
+                                placeholder="Select Location"
+                                options={locationData}
+                                currentValue={locationData.filter((option) => option.value === activeLocationId)}
+                                onChange={(e) => setActiveLocationId(e.value)}
+                                isSearchable={true}
+                                disabled={
+                                    !(
+                                        userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.advanced_passive_device_permission
+                                            ?.edit
+                                    )
+                                }
+                            />
+                        )}
+                        <Brick sizeInRem={0.25} />
+                        <Typography.Body size={Typography.Sizes.sm}>Location this device is installed.</Typography.Body>
+                    </div>
+
+                    <Brick sizeInRem={1.5} />
+
+                    <div className="device-container">
+                        <div>
                             <div>
-                                <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
-                                    <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                    {isLocationFetched ? (
-                                        <Skeleton count={1} height={35} />
-                                    ) : (
-                                        <>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Identifier</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {activeData?.identifier}
+                                </Typography.Subheader>
+                            </div>
+                            <Brick sizeInRem={1} />
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Firmware Version</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>v1.2</Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Device Model</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {activeData?.model}
+                                </Typography.Subheader>
+                            </div>
+                            <Brick sizeInRem={1} />
+                            <div>
+                                <Typography.Subheader size={Typography.Sizes.sm}>Device Version</Typography.Subheader>
+                                <Brick sizeInRem={0.25} />
+                                <Typography.Subheader size={Typography.Sizes.md}>v2</Typography.Subheader>
+                            </div>
+                        </div>
+
+                        <div
+                        // className="d-flex justify-content-between align-items-start mouse-pointer"
+                        // onClick={openEditDeviceModal}>
+                        // <PenSVG className="mr-2" />
+                        // <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader
+                        ></div>
+                    </div>
+
+                    <Brick sizeInRem={1.5} />
+
+                    <div></div>
+                </Col>
+
+                <Col lg={8}>
+                    <h5 className="device-title">Sensors ({sensors.length})</h5>
+                    <div className="mt-2">
+                        <div className="active-sensor-header">
+                            <div className="search-container mr-2">
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <input
+                                    className="search-box ml-2"
+                                    type="search"
+                                    name="search"
+                                    placeholder="Search..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="socket-container">
+                        <div className="mt-2 sockets-slots-container">
+                            {sensors.map((record, index) => {
+                                return (
+                                    <>
+                                        {record?.status && (
+                                            <div>
+                                                <div className="power-off-style">
+                                                    <FontAwesomeIcon icon={faPowerOff} size="lg" color="#3C6DF5" />
+                                                </div>
+                                                {record?.equipment_type_id === '' ? (
+                                                    <div className="socket-rect">
+                                                        <img src={SocketLogo} alt="Socket" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="online-socket-container">
+                                                        <img
+                                                            src={UnionLogo}
+                                                            alt="Union"
+                                                            className="union-icon-style"
+                                                            width="35vw"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {!record?.status && (
+                                            <div>
+                                                <div className="power-off-style">
+                                                    <FontAwesomeIcon icon={faPowerOff} size="lg" color="#EAECF0" />
+                                                </div>
+                                                {record?.equipment_type_id === '' ? (
+                                                    <div className="socket-rect">
+                                                        <img src={SocketLogo} alt="Socket" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="online-socket-container">
+                                                        <img
+                                                            src={UnionLogo}
+                                                            alt="Union"
+                                                            className="union-icon-style"
+                                                            width="35vw"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {isFetchingSensorData ? (
+                        <div className="mt-4">
+                            <Skeleton count={8} height={40} />
+                        </div>
+                    ) : (
+                        <>
+                            {sensors.map((record, index) => {
+                                return (
+                                    <div className="sensor-container-style mt-3">
+                                        <div className="sensor-data-style">
+                                            <span className="sensor-data-no">{record.index}</span>
+                                            <span className="sensor-data-title">
+                                                {record?.equipment_type_name
+                                                    ? record?.equipment_type_name
+                                                    : 'No Equipment'}
+                                                {record.equipment_id === '' ? (
+                                                    ''
+                                                ) : (
+                                                    <div className="ml-2 badge badge-soft-primary">
+                                                        {record.equipment}
+                                                    </div>
+                                                )}
+                                            </span>
+                                        </div>
+                                        <div className="sensor-data-style-right">
+                                            <FontAwesomeIcon
+                                                icon={faChartMixed}
+                                                size="md"
+                                                onClick={() => {
+                                                    handleChartShow(record.id);
+                                                }}
+                                                className="mouse-pointer"
+                                            />
                                             {userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.advanced_passive_device_permission
                                                 ?.edit ? (
-                                                <Input
-                                                    type="select"
-                                                    name="select"
-                                                    id="exampleSelect"
-                                                    className="font-weight-bold"
-                                                    onChange={(e) => {
-                                                        setActiveLocationId(e.target.value);
-                                                    }}
-                                                    value={activeLocationId}>
-                                                    <option>Select Location</option>
-                                                    {locationData.map((record, index) => {
-                                                        return (
-                                                            <option value={record?.location_id}>
-                                                                {record?.location_name}
-                                                            </option>
-                                                        );
-                                                    })}
-                                                </Input>
-                                            ) : (
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="No Location Added"
-                                                    className="font-weight-bold"
-                                                    defaultValue={activeData?.location ? activeData?.location : ''}
-                                                    disabled
-                                                />
-                                            )}
-                                        </>
-                                    )}
-
-                                    <Form.Label className="device-sub-label-style mt-1">
-                                        Location this device is installed in.
-                                    </Form.Label>
-                                </Form.Group>
-                            </div>
-                            <div className="single-passive-grid">
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Identifier
-                                    </h6>
-                                    <h6 className="passive-device-value">
-                                        {activeData?.identifier ? activeData?.identifier : ''}
-                                    </h6>
-                                </div>
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Device Model
-                                    </h6>
-                                    <h6 className="passive-device-value">
-                                        {activeData?.model ? activeData?.model : ''}
-                                    </h6>
-                                </div>
-                            </div>
-                            <div className="single-passive-grid">
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Firmware Version
-                                    </h6>
-                                    <h6 className="passive-device-value">v1.2</h6>
-                                </div>
-                                <div>
-                                    <h6 className="device-label-style" htmlFor="customSwitches">
-                                        Device Version
-                                    </h6>
-                                    <h6 className="passive-device-value">v2</h6>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-8">
-                        <h5 className="device-title">Sensors ({sensors.length})</h5>
-                        <div className="mt-2">
-                            <div className="active-sensor-header">
-                                <div className="search-container mr-2">
-                                    <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                    <input
-                                        className="search-box ml-2"
-                                        type="search"
-                                        name="search"
-                                        placeholder="Search..."
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="socket-container">
-                            <div className="mt-2 sockets-slots-container">
-                                {sensors.map((record, index) => {
-                                    return (
-                                        <>
-                                            {record?.status && (
-                                                <div>
-                                                    <div className="power-off-style">
-                                                        <FontAwesomeIcon icon={faPowerOff} size="lg" color="#3C6DF5" />
-                                                    </div>
-                                                    {record?.equipment_type_id === '' ? (
-                                                        <div className="socket-rect">
-                                                            <img src={SocketLogo} alt="Socket" />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="online-socket-container">
-                                                            <img
-                                                                src={UnionLogo}
-                                                                alt="Union"
-                                                                className="union-icon-style"
-                                                                width="35vw"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {!record?.status && (
-                                                <div>
-                                                    <div className="power-off-style">
-                                                        <FontAwesomeIcon icon={faPowerOff} size="lg" color="#EAECF0" />
-                                                    </div>
-                                                    {record?.equipment_type_id === '' ? (
-                                                        <div className="socket-rect">
-                                                            <img src={SocketLogo} alt="Socket" />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="online-socket-container">
-                                                            <img
-                                                                src={UnionLogo}
-                                                                alt="Union"
-                                                                className="union-icon-style"
-                                                                width="35vw"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {isFetchingSensorData ? (
-                            <div className="mt-4">
-                                <Skeleton count={8} height={40} />
-                            </div>
-                        ) : (
-                            <>
-                                {sensors.map((record, index) => {
-                                    return (
-                                        <div className="sensor-container-style mt-3">
-                                            <div className="sensor-data-style">
-                                                <span className="sensor-data-no">{record.index}</span>
-                                                <span className="sensor-data-title">
-                                                    {record?.equipment_type_name
-                                                        ? record?.equipment_type_name
-                                                        : 'No Equipment'}
-                                                    {record.equipment_id === '' ? (
-                                                        ''
-                                                    ) : (
-                                                        <div className="ml-2 badge badge-soft-primary">
-                                                            {record.equipment}
-                                                        </div>
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="sensor-data-style-right">
-                                                <FontAwesomeIcon
-                                                    icon={faChartMixed}
-                                                    size="md"
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-default passive-edit-style"
                                                     onClick={() => {
-                                                        handleChartShow(record.id);
-                                                    }}
-                                                    className="mouse-pointer"
-                                                />
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions
-                                                    ?.advanced_passive_device_permission?.edit ? (
-                                                    <Button
-                                                        type="button"
-                                                        className="btn btn-default passive-edit-style"
-                                                        onClick={() => {
-                                                            fetchEquipmentTypeData();
-                                                            setSelectedEquipTypeId(record.equipment_type_id);
-                                                            setNewEquipTypeID(record.equipment_type_id);
-                                                            setNewEquipTypeValue(record.equipment_type);
-                                                            setSelectedSensorId(record.id);
-                                                            handleEquipmentShow();
-                                                        }}>
-                                                        Edit
-                                                    </Button>
-                                                ) : (
-                                                    <></>
-                                                )}
-                                            </div>
+                                                        fetchEquipmentTypeData();
+                                                        setSelectedEquipTypeId(record.equipment_type_id);
+                                                        setNewEquipTypeID(record.equipment_type_id);
+                                                        setNewEquipTypeValue(record.equipment_type);
+                                                        setSelectedSensorId(record.id);
+                                                        handleEquipmentShow();
+                                                    }}>
+                                                    Edit
+                                                </button>
+                                            ) : (
+                                                <></>
+                                            )}
                                         </div>
-                                    );
-                                })}
-                            </>
-                        )}
-                    </div>
-                </div>
-                {/* </div> */}
-            </div>
+                                    </div>
+                                );
+                            })}
+                        </>
+                    )}
+                </Col>
+            </Row>
 
             <DeviceChartModel
                 showChart={showChart}
@@ -715,7 +724,7 @@ const IndividualActiveDevice = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            <Select
+                            {/* <Select
                                 id="exampleSelect"
                                 placeholder="Select Equipment Type"
                                 name="select"
@@ -726,25 +735,25 @@ const IndividualActiveDevice = () => {
                                     setNewEquipTypeID(e.value);
                                 }}
                                 className="basic-single font-weight-bold"
-                            />
+                            /> */}
                         </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleEquipmentClose}>
+                    <button variant="light" onClick={handleEquipmentClose}>
                         Cancel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                         variant="primary"
                         onClick={() => {
                             handleEquipmentClose();
                             linkSensorToEquipment(selectedSensorId, selectedEquipTypeId, newEquipTypeID);
                         }}>
                         Update Socket
-                    </Button>
+                    </button>
                 </Modal.Footer>
             </Modal>
-        </>
+        </React.Fragment>
     );
 };
 
