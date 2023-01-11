@@ -166,6 +166,20 @@ const Multi = (arg) => {
                     <Select.Multi {...arg} label="Columns" isSearchable={true} />
                     <Brick />
                 </div>
+
+                <div>
+                    <h5>With Error</h5>
+
+                    <Select.Multi
+                        {...arg}
+                        error={{
+                            text: 'Error text message.',
+                            //icon: <div>custom icon or element</div>,
+                            //icon: false, // if we want to hide icon
+                        }}
+                    />
+                    <Brick />
+                </div>
             </div>
         </>
     );
