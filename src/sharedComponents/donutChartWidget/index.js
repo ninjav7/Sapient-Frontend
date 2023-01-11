@@ -240,6 +240,7 @@ DonutChartWidget.propTypes = {
             unit: PropTypes.string.isRequired,
             trendValue: PropTypes.number,
             link: PropTypes.string,
+            onClick: PropTypes.func,
         }).isRequired
     ).isRequired,
     pageType: PropTypes.string,

@@ -1,6 +1,4 @@
 import { chartsBaseConfig } from '../configs/chartsBaseConfig';
-
-import colors from '../../assets/scss/_colors.scss';
 import { onHoverHandler, onUnHoverHandler } from './helper';
 
 export const configDonutChartWidget = ({
