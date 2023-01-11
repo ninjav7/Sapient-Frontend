@@ -14,7 +14,7 @@ import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
 import ActiveDevices from '../pages/settings/active-devices';
-import Provision from '../pages/settings/active-devices/Provision';
+import Provision from '../pages/settings/active-devices/provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
@@ -452,7 +452,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/provision',
+            path: '/settings/active-devices/Provision',
             name: 'Provision Devices',
             component: Provision,
             route: PrivateRoute,
@@ -468,7 +468,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/provision',
+            path: '/settings/active-devices/Provision',
             name: 'Provision Devices',
             component: Provision,
             route: PrivateRoute,

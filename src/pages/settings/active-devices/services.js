@@ -2,6 +2,7 @@ import axiosInstance from '../../../services/axiosInstance';
 import _ from 'lodash';
 import { generalActiveDevices, getLocation, getFiltersForEquipment } from '../../../services/Network';
 
+//Active Device Page
 export function getLocationData(params) {
     return axiosInstance.get(`${getLocation}${params}`).then((res) => res);
 }
