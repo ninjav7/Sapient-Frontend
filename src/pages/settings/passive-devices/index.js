@@ -19,7 +19,7 @@ import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData, fetchPassiveFilter } from './services';
+import { getPassiveDeviceData, fetchPassiveFilter, getSinglePassiveDevice } from './services';
 import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
@@ -246,7 +246,7 @@ const PassiveDevices = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getPassiveDeviceData(params)
+        await getSinglePassiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);

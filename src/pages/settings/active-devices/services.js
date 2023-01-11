@@ -63,3 +63,7 @@ export function fetchActiveFilter(args) {
             return res.data;
         });
 }
+
+export function getActiveDeviceList(params) {
+    return axiosInstance.get(`${generalActiveDevices}${params}`).then((res) => res);
+}
