@@ -332,7 +332,9 @@ const IndividualPassiveDevice = () => {
                                     {`${sensors.length} Sensors`}
                                 </Typography.Body>
                             </div>
-                            <Typography.Subheader size={Typography.Sizes.md} className="mouse-pointer active-tab-style">
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                className="mouse-pointer typography-wrapper active-tab-style">
                                 Configure
                             </Typography.Subheader>
                         </div>
@@ -502,7 +504,7 @@ const IndividualPassiveDevice = () => {
                                                 {record?.equipment_id !== '' && record?.breaker_id !== '' && (
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
-                                                        className="sensor-equip">
+                                                        className="sensor-equip typography-wrapper link">
                                                         {record?.equipment}
                                                     </Typography.Subheader>
                                                 )}
