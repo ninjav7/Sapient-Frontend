@@ -18,12 +18,17 @@ const data = [
 ];
 
 export const Default = (args) => {
-    return <ExploreChart {...args} />;
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    setTimeout(() => {
+        setIsLoadingData(false);
+    }, 5000);
+    return <ExploreChart {...args} isLoadingData={isLoadingData} />;
 };
 
 Default.args = {
     title: 'Chart title',
     subTitle: 'Chart subtitle',
+    isLoadingData: true,
     data,
     dateRange,
 };
