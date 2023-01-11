@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import LineChart from './LineChart';
 import { mockedData, mockedData2, mockedData3 } from './mock';
 import colors from '../../assets/scss/_colors.scss';
@@ -21,14 +21,19 @@ const dateRange = {
     maxDate: new Date('2022-11-1').getTime(),
 };
 export const Default = (args) => {
+    const [isLoadingData, setIsLoadingData] = useState(true);
+    setTimeout(() => {
+        setIsLoadingData(false);
+    }, 5000);
     return (
         <>
-            <LineChart {...args} />
+            <LineChart {...args} isLoadingData={isLoadingData} />
 
             <hr />
 
             <LineChart
                 {...args}
+                isLoadingData={isLoadingData}
                 data={args.data.map((d) => ({
                     ...d,
                     fillColor: {
@@ -51,7 +56,6 @@ export const Default = (args) => {
                 ]}
                 */
 
-
                 // "from" and "to" depend on what data was passed to Xaxis
                 plotBands={[
                     { type: LineChart.PLOT_BANDS_TYPE.off_hours, from: 1664394400000, to: 1664614400000 },
@@ -68,8 +72,7 @@ export const Default = (args) => {
                         from: 1664094400000,
                         to: 1664214400000,
                     },
-                    
-                    
+
                     // we specify colors and don't specify type, when we need custom colors
                     { background: 'rgb(16 24 40 / 25%)', from: 1662464400000, to: 1662564400000 },
                     {
@@ -84,7 +87,6 @@ export const Default = (args) => {
                         to: 1663300800000,
                     },
                 ]}
-                 
             />
         </>
     );
@@ -94,6 +96,7 @@ Default.args = {
     title: 'Chart title',
     subTitle: 'Chart subtitle',
     data,
+    isLoadingData: true,
     dateRange,
     handleMoreClick: () => console.log('Clicked'),
 };

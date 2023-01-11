@@ -10,6 +10,7 @@ import Typography from '../typography';
 import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
+import EmptyLineChart from './components/emptyLineChart/EmptyLineChart';
 import { options, PLOT_BANDS_TYPE } from './constants';
 import { DOWNLOAD_TYPES } from '../constants';
 import colors from '../../assets/scss/_colors.scss';
@@ -30,7 +31,7 @@ const LegendComponent = ({ onClick, label, styles, disabled }) => {
         setIsDisabled((state) => {
             return !state;
         });
-        
+
         onClick && onClick(state);
     };
 
@@ -67,6 +68,7 @@ const LineChart = (props) => {
         tooltipLabel,
         plotBands: plotBandsProp,
         plotBandsLegends,
+        isLoadingData,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -116,87 +118,84 @@ const LineChart = (props) => {
     };
 
     const renderPlotBandsLegends = useCallback(
-        _.uniqBy([...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)], obj => obj.type).map(
-            (plotLegend) => {
-                let styles;
+        _.uniqBy(
+            [...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)],
+            (obj) => obj.type
+        ).map((plotLegend) => {
+            let styles;
 
-                let label, color, onClick;
+            let label, color, onClick;
 
-                switch (plotLegend.type) {
-                    case PLOT_BANDS_TYPE.off_hours:
-                        {
-                            label = 'Plug Rule Off-Hours';
-                            color = 'rgb(16 24 40 / 25%)';
-                            onClick = (disabled) => {
-                                setPlotBands((oldState) =>
-                                    disabled
-                                        ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.off_hours)
-                                        : [
-                                            ...oldState,
-                                            ...plotBandsProp.filter(
-                                                (data) => data.type === PLOT_BANDS_TYPE.off_hours
-                                            ),
-                                        ]
-                                );
-                            };
-                            styles = {
-                                background: color,
-                            };
-                        }
-                        break;
-                    case PLOT_BANDS_TYPE.after_hours:
-                        {
-                            label = 'After-Hours';
-                            color = {
-                                background: 'rgba(180, 35, 24, 0.1)',
-                                borderColor: colors.error700,
-                            };
-                            onClick = (disabled) => {
-                                setPlotBands((oldState) =>
-                                    disabled
-                                        ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.after_hours)
-                                        : [
-                                              ...oldState,
-                                              ...plotBandsProp.filter(
-                                                  (data) => data.type === PLOT_BANDS_TYPE.after_hours
-                                              ),
-                                          ]
-                                );
-                            };
-                            styles = {
-                                background: color.background,
-                                border: `0.0625rem solid ${color.borderColor}`,
-                            };
-                        }
-                        break;
-                    default: {
-                        label = plotLegend.label;
-                        color = plotLegend.color;
-                        onClick = plotLegend.onClick;
-
-                        styles =
-                            typeof color === 'string'
-                                ? {
-                                      background: color,
-                                  }
-                                : {
-                                      background: color.background,
-                                      border: `0.0625rem solid ${color.borderColor}`,
-                                  };
+            switch (plotLegend.type) {
+                case PLOT_BANDS_TYPE.off_hours:
+                    {
+                        label = 'Plug Rule Off-Hours';
+                        color = 'rgb(16 24 40 / 25%)';
+                        onClick = (disabled) => {
+                            setPlotBands((oldState) =>
+                                disabled
+                                    ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.off_hours)
+                                    : [
+                                          ...oldState,
+                                          ...plotBandsProp.filter((data) => data.type === PLOT_BANDS_TYPE.off_hours),
+                                      ]
+                            );
+                        };
+                        styles = {
+                            background: color,
+                        };
                     }
-                }
+                    break;
+                case PLOT_BANDS_TYPE.after_hours:
+                    {
+                        label = 'After-Hours';
+                        color = {
+                            background: 'rgba(180, 35, 24, 0.1)',
+                            borderColor: colors.error700,
+                        };
+                        onClick = (disabled) => {
+                            setPlotBands((oldState) =>
+                                disabled
+                                    ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.after_hours)
+                                    : [
+                                          ...oldState,
+                                          ...plotBandsProp.filter((data) => data.type === PLOT_BANDS_TYPE.after_hours),
+                                      ]
+                            );
+                        };
+                        styles = {
+                            background: color.background,
+                            border: `0.0625rem solid ${color.borderColor}`,
+                        };
+                    }
+                    break;
+                default: {
+                    label = plotLegend.label;
+                    color = plotLegend.color;
+                    onClick = plotLegend.onClick;
 
-                return (
-                    <LegendComponent
-                        key={generateID()}
-                        onClick={onClick}
-                        label={label}
-                        styles={styles}
-                        type={plotLegend.type}
-                    />
-                );
+                    styles =
+                        typeof color === 'string'
+                            ? {
+                                  background: color,
+                              }
+                            : {
+                                  background: color.background,
+                                  border: `0.0625rem solid ${color.borderColor}`,
+                              };
+                }
             }
-        ),
+
+            return (
+                <LegendComponent
+                    key={generateID()}
+                    onClick={onClick}
+                    label={label}
+                    styles={styles}
+                    type={plotLegend.type}
+                />
+            );
+        }),
         []
     );
 
@@ -210,7 +209,7 @@ const LineChart = (props) => {
                 {!!renderPlotBandsLegends?.length && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
                 )}
-                <div>
+                <div style={{ 'pointer-events': isLoadingData && 'none' }}>
                     <DropDownIcon
                         options={[
                             {
@@ -234,24 +233,38 @@ const LineChart = (props) => {
                     />
                 </div>
             </div>
-            <HighchartsReact
-                highcharts={Highcharts}
-                constructorType={'stockChart'}
-                options={options({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel, widthOfWrapper, plotBands })}
-                ref={chartComponentRef}
-            />
-            {handleMoreClick && (
-                <div className="more-details-wrapper">
-                    <Button
-                        onClick={handleMoreClick}
-                        className="ml-4"
-                        label="More Details"
-                        size={Button.Sizes.md}
-                        type={Button.Type.tertiary}
-                        icon={<ArrowSVG />}
-                        iconAlignment="right"
+            {isLoadingData ? (
+                <EmptyLineChart />
+            ) : (
+                <>
+                    <HighchartsReact
+                        highcharts={Highcharts}
+                        constructorType={'stockChart'}
+                        options={options({
+                            data,
+                            dateRange,
+                            Highcharts,
+                            tooltipUnit,
+                            tooltipLabel,
+                            widthOfWrapper,
+                            plotBands,
+                        })}
+                        ref={chartComponentRef}
                     />
-                </div>
+                    {handleMoreClick && (
+                        <div className="more-details-wrapper">
+                            <Button
+                                onClick={handleMoreClick}
+                                className="ml-4"
+                                label="More Details"
+                                size={Button.Sizes.md}
+                                type={Button.Type.tertiary}
+                                icon={<ArrowSVG />}
+                                iconAlignment="right"
+                            />
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );
