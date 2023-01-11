@@ -1,0 +1,70 @@
+
+.empty-explorechart {
+    width: 100%;
+    position: relative;
+
+    &-first-line {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        min-height: 15.625rem;
+
+        .empty-explorechart-yaxis-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 15.625rem;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .pulsate {
+            -webkit-animation: pulsate 2s ease-out;
+            -webkit-animation-iteration-count: infinite;
+            opacity: 0.3;
+        }
+    }
+
+    @-webkit-keyframes pulsate {
+        0% {
+            opacity: 0.3;
+        }
+
+        50% {
+            opacity: 1.0;
+        }
+
+        100% {
+            opacity: 0.3;
+        }
+    }
+
+    &-x-axis {
+        margin-left: 3.125rem;
+    }
+
+    .axis-item {
+        font-weight: 500 !important;
+    }
+
+    .circle-legend {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background-color: #d9dde2;
+    }
+
+    &-footer {
+        margin-top: 1.5625rem;
+        display: flex;
+        justify-content: space-between;
+        svg{
+            width: 100%;
+        }
+    }
+
+    &-xaxis-wrapper {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+    }
+}

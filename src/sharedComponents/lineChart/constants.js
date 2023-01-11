@@ -3,9 +3,15 @@ import { hexToRgb } from '../../utils/helper';
 import { DATAVIZ_COLORS } from '../../constants/colors';
 import { renderComponents } from '../columnChart/helper';
 import Typography from '../../sharedComponents/typography';
+import colors from '../../assets/scss/_colors.scss';
+
+export const PLOT_BANDS_TYPE = Object.freeze({
+    off_hours: 'off_hours',
+    after_hours: 'after_hours'
+});
 
 const preparedData = (data) => {
-    const result = data.map((el, index) => {
+    return data.map((el, index) => {
         return {
             type: 'area',
             color: DATAVIZ_COLORS[`datavizMain${index + 1}`],
@@ -15,25 +21,98 @@ const preparedData = (data) => {
             showInLegend: true,
             panning: true,
             panKey: 'shift',
-            fillColor: {
-                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                stops: [
-                    [0, DATAVIZ_COLORS[`datavizMain${index + 1}`]],
-                    [1, 'rgba(255,255,255,.01)'],
-                ],
-            },
+            fillColor: el.fillColor
+                ? el.fillColor
+                : {
+                      linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                      stops: [
+                          [0, DATAVIZ_COLORS[`datavizMain${index + 1}`]],
+                          [1, 'rgba(255,255,255,.01)'],
+                      ],
+                  },
         };
     });
-    return result;
 };
 
-export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel, widthOfWrapper }) => {
+export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel, widthOfWrapper, plotBands }) => {
+    const plotBandsData = plotBands
+        ?.map(({ background, from, to, borderBottomColor, type }) => {
+            switch (type) {
+                case PLOT_BANDS_TYPE.off_hours: {
+                    return {
+                        from,
+                        to,
+                        color: 'rgb(16 24 40 / 25%)',
+                    }
+                }
+                case PLOT_BANDS_TYPE.after_hours: {
+                    return [
+                        {
+                            from,
+                            to,
+                            color: {
+                                linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                                stops: [
+                                    [0, 'rgba(240, 68, 56, 0.4)'],
+                                    [0.07, 'rgba(240, 68, 56, 0.08)'],
+                                    [1, 'rgba(240, 68, 56, 0.08)'],
+                                ],
+                            },
+                        },
+                        {
+                            from,
+                            to,
+                            color: {
+                                linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                                stops: [
+                                    [0, colors.error700],
+                                    [0.007, 'rgba(0, 0, 0, 0)'],
+                                ],
+                            },
+                        },
+                    ];
+                }
+            }
+            
+            if (Array.isArray(background)) {
+                return [
+                    {
+                        from,
+                        to,
+                        color: {
+                            linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                            stops: background,
+                        },
+                    },
+                    {
+                        from,
+                        to,
+                        color: {
+                            linearGradient: { x1: 1, y1: 1, x2: 1, y2: 0 },
+                            stops: [
+                                [0, borderBottomColor],
+                                [0.007, 'rgba(0, 0, 0, 0)'],
+                            ],
+                        },
+                    },
+                ];
+            }
+
+            if (typeof background === 'string') {
+                return {
+                    from,
+                    to,
+                    color: background,
+                };
+            }
+        })
+        .flat();
+
     return {
         chart: {
             type: 'line',
             zoomType: 'x',
             marginBottom: 100,
-
             animation: {
                 duration: 1000,
             },
@@ -47,7 +126,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
             bottom: 0,
             width: widthOfWrapper,
             itemMarginTop: 8,
-            itemDistance: 0,        
+            itemDistance: 0,
             useHTML: true,
             labelFormatter: function () {
                 let color = hexToRgb(this.color);
@@ -86,12 +165,10 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
                 </Typography.Subheader>
             )}</td></tr>`,
             footerFormat: '</table></div>',
-            shared: true,
             split: false,
             shared: true,
             useHTML: true,
             snap: 0,
-            useHTML: true,
             shape: 'div',
             padding: 0,
             borderWidth: 0,
@@ -136,8 +213,8 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
         xAxis: {
             lineWidth: 1,
             ordinal: false,
-            gridLineWidth: 1,
-            alternateGridColor: '#F2F4F7',
+            gridLineWidth: plotBands ? 0 : 1,
+            alternateGridColor: plotBands ? undefined : colors.primaryGray100,
             max: dateRange.maxDate,
             min: dateRange.minDate,
             type: 'datetime',
@@ -145,6 +222,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
                 format: '{value: %e %b `%y}',
             },
             zoomEnabled: true,
+            plotBands: plotBandsData,
         },
         yAxis: {
             gridLineWidth: 1,
