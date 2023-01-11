@@ -39,6 +39,8 @@ import '../passive-devices/styles.scss';
 import Brick from '../../../sharedComponents/brick';
 import { getLocationData } from '../passive-devices/services';
 import Select from '../../../sharedComponents/form/select';
+import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
+import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -545,52 +547,26 @@ const IndividualActiveDevice = () => {
                                 <Typography.Subheader size={Typography.Sizes.md}>v2</Typography.Subheader>
                             </div>
                         </div>
-
-                        <div
-                        // className="d-flex justify-content-between align-items-start mouse-pointer"
-                        // onClick={openEditDeviceModal}>
-                        // <PenSVG className="mr-2" />
-                        // <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader
-                        ></div>
                     </div>
 
                     <Brick sizeInRem={1.5} />
 
-                    <div></div>
-                </Col>
-
-                <Col lg={8}>
-                    <h5 className="device-title">Sensors ({sensors.length})</h5>
-                    <div className="mt-2">
-                        <div className="active-sensor-header">
-                            <div className="search-container mr-2">
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                                <input
-                                    className="search-box ml-2"
-                                    type="search"
-                                    name="search"
-                                    placeholder="Search..."
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="socket-container">
-                        <div className="mt-2 sockets-slots-container">
+                    <div className="equip-socket-container">
+                        <div className="sockets-slots-container">
                             {sensors.map((record, index) => {
                                 return (
                                     <>
-                                        {record?.status && (
+                                        {record.status && (
                                             <div>
-                                                <div className="power-off-style">
+                                                <div className="power-off-style-equip">
                                                     <FontAwesomeIcon icon={faPowerOff} size="lg" color="#3C6DF5" />
                                                 </div>
-                                                {record?.equipment_type_id === '' ? (
+                                                {record.equipment_type_id === '' ? (
                                                     <div className="socket-rect">
                                                         <img src={SocketLogo} alt="Socket" />
                                                     </div>
                                                 ) : (
-                                                    <div className="online-socket-container">
+                                                    <div className="online-socket-container-equip">
                                                         <img
                                                             src={UnionLogo}
                                                             alt="Union"
@@ -602,17 +578,17 @@ const IndividualActiveDevice = () => {
                                             </div>
                                         )}
 
-                                        {!record?.status && (
+                                        {!record.status && (
                                             <div>
-                                                <div className="power-off-style">
+                                                <div className="power-off-style-equip">
                                                     <FontAwesomeIcon icon={faPowerOff} size="lg" color="#EAECF0" />
                                                 </div>
-                                                {record?.equipment_type_id === '' ? (
+                                                {record.equipment_type_id === '' ? (
                                                     <div className="socket-rect">
                                                         <img src={SocketLogo} alt="Socket" />
                                                     </div>
                                                 ) : (
-                                                    <div className="online-socket-container">
+                                                    <div className="online-socket-container-equip">
                                                         <img
                                                             src={UnionLogo}
                                                             alt="Union"
@@ -628,61 +604,89 @@ const IndividualActiveDevice = () => {
                             })}
                         </div>
                     </div>
+                </Col>
+
+                <Col lg={8}>
+                    <Typography.Subheader
+                        size={Typography.Sizes.md}>{`Sockets (${sensors.length})`}</Typography.Subheader>
+                    <Brick sizeInRem={0.5} />
+                    <div className="active-sensor-header">
+                        <div className="search-container mr-2">
+                            <SearchSVG className="mb-1" />
+                            <input
+                                className="search-box ml-2"
+                                type="search"
+                                name="search"
+                                placeholder="Search"
+                                // value={searchSensor}
+                                // onChange={handleSearchChange}
+                            />
+                        </div>
+                    </div>
+
+                    <Brick sizeInRem={0.25} />
 
                     {isFetchingSensorData ? (
-                        <div className="mt-4">
+                        <div>
                             <Skeleton count={8} height={40} />
                         </div>
                     ) : (
                         <>
                             {sensors.map((record, index) => {
                                 return (
-                                    <div className="sensor-container-style mt-3">
-                                        <div className="sensor-data-style">
-                                            <span className="sensor-data-no">{record.index}</span>
-                                            <span className="sensor-data-title">
-                                                {record?.equipment_type_name
-                                                    ? record?.equipment_type_name
-                                                    : 'No Equipment'}
-                                                {record.equipment_id === '' ? (
-                                                    ''
-                                                ) : (
-                                                    <div className="ml-2 badge badge-soft-primary">
-                                                        {record.equipment}
-                                                    </div>
+                                    <>
+                                        <Brick sizeInRem={0.75} />
+
+                                        <div
+                                            className={`d-flex justify-content-between sensor-container ${
+                                                record?.equipment_id === '' && record?.breaker_id === ''
+                                                    ? 'sensor-unattach'
+                                                    : ''
+                                            }`}>
+                                            <div className="d-flex align-items-center mouse-pointer">
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className="sensor-index mr-4">
+                                                    {index + 1}
+                                                </Typography.Subheader>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
+                                                    className={`mr-4 ${
+                                                        record?.equipment_id === '' && record?.breaker_id === ''
+                                                            ? 'sensor-index'
+                                                            : ''
+                                                    }`}>
+                                                    {record?.equipment_type_name && record?.equipment_type_name === ''
+                                                        ? 'No Equipment'
+                                                        : record?.equipment_type_name}
+                                                </Typography.Subheader>
+                                                {record?.equipment_id && (
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        className="sensor-equip typography-wrapper link">
+                                                        {record?.equipment}
+                                                    </Typography.Subheader>
                                                 )}
-                                            </span>
+                                            </div>
+                                            <div className="d-flex align-items-center">
+                                                <ChartSVG
+                                                    onClick={() => handleChartShow(record?.id)}
+                                                    className="mouse-pointer"
+                                                />
+                                                {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
+                                                {/* <button
+                                                            type="button"
+                                                            className="btn btn-default passive-edit-style"
+                                                            onClick={() => {
+                                                                setEditSenorModelRefresh(true);
+                                                                setCurrentSensorObj(record);
+                                                                openEditSensorPanelModel();
+                                                            }}>
+                                                            Edit
+                                                        </button> */}
+                                            </div>
                                         </div>
-                                        <div className="sensor-data-style-right">
-                                            <FontAwesomeIcon
-                                                icon={faChartMixed}
-                                                size="md"
-                                                onClick={() => {
-                                                    handleChartShow(record.id);
-                                                }}
-                                                className="mouse-pointer"
-                                            />
-                                            {userPermission?.user_role === 'admin' ||
-                                            userPermission?.permissions?.permissions?.advanced_passive_device_permission
-                                                ?.edit ? (
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-default passive-edit-style"
-                                                    onClick={() => {
-                                                        fetchEquipmentTypeData();
-                                                        setSelectedEquipTypeId(record.equipment_type_id);
-                                                        setNewEquipTypeID(record.equipment_type_id);
-                                                        setNewEquipTypeValue(record.equipment_type);
-                                                        setSelectedSensorId(record.id);
-                                                        handleEquipmentShow();
-                                                    }}>
-                                                    Edit
-                                                </button>
-                                            ) : (
-                                                <></>
-                                            )}
-                                        </div>
-                                    </div>
+                                    </>
                                 );
                             })}
                         </>
