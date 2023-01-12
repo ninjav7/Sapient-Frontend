@@ -1,29 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
-import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
-import { Link, useParams, useHistory } from 'react-router-dom';
-import axios from 'axios';
-import moment from 'moment';
-import {
-    BaseUrl,
-    generalActiveDevices,
-    getLocation,
-    sensorGraphData,
-    listSensor,
-    equipmentType,
-    linkActiveSensorToEquip,
-    updateActivePassiveDevice,
-} from '../../../services/Network';
+import { useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
-import { Input } from 'reactstrap';
-import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
@@ -41,6 +24,8 @@ import { getLocationData } from '../passive-devices/services';
 import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
+import { ReactComponent as OfflineSVG } from '../../../assets/icon/active-devices/offline.svg';
+import { ReactComponent as OnlineSVG } from '../../../assets/icon/active-devices/online.svg';
 import {
     getActiveDeviceSensors,
     getEquipmentTypes,
@@ -52,8 +37,6 @@ import {
 import { Badge } from '../../../sharedComponents/badge';
 
 const IndividualActiveDevice = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
@@ -107,17 +90,6 @@ const IndividualActiveDevice = () => {
 
     const [searchSocket, setSearchSocket] = useState('');
 
-    // locationData
-    const [locationDataNow, setLocationDataNow] = useState([]);
-    // equipmentTypeDevices
-    const [equipmentTypeDataNow, setEqupimentTypeDataNow] = useState([]);
-
-    const addLocationType = () => {
-        locationData.map((item) => {
-            setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
-        });
-    };
-
     const handleSocketChange = (e) => {
         setSearchSocket(e.target.value);
     };
@@ -130,27 +102,6 @@ const IndividualActiveDevice = () => {
                   sensor.equipment.toLowerCase().includes(searchSocket.toLowerCase())
               );
           });
-
-    const addEquipmentType = () => {
-        equipmentTypeDevices.map((item) => {
-            setEqupimentTypeDataNow((el) => [
-                ...el,
-                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
-            ]);
-        });
-    };
-
-    useEffect(() => {
-        if (locationData) {
-            addLocationType();
-        }
-    }, [locationData]);
-
-    useEffect(() => {
-        if (equipmentTypeDevices) {
-            addEquipmentType();
-        }
-    }, [equipmentTypeDevices]);
 
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
@@ -268,7 +219,7 @@ const IndividualActiveDevice = () => {
         let params = `?device_id=${deviceId}`;
         await getActiveDeviceSensors(params)
             .then((res) => {
-                let response = res.data;
+                let response = res?.data;
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
@@ -526,7 +477,7 @@ const IndividualActiveDevice = () => {
                                         {record.status && (
                                             <div>
                                                 <div className="power-off-style-equip">
-                                                    <FontAwesomeIcon icon={faPowerOff} size="lg" color="#3C6DF5" />
+                                                    <OnlineSVG />
                                                 </div>
                                                 {record.equipment_type_id === '' ? (
                                                     <div className="socket-rect">
@@ -548,7 +499,7 @@ const IndividualActiveDevice = () => {
                                         {!record.status && (
                                             <div>
                                                 <div className="power-off-style-equip">
-                                                    <FontAwesomeIcon icon={faPowerOff} size="lg" color="#EAECF0" />
+                                                    <OfflineSVG />
                                                 </div>
                                                 {record.equipment_type_id === '' ? (
                                                     <div className="socket-rect">
