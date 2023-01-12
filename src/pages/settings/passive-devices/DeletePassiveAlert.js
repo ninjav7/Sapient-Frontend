@@ -21,7 +21,6 @@ const DeletePassiveAlert = ({
             .then((res) => {
                 closeDeleteDeviceModal();
                 setDeviceId('');
-                console.log('SSR Deletion Successful!');
                 nextActionAfterDeletion();
                 setIsProcessing(false);
             })
