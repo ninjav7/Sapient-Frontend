@@ -19,8 +19,8 @@ import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData, fetchPassiveFilter } from './services';
-import DeletePassiveDevice from './DeletePassiveDevice';
+import { getPassiveDeviceData, fetchPassiveFilter, getSinglePassiveDevice } from './services';
+import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
@@ -232,8 +232,7 @@ const PassiveDevices = () => {
     };
 
     const handleDeviceEdit = (record) => {
-        setSelectedPassiveDevice(record);
-        openEditDeviceModal();
+        handleClick(record);
     };
 
     const handleDeviceDelete = (record) => {
@@ -247,7 +246,7 @@ const PassiveDevices = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getPassiveDeviceData(params)
+        await getSinglePassiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
@@ -447,11 +446,11 @@ const PassiveDevices = () => {
                 fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
-            <DeletePassiveDevice
+            <DeletePassiveAlert
                 isDeleteDeviceModalOpen={isDeleteDeviceModalOpen}
                 closeDeleteDeviceModal={closeDeleteDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
-                fetchPassiveDeviceData={fetchPassiveDeviceData}
+                nextActionAfterDeletion={fetchPassiveDeviceData}
             />
         </React.Fragment>
     );

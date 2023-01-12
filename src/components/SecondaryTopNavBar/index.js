@@ -67,7 +67,7 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/control/plug-rules')) {
-            redirectToEndpoint(`/energy/portfolio/overview`);
+            redirectToEndpoint(`/control/plug-rules`);
             return;
         }
 

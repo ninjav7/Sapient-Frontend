@@ -37,6 +37,9 @@ const HorizontalLayout = (props) => {
             s.showNotification = false;
         });
     };
+
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/passive-devices/single'];
+
     return (
         <React.Fragment>
             <div id="wrapper">
@@ -56,7 +59,15 @@ const HorizontalLayout = (props) => {
                     )}
 
                     {showSideNav ? (
-                        <div className="energy-page-content">
+                        <div
+                            className="energy-page-content"
+                            style={{
+                                padding:
+                                    location.pathname.includes(deviceRouteList[0]) ||
+                                    location.pathname.includes(deviceRouteList[1])
+                                        ? '0rem'
+                                        : '2rem',
+                            }}>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
@@ -69,7 +80,7 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
                     {showNotification ? (
-                        <div style={{ position: 'fixed', width: '18.75rem', top: '44.375rem' }}>
+                        <div className="notification-alignment">
                             <Notification
                                 type={
                                     notificationType === 'success'
