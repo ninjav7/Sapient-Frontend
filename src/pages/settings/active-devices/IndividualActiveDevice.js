@@ -630,18 +630,18 @@ const IndividualActiveDevice = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            {/* <Select
+                            <Select
                                 id="exampleSelect"
                                 placeholder="Select Equipment Type"
                                 name="select"
                                 isSearchable={true}
-                                options={equipmentTypeDataNow}
+                                options={equipmentTypeDevices}
                                 defaultValue={newEquipTypeValue}
                                 onChange={(e) => {
                                     setNewEquipTypeID(e.value);
                                 }}
                                 className="basic-single font-weight-bold"
-                            /> */}
+                            />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
