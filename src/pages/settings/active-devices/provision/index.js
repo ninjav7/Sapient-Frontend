@@ -497,37 +497,31 @@ const Provision = () => {
             name: 'Timezone',
             accessor: 'timezone',
             callbackValue: renderTimezone,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'HS110s',
             accessor: 'HS110s',
             callbackValue: renderHS110s,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'KP115s',
             accessor: 'KP115s',
             callbackValue: renderKP115s,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'HS300s',
             accessor: 'HS300s',
             callbackValue: renderHS300s,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sockets',
             accessor: 'Socket',
             callbackValue: renderSocket,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Remaining Capacity',
             accessor: 'Remaining_Capacity',
             callbackValue: renderRemainingCapacity,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
@@ -537,31 +531,26 @@ const Provision = () => {
             name: 'Status',
             accessor: 'status',
             callbackValue: renderStatus,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Device ID',
             accessor: 'device_mac',
             callbackValue: renderDeviceMac,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Vendor',
             accessor: 'vendor',
             callbackValue: renderVendor,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Model',
             accessor: 'model',
             callbackValue: renderModel,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Kasa Account',
             accessor: 'kasa_account',
             callbackValue: renderKasaAccount,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
@@ -621,7 +610,6 @@ const Provision = () => {
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             disableColumnDragging={true}
-                            // onDownload={() => handleDownloadCsv()}
                             headers={headerProps1}
                             totalCount={(() => {
                                 return totalItems;
@@ -677,7 +665,7 @@ const Provision = () => {
                     <DataTableWidget
                         isLoading={isAddProcessing}
                         isLoadingComponent={<DevicesSkeletonLoading />}
-                        id="linked_devices"
+                        id="devices_linked"
                         onSearch={(query) => {
                             // setSearch(query);
                         }}
@@ -690,7 +678,6 @@ const Provision = () => {
                         rows={currentRowDevices()}
                         disableColumnDragging={true}
                         searchResultRows={currentRowDevices()}
-                        // onDownload={() => handleDownloadCsv()}
                         headers={headerProps2}
                         totalCount={(() => {
                             return totalItems;
@@ -715,64 +702,6 @@ const Provision = () => {
                     </Alert>
                 </Col>
             </Row>
-
-            {/* Add network Modal - Commented for Future Use*/}
-            {/* <Modal show={show} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal">
-                <Modal.Header>
-                    <Modal.Title>Add Network</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Identifier"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('mac_address', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Password</Form.Label>
-                            <Input type="text" placeholder="Enter Password" className="font-weight-bold"></Input>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Building</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('space_id', e.target.value);
-                                }}>
-                                <option selected>Select Building</option>
-                                {locationData.map((record) => {
-                                    return <option value={record.location_id}>{record.location_name}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button className="btn btn-outline-secondary" style={{ width: '8rem' }} onClick={handleClose}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            handleClose();
-                        }}
-                        style={{ width: '8rem' }}>
-                        Add
-                    </button>
-                </Modal.Footer>
-            </Modal> */}
 
             {/* Link Account Modal */}
             <Modal
