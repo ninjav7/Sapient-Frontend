@@ -105,6 +105,8 @@ const IndividualActiveDevice = () => {
         },
     ]);
 
+    const [searchSocket, setSearchSocket] = useState('');
+
     // locationData
     const [locationDataNow, setLocationDataNow] = useState([]);
     // equipmentTypeDevices
@@ -115,6 +117,19 @@ const IndividualActiveDevice = () => {
             setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
         });
     };
+
+    const handleSocketChange = (e) => {
+        setSearchSocket(e.target.value);
+    };
+
+    const filtered = !searchSocket
+        ? sensors
+        : sensors.filter((sensor) => {
+              return (
+                  sensor.equipment_type_name.toLowerCase().includes(searchSocket.toLowerCase()) ||
+                  sensor.equipment.toLowerCase().includes(searchSocket.toLowerCase())
+              );
+          });
 
     const addEquipmentType = () => {
         equipmentTypeDevices.map((item) => {
@@ -570,8 +585,8 @@ const IndividualActiveDevice = () => {
                                 type="search"
                                 name="search"
                                 placeholder="Search"
-                                // value={searchSensor}
-                                // onChange={handleSearchChange}
+                                value={searchSocket}
+                                onChange={handleSocketChange}
                             />
                         </div>
                     </div>
@@ -584,11 +599,10 @@ const IndividualActiveDevice = () => {
                         </div>
                     ) : (
                         <>
-                            {sensors.map((record, index) => {
+                            {filtered.map((record, index) => {
                                 return (
                                     <>
                                         <Brick sizeInRem={0.75} />
-
                                         <div
                                             className={`d-flex justify-content-between sensor-container ${
                                                 record?.equipment_id === '' && record?.breaker_id === ''
@@ -604,7 +618,7 @@ const IndividualActiveDevice = () => {
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
                                                     className={`mr-2 ${
-                                                        record?.equipment_id === '' && record?.breaker_id === ''
+                                                        record?.equipment_type_name === '' && record?.equipment === ''
                                                             ? 'sensor-index'
                                                             : ''
                                                     }`}>
@@ -621,17 +635,6 @@ const IndividualActiveDevice = () => {
                                                     onClick={() => handleChartShow(record?.id)}
                                                     className="mouse-pointer"
                                                 />
-                                                {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
-                                                {/* <button
-                                                            type="button"
-                                                            className="btn btn-default passive-edit-style"
-                                                            onClick={() => {
-                                                                setEditSenorModelRefresh(true);
-                                                                setCurrentSensorObj(record);
-                                                                openEditSensorPanelModel();
-                                                            }}>
-                                                            Edit
-                                                        </button> */}
                                             </div>
                                         </div>
                                     </>
