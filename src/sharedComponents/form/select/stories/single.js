@@ -182,6 +182,27 @@ const Default = (arg) => {
                     />
                     <Brick />
                 </div>
+                <div>
+                    <h5>With Info</h5>
+                    <Select
+                        {...arg}
+                        info={{
+                            text: 'Info text message.',
+                            // icon: <div>custom icon or element</div>,
+                        }}
+                    />
+                    <Brick />
+                </div>
+                <div>
+                    <h5>With Label</h5>
+                    <Select
+                        {...arg}
+                        label="Label text"
+                        // we can pass any node here or string
+                        //label={<h3>Label text</h3>}
+                    />
+                    <Brick />
+                </div>
             </div>
         </>
     );

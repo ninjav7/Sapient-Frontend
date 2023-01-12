@@ -29,6 +29,8 @@ const MultiSelect = ({
     type = DROPDOWN_INPUT_TYPES.Default,
     closeOnBlur = false,
     error,
+    info,
+    label,
     ...props
 }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -88,6 +90,14 @@ const MultiSelect = ({
             ref={ref}
             onClick={handleClick}
             onBlur={handleBlur}>
+            {label && (
+                <>
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                        {label}
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                </>
+            )}
             <ReactSelect
                 {...props}
                 onMenuClose={null}
@@ -143,6 +153,20 @@ const MultiSelect = ({
                     </div>
                 </div>
             )}
+            {!!info && (!!info.text || !!info.icon) && (
+                <div>
+                    <Brick sizeInRem={0.375} />
+
+                    <div className="d-flex align-items-center">
+                        {info.icon &&
+                            React.cloneElement(info.icon, {
+                                className: 'element-end-node mr-1',
+                            })}
+
+                        <Typography.Body size={Typography.Sizes.xs}>{info.text}</Typography.Body>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -180,6 +204,11 @@ MultiSelect.propTypes = {
         text: PropTypes.string,
         icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
     }),
+    info: PropTypes.shape({
+        text: PropTypes.string,
+        icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
+    }),
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
 
 export default MultiSelect;

@@ -38,6 +38,8 @@ const Select = ({
     defaultValue,
     currentValue,
     error,
+    info,
+    label,
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
@@ -110,6 +112,14 @@ const Select = ({
 
     return (
         <div className={cx(`react-select-wrapper`, className, { 'is-error': !!error })} ref={containerRef}>
+            {label && (
+                <>
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                        {label}
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                </>
+            )}
             <ReactSelect
                 {...props}
                 type={type}
@@ -144,6 +154,20 @@ const Select = ({
                         <Typography.Body size={Typography.Sizes.xs} className="error-700">
                             {error.text}
                         </Typography.Body>
+                    </div>
+                </div>
+            )}
+            {!!info && (!!info.text || !!info.icon) && (
+                <div>
+                    <Brick sizeInRem={0.375} />
+
+                    <div className="d-flex align-items-center">
+                        {info.icon &&
+                            React.cloneElement(info.icon, {
+                                className: 'element-end-node mr-1',
+                            })}
+
+                        <Typography.Body size={Typography.Sizes.xs}>{info.text}</Typography.Body>
                     </div>
                 </div>
             )}
@@ -194,6 +218,11 @@ Select.propTypes = {
         text: PropTypes.string,
         icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
     }),
+    info: PropTypes.shape({
+        text: PropTypes.string,
+        icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
+    }),
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
 
 export default Select;
