@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { getActiveDeviceData, fetchActiveFilter, getActiveDeviceList } from './services';
+import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -305,7 +305,7 @@ const ActiveDevices = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getActiveDeviceList(params)
+        await getSingleActiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getActiveDeviceTableCSVExport(responseData, headerProps);

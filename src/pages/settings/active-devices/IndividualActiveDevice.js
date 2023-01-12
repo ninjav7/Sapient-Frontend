@@ -41,6 +41,15 @@ import { getLocationData } from '../passive-devices/services';
 import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
+import {
+    getActiveDeviceSensors,
+    getEquipmentTypes,
+    getSensorData,
+    getSensorEquipmentLinked,
+    getSingleActiveDevice,
+    updateActiveDeviceService,
+} from './services';
+import { Badge } from '../../../sharedComponents/badge';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -176,7 +185,7 @@ const IndividualActiveDevice = () => {
         setSensorId(id);
         let obj = sensors.find((o) => o.id === id);
         setSensorData(obj);
-        fetchSensorGraphData(id);
+        fetchSensorChartData(id);
         setShowChart(true);
     };
 
@@ -211,61 +220,55 @@ const IndividualActiveDevice = () => {
         setConsumption('energy');
     }, [showChart]);
 
+    const fetchActiveDevice = async () => {
+        let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
+        await getSingleActiveDevice(params)
+            .then((res) => {
+                let response = res.data.data[0];
+                setActiveData(response);
+                setActiveLocationId(response.location_id);
+                localStorage.setItem('identifier', response.identifier);
+            })
+            .catch(() => {});
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Active Devices',
+                    path: '/settings/active-devices',
+                    active: false,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
+    };
+
+    const fetchActiveSensorsList = async () => {
+        setIsFetchingSensorData(true);
+        let params = `?device_id=${deviceId}`;
+        await getActiveDeviceSensors(params)
+            .then((res) => {
+                let response = res.data;
+                setSensors(response);
+                setIsFetchingSensorData(false);
+            })
+            .catch(() => {
+                setIsFetchingSensorData(false);
+            });
+    };
+
     useEffect(() => {
-        const fetchSingleActiveDevice = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data.data[0];
-                    setActiveData(response);
-                    setActiveLocationId(response.location_id);
-                    localStorage.setItem('identifier', response.identifier);
-                });
-            } catch (error) {}
-        };
-
-        const fetchActiveDeviceSensorData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${deviceId}`;
-                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setSensors(response);
-                    setIsFetchingSensorData(false);
-                });
-            } catch (error) {}
-        };
-
-        fetchSingleActiveDevice();
-        fetchActiveDeviceSensorData();
+        fetchActiveDevice();
+        fetchActiveSensorsList();
         fetchLocationData();
     }, [deviceId]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Active Devices',
-                        path: '/settings/active-devices',
-                        active: false,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -288,144 +291,93 @@ const IndividualActiveDevice = () => {
     }, [activeData]);
 
     useEffect(() => {
-        const fetchActiveDeviceSensorData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${deviceId}`;
-                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setSensors(response);
-                    setIsFetchingSensorData(false);
-                });
-            } catch (error) {
-                setIsFetchingSensorData(false);
-            }
-        };
-        fetchActiveDeviceSensorData();
+        fetchActiveSensorsList();
     }, [sensorAPIRefresh]);
 
-    const fetchSensorGraphData = async (id) => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
-            await axios
-                .post(`${BaseUrl}${sensorGraphData}${params}`, apiRequestBody(startDate, endDate, timeZone), {
-                    headers,
-                })
-                .then((res) => {
-                    setDeviceData([]);
-                    setSeriesData([]);
-                    let response = res.data;
-
-                    let data = response;
-
-                    let exploreData = [];
-
-                    let NulledData = [];
-                    data.map((ele) => {
-                        if (ele?.consumption === '') {
-                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                        } else {
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                NulledData.push({
-                                    x: new Date(ele.time_stamp).getTime(),
-                                    y: ele.consumption / UNIT_DIVIDER,
-                                });
-                            } else {
-                                NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
-                            }
-                        }
-                    });
-                    let recordToInsert = {
-                        data: NulledData,
-                        name: getRequiredConsumptionLabel(selectedConsumption),
-                    };
-                    setDeviceData([recordToInsert]);
-                    setIsSensorChartLoading(false);
-                });
-        } catch (error) {
-            setIsSensorChartLoading(false);
-        }
-    };
-
     const fetchEquipmentTypeData = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?end_use=Plug&building_id=${bldgId}&page_size=1000&page_no=1`;
-            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+        let params = `?end_use=Plug&building_id=${bldgId}&page_size=1000&page_no=1`;
+        await getEquipmentTypes(params)
+            .then((res) => {
                 let response = res.data.data;
                 response.sort((a, b) => {
                     return a.equipment_type.localeCompare(b.equipment_type);
                 });
                 setEquipmentTypeDevices(response);
+            })
+            .catch(() => {});
+    };
+
+    const fetchSensorChartData = async (id) => {
+        setIsSensorChartLoading(true);
+        const params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&building_id=${bldgId}`;
+        await getSensorData(params, apiRequestBody(startDate, endDate, timeZone))
+            .then((res) => {
+                setDeviceData([]);
+                setSeriesData([]);
+                let response = res.data;
+
+                let data = response;
+
+                let exploreData = [];
+
+                let NulledData = [];
+                data.map((ele) => {
+                    if (ele?.consumption === '') {
+                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                    } else {
+                        if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                            NulledData.push({
+                                x: new Date(ele.time_stamp).getTime(),
+                                y: ele.consumption / UNIT_DIVIDER,
+                            });
+                        } else {
+                            NulledData.push({ x: new Date(ele.time_stamp).getTime(), y: ele.consumption });
+                        }
+                    }
+                });
+                let recordToInsert = {
+                    data: NulledData,
+                    name: getRequiredConsumptionLabel(selectedConsumption),
+                };
+                setDeviceData([recordToInsert]);
+                setIsSensorChartLoading(false);
+            })
+            .catch(() => {
+                setIsSensorChartLoading(false);
             });
-        } catch (error) {}
     };
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
-        if (currEquipId === newEquipID) {
-            return;
-        }
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setSensors([]);
-            setIsFetchingSensorData(true);
-            let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
-            await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
+        if (currEquipId === newEquipID) return;
+        setSensors([]);
+        setIsFetchingSensorData(true);
+        let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
+
+        await getSensorEquipmentLinked(params)
+            .then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
-            });
-        } catch (error) {}
+            })
+            .catch(() => {});
     };
 
     const redirectToActivePage = () => {
         history.push({ pathname: `/settings/active-devices` });
     };
 
-    const updateActiveDeviceData = async () => {
-        if (activeData.equipments_id) {
-            try {
-                setIsProcessing(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${activeData.equipments_id}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
-                        {
-                            location_id: activeLocationId,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setSensorAPIRefresh(!sensorAPIRefresh);
-                        redirectToActivePage();
-                        setIsProcessing(false);
-                    });
-            } catch (error) {
+    const updateActiveDevice = async () => {
+        if (!activeData.equipments_id) return;
+        setIsProcessing(true);
+        const params = `?device_id=${activeData.equipments_id}`;
+        const payload = { location_id: activeLocationId };
+        await updateActiveDeviceService(params, payload)
+            .then((res) => {
+                setSensorAPIRefresh(!sensorAPIRefresh);
+                redirectToActivePage();
                 setIsProcessing(false);
-            }
-        }
+            })
+            .catch(() => {
+                setIsProcessing(false);
+            });
     };
 
     return (
@@ -465,7 +417,7 @@ const IndividualActiveDevice = () => {
                                         label={isProcessing ? 'Saving' : 'Save'}
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
-                                        onClick={updateActiveDeviceData}
+                                        onClick={updateActiveDevice}
                                         className="ml-2"
                                         disabled={
                                             activeLocationId === 'Select location' ||
@@ -651,7 +603,7 @@ const IndividualActiveDevice = () => {
                                                 </Typography.Subheader>
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
-                                                    className={`mr-4 ${
+                                                    className={`mr-2 ${
                                                         record?.equipment_id === '' && record?.breaker_id === ''
                                                             ? 'sensor-index'
                                                             : ''
@@ -661,11 +613,7 @@ const IndividualActiveDevice = () => {
                                                         : record?.equipment_type_name}
                                                 </Typography.Subheader>
                                                 {record?.equipment_id && (
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="sensor-equip typography-wrapper link">
-                                                        {record?.equipment}
-                                                    </Typography.Subheader>
+                                                    <Badge text={record?.equipment} className="sensor-badge-style" />
                                                 )}
                                             </div>
                                             <div className="d-flex align-items-center">

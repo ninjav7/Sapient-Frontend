@@ -1,6 +1,15 @@
 import axiosInstance from '../../../services/axiosInstance';
 import _ from 'lodash';
-import { generalActiveDevices, getLocation, getFiltersForEquipment } from '../../../services/Network';
+import {
+    generalActiveDevices,
+    getLocation,
+    getFiltersForEquipment,
+    updateActivePassiveDevice,
+    linkActiveSensorToEquip,
+    listSensor,
+    sensorGraphData,
+    equipmentType,
+} from '../../../services/Network';
 
 export function getLocationData(params) {
     return axiosInstance.get(`${getLocation}${params}`).then((res) => res);
@@ -64,6 +73,26 @@ export function fetchActiveFilter(args) {
         });
 }
 
-export function getActiveDeviceList(params) {
+export function getSingleActiveDevice(params) {
     return axiosInstance.get(`${generalActiveDevices}${params}`).then((res) => res);
+}
+
+export function getActiveDeviceSensors(params) {
+    return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
+}
+
+export function getEquipmentTypes(params) {
+    return axiosInstance.get(`${equipmentType}${params}`).then((res) => res);
+}
+
+export function updateActiveDeviceService(params, payload) {
+    return axiosInstance.post(`${updateActivePassiveDevice}${params}`, payload).then((res) => res);
+}
+
+export function getSensorEquipmentLinked(params, payload = {}) {
+    return axiosInstance.post(`${linkActiveSensorToEquip}${params}`, payload).then((res) => res);
+}
+
+export function getSensorData(params, payload) {
+    return axiosInstance.post(`${sensorGraphData}${params}`, payload).then((res) => res);
 }
