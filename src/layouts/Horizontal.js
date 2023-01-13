@@ -39,7 +39,7 @@ const HorizontalLayout = (props) => {
         });
     };
 
-    const deviceRouteList = ['/settings/active-devices/single', '/settings/passive-devices/single'];
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meter/single'];
 
     return (
         <React.Fragment>
@@ -95,9 +95,7 @@ const HorizontalLayout = (props) => {
                                 }
                                 description={notificationMessage}
                                 closeAutomatically={true}
-                                onClose={() => {
-                                    updateNotification();
-                                }}
+                                onClose={updateNotification}
                             />
                         </div>
                     ) : null}

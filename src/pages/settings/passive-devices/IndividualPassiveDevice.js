@@ -32,6 +32,7 @@ import {
 import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
+import '../active-devices/styles.scss';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -54,7 +55,7 @@ const IndividualPassiveDevice = () => {
     const handleBreakerClose = () => setShowBreaker(false);
     const handleBreakerShow = () => setShowBreaker(true);
 
-    // Delete Passive Device Modal
+    // Delete Smart Meter Modal
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
@@ -87,6 +88,7 @@ const IndividualPassiveDevice = () => {
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
+    const [locationError, setLocationError] = useState(null);
 
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
@@ -188,9 +190,13 @@ const IndividualPassiveDevice = () => {
     };
 
     const updatePassiveDeviceData = async () => {
-        if (!passiveData?.equipments_id) {
+        if (activeLocationId === passiveData?.location_id) {
+            setLocationError({
+                text: 'Please update Location.',
+            });
             return;
         }
+        if (!passiveData?.equipments_id) return;
         setIsProcessing(true);
         const params = `?device_id=${passiveData?.equipments_id}`;
         const payload = {
@@ -212,18 +218,20 @@ const IndividualPassiveDevice = () => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message;
+                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
                         s.notificationType = 'error';
                     });
                 }
+                setLocationError(null);
             })
             .catch(() => {
                 setIsProcessing(false);
+                setLocationError(null);
             });
     };
 
     const redirectToPassivePage = () => {
-        history.push({ pathname: `/settings/passive-devices` });
+        history.push({ pathname: `/settings/smart-meter` });
     };
 
     const fetchPassiveDevice = async () => {
@@ -280,8 +288,8 @@ const IndividualPassiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Passive Devices',
-                    path: '/settings/passive-devices',
+                    label: 'Smart Meter',
+                    path: '/settings/smart-meter',
                     active: false,
                 },
             ];
@@ -302,13 +310,13 @@ const IndividualPassiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Passive Devices',
-                    path: '/settings/passive-devices',
+                    label: 'Smart Meter',
+                    path: '/settings/smart-meter',
                     active: false,
                 },
                 {
                     label: passiveData?.identifier,
-                    path: '/settings/passive-devices/single',
+                    path: '/settings/smart-meter/single',
                     active: true,
                 },
             ];
@@ -328,7 +336,7 @@ const IndividualPassiveDevice = () => {
                     <div className="passive-header-wrapper d-flex justify-content-between">
                         <div className="d-flex flex-column justify-content-between">
                             <Typography.Subheader size={Typography.Sizes.sm} className="font-weight-bold">
-                                Passive Device
+                                Smart Meter
                             </Typography.Subheader>
                             <div className="d-flex align-items-center">
                                 <Typography.Header size={Typography.Sizes.md} className="mr-2">
@@ -364,13 +372,7 @@ const IndividualPassiveDevice = () => {
                                         type={Button.Type.primary}
                                         onClick={updatePassiveDeviceData}
                                         className="ml-2"
-                                        disabled={
-                                            activeLocationId === '' ||
-                                            isProcessing ||
-                                            activeLocationId === passiveData?.location_id
-                                                ? true
-                                                : false
-                                        }
+                                        disabled={isProcessing}
                                     />
                                 ) : null}
                             </div>
@@ -395,7 +397,10 @@ const IndividualPassiveDevice = () => {
                                 placeholder="Select Location"
                                 options={locationData}
                                 currentValue={locationData.filter((option) => option.value === activeLocationId)}
-                                onChange={(e) => setActiveLocationId(e.value)}
+                                onChange={(e) => {
+                                    setActiveLocationId(e.value);
+                                    setLocationError(null);
+                                }}
                                 isSearchable={true}
                                 disabled={
                                     !(
@@ -404,10 +409,15 @@ const IndividualPassiveDevice = () => {
                                             ?.edit
                                     )
                                 }
+                                error={locationError}
                             />
                         )}
                         <Brick sizeInRem={0.25} />
-                        <Typography.Body size={Typography.Sizes.sm}>Location this device is installed.</Typography.Body>
+                        {!locationError && (
+                            <Typography.Body size={Typography.Sizes.sm}>
+                                Location this device is installed.
+                            </Typography.Body>
+                        )}
                     </div>
 
                     <Brick sizeInRem={1.5} />
@@ -518,10 +528,12 @@ const IndividualPassiveDevice = () => {
                                                 )}
                                             </div>
                                             <div className="d-flex align-items-center">
-                                                <ChartSVG
-                                                    onClick={() => handleChartShow(record?.id)}
-                                                    className="mouse-pointer"
-                                                />
+                                                <div className="d-flex icon-style mr-1">
+                                                    <ChartSVG
+                                                        onClick={() => handleChartShow(record?.id)}
+                                                        className="mouse-pointer chart-icon-style"
+                                                    />
+                                                </div>
                                                 {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
                                                 {/* <button
                                                             type="button"

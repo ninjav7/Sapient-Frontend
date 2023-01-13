@@ -2262,11 +2262,11 @@ const SingleRoleNew = () => {
 
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-title">Passive Devices</h6>
+                                                    <h6 className="card-title">Smart Meter</h6>
                                                     <h6
                                                         className="card-subtitle mb-2 text-muted"
                                                         htmlFor="customSwitches">
-                                                        Ability to manage passive devices in a building.
+                                                        Ability to manage Smart Meter in a building.
                                                     </h6>
                                                 </div>
                                             </FormGroup>

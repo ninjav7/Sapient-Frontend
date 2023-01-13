@@ -41,10 +41,10 @@ const DeletePassiveAlert = ({
             backdrop="static"
             keyboard={false}>
             <Modal.Body className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Delete Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Delete Smart Meter</Typography.Header>
                 <Brick sizeInRem={1.5} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    Are you sure you want to delete the Passive Device?
+                    Are you sure you want to delete the Smart Meter?
                 </Typography.Body>
             </Modal.Body>
             <Modal.Footer className="pb-4 pr-4">
