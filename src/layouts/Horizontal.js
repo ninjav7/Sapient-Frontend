@@ -39,7 +39,7 @@ const HorizontalLayout = (props) => {
         });
     };
 
-    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meter/single'];
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meters/single'];
 
     return (
         <React.Fragment>

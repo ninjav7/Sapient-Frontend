@@ -128,8 +128,8 @@ const SecondaryTopNavBar = () => {
             if (path.includes('active-devices')) {
                 redirectToEndpoint(`/settings/active-devices`);
             }
-            if (path.includes('smart-meter')) {
-                redirectToEndpoint(`/settings/smart-meter`);
+            if (path.includes('smart-meters')) {
+                redirectToEndpoint(`/settings/smart-meters`);
             }
             return;
         }

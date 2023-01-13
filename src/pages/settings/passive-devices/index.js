@@ -227,7 +227,7 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/smart-meter/single/${el.equipments_id}`,
+            pathname: `/settings/smart-meters/single/${el.equipments_id}`,
         });
     };
 
@@ -346,8 +346,8 @@ const PassiveDevices = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Smart Meter',
-                        path: '/settings/smart-meter',
+                        label: 'Smart Meters',
+                        path: '/settings/smart-meters',
                         active: true,
                     },
                 ];
@@ -366,7 +366,7 @@ const PassiveDevices = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Smart Meter</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>Smart Meters</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
