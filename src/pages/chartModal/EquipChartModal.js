@@ -323,7 +323,7 @@ const EquipChartModal = ({
         }
 
         if (deviceType === 'passive-device') {
-            return `/settings/passive-devices/single/${equipDeviceId}`;
+            return `/settings/smart-meters/single/${equipDeviceId}`;
         }
     };
 
@@ -337,7 +337,7 @@ const EquipChartModal = ({
         }
 
         if (deviceType === 'passive-device') {
-            history.push({ pathname: `/settings/passive-devices/single/${equipDeviceId}` });
+            history.push({ pathname: `/settings/smart-meters/single/${equipDeviceId}` });
         }
     };
 

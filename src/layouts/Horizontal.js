@@ -19,6 +19,7 @@ const HorizontalLayout = (props) => {
     const showNotification = UserStore.useState((s) => s.showNotification);
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
     const notificationType = UserStore.useState((s) => s.notificationType);
+    const componentType = UserStore.useState((s) => s.componentType);
     useEffect(() => {
         if (!location.pathname.includes('/explore-page/')) {
             setShowSideNav(true);
@@ -37,6 +38,9 @@ const HorizontalLayout = (props) => {
             s.showNotification = false;
         });
     };
+
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meters/single'];
+
     return (
         <React.Fragment>
             <div id="wrapper">
@@ -56,7 +60,15 @@ const HorizontalLayout = (props) => {
                     )}
 
                     {showSideNav ? (
-                        <div className="energy-page-content">
+                        <div
+                            className="energy-page-content"
+                            style={{
+                                padding:
+                                    location.pathname.includes(deviceRouteList[0]) ||
+                                    location.pathname.includes(deviceRouteList[1])
+                                        ? '0rem'
+                                        : '2rem',
+                            }}>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
@@ -69,18 +81,21 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
                     {showNotification ? (
-                        <div style={{ position: 'fixed', width: '18.75rem', top: '44.375rem' }}>
+                        <div className="notification-alignment">
                             <Notification
                                 type={
                                     notificationType === 'success'
                                         ? Notification.Types.success
                                         : Notification.Types.error
                                 }
-                                component={Notification.ComponentTypes.alert}
+                                component={
+                                    componentType === 'alert'
+                                        ? Notification.ComponentTypes.alert
+                                        : Notification.ComponentTypes.snackBar
+                                }
                                 description={notificationMessage}
-                                onClose={() => {
-                                    updateNotification();
-                                }}
+                                closeAutomatically={true}
+                                onClose={updateNotification}
                             />
                         </div>
                     ) : null}

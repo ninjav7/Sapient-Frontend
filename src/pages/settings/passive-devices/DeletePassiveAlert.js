@@ -5,11 +5,11 @@ import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import { deletePassiveDeviceData } from './services';
 
-const DeletePassiveDevice = ({
+const DeletePassiveAlert = ({
     isDeleteDeviceModalOpen,
     closeDeleteDeviceModal,
     selectedPassiveDevice,
-    fetchPassiveDeviceData,
+    nextActionAfterDeletion,
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [deviceId, setDeviceId] = useState('');
@@ -21,7 +21,7 @@ const DeletePassiveDevice = ({
             .then((res) => {
                 closeDeleteDeviceModal();
                 setDeviceId('');
-                fetchPassiveDeviceData();
+                nextActionAfterDeletion();
                 setIsProcessing(false);
             })
             .catch(() => {
@@ -30,9 +30,7 @@ const DeletePassiveDevice = ({
     };
 
     useEffect(() => {
-        if (isDeleteDeviceModalOpen) {
-            setDeviceId(selectedPassiveDevice?.equipments_id);
-        }
+        if (isDeleteDeviceModalOpen) setDeviceId(selectedPassiveDevice?.equipments_id);
     }, [isDeleteDeviceModalOpen]);
 
     return (
@@ -43,10 +41,10 @@ const DeletePassiveDevice = ({
             backdrop="static"
             keyboard={false}>
             <Modal.Body className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Delete Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Delete Smart Meter</Typography.Header>
                 <Brick sizeInRem={1.5} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    Are you sure you want to delete the Passive Device?
+                    Are you sure you want to delete the Smart Meter?
                 </Typography.Body>
             </Modal.Body>
             <Modal.Footer className="pb-4 pr-4">
@@ -61,13 +59,11 @@ const DeletePassiveDevice = ({
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
                     disabled={isProcessing}
-                    onClick={() => {
-                        deletePassiveDevice();
-                    }}
+                    onClick={deletePassiveDevice}
                 />
             </Modal.Footer>
         </Modal>
     );
 };
 
-export default DeletePassiveDevice;
+export default DeletePassiveAlert;

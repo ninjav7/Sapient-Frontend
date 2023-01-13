@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
@@ -448,7 +448,6 @@ const BuildingOverview = () => {
                     <EnergyConsumptionByEndUse
                         title="Energy Consumption by End Use"
                         subtitle="Energy Totals"
-                        series={donutChartData}
                         energyConsumption={energyConsumption}
                         bldgId={bldgId}
                         pageType="building"

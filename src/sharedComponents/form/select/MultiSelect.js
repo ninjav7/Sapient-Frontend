@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ReactSelect from 'react-select';
-import PropTypes from 'prop-types';
+import cx from 'classnames';
 import _ from 'lodash';
+import PropTypes from 'prop-types';
 
+import Brick from '../../brick';
+import Typography from '../../typography';
 import {
     Control,
     DropdownIndicator,
@@ -16,6 +19,8 @@ import { stringOrNumberPropTypes } from '../../helpers/helper';
 import { DROPDOWN_INPUT_TYPES } from './index';
 import { selectAllOption } from './constants';
 
+import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
+
 import './style.scss';
 
 const MultiSelect = ({
@@ -23,6 +28,9 @@ const MultiSelect = ({
     className = '',
     type = DROPDOWN_INPUT_TYPES.Default,
     closeOnBlur = false,
+    error,
+    info,
+    label,
     ...props
 }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +85,19 @@ const MultiSelect = ({
     }, [props.value]);
 
     return (
-        <div className={`react-select-wrapper ${className}`} ref={ref} onClick={handleClick} onBlur={handleBlur}>
+        <div
+            className={cx(`react-select-wrapper`, className, { 'is-error': !!error })}
+            ref={ref}
+            onClick={handleClick}
+            onBlur={handleBlur}>
+            {label && (
+                <>
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                        {label}
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                </>
+            )}
             <ReactSelect
                 {...props}
                 onMenuClose={null}
@@ -115,6 +135,38 @@ const MultiSelect = ({
                 isSearchable={false}
                 backspaceRemovesValue={false}
             />
+            {!!error && (!!error.text || !!error.icon) && (
+                <div>
+                    <Brick sizeInRem={0.375} />
+
+                    <div className="d-flex align-items-center">
+                        {error.icon &&
+                            React.cloneElement(error.icon, {
+                                className: 'element-end-node mr-1',
+                            })}
+
+                        {error.icon === undefined && <ErrorSVG className="mr-1" width="12" />}
+
+                        <Typography.Body size={Typography.Sizes.xs} className="error-700">
+                            {error.text}
+                        </Typography.Body>
+                    </div>
+                </div>
+            )}
+            {!!info && (!!info.text || !!info.icon) && (
+                <div>
+                    <Brick sizeInRem={0.375} />
+
+                    <div className="d-flex align-items-center">
+                        {info.icon &&
+                            React.cloneElement(info.icon, {
+                                className: 'element-end-node mr-1',
+                            })}
+
+                        <Typography.Body size={Typography.Sizes.xs}>{info.text}</Typography.Body>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -148,6 +200,15 @@ MultiSelect.propTypes = {
         wrapper: PropTypes.any,
     }),
     searchNoResults: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
+    error: PropTypes.shape({
+        text: PropTypes.string,
+        icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
+    }),
+    info: PropTypes.shape({
+        text: PropTypes.string,
+        icon: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
+    }),
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
 
 export default MultiSelect;

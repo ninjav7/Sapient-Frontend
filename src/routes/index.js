@@ -14,7 +14,7 @@ import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
 import ActiveDevices from '../pages/settings/active-devices';
-import Provision from '../pages/settings/active-devices/Provision';
+import Provision from '../pages/settings/active-devices/provision';
 import PassiveDevices from '../pages/settings/passive-devices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
@@ -476,16 +476,16 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/passive-devices/single/:deviceId',
-            name: 'Single Passive Devices',
+            path: '/settings/smart-meters/single/:deviceId',
+            name: 'Single Smart Meter',
             component: IndividualPassiveDevice,
             route: PrivateRoute,
             visibility: false,
             parent: 'building-settings',
         },
         {
-            path: '/settings/passive-devices',
-            name: 'Passive Devices',
+            path: '/settings/smart-meters',
+            name: 'Smart Meters',
             component: PassiveDevices,
             route: PrivateRoute,
             visibility: true,

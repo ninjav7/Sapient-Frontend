@@ -46,3 +46,10 @@
     background-color: #f9fafb;
     padding-left: 0em !important;
 }
+
+.notification-alignment {
+    position: fixed;
+    width: 18.75rem;
+    left: 2rem;
+    bottom: 2rem;
+}

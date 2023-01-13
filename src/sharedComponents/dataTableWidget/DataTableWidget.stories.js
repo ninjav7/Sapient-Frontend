@@ -109,7 +109,8 @@ Default.args = {
     onChangePage: (query) => alert('Page: ' + query),
     onPageSize: (query) => alert('Per page ' + query),
     onStatus: (query) => alert('Status changed to: ' + query),
-    totalPages: 90,
+    totalCount: 90,
+    currentPage: 1,
     headers: [
         {
             name: 'Name',

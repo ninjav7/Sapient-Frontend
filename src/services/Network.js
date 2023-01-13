@@ -79,7 +79,7 @@ export const deleteEquipment = `/api/config/equipments_details/delete-equipment`
 export const generalActiveDevices = '/api/config/devices/active';
 export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
-//search active and passive device
+//search active and Smart Meter
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 

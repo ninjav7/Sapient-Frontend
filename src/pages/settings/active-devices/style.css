@@ -4,7 +4,7 @@
     width: auto;
     height: 6.25rem;
     background: #f9fafb;
-    border-bottom: .0625rem solid #eaecf0;
+    border-bottom: 0.0625rem solid #eaecf0;
 }
 .sub-heading {
     font-family: 'Inter';
@@ -334,7 +334,6 @@
     align-items: center;
     color: #1a53d7;
 }
-
 
 .model-sensor-date-time {
     font-family: 'Inter';

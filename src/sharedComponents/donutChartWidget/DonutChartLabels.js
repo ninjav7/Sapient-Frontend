@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
+
 import { TrendsBadge } from '../trendsBadge';
+import Typography from '../typography';
+
 import { formatConsumptionValue } from '../../helpers/helpers';
 
 import './Labels.scss';
@@ -16,21 +19,35 @@ const DonutChartLabels = ({ onHover, onMouseLeave, labels = [], isShowValue = tr
             },
             className
         )}>
-        {labels.map(({ label, color, value, unit, trendValue, trendType, link = null, isHovered }, index) => {
+        {labels.map(({ label, color, value, unit, trendValue, trendType, link = null, isHovered, onClick }, index) => {
+            const labelComponent = (
+                <Typography.Subheader size={Typography.Sizes.md} className="gray-800 Medium m-0">
+                    {label}
+                </Typography.Subheader>
+            );
+
             return (
                 <div
                     key={index}
                     className={cx('donut-chart-labels', { 'is-hovered': isHovered })}
                     onMouseLeave={(event) => onMouseLeave(event, index)}
                     onMouseOver={(event) => onHover(event, index)}>
-                    <div className="donut-chart-labels-dot" style={{ background: color }}></div>
+                    <div className="donut-chart-labels-dot" style={{ background: color }} />
 
                     {link ? (
-                        <Link className="donut-chart-labels-link" to={link}>
+                        <Link className="donut-chart-labels-link" to={link} onClick={onClick}>
                             {label}
                         </Link>
+                    ) : !!onClick ? (
+                        <button
+                            type="button"
+                            onClick={onClick}
+                            role="button"
+                            className="reset-styles text-left donut-chart-labels-no-link">
+                            {labelComponent}
+                        </button>
                     ) : (
-                        <div className="donut-chart-labels-no-link">{label}</div>
+                        labelComponent
                     )}
 
                     {isShowValue && (

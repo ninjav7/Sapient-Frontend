@@ -7,14 +7,24 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { getLocationData, savePassiveDeviceData } from './services';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
+import { useHistory } from 'react-router-dom';
 import { isInputLetterOrNumber } from '../../../helpers/helpers';
+import colorPalette from '../../../assets/scss/_colors.scss';
+import { UserStore } from '../../../store/UserStore';
 
 const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchPassiveDeviceData }) => {
+    const history = useHistory();
+
     const defaultDeviceObj = {
         device_type: 'passive',
         mac_address: '',
         model: '',
         space_id: '',
+    };
+
+    const defaultErrors = {
+        mac_address: null,
+        model: null,
     };
 
     const passiveDeviceModel = [
@@ -31,38 +41,64 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [deviceData, setDeviceData] = useState(defaultDeviceObj);
+    const [deviceErrors, setDeviceErrors] = useState(defaultErrors);
     const [locationData, setLocationData] = useState([]);
 
     const [isProcessing, setIsProcessing] = useState(false);
-    const [formValidation, setFormValidation] = useState(false);
-    const [identifierAlert, setIdentifierAlert] = useState(null);
 
     const handleChange = (key, value) => {
-        if (key === 'mac_address' && value.length > 16) {
-            return;
-        }
+        if (key === 'mac_address' && value.length > 16) return;
         let obj = Object.assign({}, deviceData);
         obj[key] = value;
         setDeviceData(obj);
     };
 
     const saveDeviceDetails = async () => {
-        try {
+        let alertObj = Object.assign({}, deviceErrors);
+
+        if (!isInputLetterOrNumber(deviceData.mac_address) || deviceData.mac_address === '')
+            alertObj.mac_address = 'Please enter only Letters and Numbers. 16 digit serial number.';
+        if (deviceData.model.length === 0) alertObj.model = { text: 'Please select Model Type.' };
+
+        setDeviceErrors(alertObj);
+
+        if (!alertObj.mac_address && !alertObj.model) {
             setIsProcessing(true);
-            let params = `?building_id=${bldgId}`;
-            await savePassiveDeviceData(params, deviceData).then((res) => {
-                closeAddDeviceModal();
-                setDeviceData(defaultDeviceObj);
-                fetchPassiveDeviceData();
-            });
-            setIsProcessing(false);
-        } catch (error) {
-            setIsProcessing(false);
+            const params = `?building_id=${bldgId}`;
+            await savePassiveDeviceData(params, deviceData)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    if (response?.success) {
+                        closeAddDeviceModal();
+                        setDeviceData(defaultDeviceObj);
+                        setDeviceErrors(defaultErrors);
+                    }
+
+                    setIsProcessing(false);
+                    if (response?.data?.device_id) redirectUserToPassivePage(response?.data?.device_id);
+                })
+                .catch((e) => {
+                    setDeviceErrors(defaultErrors);
+                    setIsProcessing(false);
+                });
         }
     };
 
     const fetchLocationData = async () => {
-        let response = await getLocationData(`/${bldgId}`);
+        const response = await getLocationData(`/${bldgId}`);
         if (response?.data.length === 0) {
             setLocationData([]);
             return;
@@ -80,47 +116,54 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
         setLocationData(data);
     };
 
-    useEffect(() => {
-        if (deviceData?.mac_address.length === 16 && deviceData?.model.length > 0) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-        if (isInputLetterOrNumber(deviceData.mac_address) || deviceData.mac_address === '') {
-            setIdentifierAlert(null);
-        } else {
-            setIdentifierAlert('Please Enter only Letters and Numbers.');
-        }
-    }, [deviceData]);
+    const redirectUserToPassivePage = (deviceId) => {
+        history.push({
+            pathname: `/settings/smart-meters/single/${deviceId}`,
+        });
+    };
 
     useEffect(() => {
-        if (isAddDeviceModalOpen) {
-            fetchLocationData();
-        }
+        if (isAddDeviceModalOpen) fetchLocationData();
     }, [isAddDeviceModalOpen]);
 
     return (
         <Modal show={isAddDeviceModalOpen} onHide={closeAddDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Create Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Add Smart Meter</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
+                <Typography.Body size={Typography.Sizes.md}>
+                    Enter Identifier
+                    <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                        *
+                    </span>
+                </Typography.Body>
+                <Brick sizeInRem={0.25} />
                 <InputTooltip
-                    label="Identifier"
                     placeholder="Enter Identifier"
                     onChange={(e) => {
                         handleChange('mac_address', e.target.value.trim().toUpperCase());
+                        setDeviceErrors({ ...deviceErrors, mac_address: null });
                     }}
-                    error={identifierAlert}
+                    error={deviceErrors?.mac_address}
                     labelSize={Typography.Sizes.md}
                     value={deviceData?.mac_address}
                 />
+                <Brick sizeInRem={0.25} />
+                {!deviceErrors.mac_address && (
+                    <Typography.Body size={Typography.Sizes.sm}>16 digit serial number</Typography.Body>
+                )}
 
-                <Brick sizeInRem={1.5} />
+                <Brick sizeInRem={1.25} />
 
                 <div>
-                    <Typography.Body size={Typography.Sizes.md}>Model</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Model
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select Model"
@@ -128,7 +171,9 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                         defaultValue={passiveDeviceModel.filter((option) => option.value === deviceData?.model)}
                         onChange={(e) => {
                             handleChange('model', e.value);
+                            setDeviceErrors({ ...deviceErrors, model: null });
                         }}
+                        error={deviceErrors?.model}
                         isSearchable={true}
                     />
                 </div>
@@ -159,6 +204,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                         className="w-100"
                         onClick={() => {
                             setDeviceData(defaultDeviceObj);
+                            setDeviceErrors(defaultErrors);
                             closeAddDeviceModal();
                         }}
                     />
@@ -168,10 +214,8 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={!formValidation || isProcessing || identifierAlert !== null}
-                        onClick={() => {
-                            saveDeviceDetails();
-                        }}
+                        disabled={isProcessing}
+                        onClick={saveDeviceDetails}
                     />
                 </div>
 
