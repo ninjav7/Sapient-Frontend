@@ -118,7 +118,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
 
     const redirectUserToPassivePage = (deviceId) => {
         history.push({
-            pathname: `/settings/smart-meter/single/${deviceId}`,
+            pathname: `/settings/smart-meters/single/${deviceId}`,
         });
     };
 
@@ -129,7 +129,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
     return (
         <Modal show={isAddDeviceModalOpen} onHide={closeAddDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Create Smart Meter</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Add Smart Meter</Typography.Header>
 
                 <Brick sizeInRem={2} />
 

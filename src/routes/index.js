@@ -476,7 +476,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/smart-meter/single/:deviceId',
+            path: '/settings/smart-meters/single/:deviceId',
             name: 'Single Smart Meter',
             component: IndividualPassiveDevice,
             route: PrivateRoute,
@@ -484,8 +484,8 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/smart-meter',
-            name: 'Smart Meter',
+            path: '/settings/smart-meters',
+            name: 'Smart Meters',
             component: PassiveDevices,
             route: PrivateRoute,
             visibility: true,
