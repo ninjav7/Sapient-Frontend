@@ -38,7 +38,7 @@ const DeleteDevice = ({
                                     <Skeleton count={1} height={40} width={125} />
                                 ) : (
                                     <Button
-                                        label="Delete Passive Device"
+                                        label="Delete Smart Meter"
                                         size={Button.Sizes.md}
                                         type={Button.Type.primaryDistructive}
                                         onClick={showDeleteAlert}

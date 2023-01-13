@@ -19,6 +19,8 @@ const HorizontalLayout = (props) => {
     const showNotification = UserStore.useState((s) => s.showNotification);
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
     const notificationType = UserStore.useState((s) => s.notificationType);
+    const componentType = UserStore.useState((s) => s.componentType);
+
     useEffect(() => {
         if (!location.pathname.includes('/explore-page/')) {
             setShowSideNav(true);
@@ -38,7 +40,7 @@ const HorizontalLayout = (props) => {
         });
     };
 
-    const deviceRouteList = ['/settings/active-devices/single', '/settings/passive-devices/single'];
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meter/single'];
 
     return (
         <React.Fragment>
@@ -87,11 +89,14 @@ const HorizontalLayout = (props) => {
                                         ? Notification.Types.success
                                         : Notification.Types.error
                                 }
-                                component={Notification.ComponentTypes.alert}
+                                component={
+                                    componentType === 'alert'
+                                        ? Notification.ComponentTypes.alert
+                                        : Notification.ComponentTypes.snackBar
+                                }
                                 description={notificationMessage}
-                                onClose={() => {
-                                    updateNotification();
-                                }}
+                                closeAutomatically={true}
+                                onClose={updateNotification}
                             />
                         </div>
                     ) : null}

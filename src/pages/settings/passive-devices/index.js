@@ -227,7 +227,7 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/passive-devices/single/${el.equipments_id}`,
+            pathname: `/settings/smart-meter/single/${el.equipments_id}`,
         });
     };
 
@@ -250,7 +250,7 @@ const PassiveDevices = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
-                download('Passive_Device_List', csvData);
+                download('Smart_Meter_List', csvData);
             })
             .catch(() => {});
     };
@@ -346,8 +346,8 @@ const PassiveDevices = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Passive Devices',
-                        path: '/settings/passive-devices',
+                        label: 'Smart Meter',
+                        path: '/settings/smart-meter',
                         active: true,
                     },
                 ];
@@ -366,13 +366,13 @@ const PassiveDevices = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Passive Devices</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>Smart Meter</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
                             <div className="d-flex">
                                 <Button
-                                    label={'Add Passive Device'}
+                                    label={'Add Smart Meter'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
                                     onClick={() => {
@@ -393,7 +393,7 @@ const PassiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
-                        id="passive_devices_list"
+                        id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);

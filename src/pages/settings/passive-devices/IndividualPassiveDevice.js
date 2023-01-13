@@ -55,7 +55,7 @@ const IndividualPassiveDevice = () => {
     const handleBreakerClose = () => setShowBreaker(false);
     const handleBreakerShow = () => setShowBreaker(true);
 
-    // Delete Passive Device Modal
+    // Delete Smart Meter Modal
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
@@ -231,7 +231,7 @@ const IndividualPassiveDevice = () => {
     };
 
     const redirectToPassivePage = () => {
-        history.push({ pathname: `/settings/passive-devices` });
+        history.push({ pathname: `/settings/smart-meter` });
     };
 
     const fetchPassiveDevice = async () => {
@@ -288,8 +288,8 @@ const IndividualPassiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Passive Devices',
-                    path: '/settings/passive-devices',
+                    label: 'Smart Meter',
+                    path: '/settings/smart-meter',
                     active: false,
                 },
             ];
@@ -310,13 +310,13 @@ const IndividualPassiveDevice = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'Passive Devices',
-                    path: '/settings/passive-devices',
+                    label: 'Smart Meter',
+                    path: '/settings/smart-meter',
                     active: false,
                 },
                 {
                     label: passiveData?.identifier,
-                    path: '/settings/passive-devices/single',
+                    path: '/settings/smart-meter/single',
                     active: true,
                 },
             ];
@@ -336,7 +336,7 @@ const IndividualPassiveDevice = () => {
                     <div className="passive-header-wrapper d-flex justify-content-between">
                         <div className="d-flex flex-column justify-content-between">
                             <Typography.Subheader size={Typography.Sizes.sm} className="font-weight-bold">
-                                Passive Device
+                                Smart Meter
                             </Typography.Subheader>
                             <div className="d-flex align-items-center">
                                 <Typography.Header size={Typography.Sizes.md} className="mr-2">

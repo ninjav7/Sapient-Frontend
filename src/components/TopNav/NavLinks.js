@@ -42,7 +42,7 @@ const NavLinks = () => {
         '/settings/equipment',
         '/settings/panels',
         '/settings/active-devices',
-        '/settings/passive-devices',
+        '/settings/smart-meter',
     ];
 
     const handleEnergyClick = () => {

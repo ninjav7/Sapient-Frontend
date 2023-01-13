@@ -7,4 +7,5 @@ export const UserStore = new Store({
     showNotification: false,
     notificationMessage: '',
     notificationType: '',
+    componentType: 'alert',
 });

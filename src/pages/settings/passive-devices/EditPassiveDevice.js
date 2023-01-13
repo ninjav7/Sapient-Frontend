@@ -76,7 +76,7 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
     return (
         <Modal show={isEditDeviceModalOpen} onHide={closeEditDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Update Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Update Smart Meter</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
