@@ -68,7 +68,8 @@ const NavLinks = () => {
         if (
             location.pathname.includes(configChildRoutes[0]) ||
             location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2])
+            location.pathname.includes(configChildRoutes[2]) ||
+            location.pathname.includes(configChildRoutes[3])
         ) {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
@@ -121,7 +122,8 @@ const NavLinks = () => {
         if (
             location.pathname.includes(configChildRoutes[0]) ||
             location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2])
+            location.pathname.includes(configChildRoutes[2]) ||
+            location.pathname.includes(configChildRoutes[3])
         ) {
             history.push({
                 pathname: `/explore-page/by-equipment/${bldgId}`,
