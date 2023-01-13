@@ -20,7 +20,6 @@ const HorizontalLayout = (props) => {
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
     const notificationType = UserStore.useState((s) => s.notificationType);
     const componentType = UserStore.useState((s) => s.componentType);
-
     useEffect(() => {
         if (!location.pathname.includes('/explore-page/')) {
             setShowSideNav(true);

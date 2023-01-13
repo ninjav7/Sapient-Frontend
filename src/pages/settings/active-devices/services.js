@@ -11,6 +11,7 @@ import {
     equipmentType,
 } from '../../../services/Network';
 
+//Active Device Page
 export function getLocationData(params) {
     return axiosInstance.get(`${getLocation}${params}`).then((res) => res);
 }

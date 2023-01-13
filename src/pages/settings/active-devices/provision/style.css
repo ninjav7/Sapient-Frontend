@@ -1,0 +1,44 @@
+.btn-width{
+    width:9rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.find-header{
+    margin-left: 1rem !important;
+    margin-top: .625rem !important;
+    padding: 0rem !important;
+}
+
+.find-box{
+    padding:  .5rem 0rem .5rem .25rem !important;
+}
+
+.find-row{
+    display: flex !important;
+    flex-direction: row !important;
+
+}
+
+.find-box-label{
+    margin-bottom: 0rem !important;
+    padding: 0.5rem !important;
+}
+
+.find-footer{
+    justify-content: center !important;
+     margin: 0rem !important;
+}
+
+.find-body{
+    margin-top: 0rem !important;
+}
+
+.find-error-icon{
+    margin-right: .25rem !important; 
+    color: '#B42318' !important; 
+}
+
+.find-link-color{
+    color:blue !important;
+}

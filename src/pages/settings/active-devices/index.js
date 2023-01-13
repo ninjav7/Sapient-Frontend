@@ -440,7 +440,7 @@ const ActiveDevices = () => {
                             <div className="d-flex">
                                 <Link
                                     to={{
-                                        pathname: `/settings/active-devices/provision`,
+                                        pathname: `/settings/active-devices/Provision`,
                                     }}>
                                     <Button
                                         label={'Add Active Device'}
