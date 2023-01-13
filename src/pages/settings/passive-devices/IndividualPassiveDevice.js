@@ -372,7 +372,7 @@ const IndividualPassiveDevice = () => {
                                         type={Button.Type.primary}
                                         onClick={updatePassiveDeviceData}
                                         className="ml-2"
-                                        disabled={isProcessing}
+                                        disabled={isProcessing || activeLocationId === passiveData?.location_id}
                                     />
                                 ) : null}
                             </div>
