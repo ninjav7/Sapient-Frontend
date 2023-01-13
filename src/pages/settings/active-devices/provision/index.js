@@ -647,7 +647,7 @@ const Provision = () => {
                                 icon={faCircleCheck}
                                 size="lg"
                                 className="ml-2"
-                                style={{ marginRight: '4px', color: 'white' }}
+                                style={{ marginRight: '0.25rem', color: 'white' }}
                             />
                             Devices Added to system
                         </div>
