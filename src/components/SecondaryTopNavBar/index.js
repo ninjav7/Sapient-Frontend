@@ -67,7 +67,7 @@ const SecondaryTopNavBar = () => {
         }
 
         if (path.includes('/control/plug-rules')) {
-            redirectToEndpoint(`/energy/portfolio/overview`);
+            redirectToEndpoint(`/control/plug-rules`);
             return;
         }
 
@@ -127,8 +127,8 @@ const SecondaryTopNavBar = () => {
             if (path.includes('active-devices')) {
                 redirectToEndpoint(`/settings/active-devices`);
             }
-            if (path.includes('passive-devices')) {
-                redirectToEndpoint(`/settings/passive-devices`);
+            if (path.includes('smart-meter')) {
+                redirectToEndpoint(`/settings/smart-meter`);
             }
             return;
         }

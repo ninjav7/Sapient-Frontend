@@ -7,12 +7,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { updatePassiveDeviceData } from './services';
 import { isInputLetterOrNumber } from '../../../helpers/helpers';
 
-const EditPassiveDevice = ({
-    isEditDeviceModalOpen,
-    closeEditDeviceModal,
-    selectedPassiveDevice,
-    fetchPassiveDeviceData,
-}) => {
+const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiveDeviceData, fetchPassiveDevice }) => {
     const defaultDeviceObj = {
         identifier: '',
         model: '',
@@ -45,7 +40,7 @@ const EditPassiveDevice = ({
                 closeEditDeviceModal();
                 setPassiveDeviceObj(defaultDeviceObj);
                 setIsProcessing(false);
-                fetchPassiveDeviceData();
+                fetchPassiveDevice();
             })
             .catch(() => {
                 setIsProcessing(false);
@@ -70,18 +65,18 @@ const EditPassiveDevice = ({
             return;
         }
         let obj = {
-            identifier: selectedPassiveDevice?.identifier,
-            model: selectedPassiveDevice?.model,
-            equipments_id: selectedPassiveDevice?.equipments_id,
+            identifier: passiveDeviceData?.identifier,
+            model: passiveDeviceData?.model,
+            equipments_id: passiveDeviceData?.equipments_id,
         };
         setPassiveDeviceObj(obj);
-        setPreviousIdentifier(selectedPassiveDevice?.identifier);
+        setPreviousIdentifier(passiveDeviceData?.identifier);
     }, [isEditDeviceModalOpen]);
 
     return (
         <Modal show={isEditDeviceModalOpen} onHide={closeEditDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Update Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Update Smart Meter</Typography.Header>
 
                 <Brick sizeInRem={2} />
 

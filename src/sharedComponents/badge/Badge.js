@@ -7,12 +7,15 @@ import './Badge.scss';
 
 export default function Badge({ text = '', ...props }) {
     return (
-        <div className={cx("badge-wrapper", props.className)}>
-            <Typography.Body size={Typography.Sizes.sm}>{text}</Typography.Body>
+        <div className={cx('badge-wrapper', props.className)}>
+            <Typography.Body size={Typography.Sizes.sm} className={`${props.className}`}>
+                {text}
+            </Typography.Body>
         </div>
     );
 }
 
 Badge.propTypes = {
     text: PropTypes.string.isRequired,
+    className: PropTypes.string,
 };
