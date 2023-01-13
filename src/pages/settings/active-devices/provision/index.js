@@ -27,13 +27,14 @@ import {
 } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { AvForm, AvGroup, AvInput, AvCheckboxGroup, AvCheckbox } from 'availity-reactstrap-validation';
-import { InputGroup } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
 import Brick from '../../../../sharedComponents/brick';
 import Typography from '../../../../sharedComponents/typography';
 import colorPalette from '../../../../assets/scss/_colors.scss';
+import LinkModal from './LinkModal';
+import UnLinkModal from './UnLinkModal';
+import FindDevicesModal from './FindDevicesModal';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -100,59 +101,35 @@ const Provision = () => {
     const [totalItems, setTotalItems] = useState(0);
 
     // Modal states
-    const [selected, setSelected] = useState(0);
-    const [show, setShow] = useState(false);
-    const [showEmail, setShowEmail] = useState(false);
     const [showlink, setShowLink] = useState(false);
     const [checkFind, setCheckFind] = useState(true);
     const [showUnlink, setShowUnLink] = useState(false);
     const [showFind, setShowFind] = useState(false);
-    const [showDone, setShowDone] = useState(false);
-    const handleClose = () => setShow(false);
+    const [checkedEmailFind, setCheckedEmailFind] = useState([]);
     const handleLinkClose = () => {
         setShowLink(false);
         setError(false);
-        setEmail('');
-        setPassword('');
     };
     const handleUnLinkClose = () => {
         setShowUnLink(false);
         setError(false);
     };
     const handleFindClose = () => setShowFind(false);
-    const handleShow = () => setShow(true);
+
     const [linkedAccount, setLinkedAccount] = useState([]);
     const [readyData, setReadyData] = useState([]);
     const [progressData, setProgressData] = useState([]);
     const [total, setTotal] = useState([]);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [selectedKasaEmail, setSelectedKasaEmail] = useState('');
-    const [selectedKasaId, setSelectedKasaId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isAddProcessing, setIsAddProcessing] = useState(false);
-
-    const [checkedEmail, setCheckedEmail] = useState([]);
-    const [checkedEmailFind, setCheckedEmailFind] = useState([]);
-    const [locationData, setLocationData] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(0);
-    const [createDeviceData, setCreateDeviceData] = useState({
-        device_type: 'active',
-    });
     const [auth, setAuth] = useState('');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, createDeviceData);
-        obj[key] = value;
-        setCreateDeviceData(obj);
-    };
     const [error, setError] = useState(false);
     const [message, setMessage] = useState('');
     const [kasaDevices, setKasaDevices] = useState([]);
 
-    const handleUnlink = async () => {
+    const handleUnlink = async (checkedEmail) => {
         let authData = {
             kasa_account_id: checkedEmail,
             building_id: bldgId,
@@ -193,14 +170,7 @@ const Provision = () => {
         }
     };
 
-    const handleCheckedEmail = (e) => {
-        checkedEmail.push(e.target.value);
-    };
-    const handleCheckedEmailFind = (e) => {
-        checkedEmailFind.push(e.target.value);
-    };
-
-    const handleAuthorize = async () => {
+    const handleAuthorize = async (email, password) => {
         let authData = {
             username: email,
             password: password,
@@ -222,16 +192,6 @@ const Provision = () => {
             .catch((error) => {});
     };
 
-    const handleAdd = () => {
-        linkedAccount.forEach((ele) => {
-            if (ele.email === selectedKasaEmail) {
-                setSelectedKasaId(ele.id);
-            }
-        });
-        setShowEmail(false);
-        setShowDone(true);
-    };
-
     const [showAddMsg, setShowAddMsg] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -247,7 +207,6 @@ const Provision = () => {
                 if (res.data.success === true) setShowAddMsg(true);
 
                 setIsLoading(false);
-                setShowDone(false);
                 let arr = {
                     kasa_account_ids: checkedEmailFind,
                     find_new: true,
@@ -279,7 +238,6 @@ const Provision = () => {
     };
 
     useEffect(() => {
-        setShow(false);
         setShowLink(false);
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -348,7 +306,6 @@ const Provision = () => {
                 setTotal(arr);
                 setIsProcessing(false);
                 setKasaDevices(kDevices);
-                // setTotalItems(response?.total_data);
             })
             .catch((error) => {
                 setIsProcessing(false);
@@ -491,7 +448,6 @@ const Provision = () => {
             name: 'Email',
             accessor: 'email',
             callbackValue: renderEmail,
-            // onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Timezone',
@@ -603,9 +559,7 @@ const Provision = () => {
                             isLoading={isProcessing}
                             isLoadingComponent={<SkeletonLoading />}
                             id="linked_account"
-                            onSearch={(query) => {
-                                // setSearch(query);
-                            }}
+                            onSearch={(query) => {}}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
@@ -666,9 +620,7 @@ const Provision = () => {
                         isLoading={isAddProcessing}
                         isLoadingComponent={<DevicesSkeletonLoading />}
                         id="devices_linked"
-                        onSearch={(query) => {
-                            // setSearch(query);
-                        }}
+                        onSearch={(query) => {}}
                         onStatus={setSelectedStatus}
                         buttonGroupFilterOptions={[
                             { label: `Available (${progressData.length})` },
@@ -704,304 +656,34 @@ const Provision = () => {
             </Row>
 
             {/* Link Account Modal */}
-            <Modal
-                show={showlink}
-                onHide={handleLinkClose}
-                centered
-                dialogClassName="my-modal1"
-                contentClassName="my-modal1">
-                <Modal.Header style={{ marginLeft: '1rem', marginTop: '10px', padding: '0px' }}>
-                    <Modal.Title>
-                        <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '0px' }}>
-                            Add TP Link - Kasa Account
-                        </p>
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ marginTop: '0px' }}>
-                    <AvForm className="authentication-form" autoComplete="off">
-                        {error ? (
-                            <div className="error-message">
-                                <div style={{ marginRight: '1rem' }}>
-                                    <FontAwesomeIcon
-                                        icon={faExclamationCircle}
-                                        size="lg"
-                                        className="ml-2"
-                                        style={{ marginRight: '4px', color: '#B42318' }}
-                                    />
-                                </div>
-                                <div>{message}</div>
-                            </div>
-                        ) : (
-                            ''
-                        )}
-                        <AvGroup className="">
-                            <label>Email</label>
-                            <InputGroup>
-                                <AvInput
-                                    type="text"
-                                    name="username"
-                                    id="username"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                    }}
-                                    required
-                                />
-                            </InputGroup>
-                        </AvGroup>
-                        <AvGroup className="mb-3">
-                            <label>Password</label>
-                            <InputGroup>
-                                <AvInput
-                                    type="password"
-                                    name="password"
-                                    id="password"
-                                    placeholder="Password"
-                                    value={password}
-                                    onChange={(e) => {
-                                        setPassword(e.target.value);
-                                    }}
-                                    required
-                                />
-                            </InputGroup>
-                        </AvGroup>
-                    </AvForm>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button className="btn btn-outline-secondary" style={{ width: '8rem' }} onClick={handleLinkClose}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            handleAuthorize();
-                        }}
-                        style={{ width: '8rem' }}>
-                        Add
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            <LinkModal
+                showlink={showlink}
+                handleLinkClose={handleLinkClose}
+                error={error}
+                message={message}
+                handleAuthorize={handleAuthorize}
+            />
 
             {/* UnLink Account Modal */}
-            <Modal
-                show={showUnlink}
-                onHide={handleUnLinkClose}
-                centered
-                dialogClassName="my-modal1"
-                contentClassName="my-modal1">
-                <Modal.Header style={{ marginLeft: '1rem', marginTop: '10px', padding: '0px' }}>
-                    <Modal.Title>
-                        <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '0px' }}>Unlink Account</p>
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ marginTop: '0px' }}>
-                    <p style={{ textAlign: 'center' }}>
-                        Choose the account that you would like to unlink from this building
-                    </p>
-                    <AvForm className="authentication-form" autoComplete="off">
-                        {error ? (
-                            <div className="error-message">
-                                <div style={{ marginRight: '1rem' }}>
-                                    <FontAwesomeIcon
-                                        icon={faExclamationCircle}
-                                        size="lg"
-                                        className="ml-2"
-                                        style={{ marginRight: '4px', color: '#B42318' }}
-                                    />
-                                </div>
-                                <div>{message}</div>
-                            </div>
-                        ) : (
-                            ''
-                        )}
-                        <AvGroup
-                            className=""
-                            style={{ border: '1px solid #EAECF0', borderRadius: '8px', padding: '0px 8px 4px' }}>
-                            <label style={{ marginBottom: '0px', padding: '0.5rem' }}>Email</label>
-                            <hr />
-                            <AvCheckboxGroup name="email">
-                                {linkedAccount.map((record, index) => {
-                                    return (
-                                        <>
-                                            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                                <AvCheckbox
-                                                    name="email"
-                                                    value={record.id}
-                                                    required
-                                                    onChange={(e) => {
-                                                        handleCheckedEmail(e);
-                                                    }}
-                                                />
-                                                <label style={{ color: 'blue' }}>{record.email}</label>
-                                            </div>
-                                        </>
-                                    );
-                                })}
-                            </AvCheckboxGroup>
-                        </AvGroup>
-                    </AvForm>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button className="btn btn-outline-secondary" style={{ width: '8rem' }} onClick={handleUnLinkClose}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn"
-                        style={{ backgroundColor: '#B42318', width: '8rem' }}
-                        onClick={() => {
-                            handleUnlink();
-                        }}>
-                        Unlink
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            <UnLinkModal
+                showUnlink={showUnlink}
+                handleUnLinkClose={handleUnLinkClose}
+                error={error}
+                message={message}
+                handleUnlink={handleUnlink}
+                linkedAccount={linkedAccount}
+            />
 
             {/* Find Devices Modal */}
-            <Modal
-                show={showFind}
-                onHide={handleFindClose}
-                centered
-                dialogClassName="my-modal1"
-                contentClassName="my-modal1">
-                <Modal.Header style={{ marginLeft: '1rem', marginTop: '10px', padding: '0px' }}>
-                    <Modal.Title>
-                        <p style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '0px' }}>Find Devices</p>
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ marginTop: '0px' }}>
-                    <p style={{ textAlign: 'center' }}>Select the account you would like to find devices from</p>
-                    <AvForm className="authentication-form" autoComplete="off">
-                        {error && (
-                            <Alert color="danger" isOpen={error ? true : false}>
-                                <div>{message}</div>
-                            </Alert>
-                        )}
-                        <AvGroup
-                            className=""
-                            style={{ border: '1px solid #EAECF0', borderRadius: '8px', padding: '0px 8px 4px' }}>
-                            <label style={{ marginBottom: '0px', padding: '0.5rem' }}>Email</label>
-                            <hr />
-                            <AvCheckboxGroup name="email">
-                                {linkedAccount.map((record, index) => {
-                                    return (
-                                        <>
-                                            <div style={{ display: 'flex', flexDirection: 'row' }}>
-                                                <AvCheckbox
-                                                    name="email"
-                                                    value={record.id}
-                                                    required
-                                                    onChange={(e) => {
-                                                        handleCheckedEmailFind(e);
-                                                    }}
-                                                />
-                                                <label style={{ color: 'blue' }}>{record.email}</label>
-                                            </div>
-                                        </>
-                                    );
-                                })}
-                            </AvCheckboxGroup>
-                        </AvGroup>
-                    </AvForm>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button className="btn btn-outline-secondary" style={{ width: '8rem' }} onClick={handleFindClose}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            handleFindDevices();
-                        }}
-                        style={{ width: '8rem' }}>
-                        Find Devices
-                    </button>
-                </Modal.Footer>
-            </Modal>
-
-            {/* Done Provisioning */}
-            <Modal
-                show={showEmail}
-                onHide={() => {
-                    setShowEmail(false);
-                }}
-                centered>
-                <Modal.Header>
-                    <Modal.Title>Verify Provisioning</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Kasa Account</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    setSelectedKasaEmail(e.target.value);
-                                }}>
-                                <option selected>Select Kasa Account</option>
-                                {linkedAccount.map((record) => {
-                                    return <option value={record.email}>{record.email}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button
-                        className="btn btn-outline-secondary"
-                        style={{ width: '8rem' }}
-                        onClick={() => {
-                            setShowEmail(false);
-                        }}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            handleAdd();
-                        }}
-                        style={{ width: '8rem' }}>
-                        Add
-                    </button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal
-                show={showDone}
-                onHide={() => {
-                    setShowDone(false);
-                }}
-                centered>
-                <Modal.Body>
-                    <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-                        Are you sure you want to add this account devices
-                        <p style={{ fontWeight: 'bold' }}>{selectedKasaEmail}</p>in selected building{' '}
-                        <p style={{ fontWeight: 'bold' }}>{localStorage.getItem('buildingName')} ?</p>
-                    </p>
-                </Modal.Body>
-                <Modal.Footer style={{ justifyContent: 'center', margin: '0rem' }}>
-                    <button
-                        className="btn btn-outline-secondary"
-                        style={{ width: '8rem' }}
-                        onClick={() => {
-                            setShowDone(false);
-                            setShowEmail(true);
-                        }}>
-                        Cancel
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                            //  handleDone();
-                        }}
-                        style={{ width: '8rem' }}>
-                        Done
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            <FindDevicesModal
+                showFind={showFind}
+                handleFindClose={handleFindClose}
+                error={error}
+                message={message}
+                handleFindDevices={handleFindDevices}
+                linkedAccount={linkedAccount}
+                checkedEmailFind={checkedEmailFind}
+            />
         </React.Fragment>
     );
 };
