@@ -88,6 +88,7 @@ const IndividualPassiveDevice = () => {
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
+    const [locationError, setLocationError] = useState(null);
 
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
@@ -189,9 +190,13 @@ const IndividualPassiveDevice = () => {
     };
 
     const updatePassiveDeviceData = async () => {
-        if (!passiveData?.equipments_id) {
+        if (activeLocationId === passiveData?.location_id) {
+            setLocationError({
+                text: 'Please update Location.',
+            });
             return;
         }
+        if (!passiveData?.equipments_id) return;
         setIsProcessing(true);
         const params = `?device_id=${passiveData?.equipments_id}`;
         const payload = {
@@ -213,13 +218,15 @@ const IndividualPassiveDevice = () => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message;
+                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
                         s.notificationType = 'error';
                     });
                 }
+                setLocationError(null);
             })
             .catch(() => {
                 setIsProcessing(false);
+                setLocationError(null);
             });
     };
 
@@ -365,13 +372,7 @@ const IndividualPassiveDevice = () => {
                                         type={Button.Type.primary}
                                         onClick={updatePassiveDeviceData}
                                         className="ml-2"
-                                        disabled={
-                                            activeLocationId === '' ||
-                                            isProcessing ||
-                                            activeLocationId === passiveData?.location_id
-                                                ? true
-                                                : false
-                                        }
+                                        disabled={isProcessing}
                                     />
                                 ) : null}
                             </div>
@@ -396,7 +397,10 @@ const IndividualPassiveDevice = () => {
                                 placeholder="Select Location"
                                 options={locationData}
                                 currentValue={locationData.filter((option) => option.value === activeLocationId)}
-                                onChange={(e) => setActiveLocationId(e.value)}
+                                onChange={(e) => {
+                                    setActiveLocationId(e.value);
+                                    setLocationError(null);
+                                }}
                                 isSearchable={true}
                                 disabled={
                                     !(
@@ -405,10 +409,15 @@ const IndividualPassiveDevice = () => {
                                             ?.edit
                                     )
                                 }
+                                error={locationError}
                             />
                         )}
                         <Brick sizeInRem={0.25} />
-                        <Typography.Body size={Typography.Sizes.sm}>Location this device is installed.</Typography.Body>
+                        {!locationError && (
+                            <Typography.Body size={Typography.Sizes.sm}>
+                                Location this device is installed.
+                            </Typography.Body>
+                        )}
                     </div>
 
                     <Brick sizeInRem={1.5} />
