@@ -24,7 +24,7 @@ const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize 
         let ct = 0;
         var pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{10,11}$/;
 
-        if (email.length > 0 && !pattern.test(email)) {
+        if (email.length >= 0 && !pattern.test(email)) {
             setEmailError(true);
             ct++;
         }
