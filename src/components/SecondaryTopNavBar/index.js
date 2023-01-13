@@ -79,7 +79,8 @@ const SecondaryTopNavBar = () => {
         if (
             path.includes(configChildRoutes[0]) ||
             path.includes(configChildRoutes[1]) ||
-            path.includes(configChildRoutes[2])
+            path.includes(configChildRoutes[2]) ||
+            path.includes(configChildRoutes[3])
         ) {
             redirectToEndpoint(`/settings/account`);
             return;
