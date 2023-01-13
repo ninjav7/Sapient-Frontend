@@ -452,7 +452,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/Provision',
+            path: '/settings/active-devices/provision',
             name: 'Provision Devices',
             component: Provision,
             route: PrivateRoute,
@@ -468,7 +468,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/Provision',
+            path: '/settings/active-devices/provision',
             name: 'Provision Devices',
             component: Provision,
             route: PrivateRoute,

@@ -249,7 +249,7 @@ const Provision = () => {
                     },
                     {
                         label: 'Provisioning',
-                        path: '/settings/active-devices/Provision',
+                        path: '/settings/active-devices/provision',
                         active: false,
                     },
                 ];
