@@ -1,24 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import Form from 'react-bootstrap/Form';
-import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { useParams, useHistory } from 'react-router-dom';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Modal from 'react-bootstrap/Modal';
-import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
-import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
-import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
-import './style.css';
+import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { apiRequestBody } from '../../../helpers/helpers';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
-import '../passive-devices/styles.scss';
 import Brick from '../../../sharedComponents/brick';
 import { getLocationData } from '../passive-devices/services';
 import Select from '../../../sharedComponents/form/select';
@@ -26,35 +20,41 @@ import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 import { ReactComponent as OfflineSVG } from '../../../assets/icon/active-devices/offline.svg';
 import { ReactComponent as OnlineSVG } from '../../../assets/icon/active-devices/online.svg';
+import { ReactComponent as AttachedSVG } from '../../../assets/icon/active-devices/attached.svg';
+import { ReactComponent as SocketSVG } from '../../../assets/icon/active-devices/socket.svg';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
+import { Badge } from '../../../sharedComponents/badge';
 import {
     getActiveDeviceSensors,
-    getEquipmentTypes,
     getSensorData,
     getSensorEquipmentLinked,
     getSingleActiveDevice,
     updateActiveDeviceService,
 } from './services';
-import { Badge } from '../../../sharedComponents/badge';
+import UpdateSocket from './UpdateSocket';
+import './style.css';
+import './styles.scss';
+import '../passive-devices/styles.scss';
 
 const IndividualActiveDevice = () => {
+    const history = useHistory();
     const [userPermission] = useAtom(userPermissionData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
-    let history = useHistory();
-
-    const { deviceId } = useParams();
-    const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
 
     // Equipment states
-    const [showEquipment, setShowEquipment] = useState(false);
-    const handleEquipmentClose = () => setShowEquipment(false);
-    const handleEquipmentShow = () => setShowEquipment(true);
+    const [showSocketModal, setSocketModalState] = useState(false);
+    const closeSocketModal = () => setSocketModalState(false);
+    const openSocketModal = () => setSocketModalState(true);
+
+    const { deviceId } = useParams();
+    const [sensorId, setSensorId] = useState('');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -66,28 +66,11 @@ const IndividualActiveDevice = () => {
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [sensorData, setSensorData] = useState({});
-    const [equipmentTypeDevices, setEquipmentTypeDevices] = useState([]);
-    const [sensorCount, setSensorCount] = useState(0);
-    const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
-    const [selectedSensorId, setSelectedSensorId] = useState('');
-    const [newEquipTypeID, setNewEquipTypeID] = useState('');
-    const [newEquipTypeValue, setNewEquipTypeValue] = useState([]);
+    const [selectedSensor, setSelectedSensor] = useState('');
+    const [selectedEquipType, setSelectedEquipType] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-
-    const [updatedSensorData, setUpdatedSensorData] = useState({});
-
-    const [breakerModal, setBreakerModal] = useState([
-        {
-            value: 'Breaker 1',
-            label: 'Breaker 1',
-        },
-        {
-            value: 'Breaker 2',
-            label: 'Breaker 2',
-        },
-    ]);
-
     const [searchSocket, setSearchSocket] = useState('');
 
     const handleSocketChange = (e) => {
@@ -141,12 +124,6 @@ const IndividualActiveDevice = () => {
         return label;
     };
 
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, updatedSensorData);
-        obj[key] = value;
-        setUpdatedSensorData(obj);
-    };
-
     const handleChartShow = (id) => {
         setSensorId(id);
         let obj = sensors.find((o) => o.id === id);
@@ -179,13 +156,6 @@ const IndividualActiveDevice = () => {
             });
     };
 
-    useEffect(() => {
-        if (showChart) {
-            return;
-        }
-        setConsumption('energy');
-    }, [showChart]);
-
     const fetchActiveDevice = async () => {
         let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
         await getSingleActiveDevice(params)
@@ -216,6 +186,7 @@ const IndividualActiveDevice = () => {
 
     const fetchActiveSensorsList = async () => {
         setIsFetchingSensorData(true);
+        setSensors([]);
         let params = `?device_id=${deviceId}`;
         await getActiveDeviceSensors(params)
             .then((res) => {
@@ -226,51 +197,6 @@ const IndividualActiveDevice = () => {
             .catch(() => {
                 setIsFetchingSensorData(false);
             });
-    };
-
-    useEffect(() => {
-        fetchActiveDevice();
-        fetchActiveSensorsList();
-        fetchLocationData();
-    }, [deviceId]);
-
-    useEffect(() => {
-        updateBreadcrumbStore();
-    }, []);
-
-    useEffect(() => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Active Devices',
-                    path: '/settings/active-devices',
-                    active: false,
-                },
-                {
-                    label: activeData?.identifier,
-                    path: '/settings/active-devices/single',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
-    }, [activeData]);
-
-    useEffect(() => {
-        fetchActiveSensorsList();
-    }, [sensorAPIRefresh]);
-
-    const fetchEquipmentTypeData = async () => {
-        let params = `?end_use=Plug&building_id=${bldgId}&page_size=1000&page_no=1`;
-        await getEquipmentTypes(params)
-            .then((res) => {
-                let response = res.data.data;
-                response.sort((a, b) => {
-                    return a.equipment_type.localeCompare(b.equipment_type);
-                });
-                setEquipmentTypeDevices(response);
-            })
-            .catch(() => {});
     };
 
     const fetchSensorChartData = async (id) => {
@@ -315,15 +241,18 @@ const IndividualActiveDevice = () => {
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
         if (currEquipId === newEquipID) return;
-        setSensors([]);
-        setIsFetchingSensorData(true);
-        let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
+        setIsUpdating(true);
+        const params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
 
         await getSensorEquipmentLinked(params)
             .then((res) => {
-                setSensorAPIRefresh(!sensorAPIRefresh);
+                setIsUpdating(false);
+                closeSocketModal();
+                fetchActiveSensorsList();
             })
-            .catch(() => {});
+            .catch(() => {
+                setIsUpdating(false);
+            });
     };
 
     const redirectToActivePage = () => {
@@ -331,9 +260,9 @@ const IndividualActiveDevice = () => {
     };
 
     const updateActiveDevice = async () => {
-        if (!activeData.equipments_id) return;
+        if (!activeData?.equipments_id) return;
         setIsProcessing(true);
-        const params = `?device_id=${activeData.equipments_id}`;
+        const params = `?device_id=${activeData?.equipments_id}`;
         const payload = { location_id: activeLocationId };
         await updateActiveDeviceService(params, payload)
             .then((res) => {
@@ -345,6 +274,38 @@ const IndividualActiveDevice = () => {
                 setIsProcessing(false);
             });
     };
+
+    useEffect(() => {
+        fetchActiveDevice();
+        fetchActiveSensorsList();
+        fetchLocationData();
+    }, [deviceId]);
+
+    useEffect(() => {
+        if (!showChart) setConsumption('energy');
+    }, [showChart]);
+
+    useEffect(() => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Active Devices',
+                    path: '/settings/active-devices',
+                    active: false,
+                },
+                {
+                    label: activeData?.identifier,
+                    path: '/settings/active-devices/single',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+    }, [activeData]);
+
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
@@ -469,58 +430,31 @@ const IndividualActiveDevice = () => {
 
                     <Brick sizeInRem={1.5} />
 
-                    <div className="equip-socket-container">
-                        <div className="sockets-slots-container">
-                            {sensors.map((record, index) => {
-                                return (
-                                    <>
-                                        {record.status && (
-                                            <div>
-                                                <div className="power-off-style-equip">
-                                                    <OnlineSVG />
-                                                </div>
-                                                {record.equipment_type_id === '' ? (
-                                                    <div className="socket-rect">
-                                                        <img src={SocketLogo} alt="Socket" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="online-socket-container-equip">
-                                                        <img
-                                                            src={UnionLogo}
-                                                            alt="Union"
-                                                            className="union-icon-style"
-                                                            width="35vw"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {!record.status && (
-                                            <div>
-                                                <div className="power-off-style-equip">
-                                                    <OfflineSVG />
-                                                </div>
-                                                {record.equipment_type_id === '' ? (
-                                                    <div className="socket-rect">
-                                                        <img src={SocketLogo} alt="Socket" />
-                                                    </div>
-                                                ) : (
-                                                    <div className="online-socket-container-equip">
-                                                        <img
-                                                            src={UnionLogo}
-                                                            alt="Union"
-                                                            className="union-icon-style"
-                                                            width="35vw"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            })}
-                        </div>
+                    <div
+                        className={`socket-container-style d-flex ${
+                            sensors.length === 1 ? 'justify-content-center' : 'justify-content-between'
+                        }`}>
+                        {sensors.map((record, index) => {
+                            return (
+                                <div>
+                                    <div className="d-flex justify-content-center mb-1">
+                                        {record?.status ? <OnlineSVG /> : <OfflineSVG />}
+                                    </div>
+                                    {record?.equipment_type_id === '' ? (
+                                        <div>
+                                            <SocketSVG />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className={`attached-device-socket ${
+                                                record?.status ? 'active-socket' : ''
+                                            }`}>
+                                            <AttachedSVG className="m-2" />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </Col>
 
@@ -555,7 +489,7 @@ const IndividualActiveDevice = () => {
                                     <>
                                         <Brick sizeInRem={0.75} />
                                         <div
-                                            className={`d-flex justify-content-between sensor-container ${
+                                            className={`d-flex justify-content-between align-items-center sensor-container ${
                                                 record?.equipment_id === '' && record?.breaker_id === ''
                                                     ? 'sensor-unattach'
                                                     : ''
@@ -581,11 +515,23 @@ const IndividualActiveDevice = () => {
                                                     <Badge text={record?.equipment} className="sensor-badge-style" />
                                                 )}
                                             </div>
-                                            <div className="d-flex align-items-center">
-                                                <ChartSVG
-                                                    onClick={() => handleChartShow(record?.id)}
-                                                    className="mouse-pointer"
-                                                />
+                                            <div className="d-flex">
+                                                <div className="d-flex icon-style mr-1">
+                                                    <ChartSVG
+                                                        onClick={() => handleChartShow(record?.id)}
+                                                        className="mouse-pointer chart-icon-style"
+                                                    />
+                                                </div>
+                                                <div className="d-flex icon-style ml-1">
+                                                    <PenSVG
+                                                        onClick={() => {
+                                                            setSelectedEquipType(record?.equipment_type_id);
+                                                            setSelectedSensor(record?.id);
+                                                            openSocketModal();
+                                                        }}
+                                                        className="mouse-pointer chart-icon-style"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </>
@@ -622,43 +568,16 @@ const IndividualActiveDevice = () => {
                 deviceType="active"
             />
 
-            <Modal show={showEquipment} onHide={handleEquipmentClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Edit Socket</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Type</Form.Label>
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Equipment Type"
-                                name="select"
-                                isSearchable={true}
-                                options={equipmentTypeDevices}
-                                defaultValue={newEquipTypeValue}
-                                onChange={(e) => {
-                                    setNewEquipTypeID(e.value);
-                                }}
-                                className="basic-single font-weight-bold"
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <button variant="light" onClick={handleEquipmentClose}>
-                        Cancel
-                    </button>
-                    <button
-                        variant="primary"
-                        onClick={() => {
-                            handleEquipmentClose();
-                            linkSensorToEquipment(selectedSensorId, selectedEquipTypeId, newEquipTypeID);
-                        }}>
-                        Update Socket
-                    </button>
-                </Modal.Footer>
-            </Modal>
+            <UpdateSocket
+                bldgId={bldgId}
+                showSocketModal={showSocketModal}
+                closeSocketModal={closeSocketModal}
+                selectedEquipType={selectedEquipType}
+                selectedSensor={selectedSensor}
+                setSelectedSensor={setSelectedSensor}
+                linkSensorToEquipment={linkSensorToEquipment}
+                isUpdating={isUpdating}
+            />
         </React.Fragment>
     );
 };

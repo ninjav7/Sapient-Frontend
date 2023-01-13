@@ -2,16 +2,15 @@ $base-white: #ffffff;
 $base-black: #000000;
 $base-background: #fdfeff;
 
-
 $success: #d1fadf;
-$success-25: #F6FEF9;
+$success-25: #f6fef9;
 $success-50: #ecfdf3;
 $success-100: #d1fadf;
 $success-600: #039855;
 $success-700: #027a48;
 $success-700: #027a48;
 $success-800: #05603a;
-$success-900: #054F31;
+$success-900: #054f31;
 
 $sapient-specific-hvac: #66a4ce;
 $sapient-specific-lighting: #fbe384;
@@ -97,14 +96,14 @@ $error-500: #f04438;
 $error-600: #d92d20;
 $error-700: #b42318;
 $error-800: #912018;
-$error-900: #7A271A;
+$error-900: #7a271a;
 
-$warning-25: #FFFCF5;
+$warning-25: #fffcf5;
 $warning-100: #fef0c7;
 $warning-200: #f9eabd;
-$warning-600: #DC6803;
-$warning-700: #B54708;
-$warning-900: #7A2E0E;
+$warning-600: #dc6803;
+$warning-700: #b54708;
+$warning-900: #7a2e0e;
 
 $primary-indigo-25: #f5f8ff;
 $primary-indigo-50: #eef4ff;
@@ -137,9 +136,8 @@ $primary-gray-1000: #202020;
 
 $secondary-purple-600: #6b08db;
 
-$view-50:#F0F9FF;
-$view-700:#026AA2;
-
+$view-50: #f0f9ff;
+$view-700: #026aa2;
 
 :export {
     baseWhite: $base-white;

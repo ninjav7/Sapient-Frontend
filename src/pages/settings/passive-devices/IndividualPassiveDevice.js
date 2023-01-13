@@ -32,6 +32,7 @@ import {
 import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
+import '../active-devices/styles.scss';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -518,10 +519,12 @@ const IndividualPassiveDevice = () => {
                                                 )}
                                             </div>
                                             <div className="d-flex align-items-center">
-                                                <ChartSVG
-                                                    onClick={() => handleChartShow(record?.id)}
-                                                    className="mouse-pointer"
-                                                />
+                                                <div className="d-flex icon-style mr-1">
+                                                    <ChartSVG
+                                                        onClick={() => handleChartShow(record?.id)}
+                                                        className="mouse-pointer chart-icon-style"
+                                                    />
+                                                </div>
                                                 {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
                                                 {/* <button
                                                             type="button"
