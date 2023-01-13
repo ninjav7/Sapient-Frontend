@@ -17,6 +17,8 @@ const UpdateSocket = ({
     setSelectedSensor,
     linkSensorToEquipment,
     isUpdating,
+    equipTypeError,
+    setEquipTypeError,
 }) => {
     const [equipTypeId, setEquipTypeId] = useState('');
     const [equipTypeData, setEquipTypeData] = useState([]);
@@ -51,7 +53,7 @@ const UpdateSocket = ({
 
     useEffect(() => {
         setEquipTypeId(selectedEquipType);
-    }, [selectedEquipType]);
+    }, [showSocketModal]);
 
     return (
         <Modal show={showSocketModal} onHide={closeSocketModal} backdrop="static" keyboard={false} centered>
@@ -72,8 +74,10 @@ const UpdateSocket = ({
                             currentValue={equipTypeData.filter((option) => option.value === equipTypeId)}
                             onChange={(e) => {
                                 setEquipTypeId(e.value);
+                                setEquipTypeError(null);
                             }}
                             isSearchable={true}
+                            error={equipTypeError}
                         />
                     )}
                 </div>

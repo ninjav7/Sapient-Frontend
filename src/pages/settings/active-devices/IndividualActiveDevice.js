@@ -35,6 +35,7 @@ import UpdateSocket from './UpdateSocket';
 import './style.css';
 import './styles.scss';
 import '../passive-devices/styles.scss';
+import { UserStore } from '../../../store/UserStore';
 
 const IndividualActiveDevice = () => {
     const history = useHistory();
@@ -59,11 +60,11 @@ const IndividualActiveDevice = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
+    const [locationError, setLocationError] = useState(null);
     const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeData, setActiveData] = useState({});
     const [activeLocationId, setActiveLocationId] = useState('');
     const [sensors, setSensors] = useState([]);
-    const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -72,6 +73,7 @@ const IndividualActiveDevice = () => {
     const [selectedEquipType, setSelectedEquipType] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [searchSocket, setSearchSocket] = useState('');
+    const [equipTypeError, setEquipTypeError] = useState(null);
 
     const handleSocketChange = (e) => {
         setSearchSocket(e.target.value);
@@ -162,8 +164,8 @@ const IndividualActiveDevice = () => {
             .then((res) => {
                 let response = res.data.data[0];
                 setActiveData(response);
-                setActiveLocationId(response.location_id);
-                localStorage.setItem('identifier', response.identifier);
+                setActiveLocationId(response?.location_id);
+                localStorage.setItem('identifier', response?.identifier);
             })
             .catch(() => {});
     };
@@ -240,14 +242,34 @@ const IndividualActiveDevice = () => {
     };
 
     const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
-        if (currEquipId === newEquipID) return;
+        if (currEquipId === newEquipID) {
+            setEquipTypeError({
+                text: 'Please update Equipment Type.',
+            });
+            return;
+        }
         setIsUpdating(true);
         const params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
 
         await getSensorEquipmentLinked(params)
             .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsUpdating(false);
                 closeSocketModal();
+                setEquipTypeError(null);
                 fetchActiveSensorsList();
             })
             .catch(() => {
@@ -260,18 +282,40 @@ const IndividualActiveDevice = () => {
     };
 
     const updateActiveDevice = async () => {
+        if (activeLocationId === activeData?.location_id) {
+            setLocationError({
+                text: 'Please update Location.',
+            });
+            return;
+        }
+
         if (!activeData?.equipments_id) return;
         setIsProcessing(true);
         const params = `?device_id=${activeData?.equipments_id}`;
         const payload = { location_id: activeLocationId };
         await updateActiveDeviceService(params, payload)
             .then((res) => {
-                setSensorAPIRefresh(!sensorAPIRefresh);
-                redirectToActivePage();
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsProcessing(false);
+                setLocationError(null);
+                fetchActiveDevice();
             })
             .catch(() => {
                 setIsProcessing(false);
+                setLocationError(null);
             });
     };
 
@@ -346,13 +390,7 @@ const IndividualActiveDevice = () => {
                                         type={Button.Type.primary}
                                         onClick={updateActiveDevice}
                                         className="ml-2"
-                                        disabled={
-                                            activeLocationId === 'Select location' ||
-                                            isProcessing ||
-                                            activeLocationId === activeData?.location_id
-                                                ? true
-                                                : false
-                                        }
+                                        disabled={isProcessing}
                                     />
                                 ) : null}
                             </div>
@@ -377,7 +415,10 @@ const IndividualActiveDevice = () => {
                                 placeholder="Select Location"
                                 options={locationData}
                                 currentValue={locationData.filter((option) => option.value === activeLocationId)}
-                                onChange={(e) => setActiveLocationId(e.value)}
+                                onChange={(e) => {
+                                    setActiveLocationId(e.value);
+                                    setLocationError(null);
+                                }}
                                 isSearchable={true}
                                 disabled={
                                     !(
@@ -386,10 +427,15 @@ const IndividualActiveDevice = () => {
                                             ?.edit
                                     )
                                 }
+                                error={locationError}
                             />
                         )}
                         <Brick sizeInRem={0.25} />
-                        <Typography.Body size={Typography.Sizes.sm}>Location this device is installed.</Typography.Body>
+                        {!locationError && (
+                            <Typography.Body size={Typography.Sizes.sm}>
+                                Location this device is installed.
+                            </Typography.Body>
+                        )}
                     </div>
 
                     <Brick sizeInRem={1.5} />
@@ -577,6 +623,8 @@ const IndividualActiveDevice = () => {
                 setSelectedSensor={setSelectedSensor}
                 linkSensorToEquipment={linkSensorToEquipment}
                 isUpdating={isUpdating}
+                equipTypeError={equipTypeError}
+                setEquipTypeError={setEquipTypeError}
             />
         </React.Fragment>
     );
