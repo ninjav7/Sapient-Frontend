@@ -11,7 +11,7 @@ import { ReactComponent as EyeSVG } from '../../../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../../../assets/icon/eye-slash.svg';
 import Input from '../../../../sharedComponents/form/input/Input';
 import InputTooltip from '../../../../sharedComponents/form/input/InputTooltip';
-import '../style.css';
+import './style.css';
 
 const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize }) => {
     const [email, setEmail] = useState('');

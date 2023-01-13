@@ -6,7 +6,8 @@ import { Alert, FormGroup } from 'reactstrap';
 import Checkbox from '../../../../sharedComponents/form/checkbox/Checkbox';
 import Button from '../../../../sharedComponents/button/Button';
 import Typography from '../../../../sharedComponents/typography';
-import '../style.css';
+import './style.css';
+import Brick from '../../../../sharedComponents/brick';
 
 const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnlink, linkedAccount }) => {
     const [checkedEmail, setCheckedEmail] = useState([]);
@@ -25,8 +26,8 @@ const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnli
                     <Typography.Header>Unlink Account</Typography.Header>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="find-body">
-                <Typography.Subheader size={Typography.Sizes.sm} style={{ textAlign: 'center' }}>
+            <Modal.Body>
+                <Typography.Subheader size={Typography.Sizes.md}>
                     Choose the account that you would like to unlink from this building
                 </Typography.Subheader>
 
@@ -40,18 +41,13 @@ const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnli
                 ) : (
                     ''
                 )}
-                <FormGroup className="find-box">
-                    <Typography.Subheader size={Typography.Sizes.md} className="find-box-label">
-                        Email
-                    </Typography.Subheader>
-                    <hr />
-                    <FormGroup name="email">
+                <FormGroup className="find-box mt-2 mb-0">
+                    <FormGroup name="email" className="mb-0">
                         {linkedAccount.map((record, index) => {
                             return (
                                 <>
                                     <div className="find-row">
                                         <Checkbox
-                                            label={record.email}
                                             size={Checkbox.Sizes.sm}
                                             value={record.id}
                                             required
@@ -59,6 +55,9 @@ const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnli
                                                 handleCheckedEmail(e);
                                             }}
                                         />
+                                        <Typography.Body size={Typography.Sizes.md} className="find-link-color">
+                                            {record.email}
+                                        </Typography.Body>
                                     </div>
                                 </>
                             );
@@ -78,7 +77,7 @@ const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnli
                 <Button
                     label="Unlink"
                     size={Button.Sizes.lg}
-                    type={Button.Type.primary}
+                    type={Button.Type.primaryDistructive}
                     onClick={() => {
                         handleUnlink(checkedEmail);
                     }}

@@ -4,7 +4,7 @@ import { Alert, FormGroup } from 'reactstrap';
 import Checkbox from '../../../../sharedComponents/form/checkbox/Checkbox';
 import Button from '../../../../sharedComponents/button/Button';
 import Typography from '../../../../sharedComponents/typography';
-import '../style.css';
+import './style.css';
 
 const FindDevicesModal = ({
     showFind,
@@ -30,8 +30,8 @@ const FindDevicesModal = ({
                     <Typography.Header>Find Devices</Typography.Header>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="find-body">
-                <Typography.Subheader size={Typography.Sizes.sm} style={{ textAlign: 'center' }}>
+            <Modal.Body>
+                <Typography.Subheader size={Typography.Sizes.md}>
                     Select the account you would like to find devices from
                 </Typography.Subheader>
 
@@ -40,18 +40,13 @@ const FindDevicesModal = ({
                         <Typography.Subheader size={Typography.Sizes.sm}>{message}</Typography.Subheader>
                     </Alert>
                 )}
-                <FormGroup className="find-box">
-                    <Typography.Subheader size={Typography.Sizes.md} className="find-box-label">
-                        Email
-                    </Typography.Subheader>
-                    <hr />
-                    <FormGroup name="email">
+                <FormGroup className="find-box mt-2 mb-0">
+                    <FormGroup name="email" className="mb-0">
                         {linkedAccount.map((record, index) => {
                             return (
                                 <>
                                     <div className="find-row">
                                         <Checkbox
-                                            label={record.email}
                                             size={Checkbox.Sizes.sm}
                                             value={record.id}
                                             required
@@ -59,6 +54,9 @@ const FindDevicesModal = ({
                                                 handleCheckedEmailFind(e);
                                             }}
                                         />
+                                        <Typography.Body size={Typography.Sizes.md} className="find-link-color">
+                                            {record.email}
+                                        </Typography.Body>
                                     </div>
                                 </>
                             );
