@@ -116,7 +116,7 @@ const PortfolioOverview = () => {
                     res.data.forEach((record) => {
                         newArray[0].data.push({
                             x: record.x,
-                            y: Math.round(record.y / 1000),
+                            y: (record.y / 1000).toFixed(2),
                         });
                     });
                     setEnergyConsumptionChart(newArray);
