@@ -402,6 +402,7 @@ const EquipmentType = () => {
                 isAddEquipTypeModalOpen={isAddEquipTypeModalOpen}
                 closeAddEquipTypeModal={closeAddEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
+                search={search}
             />
 
             <EditEquipType
@@ -409,6 +410,7 @@ const EquipmentType = () => {
                 closeEditEquipTypeModal={closeEditEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
+                search={search}
             />
 
             <DeleteEquipType
@@ -416,6 +418,7 @@ const EquipmentType = () => {
                 closeDeleteEquipTypeModal={closeDeleteEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
+                search={search}
             />
         </React.Fragment>
     );

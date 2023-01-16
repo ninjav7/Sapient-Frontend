@@ -8,7 +8,7 @@ import { saveEquipTypeData, getEndUseData } from './services';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 
-const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData }) => {
+const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData, search }) => {
     const defaultEquipTypeObj = {
         is_active: true,
         name: '',
@@ -17,8 +17,9 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
 
     const [equipTypeData, setEquipTypeData] = useState(defaultEquipTypeObj);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [formValidation, setFormValidation] = useState(false);
     const [endUseData, setEndUseData] = useState([]);
+    const [equipTypeNameError, setEquipTypeNameError] = useState(null);
+    const [endUseIdError, setEndUseIdError] = useState(null);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, equipTypeData);
@@ -27,33 +28,48 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     };
 
     const saveEquipTypeDetails = async () => {
-        try {
-            setIsProcessing(true);
-            await saveEquipTypeData(equipTypeData).then((res) => {
-                const response = res?.data;
-                closeAddEquipTypeModal();
-                if (response?.success) {
+        if ((equipTypeData?.name.trim()).length === 0) {
+            setEquipTypeNameError('Please Enter Equipment Type Name.');
+            return;
+        }
+        if (equipTypeData?.end_use.length === 0) {
+            setEndUseIdError({ text: 'Please select End Use.' });
+            return;
+        }
+
+        setIsProcessing(true);
+        await saveEquipTypeData(equipTypeData)
+            .then((res) => {
+                const response = res;
+                if (response?.status === 406) {
+                    setEquipTypeNameError('Equipment Type with given name already exists.');
+                    setIsProcessing(false);
+                    return;
+                }
+
+                if (response?.data?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message;
+                        s.notificationMessage = response?.data?.message;
                         s.notificationType = 'success';
                     });
+                    closeAddEquipTypeModal();
+                    setEquipTypeData(defaultEquipTypeObj);
+                    fetchEquipTypeData(search);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
+                        s.notificationMessage = response?.data?.message
+                            ? response?.data?.message
                             : 'Unable to Create Equipment Type.';
                         s.notificationType = 'error';
                     });
                 }
-                setEquipTypeData(defaultEquipTypeObj);
-                fetchEquipTypeData();
+                setIsProcessing(false);
+            })
+            .catch((e) => {
+                setIsProcessing(false);
             });
-            setIsProcessing(false);
-        } catch (error) {
-            setIsProcessing(false);
-        }
     };
 
     const fetchEndUseData = async () => {
@@ -76,17 +92,7 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
     };
 
     useEffect(() => {
-        if (equipTypeData.name.length > 0 && equipTypeData.end_use.length > 0) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-    }, [equipTypeData]);
-
-    useEffect(() => {
-        if (isAddEquipTypeModalOpen) {
-            fetchEndUseData();
-        }
+        if (isAddEquipTypeModalOpen) fetchEndUseData();
     }, [isAddEquipTypeModalOpen]);
 
     return (
@@ -106,8 +112,9 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                     placeholder="Enter Name"
                     onChange={(e) => {
                         handleChange('name', e.target.value.trim());
+                        setEquipTypeNameError(null);
                     }}
-                    error={null}
+                    error={equipTypeNameError}
                     labelSize={Typography.Sizes.md}
                 />
 
@@ -122,8 +129,10 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                         defaultValue={endUseData.filter((option) => option.value === equipTypeData?.end_use)}
                         onChange={(e) => {
                             handleChange('end_use', e.value);
+                            setEndUseIdError(null);
                         }}
                         isSearchable={true}
+                        error={endUseIdError}
                     />
                 </div>
 
@@ -146,10 +155,8 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={!formValidation || isProcessing}
-                        onClick={() => {
-                            saveEquipTypeDetails();
-                        }}
+                        disabled={isProcessing}
+                        onClick={saveEquipTypeDetails}
                     />
                 </div>
 

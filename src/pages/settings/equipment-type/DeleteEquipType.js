@@ -3,25 +3,43 @@ import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import { deleteEquipTypeData } from './services';
+import { deleteEquipmentTypeData, deleteEquipTypeData } from './services';
+import { UserStore } from '../../../store/UserStore';
 
 const DeleteEquipType = ({
     isDeleteEquipTypeModalOpen,
     closeDeleteEquipTypeModal,
     selectedEquipType,
     fetchEquipTypeData,
+    search,
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [equipTypeId, setEquipTypeId] = useState('');
 
-    const deleteEquipTypeRecord = async () => {
+    const handleEquipTypeDelete = async () => {
         setIsProcessing(true);
-        let params = `?equipment_id=${equipTypeId}`;
-        await deleteEquipTypeData(params)
+        let params = `?equipment_type_id=${equipTypeId}`;
+        await deleteEquipmentTypeData(params)
             .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : 'Unable to Create Equipment Type.';
+                        s.notificationType = 'error';
+                    });
+                }
                 closeDeleteEquipTypeModal();
                 setEquipTypeId('');
-                fetchEquipTypeData();
+                fetchEquipTypeData(search);
                 setIsProcessing(false);
             })
             .catch(() => {
@@ -61,9 +79,7 @@ const DeleteEquipType = ({
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
                     disabled={isProcessing}
-                    onClick={() => {
-                        // deleteEquipTypeRecord(); --- Function call will be enable once API is on! ---
-                    }}
+                    onClick={handleEquipTypeDelete}
                 />
             </Modal.Footer>
         </Modal>
