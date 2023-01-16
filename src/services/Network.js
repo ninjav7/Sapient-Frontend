@@ -57,7 +57,6 @@ export const serachUser = '/api/user_role/user-permission-role/all-member-users'
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
 export const endUsesChart = '/api/energy/end_use/chart/end-uses';
-export const hvacUsageChart = '/api/energy/chart/hvac';
 export const endUsesUsageChart = '/api/energy/end_use/load_usage';
 export const endUsesEquipmentUsage = '/api/energy/end_use/equipment_type_usage';
 export const equipmentDetails = '/api/config/equipments_details/by_id';

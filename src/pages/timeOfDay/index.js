@@ -201,7 +201,7 @@ const TimeOfDay = () => {
                         `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
                             colors[i]
                         };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            0
+                            2
                         )} kWh </td></tr>`;
                 }
 
@@ -434,7 +434,7 @@ const TimeOfDay = () => {
                     for (let i = 0; i < 24; i++) {
                         let matchedRecord = weekDaysData.find((record) => record.x === i);
                         if (matchedRecord) {
-                            newWeekdaysData.data.push(parseInt(matchedRecord.y / 1000));
+                            newWeekdaysData.data.push(parseFloat((matchedRecord.y / 1000).toFixed(2)));
                         } else {
                             newWeekdaysData.data.push(0);
                         }
@@ -444,7 +444,7 @@ const TimeOfDay = () => {
                         let matchedRecord = weekendsData.find((record) => record.x === i);
 
                         if (matchedRecord) {
-                            newWeekendsData.data.push(parseInt(matchedRecord.y / 1000));
+                            newWeekendsData.data.push(parseFloat((matchedRecord.y / 1000).toFixed(2)));
                         } else {
                             newWeekendsData.data.push(0);
                         }
@@ -995,7 +995,7 @@ const TimeOfDay = () => {
                         series={donutChartData}
                         options={donutChartOpts}
                         energyConsumption={energyConsumption}
-                        className={'container-height'}
+                        className={'h-100'}
                     />
                 </div>
                 <div>
@@ -1007,7 +1007,7 @@ const TimeOfDay = () => {
                         timeZone={timeZone}
                         showRouteBtn={false}
                         labelsPosition={'top'}
-                        className={'container-height'}
+                        className={'h-100'}
                     />
                 </div>
             </div>

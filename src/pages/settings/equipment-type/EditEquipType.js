@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { getEndUseData, updateEquipTypeData } from './services';
 import Select from '../../../sharedComponents/form/select';
+import { UserStore } from '../../../store/UserStore';
 
 const EditEquipType = ({
     isEditEquipTypeModalOpen,
@@ -22,6 +23,7 @@ const EditEquipType = ({
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValidation, setFormValidation] = useState(false);
     const [endUseData, setEndUseData] = useState([]);
+    const [equipTypeNameError, setEquipTypeNameError] = useState(null);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, equipTypeData);
@@ -30,17 +32,38 @@ const EditEquipType = ({
     };
 
     const updateEquipTypeDetails = async () => {
+        if ((equipTypeData?.equipment_type.trim()).length === 0) {
+            setEquipTypeNameError('Equipment Type cannot be empty');
+            return;
+        }
+
         setIsProcessing(true);
         const obj = {
             eqt_id: equipTypeData?.equipment_id,
-            name: equipTypeData?.equipment_type,
+            name: equipTypeData?.equipment_type.trim(),
             end_use: equipTypeData?.end_use_id,
         };
         await updateEquipTypeData(obj)
             .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : 'Unable to Create Equipment Type.';
+                        s.notificationType = 'error';
+                    });
+                }
+                setIsProcessing(false);
                 closeEditEquipTypeModal();
                 setEquipTypeData(defaultEquipTypeObj);
-                setIsProcessing(false);
                 fetchEquipTypeData();
             })
             .catch(() => {
@@ -109,10 +132,11 @@ const EditEquipType = ({
                     placeholder="Enter Name"
                     onChange={(e) => {
                         handleChange('equipment_type', e.target.value.trim());
+                        setEquipTypeNameError(null);
                     }}
-                    error={null}
                     labelSize={Typography.Sizes.md}
                     value={equipTypeData?.equipment_type}
+                    error={equipTypeNameError}
                 />
 
                 <Brick sizeInRem={1.5} />
@@ -131,7 +155,22 @@ const EditEquipType = ({
                     />
                 </div>
 
-                <Brick sizeInRem={2.5} />
+                {equipTypeData?.status && equipTypeData?.status.toLowerCase() === 'custom' && (
+                    <div>
+                        <Brick sizeInRem={1.5} />
+                        <Button
+                            label={'Delete Equipment Type'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryDistructive}
+                            disabled={false}
+                            onClick={() => {
+                                // deleteEquipTypeRecord(); --- Function call will be enable once API is on! ---
+                            }}
+                        />
+                    </div>
+                )}
+
+                <Brick sizeInRem={2} />
 
                 <div className="d-flex justify-content-between w-100">
                     <Button
@@ -151,9 +190,7 @@ const EditEquipType = ({
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={!formValidation || isProcessing}
-                        onClick={() => {
-                            updateEquipTypeDetails();
-                        }}
+                        onClick={updateEquipTypeDetails}
                     />
                 </div>
 

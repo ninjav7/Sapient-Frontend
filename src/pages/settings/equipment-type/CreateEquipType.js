@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { saveEquipTypeData, getEndUseData } from './services';
 import Select from '../../../sharedComponents/form/select';
+import { UserStore } from '../../../store/UserStore';
 
 const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData }) => {
     const defaultEquipTypeObj = {
@@ -29,7 +30,23 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
         try {
             setIsProcessing(true);
             await saveEquipTypeData(equipTypeData).then((res) => {
+                const response = res?.data;
                 closeAddEquipTypeModal();
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : 'Unable to Create Equipment Type.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setEquipTypeData(defaultEquipTypeObj);
                 fetchEquipTypeData();
             });
