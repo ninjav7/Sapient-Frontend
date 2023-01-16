@@ -197,7 +197,7 @@ const PortfolioOverview = () => {
         <>
             <Header title="Portfolio Overview" type="page" />
 
-            <Brick sizeInRem={2} />
+            <Brick sizeInRem={1.5} />
 
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
@@ -213,7 +213,7 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <Brick sizeInRem={2} />
+                    <Brick sizeInRem={1.5} />
 
                     <Row className="container-gap">
                         <Col xl={6}>
