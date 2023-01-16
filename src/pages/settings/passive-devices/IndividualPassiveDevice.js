@@ -456,12 +456,15 @@ const IndividualPassiveDevice = () => {
                             </div>
                         </div>
 
-                        <div
-                            className="d-flex justify-content-between align-items-start mouse-pointer"
-                            onClick={openEditDeviceModal}>
-                            <PenSVG className="mr-2" />
-                            <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
-                        </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                            <div
+                                className="d-flex justify-content-between align-items-start mouse-pointer"
+                                onClick={openEditDeviceModal}>
+                                <PenSVG className="mr-2" />
+                                <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
 
