@@ -212,7 +212,7 @@ const IndividualPassiveDevice = () => {
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message;
+                        s.notificationMessage = 'Device updated Successfully.';
                         s.notificationType = 'success';
                     });
                 } else {
