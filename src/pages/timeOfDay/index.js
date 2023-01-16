@@ -451,7 +451,6 @@ const TimeOfDay = () => {
                     }
                     chartDataToDisplay.push(newWeekdaysData);
                     chartDataToDisplay.push(newWeekendsData);
-                    console.log('SSR chartDataToDisplay => ', chartDataToDisplay);
                     setAreaChartData(chartDataToDisplay);
                     setIsAvgUsageChartLoading(false);
                 })

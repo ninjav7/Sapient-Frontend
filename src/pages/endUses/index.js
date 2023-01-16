@@ -198,7 +198,6 @@ const EndUsesPage = () => {
                         });
                         return obj;
                     });
-                    console.log('SSR formattedData => ', formattedData);
 
                     setEndUseCategories(endUseColors);
                     setStackedColumnChartCategories(formattedTimestamp);

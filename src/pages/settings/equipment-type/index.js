@@ -18,6 +18,7 @@ import { pageListSizes } from '../../../helpers/helpers';
 import EditEquipType from './EditEquipType';
 import DeleteEquipType from './DeleteEquipType';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -257,7 +258,7 @@ const EquipmentType = () => {
     const renderEquipCount = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.equipment_count === '' ? '-' : row?.equipment_count}
+                {row?.equipment_count ? formatConsumptionValue(row?.equipment_count, 0) : 0}
             </Typography.Body>
         );
     };
