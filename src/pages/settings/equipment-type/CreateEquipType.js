@@ -7,6 +7,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { saveEquipTypeData, getEndUseData } from './services';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetchEquipTypeData, search }) => {
     const defaultEquipTypeObj = {
@@ -107,8 +108,14 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
 
                 <Brick sizeInRem={2} />
 
+                <Typography.Body size={Typography.Sizes.md}>
+                    Name
+                    <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                        *
+                    </span>
+                </Typography.Body>
+                <Brick sizeInRem={0.25} />
                 <InputTooltip
-                    label="Name"
                     placeholder="Enter Name"
                     onChange={(e) => {
                         handleChange('name', e.target.value.trim());
@@ -121,7 +128,12 @@ const CreateEquipType = ({ isAddEquipTypeModalOpen, closeAddEquipTypeModal, fetc
                 <Brick sizeInRem={1.5} />
 
                 <div>
-                    <Typography.Body size={Typography.Sizes.md}>End Use</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        End Use
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select End Use"
