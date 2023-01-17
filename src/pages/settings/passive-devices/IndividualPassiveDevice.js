@@ -33,6 +33,7 @@ import { Button } from '../../../sharedComponents/button';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 import '../active-devices/styles.scss';
+import '../../../sharedComponents/breaker/Breaker.scss';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -525,18 +526,20 @@ const IndividualPassiveDevice = () => {
                                                 {record?.equipment_id !== '' && record?.breaker_id !== '' && (
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
-                                                        className="sensor-equip typography-wrapper link">
+                                                        className="sensor-equip typography-wrapper link"
+                                                        style={{ fontWeight: '500' }}>
                                                         {record?.equipment}
                                                     </Typography.Subheader>
                                                 )}
                                             </div>
                                             <div className="d-flex align-items-center">
-                                                <div className="d-flex icon-style mr-1">
-                                                    <ChartSVG
-                                                        onClick={() => handleChartShow(record?.id)}
-                                                        className="mouse-pointer chart-icon-style"
-                                                    />
-                                                </div>
+                                                <Button
+                                                    className="breaker-action-btn"
+                                                    onClick={() => handleChartShow(record?.id)}
+                                                    type={Button.Type.secondaryGrey}
+                                                    label=""
+                                                    icon={<ChartSVG width={16} />}
+                                                />
                                                 {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
                                                 {/* <button
                                                             type="button"
