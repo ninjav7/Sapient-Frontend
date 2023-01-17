@@ -14,6 +14,7 @@ export const Default = () => {
     return (
         <BrowserRouter>
             <TopConsumptionWidget
+                style={{width: 450}}
                 title="Title"
                 subtitle="subtitle"
                 heads={['Equipment', 'Power', 'Change']}
@@ -21,7 +22,7 @@ export const Default = () => {
                 rows={[
                     {
                         link: '#',
-                        label: 'AHU 1',
+                        label: 'Long loooong text - very loong',
                         value: 25.3,
                         unit: UNITS.KWH,
                         badgePercentage: 22,
