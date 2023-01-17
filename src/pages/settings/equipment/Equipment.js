@@ -44,6 +44,7 @@ import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Brick from '../../../sharedComponents/brick';
 import AddEquipment from './AddEquipment';
 import { UserStore } from '../../../store/UserStore';
+import { pageListSizes } from '../../../helpers/helpers';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -720,6 +721,7 @@ const Equipment = () => {
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         currentPage={pageNo}
+                        pageListSizes={pageListSizes}
                         totalCount={(() => {
                             if (search) {
                                 return totalItemsSearched;
