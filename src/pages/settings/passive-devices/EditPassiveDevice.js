@@ -49,11 +49,15 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
                     setPassiveDeviceObj(defaultDeviceObj);
                     fetchPassiveDevice();
                 } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
-                        s.notificationType = 'error';
-                    });
+                    if (!response?.success && response?.message.includes('identifier already exists')) {
+                        setIdentifierAlert('Identifier with given name already exists.');
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                            s.notificationType = 'error';
+                        });
+                    }
                 }
                 setIsProcessing(false);
             })

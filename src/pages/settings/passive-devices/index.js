@@ -375,9 +375,7 @@ const PassiveDevices = () => {
                                     label={'Add Smart Meter'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={() => {
-                                        openAddDeviceModal();
-                                    }}
+                                    onClick={openAddDeviceModal}
                                     icon={<PlusSVG />}
                                 />
                             </div>
