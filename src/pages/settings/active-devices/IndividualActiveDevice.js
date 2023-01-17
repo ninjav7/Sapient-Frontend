@@ -36,6 +36,7 @@ import './style.css';
 import './styles.scss';
 import '../passive-devices/styles.scss';
 import { UserStore } from '../../../store/UserStore';
+import '../../../sharedComponents/breaker/Breaker.scss';
 
 const IndividualActiveDevice = () => {
     const history = useHistory();
@@ -562,22 +563,25 @@ const IndividualActiveDevice = () => {
                                                 )}
                                             </div>
                                             <div className="d-flex">
-                                                <div className="d-flex icon-style mr-1">
-                                                    <ChartSVG
-                                                        onClick={() => handleChartShow(record?.id)}
-                                                        className="mouse-pointer chart-icon-style"
-                                                    />
-                                                </div>
-                                                <div className="d-flex icon-style ml-1">
-                                                    <PenSVG
-                                                        onClick={() => {
-                                                            setSelectedEquipType(record?.equipment_type_id);
-                                                            setSelectedSensor(record?.id);
-                                                            openSocketModal();
-                                                        }}
-                                                        className="mouse-pointer chart-icon-style"
-                                                    />
-                                                </div>
+                                                <Button
+                                                    className="breaker-action-btn"
+                                                    onClick={() => handleChartShow(record?.id)}
+                                                    type={Button.Type.secondaryGrey}
+                                                    label=""
+                                                    icon={<ChartSVG width={16} />}
+                                                />
+
+                                                <Button
+                                                    className="breaker-action-btn ml-2"
+                                                    onClick={() => {
+                                                        setSelectedEquipType(record?.equipment_type_id);
+                                                        setSelectedSensor(record?.id);
+                                                        openSocketModal();
+                                                    }}
+                                                    type={Button.Type.secondaryGrey}
+                                                    label=""
+                                                    icon={<PenSVG width={15} />}
+                                                />
                                             </div>
                                         </div>
                                     </>
