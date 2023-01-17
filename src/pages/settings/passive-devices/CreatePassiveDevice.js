@@ -74,21 +74,23 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                             s.notificationMessage = response?.message;
                             s.notificationType = 'success';
                         });
-                    } else {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
-                            s.notificationType = 'error';
-                        });
-                    }
-                    if (response?.success) {
                         closeAddDeviceModal();
                         setDeviceData(defaultDeviceObj);
                         setDeviceErrors(defaultErrors);
+                        if (response?.data?.device_id) redirectUserToPassivePage(response?.data?.device_id);
+                    } else {
+                        if (!response?.success && response?.message.includes('identifier already exists')) {
+                            alertObj.mac_address = 'Identifier with given name already exists.';
+                            setDeviceErrors(alertObj);
+                        } else {
+                            UserStore.update((s) => {
+                                s.showNotification = true;
+                                s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                                s.notificationType = 'error';
+                            });
+                        }
                     }
-
                     setIsProcessing(false);
-                    if (response?.data?.device_id) redirectUserToPassivePage(response?.data?.device_id);
                 })
                 .catch((e) => {
                     setDeviceErrors(defaultErrors);

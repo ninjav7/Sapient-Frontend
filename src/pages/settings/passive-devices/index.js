@@ -96,7 +96,7 @@ const PassiveDevices = () => {
     const fetchPassiveDeviceData = async () => {
         const sorting = sortBy.method &&
             sortBy.name && {
-                order_by: sortBy.name,
+                order_by: sortBy.name === 'status' ? 'stat' : sortBy.name,
                 sort_by: sortBy.method,
             };
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
@@ -375,9 +375,7 @@ const PassiveDevices = () => {
                                     label={'Add Smart Meter'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={() => {
-                                        openAddDeviceModal();
-                                    }}
+                                    onClick={openAddDeviceModal}
                                     icon={<PlusSVG />}
                                 />
                             </div>
