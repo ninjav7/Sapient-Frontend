@@ -16,16 +16,15 @@ import './style.css';
 const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [emailError, setEmailError] = useState(false);
+    const [emailError, setEmailError] = useState(null);
     const [passwordError, setPasswordError] = useState(false);
     const [passwordType, setPasswordType] = useState('password');
 
     const Submit = () => {
         let ct = 0;
-        var pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{10,11}$/;
 
-        if (email.length >= 0 && !pattern.test(email)) {
-            setEmailError(true);
+        if (email.length >= 0 && !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(email)) {
+            setEmailError('Please Enter a Valid Email');
             ct++;
         }
         if (password.length < 4) {
@@ -64,7 +63,7 @@ const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize 
 
                     <InputTooltip
                         placeholder="hello@Sapient.industries"
-                        error={emailError ? 'Please Enter a Valid Email' : null}
+                        error={emailError}
                         value={email}
                         onChange={(e) => {
                             setEmail(e.target.value);
@@ -110,7 +109,7 @@ const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize 
                     onClick={() => {
                         setEmail('');
                         setPassword('');
-                        setEmailError(false);
+                        setEmailError(null);
                         setPasswordError(false);
                         handleLinkClose();
                     }}

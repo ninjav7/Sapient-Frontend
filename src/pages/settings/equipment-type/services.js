@@ -5,6 +5,7 @@ import {
     equipmentType,
     updateEquipmentType,
     getMetadataFilter,
+    deleteEquipmentType,
 } from '../../../services/Network';
 import _ from 'lodash';
 
@@ -13,10 +14,6 @@ export function saveEquipTypeData(payload) {
 }
 
 export function updateEquipTypeData(payload) {
-    return axiosInstance.post(`${updateEquipmentType}`, payload).then((res) => res);
-}
-
-export function deleteEquipTypeData(payload) {
     return axiosInstance.post(`${updateEquipmentType}`, payload).then((res) => res);
 }
 
@@ -44,4 +41,8 @@ export function fetchEquipmentTypeFilter(args) {
         .then((res) => {
             return res.data;
         });
+}
+
+export function deleteEquipmentTypeData(params) {
+    return axiosInstance.delete(`${deleteEquipmentType}${params}`).then((res) => res);
 }

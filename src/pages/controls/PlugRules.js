@@ -3,9 +3,10 @@ import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 
 import ButtonSC from '../../sharedComponents/button/Button';
+import { getPlugRulesTableCSVExport } from '../../utils/tablesExport';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
@@ -106,6 +107,7 @@ const PlugRules = () => {
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
     const handleAddRuleShow = () => setShowAddRule(true);
+    const { download } = useCSVDownload();
 
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
@@ -267,8 +269,14 @@ const PlugRules = () => {
             });
     };
 
+    const handleDownloadCsv = async () => {
+        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps));
+    };
+
     useEffect(() => {
-        fetchPlugRuleData();
+        if (activeBuildingId) {
+            fetchPlugRuleData();
+        }
     }, [activeBuildingId, search]);
 
     const history = useHistory();
@@ -285,7 +293,7 @@ const PlugRules = () => {
 
             const sortedDays = ['mon', 'tue', 'wed', 'thr', 'fri', 'sat', 'sun'];
 
-            newRow.mame = (
+            newRow.name = (
                 <ButtonSC
                     className={'p-0'}
                     type={ButtonSC.Type.link}
@@ -324,19 +332,45 @@ const PlugRules = () => {
             return newRow;
         });
 
-    let newPlugRuleData = [];
+    const headerProps = [
+        { name: 'Name', accessor: 'name' },
+        { name: 'Description', accessor: 'description' },
+        { name: 'Days', accessor: 'days' },
+        { name: 'Socket Count', accessor: 'sensors_count' },
+    ];
 
-    if (selectedTab === 0) {
-        newPlugRuleData = formatRows(plugRuleData);
-    }
+    const dataForCSV = () => {
+        let newPlugRuleData = [];
 
-    if (selectedTab === 1) {
-        newPlugRuleData = formatRows(onlinePlugRuleData);
-    }
+        if (selectedTab === 0) {
+            newPlugRuleData = plugRuleData;
+        }
 
-    if (selectedTab === 2) {
-        newPlugRuleData = formatRows(offlinePlugRuleData);
-    }
+        if (selectedTab === 1) {
+            newPlugRuleData = onlinePlugRuleData;
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = offlinePlugRuleData;
+        }
+        return newPlugRuleData;
+    };
+    const currentRow = () => {
+        let newPlugRuleData = [];
+
+        if (selectedTab === 0) {
+            newPlugRuleData = formatRows(plugRuleData);
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = formatRows(onlinePlugRuleData);
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = formatRows(offlinePlugRuleData);
+        }
+        return newPlugRuleData;
+    };
 
     return (
         <React.Fragment>
@@ -399,14 +433,10 @@ const PlugRules = () => {
                             id="plugRulesTable1"
                             onSearch={setSearch}
                             onStatus={setSelectedTab}
-                            rows={newPlugRuleData}
-                            searchResultRows={newPlugRuleData}
-                            headers={[
-                                { name: 'Name', accessor: 'mame' },
-                                { name: 'Description', accessor: 'description' },
-                                { name: 'Days', accessor: 'days' },
-                                { name: 'Socket Count', accessor: 'sensors_count' },
-                            ]}
+                            rows={currentRow()}
+                            searchResultRows={currentRow()}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
                         />
                     )}
                 </Col>

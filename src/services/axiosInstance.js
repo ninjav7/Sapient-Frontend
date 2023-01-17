@@ -32,7 +32,9 @@ axiosInstance.interceptors.response.use(
             localStorage.clear();
             cookies.remove('user', { path: '/' });
             window.location.reload();
+            return;
         }
+        return error?.response;
     }
 );
 

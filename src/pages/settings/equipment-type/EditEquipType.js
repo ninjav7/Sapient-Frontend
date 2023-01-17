@@ -4,14 +4,16 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { getEndUseData, updateEquipTypeData } from './services';
+import { deleteEquipmentTypeData, getEndUseData, updateEquipTypeData } from './services';
 import Select from '../../../sharedComponents/form/select';
+import { UserStore } from '../../../store/UserStore';
 
 const EditEquipType = ({
     isEditEquipTypeModalOpen,
     closeEditEquipTypeModal,
     fetchEquipTypeData,
     selectedEquipType,
+    search,
 }) => {
     const defaultEquipTypeObj = {
         equipment_type: '',
@@ -19,9 +21,11 @@ const EditEquipType = ({
     };
 
     const [equipTypeData, setEquipTypeData] = useState(defaultEquipTypeObj);
+    const [isDeleting, setDeletion] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [formValidation, setFormValidation] = useState(false);
     const [endUseData, setEndUseData] = useState([]);
+    const [equipTypeNameError, setEquipTypeNameError] = useState(null);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, equipTypeData);
@@ -30,18 +34,46 @@ const EditEquipType = ({
     };
 
     const updateEquipTypeDetails = async () => {
+        if (!equipTypeData) return;
+
         setIsProcessing(true);
+
         const obj = {
             eqt_id: equipTypeData?.equipment_id,
-            name: equipTypeData?.equipment_type,
             end_use: equipTypeData?.end_use_id,
         };
+
+        if (equipTypeData?.equipment_type.trim() !== selectedEquipType?.equipment_type.trim()) {
+            obj.name = equipTypeData?.equipment_type.trim();
+        }
+
         await updateEquipTypeData(obj)
             .then((res) => {
-                closeEditEquipTypeModal();
-                setEquipTypeData(defaultEquipTypeObj);
+                const response = res;
+                if (response?.status === 406) {
+                    setEquipTypeNameError('Equipment Type with given name already exists.');
+                    setIsProcessing(false);
+                    return;
+                }
+                if (response?.data?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.data?.message;
+                        s.notificationType = 'success';
+                    });
+                    closeEditEquipTypeModal();
+                    setEquipTypeData(defaultEquipTypeObj);
+                    fetchEquipTypeData(search);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.data?.message
+                            ? response?.data?.message
+                            : 'Unable to Create Equipment Type.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsProcessing(false);
-                fetchEquipTypeData();
             })
             .catch(() => {
                 setIsProcessing(false);
@@ -65,6 +97,36 @@ const EditEquipType = ({
             });
         });
         setEndUseData(data);
+    };
+
+    const handleEquipTypeDelete = async () => {
+        setDeletion(true);
+        let params = `?equipment_type_id=${equipTypeData?.equipment_id}`;
+        await deleteEquipmentTypeData(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : 'Unable to Create Equipment Type.';
+                        s.notificationType = 'error';
+                    });
+                }
+                closeEditEquipTypeModal();
+                fetchEquipTypeData(search);
+                setDeletion(false);
+            })
+            .catch(() => {
+                setDeletion(false);
+            });
     };
 
     useEffect(() => {
@@ -108,11 +170,12 @@ const EditEquipType = ({
                     label="Name"
                     placeholder="Enter Name"
                     onChange={(e) => {
-                        handleChange('equipment_type', e.target.value.trim());
+                        handleChange('equipment_type', e.target.value);
+                        setEquipTypeNameError(null);
                     }}
-                    error={null}
                     labelSize={Typography.Sizes.md}
                     value={equipTypeData?.equipment_type}
+                    error={equipTypeNameError}
                 />
 
                 <Brick sizeInRem={1.5} />
@@ -131,7 +194,20 @@ const EditEquipType = ({
                     />
                 </div>
 
-                <Brick sizeInRem={2.5} />
+                {equipTypeData?.status && equipTypeData?.status.toLowerCase() === 'custom' && (
+                    <div>
+                        <Brick sizeInRem={1.5} />
+                        <Button
+                            label={isDeleting ? 'Deleting' : 'Delete Equipment Type'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.secondaryDistructive}
+                            disabled={isDeleting}
+                            onClick={handleEquipTypeDelete}
+                        />
+                    </div>
+                )}
+
+                <Brick sizeInRem={2} />
 
                 <div className="d-flex justify-content-between w-100">
                     <Button
@@ -150,10 +226,8 @@ const EditEquipType = ({
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={!formValidation || isProcessing}
-                        onClick={() => {
-                            updateEquipTypeDetails();
-                        }}
+                        disabled={!formValidation || isProcessing || isDeleting}
+                        onClick={updateEquipTypeDetails}
                     />
                 </div>
 
