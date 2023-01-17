@@ -96,7 +96,7 @@ const PassiveDevices = () => {
     const fetchPassiveDeviceData = async () => {
         const sorting = sortBy.method &&
             sortBy.name && {
-                order_by: sortBy.name,
+                order_by: sortBy.name === 'status' ? 'stat' : sortBy.name,
                 sort_by: sortBy.method,
             };
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));

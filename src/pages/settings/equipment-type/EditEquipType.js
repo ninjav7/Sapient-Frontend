@@ -170,7 +170,7 @@ const EditEquipType = ({
                     label="Name"
                     placeholder="Enter Name"
                     onChange={(e) => {
-                        handleChange('equipment_type', e.target.value.trim());
+                        handleChange('equipment_type', e.target.value);
                         setEquipTypeNameError(null);
                     }}
                     labelSize={Typography.Sizes.md}
