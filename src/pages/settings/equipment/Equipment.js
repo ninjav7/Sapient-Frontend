@@ -43,6 +43,7 @@ import Input from '../../../sharedComponents/form/input/Input';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Brick from '../../../sharedComponents/brick';
 import AddEquipment from './AddEquipment';
+import { UserStore } from '../../../store/UserStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -140,6 +141,7 @@ const Equipment = () => {
             preparedData.push({
                 value: `${item?.equipment_id}`,
                 label: `${item?.equipment_type} (${item?.end_use_name})`,
+                end_use_id: `${item?.end_use_id}`,
             });
         });
         setEquipmentTypeDataAll(preparedData);
@@ -545,7 +547,21 @@ const Equipment = () => {
         setIsDeleting(true);
         await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
-                fetchEquipmentData();
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                    fetchEquipmentData();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message ? response?.message : 'Unable to delete Equipment.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsDeleting(false);
                 setShowDeleteEquipmentModal(false);
             })
