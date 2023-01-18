@@ -768,8 +768,11 @@ const ExploreByBuildings = () => {
             ''
         )
             .then((res) => {
-                let responseData = res.data;
-                download('Explore_By_Building', getExploreByBuildingTableCSVExport(responseData, headerProps));
+                let responseData = res?.data;
+                download(
+                    `Explore_By_Building_${new Date().toISOString().split('T')[0]}`,
+                    getExploreByBuildingTableCSVExport(responseData, headerProps)
+                );
             })
             .catch((error) => {});
     };
