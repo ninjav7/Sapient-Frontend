@@ -9,7 +9,7 @@ import {
     getUserFilters,
 } from '../../../services/Network';
 
-export function inviteMemberUsers(payload, params) {
+export function inviteMemberUsers(params, payload) {
     return axiosInstance.post(`${addMemberUser}${params}`, payload).then((res) => res);
 }
 

@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Input } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import { inviteMemberUsers, fetchMemberUserList, updateVendorPermissions, fetchUserFilters } from './service';
-import { Cookies } from 'react-cookie';
+import { fetchMemberUserList, fetchUserFilters } from './service';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import { UserStore } from '../../../store/UserStore';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
@@ -19,12 +14,14 @@ import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constant
 import 'moment-timezone';
 import moment from 'moment';
 import { timeZone } from '../../../utils/helper';
-import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { pageListSizes } from '../../../helpers/helpers';
+import Brick from '../../../sharedComponents/brick';
+import AddUser from './AddUser';
+import '../style.css';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -53,27 +50,13 @@ const SkeletonLoading = () => (
 );
 
 const Users = () => {
-    // Modal states
-    const [show, setShow] = useState(false);
-    const handleClose = () => {
-        setUserObj({
-            first_name: '',
-            last_name: '',
-            email: '',
-            role: '',
-        });
-        setShow(false);
-    };
-    const handleShow = () => setShow(true);
+    // Add User Modal
+    const [addUserModal, setAddUserModal] = useState(false);
+    const handleAddModalClose = () => setAddUserModal(false);
+    const handleAddModalOpen = () => setAddUserModal(true);
+
     const [userPermission] = useAtom(userPermissionData);
 
-    const [formValidation, setFormValidation] = useState(false);
-
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-    const history = useHistory();
-
-    const [isProcessing, setIsProcessing] = useState(false);
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
 
     const [userData, setUserData] = useState([]);
@@ -82,61 +65,25 @@ const Users = () => {
     const [sortBy, setSortBy] = useState({});
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
-    const [rolesData, setRolesData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [filterOptions, setFilterOptions] = useState([]);
     const [permissionRoleIds, setPermissionRoleIds] = useState([]);
 
-    const [userObj, setUserObj] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-        role: '',
-    });
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Users',
-                        path: '/settings/users',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
-    // setFormValidation
-    useEffect(() => {
-        if (
-            userObj.first_name.length > 0 &&
-            userObj.last_name.length > 0 &&
-            userObj.role.length > 0 &&
-            userObj.email.length > 0 &&
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userObj.email)
-        ) {
-            setFormValidation(true);
-        }
-    }, [userObj]);
-
-    useEffect(() => {
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userObj.email)) {
-            setFormValidation(false);
-        }
-    }, [userObj]);
-
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, userObj);
-        obj[key] = value;
-        setUserObj(obj);
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Users',
+                    path: '/settings/users',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'account';
+        });
     };
 
     const getUsersList = async () => {
@@ -161,12 +108,13 @@ const Users = () => {
 
         await fetchMemberUserList(params)
             .then((res) => {
-                let response = res.data;
-                setUserData(response.data?.data);
+                let response = res?.data;
+                setUserData(response?.data?.data);
                 setTotalItems(response?.data?.total_users);
                 setIsUserDataFetched(false);
             })
             .catch((error) => {
+                setUserData([]);
                 setIsUserDataFetched(false);
             });
     };
@@ -216,55 +164,18 @@ const Users = () => {
         getUserFilterData();
     }, [userSearchInfo]);
 
-    const saveUserData = async () => {
-        setIsProcessing(true);
-        let userData = Object.assign({}, userObj);
-        let params = '?request_type=invite';
-        await inviteMemberUsers(userData, params)
-            .then((res) => {
-                let response = res.data;
-                getUsersList();
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Invite has been sent';
-                        s.notificationType = 'success';
-                    });
-                } else if (response?.success == false) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'User Already Exist';
-                        s.notificationType = 'error';
-                    });
-                }
-                setIsProcessing(false);
-                handleClose();
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
-    };
-
-    const fetchRoles = async () => {
-        await updateVendorPermissions({}, '')
-            .then((res) => {
-                let response = res.data;
-                setRolesData(response.data);
-            })
-            .catch((error) => {});
-    };
-
-    useEffect(() => {
-        fetchRoles();
-    }, []);
-
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
+
     const currentRow = () => {
         return userData;
     };
+
     const renderName = (row) => {
         return (
             <>
@@ -285,7 +196,7 @@ const Users = () => {
     const renderRole = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.sm}>
-                {row?.role === '' ? '-' : row?.permissions[0]?.permission_name}
+                {row?.role === '' || row?.permissions.length === 0 ? '-' : row?.permissions[0]?.permission_name}
             </Typography.Body>
         );
     };
@@ -347,38 +258,32 @@ const Users = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Users</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
-                            {userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_user_permission?.create ? (
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Users</Typography.Header>
+                        </div>
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.account_user_permission?.create ? (
+                            <div className="d-flex">
                                 <Button
                                     label="Add User"
-                                    size={Button.Sizes.lg}
+                                    size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    icon={
-                                        <FontAwesomeIcon
-                                            icon={faPlus}
-                                            size="lg"
-                                            style={{ color: colorPalette.baseWhite }}
-                                        />
-                                    }
-                                    iconAlignment={Button.IconAlignment.left}
-                                    onClick={() => {
-                                        handleShow();
-                                    }}
+                                    onClick={handleAddModalOpen}
+                                    icon={<PlusSVG />}
                                 />
-                            ) : null}
-                        </div>
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
 
+            <Brick sizeInRem={1.5} />
+
             <Row>
-                <Col lg={12} className="mt-4">
+                <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
@@ -449,102 +354,11 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered>
-                <Modal.Header>
-                    <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
-                </Modal.Header>
-                <Modal.Body className="add-user-model">
-                    <Form autoComplete="off">
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Typography.Subheader className="mb-1">First Name</Typography.Subheader>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter First Name"
-                                        onChange={(e) => {
-                                            handleChange('first_name', e.target.value);
-                                        }}
-                                        value={userObj.first_name}
-                                        autoFocus
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Typography.Subheader className="mb-1">Last Name</Typography.Subheader>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter Last Name"
-                                        onChange={(e) => {
-                                            handleChange('last_name', e.target.value);
-                                        }}
-                                        value={userObj.last_name}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Typography.Subheader className="mb-1">Email Address</Typography.Subheader>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Sapient Email"
-                                onChange={(e) => {
-                                    handleChange('email', e.target.value);
-                                }}
-                                value={userObj.email}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Typography.Subheader className="mb-1">User Role</Typography.Subheader>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="roles"
-                                contentEditable="false"
-                                required
-                                onChange={(e) => {
-                                    handleChange('role', e.target.value);
-                                }}
-                                value={userObj?.role}>
-                                <option selected>Select Role</option>
-                                {rolesData?.map((record) => {
-                                    return <option value={record?.id}>{record?.name}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
-                        <Button
-                            label="Cancel"
-                            size={Button.Sizes.lg}
-                            type={Button.Type.secondaryGrey}
-                            className="d-flex align-items-center button-container"
-                            onClick={() => {
-                                handleClose();
-                                setFormValidation(false);
-                            }}
-                        />
-                        <Button
-                            label={isProcessing ? 'Adding User...' : 'Add & Invite User'}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            className="d-flex align-items-center button-container"
-                            onClick={() => {
-                                setIsProcessing(true);
-                                saveUserData();
-                            }}
-                            disabled={!formValidation}
-                        />
-                    </div>
-                </Modal.Footer>
-            </Modal>
+            <AddUser
+                addUserModal={addUserModal}
+                handleAddModalClose={handleAddModalClose}
+                getUsersList={getUsersList}
+            />
         </React.Fragment>
     );
 };
