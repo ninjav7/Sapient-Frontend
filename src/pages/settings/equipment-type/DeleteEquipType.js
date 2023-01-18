@@ -38,7 +38,6 @@ const DeleteEquipType = ({
                             ? 'Unable to Delete Equipment Type.'
                             : 'Unable to delete Equipment Type due to Internal Server Error!.';
                         s.notificationType = 'error';
-                        s.componentType = 'alert';
                     });
                 }
                 closeDeleteEquipTypeModal();

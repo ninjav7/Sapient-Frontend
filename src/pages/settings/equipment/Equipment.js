@@ -543,7 +543,11 @@ const Equipment = () => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message ? response?.message : 'Unable to delete Equipment.';
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Equipment.'
+                            : 'Unable to delete Equipment due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }

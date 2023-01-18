@@ -54,7 +54,11 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
                     } else {
                         UserStore.update((s) => {
                             s.showNotification = true;
-                            s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update Smart Meter.'
+                                : 'Unable to update Smart Meter due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
                     }
