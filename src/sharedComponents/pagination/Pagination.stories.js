@@ -48,7 +48,8 @@ export const Default = () => {
                 ]}
                 className="pagination-bar"
                 currentPage={currentPage2}
-                totalCount={90}
+                totalCount={4}
+                isAlwaysShown={true}
                 pageSize={pageSize2}
                 onPageChange={(page) => setCurrentPage2(page)}
                 setPageSize={(pageSize) => setPageSize2(pageSize)}

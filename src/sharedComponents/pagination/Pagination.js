@@ -33,6 +33,7 @@ const Pagination = (props) => {
         setPageSize,
         pageListSizes = DEFAULT_LIST_PAGE_SIZES,
         label,
+        isAlwaysShown,
     } = props;
 
     const paginationRange = usePagination({
@@ -42,8 +43,8 @@ const Pagination = (props) => {
         pageSize,
     });
 
-    if (currentPage === 0 || paginationRange.length < 2) {
-        return null;
+    if (!isAlwaysShown && (currentPage === 0 || paginationRange.length < 2)) {
+       return null;
     }
 
     const onNext = () => {
@@ -127,6 +128,7 @@ Pagination.propTypes = {
         })
     ),
     label: PropTypes.string,
+    isAlwaysShown: PropTypes.bool,
 };
 
 export default Pagination;

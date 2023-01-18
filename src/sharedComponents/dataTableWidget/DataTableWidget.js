@@ -381,6 +381,7 @@ const DataTableWidget = (props) => {
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
                         pageListSizes={props.pageListSizes}
+                        isAlwaysShown={props.isPaginationAlwaysShown}
                     />
                 </div>
             )}
@@ -445,6 +446,7 @@ DataTableWidget.propTypes = {
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,
     }),
+    isPaginationAlwaysShown: PropTypes.bool,
 };
 
 export default DataTableWidget;

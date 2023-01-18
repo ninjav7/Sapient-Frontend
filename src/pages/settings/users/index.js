@@ -436,11 +436,15 @@ const Users = () => {
                         currentPage={pageNo}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
-                        onPageSize={setPageSize}
+                        onPageSize={(currentPageSize) => {
+                            setPageNo(1);
+                            setPageSize(currentPageSize);
+                        }}
                         pageListSizes={pageListSizes}
                         totalCount={(() => {
                             return totalItems;
                         })()}
+                        isPaginationAlwaysShown={true}
                     />
                 </Col>
             </Row>
