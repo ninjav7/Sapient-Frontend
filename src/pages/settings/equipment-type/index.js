@@ -220,7 +220,10 @@ const EquipmentType = () => {
         await getEquipTypeData()
             .then((res) => {
                 const responseData = res?.data?.data;
-                download('Equipment_Type_List', getEquipTypeTableCSVExport(responseData, headerProps));
+                download(
+                    `Equipment_Types_${new Date().toISOString().split('T')[0]}`,
+                    getEquipTypeTableCSVExport(responseData, headerProps)
+                );
             })
             .catch(() => {});
     };
@@ -411,6 +414,7 @@ const EquipmentType = () => {
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
                 search={search}
+                openEditEquipTypeModal={openEditEquipTypeModal}
             />
 
             <DeleteEquipType

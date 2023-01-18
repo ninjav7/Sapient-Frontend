@@ -62,6 +62,7 @@ const Panels = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -149,7 +150,7 @@ const Panels = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);
-                download('Panels_List', csvData);
+                download(`${bldgName}_Panels_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };

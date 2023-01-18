@@ -60,6 +60,7 @@ const SkeletonLoading = () => (
 const PassiveDevices = () => {
     const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -250,7 +251,7 @@ const PassiveDevices = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
-                download('Smart_Meter_List', csvData);
+                download(`${bldgName}_Smart Meter_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };

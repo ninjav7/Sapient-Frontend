@@ -65,6 +65,7 @@ const SkeletonLoading = () => (
 
 const ActiveDevices = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -309,7 +310,7 @@ const ActiveDevices = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getActiveDeviceTableCSVExport(responseData, headerProps);
-                download('Active_Device_List', csvData);
+                download(`${bldgName}_Active_Devices_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };

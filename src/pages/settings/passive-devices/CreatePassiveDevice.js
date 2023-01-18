@@ -85,7 +85,11 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                         } else {
                             UserStore.update((s) => {
                                 s.showNotification = true;
-                                s.notificationMessage = response?.message ? response?.message : 'Unable to Save.';
+                                s.notificationMessage = response?.message
+                                    ? response?.message
+                                    : res
+                                    ? 'Unable to create Smart Meter.'
+                                    : 'Unable to create Smart Meter due to Internal Server Error!.';
                                 s.notificationType = 'error';
                             });
                         }
