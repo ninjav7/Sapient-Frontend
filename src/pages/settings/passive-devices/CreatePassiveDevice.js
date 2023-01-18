@@ -56,9 +56,13 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
     const saveDeviceDetails = async () => {
         let alertObj = Object.assign({}, deviceErrors);
 
-        if (!isInputLetterOrNumber(deviceData.mac_address) || deviceData.mac_address === '')
+        if (
+            !isInputLetterOrNumber(deviceData?.mac_address) ||
+            deviceData?.mac_address === '' ||
+            deviceData?.mac_address.length !== 16
+        )
             alertObj.mac_address = 'Please enter only Letters and Numbers. 16 digit serial number.';
-        if (deviceData.model.length === 0) alertObj.model = { text: 'Please select Model Type.' };
+        if (deviceData?.model.length === 0) alertObj.model = { text: 'Please select Model Type.' };
 
         setDeviceErrors(alertObj);
 
