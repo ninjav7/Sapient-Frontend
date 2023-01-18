@@ -414,6 +414,7 @@ const EquipmentType = () => {
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
                 search={search}
+                openEditEquipTypeModal={openEditEquipTypeModal}
             />
 
             <DeleteEquipType
