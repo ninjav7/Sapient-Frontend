@@ -285,7 +285,7 @@ const Users = () => {
     const renderRole = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.sm}>
-                {row?.role === '' ? '-' : row?.permissions[0].permission_name}
+                {row?.role === '' ? '-' : row?.permissions[0]?.permission_name}
             </Typography.Body>
         );
     };

@@ -114,8 +114,13 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
                     value={passiveDeviceObj?.identifier}
                     defaultValue={passiveDeviceObj?.identifier}
                 />
+                <Brick sizeInRem={0.25} />
 
-                <Brick sizeInRem={1.5} />
+                {!identifierAlert && (
+                    <Typography.Body size={Typography.Sizes.sm}>16 digit serial number</Typography.Body>
+                )}
+
+                <Brick sizeInRem={1.25} />
 
                 <InputTooltip
                     label="Model"
