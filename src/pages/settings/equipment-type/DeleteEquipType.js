@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import { deleteEquipmentTypeData, deleteEquipTypeData } from './services';
+import { deleteEquipmentTypeData } from './services';
 import { UserStore } from '../../../store/UserStore';
 
 const DeleteEquipType = ({
@@ -12,6 +12,7 @@ const DeleteEquipType = ({
     selectedEquipType,
     fetchEquipTypeData,
     search,
+    openEditEquipTypeModal,
 }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [equipTypeId, setEquipTypeId] = useState('');
@@ -33,7 +34,9 @@ const DeleteEquipType = ({
                         s.showNotification = true;
                         s.notificationMessage = response?.message
                             ? response?.message
-                            : 'Unable to Create Equipment Type.';
+                            : res
+                            ? 'Unable to Delete Equipment Type.'
+                            : 'Unable to delete Equipment Type due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
@@ -42,15 +45,23 @@ const DeleteEquipType = ({
                 fetchEquipTypeData(search);
                 setIsProcessing(false);
             })
-            .catch(() => {
+            .catch((error) => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Internal Server Error! Unable to delete record.';
+                    s.notificationType = 'error';
+                });
                 setIsProcessing(false);
             });
     };
 
+    const handleDeleteAlertClose = () => {
+        closeDeleteEquipTypeModal();
+        if (openEditEquipTypeModal) openEditEquipTypeModal();
+    };
+
     useEffect(() => {
-        if (isDeleteEquipTypeModalOpen) {
-            setEquipTypeId(selectedEquipType?.equipment_id);
-        }
+        if (isDeleteEquipTypeModalOpen) setEquipTypeId(selectedEquipType?.equipment_id);
     }, [isDeleteEquipTypeModalOpen]);
 
     return (
@@ -72,7 +83,7 @@ const DeleteEquipType = ({
                     label="Cancel"
                     size={Button.Sizes.lg}
                     type={Button.Type.secondaryGrey}
-                    onClick={closeDeleteEquipTypeModal}
+                    onClick={handleDeleteAlertClose}
                 />
                 <Button
                     label={isProcessing ? 'Deleting' : 'Delete'}

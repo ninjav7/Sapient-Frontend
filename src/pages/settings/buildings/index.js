@@ -272,7 +272,10 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by)
             .then((res) => {
                 const responseData = res.data;
-                download('Buildings_List', getBuildingsTableCSVExport(responseData, headerProps));
+                download(
+                    `Buildings_${new Date().toISOString().split('T')[0]}`,
+                    getBuildingsTableCSVExport(responseData, headerProps)
+                );
             })
             .catch((error) => {});
     };

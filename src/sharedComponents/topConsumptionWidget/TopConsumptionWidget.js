@@ -19,9 +19,10 @@ const TopConsumptionWidget = ({
     className = '',
     handleClick,
     widgetType = 'TopConsumptionWidget',
+    style,
 }) => {
     return (
-        <div className={`${widgetType}-wrapper ${className}`}>
+        <div className={`${widgetType}-wrapper ${className}`} style={style}>
             <div className="d-flex align-items-center justify-content-between mt-1">
                 <div>
                     {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
@@ -44,8 +45,9 @@ const TopConsumptionWidget = ({
                         <div>
                             <Button
                                 label={label}
-                                size={Button.Sizes.md}                                type={Button.Type.link}
-                                className="typography-wrapper link mouse-pointer"
+                                size={Button.Sizes.md}                                
+                                type={Button.Type.link}
+                                className="typography-wrapper link mouse-pointer text-left"
                                 onClick={() => {
                                     handleClick(label);
                                 }}
