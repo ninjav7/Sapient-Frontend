@@ -7,7 +7,6 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { UserStore } from '../../../store/UserStore';
 import { useParams } from 'react-router-dom';
-import { Cookies } from 'react-cookie';
 import Brick from '../../../sharedComponents/brick';
 import {
     fetchSingleUserDetail,
@@ -16,8 +15,6 @@ import {
     inviteMemberUsers,
     updateUserRolePermission,
 } from './service';
-import 'moment-timezone';
-import moment from 'moment';
 import { timeZone } from '../../../utils/helper';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
@@ -31,11 +28,11 @@ import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 import CompareRoles from './CompareRoles';
 import Countdown from 'react-countdown';
+import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
+import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 
 const UserProfile = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const [userDetail, setUserDetail] = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [loadButton, setLoadButton] = useState(false);
@@ -175,39 +172,22 @@ const UserProfile = () => {
     }, []);
 
     const renderStatus = () => {
-        if (userDetail?.is_verified === false) {
-            return (
-                <Typography.Subheader
-                    size={Typography.Sizes.sm}
-                    className="d-flex pending-container justify-content-center"
-                    style={{ color: colorPalette.warning700 }}>
-                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
-                    Pending
-                </Typography.Subheader>
-            );
-        } else {
-            if (userDetail?.is_active === true) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex active-container justify-content-center"
-                        style={{ color: colorPalette.success700 }}>
-                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
-                        Active
-                    </Typography.Subheader>
-                );
-            } else if (userDetail?.is_active === false) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex inactive-container justify-content-center"
-                        style={{ color: colorPalette.primaryGray800 }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
-                        Inactive
-                    </Typography.Subheader>
-                );
-            }
-        }
+        const status = userDetail?.is_verified ? (userDetail?.is_active ? 'Active' : 'Inactive') : 'Pending';
+
+        return (
+            <Button
+                label={status}
+                size={Button.Sizes.lg}
+                type={Button.Type.secondary}
+                icon={
+                    (status === 'Active' && <ActiveSVG />) ||
+                    (status === 'Inactive' && <InactiveSVG />) ||
+                    (status === 'Pending' && <PendingSVG />)
+                }
+                iconAlignment={Button.IconAlignment.left}
+                className={`status-container ${status.toLowerCase()}-btn`}
+            />
+        );
     };
 
     const renderer = ({ hours, minutes, seconds, completed }) => {
@@ -352,7 +332,6 @@ const UserProfile = () => {
                                         await updateRolesPermission();
                                     }}
                                     className="ml-2"
-                                    disabled={!isEditing}
                                 />
                             </div>
                         </div>
@@ -378,8 +357,8 @@ const UserProfile = () => {
                         <CardBody>
                             <div className="row">
                                 <div className="col">
-                                    {renderStatus()}
-                                    <Brick sizeInRem={0.25} />
+                                    {userDetail && renderStatus()}
+                                    <Brick sizeInRem={0.5} />
                                     <Typography.Body size={Typography.Sizes.sm}>
                                         Only active users can sign in
                                     </Typography.Body>

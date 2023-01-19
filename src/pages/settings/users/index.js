@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -14,10 +14,10 @@ import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constant
 import 'moment-timezone';
 import moment from 'moment';
 import { timeZone } from '../../../utils/helper';
-import colorPalette from '../../../assets/scss/_colors.scss';
-import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
+import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 import { pageListSizes } from '../../../helpers/helpers';
 import Brick from '../../../sharedComponents/brick';
 import AddUser from './AddUser';
@@ -50,15 +50,15 @@ const SkeletonLoading = () => (
 );
 
 const Users = () => {
+    const history = useHistory();
+    const [userPermission] = useAtom(userPermissionData);
+
     // Add User Modal
     const [addUserModal, setAddUserModal] = useState(false);
     const handleAddModalClose = () => setAddUserModal(false);
     const handleAddModalOpen = () => setAddUserModal(true);
 
-    const [userPermission] = useAtom(userPermissionData);
-
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
-
     const [userData, setUserData] = useState([]);
 
     const [userSearchInfo, setUserSearchInfo] = useState('');
@@ -156,6 +156,12 @@ const Users = () => {
             .catch((error) => {});
     };
 
+    const handleClick = (el) => {
+        history.push({
+            pathname: `/settings/users/user-profile/single/${el?._id}`,
+        });
+    };
+
     useEffect(() => {
         getUsersList();
     }, [userSearchInfo, sortBy, pageNo, pageSize, permissionRoleIds, selectedStatus]);
@@ -178,67 +184,41 @@ const Users = () => {
 
     const renderName = (row) => {
         return (
-            <>
-                {userPermission?.user_role === 'admin' ||
-                userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
-                    <Link className="typography-wrapper link" to={`/settings/users/user-profile/single/${row?._id}`}>
-                        <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
-                    </Link>
-                ) : (
-                    <Link className="typography-wrapper link" to={`/settings/users/user-profile/single/${row?._id}`}>
-                        <a>{row?.first_name ? row?.first_name + ' ' + row?.last_name : row?.name}</a>
-                    </Link>
-                )}
-            </>
+            <div className="typography-wrapper link mouse-pointer" onClick={() => handleClick(row)}>
+                {row?.name ? `${row?.name}` : '-'}
+            </div>
         );
     };
 
     const renderRole = (row) => {
         return (
-            <Typography.Body size={Typography.Sizes.sm}>
+            <Typography.Body size={Typography.Sizes.md}>
                 {row?.role === '' || row?.permissions.length === 0 ? '-' : row?.permissions[0]?.permission_name}
             </Typography.Body>
         );
     };
 
     const renderStatus = (row) => {
-        if (row?.is_verified === false) {
-            return (
-                <Typography.Subheader
-                    size={Typography.Sizes.sm}
-                    className="d-flex pending-container justify-content-center"
-                    style={{ color: colorPalette.warning700 }}>
-                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
-                    Pending
-                </Typography.Subheader>
-            );
-        } else {
-            if (row?.is_active === false) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex inactive-container justify-content-center"
-                        style={{ color: colorPalette.primaryGray800 }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
-                        Inactive
-                    </Typography.Subheader>
-                );
-            } else if (row?.is_active === true) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex active-container justify-content-center"
-                        style={{ color: colorPalette.success700 }}>
-                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
-                        Active
-                    </Typography.Subheader>
-                );
-            }
-        }
+        const status = row?.is_verified ? (row?.is_active ? 'Active' : 'Inactive') : 'Pending';
+
+        return (
+            <Button
+                label={status}
+                size={Button.Sizes.lg}
+                type={Button.Type.secondary}
+                icon={
+                    (status === 'Active' && <ActiveSVG />) ||
+                    (status === 'Inactive' && <InactiveSVG />) ||
+                    (status === 'Pending' && <PendingSVG />)
+                }
+                iconAlignment={Button.IconAlignment.left}
+                className={`status-container ${status.toLowerCase()}-btn`}
+            />
+        );
     };
 
     const renderEmail = (row) => {
-        return <Typography.Body size={Typography.Sizes.sm}>{row?.email === '' ? '-' : row?.email}</Typography.Body>;
+        return <Typography.Body size={Typography.Sizes.md}>{row?.email ? row?.email : '-'}</Typography.Body>;
     };
 
     function isValidDate(d) {
@@ -253,7 +233,7 @@ const Users = () => {
         } else {
             dt = 'Never';
         }
-        return <Typography.Body size={Typography.Sizes.sm}>{dt}</Typography.Body>;
+        return <Typography.Body size={Typography.Sizes.md}>{dt}</Typography.Body>;
     };
 
     return (

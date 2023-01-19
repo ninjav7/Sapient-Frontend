@@ -81,7 +81,7 @@ const AddUser = ({ addUserModal, handleAddModalClose, getUsersList }) => {
                         setErrorObj(defaultErrorObj);
                     } else {
                         if (response?.message.includes('email already exist')) {
-                            setErrorObj({ ...errorObj, email: 'User with given email already exists.' });
+                            setErrorObj({ ...errorObj, email: 'Email already exists in system' });
                             setIsProcessing(false);
                             return;
                         }

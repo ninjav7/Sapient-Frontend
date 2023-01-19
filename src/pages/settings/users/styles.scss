@@ -30,7 +30,7 @@
 .modal-role-compare {
     max-width: 56.25rem !important;
     max-height: 19.375rem !important;
-    height: 19.375rem !important; 
+    height: 19.375rem !important;
 }
 
 .pending-container {
@@ -85,11 +85,11 @@
     justify-content: center;
 }
 
-.add-user-model{
-    height:15.875rem;
+.add-user-model {
+    height: 15.875rem;
 }
 
-.buttonStyle{
+.buttonStyle {
     width: 8rem;
     justify-content: center;
 }
@@ -102,7 +102,7 @@
     background: $success-50;
     border: 0.0625rem solid $success-50;
     border-radius: 1rem;
-    color:$success-700,
+    color: $success-700;
 }
 
 .view-container {
@@ -113,7 +113,7 @@
     background: $view-50;
     border: 0.0625rem solid $view-50;
     border-radius: 1rem;
-    color:$view-700;
+    color: $view-700;
 }
 
 .no-access-container {
@@ -133,3 +133,23 @@
     height: 2.25rem;
 }
 
+.status-container {
+    width: 8.75rem !important;
+    height: 1.75rem !important;
+    border-radius: 0.9375rem !important;
+}
+
+.active-btn {
+    background: $success-50 !important;
+    color: $success-700 !important;
+}
+
+.inactive-btn {
+    background: $primary-gray-100 !important;
+    color: $primary-gray-800 !important;
+}
+
+.pending-btn {
+    background: $warning-50 !important;
+    color: $warning-700 !important;
+}
