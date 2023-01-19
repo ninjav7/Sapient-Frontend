@@ -31,6 +31,7 @@ import Countdown from 'react-countdown';
 import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
 import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 const UserProfile = () => {
     const [userDetail, setUserDetail] = useState();
@@ -345,37 +346,32 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    User Details
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                User Details
+                            </Typography.Subheader>
                         </CardHeader>
 
-                        <CardBody>
-                            <div className="row">
-                                <div className="col">
-                                    {userDetail && renderStatus()}
-                                    <Brick sizeInRem={0.5} />
-                                    <Typography.Body size={Typography.Sizes.sm}>
-                                        Only active users can sign in
-                                    </Typography.Body>
-                                </div>
+                        <div className="p-4">
+                            <div className="w-100">
+                                {userDetail && renderStatus()}
+                                <Brick sizeInRem={0.5} />
+                                <Typography.Body size={Typography.Sizes.sm}>
+                                    Only active users can sign in
+                                </Typography.Body>
                             </div>
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>First Name</Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter First Name"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
                                             setIsEditing(true);
                                             setUpdateUserDetail({
@@ -383,7 +379,6 @@ const UserProfile = () => {
                                                 first_name: e.target.value,
                                             });
                                         }}
-                                        className="w-100"
                                         value={updateUserDetail?.first_name}
                                     />
                                 </div>
@@ -391,15 +386,14 @@ const UserProfile = () => {
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>Last Name</Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter Last Name"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
                                             setIsEditing(true);
                                             setUpdateUserDetail({
@@ -407,7 +401,6 @@ const UserProfile = () => {
                                                 last_name: e.target.value,
                                             });
                                         }}
-                                        className="w-100"
                                         value={updateUserDetail?.last_name}
                                     />
                                 </div>
@@ -415,17 +408,16 @@ const UserProfile = () => {
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         Email Address
                                     </Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter Email Address"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
                                             setIsEditing(true);
                                             setUpdateUserDetail({
@@ -433,12 +425,11 @@ const UserProfile = () => {
                                                 email: e.target.value,
                                             });
                                         }}
-                                        className="w-100"
                                         value={updateUserDetail?.email}
                                     />
                                 </div>
                             </div>
-                        </CardBody>
+                        </div>
                     </div>
                 </Col>
             </Row>
@@ -449,81 +440,53 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    User Roles
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                User Roles
+                            </Typography.Subheader>
                         </CardHeader>
 
-                        <CardBody>
-                            <Row>
-                                <Col lg={6}>
-                                    {userPermissionList?.map((item) => {
-                                        return (
-                                            <>
-                                                <div className="row ml-2">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        style={{ paddingTop: '0.5rem' }}>
-                                                        {item?.permission_name}
-                                                    </Typography.Subheader>
-                                                    <Button
-                                                        label="Compare Roles"
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.link}
-                                                        onClick={() => {
-                                                            setShowCompareRoles(true);
-                                                        }}
-                                                    />
+                        <div className="p-4">
+                            {userPermissionList?.map((item) => {
+                                return (
+                                    <div className="w-100">
+                                        <div className="d-flex justify-content-start align-items-center">
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {item?.permission_name}
+                                            </Typography.Subheader>
 
-                                                    {/* <Typography.Link
-                                                        size={Typography.Sizes.md}
-                                                        href={() => {
-                                                            setShowCompareRoles(true);
-                                                        }}
-                                                        as="a"
-                                                        target="_blank"
-                                                        style={{
-                                                            marginLeft: '1rem',
-                                                        }}>
-                                                        {' '}
-                                                        Compare Roles
-                                                    </Typography.Link> */}
-                                                </div>
-                                                <Brick sizeInRem={1} />
-                                                <div className="row d-flex align-items-center">
-                                                    <div className="col">
-                                                        <Select
-                                                            id="roles"
-                                                            placeholder="Select Role"
-                                                            name="select Roles"
-                                                            className="font-weight-bold"
-                                                            style={{ color: 'black' }}
-                                                            options={rolesData}
-                                                            isSearchable={false}
-                                                            defaultValue={
-                                                                userObj.permission_role == ''
-                                                                    ? item?.permission_id
-                                                                    : userObj.permission_role
-                                                            }
-                                                            onChange={(e) => {
-                                                                setIsEditing(true);
-                                                                handleChange('permission_role', e.value);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </>
-                                        );
-                                    })}
+                                            <Button
+                                                label="Compare Roles"
+                                                size={Button.Sizes.md}
+                                                type={Button.Type.link}
+                                                onClick={() => setShowCompareRoles(true)}
+                                            />
+                                        </div>
 
-                                    <Brick sizeInRem={1} />
-                                </Col>
-                            </Row>
-                        </CardBody>
+                                        <Brick sizeInRem={1} />
+
+                                        <div className="align-items-center" style={{ width: '40%' }}>
+                                            <Select
+                                                id="roles"
+                                                placeholder="Select Role to assign"
+                                                options={rolesData}
+                                                isSearchable={false}
+                                                defaultValue={
+                                                    userObj.permission_role == ''
+                                                        ? item?.permission_id
+                                                        : userObj.permission_role
+                                                }
+                                                onChange={(e) => {
+                                                    setIsEditing(true);
+                                                    handleChange('permission_role', e.value);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </Col>
             </Row>
@@ -534,13 +497,11 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    Danger Zone
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                Danger Zone
+                            </Typography.Subheader>
                         </CardHeader>
 
                         <CardBody>
@@ -549,7 +510,9 @@ const UserProfile = () => {
                     </div>
                 </Col>
             </Row>
+
             <CompareRoles show={showCompareRoles} setShow={setShowCompareRoles} />
+
             <Modal
                 show={show}
                 onHide={() => {
