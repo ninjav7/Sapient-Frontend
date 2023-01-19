@@ -40,16 +40,6 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 
-const weekDays = [
-    { label: 'Mo', value: 'mon' },
-    { label: 'Tu', value: 'tue' },
-    { label: 'We', value: 'wed' },
-    { label: 'Th', value: 'thr' },
-    { label: 'Fr', value: 'fri' },
-    { label: 'Sa', value: 'sat' },
-    { label: 'Su', value: 'sun' },
-];
-const fullWeek = ['mon', 'tue', 'wed', 'thr', 'fri', 'sat', 'sun'];
 const SkeletonLoading = () => (
     <SkeletonTheme color="#202020" height={35}>
         <tr>
