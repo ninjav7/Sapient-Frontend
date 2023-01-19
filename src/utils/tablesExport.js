@@ -217,6 +217,42 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
     return csv;
 };
 
+export const getPlugRulesTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'days':
+                    const days = [...new Set(tableRow.action.reduce((acc, actionItem) => {
+                        actionItem.action_day &&
+                            actionItem.action_day.forEach((item) => {
+                                acc.push(item);
+                            });
+
+                        return acc;
+                    }, []))];
+
+                    arr.push(days.join(' '));
+                    break;
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getEquipTypeTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 

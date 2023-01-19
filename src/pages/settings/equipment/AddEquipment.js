@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { useHistory } from 'react-router-dom';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { BuildingStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
 import { addNewEquipment } from '../../../services/equipment';
+import { UserStore } from '../../../store/UserStore';
 
 const AddEquipment = ({
     isAddEquipModalOpen,
@@ -27,44 +27,71 @@ const AddEquipment = ({
         space_id: '',
     };
 
+    const defaultErrors = {
+        name: null,
+        equipment_type: null,
+        end_use: null,
+    };
+
     const [equipmentObj, setEquipmentObj] = useState(defaultEquipmentObj);
-    const [formValidation, setFormValidation] = useState(false);
+    const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
+        if (key === 'equipment_type') {
+            let equipTypeObj = equipmentTypeDataAll.find((el) => el.value === value);
+            obj['end_use'] = equipTypeObj?.end_use_id;
+            let errorObj = Object.assign({}, equipmentErrors);
+            errorObj.equipment_type = null;
+            errorObj.end_use = null;
+            setEquipmentErrors(errorObj);
+        }
         obj[key] = value;
         setEquipmentObj(obj);
     };
 
     const saveDeviceData = async () => {
-        setIsProcessing(true);
-        await addNewEquipment(bldgId, equipmentObj)
-            .then((res) => {
-                fetchEquipmentData();
-                closeModal();
-                setIsProcessing(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
+        let alertObj = Object.assign({}, equipmentErrors);
+
+        if ((equipmentObj?.name.trim()).length === 0)
+            alertObj.name = 'Please enter Equipment name. It cannot be blank.';
+        if (equipmentObj?.equipment_type.length === 0)
+            alertObj.equipment_type = { text: 'Please select Equipment Type.' };
+        if (equipmentObj?.end_use.length === 0) alertObj.end_use = { text: 'Please select End Use Category.' };
+
+        setEquipmentErrors(alertObj);
+
+        if (!alertObj.name && !alertObj.equipment_type && !alertObj.end_use) {
+            setIsProcessing(true);
+            await addNewEquipment(bldgId, equipmentObj)
+                .then((res) => {
+                    const response = res;
+                    if (response?.status === 200) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Equipment created successfully.';
+                            s.notificationType = 'success';
+                        });
+                        fetchEquipmentData();
+                        closeModal();
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Unable to create Equipment.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    setIsProcessing(false);
+                })
+                .catch((e) => {
+                    setIsProcessing(false);
+                    setEquipmentErrors(defaultErrors);
+                });
+        }
     };
 
     useEffect(() => {
-        if (
-            equipmentObj?.name.length > 0 &&
-            equipmentObj?.equipment_type.length > 0 &&
-            equipmentObj?.end_use.length > 0
-        ) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-    }, [equipmentObj]);
-
-    useEffect(() => {
-        if (isAddEquipModalOpen) {
-            setEquipmentObj(defaultEquipmentObj);
-        }
+        if (isAddEquipModalOpen) setEquipmentObj(defaultEquipmentObj);
     }, [isAddEquipModalOpen]);
 
     return (
@@ -74,31 +101,49 @@ const AddEquipment = ({
 
                 <Brick sizeInRem={2} />
 
+                <Typography.Body size={Typography.Sizes.md}>
+                    Name
+                    <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                        *
+                    </span>
+                </Typography.Body>
+
+                <Brick sizeInRem={0.25} />
+
                 <InputTooltip
-                    label="Name"
                     placeholder="Enter Equipment Name"
                     onChange={(e) => {
                         handleChange('name', e.target.value);
+                        setEquipmentErrors({ ...equipmentErrors, name: null });
                     }}
                     value={equipmentObj?.name}
                     labelSize={Typography.Sizes.md}
+                    error={equipmentErrors?.name}
                 />
 
                 <Brick sizeInRem={1.5} />
 
                 <div>
-                    <Typography.Body size={Typography.Sizes.md}>Equipment Type</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Equipment Type
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         id="exampleSelect"
                         placeholder="Select Equipment Type"
                         name="select"
                         isSearchable={true}
-                        value={equipmentObj?.equipment_type}
+                        currentValue={equipmentTypeDataAll.filter(
+                            (option) => option.value === equipmentObj?.equipment_type
+                        )}
                         options={equipmentTypeDataAll}
                         onChange={(e) => {
                             handleChange('equipment_type', e.value);
                         }}
+                        error={equipmentErrors?.equipment_type}
                         className="basic-single"
                     />
                 </div>
@@ -106,18 +151,25 @@ const AddEquipment = ({
                 <Brick sizeInRem={1.5} />
 
                 <div>
-                    <Typography.Body size={Typography.Sizes.md}>End Use Category</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        End Use Category
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         id="endUseSelect"
                         placeholder="Selected End Use"
                         name="select"
                         isSearchable={true}
-                        value={equipmentObj?.end_use}
+                        currentValue={endUseDataNow.filter((option) => option.value === equipmentObj?.end_use)}
                         options={endUseDataNow}
                         onChange={(e) => {
                             handleChange('end_use', e.value);
+                            setEquipmentErrors({ ...equipmentErrors, end_use: null });
                         }}
+                        error={equipmentErrors?.end_use}
                         className="basic-single"
                     />
                 </div>
@@ -132,7 +184,7 @@ const AddEquipment = ({
                         placeholder="Select Equipment Location"
                         name="select"
                         isSearchable={true}
-                        value={equipmentObj?.space_id}
+                        currentValue={locationDataNow.filter((option) => option.value === equipmentObj?.space_id)}
                         options={locationDataNow}
                         onChange={(e) => {
                             handleChange('space_id', e.value);
@@ -149,7 +201,10 @@ const AddEquipment = ({
                         size={Button.Sizes.lg}
                         type={Button.Type.secondaryGrey}
                         className="w-100"
-                        onClick={closeModal}
+                        onClick={() => {
+                            closeModal();
+                            setEquipmentErrors(defaultErrors);
+                        }}
                     />
 
                     <Button
@@ -157,7 +212,7 @@ const AddEquipment = ({
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={!formValidation || isProcessing}
+                        disabled={isProcessing}
                         onClick={saveDeviceData}
                     />
                 </div>

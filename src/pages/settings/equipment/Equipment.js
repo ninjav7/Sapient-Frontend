@@ -6,24 +6,17 @@ import Typography from '../../../sharedComponents/typography';
 import { UncontrolledTooltip } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Form from 'react-bootstrap/Form';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Button from '../../../sharedComponents/button/Button';
 import { getEquipmentTableCSVExport } from '../../../utils/tablesExport';
-
 import 'react-datepicker/dist/react-datepicker.css';
-import Select from '../../../sharedComponents/form/select';
-
 import _ from 'lodash';
-
 import { Badge } from '../../../sharedComponents/badge';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
-import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-
 import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
@@ -32,17 +25,16 @@ import './style.scss';
 import {
     getEqupmentDataRequest,
     deleteEquipmentRequest,
-    addNewEquipment,
     getFiltersForEquipmentRequest,
-    getEndUseDataRequest,
     getLocationDataRequest,
     getMetadataRequest,
 } from '../../../services/equipment';
 import { primaryGray100 } from '../../../assets/scss/_colors.scss';
-import Input from '../../../sharedComponents/form/input/Input';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import Brick from '../../../sharedComponents/brick';
 import AddEquipment from './AddEquipment';
+import { UserStore } from '../../../store/UserStore';
+import { pageListSizes } from '../../../helpers/helpers';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -81,16 +73,9 @@ const SkeletonLoading = () => (
 );
 
 const Equipment = () => {
-    const buildingName = localStorage.getItem('buildingName');
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
-    const [isDelete, setIsDelete] = useState(false);
-    const handleDeleteClose = () => setIsDelete(false);
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(1);
@@ -104,6 +89,7 @@ const Equipment = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
     const [DuplicateGeneralEquipmentData, setDuplicateGeneralEquipmentData] = useState([]);
     const [onlineEquipData, setOnlineEquipData] = useState([]);
@@ -140,6 +126,7 @@ const Equipment = () => {
             preparedData.push({
                 value: `${item?.equipment_id}`,
                 label: `${item?.equipment_type} (${item?.end_use_name})`,
+                end_use_id: `${item?.end_use_id}`,
             });
         });
         setEquipmentTypeDataAll(preparedData);
@@ -545,7 +532,25 @@ const Equipment = () => {
         setIsDeleting(true);
         await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
-                fetchEquipmentData();
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                    fetchEquipmentData();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Equipment.'
+                            : 'Unable to delete Equipment due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsDeleting(false);
                 setShowDeleteEquipmentModal(false);
             })
@@ -623,7 +628,10 @@ const Equipment = () => {
         )
             .then((res) => {
                 let response = res.data;
-                download(buildingName, getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData));
+                download(
+                    `${bldgName}_Equipments_${new Date().toISOString().split('T')[0]}`,
+                    getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData)
+                );
                 setIsEquipDataFetched(false);
             })
             .catch((error) => {
@@ -704,6 +712,7 @@ const Equipment = () => {
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         currentPage={pageNo}
+                        pageListSizes={pageListSizes}
                         totalCount={(() => {
                             if (search) {
                                 return totalItemsSearched;

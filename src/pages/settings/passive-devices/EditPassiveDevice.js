@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { updatePassiveDeviceData } from './services';
 import { isInputLetterOrNumber } from '../../../helpers/helpers';
+import { UserStore } from '../../../store/UserStore';
 
 const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiveDeviceData, fetchPassiveDevice }) => {
     const defaultDeviceObj = {
@@ -32,15 +33,37 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
     const updateDeviceDetails = async () => {
         setIsProcessing(true);
         const params = `?device_id=${passiveDeviceObj?.equipments_id}`;
-        const dataToUpdate = {
+        const payload = {
             mac_address: passiveDeviceObj?.identifier,
         };
-        await updatePassiveDeviceData(params, dataToUpdate)
+        await updatePassiveDeviceData(params, payload)
             .then((res) => {
-                closeEditDeviceModal();
-                setPassiveDeviceObj(defaultDeviceObj);
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Device updated Successfully.';
+                        s.notificationType = 'success';
+                    });
+                    closeEditDeviceModal();
+                    setPassiveDeviceObj(defaultDeviceObj);
+                    fetchPassiveDevice();
+                } else {
+                    if (!response?.success && response?.message.includes('identifier already exists')) {
+                        setIdentifierAlert('Identifier with given name already exists.');
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update Smart Meter.'
+                                : 'Unable to update Smart Meter due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                }
                 setIsProcessing(false);
-                fetchPassiveDevice();
             })
             .catch(() => {
                 setIsProcessing(false);
@@ -91,8 +114,13 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
                     value={passiveDeviceObj?.identifier}
                     defaultValue={passiveDeviceObj?.identifier}
                 />
+                <Brick sizeInRem={0.25} />
 
-                <Brick sizeInRem={1.5} />
+                {!identifierAlert && (
+                    <Typography.Body size={Typography.Sizes.sm}>16 digit serial number</Typography.Body>
+                )}
+
+                <Brick sizeInRem={1.25} />
 
                 <InputTooltip
                     label="Model"
@@ -122,9 +150,7 @@ const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiv
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={!formValidation || isProcessing || identifierAlert !== null}
-                        onClick={() => {
-                            updateDeviceDetails();
-                        }}
+                        onClick={updateDeviceDetails}
                     />
                 </div>
 

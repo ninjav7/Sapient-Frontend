@@ -20,6 +20,17 @@ const isUserAuthenticated = () => {
     }
 };
 
+const isSuperUserAuthenticated=()=>{
+    const superuser =JSON.parse(localStorage.getItem("isSuperUser"))
+    console.log(superuser);
+    if(superuser==="true" || superuser===true){
+        return true;
+    }
+    else{
+       return false;
+    }
+}
+
 /**
  * Returns the logged in user
  */
@@ -29,4 +40,4 @@ const getLoggedInUser = () => {
     return user ? (typeof user == 'object' ? user : JSON.parse(user)) : null;
 };
 
-export { isUserAuthenticated, getLoggedInUser };
+export { isUserAuthenticated, getLoggedInUser, isSuperUserAuthenticated };

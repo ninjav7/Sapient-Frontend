@@ -430,7 +430,7 @@ const EndUseType = () => {
                     data.map((record) => {
                         let obj = {
                             x: record.date,
-                            y: parseInt(record.energy_consumption / 1000),
+                            y: parseFloat((record.energy_consumption / 1000).toFixed(2)),
                         };
                         energyData[0].data.push(obj);
                     });

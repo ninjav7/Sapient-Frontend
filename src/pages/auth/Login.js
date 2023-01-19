@@ -71,6 +71,11 @@ const Login = (props) => {
         }
     };
 
+    const handleAdminPortal=async()=>{
+        await localStorage.setItem("isSuperUser",true); 
+        await history.push('/admin/accounts')
+        window.location.reload();
+    }
     return (
         <React.Fragment>
             {(_isMounted || !isAuthTokenValid) && (
@@ -158,6 +163,11 @@ const Login = (props) => {
                                     <FormGroup>
                                         <Button className="sub-button" color="primary" onClick={handleValidSubmit}>
                                             Sign In
+                                        </Button>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <Button className="sub-button" color="primary" onClick={()=>{handleAdminPortal()}}>
+                                            Admin Portal
                                         </Button>
                                     </FormGroup>
                                 </form>

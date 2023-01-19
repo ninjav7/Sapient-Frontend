@@ -18,6 +18,7 @@ import { pageListSizes } from '../../../helpers/helpers';
 import EditEquipType from './EditEquipType';
 import DeleteEquipType from './DeleteEquipType';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { formatConsumptionValue } from '../../../sharedComponents/helpers/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -219,7 +220,10 @@ const EquipmentType = () => {
         await getEquipTypeData()
             .then((res) => {
                 const responseData = res?.data?.data;
-                download('Equipment_Type_List', getEquipTypeTableCSVExport(responseData, headerProps));
+                download(
+                    `Equipment_Types_${new Date().toISOString().split('T')[0]}`,
+                    getEquipTypeTableCSVExport(responseData, headerProps)
+                );
             })
             .catch(() => {});
     };
@@ -257,7 +261,7 @@ const EquipmentType = () => {
     const renderEquipCount = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.equipment_count === '' ? '-' : row?.equipment_count}
+                {row?.equipment_count ? formatConsumptionValue(row?.equipment_count, 0) : 0}
             </Typography.Body>
         );
     };
@@ -401,6 +405,7 @@ const EquipmentType = () => {
                 isAddEquipTypeModalOpen={isAddEquipTypeModalOpen}
                 closeAddEquipTypeModal={closeAddEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
+                search={search}
             />
 
             <EditEquipType
@@ -408,6 +413,8 @@ const EquipmentType = () => {
                 closeEditEquipTypeModal={closeEditEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
+                search={search}
+                openEditEquipTypeModal={openEditEquipTypeModal}
             />
 
             <DeleteEquipType
@@ -415,6 +422,7 @@ const EquipmentType = () => {
                 closeDeleteEquipTypeModal={closeDeleteEquipTypeModal}
                 fetchEquipTypeData={fetchEquipTypeData}
                 selectedEquipType={selectedEquipType}
+                search={search}
             />
         </React.Fragment>
     );

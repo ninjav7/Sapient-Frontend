@@ -60,6 +60,7 @@ const SkeletonLoading = () => (
 const PassiveDevices = () => {
     const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -96,7 +97,7 @@ const PassiveDevices = () => {
     const fetchPassiveDeviceData = async () => {
         const sorting = sortBy.method &&
             sortBy.name && {
-                order_by: sortBy.name,
+                order_by: sortBy.name === 'status' ? 'stat' : sortBy.name,
                 sort_by: sortBy.method,
             };
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
@@ -250,7 +251,7 @@ const PassiveDevices = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
-                download('Smart_Meter_List', csvData);
+                download(`${bldgName}_Smart Meter_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };
@@ -375,9 +376,7 @@ const PassiveDevices = () => {
                                     label={'Add Smart Meter'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={() => {
-                                        openAddDeviceModal();
-                                    }}
+                                    onClick={openAddDeviceModal}
                                     icon={<PlusSVG />}
                                 />
                             </div>

@@ -105,6 +105,7 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 // const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
+const AdminPortal = React.lazy(()=>import('../pages/admin'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -667,6 +668,22 @@ const authRoutes = {
     ],
 };
 
+// admin
+const adminRoutes = {
+    path: '/admin',
+    name: 'Admin',
+    visibility: true,
+    children: [
+        {
+            path: '/admin/accounts',
+            name: 'Accounts',
+            component: AdminPortal,
+            route: Route,
+            visibility: true,
+        },
+    ],
+};
+
 // flatten the list of all nested routes
 const flattenRoutes = (routes) => {
     let flatRoutes = [];
@@ -677,6 +694,7 @@ const flattenRoutes = (routes) => {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
+    console.log(flatRoutes);
     return flatRoutes;
 };
 
@@ -689,6 +707,7 @@ const allRoutes = [
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    adminRoutes,
     authRoutes,
     // ...appRoutes,
     // pagesRoutes,

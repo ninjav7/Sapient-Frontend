@@ -191,7 +191,9 @@ const EndUsesPage = () => {
                         record.data.forEach((el) => {
                             if (index === 0) formattedTimestamp.push(el?.time_stamp);
                             obj.data.push(
-                                isNaN(el?.consumption) ? el?.consumption : Math.round(el?.consumption / 1000)
+                                isNaN(el?.consumption)
+                                    ? el?.consumption
+                                    : parseFloat((el?.consumption / 1000).toFixed(2))
                             );
                         });
                         return obj;

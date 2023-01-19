@@ -285,7 +285,7 @@ const Users = () => {
     const renderRole = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.sm}>
-                {row?.role === '' ? '-' : row?.permissions[0].permission_name}
+                {row?.role === '' ? '-' : row?.permissions[0]?.permission_name}
             </Typography.Body>
         );
     };
@@ -436,11 +436,15 @@ const Users = () => {
                         currentPage={pageNo}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
-                        onPageSize={setPageSize}
+                        onPageSize={(currentPageSize) => {
+                            setPageNo(1);
+                            setPageSize(currentPageSize);
+                        }}
                         pageListSizes={pageListSizes}
                         totalCount={(() => {
                             return totalItems;
                         })()}
+                        isPaginationAlwaysShown={true}
                     />
                 </Col>
             </Row>

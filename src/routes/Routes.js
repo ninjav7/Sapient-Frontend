@@ -3,7 +3,7 @@ import { BrowserRouter, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import { connect } from 'react-redux';
 
-import { isUserAuthenticated } from '../helpers/authUtils';
+import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUtils';
 import * as layoutConstants from '../constants/layout';
 import { allFlattenRoutes as routes } from './index';
 
@@ -39,10 +39,20 @@ const HorizontalLayout = Loadable({
     loading,
 });
 
+const AdminLayout = Loadable({
+    loader: () => import('../layouts/Admin'),
+    render(loaded, props) {
+        let Component = loaded.default;
+        return <Component {...props} />;
+    },
+    loading,
+});
+
 class Routes extends Component {
     // returns the layout
     getLayout = () => {
-        if (!isUserAuthenticated()) return AuthLayout;
+        if(isSuperUserAuthenticated()) return AdminLayout;
+        else if (!isUserAuthenticated()) return AuthLayout;
 
         let layoutCls = VerticalLayout;
 
@@ -66,6 +76,7 @@ class Routes extends Component {
                 <Layout {...this.props}>
                     <Switch>
                         {routes.map((route, index) => {
+                            console.log(route);
                             return !route.children ? (
                                 <route.route
                                     key={index}

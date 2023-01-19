@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { BaseUrl } from './Network';
 import { Cookies } from 'react-cookie';
-let cookies = new Cookies();
-let userdata = cookies.get('user');
+
+const cookies = new Cookies();
+const userdata = cookies.get('user');
 const defaultOptions = {
     baseURL: BaseUrl,
     Authorization: `Bearer ${userdata?.token}`,
@@ -28,11 +29,13 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     function (error) {
-        if (error.response.status === 403) {
+        if (error?.response?.status === 403) {
             localStorage.clear();
             cookies.remove('user', { path: '/' });
             window.location.reload();
+            return;
         }
+        return error?.response;
     }
 );
 

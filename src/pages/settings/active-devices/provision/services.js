@@ -17,7 +17,7 @@ export function fetchKasaAccounts(params) {
 }
 
 export function getKasaLinkAccounts(payload) {
-    return axiosInstance.get(`${kasaLinkAccount}`, payload).then((res) => res);
+    return axiosInstance.post(`${kasaLinkAccount}`, payload).then((res) => res);
 }
 
 export function getKasaUnLinkAccounts(payload) {

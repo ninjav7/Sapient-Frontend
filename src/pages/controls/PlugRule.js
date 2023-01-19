@@ -7,6 +7,7 @@ import LineChart from '../charts/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
+import { fetchPlugRules } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
 
 import 'react-datepicker/dist/react-datepicker.css';
@@ -24,7 +25,6 @@ import {
     fetchPlugRuleDetails,
     deletePlugRuleRequest,
     getGraphDataRequest,
-    getListSensorsForBuildingsRequest,
     linkSensorsToRuleRequest,
     listLinkSocketRulesRequest,
     unlinkSocketRequest,
@@ -32,13 +32,11 @@ import {
     getFiltersForSensorsRequest,
 } from '../../services/plugRules';
 import './style.scss';
-import { ceil } from 'lodash';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Badge } from '../../sharedComponents/badge';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import { generateID } from '../../sharedComponents/helpers/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="#202020" height={35}>
@@ -89,13 +87,12 @@ const PlugRule = () => {
         sensor_id: [],
     });
 
-    const activeBuildingId = localStorage.getItem('buildingId');
-
     const { v4: uuidv4 } = require('uuid');
     const history = useHistory();
 
     const getConditionId = () => uuidv4();
     const [currentData, setCurrentData] = useState([]);
+    const [activeBuildingId, setActiveBuildingId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -211,6 +208,19 @@ const PlugRule = () => {
             }
         }
     };
+    const fetchPlugRulesData = async () => {
+        const params = '';
+        await fetchPlugRules(params, '').then((res) => {
+            const plugRules = res.data.data;
+
+            plugRules &&
+                plugRules.forEach((plugRule) => {
+                    if (plugRule.name == currentData.name) {
+                        setActiveBuildingId(plugRule.buildings[0].building_id);
+                    }
+                });
+        });
+    };
 
     useEffect(() => {
         generateHours();
@@ -226,10 +236,16 @@ const PlugRule = () => {
             if (res.status) {
                 setSkeletonLoading(false);
             }
-            let response = res.data;
-            setCurrentData(response.data);
+            let response = res.data.data;
+            setCurrentData(response);
         });
     };
+    useEffect(() => {
+        if (currentData?.name) {
+            fetchPlugRulesData();
+        }
+    }, [currentData]);
+
     const deletePlugRule = async () => {
         setIsDeletting(true);
         await deletePlugRuleRequest(ruleId).then((res) => {
@@ -801,40 +817,41 @@ const PlugRule = () => {
 
         isLoadingRef.current = true;
 
-        await getUnlinkedSocketRules(
-            pageSize,
-            pageNo,
-            ruleId,
-            activeBuildingId,
-            equpimentTypeFilterString,
-            macTypeFilterString,
-            locationTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
-            {
-                ...sorting,
-            }
-        ).then((res) => {
-            isLoadingRef.current = false;
+        activeBuildingId &&
+            (await getUnlinkedSocketRules(
+                pageSize,
+                pageNo,
+                ruleId,
+                activeBuildingId,
+                equpimentTypeFilterString,
+                macTypeFilterString,
+                locationTypeFilterString,
+                sensorTypeFilterString,
+                floorTypeFilterString,
+                spaceTypeFilterString,
+                spaceTypeTypeFilterString,
+                {
+                    ...sorting,
+                }
+            ).then((res) => {
+                isLoadingRef.current = false;
 
-            let response = res.data.data;
+                let response = res.data.data;
 
-            setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
+                setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
 
-            setUnlinkedSocketRuleSuccess(res.status);
+                setUnlinkedSocketRuleSuccess(res.status);
 
-            let unLinkedData = [];
-            _.uniqBy(response.data, 'id').forEach((record) => {
-                record.linked_rule = false;
-                unLinkedData.push(record);
-            });
+                let unLinkedData = [];
+                _.uniqBy(response.data, 'id').forEach((record) => {
+                    record.linked_rule = false;
+                    unLinkedData.push(record);
+                });
 
-            setUnLinkedRuleData(unLinkedData);
-            setAllUnlinkedRuleAdded((el) => [...el, '1']);
-            setTotalItems(response.total_data);
-        });
+                setUnLinkedRuleData(unLinkedData);
+                setAllUnlinkedRuleAdded((el) => [...el, '1']);
+                setTotalItems(response.total_data);
+            }));
     };
 
     const fetchLinkedSocketRules = async () => {
@@ -859,10 +876,6 @@ const PlugRule = () => {
             })
             .catch((error) => {});
     };
-
-    useEffect(() => {
-        fetchLinkedSocketRules();
-    }, []);
 
     useEffect(() => {
         const selectedSensors = selectedIds
@@ -983,107 +996,111 @@ const PlugRule = () => {
         setter(options.map(({ value }) => value).join('+'));
         setPageNo(1);
     };
+    const fetchFiltersForSensors = async () => {
+        isLoadingRef.current = true;
+        const filters = await getFiltersForSensorsRequest({
+            activeBuildingId,
+            macTypeFilterString,
+            equpimentTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+        });
 
+        filters.data.forEach((filterOptions) => {
+            const filterOptionsFetched = [
+                {
+                    label: 'MAC Address',
+                    value: 'macAddresses',
+                    placeholder: 'All Mac addresses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOptionMac([]);
+                        setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Equipment Type',
+                    value: 'equipmentType',
+                    placeholder: 'All Equipment Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.equipment_type.map((filterItem) => ({
+                        value: filterItem.equipment_type_id,
+                        label: filterItem.equipment_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setEqupimentTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensors',
+                    placeholder: 'All Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                    onDelete: setSensorTypeFilterString(''),
+                },
+                {
+                    label: 'Floor',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_floor.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+                    onDelete: () => setFloorTypeFilterString(''),
+                },
+                {
+                    label: 'Space',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_space.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                    onDelete: () => setSpaceTypeFilterString(''),
+                },
+                {
+                    label: 'Space Type',
+                    value: 'spaceType',
+                    placeholder: 'All Space Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
+                        value: filterItem.space_type_id,
+                        label: filterItem.space_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+                    onDelete: () => setSpaceTypeTypeFilterString(''),
+                },
+            ];
+
+            setFilterOptions(filterOptionsFetched);
+        });
+
+        isLoadingRef.current = false;
+    };
     useEffect(() => {
-        (async () => {
-            isLoadingRef.current = true;
-            const filters = await getFiltersForSensorsRequest({
-                activeBuildingId,
-                macTypeFilterString,
-                equpimentTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-            });
-
-            filters.data.forEach((filterOptions) => {
-                const filterOptionsFetched = [
-                    {
-                        label: 'MAC Address',
-                        value: 'macAddresses',
-                        placeholder: 'All Mac addresses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOptionMac([]);
-                            setMacTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipmentType',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOption([]);
-                            setEqupimentTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Sensors',
-                        value: 'sensors',
-                        placeholder: 'All Sensors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                        onDelete: setSensorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Floor',
-                        value: 'floor',
-                        placeholder: 'All Floors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                            value: filterItem.floor_id,
-                            label: filterItem.floor_name,
-                        })),
-                        onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                        onDelete: () => setFloorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space',
-                        value: 'space',
-                        placeholder: 'All Spaces',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                            value: filterItem.space_id,
-                            label: filterItem.space_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                        onDelete: () => setSpaceTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'spaceType',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                            value: filterItem.space_type_id,
-                            label: filterItem.space_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                        onDelete: () => setSpaceTypeTypeFilterString(''),
-                    },
-                ];
-
-                setFilterOptions(filterOptionsFetched);
-            });
-
-            isLoadingRef.current = false;
-        })();
+        if (activeBuildingId) {
+            fetchUnLinkedSocketRules();
+            fetchFiltersForSensors();
+            fetchLinkedSocketRules();
+        }
     }, [
         activeBuildingId,
         macTypeFilterString,
@@ -1095,51 +1112,51 @@ const PlugRule = () => {
         spaceTypeTypeFilterString,
     ]);
 
+    const fetchAllData = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        isLoadingRef.current = true;
+        await getUnlinkedSocketRules(
+            pageSize,
+            pageNo,
+            ruleId,
+            activeBuildingId,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            {
+                sensor_search: search,
+                ...sorting,
+            }
+        ).then((res) => {
+            isLoadingRef.current = false;
+
+            setUnlinkedSocketRuleSuccess(res.status);
+            let response = res.data.data;
+            let unLinkedData = [];
+            response.data.forEach((record) => {
+                record.linked_rule = false;
+                unLinkedData.push(record);
+            });
+            setAllSearchData(unLinkedData);
+            setTotalItemsSearched(response.total_data);
+        });
+    };
     useEffect(() => {
         setAllSearchData([]);
 
-        const fetchAllData = async () => {
-            const sorting = sortBy.method &&
-                sortBy.name && {
-                    order_by: sortBy.name,
-                    sort_by: sortBy.method,
-                };
-
-            isLoadingRef.current = true;
-            await getUnlinkedSocketRules(
-                pageSize,
-                pageNo,
-                ruleId,
-                activeBuildingId,
-                equpimentTypeFilterString,
-                macTypeFilterString,
-                locationTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-                {
-                    sensor_search: search,
-                    ...sorting,
-                }
-            ).then((res) => {
-                isLoadingRef.current = false;
-
-                setUnlinkedSocketRuleSuccess(res.status);
-                let response = res.data.data;
-                let unLinkedData = [];
-                response.data.forEach((record) => {
-                    record.linked_rule = false;
-                    unLinkedData.push(record);
-                });
-                setAllSearchData(unLinkedData);
-                setTotalItemsSearched(response.total_data);
-            });
-        };
-
-        search && fetchAllData();
+        search && activeBuildingId && fetchAllData();
     }, [
         search,
+        activeBuildingId,
         equpimentTypeFilterString,
         macTypeFilterString,
         locationTypeFilterString,
