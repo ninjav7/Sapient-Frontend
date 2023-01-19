@@ -1,0 +1,52 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.condition-group-wrapper {
+    display: flex;
+    gap: 4px;
+
+    .condition-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #7c879c;
+        border-radius: 4px;
+        color: #1d2939;
+        padding: 4px 8px;
+
+        &.selected {
+            border-color: #eef4ff;
+            background-color: #eef4ff;
+
+            .typography-wrapper {
+                color: #444ce7;
+            }
+        }
+        &.disabled {
+            border: 1px solid #eaecf0;
+            background-color: #fff;
+            .typography-wrapper {
+                color: #d0d5dd;
+            }
+            &:hover {
+                cursor: not-allowed;
+            }
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+        &:hover {
+            cursor: pointer;
+        }
+
+        svg {
+            margin-right: 10px;
+        }
+
+        .typography-wrapper {
+            font-weight: 500;
+        }
+    }
+}

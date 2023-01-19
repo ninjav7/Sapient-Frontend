@@ -169,6 +169,7 @@ export const listSensor = '/api/config/sensor/list_sensor';
 // plug rules
 export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';
 export const plugRuleDetails = '/api/energy/plug_rule/plug-rule-details';
+export const listConditions = '/api/energy/plug_rule/all-conditions';
 export const createPlugRule = '/api/energy/plug_rule/create-plug-rule';
 export const updatePlugRule = '/api/energy/plug_rule/update-plug-rule';
 export const deletePlugRule = '/api/energy/plug_rule/delete-plug-rule';

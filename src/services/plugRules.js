@@ -2,6 +2,7 @@ import _ from 'lodash';
 import axiosInstance from './axiosInstance';
 import {
     listPlugRules,
+    listConditions,
     updatePlugRule,
     createPlugRule,
     deletePlugRule,
@@ -24,6 +25,12 @@ export function fetchPlugRuleDetails(ruleId) {
     return axiosInstance.get(`${plugRuleDetails}?rule_id=${ruleId}`).then((res) => {
         return res;
     });
+}
+
+export function getAllConditions(){
+    return axiosInstance.get(`${listConditions}`).then((res)=>{
+        return res.data;
+    })
 }
 
 export function updatePlugRuleRequest(currentData) {
