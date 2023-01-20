@@ -17,6 +17,7 @@ function Holder({ rightContent }) {
                             <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
                         </Carousel.Caption>
                     </Carousel.Item>
+                    {/* Commented for Future Use */}
                     {/* <Carousel.Item>
                         <img className="backgroundStyle name" src={Slide2} />
                         <Carousel.Caption>
