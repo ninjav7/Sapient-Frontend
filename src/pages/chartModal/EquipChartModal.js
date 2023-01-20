@@ -36,6 +36,8 @@ import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
+import Brick from '../../sharedComponents/brick';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -379,17 +381,32 @@ const EquipChartModal = ({
         const fetchMetadata = async () => {
             await getMetadataRequest(bldgId)
                 .then((res) => {
-                    const { end_uses, equipment_type, location } = res.data;
+                    const { end_uses, equipment_type, location } = res?.data;
 
-                    const data = location.map((el) => {
+                    const endUseData = end_uses.map((el) => {
                         return {
-                            label: el.location_name,
-                            value: el.location_id,
+                            label: el?.name,
+                            value: el?.end_use_id,
                         };
                     });
-                    setEquipmentTypeData(equipment_type);
-                    setEndUse(end_uses);
-                    setLocationData(data);
+
+                    const locationData = location.map((el) => {
+                        return {
+                            label: el?.location_name,
+                            value: el?.location_id,
+                        };
+                    });
+
+                    const equipTypeData = equipment_type.map((el) => {
+                        return {
+                            label: el?.equipment_type,
+                            value: el?.equipment_id,
+                        };
+                    });
+
+                    setEquipmentTypeData(equipTypeData);
+                    setEndUse(endUseData);
+                    setLocationData(locationData);
                 })
                 .finally(() => {});
         };
@@ -855,11 +872,109 @@ const EquipChartModal = ({
 
                         {selectedTab === 1 && (
                             <>
+                                {equipmentData?.device_type === 'passive' && (
+                                    <>
+                                        <Brick sizeInRem={1} />
+
+                                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                                            Equipment Details
+                                        </Typography.Header>
+
+                                        <Brick sizeInRem={1} />
+
+                                        <Row>
+                                            <Col xl={8}>
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Name
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <InputTooltip
+                                                            placeholder="Enter Equipment Name"
+                                                            labelSize={Typography.Sizes.md}
+                                                            value={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Type
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={equipmentTypeData}
+                                                            currentValue={equipmentTypeData.filter(
+                                                                (option) => option.value === equipType
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'passive'
+                                                                );
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            End Use Category
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={endUse}
+                                                            currentValue={endUse.filter(
+                                                                (option) => option.value === equipmentData?.end_use_id
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleChange('end_use', e.target.value);
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div>
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Select
+                                                        placeholder="Select Location"
+                                                        options={locationData}
+                                                        currentValue={locationData.filter(
+                                                            (option) => option.value === location
+                                                        )}
+                                                        onChange={(e) => {
+                                                            handleChange('space_id', e.value);
+                                                        }}
+                                                        isSearchable={true}
+                                                    />
+
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        Location this equipment is installed in.
+                                                    </Typography.Body>
+                                                </div>
+                                            </Col>
+                                            <Col xl={4}></Col>
+                                        </Row>
+                                    </>
+                                )}
                                 {equipmentData?.device_type === 'passive' ? (
-                                    <Row className="mt-4">
-                                        <Col lg={8}>
+                                    <Row>
+                                        <Col xl={8}>
                                             <Row>
-                                                <Col lg={12} className="mb-2">
+                                                <Col xl={12}>
                                                     <Typography.Header
                                                         size={Typography.Sizes.md}
                                                         Type={Typography.Types.Regular}>
