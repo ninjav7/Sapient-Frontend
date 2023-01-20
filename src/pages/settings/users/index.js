@@ -329,7 +329,6 @@ const Users = () => {
                         totalCount={(() => {
                             return totalItems;
                         })()}
-                        isPaginationAlwaysShown={true}
                     />
                 </Col>
             </Row>
