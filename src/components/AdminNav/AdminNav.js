@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
 import Logo from './Logo';
 import NavLinks from './NavLinks';
 import Control from './Control';
 import '../style.css';
 
 const TopNav = () => {
-      
     return (
         <div className="energy-top-nav">
             <Logo />

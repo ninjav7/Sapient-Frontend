@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import { ComponentStore } from '../../store/ComponentStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import Typography from '../../sharedComponents/typography';
-import Button from '../../sharedComponents/button/Button';
-import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import Typography from '../../../sharedComponents/typography';
+import Button from '../../../sharedComponents/button/Button';
+import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { useHistory } from 'react-router-dom';
-import colorPalette from '../../assets/scss/_colors.scss';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import { faCircleCheck, faBan } from '@fortawesome/pro-thin-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
-import { ReactComponent as Pencil } from '../../assets/icon/pencil.png';
-import { TrendsBadge } from '../../sharedComponents/trendsBadge';
+import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
+import AddCustomer from './addCustomer';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -50,7 +49,9 @@ const Accounts = () => {
     const history = useHistory();
 
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
+    const [openCustomer, setOpenCustomer] = useState(false);
 
+    const closeAddCustomer = () => setOpenCustomer(false);
     const [userData, setUserData] = useState([
         {
             account_id: '#2148',
@@ -273,13 +274,14 @@ const Accounts = () => {
                                     />
                                 }
                                 iconAlignment={Button.IconAlignment.left}
-                                onClick={() => {}}
+                                onClick={() => {
+                                    setOpenCustomer(true);
+                                }}
                             />
                         </div>
                     </div>
                 </Col>
             </Row>
-
             <Row>
                 <Col lg={12} className="mt-4">
                     <DataTableWidget
@@ -338,103 +340,7 @@ const Accounts = () => {
                     />
                 </Col>
             </Row>
-
-            {/* <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} centered>
-                <Modal.Header>
-                    <Typography.Header size={Typography.Sizes.sm}>Add User</Typography.Header>
-                </Modal.Header>
-                <Modal.Body className="add-user-model">
-                    <Form autoComplete="off">
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Typography.Subheader className="mb-1">First Name</Typography.Subheader>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter First Name"
-                                        onChange={(e) => {
-                                            handleChange('first_name', e.target.value);
-                                        }}
-                                        value={userObj.first_name}
-                                        autoFocus
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Typography.Subheader className="mb-1">Last Name</Typography.Subheader>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter Last Name"
-                                        onChange={(e) => {
-                                            handleChange('last_name', e.target.value);
-                                        }}
-                                        value={userObj.last_name}
-                                        required
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Typography.Subheader className="mb-1">Email Address</Typography.Subheader>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Sapient Email"
-                                onChange={(e) => {
-                                    handleChange('email', e.target.value);
-                                }}
-                                value={userObj.email}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Typography.Subheader className="mb-1">User Role</Typography.Subheader>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="roles"
-                                contentEditable="false"
-                                required
-                                onChange={(e) => {
-                                    handleChange('role', e.target.value);
-                                }}
-                                value={userObj?.role}>
-                                <option selected>Select Role</option>
-                                {rolesData?.map((record) => {
-                                    return <option value={record?.id}>{record?.name}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>
-                        <Button
-                            label="Cancel"
-                            size={Button.Sizes.lg}
-                            type={Button.Type.secondaryGrey}
-                            className="d-flex align-items-center button-container"
-                            onClick={() => {
-                                handleClose();
-                                setFormValidation(false);
-                            }}
-                        />
-                        <Button
-                            label={isProcessing ? 'Adding User...' : 'Add & Invite User'}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            className="d-flex align-items-center button-container"
-                            onClick={() => {
-                                setIsProcessing(true);
-                                saveUserData();
-                            }}
-                            disabled={!formValidation}
-                        />
-                    </div>
-                </Modal.Footer>
-            </Modal> */}
+            <AddCustomer isAddCustomerOpen={openCustomer} closeAddCustomerModal={closeAddCustomer} />{' '}
         </React.Fragment>
     );
 };

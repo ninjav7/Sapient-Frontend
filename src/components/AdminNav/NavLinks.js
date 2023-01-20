@@ -1,23 +1,15 @@
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faBell, faMonitorWaveform } from '@fortawesome/pro-regular-svg-icons';
+import { faUser } from '@fortawesome/pro-regular-svg-icons';
 
 const NavLinks = () => {
     const location = useLocation();
     const history = useHistory();
     const routes = [
         {
-            path: '/admin/accounts',
+            path: '/super-user/accounts',
             name: 'Accounts',
-        },
-        {
-            path: '/admin/accounts',
-            name: 'Insights',
-        },
-        {
-            path: '/admin/accounts',
-            name: 'Equipment Types',
         },
     ];
     return (
@@ -39,16 +31,6 @@ const NavLinks = () => {
                             {item.name === 'Accounts' && (
                                 <div className={`font-icon-style ${className}`}>
                                     <FontAwesomeIcon icon={faUser} size="lg" />
-                                </div>
-                            )}
-                            {item.name === 'Insights' && (
-                                <div className={`font-icon-style ${className}`}>
-                                    <FontAwesomeIcon icon={faBell} size="lg" />
-                                </div>
-                            )}
-                            {item.name === 'Equipment Types' && (
-                                <div className={`font-icon-style ${className}`}>
-                                    <FontAwesomeIcon icon={faMonitorWaveform} size="lg" />
                                 </div>
                             )}
                             <div className={`navbar-heading ${className}`} style={{ width: 'max-content' }}>

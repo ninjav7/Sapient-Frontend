@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
 
-import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
+import { isUserAuthenticated, getLoggedInUser, isSuperUserAuthenticated } from '../helpers/authUtils';
 
 // settings
 import General from '../pages/settings/general-settings';
@@ -105,7 +105,7 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 // const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
-const AdminPortal = React.lazy(()=>import('../pages/admin'));
+const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -113,7 +113,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         exact
         {...rest}
         render={(props) => {
-            if (!isUserAuthenticated()) {
+            if (isSuperUserAuthenticated()) {
+                return <Component {...props} />;
+            } else if (!isUserAuthenticated()) {
                 // not logged in so redirect to login page with the return url
                 return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
             }
@@ -139,7 +141,12 @@ const rootRoute = {
     path: '/',
     exact: true,
     // component: () => <Redirect to="/dashboard" />,
-    component: () => <Redirect to="/energy/portfolio/overview" />,
+    component: () =>
+        isSuperUserAuthenticated() ? (
+            <Redirect to="/super-user/accounts" />
+        ) : (
+            <Redirect to="/energy/portfolio/overview" />
+        ),
     route: PrivateRoute,
     visibility: true,
 };
@@ -670,14 +677,14 @@ const authRoutes = {
 
 // admin
 const adminRoutes = {
-    path: '/admin',
+    path: '/super-user',
     name: 'Admin',
     visibility: true,
     children: [
         {
-            path: '/admin/accounts',
+            path: '/super-user/accounts',
             name: 'Accounts',
-            component: AdminPortal,
+            component: Accounts,
             route: Route,
             visibility: true,
         },

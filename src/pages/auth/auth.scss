@@ -27,7 +27,14 @@
 .sub-button{
     width:100%;
     justify-content: center;
-    margin-top: 3rem;
+}
+ .or-text{
+    text-align: center;
+ }
+
+.btn-secondary {
+    background-color:none !important;
+    border-color:none !important
 }
 
 .logoContainer{

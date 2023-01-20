@@ -1,8 +1,15 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-beta.azurewebsites.net';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
+
+//SuperUser Auth
+export const googleSignIn = '/api/user_role/sso/google/auth';
+export const sessionValidator = '/api/user_role/user/user-session-details';
+export const customerList = '/api/user_role/vendor/customer-list';
+export const selectCustomer = '/api/user_role/superuser-select-customer';
+export const createCustomer = '/api/user_role/vendor/create-customer';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';

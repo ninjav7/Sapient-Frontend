@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
-import { Col, FormGroup, Alert, Button } from 'reactstrap';
+import { Col, FormGroup, Alert } from 'reactstrap';
 import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
@@ -9,11 +9,13 @@ import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
+import { ReactComponent as Google } from '../../assets/icon/google.svg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
 import Input from '../../sharedComponents/form/input/Input';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { UserStore } from '../../store/UserStore';
+import Button from '../../sharedComponents/button/Button';
 
 const Login = (props) => {
     const history = useHistory();
@@ -71,11 +73,11 @@ const Login = (props) => {
         }
     };
 
-    const handleAdminPortal=async()=>{
-        await localStorage.setItem("isSuperUser",true); 
-        await history.push('/admin/accounts')
+    const handleAdminPortal = async () => {
+        await localStorage.setItem('isSuperUser', true);
+        await history.push('/super-user/accounts');
         window.location.reload();
-    }
+    };
     return (
         <React.Fragment>
             {(_isMounted || !isAuthTokenValid) && (
@@ -122,7 +124,7 @@ const Login = (props) => {
                                         />
                                     </FormGroup>
 
-                                    <FormGroup className="mb-3 pt-5">
+                                    <FormGroup className="mb-4 pt-5">
                                         <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
                                             Password
                                         </Typography.Subheader>
@@ -152,24 +154,44 @@ const Login = (props) => {
                                             labelSize={Typography.Sizes.md}
                                             value={password}
                                         />
-                                        <Link
-                                            to="/account/forget-password"
-                                            className="float-right  ml-1 text-primary font-weight-bold"
-                                            style={{ marginTop: '1.875rem' }}>
-                                            Forgot Password?
-                                        </Link>
                                     </FormGroup>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <FormGroup>
+                                            <Link
+                                                to="/account/forget-password"
+                                                className="float-right  ml-1 text-primary font-weight-bold"
+                                                style={{}}>
+                                                Forgot Password?
+                                            </Link>
+                                        </FormGroup>
 
-                                    <FormGroup>
-                                        <Button className="sub-button" color="primary" onClick={handleValidSubmit}>
-                                            Sign In
-                                        </Button>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Button className="sub-button" color="primary" onClick={()=>{handleAdminPortal()}}>
-                                            Admin Portal
-                                        </Button>
-                                    </FormGroup>
+                                        <FormGroup>
+                                            <Button
+                                                className="sub-button"
+                                                type={Button.Type.primary}
+                                                size={Button.Sizes.md}
+                                                onClick={handleValidSubmit}
+                                                label="Sign In"></Button>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Typography.Header
+                                                size={Typography.Sizes.md}
+                                                className="text-mute mb-1 or-text">
+                                                Or
+                                            </Typography.Header>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Button
+                                                className="sub-button"
+                                                type={Button.Type.secondaryGrey}
+                                                icon={<Google />}
+                                                size={Button.Sizes.md}
+                                                onClick={() => {
+                                                    handleAdminPortal();
+                                                }}
+                                                label="Sign In with Google"></Button>
+                                        </FormGroup>
+                                    </div>
                                 </form>
                             </Col>
                         </>
