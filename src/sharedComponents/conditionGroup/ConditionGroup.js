@@ -1,21 +1,11 @@
 import React from 'react';
-import classNames from 'classnames';
+import cx from 'classnames';
 import './ConditionGroup.scss';
 import { ReactComponent as ConditionCircleUnchecked } from '../../sharedComponents/assets/icons/condition-circle-unchecked.svg';
 import { ReactComponent as ConditionCircleDisabled } from '../../sharedComponents/assets/icons/condition-circle-disabled.svg';
 import { ReactComponent as ConditionCircleChecked } from '../../sharedComponents/assets/icons/condition-circle-checked.svg';
-
+import { weekDays } from './constants';
 import Typography from '../typography';
-
-const weekDays = [
-    { label: 'Mo', value: 'mon' },
-    { label: 'Tu', value: 'tue' },
-    { label: 'We', value: 'wed' },
-    { label: 'Th', value: 'thr' },
-    { label: 'Fr', value: 'fri' },
-    { label: 'Sa', value: 'sat' },
-    { label: 'Su', value: 'sun' },
-];
 
 const ConditionGroup = ({ selectedItemsList, handleButtonClick, disabledItemsList }) => {
     return (
@@ -36,9 +26,11 @@ const ConditionGroup = ({ selectedItemsList, handleButtonClick, disabledItemsLis
                     <div
                         key={i}
                         onClick={() => !isDisabledDay && handleButtonClick(buttonItem.value)}
-                        className={classNames('condition-item', disabledClass, isSelectedClass)}>
+                        className={cx('condition-item', disabledClass, isSelectedClass)}>
                         {icon}
-                        <Typography.Body size={Typography.Sizes.md}>{buttonItem.label}</Typography.Body>
+                        <Typography.Body size={Typography.Sizes.md} fontWeight={Typography.Types.Medium}>
+                            {buttonItem.label}
+                        </Typography.Body>
                     </div>
                 );
             })}

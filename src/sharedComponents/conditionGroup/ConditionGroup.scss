@@ -9,25 +9,25 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #fff;
-        border: 1px solid #7c879c;
+        background-color: $base-white;
+        border: 1px solid $primary-gray-450;
         border-radius: .25rem;
-        color: #1d2939;
+        color: $primary-gray-800;
         padding: .25rem .5rem;
 
         &.selected {
-            border-color: #eef4ff;
-            background-color: #eef4ff;
+            border-color: $primary-indigo-50;
+            background-color: $primary-indigo-50;
 
             .typography-wrapper {
-                color: #444ce7;
+                color: $primary-indigo-600;
             }
         }
         &.disabled {
-            border: 1px solid #eaecf0;
-            background-color: #fff;
+            border: 1px solid $primary-gray-200;
+            background-color: $base-white;
             .typography-wrapper {
-                color: #d0d5dd;
+                color: $primary-gray-300;
             }
             &:hover {
                 cursor: not-allowed;
@@ -43,10 +43,6 @@
 
         svg {
             margin-right: .625rem;
-        }
-
-        .typography-wrapper {
-            font-weight: 500;
         }
     }
 }
