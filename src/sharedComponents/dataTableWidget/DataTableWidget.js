@@ -412,6 +412,7 @@ DataTableWidget.propTypes = {
     disableColumnDragging: PropTypes.bool,
     filterOptions: PropTypes.arrayOf(
         PropTypes.shape({
+            id: stringOrNumberPropTypes,
             label: PropTypes.string.isRequired,
             value: PropTypes.string.isRequired,
             placeholder: PropTypes.string.isRequired,
