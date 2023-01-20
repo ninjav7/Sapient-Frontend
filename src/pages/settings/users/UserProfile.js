@@ -191,23 +191,25 @@ const UserProfile = () => {
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'User details updated.';
+                        s.notificationMessage =
+                            requestType === 'Deactivate'
+                                ? 'User account has been Deactivated.'
+                                : 'User account has been Activated.';
                         s.notificationType = 'success';
                     });
                     getUserDetails();
                 } else {
-                    if (response?.message.includes('email already exist')) {
-                        setErrorObj({ ...errorObj, email: 'Email already exists in system' });
-                        setIsProcessing(false);
-                        return;
-                    }
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Unable to update user details.';
+                        s.notificationMessage =
+                            requestType === 'Deactivate'
+                                ? 'Unable to Deactivate user Account.'
+                                : 'Unable to Activate user Account.';
                         s.notificationType = 'error';
                     });
                 }
                 setIsUpdating(false);
+                handleModalClose();
             })
             .catch((error) => {
                 setIsUpdating(false);
