@@ -213,6 +213,7 @@ const Users = () => {
                 }
                 iconAlignment={Button.IconAlignment.left}
                 className={`status-container ${status.toLowerCase()}-btn`}
+                disabled
             />
         );
     };
