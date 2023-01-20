@@ -8,6 +8,7 @@ import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { inviteMemberUsers, updateVendorPermissions } from './service';
+import EmailValidator from 'email-validator';
 
 const AddUser = ({ addUserModal, handleAddModalClose, getUsersList }) => {
     const defaultUserObj = {
@@ -46,7 +47,11 @@ const AddUser = ({ addUserModal, handleAddModalClose, getUsersList }) => {
 
         if ((userData?.first_name).length === 0) alertObj.first_name = 'First Name cannot be blank.';
         if ((userData?.last_name).length === 0) alertObj.last_name = 'Last Name cannot be blank.';
-        if ((userData?.email).length === 0 || !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userData.email))
+        if (
+            (userData?.email).length === 0 ||
+            !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userData?.email) ||
+            EmailValidator.validate(userData?.email)
+        )
             alertObj.email = 'Please enter valid Email address.';
         if ((userData?.role).length === 0) alertObj.role = { text: 'Please select Role.' };
 
