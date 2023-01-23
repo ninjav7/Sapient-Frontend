@@ -6,8 +6,7 @@ import '../style.css';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { UserStore } from '../../../store/UserStore';
-import { useParams } from 'react-router-dom';
-import { Cookies } from 'react-cookie';
+import { useParams, useHistory } from 'react-router-dom';
 import Brick from '../../../sharedComponents/brick';
 import {
     fetchSingleUserDetail,
@@ -16,47 +15,56 @@ import {
     inviteMemberUsers,
     updateUserRolePermission,
 } from './service';
-import 'moment-timezone';
-import moment from 'moment';
 import { timeZone } from '../../../utils/helper';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
-import Inputs from '../../../sharedComponents/form/input/Input';
 import Select from '../../../sharedComponents/form/select';
 import colorPalette from '../../../assets/scss/_colors.scss';
-import { faCircleCheck, faClockFour, faBan } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShare } from '@fortawesome/pro-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 import CompareRoles from './CompareRoles';
-import Countdown from 'react-countdown';
+import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
+import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
+import { ReactComponent as InviteSVG } from '../../../assets/icon/share.svg';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import { compareObjData } from '../../../helpers/helpers';
+import EmailValidator from 'email-validator';
 
 const UserProfile = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
+    const { userId } = useParams();
+    const history = useHistory();
+
+    const defaultErrorObj = {
+        first_name: null,
+        last_name: null,
+        email: null,
+    };
+
+    const [errorObj, setErrorObj] = useState(defaultErrorObj);
+
+    const [isDataChanged, setDataChanged] = useState(false);
+    const [isRoleChanged, setRoleChanged] = useState(false);
 
     const [userDetail, setUserDetail] = useState();
-    const [isEditing, setIsEditing] = useState(false);
-    const [loadButton, setLoadButton] = useState(false);
+    const [orginalUserData, setOrginalUserData] = useState({});
+
+    const [userRole, setUserRole] = useState();
+    const [orignalUserRole, setOrginalUserRole] = useState({});
+
+    const [isInviting, setInviting] = useState(false);
+
     const [showCompareRoles, setShowCompareRoles] = useState(false);
-    const { userId } = useParams();
-    const [updateUserDetail, setUpdateUserDetail] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-    });
 
-    const [userObj, setUserObj] = useState({
-        user: userId,
-        permission_role: '',
-    });
+    // Add User Modal
+    const [alertModal, setAlertModal] = useState(false);
+    const handleModalClose = () => setAlertModal(false);
+    const handleModalOpen = () => setAlertModal(true);
 
-    const [userPermissionList, setUserPermissionList] = useState();
-    const [show, setShow] = useState(false);
     const [dangerZoneText, setDangerZoneText] = useState('');
-    const [showResendIn, setShowResendIn] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isRoleUpdating, setRoleUpdating] = useState(false);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -77,85 +85,29 @@ const UserProfile = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // TODO:
-    const getSingleUserDetailFunc = async () => {
-        let params = `?member_user_id=${userId}&timezone=${timeZone}`;
+    const getUserDetails = async () => {
+        const params = `?member_user_id=${userId}&timezone=${timeZone}`;
         await fetchSingleUserDetail(params)
             .then((res) => {
-                setUserDetail(res?.data?.data?.user_details);
-                let time = res?.data?.data?.user_details?.last_invite_at;
-                var d = new Date(time);
-                if (!(d.getTime() + 3600000 < Date.now() && d.getTime() < Date.now())) {
-                    setShowResendIn(true);
-                } else {
-                    setShowResendIn(false);
+                const response = res?.data?.data;
+
+                setOrginalUserData(response?.user_details);
+                setUserDetail(response?.user_details);
+
+                if (response?.permissions.length !== 0) {
+                    setOrginalUserRole(response?.permissions[0]);
+                    console.log('SSR user Role => ', response?.permissions[0]);
+                    setUserRole(response?.permissions[0]);
                 }
-                setUserPermissionList(res?.data?.data?.permissions);
-            })
-            .catch((error) => {});
-    };
-
-    const updateSingleUserDetailFunc = async (obj) => {
-        if (obj.is_active !== undefined) {
-            setIsProcessing(true);
-        }
-        let params = `?member_user_id=${userId}`;
-        await updateSingleUserDetails(obj, params)
-            .then((res) => {
-                setUserDetail(res?.data?.data);
-
-                if (obj.is_active !== undefined) {
-                    setShow(false);
-                } else {
-                    setLoadButton(false);
-                }
-                getSingleUserDetailFunc();
-                setIsProcessing(false);
-            })
-            .catch((error) => {});
-        setIsProcessing(false);
-    };
-    const updateRolesPermission = async () => {
-        await updateUserRolePermission(userObj)
-            .then((res) => {
-                setIsProcessing(false);
-                setShow(false);
-
-                getSingleUserDetailFunc();
             })
             .catch((error) => {
-                setIsProcessing(false);
+                setUserDetail({});
+                setUserRole({});
             });
     };
 
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, userObj);
-        obj[key] = value;
-        setUserObj(obj);
-    };
-
-    useEffect(() => {
-        if (userId) {
-            getSingleUserDetailFunc();
-        }
-    }, [userId]);
-
-    useEffect(() => {
-        if (userDetail) {
-            setUpdateUserDetail({
-                first_name: userDetail?.first_name,
-                last_name: userDetail?.last_name,
-                email: userDetail?.email,
-                is_active: userDetail?.is_active,
-                is_verified: userDetail?.is_verified,
-            });
-        }
-    }, [userDetail]);
-
-    const [rolesData, setRolesData] = useState([]);
-
-    const getPermissionRoleFunc = async () => {
-        await updateVendorPermissions({}, '')
+    const getUserRoles = async () => {
+        await updateVendorPermissions()
             .then((res) => {
                 let response = res.data;
                 let arr = [];
@@ -170,156 +122,250 @@ const UserProfile = () => {
             .catch((error) => {});
     };
 
-    useEffect(() => {
-        getPermissionRoleFunc();
-    }, []);
+    const updateUserDetails = async () => {
+        if (!userDetail) return;
 
-    const renderStatus = () => {
-        if (userDetail?.is_verified === false) {
-            return (
-                <Typography.Subheader
-                    size={Typography.Sizes.sm}
-                    className="d-flex pending-container justify-content-center"
-                    style={{ color: colorPalette.warning700 }}>
-                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
-                    Pending
-                </Typography.Subheader>
-            );
-        } else {
-            if (userDetail?.is_active === true) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex active-container justify-content-center"
-                        style={{ color: colorPalette.success700 }}>
-                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
-                        Active
-                    </Typography.Subheader>
-                );
-            } else if (userDetail?.is_active === false) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.sm}
-                        className="d-flex inactive-container justify-content-center"
-                        style={{ color: colorPalette.primaryGray800 }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
-                        Inactive
-                    </Typography.Subheader>
-                );
-            }
+        let alertObj = Object.assign({}, errorObj);
+
+        if ((userDetail?.first_name).length === 0) alertObj.first_name = 'First Name cannot be blank.';
+        if ((userDetail?.last_name).length === 0) alertObj.last_name = 'Last Name cannot be blank.';
+        if (
+            (userDetail?.email).length === 0 ||
+            !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userDetail.email) ||
+            EmailValidator.validate(userDetail?.email)
+        )
+            alertObj.email = 'Please enter valid Email address.';
+
+        setErrorObj(alertObj);
+
+        if (!alertObj.first_name && !alertObj.last_name && !alertObj.email) {
+            setIsProcessing(true);
+
+            let obj = {};
+
+            if (userDetail?.first_name !== orginalUserData?.first_name) obj.first_name = userDetail.first_name.trim();
+            if (userDetail?.last_name !== orginalUserData?.last_name) obj.last_name = userDetail.last_name.trim();
+            if (userDetail?.email !== orginalUserData?.email) obj.email = userDetail.email.trim();
+
+            const params = `?member_user_id=${userId}`;
+            await updateSingleUserDetails(obj, params)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'User details updated.';
+                            s.notificationType = 'success';
+                        });
+                    } else {
+                        if (response?.message.includes('email already exist')) {
+                            setErrorObj({ ...errorObj, email: 'Email already exists in system' });
+                            setIsProcessing(false);
+                            return;
+                        }
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Unable to update user details.';
+                            s.notificationType = 'error';
+                        });
+                    }
+
+                    getUserDetails();
+                    setIsProcessing(false);
+                })
+                .catch((error) => {
+                    setIsProcessing(false);
+                });
         }
     };
 
-    const renderer = ({ hours, minutes, seconds, completed }) => {
-        if (minutes === 0 && seconds === 0) {
-            setShowResendIn(false);
+    const handleActivateDeactivate = async (requestType) => {
+        setIsUpdating(true);
+
+        const obj = {
+            is_active: requestType === 'Deactivate' ? false : true,
+        };
+
+        const params = `?member_user_id=${userId}`;
+        await updateSingleUserDetails(obj, params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage =
+                            requestType === 'Deactivate'
+                                ? 'User account has been Deactivated.'
+                                : 'User account has been Activated.';
+                        s.notificationType = 'success';
+                    });
+                    getUserDetails();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage =
+                            requestType === 'Deactivate'
+                                ? 'Unable to Deactivate user Account.'
+                                : 'Unable to Activate user Account.';
+                        s.notificationType = 'error';
+                    });
+                }
+                setIsUpdating(false);
+                handleModalClose();
+            })
+            .catch((error) => {
+                setIsUpdating(false);
+            });
+    };
+
+    const updateUserRoles = async () => {
+        setRoleUpdating(true);
+        const userRoleObj = {
+            user: userId,
+            permission_role: userRole?.permission_id,
+        };
+        await updateUserRolePermission(userRoleObj)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'User details updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to update User details.';
+                        s.notificationType = 'error';
+                    });
+                }
+                setRoleUpdating(false);
+                getUserDetails();
+            })
+            .catch((error) => {
+                setRoleUpdating(false);
+            });
+    };
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, userDetail);
+        obj[key] = value;
+        setUserDetail(obj);
+    };
+
+    const handleRoleChange = (key, value) => {
+        let obj = Object.assign({}, userRole);
+        obj[key] = value;
+        setUserRole(obj);
+    };
+
+    useEffect(() => {
+        if (userId) {
+            getUserDetails();
+            getUserRoles();
         }
+    }, [userId]);
+
+    const [rolesData, setRolesData] = useState([]);
+
+    const renderStatus = () => {
+        const status = userDetail?.is_verified ? (userDetail?.is_active ? 'Active' : 'Inactive') : 'Pending';
+
         return (
-            <span>
-                {minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}
-            </span>
+            <Button
+                label={status}
+                size={Button.Sizes.lg}
+                type={Button.Type.secondary}
+                icon={
+                    (status === 'Active' && <ActiveSVG />) ||
+                    (status === 'Inactive' && <InactiveSVG />) ||
+                    (status === 'Pending' && <PendingSVG />)
+                }
+                iconAlignment={Button.IconAlignment.left}
+                className={`status-container ${status.toLowerCase()}-btn`}
+                disabled
+            />
         );
     };
 
     const resendInvite = async () => {
-        let userData = {
-            first_name: updateUserDetail?.first_name,
-            last_name: updateUserDetail?.last_name,
-            email: updateUserDetail?.email,
-            role: userPermissionList[0]?.permission_id,
+        const userData = {
+            first_name: orginalUserData?.first_name,
+            last_name: orginalUserData?.last_name,
+            email: orginalUserData?.email,
+            role: orignalUserRole?.permission_id,
         };
-        let params = '?request_type=reinvite';
-        await inviteMemberUsers(userData, params)
+        const params = '?request_type=reinvite';
+
+        setInviting(true);
+
+        await inviteMemberUsers(params, userData)
             .then((res) => {
-                let response = res.data;
+                const response = res?.data;
                 if (response?.success) {
-                    getSingleUserDetailFunc();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Invite has been sent';
                         s.notificationType = 'success';
                     });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to sent invite';
+                        s.notificationType = 'error';
+                    });
                 }
+                setInviting(false);
             })
-            .catch((error) => {});
+            .catch((error) => {
+                setInviting(false);
+            });
     };
 
     const deactivateUser = () => {
-        if (userDetail?.is_verified === false) {
-            return (
-                <>
-                    <Typography.Subheader
-                        size={Typography.Sizes.md}
-                        className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700, cursor: 'pointer' }}
-                        onClick={() => {
-                            setDangerZoneText('Deactivate');
-                            setShow(true);
-                        }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
-                        Deactivate User
-                    </Typography.Subheader>
-                    <Typography.Subheader
-                        size={Typography.Sizes.md}
-                        className={`d-flex ${
-                            showResendIn ? 'blur-activate-container' : 'activate-container'
-                        } justify-content-center`}
-                        style={{ color: colorPalette.primaryIndigo600, cursor: 'pointer' }}
+        return (
+            <>
+                <Button
+                    label={userDetail?.is_active ? 'Deactivate User' : 'Activate User'}
+                    size={Button.Sizes.lg}
+                    type={userDetail?.is_active ? Button.Type.secondaryDistructive : Button.Type.secondary}
+                    icon={(userDetail?.is_active && <InactiveSVG />) || (!userDetail?.is_active && <ActiveSVG />)}
+                    iconAlignment={Button.IconAlignment.left}
+                    className={`w-100 mr-2`}
+                    onClick={() => {
+                        userDetail?.is_active ? setDangerZoneText('Deactivate') : setDangerZoneText('Activate');
+                        handleModalOpen();
+                    }}
+                />
+
+                {!userDetail?.is_verified && (
+                    <Button
+                        label={isInviting ? 'Resending Invite' : 'Resend Invitation'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondary}
+                        icon={<InviteSVG />}
+                        iconAlignment={Button.IconAlignment.left}
+                        className={`w-100`}
                         onClick={resendInvite}
-                        disabled={showResendIn}>
-                        <FontAwesomeIcon icon={faShare} size="lg" style={{ color: colorPalette.primaryIndigo600 }} />
-                        Resend Invitation
-                    </Typography.Subheader>
-                    {showResendIn ? (
-                        <Typography.Subheader
-                            size={Typography.Sizes.md}
-                            type={Typography.Types.Regular}
-                            className="d-flex send-container justify-content-center"
-                            style={{ color: colorPalette.primaryGray550 }}>
-                            Send new invitation in&nbsp;
-                            <Countdown
-                                date={new Date(userDetail?.last_invite_at).getTime() + 3600000}
-                                renderer={renderer}
-                            />
-                        </Typography.Subheader>
-                    ) : null}
-                </>
-            );
-        } else {
-            if (userDetail?.is_active === true) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.md}
-                        className="d-flex deactivate-container justify-content-center"
-                        style={{ color: colorPalette.error700, cursor: 'pointer' }}
-                        onClick={() => {
-                            setDangerZoneText('Deactivate');
-                            setShow(true);
-                        }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.error700 }} />
-                        Deactivate User
-                    </Typography.Subheader>
-                );
-            } else if (userDetail?.is_active === false) {
-                return (
-                    <Typography.Subheader
-                        size={Typography.Sizes.md}
-                        className="d-flex activate-container justify-content-center"
-                        style={{ color: colorPalette.primaryIndigo600, cursor: 'pointer' }}
-                        onClick={() => {
-                            setDangerZoneText('Activate');
-                            setShow(true);
-                        }}>
-                        <FontAwesomeIcon
-                            icon={faCircleCheck}
-                            size="lg"
-                            style={{ color: colorPalette.primaryIndigo600 }}
-                        />
-                        Activate User
-                    </Typography.Subheader>
-                );
-            }
-        }
+                        disabled={isInviting}
+                    />
+                )}
+            </>
+        );
+    };
+
+    useEffect(() => {
+        if (userDetail) setDataChanged(compareObjData(userDetail, orginalUserData));
+    }, [userDetail]);
+
+    useEffect(() => {
+        if (userRole) setRoleChanged(compareObjData(userRole, orignalUserRole));
+    }, [userRole]);
+
+    const handleSaveClick = () => {
+        if (!isDataChanged) updateUserDetails();
+        if (!isRoleChanged) updateUserRoles();
     };
 
     return (
@@ -329,9 +375,11 @@ const UserProfile = () => {
                     <div className="d-flex justify-content-between">
                         <div>
                             <Typography.Header size={Typography.Sizes.lg}>
-                                {userDetail?.first_name} {userDetail?.last_name}
+                                {orginalUserData?.first_name} {orginalUserData?.last_name}
                             </Typography.Header>
-                            <Typography.Subheader size={Typography.Sizes.lg}>{userDetail?.email}</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.lg}>
+                                {orginalUserData?.email}
+                            </Typography.Subheader>
                         </div>
                         <div>
                             <div className="d-flex">
@@ -340,19 +388,16 @@ const UserProfile = () => {
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
                                     onClick={() => {
-                                        setIsEditing(false);
+                                        history.push({ pathname: `/settings/users` });
                                     }}
                                 />
                                 <Button
-                                    label={loadButton ? 'Saving' : 'Save'}
+                                    label={isProcessing || isRoleUpdating ? 'Saving' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={async () => {
-                                        updateSingleUserDetailFunc(updateUserDetail);
-                                        await updateRolesPermission();
-                                    }}
+                                    onClick={handleSaveClick}
+                                    disabled={isDataChanged && isRoleChanged}
                                     className="ml-2"
-                                    disabled={!isEditing}
                                 />
                             </div>
                         </div>
@@ -366,100 +411,86 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    User Details
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                User Details
+                            </Typography.Subheader>
                         </CardHeader>
 
-                        <CardBody>
-                            <div className="row">
-                                <div className="col">
-                                    {renderStatus()}
-                                    <Brick sizeInRem={0.25} />
-                                    <Typography.Body size={Typography.Sizes.sm}>
-                                        Only active users can sign in
-                                    </Typography.Body>
-                                </div>
+                        <div className="p-4">
+                            <div className="w-100">
+                                {userDetail && renderStatus()}
+
+                                <Brick sizeInRem={0.5} />
+                                <Typography.Body size={Typography.Sizes.sm}>
+                                    Only active users can sign in
+                                </Typography.Body>
                             </div>
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>First Name</Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter First Name"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
-                                            setIsEditing(true);
-                                            setUpdateUserDetail({
-                                                ...updateUserDetail,
-                                                first_name: e.target.value,
-                                            });
+                                            handleChange('first_name', e.target.value);
+                                            setErrorObj({ ...errorObj, first_name: null });
                                         }}
-                                        className="w-100"
-                                        value={updateUserDetail?.first_name}
+                                        value={userDetail?.first_name}
+                                        error={errorObj.first_name}
                                     />
                                 </div>
                             </div>
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>Last Name</Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter Last Name"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
-                                            setIsEditing(true);
-                                            setUpdateUserDetail({
-                                                ...updateUserDetail,
-                                                last_name: e.target.value,
-                                            });
+                                            handleChange('last_name', e.target.value);
+                                            setErrorObj({ ...errorObj, last_name: null });
                                         }}
-                                        className="w-100"
-                                        value={updateUserDetail?.last_name}
+                                        value={userDetail?.last_name}
+                                        error={errorObj.last_name}
                                     />
                                 </div>
                             </div>
 
                             <Brick sizeInRem={1} />
 
-                            <div className="row">
-                                <div className="col">
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <div className="w-50">
                                     <Typography.Subheader size={Typography.Sizes.md}>
                                         Email Address
                                     </Typography.Subheader>
-                                    <Brick sizeInRem={0.25} />
                                 </div>
-                                <div className="col d-flex align-items-center">
-                                    <Inputs
-                                        type="text"
+                                <div className="w-50">
+                                    <InputTooltip
                                         placeholder="Enter Email Address"
+                                        labelSize={Typography.Sizes.md}
                                         onChange={(e) => {
-                                            setIsEditing(true);
-                                            setUpdateUserDetail({
-                                                ...updateUserDetail,
-                                                email: e.target.value,
-                                            });
+                                            handleChange('email', e.target.value);
+                                            setErrorObj({ ...errorObj, email: null });
                                         }}
-                                        className="w-100"
-                                        value={updateUserDetail?.email}
+                                        value={userDetail?.email}
+                                        disabled={userDetail?.is_verified}
+                                        error={errorObj.email}
                                     />
                                 </div>
                             </div>
-                        </CardBody>
+                        </div>
                     </div>
                 </Col>
             </Row>
@@ -470,81 +501,46 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    User Roles
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                User Roles
+                            </Typography.Subheader>
                         </CardHeader>
 
-                        <CardBody>
-                            <Row>
-                                <Col lg={6}>
-                                    {userPermissionList?.map((item) => {
-                                        return (
-                                            <>
-                                                <div className="row ml-2">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        style={{ paddingTop: '0.5rem' }}>
-                                                        {item?.permission_name}
-                                                    </Typography.Subheader>
-                                                    <Button
-                                                        label="Compare Roles"
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.link}
-                                                        onClick={() => {
-                                                            setShowCompareRoles(true);
-                                                        }}
-                                                    />
+                        <div className="p-4">
+                            <div className="w-100">
+                                <div className="d-flex justify-content-start align-items-center">
+                                    <Typography.Subheader size={Typography.Sizes.md}>
+                                        {orignalUserRole?.permission_name}
+                                    </Typography.Subheader>
 
-                                                    {/* <Typography.Link
-                                                        size={Typography.Sizes.md}
-                                                        href={() => {
-                                                            setShowCompareRoles(true);
-                                                        }}
-                                                        as="a"
-                                                        target="_blank"
-                                                        style={{
-                                                            marginLeft: '1rem',
-                                                        }}>
-                                                        {' '}
-                                                        Compare Roles
-                                                    </Typography.Link> */}
-                                                </div>
-                                                <Brick sizeInRem={1} />
-                                                <div className="row d-flex align-items-center">
-                                                    <div className="col">
-                                                        <Select
-                                                            id="roles"
-                                                            placeholder="Select Role"
-                                                            name="select Roles"
-                                                            className="font-weight-bold"
-                                                            style={{ color: 'black' }}
-                                                            options={rolesData}
-                                                            isSearchable={false}
-                                                            defaultValue={
-                                                                userObj.permission_role == ''
-                                                                    ? item?.permission_id
-                                                                    : userObj.permission_role
-                                                            }
-                                                            onChange={(e) => {
-                                                                setIsEditing(true);
-                                                                handleChange('permission_role', e.value);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </>
-                                        );
-                                    })}
+                                    <Button
+                                        label="Compare Roles"
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.link}
+                                        onClick={() => setShowCompareRoles(true)}
+                                    />
+                                </div>
 
-                                    <Brick sizeInRem={1} />
-                                </Col>
-                            </Row>
-                        </CardBody>
+                                <Brick sizeInRem={1} />
+
+                                <div className="align-items-center" style={{ width: '40%' }}>
+                                    <Select
+                                        id="roles"
+                                        placeholder="Select Role to assign"
+                                        options={rolesData}
+                                        isSearchable={false}
+                                        currentValue={rolesData.filter(
+                                            (option) => option.value === userRole?.permission_id
+                                        )}
+                                        onChange={(e) => {
+                                            handleRoleChange('permission_id', e.value);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </Col>
             </Row>
@@ -555,76 +551,56 @@ const UserProfile = () => {
                 <Col lg={9}>
                     <div className="custom-card">
                         <CardHeader>
-                            <div>
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    style={{ color: colorPalette.primaryGray550 }}>
-                                    Danger Zone
-                                </Typography.Subheader>
-                            </div>
+                            <Typography.Subheader
+                                size={Typography.Sizes.md}
+                                style={{ color: colorPalette.primaryGray550 }}>
+                                Danger Zone
+                            </Typography.Subheader>
                         </CardHeader>
 
-                        <CardBody>
-                            <div style={{ display: 'flex', width: '100%', gap: '1.25rem' }}>{deactivateUser()}</div>
-                        </CardBody>
+                        <CardBody>{userDetail && <div className="d-flex">{deactivateUser()}</div>}</CardBody>
                     </div>
                 </Col>
             </Row>
+
             <CompareRoles show={showCompareRoles} setShow={setShowCompareRoles} />
-            <Modal
-                show={show}
-                onHide={() => {
-                    setShow(false);
-                }}
-                centered
-                dialogClassName="modal-active-deactive">
-                <Modal.Header style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
-                    <Modal.Title>
-                        <Typography.Header size={Typography.Sizes.md} style={{ color: colorPalette.primary }}>
-                            {dangerZoneText} User
-                        </Typography.Header>
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
-                    <Typography.Subheader size={Typography.Sizes.md}>
+
+            <Modal show={alertModal} onHide={handleModalClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body className="p-4">
+                    <Typography.Header size={Typography.Sizes.lg}>{dangerZoneText} User</Typography.Header>
+                    <Brick sizeInRem={1.5} />
+                    <Typography.Body size={Typography.Sizes.lg}>
                         Are you sure you want to {dangerZoneText} the User?
-                    </Typography.Subheader>
+                    </Typography.Body>
                 </Modal.Body>
-                <Modal.Footer style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
-                    <div className="add-equipment-footer">
+                <Modal.Footer className="pb-4 pr-4">
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        onClick={handleModalClose}
+                    />
+                    {dangerZoneText === 'Deactivate' ? (
                         <Button
-                            label="Cancel"
+                            label={isUpdating ? 'Deactivating...' : 'Deactivate'}
                             size={Button.Sizes.lg}
-                            type={Button.Type.secondaryGrey}
-                            onClick={() => setShow(false)}
-                            className="buttonStyle"
+                            type={Button.Type.primaryDistructive}
+                            onClick={() => {
+                                handleActivateDeactivate(dangerZoneText);
+                            }}
+                            disabled={isUpdating}
                         />
-                        {dangerZoneText === 'Deactivate' ? (
-                            <Button
-                                label={isProcessing ? 'Deactivating...' : 'Deactivate'}
-                                size={Button.Sizes.lg}
-                                type={Button.Type.primaryDistructive}
-                                className="buttonStyle"
-                                onClick={() => {
-                                    updateSingleUserDetailFunc({
-                                        is_active: false,
-                                    });
-                                }}
-                            />
-                        ) : (
-                            <Button
-                                label={isProcessing ? 'Activating...' : 'Activate'}
-                                size={Button.Sizes.lg}
-                                type={Button.Type.primary}
-                                className="buttonStyle"
-                                onClick={() => {
-                                    updateSingleUserDetailFunc({
-                                        is_active: true,
-                                    });
-                                }}
-                            />
-                        )}
-                    </div>
+                    ) : (
+                        <Button
+                            label={isUpdating ? 'Activating...' : 'Activate'}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.primary}
+                            onClick={() => {
+                                handleActivateDeactivate(dangerZoneText);
+                            }}
+                            disabled={isUpdating}
+                        />
+                    )}
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

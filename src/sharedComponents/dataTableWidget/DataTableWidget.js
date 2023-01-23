@@ -381,7 +381,7 @@ const DataTableWidget = (props) => {
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
                         pageListSizes={props.pageListSizes}
-                        isAlwaysShown={props.isPaginationAlwaysShown}
+                        isAlwaysShown={!props.hidePaginationIfNotEnoughItems}
                     />
                 </div>
             )}
@@ -397,11 +397,13 @@ DataTableWidget.propTypes = {
     onDeleteRow: PropTypes.func,
     isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
-    onChangePage: PropTypes.func,
-    totalCount: PropTypes.number,
-    currentPage: PropTypes.number,
+    /**** The following 4 props are responsible for showing pagination ****/
+    onChangePage: PropTypes.func.isRequired,
+    totalCount: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    onPageSize: PropTypes.func.isRequired,
+    
     pageSize: PropTypes.number,
-    onPageSize: PropTypes.func,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
     status: PropTypes.number,
@@ -410,6 +412,7 @@ DataTableWidget.propTypes = {
     disableColumnDragging: PropTypes.bool,
     filterOptions: PropTypes.arrayOf(
         PropTypes.shape({
+            id: stringOrNumberPropTypes,
             label: PropTypes.string.isRequired,
             value: PropTypes.string.isRequired,
             placeholder: PropTypes.string.isRequired,
@@ -446,7 +449,7 @@ DataTableWidget.propTypes = {
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,
     }),
-    isPaginationAlwaysShown: PropTypes.bool,
+    hidePaginationIfNotEnoughItems: PropTypes.bool,
 };
 
 export default DataTableWidget;

@@ -12,23 +12,24 @@ function Holder({ rightContent }) {
             <Col lg={6} className="pr-0 pl-0">
                 <Carousel controls={false} indicators={false}>
                     <Carousel.Item>
-                        <img className="backgroundStyle" src={Slide3} />
+                        <img className="backgroundStyle name" src={Slide3} />
                         <Carousel.Caption>
-                            <h3>A radically better way of achieving efficient buildings.</h3>
+                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
+                        </Carousel.Caption>
+                    </Carousel.Item>
+                    {/* Commented for Future Use */}
+                    {/* <Carousel.Item>
+                        <img className="backgroundStyle name" src={Slide2} />
+                        <Carousel.Caption>
+                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
                         </Carousel.Caption>
                     </Carousel.Item>
                     <Carousel.Item>
-                        <img className="backgroundStyle" src={Slide2} />
+                        <img className="backgroundStyle name" src={Slide1} />
                         <Carousel.Caption>
-                            <h3>A radically better way of achieving efficient buildings.</h3>
+                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
                         </Carousel.Caption>
-                    </Carousel.Item>
-                    <Carousel.Item>
-                        <img className="backgroundStyle" src={Slide1} />
-                        <Carousel.Caption>
-                            <h3>A radically better way of achieving efficient buildings.</h3>
-                        </Carousel.Caption>
-                    </Carousel.Item>
+                    </Carousel.Item> */}
                 </Carousel>
             </Col>
             <Col lg={6} className="pr-0 pl-0">
