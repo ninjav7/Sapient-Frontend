@@ -1,0 +1,48 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.condition-group-wrapper {
+    display: flex;
+    gap: .25rem;
+
+    .condition-item {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: $base-white;
+        border: 1px solid $primary-gray-450;
+        border-radius: .25rem;
+        color: $primary-gray-800;
+        padding: .25rem .5rem;
+
+        &.selected {
+            border-color: $primary-indigo-50;
+            background-color: $primary-indigo-50;
+
+            .typography-wrapper {
+                color: $primary-indigo-600;
+            }
+        }
+        &.disabled {
+            border: 1px solid $primary-gray-200;
+            background-color: $base-white;
+            .typography-wrapper {
+                color: $primary-gray-300;
+            }
+            &:hover {
+                cursor: not-allowed;
+            }
+        }
+
+        &:hover {
+            cursor: pointer;
+        }
+        &:hover {
+            cursor: pointer;
+        }
+
+        svg {
+            margin-right: .625rem;
+        }
+    }
+}

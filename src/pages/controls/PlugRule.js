@@ -8,7 +8,8 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
 import { fetchPlugRules } from '../../services/plugRules';
-import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
+import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
+import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -30,6 +31,7 @@ import {
     unlinkSocketRequest,
     getUnlinkedSocketRules,
     getFiltersForSensorsRequest,
+    getAllConditions,
 } from '../../services/plugRules';
 import './style.scss';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -76,6 +78,20 @@ const SkeletonLoading = () => (
         </tr>
     </SkeletonTheme>
 );
+const actionTypeInitial = [
+    {
+        label: 'Turn Off',
+        value: 0,
+    },
+    {
+        label: 'Turn On',
+        value: 1,
+    },
+    {
+        label: 'Do nothing',
+        value: 2,
+    },
+];
 
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
@@ -103,6 +119,8 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [preparedScheduleData, setPreparedScheduleData] = useState();
+    const [conditionDisabledDays, setConditionDisabledDays] = useState();
     const [skeletonLoading, setSkeletonLoading] = useState(true);
 
     const [selectedTab, setSelectedTab] = useState(0);
@@ -178,6 +196,38 @@ const PlugRule = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
 
+    useEffect(() => {
+        const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
+        const workingDaysPerCondition = {};
+        const data = preparedScheduleDataCopy?.forEach((curr) => {
+            const { title } = curr;
+            workingDaysPerCondition[title] = curr.data[0].action_day;
+        });
+
+        const flat = Object.values(workingDaysPerCondition).flat(1);
+        const disabledDays = {};
+
+        for (const [key, value] of Object.entries(workingDaysPerCondition)) {
+            const restOfDays = flat.filter((el) => !value.includes(el));
+            disabledDays[key] = restOfDays;
+        }
+
+        setConditionDisabledDays(disabledDays);
+    }, [preparedScheduleData]);
+
+    const groupedCurrentDataById = (actions) => {
+        return (
+            actions &&
+            actions.reduce((acc, curr) => {
+                const { condition_group_id } = curr;
+                const objInAcc = acc.find((o) => o.title === condition_group_id);
+                if (objInAcc) objInAcc.data.push(curr);
+                else acc.push({ title: condition_group_id, data: [curr] });
+                return acc;
+            }, [])
+        );
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -238,13 +288,10 @@ const PlugRule = () => {
             }
             let response = res.data.data;
             setCurrentData(response);
+            const scheduleData = groupedCurrentDataById(response.action);
+            setPreparedScheduleData(scheduleData);
         });
     };
-    useEffect(() => {
-        if (currentData?.name) {
-            fetchPlugRulesData();
-        }
-    }, [currentData]);
 
     const deletePlugRule = async () => {
         setIsDeletting(true);
@@ -578,18 +625,67 @@ const PlugRule = () => {
         obj[key] = value;
         setCurrentData(obj);
     };
+    const handleScheduleDayChange = (day, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
 
-    const createScheduleCondition = () => {
-        let currentObj = currentData;
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.action_day.includes(day)) {
+                        row.action_day = row.action_day.filter((e) => e !== day);
+                    } else {
+                        row.action_day.push(day);
+                    }
+                });
+            }
+        });
+
+        setPreparedScheduleData(currentObj);
+    };
+    const makeId = (checkedArray) => {
+        const newId = getConditionId();
+        if (!checkedArray.includes(newId)) {
+            return newId;
+        } else {
+            makeId(checkedArray);
+        }
+    };
+
+    const createScheduleCondition = async () => {
+        const allConditions = await getAllConditions()
+            .then((res) => {
+                const { data } = res;
+                return data;
+            })
+            .catch((error) => {});
+        let currentObj = [...preparedScheduleData];
+
+        const generateConditionGroupId = makeId(allConditions.condition_group_id);
+        const generateFirstConditionId = makeId(allConditions.condition_id);
+        const generateSecondConditionId = makeId(allConditions.condition_id);
         let obj = {
-            action_type: false,
-            action_time: '08:00 AM',
-            action_day: [],
-            condition_id: getConditionId(),
-            is_deleted: false,
+            title: generateConditionGroupId,
+            data: [
+                {
+                    action_type: 1,
+                    action_time: '08:00 AM',
+                    action_day: [],
+                    condition_id: generateFirstConditionId,
+                    condition_group_id: generateConditionGroupId,
+                    is_deleted: false,
+                },
+                {
+                    action_type: 0,
+                    action_time: '09:00 AM',
+                    action_day: [],
+                    condition_id: generateSecondConditionId,
+                    condition_group_id: generateConditionGroupId,
+                    is_deleted: false,
+                },
+            ],
         };
-        currentObj.action.push(obj);
-        handleCurrentDataChange('action', currentObj.action);
+        currentObj.push(obj);
+        setPreparedScheduleData(currentObj);
     };
 
     const showOptionToDelete = (condition_id) => {
@@ -602,16 +698,15 @@ const PlugRule = () => {
         handleCurrentDataChange('action', currentObj.action);
     };
 
-    const deleteScheduleCondition = (condition_id) => {
-        let currentObj = currentData;
-        let newArray = [];
-        currentObj.action.forEach((record) => {
-            if (record.condition_id !== condition_id) {
-                newArray.push(record);
+    const deleteScheduleCondition = (condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+        let resArray = [];
+        currentObj.forEach((record) => {
+            if (record.title !== condition_group_id) {
+                resArray.push(record);
             }
         });
-        currentObj.action = newArray;
-        handleCurrentDataChange('action', currentObj.action);
+        setPreparedScheduleData(resArray);
         setShowDeleteConditionModal(false);
     };
 
@@ -648,24 +743,36 @@ const PlugRule = () => {
         });
     };
 
-    const handleSchedularConditionChange = (key, value, condition_id) => {
-        let currentObj = currentData;
-        currentObj.action.forEach((record) => {
-            if (record.condition_id === condition_id) {
-                record[key] = value === true;
+    const handleSchedularConditionChange = (key, value, condition_id, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.condition_id === condition_id) {
+                        if (value == '2') {
+                            row['action_time'] = null;
+                        }
+                        row[key] = value;
+                    }
+                });
             }
         });
-        handleCurrentDataChange('action', currentObj.action);
+        setPreparedScheduleData(currentObj);
     };
 
-    const handleSchedularTimeChange = (key, value, condition_id) => {
-        let currentObj = currentData;
-        currentObj.action.forEach((record) => {
-            if (record.condition_id === condition_id) {
-                record[key] = value;
+    const handleSchedularTimeChange = (key, value, condition_id, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.condition_id === condition_id) {
+                        row[key] = value;
+                    }
+                });
             }
         });
-        handleCurrentDataChange('action', currentObj.action);
+        setPreparedScheduleData(currentObj);
     };
 
     const handleActionDayChange = (day, condition_id) => {
@@ -741,7 +848,16 @@ const PlugRule = () => {
 
     const updatePlugRuleData = async () => {
         setIsProcessing(true);
-        await updatePlugRuleRequest(currentData)
+        let currentDataCopy = Object.assign({}, currentData);
+
+        const formattedSchedule = [];
+        preparedScheduleData.forEach((currentCondition) => {
+            currentCondition.data.forEach((currentRow) => {
+                formattedSchedule.push(currentRow);
+            });
+        });
+        currentDataCopy.action = formattedSchedule;
+        await updatePlugRuleRequest(currentDataCopy)
             .then((res) => {
                 setIsProcessing(false);
                 setPageRefresh(!pageRefresh);
@@ -1150,6 +1266,18 @@ const PlugRule = () => {
             setTotalItemsSearched(response.total_data);
         });
     };
+
+    const getAvailableActionType = (anotherSelectedValue) => {
+        const resultArr = actionTypeInitial.map((el) => {
+            if (el.value === anotherSelectedValue) {
+                return { ...el, isDisabled: true };
+            } else {
+                return { ...el, isDisabled: false };
+            }
+        });
+        return resultArr;
+    };
+
     useEffect(() => {
         setAllSearchData([]);
 
@@ -1169,6 +1297,108 @@ const PlugRule = () => {
         pageNo,
         pageSize,
     ]);
+
+    const RenderScheduleActionItem = ({ record }) => {
+        const firstCondition = record.data[0];
+        const secondCondition = record.data[1];
+        return (
+            <>
+                <div className="plug-rule-schedule-row mb-1">
+                    <div className="schedule-left-flex">
+                        <div>
+                            <Select
+                                defaultValue={firstCondition.action_type}
+                                onChange={(event) => {
+                                    handleSchedularConditionChange(
+                                        'action_type',
+                                        event.value,
+                                        firstCondition.condition_id,
+                                        firstCondition.condition_group_id
+                                    );
+                                }}
+                                options={getAvailableActionType(secondCondition.action_type)}
+                            />
+                        </div>
+                        <div>at</div>
+                        <div>
+                            <Select
+                                defaultValue={firstCondition.action_time}
+                                onChange={(event) => {
+                                    handleSchedularTimeChange(
+                                        'action_time',
+                                        event.value,
+                                        firstCondition.condition_id,
+                                        firstCondition.condition_group_id
+                                    );
+                                }}
+                                isDisabled={firstCondition.action_type == '2'}
+                                options={firstCondition.action_type == '2' ? [] : timePicker15MinutesIntervalOption}
+                            />
+                        </div>
+                        <div>on</div>
+                        <div className="schedular-weekday-group">
+                            <ConditionGroup
+                                handleButtonClick={(day) =>
+                                    handleScheduleDayChange(day, firstCondition.condition_group_id)
+                                }
+                                disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
+                                selectedItemsList={firstCondition.action_day}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="plug-rule-schedule-row mb-1">
+                    <div className="schedule-left-flex">
+                        <div>
+                            <Select
+                                defaultValue={secondCondition.action_type}
+                                onChange={(event) => {
+                                    handleSchedularConditionChange(
+                                        'action_type',
+                                        event.value,
+                                        secondCondition.condition_id,
+                                        secondCondition.condition_group_id
+                                    );
+                                }}
+                                options={getAvailableActionType(firstCondition.action_type)}
+                            />
+                        </div>
+                        <div>at</div>
+                        <div>
+                            <Select
+                                defaultValue={secondCondition.action_time}
+                                onChange={(event) => {
+                                    handleSchedularTimeChange(
+                                        'action_time',
+                                        event.value,
+                                        secondCondition.condition_id,
+                                        secondCondition.condition_group_id
+                                    );
+                                }}
+                                isDisabled={secondCondition.action_type == '2'}
+                                options={timePicker15MinutesIntervalOption}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <Button
+                            label="Delete Condition"
+                            onClick={() => {
+                                showOptionToDelete(firstCondition.condition_group_id);
+                                setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
+                                setShowDeleteConditionModal(true);
+                            }}
+                            size={Button.Sizes.md}
+                            icon={<DeleteIcon />}
+                            type={Button.Type.secondaryDistructive}
+                        />
+                    </div>
+                </div>
+
+                <hr className="plug-rule-schedule-breaker" />
+            </>
+        );
+    };
 
     return (
         <>
@@ -1205,6 +1435,7 @@ const PlugRule = () => {
                         <div>
                             <button
                                 type="button"
+                                size={Button.Sizes.md}
                                 className="btn btn-default plug-rule-cancel"
                                 onClick={() => {
                                     history.push({
@@ -1216,6 +1447,7 @@ const PlugRule = () => {
                             <button
                                 type="button"
                                 className="btn btn-primary plug-rule-save ml-2"
+                                size={Button.Sizes.md}
                                 onClick={() => {
                                     Promise.allSettled([
                                         updatePlugRuleData(),
@@ -1294,403 +1526,9 @@ const PlugRule = () => {
                                     </div>
 
                                     <hr className="plug-rule-schedule-breaker" />
-
-                                    {currentData.action &&
-                                        currentData.action.map((record, index) => {
-                                            return (
-                                                <>
-                                                    <div className="plug-rule-schedule-row mb-1">
-                                                        <div className="schedule-left-flex">
-                                                            <div>
-                                                                <Select
-                                                                    defaultValue={record.action_type}
-                                                                    label="Select"
-                                                                    onChange={(event) => {
-                                                                        handleSchedularConditionChange(
-                                                                            'action_type',
-                                                                            event.value,
-                                                                            record.condition_id
-                                                                        );
-                                                                    }}
-                                                                    options={[
-                                                                        {
-                                                                            label: 'Turn Off',
-                                                                            value: false,
-                                                                        },
-                                                                        {
-                                                                            label: 'Turn On',
-                                                                            value: true,
-                                                                        },
-                                                                    ]}
-                                                                />
-                                                            </div>
-                                                            <div>at</div>
-                                                            <div>
-                                                                <Select
-                                                                    defaultValue={record.action_time}
-                                                                    label="Select"
-                                                                    onChange={(event) => {
-                                                                        handleSchedularTimeChange(
-                                                                            'action_time',
-                                                                            event.value,
-                                                                            record.condition_id
-                                                                        );
-                                                                    }}
-                                                                    options={timePicker15MinutesIntervalOption}
-                                                                />
-                                                            </div>
-                                                            <div>on</div>
-                                                            <div className="schedular-weekday-group">
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('mon')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'mon',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('mon')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Mon 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('mon')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Mon 12 am',
-                                                                                    x2: 'Mon 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Mo
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('tue')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'tue',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('tue')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Tue 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('tue')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Tue 12 am',
-                                                                                    x2: 'Tue 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Tu
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('wed')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'wed',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('wed')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Wed 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('wed')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Wed 12 am',
-                                                                                    x2: 'Wed 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    We
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('thr')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'thr',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('thr')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Thu 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('thr')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Thu 12 am',
-                                                                                    x2: 'Thu 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Th
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('fri')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'fri',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('fri')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Fri 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('fri')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Fri 12 am',
-                                                                                    x2: 'Fri 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Fr
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('sat')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'sat',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('sat')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Sat 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('sat')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Sat 12 am',
-                                                                                    x2: 'Sat 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Sa
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('sun')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'sun',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('sun')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Sun 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('sun')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Sun 12 am',
-                                                                                    x2: 'Sun 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Su
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <Button
-                                                                label=""
-                                                                onClick={() => {
-                                                                    showOptionToDelete(record.condition_id);
-                                                                    setCurrentScheduleIdToDelete(record.condition_id);
-                                                                    setShowDeleteConditionModal(true);
-                                                                }}
-                                                                size={Button.Sizes.md}
-                                                                icon={<DeleteIcon />}
-                                                                type={Button.Type.primaryDistructive}
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <hr className="plug-rule-schedule-breaker" />
-                                                </>
-                                            );
+                                    {preparedScheduleData &&
+                                        preparedScheduleData.map((record, index) => {
+                                            return <RenderScheduleActionItem record={record} key={index} />;
                                         })}
 
                                     <button
