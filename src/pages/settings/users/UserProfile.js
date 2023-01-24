@@ -29,7 +29,6 @@ import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 import { ReactComponent as InviteSVG } from '../../../assets/icon/share.svg';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { compareObjData } from '../../../helpers/helpers';
-import EmailValidator from 'email-validator';
 
 const UserProfile = () => {
     const { userId } = useParams();
@@ -131,8 +130,7 @@ const UserProfile = () => {
         if ((userDetail?.last_name).length === 0) alertObj.last_name = 'Last Name cannot be blank.';
         if (
             (userDetail?.email).length === 0 ||
-            !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userDetail.email) ||
-            EmailValidator.validate(userDetail?.email)
+            !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(userDetail.email)
         )
             alertObj.email = 'Please enter valid Email address.';
 
