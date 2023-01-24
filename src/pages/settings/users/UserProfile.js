@@ -348,7 +348,7 @@ const UserProfile = () => {
                         iconAlignment={Button.IconAlignment.left}
                         className={`w-100`}
                         onClick={resendInvite}
-                        disabled={isInviting}
+                        disabled={isInviting || !(isDataChanged && isRoleChanged)}
                     />
                 )}
             </>
