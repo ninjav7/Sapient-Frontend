@@ -51,7 +51,7 @@ const AdminLayout = Loadable({
 class Routes extends Component {
     // returns the layout
     getLayout = () => {
-        if(isSuperUserAuthenticated()) return AdminLayout;
+        if (isSuperUserAuthenticated()) return AdminLayout;
         else if (!isUserAuthenticated()) return AuthLayout;
 
         let layoutCls = VerticalLayout;
@@ -76,7 +76,6 @@ class Routes extends Component {
                 <Layout {...this.props}>
                     <Switch>
                         {routes.map((route, index) => {
-                            console.log(route);
                             return !route.children ? (
                                 <route.route
                                     key={index}

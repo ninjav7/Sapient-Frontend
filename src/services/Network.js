@@ -9,7 +9,8 @@ export const googleSignIn = '/api/user_role/sso/google/auth';
 export const sessionValidator = '/api/user_role/user/user-session-details';
 export const customerList = '/api/user_role/vendor/customer-list';
 export const selectCustomer = '/api/user_role/superuser-select-customer';
-export const createCustomer = '/api/user_role/vendor/create-customer';
+export const getCustomer = '/api/user_role/vendor/create-customer';
+export const updateUsers = '/api/user_role/user/update-user';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';

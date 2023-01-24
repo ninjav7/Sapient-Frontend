@@ -106,6 +106,7 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
+const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -639,12 +640,27 @@ const authRoutes = {
     visibility: true,
     children: [
         {
+            path: '/account/login/:user_found/:link_type/:account_linked/:session_id',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/login/:user_found',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
             path: '/account/login',
             name: 'Login',
             component: Login,
             route: Route,
             visibility: true,
         },
+
         {
             path: '/account/logout',
             name: 'Logout',
@@ -663,6 +679,13 @@ const authRoutes = {
             path: '/account/forget-password',
             name: 'Forget Password',
             component: ForgetPassword,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/update-auth',
+            name: 'Update Auth',
+            component: UpdateAuth,
             route: Route,
             visibility: true,
         },
@@ -701,7 +724,6 @@ const flattenRoutes = (routes) => {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
-    console.log(flatRoutes);
     return flatRoutes;
 };
 

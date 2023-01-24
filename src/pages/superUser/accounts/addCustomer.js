@@ -8,6 +8,7 @@ import { saveEquipTypeData, getEndUseData } from './services';
 import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 import colorPalette from '../../../assets/scss/_colors.scss';
+import { createCustomer } from './services';
 
 const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal }) => {
     const defaultCustomerObj = {

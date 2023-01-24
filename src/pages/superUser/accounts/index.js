@@ -14,6 +14,8 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import AddCustomer from './addCustomer';
+import { fetchCustomerList } from './services';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -37,6 +39,12 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
         </tr>
     </SkeletonTheme>
 );
@@ -52,91 +60,10 @@ const Accounts = () => {
     const [openCustomer, setOpenCustomer] = useState(false);
 
     const closeAddCustomer = () => setOpenCustomer(false);
-    const [userData, setUserData] = useState([
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: true,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: true,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: true,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-        {
-            account_id: '#2148',
-            account_name: 'Account 1',
-            is_active: false,
-            active_devices: '253',
-            passive_devices: '121',
-            energy: '25.3',
-            per: '22',
-        },
-    ]);
+    const [userData, setUserData] = useState([]);
 
     const [totalItems, setTotalItems] = useState(0);
+    const [selectedStatus, setSelectedStatus] = useState(0);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -155,30 +82,61 @@ const Accounts = () => {
             });
         };
         updateBreadcrumbStore();
+        getCustomerList();
     }, []);
 
+    const getCustomerList = async () => {
+        setIsUserDataFetched(true);
+        await fetchCustomerList()
+            .then((res) => {
+                let response = res.data;
+                console.log('Customer ', response);
+                setUserData(response?.data);
+                setIsUserDataFetched(false);
+            })
+            .catch((error) => {
+                setIsUserDataFetched(false);
+                console.log('error', error);
+            });
+    };
+
     const currentRow = () => {
-        return userData;
+        if (selectedStatus === 0) return userData;
+        else if (selectedStatus === 1) {
+            return userData.filter((ele) => ele?.status === true);
+        } else {
+            return userData.filter((ele) => ele?.status === false);
+        }
     };
 
     const renderActiveDevices = (row) => {
         return (
-            <Typography.Body size={Typography.Sizes.sm}>
-                {row?.active_devices === '' ? '-' : row?.active_devices}
-            </Typography.Body>
+            <>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {row?.active_devices.online}&nbsp;
+                    <StatusBadge
+                        text={row?.active_devices.offline === '' ? '0' : row?.active_devices.offline}
+                        type={StatusBadge.Type.error}
+                    />
+                </Typography.Body>
+            </>
         );
     };
 
     const renderPassiveDevices = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.sm}>
-                {row?.passive_devices === '' ? '-' : row?.passive_devices}
+                {row?.passive_devices.online}&nbsp;
+                <StatusBadge
+                    text={row?.passive_devices.offline === '' ? '0' : row?.passive_devices.offline}
+                    type={StatusBadge.Type.error}
+                />
             </Typography.Body>
         );
     };
 
     const renderStatus = (row) => {
-        if (row?.is_active === false) {
+        if (row?.status === false) {
             return (
                 <Typography.Subheader
                     size={Typography.Sizes.sm}
@@ -188,7 +146,7 @@ const Accounts = () => {
                     Inactive
                 </Typography.Subheader>
             );
-        } else if (row?.is_active === true) {
+        } else if (row?.status === true) {
             return (
                 <Typography.Subheader
                     size={Typography.Sizes.sm}
@@ -202,16 +160,12 @@ const Accounts = () => {
     };
 
     const renderAccountID = (row) => {
-        return (
-            <Typography.Body size={Typography.Sizes.sm}>
-                {row?.account_id === '' ? '-' : row?.account_id}
-            </Typography.Body>
-        );
+        return <Typography.Body size={Typography.Sizes.sm}>{row?.id === '' ? '-' : row?.id}</Typography.Body>;
     };
     const renderAccountName = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.sm}>
-                {row?.account_name === '' ? '-' : row?.account_name}
+                {row?.company_name === '' ? '-' : row?.company_name}
             </Typography.Body>
         );
     };
@@ -220,10 +174,10 @@ const Accounts = () => {
         return (
             <>
                 <Row style={{ padding: '0.5rem 0.625rem' }}>
-                    <Typography.Body size={Typography.Sizes.sm}>{row.energy} kWh </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm}>{row.total_usage} kWh </Typography.Body>
                     &nbsp;&nbsp;
                     <TrendsBadge
-                        value={Math.abs(Math.round(row.per))}
+                        value={isNaN(Math.abs(Math.round(row.per))) ? 0 : Math.abs(Math.round(row.per))}
                         type={row?.per < row?.per ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND}
                     />
                 </Row>
@@ -292,9 +246,9 @@ const Accounts = () => {
                             // setPageNo(1);
                             // setUserSearchInfo(query);
                         }}
-                        buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
+                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Active' }, { label: 'Inactive' }]}
                         filterOptions={[]}
-                        onStatus={(query) => {}}
+                        onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         headers={[
