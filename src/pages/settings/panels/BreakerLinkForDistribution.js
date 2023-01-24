@@ -10,6 +10,8 @@ import {
     validateConfiguredEquip,
     getEquipmentForBreaker,
     validateDevicesForBreaker,
+    getPhaseConfigValue,
+    getVoltageConfigValue,
 } from './utils';
 import { ReactComponent as LinkSVG } from '../../../assets/icon/panels/link.svg';
 import { ReactComponent as UnlinkSVG } from '../../../assets/icon/panels/unlink.svg';
@@ -60,84 +62,6 @@ export default function CustomEdge({
         LoadingStore.update((s) => {
             s.isBreakerDataFetched = true;
         });
-    };
-
-    const getVoltageConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '120/240') {
-                return 120;
-            }
-            if (value === '208/120') {
-                return 120;
-            }
-            if (value === '480') {
-                return 277;
-            }
-            if (value === '600') {
-                return 347;
-            }
-        }
-        if (breakerType === 'double') {
-            if (value === '120/240') {
-                return 240;
-            }
-            if (value === '208/120') {
-                return 240;
-            }
-            if (value === '480') {
-                return 480;
-            }
-        }
-        if (breakerType === 'triple') {
-            if (value === '208/120') {
-                return 208;
-            }
-            if (value === '480') {
-                return 480;
-            }
-            if (value === '600') {
-                return 600;
-            }
-        }
-    };
-
-    const getPhaseConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '120/240') {
-                return 1;
-            }
-            if (value === '208/120') {
-                return 1;
-            }
-            if (value === '480') {
-                return 1;
-            }
-            if (value === '600') {
-                return 1;
-            }
-        }
-        if (breakerType === 'double') {
-            if (value === '120/240') {
-                return 1;
-            }
-            if (value === '208/120') {
-                return 1;
-            }
-            if (value === '480') {
-                return 1;
-            }
-        }
-        if (breakerType === 'triple') {
-            if (value === '208/120') {
-                return 3;
-            }
-            if (value === '480') {
-                return 3;
-            }
-            if (value === '600') {
-                return 3;
-            }
-        }
     };
 
     const isBothBreakerLinked = () => {
