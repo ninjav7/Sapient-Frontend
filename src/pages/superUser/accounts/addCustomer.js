@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { saveEquipTypeData, getEndUseData } from './services';
-import Select from '../../../sharedComponents/form/select';
-import { UserStore } from '../../../store/UserStore';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { createCustomer } from './services';
 
-const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal }) => {
+const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerList }) => {
     const defaultCustomerObj = {
         name: '',
     };
@@ -24,8 +21,29 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal }) => {
         setCustomerData(obj);
     };
 
+    const createCustomers = async () => {
+        setIsProcessing(true);
+        let payload = { customer_name: customerData?.name };
+        await createCustomer(payload)
+            .then((res) => {
+                let response = res.data;
+                setIsProcessing(false);
+                closeAddCustomerModal();
+                getCustomerList();
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+            });
+    };
+
     return (
-        <Modal show={isAddCustomerOpen} onHide={closeAddCustomerModal} backdrop="static" keyboard={false} centered>
+        <Modal
+            show={isAddCustomerOpen}
+            onHide={closeAddCustomerModal}
+            dialogClassName="customer-container-style"
+            backdrop="static"
+            keyboard={false}
+            centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Add Customer</Typography.Header>
 
@@ -64,7 +82,9 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal }) => {
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={isProcessing}
-                        onClick={() => {}}
+                        onClick={() => {
+                            createCustomers();
+                        }}
                     />
                 </div>
 

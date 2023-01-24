@@ -12,15 +12,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
 import { fetchSessionDetails, updateUser } from './service';
-import { async } from 'q';
 
 const AuthUpdate = (props) => {
     let history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [titleText, setTitleText] = useState('Success');
-    const [showReset, setShowReset] = useState(false);
-    const [error, setError] = useState(false);
 
     const setSession = (user) => {
         let cookies = new Cookies();
@@ -58,6 +55,7 @@ const AuthUpdate = (props) => {
                 setIsLoading(false);
             });
     };
+
     const updateUserDetails = async () => {
         let payload = {
             linked_oauth: ['google'],

@@ -9,13 +9,14 @@ import Button from '../../../sharedComponents/button/Button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
-import { faCircleCheck, faBan } from '@fortawesome/pro-thin-svg-icons';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as MiniLogo } from '../../../assets/icon/miniLogo.svg';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import AddCustomer from './addCustomer';
-import { fetchCustomerList } from './services';
-import { StatusBadge } from '../../../sharedComponents/statusBadge';
+import { fetchCustomerList, fetchSelectedCustomer } from './services';
+import { BaseUrl } from '../../../services/Network';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -98,6 +99,22 @@ const Accounts = () => {
             });
     };
 
+    const redirectToVendorPage = async (vendorID) => {
+        if (vendorID === '' || vendorID === null) {
+            return '';
+        }
+        localStorage.setItem('vendor_id', vendorID);
+        let params = `?vendor_id=${vendorID}`;
+        await fetchSelectedCustomer(params)
+            .then((res) => {
+                let response = res.data;
+                window.open(`http://localhost:3000/energy/portfolio/overview`, '_blank');
+            })
+            .catch((error) => {
+                setIsUserDataFetched(false);
+            });
+    };
+
     const currentRow = () => {
         if (selectedStatus === 0) return userData;
         else if (selectedStatus === 1) {
@@ -110,26 +127,42 @@ const Accounts = () => {
     const renderActiveDevices = (row) => {
         return (
             <>
-                <Typography.Body size={Typography.Sizes.sm}>
-                    {row?.active_devices.online}&nbsp;
-                    <StatusBadge
-                        text={row?.active_devices.offline === '' ? '0' : row?.active_devices.offline}
-                        type={StatusBadge.Type.error}
-                    />
-                </Typography.Body>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Typography.Body size={Typography.Sizes.sm} className="mt-1">
+                        {row?.active_devices.online}
+                    </Typography.Body>
+                    &nbsp;
+                    {row?.active_devices.offline !== '' && row?.active_devices.offline !== '0' ? (
+                        <Typography.Subheader
+                            size={Typography.Sizes.sm}
+                            className="d-flex badge-container justify-content-center"
+                            style={{ color: colorPalette.error700 }}>
+                            {row?.active_devices.offline}&nbsp; offline
+                        </Typography.Subheader>
+                    ) : null}
+                </div>
             </>
         );
     };
 
     const renderPassiveDevices = (row) => {
         return (
-            <Typography.Body size={Typography.Sizes.sm}>
-                {row?.passive_devices.online}&nbsp;
-                <StatusBadge
-                    text={row?.passive_devices.offline === '' ? '0' : row?.passive_devices.offline}
-                    type={StatusBadge.Type.error}
-                />
-            </Typography.Body>
+            <>
+                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                    <Typography.Body size={Typography.Sizes.sm} className="mt-1">
+                        {row?.passive_devices.online}
+                    </Typography.Body>
+                    &nbsp;
+                    {row?.passive_devices.offline !== '' && row?.passive_devices.offline !== '0' ? (
+                        <Typography.Subheader
+                            size={Typography.Sizes.sm}
+                            className="d-flex badge-container justify-content-center"
+                            style={{ color: colorPalette.error700 }}>
+                            {row?.passive_devices.offline}&nbsp; offline
+                        </Typography.Subheader>
+                    ) : null}
+                </div>
+            </>
         );
     };
 
@@ -140,7 +173,7 @@ const Accounts = () => {
                     size={Typography.Sizes.sm}
                     className="d-flex inactive-container justify-content-center"
                     style={{ color: colorPalette.primaryGray800 }}>
-                    <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
+                    <InactiveSVG style={{ marginTop: '0.125rem' }} />
                     Inactive
                 </Typography.Subheader>
             );
@@ -150,7 +183,7 @@ const Accounts = () => {
                     size={Typography.Sizes.sm}
                     className="d-flex active-container justify-content-center"
                     style={{ color: colorPalette.success700 }}>
-                    <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
+                    <ActiveSVG style={{ marginTop: '0.125rem' }} />
                     Active
                 </Typography.Subheader>
             );
@@ -172,7 +205,7 @@ const Accounts = () => {
         return (
             <>
                 <Row style={{ padding: '0.5rem 0.625rem' }}>
-                    <Typography.Body size={Typography.Sizes.sm}>{row.total_usage} kWh </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm}>{row.total_usage.toFixed(2)} kWh </Typography.Body>
                     &nbsp;&nbsp;
                     <TrendsBadge
                         value={isNaN(Math.abs(Math.round(row.per))) ? 0 : Math.abs(Math.round(row.per))}
@@ -189,18 +222,13 @@ const Accounts = () => {
                 <Row style={{ padding: '0.5rem 0.625rem' }}>
                     <Button
                         label="View"
-                        size={Button.Sizes.md}
+                        size={Button.Sizes.lg}
+                        className="sub-button"
                         type={Button.Type.secondaryGrey}
-                        //icon={<EyeSVG />}
-                        onClick={() => {}}
-                    />
-                    &nbsp;&nbsp;
-                    <Button
-                        label="Edit"
-                        size={Button.Sizes.md}
-                        type={Button.Type.secondaryGrey}
-                        //icon={<Pencil />}
-                        onClick={() => {}}
+                        icon={<MiniLogo />}
+                        onClick={() => {
+                            redirectToVendorPage(row?.id);
+                        }}
                     />
                 </Row>
             </>
@@ -218,13 +246,7 @@ const Accounts = () => {
                                 label="Add Customer"
                                 size={Button.Sizes.lg}
                                 type={Button.Type.primary}
-                                icon={
-                                    <FontAwesomeIcon
-                                        icon={faPlus}
-                                        size="lg"
-                                        style={{ color: colorPalette.baseWhite }}
-                                    />
-                                }
+                                icon={<PlusSVG />}
                                 iconAlignment={Button.IconAlignment.left}
                                 onClick={() => {
                                     setOpenCustomer(true);
@@ -245,7 +267,7 @@ const Accounts = () => {
                             // setUserSearchInfo(query);
                         }}
                         buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Active' }, { label: 'Inactive' }]}
-                        filterOptions={[]}
+                        // filterOptions={[]}
                         onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
@@ -292,7 +314,11 @@ const Accounts = () => {
                     />
                 </Col>
             </Row>
-            <AddCustomer isAddCustomerOpen={openCustomer} closeAddCustomerModal={closeAddCustomer} />{' '}
+            <AddCustomer
+                isAddCustomerOpen={openCustomer}
+                closeAddCustomerModal={closeAddCustomer}
+                getCustomerList={getCustomerList}
+            />{' '}
         </React.Fragment>
     );
 };

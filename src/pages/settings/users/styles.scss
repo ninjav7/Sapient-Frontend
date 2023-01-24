@@ -153,3 +153,24 @@
     background: $warning-50 !important;
     color: $warning-700 !important;
 }
+
+.badge-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    gap: 0.5rem;
+    background: $error-100;
+    border-radius: 0.5rem;
+}
+
+.sub-button{
+    width:100%;
+    justify-content: center;
+}
+
+.customer-container-style {
+    max-width: 25rem !important;
+    max-height: 25rem !important;
+    height: 25rem !important;
+}
