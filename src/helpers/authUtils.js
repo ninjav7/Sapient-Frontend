@@ -33,14 +33,6 @@ const isSuperUserAuthenticated = () => {
     } else {
         return true;
     }
-    // const superuser =JSON.parse(localStorage.getItem("isSuperUser"))
-    // console.log(superuser);
-    // if(superuser==="true" || superuser===true){
-    //     return true;
-    // }
-    // else{
-    //    return false;
-    // }
 };
 
 /**

@@ -117,7 +117,6 @@ const Login = (props) => {
         await fetchSessionDetails(params)
             .then((res) => {
                 let response = res.data;
-                console.log(response);
                 setRefresh(false);
                 setSession(response.data);
                 history.push('/');
@@ -125,7 +124,6 @@ const Login = (props) => {
             })
             .catch((error) => {
                 setRefresh(false);
-                console.log('error', error);
             });
     };
     const renderRedirectToRoot = () => {
@@ -137,18 +135,12 @@ const Login = (props) => {
     };
 
     const handleAdminPortal = async () => {
-        // await localStorage.setItem('isSuperUser', true);
-        // await history.push('/super-user/accounts');
-        // window.location.reload();
         await googleAuth()
             .then((res) => {
                 let response = res.data;
-                console.log(response);
                 window.open(response?.url, '_self');
             })
-            .catch((error) => {
-                console.log('error', error);
-            });
+            .catch((error) => {});
     };
     return (
         <React.Fragment>

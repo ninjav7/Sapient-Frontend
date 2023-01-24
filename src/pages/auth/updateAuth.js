@@ -47,7 +47,6 @@ const AuthUpdate = (props) => {
         await fetchSessionDetails(params)
             .then(async (res) => {
                 let response = res.data;
-                console.log(response);
 
                 setSession(response.data);
                 await updateUserDetails();
@@ -57,7 +56,6 @@ const AuthUpdate = (props) => {
             })
             .catch((error) => {
                 setIsLoading(false);
-                console.log('error', error);
             });
     };
     const updateUserDetails = async () => {
@@ -67,11 +65,8 @@ const AuthUpdate = (props) => {
         await updateUser(payload)
             .then((res) => {
                 let response = res.data;
-                console.log(response);
             })
-            .catch((error) => {
-                console.log('error', error);
-            });
+            .catch((error) => {});
     };
 
     return (

@@ -95,7 +95,6 @@ const UserProfile = () => {
 
                 if (response?.permissions.length !== 0) {
                     setOrginalUserRole(response?.permissions[0]);
-                    console.log('SSR user Role => ', response?.permissions[0]);
                     setUserRole(response?.permissions[0]);
                 }
             })

@@ -90,13 +90,11 @@ const Accounts = () => {
         await fetchCustomerList()
             .then((res) => {
                 let response = res.data;
-                console.log('Customer ', response);
                 setUserData(response?.data);
                 setIsUserDataFetched(false);
             })
             .catch((error) => {
                 setIsUserDataFetched(false);
-                console.log('error', error);
             });
     };
 
@@ -268,12 +266,12 @@ const Accounts = () => {
                                 callbackValue: renderStatus,
                             },
                             {
-                                name: 'Active / Offline Devices',
+                                name: 'Active Devices',
                                 accessor: 'active_devices',
                                 callbackValue: renderActiveDevices,
                             },
                             {
-                                name: 'Passive / Offline Devices',
+                                name: 'Smart Meters',
                                 accessor: 'passive_devices',
                                 callbackValue: renderPassiveDevices,
                             },

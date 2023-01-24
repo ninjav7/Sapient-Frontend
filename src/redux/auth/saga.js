@@ -62,10 +62,8 @@ function* login({ payload: { username, password } }) {
             localStorage.setItem('login_success', true);
         }
         setSession(response.data);
-        console.log(response.data);
         yield put(loginUserSuccess(response.data));
     } catch (error) {
-        console.log('error ', error);
         let message;
         switch (error.status) {
             case 500:
