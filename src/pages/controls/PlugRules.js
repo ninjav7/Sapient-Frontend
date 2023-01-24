@@ -274,9 +274,9 @@ const PlugRules = () => {
     };
 
     useEffect(() => {
-        if (activeBuildingId) {
+        // if (activeBuildingId) {
             fetchPlugRuleData();
-        }
+        // }
     }, [activeBuildingId, search]);
 
     const history = useHistory();
@@ -286,6 +286,11 @@ const PlugRules = () => {
             pathname: `/control/plug-rules/${ruleId}`,
         });
     };
+const handleCreatePlugRule = ()=>{
+    history.push({
+        pathname: `/control/plug-rules/create-plug-rule`,
+    });
+}
 
     const formatRows = (data) =>
         data.map((row) => {
@@ -387,7 +392,9 @@ const PlugRules = () => {
                             type="button"
                             className="btn btn-md btn-primary font-weight-bold"
                             onClick={() => {
-                                handleAddRuleShow();
+                                // handleAddRuleShow();
+
+                                handleCreatePlugRule();
                             }}>
                             <FontAwesomeIcon icon={faPlus} size="md" className="mr-2" />
                             Add Rule

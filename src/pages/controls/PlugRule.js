@@ -10,6 +10,9 @@ import Button from '../../sharedComponents/button/Button';
 import { fetchPlugRules } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
+import { buildingData } from '../../store/globalState';
+import { useAtom } from 'jotai';
+import { fetchBuildingsList } from '../../services/buildings';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -23,6 +26,7 @@ import moment from 'moment';
 
 import {
     updatePlugRuleRequest,
+    createPlugRuleRequest,
     fetchPlugRuleDetails,
     deletePlugRuleRequest,
     getGraphDataRequest,
@@ -96,6 +100,10 @@ const actionTypeInitial = [
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
+
+    const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
+    const [buildingListData, setBuildingListData] = useState([]);
+    console.log('buildingListData4564', buildingListData);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [rulesToUnLink, setRulesToUnLink] = useState({
@@ -119,7 +127,10 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-    const [preparedScheduleData, setPreparedScheduleData] = useState();
+    console.log('currentData243324', currentData);
+
+    const [buildingError, setBuildingError] = useState({ text: '' });
+    const [preparedScheduleData, setPreparedScheduleData] = useState([]);
     const [conditionDisabledDays, setConditionDisabledDays] = useState();
     const [skeletonLoading, setSkeletonLoading] = useState(true);
 
@@ -227,6 +238,20 @@ const PlugRule = () => {
             }, [])
         );
     };
+    const formatBuildingListData = (data) => {
+        return data.map((el) => {
+            return { value: el.building_id, label: el.building_name };
+        });
+    };
+
+    const getBuildingData = async () => {
+        await fetchBuildingsList(false).then((res) => {
+            let data = res.data;
+            const formattedData = formatBuildingListData(data);
+
+            setBuildingListData(formattedData);
+        });
+    };
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -274,7 +299,12 @@ const PlugRule = () => {
 
     useEffect(() => {
         generateHours();
-        fetchPlugRuleDetail();
+        getBuildingData();
+        if (ruleId == 'create-plug-rule') {
+            setIsCreateRuleMode(true);
+        } else {
+            fetchPlugRuleDetail();
+        }
     }, []);
 
     useEffect(() => {
@@ -287,6 +317,7 @@ const PlugRule = () => {
                 setSkeletonLoading(false);
             }
             let response = res.data.data;
+            response.building_id = localStorage.getItem('buildingId');
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
             setPreparedScheduleData(scheduleData);
@@ -623,6 +654,9 @@ const PlugRule = () => {
     const handleCurrentDataChange = (key, value) => {
         let obj = Object.assign({}, currentData);
         obj[key] = value;
+        if (key == 'building_id' && value) {
+            setBuildingError({});
+        }
         setCurrentData(obj);
     };
     const handleScheduleDayChange = (day, condition_group_id) => {
@@ -1090,6 +1124,40 @@ const PlugRule = () => {
 
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
+    const handleSaveClicked = async () => {
+        if (isCreateRuleMode) {
+            let currentDataCopy = Object.assign({}, currentData);
+
+            const formattedSchedule = [];
+            preparedScheduleData.forEach((currentCondition) => {
+                currentCondition.data.forEach((currentRow) => {
+                    formattedSchedule.push(currentRow);
+                });
+            });
+            currentDataCopy.action = formattedSchedule;
+            currentDataCopy.building_id = [currentData.building_id||localStorage.getItem('buildingId')];
+
+            await createPlugRuleRequest(currentDataCopy)
+                .then((res) => {
+                    history.push({
+                        pathname: `/control/plug-rules`,
+                    });
+                })
+                .catch((error) => {
+                    setIsProcessing(false);
+                });
+        } else {
+            if (currentData.building_id) {
+                Promise.allSettled([updatePlugRuleData(), updateSocketLink(), updateSocketUnlink()]).then((value) => {
+                    history.push({
+                        pathname: `/control/plug-rules`,
+                    });
+                });
+            } else {
+                setBuildingError({ text: 'please select building' });
+            }
+        }
+    };
 
     const renderAssignRule = useCallback(
         (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
@@ -1399,7 +1467,20 @@ const PlugRule = () => {
             </>
         );
     };
+    const buildingIdProps = {
+        isDisabled: true,
+        label: 'Choose building',
+        defaultValue: localStorage.getItem('buildingId'),
+        onChange: (event) => {
+            console.log('EVENT', event);
+            handleCurrentDataChange('building_id', event.value);
+        },
+        options:  buildingListData ,
+    };
 
+    if (!!buildingError.text.length) {
+        buildingIdProps.error = buildingError;
+    }
     return (
         <>
             <div className="single-plug-rule-container">
@@ -1449,15 +1530,7 @@ const PlugRule = () => {
                                 className="btn btn-primary plug-rule-save ml-2"
                                 size={Button.Sizes.md}
                                 onClick={() => {
-                                    Promise.allSettled([
-                                        updatePlugRuleData(),
-                                        updateSocketLink(),
-                                        updateSocketUnlink(),
-                                    ]).then((value) => {
-                                        history.push({
-                                            pathname: `/control/plug-rules`,
-                                        });
-                                    });
+                                    handleSaveClicked();
                                 }}>
                                 Save
                             </button>
@@ -1498,6 +1571,21 @@ const PlugRule = () => {
                                                 handleCurrentDataChange('name', e.target.value);
                                             }}
                                         />
+                                        <div className="my-3">
+                                            {isCreateRuleMode && localStorage.getItem('buildingId') == 'portfolio' && (
+                                                <Select
+                                                    label="Choose building"
+                                                    defaultValue={currentData.building_id}
+                                                    onChange={(event) => {
+                                                        console.log('EVENT', event);
+                                                        handleCurrentDataChange('building_id', event.value);
+                                                    }}
+                                                    options={buildingListData}
+                                                />
+                                            )}
+                                            {!isCreateRuleMode && <Select {...buildingIdProps} />}
+                                        </div>
+
                                         <Textarea
                                             type="textarea"
                                             label="Description"

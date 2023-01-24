@@ -612,6 +612,14 @@ const controlRoutes = {
             visibility: false,
         },
         {
+            path: '/control/plug-rules/create-plug-rule',
+            name: 'Create Plug Rule',
+            component: PlugRule,
+            route: PrivateRoute,
+            parent: 'control',
+            visibility: false,
+        },
+        {
             path: '/control/plug-rules',
             name: 'Plug Rules',
             component: PlugRules,
