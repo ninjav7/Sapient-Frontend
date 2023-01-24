@@ -205,7 +205,7 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
             )}
             <StatusFilter />
 
-            {selectedFilters.map((filter, key) => {
+            {selectedFilters.map((filter) => {
                 const Component = mapFilters[filter.filterType];
 
                 const handleDeleteFilter = (args) => {
@@ -215,8 +215,13 @@ export const Filters = ({ filterOptions, onChange, onChangeFilterValue, selected
 
                 //@TODO Delete on change filter carefully
                 return (
+                    // putting here any other content, can execute re-render even if it is necessary
+                    // it will force to rerender the component per each change a list of filters
                     <Component
-                        key={key}
+                        // Here we try to use id or value as uniq id, to avoid mixing up between different filters
+                        // We can't use generateID() here, because per iteration the list will be re-rendered again with losing selected items.
+                        // Using predefined IDs resolves that issue, allows to not re-render all children.
+                        key={filter.id || filter.value}
                         {...filter}
                         onDeleteFilter={handleDeleteFilter}
                         onChangeFilterValue={onChangeFilterValue}

@@ -32,7 +32,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
             />
 
             <KPILabeled
-                title="Energy Density"
+                title="Average Consumption / sq. ft."
                 value={formatConsumptionValue(overalldata?.average_energy_density.now / 1000, 2)}
                 badgePrecentage={percentageHandler(
                     overalldata?.average_energy_density.now,
@@ -41,8 +41,8 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
                 unit={KPI_UNITS.KWH_SQ_FT}
                 tooltipText={
                     daysCount > 1
-                        ? `Energy density (kWh / sq. ft) of this building for the past ${daysCount} days.`
-                        : `Energy density (kWh / sq. ft) of this building for the past ${daysCount} day.`
+                        ? `Average Consumption / sq. ft. of this building for the past ${daysCount} days.`
+                        : `Average Consumption / sq. ft. of this building for the past ${daysCount} day.`
                 }
                 tooltipId="avg-bld-dnty"
                 type={
