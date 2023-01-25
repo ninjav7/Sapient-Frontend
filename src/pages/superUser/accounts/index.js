@@ -16,7 +16,7 @@ import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.s
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import AddCustomer from './addCustomer';
 import { fetchCustomerList, fetchSelectedCustomer } from './services';
-import { BaseUrl } from '../../../services/Network';
+import './style.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -227,7 +227,7 @@ const Accounts = () => {
                             <Button
                                 label="Add Customer"
                                 size={Button.Sizes.lg}
-                                type={Button.Type.link}
+                                type={Button.Type.primary}
                                 icon={<PlusSVG />}
                                 iconAlignment={Button.IconAlignment.left}
                                 onClick={() => {

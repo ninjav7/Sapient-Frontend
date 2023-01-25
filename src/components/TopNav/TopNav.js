@@ -36,8 +36,9 @@ const TopNav = () => {
                     setBuildingListData([]);
                 });
         };
-
-        getBuildingData(activeBldgList);
+        if (!location.pathname.includes('/super-user/')) {
+            getBuildingData(activeBldgList);
+        }
     }, [activeBldgList]);
 
     useEffect(() => {
@@ -73,12 +74,15 @@ const TopNav = () => {
                 });
             });
         };
-
-        getBuildingData(activeBldgList);
+        if (!location.pathname.includes('/super-user/')) {
+            getBuildingData(activeBldgList);
+        }
     }, [pageRefresh]);
 
     useEffect(() => {
-        getUserPermissionDetail();
+        if (!location.pathname.includes('/super-user/')) {
+            getUserPermissionDetail();
+        }
     }, []);
 
     return (
