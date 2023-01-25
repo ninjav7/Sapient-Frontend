@@ -88,3 +88,17 @@ $text-colors: (
         }
     }
 }
+
+//Skeleton loading
+.skeleton {
+    background: $primary-gray-150;
+    background: linear-gradient(110deg, $primary-gray-100 8%, $primary-gray-25 18%, $primary-gray-150 33%);
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position-x: -200%;
+    }
+}
