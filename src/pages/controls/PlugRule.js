@@ -103,7 +103,6 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
-    console.log('buildingListData4564', buildingListData);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [rulesToUnLink, setRulesToUnLink] = useState({
@@ -115,7 +114,12 @@ const PlugRule = () => {
     const history = useHistory();
 
     const getConditionId = () => uuidv4();
-    const [currentData, setCurrentData] = useState([]);
+    const initialCurrentData = {
+        name: '',
+        building_id: '',
+        description: '',
+    };
+    const [currentData, setCurrentData] = useState(initialCurrentData);
     const [activeBuildingId, setActiveBuildingId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
@@ -127,13 +131,12 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-    console.log('currentData243324', currentData);
 
     const [buildingError, setBuildingError] = useState({ text: '' });
+    const [nameError, setNameError] = useState(false);
     const [preparedScheduleData, setPreparedScheduleData] = useState([]);
     const [conditionDisabledDays, setConditionDisabledDays] = useState();
     const [skeletonLoading, setSkeletonLoading] = useState(true);
-
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
@@ -316,8 +319,8 @@ const PlugRule = () => {
             if (res.status) {
                 setSkeletonLoading(false);
             }
-            let response = res.data.data;
-            response.building_id = localStorage.getItem('buildingId');
+            let response = Object.assign({}, res.data.data[0]);            
+            response.building_id = response.building[0].building_id;
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
             setPreparedScheduleData(scheduleData);
@@ -655,7 +658,10 @@ const PlugRule = () => {
         let obj = Object.assign({}, currentData);
         obj[key] = value;
         if (key == 'building_id' && value) {
-            setBuildingError({});
+            setBuildingError({text:''});
+        }
+        if (key == 'name' && value) {
+            setNameError(false);
         }
         setCurrentData(obj);
     };
@@ -1124,38 +1130,49 @@ const PlugRule = () => {
 
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
+    const validatePlugRuleForm = (data) => {
+        let valid = true;
+        if (!data.name.length) {
+            setNameError(true);
+            valid = false;
+        }
+        if (!data.building_id.length) {
+            setBuildingError({ text: 'please select building' });
+            valid = false;
+        }
+        return valid;
+    };
     const handleSaveClicked = async () => {
         if (isCreateRuleMode) {
-            let currentDataCopy = Object.assign({}, currentData);
+            const isValid = validatePlugRuleForm(currentData);
+            if (isValid) {
+                let currentDataCopy = Object.assign({}, currentData);
 
-            const formattedSchedule = [];
-            preparedScheduleData.forEach((currentCondition) => {
-                currentCondition.data.forEach((currentRow) => {
-                    formattedSchedule.push(currentRow);
+                const formattedSchedule = [];
+                preparedScheduleData.forEach((currentCondition) => {
+                    currentCondition.data.forEach((currentRow) => {
+                        formattedSchedule.push(currentRow);
+                    });
+                });
+                currentDataCopy.action = formattedSchedule;
+                currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
+
+                await createPlugRuleRequest(currentDataCopy)
+                    .then((res) => {
+                        history.push({
+                            pathname: `/control/plug-rules`,
+                        });
+                    })
+                    .catch((error) => {
+                        setIsProcessing(false);
+                    });
+            }
+        } else {
+            Promise.allSettled([updatePlugRuleData(), updateSocketLink(), updateSocketUnlink()]).then((value) => {
+                history.push({
+                    pathname: `/control/plug-rules`,
                 });
             });
-            currentDataCopy.action = formattedSchedule;
-            currentDataCopy.building_id = [currentData.building_id||localStorage.getItem('buildingId')];
-
-            await createPlugRuleRequest(currentDataCopy)
-                .then((res) => {
-                    history.push({
-                        pathname: `/control/plug-rules`,
-                    });
-                })
-                .catch((error) => {
-                    setIsProcessing(false);
-                });
-        } else {
-            if (currentData.building_id) {
-                Promise.allSettled([updatePlugRuleData(), updateSocketLink(), updateSocketUnlink()]).then((value) => {
-                    history.push({
-                        pathname: `/control/plug-rules`,
-                    });
-                });
-            } else {
-                setBuildingError({ text: 'please select building' });
-            }
         }
     };
 
@@ -1468,17 +1485,15 @@ const PlugRule = () => {
         );
     };
     const buildingIdProps = {
-        isDisabled: true,
         label: 'Choose building',
         defaultValue: localStorage.getItem('buildingId'),
         onChange: (event) => {
-            console.log('EVENT', event);
             handleCurrentDataChange('building_id', event.value);
         },
-        options:  buildingListData ,
+        options: buildingListData,
     };
 
-    if (!!buildingError.text.length) {
+    if (buildingError?.text?.length) {
         buildingIdProps.error = buildingError;
     }
     return (
@@ -1570,20 +1585,23 @@ const PlugRule = () => {
                                             onChange={(e) => {
                                                 handleCurrentDataChange('name', e.target.value);
                                             }}
+                                            error={nameError}
                                         />
                                         <div className="my-3">
                                             {isCreateRuleMode && localStorage.getItem('buildingId') == 'portfolio' && (
+                                                <Select {...buildingIdProps} />
+                                            )}
+                                            {!isCreateRuleMode && (
                                                 <Select
                                                     label="Choose building"
                                                     defaultValue={currentData.building_id}
                                                     onChange={(event) => {
-                                                        console.log('EVENT', event);
                                                         handleCurrentDataChange('building_id', event.value);
                                                     }}
+                                                    isDisabled={true}
                                                     options={buildingListData}
                                                 />
                                             )}
-                                            {!isCreateRuleMode && <Select {...buildingIdProps} />}
                                         </div>
 
                                         <Textarea
