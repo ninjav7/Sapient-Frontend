@@ -108,7 +108,7 @@ const Accounts = () => {
         await fetchSelectedCustomer(params)
             .then((res) => {
                 let response = res.data;
-                window.open(`http://localhost:3000/energy/portfolio/overview`, '_blank');
+                window.open(`/energy/portfolio/overview`, '_blank');
             })
             .catch((error) => {
                 setIsUserDataFetched(false);
