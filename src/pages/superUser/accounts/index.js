@@ -129,17 +129,8 @@ const Accounts = () => {
             <>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Typography.Body size={Typography.Sizes.sm} className="mt-1">
-                        {row?.active_devices.online}
+                        {row?.active_devices}
                     </Typography.Body>
-                    &nbsp;
-                    {row?.active_devices.offline !== '' && row?.active_devices.offline !== '0' ? (
-                        <Typography.Subheader
-                            size={Typography.Sizes.sm}
-                            className="d-flex badge-container justify-content-center"
-                            style={{ color: colorPalette.error700 }}>
-                            {row?.active_devices.offline}&nbsp; offline
-                        </Typography.Subheader>
-                    ) : null}
                 </div>
             </>
         );
@@ -150,17 +141,8 @@ const Accounts = () => {
             <>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <Typography.Body size={Typography.Sizes.sm} className="mt-1">
-                        {row?.passive_devices.online}
+                        {row?.passive_devices}
                     </Typography.Body>
-                    &nbsp;
-                    {row?.passive_devices.offline !== '' && row?.passive_devices.offline !== '0' ? (
-                        <Typography.Subheader
-                            size={Typography.Sizes.sm}
-                            className="d-flex badge-container justify-content-center"
-                            style={{ color: colorPalette.error700 }}>
-                            {row?.passive_devices.offline}&nbsp; offline
-                        </Typography.Subheader>
-                    ) : null}
                 </div>
             </>
         );
@@ -245,7 +227,7 @@ const Accounts = () => {
                             <Button
                                 label="Add Customer"
                                 size={Button.Sizes.lg}
-                                type={Button.Type.primary}
+                                type={Button.Type.link}
                                 icon={<PlusSVG />}
                                 iconAlignment={Button.IconAlignment.left}
                                 onClick={() => {
