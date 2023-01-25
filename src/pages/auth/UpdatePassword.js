@@ -104,8 +104,12 @@ const Confirm = (props) => {
     }, [redirectToLogin]);
 
     useEffect(() => {
-        if (password.length >= 8) {
-            setCharErr('success');
+        if (password.length >= 2) {
+            if (password.length >= 8) {
+                setCharErr('success');
+            } else {
+                setCharErr('error');
+            }
             if (password.match(/[A-Z]/)) {
                 setUpperCaseErr('success');
             } else {
