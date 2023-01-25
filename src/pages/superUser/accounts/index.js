@@ -252,6 +252,7 @@ const Accounts = () => {
                                     setOpenCustomer(true);
                                 }}
                             />
+                            {/* <Button label="Link Style" size={Button.Sizes.lg} type={Button.Type.link} /> */}
                         </div>
                     </div>
                 </Col>
@@ -262,12 +263,8 @@ const Accounts = () => {
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
-                        onSearch={(query) => {
-                            // setPageNo(1);
-                            // setUserSearchInfo(query);
-                        }}
+                        onSearch={(query) => {}}
                         buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Active' }, { label: 'Inactive' }]}
-                        // filterOptions={[]}
                         onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
