@@ -57,6 +57,10 @@
         padding: 1.5rem;
         display: inline-block;
 
+        .no-filtered-data-alert-text {
+            max-width: 8.125rem;
+        }
+
         .drop-down-button-menu {
             width: auto;
             overflow: auto;

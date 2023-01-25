@@ -39,6 +39,7 @@ const Notification = (props) => {
         closeByCloseBtn = true,
         duration = ALERT_DURATION,
         closeAutomatically,
+        customCloseNode,
     } = props;
 
     const [isShown, setIsShown] = useState(props.isShown);
@@ -137,7 +138,7 @@ const Notification = (props) => {
 
                     {renderActionButtons(currentColorsSchema)}
                 </div>
-                {isShownCloseBtn && (
+                {!customCloseNode && isShownCloseBtn && (
                     <button
                         onClick={handleClose}
                         type="button"
@@ -149,6 +150,24 @@ const Notification = (props) => {
                         />
                     </button>
                 )}
+
+                {customCloseNode &&
+                    React.cloneElement(customCloseNode, {
+                        ...customCloseNode.props,
+                        onClick: (event) => {
+                            const result =
+                                customCloseNode.props?.onClick &&
+                                customCloseNode.props?.onClick({ event, nativeHandler: handleClose });
+
+                            if (result) {
+                                handleClose(event);
+                            }
+                        },
+                        className: cx(
+                            'ml-auto align-self-start notification-btn-close custom-close-node',
+                            customCloseNode.props?.className
+                        ),
+                    })}
             </div>
         </div>
     );
@@ -158,9 +177,10 @@ Notification.Types = TYPES;
 Notification.ComponentTypes = COMPONENT_TYPES;
 
 Notification.propTypes = {
-    title: PropTypes.string,
-    description: PropTypes.string,
+    title: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.node.isRequired]),
+    description: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.node.isRequired]),
     onClose: PropTypes.func,
+    customCloseNode: PropTypes.node,
     icon: PropTypes.oneOfType([PropTypes.string.isRequired, PropTypes.node.isRequired]),
     actionButtons: PropTypes.oneOfType([
         PropTypes.node.isRequired,

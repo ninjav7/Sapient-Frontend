@@ -1,0 +1,21 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.no-filtered-data-alert {
+  &-wrapper {
+    .notification-body {
+      align-items: center;
+    }
+  }
+  &-refresh-btn {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.25rem;
+    margin-left: 1rem !important;
+    
+    path {
+      fill: $error-900;
+
+    }
+  }
+}
