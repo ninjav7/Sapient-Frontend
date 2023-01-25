@@ -24,6 +24,7 @@ import OperatingHours from './OperatingHours';
 import '../../../sharedComponents/form/select/style.scss';
 import '../style.css';
 import './styles.scss';
+import { UserStore } from '../../../store/UserStore';
 
 const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
@@ -169,16 +170,43 @@ const GeneralBuildingSettings = () => {
 
         await updateGeneralBuildingChange(bldgData, params)
             .then((res) => {
+                const response = res?.data;
+                if (!res) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = '';
+                        s.notificationType = 'error';
+                    });
+                    return;
+                }
+
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Building Details updated successfully!';
+                        s.notificationType = 'success';
+                    });
+                    localStorage.removeItem('generalState');
+                    localStorage.removeItem('generalStreetAddress');
+                    localStorage.removeItem('generalBuildingName');
+                    localStorage.removeItem('generalBuildingType');
+                    localStorage.removeItem('generaltimeZone');
+                    localStorage.removeItem('generalZipCode');
+                    BuildingListStore.update((s) => {
+                        s.fetchBuildingList = true;
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to update Building Details.'
+                            : 'Unable to save building details due to Internal Server Error!';
+                        s.notificationType = 'error';
+                    });
+                }
                 setLoadButton(false);
-                localStorage.removeItem('generalState');
-                localStorage.removeItem('generalStreetAddress');
-                localStorage.removeItem('generalBuildingName');
-                localStorage.removeItem('generalBuildingType');
-                localStorage.removeItem('generaltimeZone');
-                localStorage.removeItem('generalZipCode');
-                BuildingListStore.update((s) => {
-                    s.fetchBuildingList = true;
-                });
             })
             .catch((e) => {
                 setLoadButton(false);
