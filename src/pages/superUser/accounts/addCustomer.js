@@ -61,7 +61,6 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
                     onChange={(e) => {
                         handleChange('name', e.target.value.trim());
                     }}
-                    //error={equipTypeNameError}
                     labelSize={Typography.Sizes.md}
                 />
 

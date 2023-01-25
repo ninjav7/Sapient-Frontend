@@ -234,7 +234,6 @@ const Accounts = () => {
                                     setOpenCustomer(true);
                                 }}
                             />
-                            {/* <Button label="Link Style" size={Button.Sizes.lg} type={Button.Type.link} /> */}
                         </div>
                     </div>
                 </Col>

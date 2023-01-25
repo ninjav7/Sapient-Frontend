@@ -51,8 +51,6 @@ const AdminLayout = Loadable({
 class Routes extends Component {
     // returns the layout
     getLayout = () => {
-        // if (isSuperUserAuthenticated() && localStorage.getItem('vendor_id') == null) return AdminLayout;
-        // else if (isSuperUserAuthenticated() && localStorage.getItem('vendor_id') != null) return HorizontalLayout;
         if (!isUserAuthenticated()) return AuthLayout;
 
         let layoutCls = VerticalLayout;
