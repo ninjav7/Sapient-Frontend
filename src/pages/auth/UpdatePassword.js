@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Col } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import { FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
+import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
+import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg';
+import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
@@ -31,6 +34,12 @@ const Confirm = (props) => {
     const [cpassword, setCPassword] = useState('');
     const [passwordType, setPasswordType] = useState('password');
     const [cPasswordType, setCPasswordType] = useState('password');
+    const [charErr, setCharErr] = useState('');
+    const [lowerCaseErr, setLowerCaseErr] = useState('');
+    const [upperCaseErr, setUpperCaseErr] = useState('');
+    const [specialCharErr, setSpecialCharErr] = useState('');
+    const [numberErr, setNumberErr] = useState('');
+    const [matchErr, setMatchErr] = useState('');
 
     useEffect(() => {
         set_isMounted(true);
@@ -94,6 +103,48 @@ const Confirm = (props) => {
         }
     }, [redirectToLogin]);
 
+    useEffect(() => {
+        if (password.length >= 8) {
+            setCharErr('success');
+            if (password.match(/[A-Z]/)) {
+                setUpperCaseErr('success');
+            } else {
+                setUpperCaseErr('error');
+            }
+            if (password.match(/[a-z]/)) {
+                setLowerCaseErr('success');
+            } else {
+                setLowerCaseErr('error');
+            }
+            if (password.match(/[\d`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+                setSpecialCharErr('success');
+            } else {
+                setSpecialCharErr('error');
+            }
+            if (password.match(/[0-9]/)) {
+                setNumberErr('success');
+            } else {
+                setNumberErr('error');
+            }
+        } else if (password.length === 0) {
+            setSpecialCharErr('');
+            setNumberErr('');
+            setCharErr('');
+            setUpperCaseErr('');
+            setLowerCaseErr('');
+        }
+    }, [password]);
+
+    useEffect(() => {
+        if (cpassword.length >= 8) {
+            if (cpassword === password) {
+                setMatchErr('success');
+            } else {
+                setMatchErr('error');
+            }
+        }
+    }, [cpassword]);
+
     return (
         <React.Fragment>
             {_isMounted && (
@@ -156,7 +207,7 @@ const Confirm = (props) => {
                                         )}
 
                                         <form className="authentication-form">
-                                            <FormGroup className="mb-3 pt-5">
+                                            <FormGroup className="mb-3 pt-2">
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
                                                     className="text-mute mb-1">
@@ -189,6 +240,183 @@ const Confirm = (props) => {
                                                     value={password}
                                                 />
                                             </FormGroup>
+                                            <div className="columnField ml-3">
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {charErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : charErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {charErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: 8 or more characters
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                8 or more characters
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {upperCaseErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : upperCaseErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {upperCaseErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: Upper case letter (1 or more)
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                Upper case letter (1 or more)
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {lowerCaseErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : lowerCaseErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {lowerCaseErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: Lower case letter (1 or more)
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                Lower case letter (1 or more)
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {specialCharErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : specialCharErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {specialCharErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: Special Character (1 or more)
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                Special Character (1 or more)
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {numberErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : numberErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {numberErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: Number (1 or more)
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                Number (1 or more)
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <FormGroup className="mb-3 pt-5">
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
@@ -222,7 +450,44 @@ const Confirm = (props) => {
                                                     value={cpassword}
                                                 />
                                             </FormGroup>
-                                            <FormGroup>
+                                            <div className="columnField ml-3">
+                                                <div className="rowField">
+                                                    <div className="mr-2">
+                                                        {matchErr == '' ? (
+                                                            <CheckMinusMark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : matchErr === 'success' ? (
+                                                            <Check
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        ) : (
+                                                            <CheckXmark
+                                                                className="mt-2"
+                                                                style={{ height: '1.2rem', width: '1.2rem' }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        {matchErr === 'error' ? (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute-error mt-2">
+                                                                Error: Password must match
+                                                            </Typography.Subheader>
+                                                        ) : (
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mt-2">
+                                                                Password must match
+                                                            </Typography.Subheader>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <FormGroup className="mb-3 pt-5">
                                                 <Button
                                                     className="sub-button"
                                                     color="primary"
