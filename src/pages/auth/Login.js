@@ -38,7 +38,7 @@ const Login = (props) => {
     const setSession = (user) => {
         let cookies = new Cookies();
         if (user) {
-            localStorage.setItem('accountName', user?.account_id);
+            localStorage.setItem('accountName', user?.vendor_name);
             cookies.set('user', JSON.stringify(user), { path: '/' });
         } else cookies.remove('user', { path: '/' });
     };

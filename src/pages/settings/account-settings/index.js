@@ -30,6 +30,7 @@ const AccountSettings = () => {
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
+
     const updateAccountName = async () => {
         localStorage.removeItem('accountName');
         const headers = {
@@ -44,8 +45,8 @@ const AccountSettings = () => {
 
         await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
             let response = res.data.data;
-            localStorage.setItem('accountName', accoutnIdData);
-            setAccoutnIdData(response.account_id);
+            localStorage.setItem('accountName', response?.vendor_name);
+            setAccoutnIdData(response.vendor_name);
             setInputValidation(false);
         });
     };
@@ -121,7 +122,7 @@ const AccountSettings = () => {
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         onClick={(e) => {
-                                            updateAccountName();
+                                            // updateAccountName();
                                         }}
                                         className="ml-2"
                                         disabled={!inputValidation}
