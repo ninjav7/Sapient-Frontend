@@ -19,7 +19,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Typography from '../../../sharedComponents/typography';
 import UnlinkBreaker from './UnlinkBreaker';
-import { getBreakerDeleted, resetAllBreakers } from './services';
+import { getBreakerDeleted, getSensorsList, resetAllBreakers } from './services';
 import DeleteBreaker from './DeleteBreaker';
 import '../style.css';
 import './panel-style.css';
@@ -89,28 +89,27 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === '') {
             return;
         }
-        try {
-            setIsSensorDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setSensorData(response);
+
+        setIsSensorDataFetched(true);
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
+                setSensorData(unlinkedSensor.concat(linkedSensor));
                 if (doubleBreakerData.data.device_id !== '') {
-                    setDoubleSensorData(response);
+                    setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
                 }
                 if (tripleBreakerData.data.device_id !== '') {
-                    setTripleSensorData(response);
+                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
                 }
                 setIsSensorDataFetched(false);
+            })
+            .catch(() => {
+                setIsSensorDataFetched(false);
             });
-        } catch (error) {
-            setIsSensorDataFetched(false);
-        }
     };
 
     const fetchSensorDataForSelectionOne = async (deviceId, breakerLvl) => {
@@ -120,26 +119,25 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === '') {
             return;
         }
-        try {
-            setIsSensorDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setSensorData(response);
-                setDoubleSensorData(response);
+
+        setIsSensorDataFetched(true);
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
+                setSensorData(unlinkedSensor.concat(linkedSensor));
+                setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
                 if (breakerLvl === 'triple') {
-                    setTripleSensorData(response);
+                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
                 }
                 setIsSensorDataFetched(false);
+            })
+            .catch(() => {
+                setIsSensorDataFetched(false);
             });
-        } catch (error) {
-            setIsSensorDataFetched(false);
-        }
     };
 
     const fetchSingleSensorList = async (deviceId) => {
@@ -152,30 +150,29 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === undefined) {
             return;
         }
-        try {
-            setIsSensorDataFetched(true);
-            setIsSensorDataFetchedForDouble(true);
-            setIsSensorDataFetchedForTriple(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+
+        setIsSensorDataFetched(true);
+        setIsSensorDataFetchedForDouble(true);
+        setIsSensorDataFetchedForTriple(true);
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
                 let response = res?.data;
-                setSensorData(response);
-                setDoubleSensorData(response);
-                setTripleSensorData(response);
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
+                setSensorData(unlinkedSensor.concat(linkedSensor));
+                setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
+                setTripleSensorData(unlinkedSensor.concat(linkedSensor));
+                setIsSensorDataFetched(false);
+                setIsSensorDataFetchedForDouble(false);
+                setIsSensorDataFetchedForTriple(false);
+            })
+            .catch(() => {
                 setIsSensorDataFetched(false);
                 setIsSensorDataFetchedForDouble(false);
                 setIsSensorDataFetchedForTriple(false);
             });
-        } catch (error) {
-            setIsSensorDataFetched(false);
-            setIsSensorDataFetchedForDouble(false);
-            setIsSensorDataFetchedForTriple(false);
-        }
     };
 
     const fetchMultipleSensorList = async (deviceId, breakerNo) => {
@@ -188,48 +185,47 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === undefined) {
             return;
         }
-        try {
-            if (breakerNo === 'first') {
-                setIsSensorDataFetched(true);
-            }
-            if (breakerNo === 'second') {
-                setIsSensorDataFetchedForDouble(true);
-            }
-            if (breakerNo === 'third') {
-                setIsSensorDataFetchedForTriple(true);
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+        if (breakerNo === 'first') {
+            setIsSensorDataFetched(true);
+        }
+        if (breakerNo === 'second') {
+            setIsSensorDataFetchedForDouble(true);
+        }
+        if (breakerNo === 'third') {
+            setIsSensorDataFetchedForTriple(true);
+        }
+
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
                 let response = res?.data;
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
                 if (breakerNo === 'first') {
-                    setSensorData(response);
+                    setSensorData(unlinkedSensor.concat(linkedSensor));
                     setIsSensorDataFetched(false);
                 }
                 if (breakerNo === 'second') {
-                    setDoubleSensorData(response);
+                    setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
                     setIsSensorDataFetchedForDouble(false);
                 }
                 if (breakerNo === 'third') {
-                    setTripleSensorData(response);
+                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
+                    setIsSensorDataFetchedForTriple(false);
+                }
+            })
+            .catch(() => {
+                if (breakerNo === 'first') {
+                    setIsSensorDataFetched(false);
+                }
+                if (breakerNo === 'second') {
+                    setIsSensorDataFetchedForDouble(false);
+                }
+                if (breakerNo === 'third') {
                     setIsSensorDataFetchedForTriple(false);
                 }
             });
-        } catch (error) {
-            if (breakerNo === 'first') {
-                setIsSensorDataFetched(false);
-            }
-            if (breakerNo === 'second') {
-                setIsSensorDataFetchedForDouble(false);
-            }
-            if (breakerNo === 'third') {
-                setIsSensorDataFetchedForTriple(false);
-            }
-        }
     };
 
     const unLinkCurrentBreaker = async () => {
@@ -299,22 +295,21 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === '') {
             return;
         }
-        try {
-            setIsSensorDataFetchedForDouble(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setDoubleSensorData(response);
+
+        setIsSensorDataFetchedForDouble(true);
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
+                setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
+                setIsSensorDataFetchedForDouble(false);
+            })
+            .catch(() => {
                 setIsSensorDataFetchedForDouble(false);
             });
-        } catch (error) {
-            setIsSensorDataFetchedForDouble(false);
-        }
     };
 
     const fetchDeviceSensorDataForTriple = async (deviceId) => {
@@ -324,22 +319,21 @@ const DistributedBreakerComponent = ({ data, id }) => {
         if (deviceId === 'unlink') {
             return;
         }
-        try {
-            setIsSensorDataFetchedForTriple(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                setTripleSensorData(response);
+
+        setIsSensorDataFetchedForTriple(true);
+        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+                response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
+                setTripleSensorData(unlinkedSensor.concat(linkedSensor));
+                setIsSensorDataFetchedForTriple(false);
+            })
+            .catch(() => {
                 setIsSensorDataFetchedForTriple(false);
             });
-        } catch (error) {
-            setIsSensorDataFetchedForTriple(false);
-        }
     };
 
     const triggerBreakerAPI = () => {

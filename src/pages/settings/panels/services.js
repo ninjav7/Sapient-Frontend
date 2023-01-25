@@ -13,6 +13,7 @@ import {
     updateLinkBreakers,
     deleteBreaker,
     getFiltersForEquipment,
+    listSensor,
 } from '../../../services/Network';
 
 export function getPanelsData(
@@ -100,4 +101,8 @@ export function fetchPanelsFilter(args) {
 // This Service is created to fetch Panel List without Filters
 export function getPanelsList(params) {
     return axiosInstance.get(`${generalPanels}${params}`).then((res) => res);
+}
+
+export function getSensorsList(params) {
+    return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
 }
