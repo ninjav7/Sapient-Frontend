@@ -1,0 +1,16 @@
+@import '../../../assets/scss/colors';
+@import '../../assets/scss/helpers';
+
+@import 'LayoutColumnHeader';
+@import 'LayoutLevelColumn';
+@import 'LayoutLocationSelectionMenuList';
+@import 'LayoutLoading';
+
+.layout-elements {
+    &-wrapper {
+        @extend .borders;
+        @extend .box-shadow-lg;
+        border-radius: 0.5rem;
+        overflow: auto;
+    }
+}
