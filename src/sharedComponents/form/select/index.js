@@ -33,7 +33,6 @@ export const DROPDOWN_INPUT_TYPES = Object.freeze({
 const Select = ({
     selectClassName = '',
     className = '',
-    disabled,
     options = [],
     type = DROPDOWN_INPUT_TYPES.Default,
     defaultValue,
