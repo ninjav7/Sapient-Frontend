@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Link, useHistory } from 'react-router-dom';
-import { Col, FormGroup, Alert, Button } from 'reactstrap';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { Col, FormGroup, Alert } from 'reactstrap';
 import { loginUser } from '../../redux/actions';
+import { Cookies } from 'react-cookie';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
+import { ReactComponent as Google } from '../../assets/icon/google.svg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
 import Input from '../../sharedComponents/form/input/Input';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { UserStore } from '../../store/UserStore';
+import Button from '../../sharedComponents/button/Button';
+import { googleAuth, fetchSessionDetails } from './service';
 
 const Login = (props) => {
     const history = useHistory();
@@ -28,6 +32,50 @@ const Login = (props) => {
     const [passwordType, setPasswordType] = useState('password');
     const [passwordError, setPasswordError] = useState(false);
     const [emailError, setEmailError] = useState(false);
+    const [refresh, setRefresh] = useState(false);
+    let { user_found, link_type, account_linked, session_id } = useParams();
+
+    const setSession = (user) => {
+        let cookies = new Cookies();
+        if (user) {
+            localStorage.setItem('accountName', user?.vendor_name);
+            cookies.set('user', JSON.stringify(user), { path: '/' });
+        } else cookies.remove('user', { path: '/' });
+    };
+
+    useEffect(() => {
+        if (
+            user_found !== undefined &&
+            link_type !== undefined &&
+            account_linked !== undefined &&
+            session_id !== undefined
+        ) {
+            setRefresh(true);
+            let usrFound = user_found.split('=');
+            if (usrFound[1] === 'true') {
+                let accountLinked = account_linked.split('=');
+                if (accountLinked[1] === 'true') {
+                    let sessionId = session_id.split('=');
+                    fetchSession(sessionId[1]);
+                } else if (accountLinked[1] === 'false') {
+                    let sessionId = session_id.split('=');
+                    localStorage.setItem('session-id', sessionId[1]);
+                    history.push('/account/update-auth');
+                }
+            } else if (usrFound[1] === 'false') {
+                setRefresh(false);
+                setError(true);
+                setMessage('Unable to Login');
+            }
+        } else if (user_found !== undefined) {
+            let usrFound = user_found.split('=');
+            if (usrFound[1] === 'false') {
+                setRefresh(false);
+                setError(true);
+                setMessage('Unable to Login');
+            }
+        }
+    }, []);
 
     useEffect(() => {
         set_isMounted(true);
@@ -39,6 +87,7 @@ const Login = (props) => {
             document.body.classList.remove('authentication-bg');
         };
     }, []);
+
     useEffect(() => {
         if (loginSuccess === false) {
             setError(true);
@@ -63,6 +112,20 @@ const Login = (props) => {
         }
     };
 
+    const fetchSession = async (sessionId) => {
+        let params = `?session_id=${sessionId}`;
+        await fetchSessionDetails(params)
+            .then((res) => {
+                let response = res.data;
+                setRefresh(false);
+                setSession(response.data);
+                history.push('/');
+                window.location.reload();
+            })
+            .catch((error) => {
+                setRefresh(false);
+            });
+    };
     const renderRedirectToRoot = () => {
         const isAuthTknValid = isUserAuthenticated();
         setisAuthTokenValid(isAuthTknValid);
@@ -71,13 +134,21 @@ const Login = (props) => {
         }
     };
 
+    const handleAdminPortal = async () => {
+        await googleAuth()
+            .then((res) => {
+                let response = res.data;
+                window.open(response?.url, '_self');
+            })
+            .catch((error) => {});
+    };
     return (
         <React.Fragment>
             {(_isMounted || !isAuthTokenValid) && (
                 <Holder
                     rightContent={
                         <>
-                            {props.loading && <Loader />}
+                            {props.loading || refresh ? <Loader /> : null}
 
                             <Col lg={8}>
                                 <div className="logoContainer">
@@ -117,7 +188,7 @@ const Login = (props) => {
                                         />
                                     </FormGroup>
 
-                                    <FormGroup className="mb-3 pt-5">
+                                    <FormGroup className="mb-4 pt-5">
                                         <Typography.Subheader size={Typography.Sizes.md} className="text-mute mb-1">
                                             Password
                                         </Typography.Subheader>
@@ -147,19 +218,44 @@ const Login = (props) => {
                                             labelSize={Typography.Sizes.md}
                                             value={password}
                                         />
-                                        <Link
-                                            to="/account/forget-password"
-                                            className="float-right  ml-1 text-primary font-weight-bold"
-                                            style={{ marginTop: '1.875rem' }}>
-                                            Forgot Password?
-                                        </Link>
                                     </FormGroup>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <FormGroup>
+                                            <Link
+                                                to="/account/forget-password"
+                                                className="float-right  ml-1 text-primary font-weight-bold"
+                                                style={{}}>
+                                                Forgot Password?
+                                            </Link>
+                                        </FormGroup>
 
-                                    <FormGroup>
-                                        <Button className="sub-button" color="primary" onClick={handleValidSubmit}>
-                                            Sign In
-                                        </Button>
-                                    </FormGroup>
+                                        <FormGroup>
+                                            <Button
+                                                className="sub-button"
+                                                type={Button.Type.primary}
+                                                size={Button.Sizes.md}
+                                                onClick={handleValidSubmit}
+                                                label="Sign In"></Button>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Typography.Header
+                                                size={Typography.Sizes.md}
+                                                className="text-mute mb-1 or-text">
+                                                Or
+                                            </Typography.Header>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Button
+                                                className="sub-button"
+                                                type={Button.Type.secondaryGrey}
+                                                icon={<Google />}
+                                                size={Button.Sizes.md}
+                                                onClick={() => {
+                                                    handleAdminPortal();
+                                                }}
+                                                label="Sign In with Google"></Button>
+                                        </FormGroup>
+                                    </div>
                                 </form>
                             </Col>
                         </>

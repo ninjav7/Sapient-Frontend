@@ -44,7 +44,6 @@ const ForgetPassword = () => {
                 setShowReset(true);
             })
             .catch((error) => {
-                console.log('error', error);
                 setIsLoading(false);
             });
     };
