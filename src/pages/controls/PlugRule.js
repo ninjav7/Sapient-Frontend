@@ -319,7 +319,7 @@ const PlugRule = () => {
             if (res.status) {
                 setSkeletonLoading(false);
             }
-            let response = Object.assign({}, res.data.data[0]);            
+            let response = Object.assign({}, res.data.data[0]);
             response.building_id = response.building[0].building_id;
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
@@ -658,7 +658,7 @@ const PlugRule = () => {
         let obj = Object.assign({}, currentData);
         obj[key] = value;
         if (key == 'building_id' && value) {
-            setBuildingError({text:''});
+            setBuildingError({ text: '' });
         }
         if (key == 'name' && value) {
             setNameError(false);
@@ -897,6 +897,7 @@ const PlugRule = () => {
             });
         });
         currentDataCopy.action = formattedSchedule;
+        currentDataCopy.building_id = [currentDataCopy.building_id];
         await updatePlugRuleRequest(currentDataCopy)
             .then((res) => {
                 setIsProcessing(false);
@@ -1588,10 +1589,9 @@ const PlugRule = () => {
                                             error={nameError}
                                         />
                                         <div className="my-3">
-                                            {isCreateRuleMode && localStorage.getItem('buildingId') == 'portfolio' && (
+                                            {isCreateRuleMode ? (
                                                 <Select {...buildingIdProps} />
-                                            )}
-                                            {!isCreateRuleMode && (
+                                            ) : (
                                                 <Select
                                                     label="Choose building"
                                                     defaultValue={currentData.building_id}
