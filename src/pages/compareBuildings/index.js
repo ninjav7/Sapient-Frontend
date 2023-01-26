@@ -243,27 +243,31 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    <DataTableWidget
-                        isLoading={isLoadingBuildingData}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="compare-building"
-                        onSearch={(query) => {
-                            setSearch(query);
-                        }}
-                        rows={buildingsData}
-                        searchResultRows={buildingsData}
-                        onDownload={() => handleDownloadCsv()}
-                        headers={headerProps}
-                        disableColumnDragging={true}
-                        buttonGroupFilterOptions={[]}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
+                    {isLoadingBuildingData ? (
+                        <SkeletonLoading />
+                    ) : (
+                        <DataTableWidget
+                            isLoading={isLoadingBuildingData}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="compare-building"
+                            onSearch={(query) => {
+                                setSearch(query);
+                            }}
+                            rows={buildingsData}
+                            searchResultRows={buildingsData}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
+                            disableColumnDragging={true}
+                            buttonGroupFilterOptions={[]}
+                            totalCount={() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            }}
+                        />
+                    )}
                 </Col>
             </Row>
         </React.Fragment>
