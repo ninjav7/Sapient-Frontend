@@ -245,7 +245,7 @@ const PlugRules = () => {
 
         let params = '';
 
-        if (activeBuildingId !== 'portfolio') params = `?building_id=${activeBuildingId}`;
+        if (activeBuildingId !== 'portfolio' && activeBuildingId !== null) params = `?building_id=${activeBuildingId}`;
 
         await fetchPlugRules(params, searchParams)
             .then((res) => {
@@ -415,13 +415,6 @@ const PlugRules = () => {
                                     </th>
 
                                     <th width={200}>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                    <th>
                                         <Skeleton count={5} />
                                     </th>
 

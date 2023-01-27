@@ -27,7 +27,14 @@
 .sub-button{
     width:100%;
     justify-content: center;
-    margin-top: 3rem;
+}
+ .or-text{
+    text-align: center;
+ }
+
+.btn-secondary {
+    background-color:none !important;
+    border-color:none !important
 }
 
 .logoContainer{
@@ -75,6 +82,12 @@ h3{
     font-size: 0.75rem;
 }
 
+.text-mute-error{
+    color: $error-700 !important;
+    font-weight: 500 !important;
+    font-size: 0.75rem;
+}
+
 
 .text-muted{
     color: $primary-gray-550;
@@ -95,5 +108,14 @@ h3{
     color: $success-900;
     font-weight: 600 !important;
     font-size: 1rem;
+}
+
+.rowField{
+    display: flex;
+    flex-direction: row;
+}
+.columnField{
+    display: flex;
+    flex-direction: column;
 }
     

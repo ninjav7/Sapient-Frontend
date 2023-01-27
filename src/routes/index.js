@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
 
-import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
+import { isUserAuthenticated, getLoggedInUser, isSuperUserAuthenticated } from '../helpers/authUtils';
 
 // settings
 import General from '../pages/settings/general-settings';
@@ -105,6 +105,8 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 // const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
+const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
+const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -112,7 +114,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         exact
         {...rest}
         render={(props) => {
-            if (!isUserAuthenticated()) {
+            if (isSuperUserAuthenticated()) {
+                return <Component {...props} />;
+            } else if (!isUserAuthenticated()) {
                 // not logged in so redirect to login page with the return url
                 return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
             }
@@ -138,7 +142,12 @@ const rootRoute = {
     path: '/',
     exact: true,
     // component: () => <Redirect to="/dashboard" />,
-    component: () => <Redirect to="/energy/portfolio/overview" />,
+    component: () =>
+        isSuperUserAuthenticated() ? (
+            <Redirect to="/super-user/accounts" />
+        ) : (
+            <Redirect to="/energy/portfolio/overview" />
+        ),
     route: PrivateRoute,
     visibility: true,
 };
@@ -639,12 +648,27 @@ const authRoutes = {
     visibility: true,
     children: [
         {
+            path: '/account/login/:user_found/:link_type/:account_linked/:session_id',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/login/:user_found',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
             path: '/account/login',
             name: 'Login',
             component: Login,
             route: Route,
             visibility: true,
         },
+
         {
             path: '/account/logout',
             name: 'Logout',
@@ -667,10 +691,33 @@ const authRoutes = {
             visibility: true,
         },
         {
+            path: '/account/update-auth',
+            name: 'Update Auth',
+            component: UpdateAuth,
+            route: Route,
+            visibility: true,
+        },
+        {
             path: '/*',
             name: 'Error 404',
             component: Error404,
             route: Route,
+        },
+    ],
+};
+
+// admin
+const adminRoutes = {
+    path: '/super-user',
+    name: 'Admin',
+    visibility: true,
+    children: [
+        {
+            path: '/super-user/accounts',
+            name: 'Accounts',
+            component: Accounts,
+            route: Route,
+            visibility: true,
         },
     ],
 };
@@ -697,6 +744,7 @@ const allRoutes = [
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    adminRoutes,
     authRoutes,
     // ...appRoutes,
     // pagesRoutes,

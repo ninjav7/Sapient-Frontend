@@ -24,7 +24,7 @@ import { UserStore } from '../../store/UserStore';
 const setSession = (user) => {
     let cookies = new Cookies();
     if (user) {
-        localStorage.setItem('accountName', user?.account_id);
+        localStorage.setItem('accountName', user?.vendor_name);
         cookies.set('user', JSON.stringify(user), { path: '/' });
     } else cookies.remove('user', { path: '/' });
 };
@@ -64,7 +64,6 @@ function* login({ payload: { username, password } }) {
         setSession(response.data);
         yield put(loginUserSuccess(response.data));
     } catch (error) {
-        console.log('error ', error);
         let message;
         switch (error.status) {
             case 500:
