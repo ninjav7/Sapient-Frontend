@@ -22,7 +22,8 @@ const AuthUpdate = (props) => {
     const setSession = (user) => {
         let cookies = new Cookies();
         if (user) {
-            localStorage.setItem('accountName', user?.vendor_name);
+            localStorage.setItem('vendorName', user?.vendor_name);
+            localStorage.setItem('vendorId', user?.vendor_id);
             cookies.set('user', JSON.stringify(user), { path: '/' });
         } else cookies.remove('user', { path: '/' });
     };
