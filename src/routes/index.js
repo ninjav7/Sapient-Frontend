@@ -59,12 +59,6 @@ const Pricing = React.lazy(() => import('../pages/other/Pricing'));
 const Error404 = React.lazy(() => import('../pages/other/Error404'));
 const Error500 = React.lazy(() => import('../pages/other/Error500'));
 
-// ui
-const BSComponents = React.lazy(() => import('../pages/uikit/BSComponents/'));
-const FeatherIcons = React.lazy(() => import('../pages/uikit/Icons/Feather'));
-const UniconsIcons = React.lazy(() => import('../pages/uikit/Icons/Unicons'));
-const Widgets = React.lazy(() => import('../pages/uikit/Widgets/'));
-
 // charts
 const Charts = React.lazy(() => import('../pages/charts'));
 
