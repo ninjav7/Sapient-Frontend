@@ -272,22 +272,25 @@ const BuildingOverview = () => {
                     let weekDaysList = [];
 
                     const weekDaysData = weekDaysResData.map((el) => {
-                        weekDaysList.push(Math.round(el.y / 1000));
+                        weekDaysList.push(parseFloat(el.y / 1000).toFixed(2));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: Math.round(el.y / 1000),
+                            y: (el.y / 1000).toFixed(2),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
-                        weekEndList.push(Math.round(el.y / 1000));
+                        weekEndList.push(parseFloat(el.y / 1000).toFixed(2));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: Math.round(el.y / 1000),
+                            y: (el.y / 1000).toFixed(2),
                         };
                     });
 
                     let finalList = weekEndList.concat(weekDaysList);
+
+                    console.log('SSR finalList => ', finalList);
+
                     finalList.sort((a, b) => a - b);
 
                     let minVal = finalList[0];

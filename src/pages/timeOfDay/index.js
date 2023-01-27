@@ -218,7 +218,7 @@ const TimeOfDay = () => {
     const [heatMapChartData, setHeatMapChartData] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = '300px';
+    const weekdaysChartHeight = '400px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
@@ -697,11 +697,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -739,11 +739,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -781,11 +781,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -823,11 +823,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -865,11 +865,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -907,11 +907,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -949,11 +949,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
