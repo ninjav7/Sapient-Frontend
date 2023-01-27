@@ -237,13 +237,15 @@ const Login = (props) => {
                                                 onClick={handleValidSubmit}
                                                 label="Sign In"></Button>
                                         </FormGroup>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <FormGroup>
-                                            <Typography.Header
-                                                size={Typography.Sizes.md}
-                                                className="text-mute mb-1 or-text">
+                                            <Typography.Header size={Typography.Sizes.md} className="text-mute or-text">
                                                 Or
                                             </Typography.Header>
                                         </FormGroup>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <FormGroup>
                                             <Button
                                                 className="sub-button"
