@@ -1321,7 +1321,6 @@ const EquipChartModal = ({
                                                         placeholder="Enter a Note..."
                                                         value={equipmentData?.note}
                                                         onChange={(e) => {
-                                                            console.log('SSR e => ', e.target.value);
                                                             handleChange('note', e.target.value);
                                                         }}
                                                         inputClassName="pt-2"
@@ -1332,16 +1331,26 @@ const EquipChartModal = ({
                                                 <div className="modal-right-container">
                                                     <div className="equip-panel-info pt-0">
                                                         {equipBreakerLink?.length === 0 ? (
-                                                            <div className="equip-breaker-style">
-                                                                <img
-                                                                    src={DoubleBreakerUninked}
-                                                                    alt="DoubleBreakerUninked"
-                                                                />
+                                                            <div className="breaker-container-disabled-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div></div>
+                                                                </div>
+                                                                <div className="breaker-number-style-single">
+                                                                    <div className="breaker-offline-style"></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div></div>
+                                                                    <div></div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style-disbaled"></div>
+                                                                    <div className="breaker-socket-single-style-disabled"></div>
+                                                                </div>
                                                             </div>
                                                         ) : (
                                                             <>
                                                                 {equipBreakerLink?.length === 1 && (
-                                                                    <div className="breaker-container-style">
+                                                                    <div className="breaker-container-disabled-style">
                                                                         <div className="breaker-number-style-single">
                                                                             <div>
                                                                                 {equipBreakerLink[0]?.breaker_number}
@@ -1350,7 +1359,7 @@ const EquipChartModal = ({
                                                                         <div className="breaker-number-style-single">
                                                                             <div
                                                                                 className={
-                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    equipBreakerLink[0]?.sensor_id ===
                                                                                     ''
                                                                                         ? 'breaker-offline-style'
                                                                                         : 'breaker-online-style'
@@ -1362,12 +1371,12 @@ const EquipChartModal = ({
                                                                         </div>
                                                                         <div className="breaker-number-style">
                                                                             <div className="breaker-socket1-style"></div>
-                                                                            <div className="breaker-socket-single-style"></div>
+                                                                            <div className="breaker-socket-single-style-disabled"></div>
                                                                         </div>
                                                                     </div>
                                                                 )}
                                                                 {equipBreakerLink?.length === 2 && (
-                                                                    <div className="breaker-container-style">
+                                                                    <div className="breaker-container-disabled-style">
                                                                         <div className="breaker-number-style">
                                                                             <div>
                                                                                 {equipBreakerLink[0]?.breaker_number}
@@ -1399,12 +1408,12 @@ const EquipChartModal = ({
                                                                         <div className="breaker-number-style">
                                                                             <div className="breaker-socket1-style"></div>
                                                                             <div className="breaker-socket1-style"></div>
-                                                                            <div className="breaker-socket-double-style"></div>
+                                                                            <div className="breaker-socket-double-style-disabled"></div>
                                                                         </div>
                                                                     </div>
                                                                 )}
                                                                 {equipBreakerLink?.length === 3 && (
-                                                                    <div className="breaker-container-style">
+                                                                    <div className="breaker-container-disabled-style">
                                                                         <div className="breaker-number-style">
                                                                             <div>
                                                                                 {equipBreakerLink[0]?.breaker_number}
@@ -1447,7 +1456,7 @@ const EquipChartModal = ({
                                                                             <div className="breaker-socket1-style"></div>
                                                                             <div className="breaker-socket1-style"></div>
                                                                             <div className="breaker-socket1-style"></div>
-                                                                            <div className="breaker-socket-triple-style"></div>
+                                                                            <div className="breaker-socket-triple-style-disabled"></div>
                                                                         </div>
                                                                     </div>
                                                                 )}
@@ -1463,6 +1472,7 @@ const EquipChartModal = ({
                                                                 className="modal-right-card-title">
                                                                 Energy Monitoring
                                                             </Typography.Subheader>
+
                                                             <Button
                                                                 label="View"
                                                                 size={Button.Sizes.md}
@@ -1473,49 +1483,54 @@ const EquipChartModal = ({
                                                                         'passive-device'
                                                                     );
                                                                 }}
-                                                                disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                                disabled={true}
                                                             />
                                                         </div>
-                                                        <div className="equip-breaker-container">
-                                                            <div className="equip-breaker-detail">
-                                                                <div className="phase-style">
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.sm}
-                                                                        Type={Typography.Types.Light}
-                                                                        className="equip-breaker-header mb-1">
-                                                                        Phases
-                                                                    </Typography.Subheader>
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        Type={Typography.Types.Light}
-                                                                        className="equip-breaker-value float-left">
-                                                                        {equipBreakerLink[0]?.breaker_type}
-                                                                    </Typography.Subheader>
-                                                                </div>
-                                                                <div className="installed-style">
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.sm}
-                                                                        Type={Typography.Types.Light}
-                                                                        className="equip-breaker-header mb-1">
-                                                                        Installed at
-                                                                    </Typography.Subheader>
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        Type={Typography.Types.Light}
-                                                                        className="equip-breaker-value box float-left">
-                                                                        {equipBreakerLink?.length === 1 &&
-                                                                            `${equipBreakerLink[0]?.panel_name} 
-                                                                     > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                        {equipBreakerLink?.length === 2 &&
-                                                                            `${equipBreakerLink[0]?.panel_name} 
-                                                                     > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                        {equipBreakerLink?.length === 3 &&
-                                                                            `${equipBreakerLink[0]?.panel_name} 
-                                                                     > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
-                                                                    </Typography.Subheader>
+
+                                                        {equipBreakerLink?.length === 0 ? (
+                                                            <></>
+                                                        ) : (
+                                                            <div className="equip-breaker-container">
+                                                                <div className="equip-breaker-detail">
+                                                                    <div className="phase-style">
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.sm}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-header mb-1">
+                                                                            Phases
+                                                                        </Typography.Subheader>
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.md}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-value float-left">
+                                                                            {equipBreakerLink[0]?.breaker_type}
+                                                                        </Typography.Subheader>
+                                                                    </div>
+                                                                    <div className="installed-style">
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.sm}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-header mb-1">
+                                                                            Installed at
+                                                                        </Typography.Subheader>
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.md}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-value justify-content-between box float-left">
+                                                                            {equipBreakerLink?.length === 1 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                            {equipBreakerLink?.length === 2 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                            {equipBreakerLink?.length === 3 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                        </Typography.Subheader>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </Col>
@@ -1612,7 +1627,7 @@ const EquipChartModal = ({
                                                         currentValue={rulesAlert.filter(
                                                             (option) => option.value === 'desktop-pc'
                                                         )}
-                                                        isSearchable={true}
+                                                        isSearchable={false}
                                                     />
 
                                                     <Brick sizeInRem={0.25} />
