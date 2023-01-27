@@ -25,31 +25,31 @@ import { timeZone } from '../../utils/helper';
 import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
 
-import { primaryGray100, primaryGray800 } from '../../assets/scss/_colors.scss';
+import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 
 const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray100} height={35}>
-        <tr>
-            <th>
-                <Skeleton count={5} />
-            </th>
+    <SkeletonTheme color={primaryGray1000} height={35}>
+        <table cellPadding={5} className="table">
+            <tr>
+                <th>
+                    <Skeleton count={5} />
+                </th>
+                <th>
+                    <Skeleton count={5} />
+                </th>
 
-            <th>
-                <Skeleton count={5} />
-            </th>
+                <th>
+                    <Skeleton count={5} />
+                </th>
 
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-
-            <th>
-                <Skeleton count={5} />
-            </th>
-        </tr>
+                <th>
+                    <Skeleton count={5} />
+                </th>
+                <th>
+                    <Skeleton count={5} />
+                </th>
+            </tr>
+        </table>
     </SkeletonTheme>
 );
 
@@ -65,7 +65,7 @@ const CompareBuildings = () => {
 
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState([]);
+    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
     let entryPoint = '';
 
     useEffect(() => {
@@ -243,27 +243,31 @@ const CompareBuildings = () => {
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    <DataTableWidget
-                        isLoading={isLoadingBuildingData}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="compare-building"
-                        onSearch={(query) => {
-                            setSearch(query);
-                        }}
-                        rows={buildingsData}
-                        searchResultRows={buildingsData}
-                        onDownload={() => handleDownloadCsv()}
-                        headers={headerProps}
-                        disableColumnDragging={true}
-                        buttonGroupFilterOptions={[]}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
+                    {isLoadingBuildingData ? (
+                        <SkeletonLoading />
+                    ) : (
+                        <DataTableWidget
+                            isLoading={isLoadingBuildingData}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="compare-building"
+                            onSearch={(query) => {
+                                setSearch(query);
+                            }}
+                            rows={buildingsData}
+                            searchResultRows={buildingsData}
+                            onDownload={() => handleDownloadCsv()}
+                            headers={headerProps}
+                            disableColumnDragging={true}
+                            buttonGroupFilterOptions={[]}
+                            totalCount={() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            }}
+                        />
+                    )}
                 </Col>
             </Row>
         </React.Fragment>
