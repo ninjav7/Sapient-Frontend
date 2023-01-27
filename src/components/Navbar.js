@@ -47,10 +47,6 @@ const Navbar = (props) => {
                         </Link>
                     </div>
                     {/* <ul className="navbar-nav flex-row ml-auto d-flex list-unstyled topnav-menu float-right mb-0"> */}
-                    {/*
-            <LanguageDropdown tag="li" />
-              <NotificationDropdown notifications={Notifications} />
-            */}
 
                     {/*
             <li className="notification-list">

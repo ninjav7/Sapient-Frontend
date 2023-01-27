@@ -10,7 +10,6 @@ import { UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem } from
 import * as FeatherIcon from 'react-feather';
 
 import AppMenu from './AppMenu';
-import profilePic from '../assets/images/users/avatar-7.jpg';
 
 /**
  * User Widget
@@ -19,9 +18,6 @@ const UserProfile = () => {
     return (
         <React.Fragment>
             <div className="media user-profile mt-2 mb-2">
-                <img src={profilePic} className="avatar-sm rounded-circle mr-2" alt="Sapient" />
-                <img src={profilePic} className="avatar-xs rounded-circle mr-2" alt="Sapient" />
-
                 <div className="media-body">
                     <h6 className="pro-user-name mt-0 mb-0">Sapient N</h6>
                     <span className="pro-user-desc">Administrator</span>

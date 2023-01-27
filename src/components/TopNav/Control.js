@@ -37,6 +37,9 @@ const Control = () => {
     ]);
 
     const handleLogout = () => {
+        ComponentStore.update((s) => {
+            s.parent = '';
+        });
         localStorage.clear();
         cookies.remove('user', { path: '/' });
         window.location.reload();
