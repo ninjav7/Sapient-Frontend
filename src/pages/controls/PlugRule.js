@@ -103,6 +103,7 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
+    const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [rulesToUnLink, setRulesToUnLink] = useState({
@@ -290,16 +291,15 @@ const PlugRule = () => {
         const params = '';
         await fetchPlugRules(params, '').then((res) => {
             const plugRules = res.data.data;
-
             plugRules &&
                 plugRules.forEach((plugRule) => {
                     if (plugRule.name == currentData.name) {
                         setActiveBuildingId(plugRule.buildings[0].building_id);
                     }
                 });
+            setIsFetchedPlugRulesData(true);
         });
     };
-
     useEffect(() => {
         generateHours();
         getBuildingData();
@@ -309,6 +309,11 @@ const PlugRule = () => {
             fetchPlugRuleDetail();
         }
     }, []);
+    useEffect(() => {
+        if (!isFetchedPlugRulesData) {
+            fetchPlugRulesData();
+        }
+    }, [currentData.name,isFetchedPlugRulesData]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -973,6 +978,7 @@ const PlugRule = () => {
             };
 
         isLoadingRef.current = true;
+        console.log('FETCHUNLIKCED', activeBuildingId);
 
         activeBuildingId &&
             (await getUnlinkedSocketRules(
@@ -1057,6 +1063,8 @@ const PlugRule = () => {
         fetchUnLinkedSocketRules();
     }, [
         ruleId,
+        currentData.name,
+        activeBuildingId,
         equpimentTypeFilterString,
         macTypeFilterString,
         locationTypeFilterString,
