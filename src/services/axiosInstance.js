@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { BaseUrl } from './Network';
 import { Cookies } from 'react-cookie';
+import { UserStore } from '../store/UserStore';
 
 const cookies = new Cookies();
 const userdata = cookies.get('user');
@@ -33,6 +34,11 @@ axiosInstance.interceptors.response.use(
             localStorage.clear();
             cookies.remove('user', { path: '/' });
             window.location.reload();
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Token expired / invalid. Please login again!';
+                s.notificationType = 'error';
+            });
             return;
         }
         return error?.response;
