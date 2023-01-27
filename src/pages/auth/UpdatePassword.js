@@ -120,7 +120,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[\d`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+            if (password.match(/[`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
@@ -198,18 +198,6 @@ const Confirm = (props) => {
                                     </>
                                 ) : (
                                     <>
-                                        {matchError && (
-                                            <Alert color="danger" isOpen={matchError ? true : false}>
-                                                <div>Password Not Matched</div>
-                                                <div>Password should be at least 8 letters long.</div>
-                                                <div>At least 1 Upper Case, 1 Lower Case Letter & 1 digit.</div>
-                                                <div>
-                                                    At least 1 Punctuation from [~\\!@#\\$%\\^&\\*\\(\\)_\\+{}
-                                                    \":;'\\[\\]].
-                                                </div>
-                                            </Alert>
-                                        )}
-
                                         <form className="authentication-form">
                                             <FormGroup className="mb-3 pt-2">
                                                 <Typography.Subheader

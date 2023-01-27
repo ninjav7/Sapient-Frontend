@@ -38,7 +38,8 @@ const Login = (props) => {
     const setSession = (user) => {
         let cookies = new Cookies();
         if (user) {
-            localStorage.setItem('accountName', user?.vendor_name);
+            localStorage.setItem('vendorName', user?.vendor_name);
+            localStorage.setItem('vendorId', user?.vendor_id);
             cookies.set('user', JSON.stringify(user), { path: '/' });
         } else cookies.remove('user', { path: '/' });
     };
@@ -237,13 +238,15 @@ const Login = (props) => {
                                                 onClick={handleValidSubmit}
                                                 label="Sign In"></Button>
                                         </FormGroup>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <FormGroup>
-                                            <Typography.Header
-                                                size={Typography.Sizes.md}
-                                                className="text-mute mb-1 or-text">
+                                            <Typography.Header size={Typography.Sizes.md} className="text-mute or-text">
                                                 Or
                                             </Typography.Header>
                                         </FormGroup>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <FormGroup>
                                             <Button
                                                 className="sub-button"

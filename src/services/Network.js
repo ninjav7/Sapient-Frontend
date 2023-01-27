@@ -38,7 +38,7 @@ export const getFiltersForBuildings = '/api/config/general/general-buildings-fil
 export const generalBldgDelete = '/api/config/general/delete_building';
 
 //user roles
-export const updateAccount = '/api/user_role/user/update-user';
+export const updateVendor = '/api/user_role/vendor/update-customer';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
 export const vendorPermissions = '/api/user_role/user-permission-role/vendor-permissions';
