@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Col, Row } from 'reactstrap';
+import { Col } from 'reactstrap';
 import { FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
@@ -11,10 +11,9 @@ import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg';
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
-import './auth.scss';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import './auth.scss';
 import axios from 'axios';
 import { BaseUrl, UpdateUserPassword } from '../../services/Network';
 import Input from '../../sharedComponents/form/input/Input';
@@ -170,9 +169,7 @@ const Confirm = (props) => {
                                         <Alert color="success" className="alertPop" isOpen={true}>
                                             <div>
                                                 <Typography.Subheader className="alertText">
-                                                    <FontAwesomeIcon
-                                                        icon={faCircleCheck}
-                                                        size="lg"
+                                                    <CircleCheckSVG
                                                         className="ml-2 mr-2"
                                                         style={{ marginRight: '4px', color: 'green' }}
                                                     />

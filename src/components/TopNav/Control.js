@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
+import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
@@ -277,7 +276,7 @@ const Control = () => {
                                 handleSideNavChange();
                                 handleRouteChange();
                             }}>
-                            <FontAwesomeIcon icon={faGear} size="lg" />
+                            <Gear />
                         </button>
                     </div>
                 </div>

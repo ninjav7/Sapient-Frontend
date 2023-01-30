@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Alert, Input, Spinner } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import {
     fetchKasaDevices,
     fetchKasaAccounts,
@@ -15,17 +13,13 @@ import { BuildingStore } from '../../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { ComponentStore } from '../../../../store/ComponentStore';
 import '../style.css';
-import {
-    faCircleCheck,
-    faSignalStream,
-    faLink,
-    faLinkSlash,
-    faMagnifyingGlass,
-    faExclamationCircle,
-    faClockFour,
-    faBan,
-} from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as CircleCheckSVG } from '../../../../assets/icon/circle-check.svg';
+import { ReactComponent as LinkSVG } from '../../../../assets/icon/link.svg';
+import { ReactComponent as LinkSlashSVG } from '../../../../assets/icon/link-slash.svg';
+import { ReactComponent as MagnifyingGlassSVG } from '../../../../assets/icon/magnifying-glass.svg';
+import { ReactComponent as CircleXmarkSVG } from '../../../../assets/icon/circle-xmark.svg';
+import { ReactComponent as SignalStreamSVG } from '../../../../assets/icon/signal-stream.svg';
+import { ReactComponent as ClockSVG } from '../../../../assets/icon/clock.svg';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { DataTableWidget } from '../../../../sharedComponents/dataTableWidget';
@@ -392,7 +386,7 @@ const Provision = () => {
                     size={Typography.Sizes.sm}
                     className="d-flex pending-container justify-content-center"
                     style={{ color: colorPalette.warning700 }}>
-                    <FontAwesomeIcon icon={faClockFour} size="lg" style={{ color: colorPalette.warning700 }} />
+                    <ClockSVG />
                     {row?.status}
                 </Typography.Subheader>
             );
@@ -403,7 +397,7 @@ const Provision = () => {
                         size={Typography.Sizes.sm}
                         className="d-flex inactive-container justify-content-center"
                         style={{ color: colorPalette.primaryGray800 }}>
-                        <FontAwesomeIcon icon={faBan} size="lg" style={{ color: colorPalette.primaryGray800 }} />
+                        <CircleXmarkSVG />
                         {row?.status}
                     </Typography.Subheader>
                 );
@@ -413,7 +407,7 @@ const Provision = () => {
                         size={Typography.Sizes.sm}
                         className="d-flex active-container justify-content-center"
                         style={{ color: colorPalette.success700 }}>
-                        <FontAwesomeIcon icon={faCircleCheck} size="lg" style={{ color: colorPalette.success700 }} />
+                        <CircleCheckSVG />
                         {row?.status}
                     </Typography.Subheader>
                 );
@@ -533,8 +527,8 @@ const Provision = () => {
                                     setShowUnLink(true);
                                     setShowAddMsg(false);
                                 }}>
-                                <FontAwesomeIcon icon={faLinkSlash} size="md" style={{ marginRight: '0.5rem' }} />
-                                UnLink Account
+                                <LinkSlashSVG style={{ marginRight: '0.5rem' }} />
+                                &nbsp; UnLink Account
                             </button>
                         </div>
                         <div className="mr-2">
@@ -545,8 +539,8 @@ const Provision = () => {
                                     setShowLink(true);
                                     setShowAddMsg(false);
                                 }}>
-                                <FontAwesomeIcon icon={faLink} size="md" style={{ marginRight: '0.5rem' }} />
-                                Link Account
+                                <LinkSVG style={{ marginRight: '0.5rem' }} />
+                                &nbsp; Link Account
                             </button>
                         </div>
                     </div>
@@ -588,7 +582,7 @@ const Provision = () => {
                                     setShowFind(true);
                                     setShowAddMsg(false);
                                 }}>
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" style={{ marginRight: '0.5rem' }} />
+                                <MagnifyingGlassSVG style={{ marginRight: '0.5rem' }} />
                                 Find Devices
                             </button>
                         </div>
@@ -601,11 +595,7 @@ const Provision = () => {
                                 {isLoading ? (
                                     <Spinner color={'white'} size="sm" style={{ marginRight: '0.5rem' }} />
                                 ) : (
-                                    <FontAwesomeIcon
-                                        icon={faSignalStream}
-                                        size="md"
-                                        style={{ marginRight: '0.5rem' }}
-                                    />
+                                    <SignalStreamSVG style={{ marginRight: '0.5rem' }} />
                                 )}
                                 <div style={{ display: 'inline-block' }}>Add to System</div>
                             </button>
@@ -643,12 +633,7 @@ const Provision = () => {
                     <Alert variant="success" isOpen={showAddMsg}>
                         <div>
                             {' '}
-                            <FontAwesomeIcon
-                                icon={faCircleCheck}
-                                size="lg"
-                                className="ml-2"
-                                style={{ marginRight: '0.25rem', color: 'white' }}
-                            />
+                            <CircleCheckSVG className="ml-2" style={{ marginRight: '0.25rem', color: 'white' }} />
                             Devices Added to system
                         </div>
                     </Alert>

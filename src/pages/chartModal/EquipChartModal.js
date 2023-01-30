@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+import { ReactComponent as PowerOff } from '../../assets/icon/power-off.svg';
 import { fetchExploreEquipmentChart } from '../explore/services';
 import {
     updateListSensor,
@@ -525,13 +525,7 @@ const EquipChartModal = ({
                                                     ?.edit ? (
                                                     <Button
                                                         label="Turn Off"
-                                                        icon={
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                style={{ color: 'red' }}
-                                                            />
-                                                        }
+                                                        icon={<PowerOff style={{ color: 'red' }} />}
                                                         size={Button.Sizes.md}
                                                         type={Button.Type.primaryDistructive}
                                                     />
@@ -831,11 +825,7 @@ const EquipChartModal = ({
                                                         style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
                                                         {equipmentData?.device_mac}
                                                         &nbsp;
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowUpRightFromSquare}
-                                                            size="md"
-                                                            style={{ color: 'base-black' }}
-                                                        />
+                                                        <ArrowUpRightFromSquare style={{ color: 'base-black' }} />
                                                     </span>
                                                 </Link>
                                             </Typography.Subheader>
@@ -1678,11 +1668,7 @@ const EquipChartModal = ({
                                                                         {record.status && (
                                                                             <div>
                                                                                 <div className="power-off-style-equip">
-                                                                                    <FontAwesomeIcon
-                                                                                        icon={faPowerOff}
-                                                                                        size="lg"
-                                                                                        color="#3C6DF5"
-                                                                                    />
+                                                                                    <PowerOff color="#3C6DF5" />
                                                                                 </div>
                                                                                 {record.equipment_type_id === '' ? (
                                                                                     <div className="socket-rect">
@@ -1707,11 +1693,7 @@ const EquipChartModal = ({
                                                                         {!record.status && (
                                                                             <div>
                                                                                 <div className="power-off-style-equip">
-                                                                                    <FontAwesomeIcon
-                                                                                        icon={faPowerOff}
-                                                                                        size="lg"
-                                                                                        color="#EAECF0"
-                                                                                    />
+                                                                                    <PowerOff color="#EAECF0" />
                                                                                 </div>
                                                                                 {record.equipment_type_id === '' ? (
                                                                                     <div className="socket-rect">
