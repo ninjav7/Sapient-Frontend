@@ -6,8 +6,6 @@ import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 
 const EditSensorPanelModel = ({

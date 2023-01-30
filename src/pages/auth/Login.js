@@ -120,8 +120,8 @@ const Login = (props) => {
                 let response = res.data;
                 setRefresh(false);
                 setSession(response.data);
-                history.push('/');
                 window.location.reload();
+                history.push('/');
             })
             .catch((error) => {
                 setRefresh(false);

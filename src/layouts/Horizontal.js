@@ -41,6 +41,10 @@ const HorizontalLayout = (props) => {
         if (location.pathname.includes('/control/plug-rules/')) {
             setShowSideNav(false);
         }
+        if (location.pathname.includes('/login')) {
+            setShowTopNav(false);
+            setShowSideNav(false);
+        }
     }, [location]);
 
     const updateNotification = () => {

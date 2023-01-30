@@ -138,6 +138,7 @@ const SideNav = () => {
                     activeSideRoutes.push(route);
                 }
             });
+
         setActiveRoute(activeSideRoutes);
     }, [
         parentRoute,
