@@ -487,19 +487,13 @@ const IndividualActiveDevice = () => {
                         }`}>
                         {sensors.map((record, index) => {
                             return (
-                                <div>
-                                    <div className="d-flex justify-content-center mb-1">
-                                        {record?.status ? <OnlineSVG /> : <OfflineSVG />}
-                                    </div>
-                                    {record?.equipment_type_id === '' ? (
+                                <div className="d-flex align-items-center">
+                                    {record?.name.toLowerCase() === 'unlabeled' ? (
                                         <div>
                                             <SocketSVG />
                                         </div>
                                     ) : (
-                                        <div
-                                            className={`attached-device-socket ${
-                                                record?.status ? 'active-socket' : ''
-                                            }`}>
+                                        <div className="attached-device-socket">
                                             <AttachedSVG className="m-2" />
                                         </div>
                                     )}
@@ -541,7 +535,8 @@ const IndividualActiveDevice = () => {
                                         <Brick sizeInRem={0.75} />
                                         <div
                                             className={`d-flex justify-content-between align-items-center sensor-container ${
-                                                record?.equipment_id === '' && record?.breaker_id === ''
+                                                (record?.equipment_id === '' && record?.breaker_id === '') ||
+                                                record?.name.toLowerCase() === 'unlabeled'
                                                     ? 'sensor-unattach'
                                                     : ''
                                             }`}>
@@ -554,13 +549,13 @@ const IndividualActiveDevice = () => {
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
                                                     className={`mr-2 ${
-                                                        record?.equipment_type_name === '' && record?.equipment === ''
+                                                        (record?.equipment_type_name === '' &&
+                                                            record?.equipment === '') ||
+                                                        record?.name.toLowerCase() === 'unlabeled'
                                                             ? 'sensor-index'
                                                             : ''
                                                     }`}>
-                                                    {record?.equipment_type_name && record?.equipment_type_name === ''
-                                                        ? 'No Equipment'
-                                                        : record?.equipment_type_name}
+                                                    {record?.equipment_type_name}
                                                 </Typography.Subheader>
                                                 {record?.equipment_id && (
                                                     <Badge text={record?.equipment} className="sensor-badge-style" />
