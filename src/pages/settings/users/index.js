@@ -210,7 +210,7 @@ const Users = () => {
                 icon={
                     (status === 'Active' && <ActiveSVG />) ||
                     (status === 'Inactive' && <InactiveSVG />) ||
-                    (status === 'Pending' && <PendingSVG style={{ color: '#f9eabd' }} />)
+                    (status === 'Pending' && <PendingSVG />)
                 }
                 iconAlignment={Button.IconAlignment.left}
                 className={`status-container ${status.toLowerCase()}-btn`}
