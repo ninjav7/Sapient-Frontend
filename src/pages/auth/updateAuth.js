@@ -7,8 +7,7 @@ import { Cookies } from 'react-cookie';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
 import { fetchSessionDetails, updateUser } from './service';
@@ -22,7 +21,8 @@ const AuthUpdate = (props) => {
     const setSession = (user) => {
         let cookies = new Cookies();
         if (user) {
-            localStorage.setItem('accountName', user?.vendor_name);
+            localStorage.setItem('vendorName', user?.vendor_name);
+            localStorage.setItem('vendorId', user?.vendor_id);
             cookies.set('user', JSON.stringify(user), { path: '/' });
         } else cookies.remove('user', { path: '/' });
     };
@@ -88,9 +88,7 @@ const AuthUpdate = (props) => {
                                     <Alert color="success" className="alertPop" isOpen={true}>
                                         <div>
                                             <Typography.Subheader size={Typography.Sizes.md} className="alertText">
-                                                <FontAwesomeIcon
-                                                    icon={faCircleCheck}
-                                                    size="lg"
+                                                <CircleCheckSVG
                                                     className="ml-2 mr-2"
                                                     style={{ marginRight: '4px', color: 'green' }}
                                                 />

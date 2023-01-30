@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Button, Input } from 'reactstrap';
+import { Row, Col, Card, Table } from 'reactstrap';
 import { Link, useHistory } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as MagnifyingGlassSVG } from '../../../assets/icon/magnifying-glass.svg';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import '../style.css';
@@ -163,7 +162,7 @@ const Roles = () => {
                     <div className="">
                         <div className="active-sensor-header">
                             <div className="search-container mr-2">
-                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <MagnifyingGlassSVG />
                                 <input
                                     className="search-box ml-2"
                                     type="search"

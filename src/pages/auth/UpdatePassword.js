@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Col, Row } from 'reactstrap';
+import { Col } from 'reactstrap';
 import { FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
@@ -11,10 +11,9 @@ import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg';
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
-import './auth.scss';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import './auth.scss';
 import axios from 'axios';
 import { BaseUrl, UpdateUserPassword } from '../../services/Network';
 import Input from '../../sharedComponents/form/input/Input';
@@ -120,7 +119,7 @@ const Confirm = (props) => {
             } else {
                 setLowerCaseErr('error');
             }
-            if (password.match(/[\d`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
+            if (password.match(/[`~!@#$%\^&*()+=|;:'",.<>\/?\\\-]/)) {
                 setSpecialCharErr('success');
             } else {
                 setSpecialCharErr('error');
@@ -170,9 +169,7 @@ const Confirm = (props) => {
                                         <Alert color="success" className="alertPop" isOpen={true}>
                                             <div>
                                                 <Typography.Subheader className="alertText">
-                                                    <FontAwesomeIcon
-                                                        icon={faCircleCheck}
-                                                        size="lg"
+                                                    <CircleCheckSVG
                                                         className="ml-2 mr-2"
                                                         style={{ marginRight: '4px', color: 'green' }}
                                                     />
@@ -198,18 +195,6 @@ const Confirm = (props) => {
                                     </>
                                 ) : (
                                     <>
-                                        {matchError && (
-                                            <Alert color="danger" isOpen={matchError ? true : false}>
-                                                <div>Password Not Matched</div>
-                                                <div>Password should be at least 8 letters long.</div>
-                                                <div>At least 1 Upper Case, 1 Lower Case Letter & 1 digit.</div>
-                                                <div>
-                                                    At least 1 Punctuation from [~\\!@#\\$%\\^&\\*\\(\\)_\\+{}
-                                                    \":;'\\[\\]].
-                                                </div>
-                                            </Alert>
-                                        )}
-
                                         <form className="authentication-form">
                                             <FormGroup className="mb-3 pt-2">
                                                 <Typography.Subheader

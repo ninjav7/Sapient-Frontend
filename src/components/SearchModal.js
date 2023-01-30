@@ -1,25 +1,9 @@
 import React, { useState } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-    Label,
-} from 'reactstrap';
+import { Input, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { Search } from 'react-feather';
 import { allRoutes } from '../routes/index';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBellOn } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as Bell } from '../../assets/icon/bell.svg';
 import './style.css';
 
 const SearchModal = () => {
@@ -54,7 +38,7 @@ const SearchModal = () => {
         <>
             <div className="navbar-icon-container float-right topbar-buttons">
                 <button className="btn btn-sm float-right other-font-icon-style" onClick={() => searchModalOpen()}>
-                    <FontAwesomeIcon icon={faBellOn} size="lg" />
+                    <Bell />
                 </button>
             </div>
 

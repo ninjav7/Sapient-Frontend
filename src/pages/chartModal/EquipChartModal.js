@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+import { ReactComponent as PowerOff } from '../../assets/icon/power-off.svg';
 import { fetchExploreEquipmentChart } from '../explore/services';
 import {
     updateListSensor,
@@ -19,9 +19,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
-import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
-import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
@@ -37,7 +35,6 @@ import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
-import colorPalette from '../../assets/scss/_colors.scss';
 import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import './styles.scss';
@@ -524,13 +521,7 @@ const EquipChartModal = ({
                                                     ?.edit ? (
                                                     <Button
                                                         label="Turn Off"
-                                                        icon={
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                style={{ color: 'red' }}
-                                                            />
-                                                        }
+                                                        icon={<PowerOff style={{ color: 'red' }} />}
                                                         size={Button.Sizes.md}
                                                         type={Button.Type.primaryDistructive}
                                                     />
@@ -830,11 +821,7 @@ const EquipChartModal = ({
                                                         style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
                                                         {equipmentData?.device_mac}
                                                         &nbsp;
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowUpRightFromSquare}
-                                                            size="md"
-                                                            style={{ color: 'base-black' }}
-                                                        />
+                                                        <ArrowUpRightFromSquare style={{ color: 'base-black' }} />
                                                     </span>
                                                 </Link>
                                             </Typography.Subheader>
