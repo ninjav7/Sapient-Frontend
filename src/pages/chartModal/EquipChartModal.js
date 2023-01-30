@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
+import { Row, Col, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
@@ -13,7 +12,6 @@ import {
     updateExploreEquipmentYTDUsage,
     getMetadataRequest,
 } from './services';
-import { Cookies } from 'react-cookie';
 import { useHistory, Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -40,6 +38,9 @@ import Brick from '../../sharedComponents/brick';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import colorPalette from '../../assets/scss/_colors.scss';
+import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
+import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
+import './styles.scss';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -50,8 +51,6 @@ const EquipChartModal = ({
     setSelectedTab,
     activePage,
 }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
 
     const history = useHistory();
@@ -1670,74 +1669,34 @@ const EquipChartModal = ({
                                             </Col>
                                             <Col xl={4}>
                                                 <div className="modal-right-container">
-                                                    <div className="equip-socket-container">
-                                                        <div className="mt-2 sockets-slots-container">
+                                                    <div className="equip-type-socket">
+                                                        <div
+                                                            className={`socket-container-style p-2 d-flex ${
+                                                                sensors.length === 1
+                                                                    ? 'justify-content-center'
+                                                                    : 'justify-content-between'
+                                                            }`}>
                                                             {sensors.map((record, index) => {
                                                                 return (
-                                                                    <>
-                                                                        {record.status && (
+                                                                    <div className="d-flex align-items-center">
+                                                                        {record?.name.toLowerCase() === 'unlabeled' ? (
                                                                             <div>
-                                                                                <div className="power-off-style-equip">
-                                                                                    <FontAwesomeIcon
-                                                                                        icon={faPowerOff}
-                                                                                        size="lg"
-                                                                                        color="#3C6DF5"
-                                                                                    />
-                                                                                </div>
-                                                                                {record.equipment_type_id === '' ? (
-                                                                                    <div className="socket-rect">
-                                                                                        <img
-                                                                                            src={SocketLogo}
-                                                                                            alt="Socket"
-                                                                                        />
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="online-socket-container-equip">
-                                                                                        <img
-                                                                                            src={UnionLogo}
-                                                                                            alt="Union"
-                                                                                            className="union-icon-style"
-                                                                                            width="35vw"
-                                                                                        />
-                                                                                    </div>
-                                                                                )}
+                                                                                <SocketSVG />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="attached-device-socket">
+                                                                                <AttachedSVG className="m-2" />
                                                                             </div>
                                                                         )}
-
-                                                                        {!record.status && (
-                                                                            <div>
-                                                                                <div className="power-off-style-equip">
-                                                                                    <FontAwesomeIcon
-                                                                                        icon={faPowerOff}
-                                                                                        size="lg"
-                                                                                        color="#EAECF0"
-                                                                                    />
-                                                                                </div>
-                                                                                {record.equipment_type_id === '' ? (
-                                                                                    <div className="socket-rect">
-                                                                                        <img
-                                                                                            src={SocketLogo}
-                                                                                            alt="Socket"
-                                                                                        />
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="online-socket-container-equip">
-                                                                                        <img
-                                                                                            src={UnionLogo}
-                                                                                            alt="Union"
-                                                                                            className="union-icon-style"
-                                                                                            width="35vw"
-                                                                                        />
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </>
+                                                                    </div>
                                                                 );
                                                             })}
                                                         </div>
                                                     </div>
-                                                    <div className="modal-right-card mt-2">
+
+                                                    <Brick sizeInRem={1.5} />
+
+                                                    <div className="modal-right-card">
                                                         <Typography.Subheader
                                                             size={Typography.Sizes.lg}
                                                             Type={Typography.Types.Light}
@@ -1755,15 +1714,17 @@ const EquipChartModal = ({
                                                                     'active-device'
                                                                 );
                                                             }}
+                                                            className="m-0"
                                                             disabled={
                                                                 equipmentData !== null
-                                                                    ? equipmentData.device_id === ''
+                                                                    ? equipmentData?.device_id === ''
                                                                         ? true
                                                                         : false
                                                                     : true
                                                             }
                                                         />
                                                     </div>
+
                                                     <div>
                                                         {equipmentData !== null
                                                             ? equipmentData.status === 'Online' && (
@@ -1782,60 +1743,60 @@ const EquipChartModal = ({
                                                               )
                                                             : ''}
                                                     </div>
-                                                    <div className="mt-4 modal-right-group">
-                                                        <FormGroup>
-                                                            <div className="single-line-style">
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.sm}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="card-title">
-                                                                    MAC Address
-                                                                </Typography.Subheader>
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.md}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="card-subtitle mb-2 text-muted">
-                                                                    {equipmentData !== null
-                                                                        ? equipmentData.device_mac
-                                                                        : ''}
-                                                                </Typography.Subheader>
-                                                            </div>
-                                                        </FormGroup>
-                                                        <FormGroup>
-                                                            <div className="single-line-style">
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.sm}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="card-title">
-                                                                    Device type
-                                                                </Typography.Subheader>
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.md}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="card-subtitle mb-2 text-muted">
-                                                                    {equipmentData !== null
-                                                                        ? equipmentData?.device_type
-                                                                        : ''}
-                                                                </Typography.Subheader>
-                                                            </div>
-                                                        </FormGroup>
-                                                    </div>
-                                                    <FormGroup>
-                                                        <div className="single-line-style">
+
+                                                    <Brick sizeInRem={1.5} />
+
+                                                    <div className="d-flex justify-content-start">
+                                                        <div className="single-line-style mr-4">
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.sm}
                                                                 Type={Typography.Types.Light}
                                                                 className="card-title">
-                                                                Installed at
+                                                                Device ID
                                                             </Typography.Subheader>
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.md}
                                                                 Type={Typography.Types.Light}
                                                                 className="card-subtitle mb-2 text-muted">
-                                                                {equipmentData !== null ? equipmentData.location : ''}
+                                                                {equipmentData !== null ? equipmentData.device_mac : ''}
                                                             </Typography.Subheader>
                                                         </div>
-                                                    </FormGroup>
+                                                        <div className="single-line-style">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.sm}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-title">
+                                                                Device Type
+                                                            </Typography.Subheader>
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                Type={Typography.Types.Light}
+                                                                className="card-subtitle mb-2 text-muted">
+                                                                {equipmentData !== null
+                                                                    ? equipmentData?.device_type
+                                                                    : ''}
+                                                            </Typography.Subheader>
+                                                        </div>
+                                                    </div>
+
+                                                    {equipmentData?.location && (
+                                                        <FormGroup>
+                                                            <div className="single-line-style">
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.sm}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="card-title">
+                                                                    Installed at
+                                                                </Typography.Subheader>
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="card-subtitle mb-2 text-muted">
+                                                                    {equipmentData?.location}
+                                                                </Typography.Subheader>
+                                                            </div>
+                                                        </FormGroup>
+                                                    )}
                                                 </div>
                                             </Col>
                                         </Row>

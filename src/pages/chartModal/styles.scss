@@ -1,0 +1,9 @@
+@import '../../assets/scss/colors';
+
+.equip-type-socket {
+    width: 100%;
+    min-height: fit-content;
+    background: $primary-gray-50;
+    border: 0.0625rem solid $primary-gray-150;
+    padding: 1.5rem;
+}

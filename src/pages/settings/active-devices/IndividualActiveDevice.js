@@ -18,8 +18,6 @@ import { getLocationData } from '../passive-devices/services';
 import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
-import { ReactComponent as OfflineSVG } from '../../../assets/icon/active-devices/offline.svg';
-import { ReactComponent as OnlineSVG } from '../../../assets/icon/active-devices/online.svg';
 import { ReactComponent as AttachedSVG } from '../../../assets/icon/active-devices/attached.svg';
 import { ReactComponent as SocketSVG } from '../../../assets/icon/active-devices/socket.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
