@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
-
 import ButtonSC from '../../sharedComponents/button/Button';
 import { getPlugRulesTableCSVExport } from '../../utils/tablesExport';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -392,7 +389,7 @@ const PlugRules = () => {
                             onClick={() => {
                                 handleCreatePlugRule();
                             }}>
-                            <FontAwesomeIcon icon={faPlus} size="md" className="mr-2" />
+                            <PlusSVG className="mr-2" />
                             Add Rule
                         </button>
                     </div>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as User } from '../../assets/icon/user.svg';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -30,7 +29,7 @@ const NavLinks = () => {
                         <div className="d-flex align-items-center">
                             {item.name === 'Accounts' && (
                                 <div className={`font-icon-style ${className}`}>
-                                    <FontAwesomeIcon icon={faUser} size="lg" />
+                                    <User />
                                 </div>
                             )}
                             <div className={`navbar-heading ${className}`} style={{ width: 'max-content' }}>

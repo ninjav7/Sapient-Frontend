@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationCircle } from '@fortawesome/pro-thin-svg-icons';
-import { Alert, FormGroup } from 'reactstrap';
+import { ReactComponent as InfoCircleSVG } from '../../../../assets/icon/info-circle.svg';
+import { FormGroup } from 'reactstrap';
 import Checkbox from '../../../../sharedComponents/form/checkbox/Checkbox';
 import Button from '../../../../sharedComponents/button/Button';
 import Typography from '../../../../sharedComponents/typography';
 import './style.css';
-import Brick from '../../../../sharedComponents/brick';
 
 const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnlink, linkedAccount }) => {
     const [checkedEmail, setCheckedEmail] = useState([]);
@@ -34,7 +32,7 @@ const UnLinkModal = ({ showUnlink, handleUnLinkClose, error, message, handleUnli
                 {error ? (
                     <div className="error-message">
                         <div style={{ marginRight: '1rem' }}>
-                            <FontAwesomeIcon icon={faExclamationCircle} size="lg" className="ml-2 find-error-icon" />
+                            <InfoCircleSVG className="ml-2 find-error-icon" />
                         </div>
                         <div>{message}</div>
                     </div>

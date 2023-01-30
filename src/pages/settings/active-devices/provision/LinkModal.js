@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { AvForm, AvGroup, AvInput } from 'availity-reactstrap-validation';
-import { InputGroup } from 'reactstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationCircle } from '@fortawesome/pro-thin-svg-icons';
-import { Alert, FormGroup } from 'reactstrap';
+import { FormGroup } from 'reactstrap';
 import Button from '../../../../sharedComponents/button/Button';
 import Typography from '../../../../sharedComponents/typography';
 import { ReactComponent as EyeSVG } from '../../../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../../../assets/icon/eye-slash.svg';
+import { ReactComponent as InfoCircleSVG } from '../../../../assets/icon/info-circle.svg';
 import Input from '../../../../sharedComponents/form/input/Input';
 import InputTooltip from '../../../../sharedComponents/form/input/InputTooltip';
 import './style.css';
@@ -51,7 +48,7 @@ const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize 
                 {error ? (
                     <div className="error-message">
                         <div style={{ marginRight: '1rem' }}>
-                            <FontAwesomeIcon icon={faExclamationCircle} size="lg" className="ml-2 find-error-icon" />
+                            <InfoCircleSVG className="ml-2 find-error-icon" />
                         </div>
                         <div>{message}</div>
                     </div>
