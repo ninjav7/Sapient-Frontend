@@ -22,7 +22,6 @@ import { pageListSizes } from '../../../helpers/helpers';
 import Brick from '../../../sharedComponents/brick';
 import AddUser from './AddUser';
 import '../style.css';
-import colorPalette from '../../../assets/scss/_colors.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
