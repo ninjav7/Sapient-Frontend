@@ -36,6 +36,7 @@ const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
 const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const UpdatePassword = React.lazy(() => import('../pages/auth/UpdatePassword'));
+const VerifyAccount = React.lazy(() => import('../pages/auth/VerifyAccount'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
 
@@ -502,6 +503,13 @@ const authRoutes = {
             path: '/account/forget-password',
             name: 'Forget Password',
             component: ForgetPassword,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/verify-account/:id/:token',
+            name: 'Verify Account',
+            component: VerifyAccount,
             route: Route,
             visibility: true,
         },
