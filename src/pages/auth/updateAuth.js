@@ -11,6 +11,7 @@ import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
 import { fetchSessionDetails, updateUser } from './service';
+import { googleLoginUser } from '../../redux/actions';
 
 const AuthUpdate = (props) => {
     let history = useHistory();
@@ -49,7 +50,6 @@ const AuthUpdate = (props) => {
                 await updateUserDetails();
                 setIsLoading(false);
                 history.push('/');
-                window.location.reload();
             })
             .catch((error) => {
                 setIsLoading(false);
@@ -134,4 +134,4 @@ const AuthUpdate = (props) => {
     );
 };
 
-export default connect()(AuthUpdate);
+export default connect({ googleLoginUser })(AuthUpdate);

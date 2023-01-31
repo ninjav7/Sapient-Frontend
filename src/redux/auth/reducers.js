@@ -10,19 +10,22 @@ import {
     FORGET_PASSWORD,
     FORGET_PASSWORD_SUCCESS,
     FORGET_PASSWORD_FAILED,
+    GOOGLE_LOGIN_USER,
 } from './constants';
 
 import { getLoggedInUser } from '../../helpers/authUtils';
+import { stat } from 'fs';
 
 const INIT_STATE = {
     user: getLoggedInUser(),
     loading: false,
 };
 
-
 const Auth = (state = INIT_STATE, action) => {
     switch (action.type) {
         case LOGIN_USER:
+            return { ...state, loading: true };
+        case GOOGLE_LOGIN_USER:
             return { ...state, loading: true };
         case LOGIN_USER_SUCCESS:
             return { ...state, user: action.payload, loading: false, error: null };

@@ -10,12 +10,16 @@ import {
     FORGET_PASSWORD,
     FORGET_PASSWORD_SUCCESS,
     FORGET_PASSWORD_FAILED,
+    GOOGLE_LOGIN_USER,
 } from './constants';
-
 
 export const loginUser = (username, password) => ({
     type: LOGIN_USER,
     payload: { username, password },
+});
+export const googleLoginUser = (sessionId) => ({
+    type: GOOGLE_LOGIN_USER,
+    payload: { sessionId },
 });
 
 export const loginUserSuccess = (user) => ({
@@ -28,7 +32,7 @@ export const loginUserFailed = (error) => ({
     payload: error,
 });
 
-export const registerUser = (fullname, email, password,user_id,vendor) => ({
+export const registerUser = (fullname, email, password, user_id, vendor) => ({
     type: REGISTER_USER,
     payload: { fullname, email, password, user_id, vendor },
 });

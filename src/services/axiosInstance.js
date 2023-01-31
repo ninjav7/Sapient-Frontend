@@ -32,7 +32,7 @@ axiosInstance.interceptors.response.use(
     function (error) {
         if (error?.response?.status === 403) {
             localStorage.clear();
-            cookies.remove('user', { path: '/' });
+            cookies.remove('user', { path: '/account/login' });
             window.location.reload();
             UserStore.update((s) => {
                 s.showNotification = true;
