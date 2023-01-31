@@ -80,20 +80,15 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioEndUse(payload)
+            const params = `?off_hours=false`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchPortfolioEndUse(params, payload)
                 .then((res) => {
-                    let response = res?.data;
-                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                    const response = res?.data?.data;
+                    response.sort((a, b) => b?.energy_consumption?.now - a?.energy_consumption?.now);
                     response.forEach((record) => {
                         record.energy_consumption.now = Math.round(record.energy_consumption.now);
                         record.energy_consumption.old = Math.round(record.energy_consumption.old);
-                        record.after_hours_energy_consumption.now = Math.round(
-                            record.after_hours_energy_consumption.now
-                        );
-                        record.after_hours_energy_consumption.old = Math.round(
-                            record.after_hours_energy_consumption.old
-                        );
                     });
                     setenergyConsumption(response);
                     setIsEnergyConsumptionChartLoading(false);

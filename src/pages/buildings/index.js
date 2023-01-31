@@ -8,10 +8,10 @@ import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
 import {
     fetchOverallBldgData,
-    fetchOverallEndUse,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
     fetchEnergyConsumption,
+    fetchEndUseByBuilding,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -243,15 +243,16 @@ const BuildingOverview = () => {
         };
 
         const buildingEndUserData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchOverallEndUse(bldgId, payload)
+            const params = `?building_id=${bldgId}&off_hours=false`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
-                    let response = res?.data;
-                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                    const response = res?.data?.data;
+                    response.sort((a, b) => b?.energy_consumption.now - a?.energy_consumption.now);
                     setEnergyConsumption(response);
                     let newDonutData = [];
                     response.forEach((record) => {
-                        let fixedConsumption = Math.round(record.energy_consumption.now);
+                        let fixedConsumption = Math.round(record?.energy_consumption.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
@@ -288,8 +289,6 @@ const BuildingOverview = () => {
                     });
 
                     let finalList = weekEndList.concat(weekDaysList);
-
-                    console.log('SSR finalList => ', finalList);
 
                     finalList.sort((a, b) => a - b);
 

@@ -18,6 +18,7 @@ import colors from '../../assets/scss/_colors.scss';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
 import { generateID } from '../helpers/helper';
+import Brick from '../brick';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
@@ -233,6 +234,9 @@ const LineChart = (props) => {
                     />
                 </div>
             </div>
+
+            <Brick sizeInRem={1} />
+
             {isLoadingData ? (
                 <EmptyLineChart />
             ) : (

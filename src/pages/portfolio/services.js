@@ -1,11 +1,5 @@
 import axiosInstance from '../../services/axiosInstance';
-import {
-    portfolioBuilidings,
-    portfolioEndUser,
-    portfolioOverall,
-    getEnergyConsumption,
-} from '../../services/Network';
-
+import { portfolioBuilidings, energyEndUseInfo, portfolioOverall, getEnergyConsumption } from '../../services/Network';
 
 export function fetchPortfolioBuilidings(payload) {
     return axiosInstance.post(`${portfolioBuilidings}`, payload).then((res) => res);
@@ -15,8 +9,8 @@ export function fetchPortfolioOverall(payload) {
     return axiosInstance.post(`${portfolioOverall}`, payload).then((res) => res);
 }
 
-export function fetchPortfolioEndUse(payload) {
-    return axiosInstance.post(`${portfolioEndUser}`, payload).then((res) => res);
+export function fetchPortfolioEndUse(params, payload) {
+    return axiosInstance.post(`${energyEndUseInfo}${params}`, payload).then((res) => res);
 }
 
 export function fetchPortfolioEnergyConsumption(payload) {

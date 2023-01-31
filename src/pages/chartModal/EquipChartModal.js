@@ -27,7 +27,7 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, compareObjData } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
@@ -84,9 +84,12 @@ const EquipChartModal = ({
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [isDataChanged, setDataChanged] = useState(false);
+    const [isModified, setModification] = useState(false);
     const [defaultEquipData, setDefaultEquipData] = useState({});
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [equipmentData, setEquipmentData] = useState({});
+    const [equipData, setEquipData] = useState({});
+    const [originalEquipData, setOriginalEquipData] = useState({});
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [equipResult, setEquipResult] = useState({});
 
@@ -151,6 +154,12 @@ const EquipChartModal = ({
             }
         }
         setDataChanged(true);
+    };
+
+    const handleDataChange = (key, value) => {
+        let obj = Object.assign({}, equipData);
+        obj[key] = value;
+        setEquipData(obj);
     };
 
     const handleChange = (key, value) => {
@@ -361,25 +370,24 @@ const EquipChartModal = ({
             });
     };
 
+    const fetchEquipmentDetails = async (equipId) => {
+        const params = `/${equipId}`;
+        await getEquipmentDetails(params)
+            .then((res) => {
+                const response = res?.data?.data;
+
+                if (response) {
+                    setOriginalEquipData(response);
+                    setEquipData(response);
+                }
+
+                setEquipmentData(response);
+            })
+            .catch((error) => {});
+    };
+
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) {
-            return;
-        }
-
-        const fetchEquipmentDetails = async (equipId) => {
-            let params = `/${equipId}`;
-            await getEquipmentDetails(params)
-                .then((res) => {
-                    let response = res.data.data;
-                    setLocation(response?.location_id);
-                    setEquipType(response?.equipments_type_id);
-
-                    setEquipBreakerLink(response?.breaker_link);
-                    setDefaultEquipData(response);
-                    setEquipmentData(response);
-                })
-                .catch((error) => {});
-        };
+        if (!equipmentFilter?.equipment_id) return;
 
         const fetchMetadata = async () => {
             await getMetadataRequest(bldgId)
@@ -413,6 +421,7 @@ const EquipChartModal = ({
                 })
                 .finally(() => {});
         };
+
         fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
@@ -481,6 +490,10 @@ const EquipChartModal = ({
             addEquimentType();
         }
     }, [equipmentTypeData]);
+
+    useEffect(() => {
+        if (equipData) setModification(compareObjData(equipData, originalEquipData));
+    }, [equipData]);
 
     return (
         <div>
@@ -553,11 +566,9 @@ const EquipChartModal = ({
                                                             onClick={() => {
                                                                 handleSave();
                                                             }}
-                                                            disabled={!isDataChanged}
+                                                            disabled={isModified}
                                                         />
-                                                    ) : (
-                                                        <></>
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                             ) : null}
                                         </div>
@@ -985,7 +996,6 @@ const EquipChartModal = ({
                                                         placeholder="Enter a Note..."
                                                         value={equipmentData?.note}
                                                         onChange={(e) => {
-                                                            console.log('SSR e => ', e.target.value);
                                                             handleChange('note', e.target.value);
                                                         }}
                                                         inputClassName="pt-2"
@@ -1545,9 +1555,9 @@ const EquipChartModal = ({
                                                         <InputTooltip
                                                             placeholder="Enter Equipment Name"
                                                             labelSize={Typography.Sizes.md}
-                                                            value={equipmentData?.equipments_name}
+                                                            value={equipData?.equipments_name}
                                                             onChange={(e) => {
-                                                                handleChange('name', e.target.value);
+                                                                handleDataChange('equipments_name', e.target.value);
                                                             }}
                                                         />
                                                     </div>
@@ -1558,17 +1568,14 @@ const EquipChartModal = ({
                                                         </Typography.Body>
                                                         <Brick sizeInRem={0.25} />
                                                         <Select
-                                                            placeholder="Select Role"
+                                                            placeholder="Select Equipment Type"
                                                             options={equipmentTypeData}
                                                             currentValue={equipmentTypeData.filter(
-                                                                (option) => option.value === equipType
+                                                                (option) =>
+                                                                    option.value === equipData?.equipments_type_id
                                                             )}
                                                             onChange={(e) => {
-                                                                handleEquipTypeChange(
-                                                                    'equipment_type',
-                                                                    e.target.value,
-                                                                    'active'
-                                                                );
+                                                                handleDataChange('equipments_type_id', e.value);
                                                             }}
                                                             isSearchable={true}
                                                         />
@@ -1586,10 +1593,10 @@ const EquipChartModal = ({
                                                         placeholder="Select Location"
                                                         options={locationData}
                                                         currentValue={locationData.filter(
-                                                            (option) => option.value === equipmentData.location
+                                                            (option) => option.value === equipData?.location_id
                                                         )}
                                                         onChange={(e) => {
-                                                            handleChange('space_id', e.value);
+                                                            handleDataChange('location_id', e.value);
                                                         }}
                                                         isSearchable={true}
                                                     />
@@ -1628,9 +1635,9 @@ const EquipChartModal = ({
                                                     <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
                                                     <Brick sizeInRem={0.25} />
                                                     <TagsInput
-                                                        value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                        value={equipData?.tags}
                                                         onChange={(value) => {
-                                                            handleChange('tags', value);
+                                                            handleDataChange('tags', value);
                                                         }}
                                                         name="tag"
                                                         placeHolder="+ Add Tag"
@@ -1646,14 +1653,15 @@ const EquipChartModal = ({
                                                         type="textarea"
                                                         rows="4"
                                                         placeholder="Enter a Note..."
-                                                        value={equipmentData?.note}
+                                                        value={equipData?.note}
                                                         onChange={(e) => {
-                                                            handleChange('note', e.target.value);
+                                                            handleDataChange('note', e.target.value);
                                                         }}
                                                         inputClassName="pt-2"
                                                     />
                                                 </div>
                                             </Col>
+
                                             <Col xl={4}>
                                                 <div className="modal-right-container">
                                                     <div className="equip-type-socket">
