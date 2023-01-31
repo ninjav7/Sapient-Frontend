@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -12,6 +11,8 @@ import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
 import DailyUsageByHour from './DailyUsageByHour';
 import './style.css';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
+import { defaultChartData } from './mock';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -213,6 +214,8 @@ const TimeOfDay = () => {
         },
     };
     const [areaChartData, setAreaChartData] = useState([]);
+    const [minDate, setMinDate] = useState([]);
+    const [maxDate, setMaxDate] = useState([]);
     const [isAvgUsageChartLoading, setIsAvgUsageChartLoading] = useState(false);
 
     const [heatMapChartData, setHeatMapChartData] = useState([]);
@@ -401,24 +404,7 @@ const TimeOfDay = () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
-                    let response = res?.data;
-
-                    let weekDaysResData = response[0]?.weekdays;
-                    let weekEndResData = response[0]?.weekend;
-
-                    const weekDaysData = weekDaysResData.map((el) => {
-                        return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
-                            y: el.y.toFixed(0),
-                        };
-                    });
-
-                    const weekendsData = weekEndResData.map((el) => {
-                        return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
-                            y: el.y.toFixed(0),
-                        };
-                    });
+                    const response = res?.data;
 
                     const newWeekdaysData = {
                         name: 'Weekdays',
@@ -429,28 +415,40 @@ const TimeOfDay = () => {
                         data: [],
                     };
 
+                    const weekDaysResData = response[0]?.weekdays;
+                    const weekEndResData = response[0]?.weekend;
+
+                    if (weekDaysResData.length === 0) {
+                        newWeekdaysData.data = [...defaultChartData];
+                    } else {
+                        newWeekdaysData.data = weekDaysResData.map((el, index) => {
+                            if (index === 0) setMinDate(new Date(el.x).getTime());
+                            if (index === weekDaysResData.length - 1) setMaxDate(new Date(el.x).getTime());
+                            return {
+                                x: new Date(el.x).getTime(),
+                                y: parseFloat((el.y / 1000).toFixed(2)),
+                            };
+                        });
+                    }
+
+                    if (weekEndResData.length === 0) {
+                        newWeekendsData.data = [...defaultChartData];
+                    } else {
+                        newWeekendsData.data = weekEndResData.map((el, index) => {
+                            if (index === 0) setMinDate(new Date(el.x).getTime());
+                            if (index === weekDaysResData.length - 1) setMaxDate(new Date(el.x).getTime());
+                            return {
+                                x: moment.utc(el.x).format('h A'),
+                                y: parseFloat((el.y / 1000).toFixed(2)),
+                            };
+                        });
+                    }
+
                     const chartDataToDisplay = [];
 
-                    for (let i = 0; i < 24; i++) {
-                        let matchedRecord = weekDaysData.find((record) => record.x === i);
-                        if (matchedRecord) {
-                            newWeekdaysData.data.push(parseFloat((matchedRecord.y / 1000).toFixed(2)));
-                        } else {
-                            newWeekdaysData.data.push(0);
-                        }
-                    }
-
-                    for (let i = 0; i < 24; i++) {
-                        let matchedRecord = weekendsData.find((record) => record.x === i);
-
-                        if (matchedRecord) {
-                            newWeekendsData.data.push(parseFloat((matchedRecord.y / 1000).toFixed(2)));
-                        } else {
-                            newWeekendsData.data.push(0);
-                        }
-                    }
                     chartDataToDisplay.push(newWeekdaysData);
                     chartDataToDisplay.push(newWeekendsData);
+
                     setAreaChartData(chartDataToDisplay);
                     setIsAvgUsageChartLoading(false);
                 })
@@ -1013,11 +1011,21 @@ const TimeOfDay = () => {
             </div>
 
             <div className="mt-2">
-                <DailyUsageByHour
+                {/* <DailyUsageByHour
                     title="Average Daily Usage by Hour"
                     subtitle="Energy Usage By Hour (kWh)"
                     options={areaChartOptions}
                     series={areaChartData}
+                /> */}
+                <LineChart
+                    title="Average Daily Usage by Hour"
+                    subTitle="Energy Usage By Hour (kWh)"
+                    handleMoreClick={null}
+                    dateRange={{
+                        minDate: new Date(startDate).getTime(),
+                        maxDate: new Date(endDate).getTime(),
+                    }}
+                    data={areaChartData}
                 />
             </div>
         </React.Fragment>
