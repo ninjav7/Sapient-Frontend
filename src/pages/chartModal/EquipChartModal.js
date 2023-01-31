@@ -492,10 +492,6 @@ const EquipChartModal = ({
     }, [equipmentTypeData]);
 
     useEffect(() => {
-        console.log('SSR equipData => ', equipData);
-    });
-
-    useEffect(() => {
         if (equipData) setModification(compareObjData(equipData, originalEquipData));
     }, [equipData]);
 
@@ -1000,7 +996,6 @@ const EquipChartModal = ({
                                                         placeholder="Enter a Note..."
                                                         value={equipmentData?.note}
                                                         onChange={(e) => {
-                                                            console.log('SSR e => ', e.target.value);
                                                             handleChange('note', e.target.value);
                                                         }}
                                                         inputClassName="pt-2"
