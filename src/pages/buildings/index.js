@@ -247,7 +247,7 @@ const BuildingOverview = () => {
             const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
-                    const response = res?.data;
+                    const response = res?.data?.data;
                     response.sort((a, b) => b?.energy_consumption.now - a?.energy_consumption.now);
                     setEnergyConsumption(response);
                     let newDonutData = [];

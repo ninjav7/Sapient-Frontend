@@ -84,7 +84,7 @@ const PortfolioOverview = () => {
             const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioEndUse(params, payload)
                 .then((res) => {
-                    const response = res?.data;
+                    const response = res?.data?.data;
                     response.sort((a, b) => b?.energy_consumption?.now - a?.energy_consumption?.now);
                     response.forEach((record) => {
                         record.energy_consumption.now = Math.round(record.energy_consumption.now);

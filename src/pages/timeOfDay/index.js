@@ -212,12 +212,12 @@ const TimeOfDay = () => {
             const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
-                    const response = res?.data;
+                    const response = res?.data?.data;
                     setEnergyConsumption(response);
                     const energyData = response;
                     let newDonutData = [];
                     energyData.forEach((record) => {
-                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        let fixedConsumption = parseInt(record?.after_hours_energy_consumption?.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);

@@ -1,8 +1,7 @@
 import axiosInstance from '../../services/axiosInstance';
 import { energyEndUseInfo, endUsesChart, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
 
-export function fetchEndUses(bldgId, payload) {
-    let params = `?building_id=${bldgId}`;
+export function fetchEndUses(params, payload) {
     return axiosInstance.post(`${energyEndUseInfo}${params}`, payload).then((res) => res);
 }
 
