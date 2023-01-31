@@ -16,6 +16,7 @@ const TopNav = () => {
             setUserPermissionDataNow(data);
         });
     };
+
     useEffect(() => {
         getUserPermissionDetail();
     }, []);
