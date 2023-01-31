@@ -827,26 +827,22 @@ const TimeOfDay = () => {
             <Brick sizeInRem={1.5} />
 
             <div className="custom-time-of-day-grid">
-                <div>
-                    <EndUseTotals
-                        series={donutChartData}
-                        options={donutChartOpts}
-                        energyConsumption={energyConsumption}
-                        className={'h-100'}
-                    />
-                </div>
-                <div>
-                    <HeatMapWidget
-                        title="Hourly Average Consumption"
-                        subtitle="Energy Usage By Hour (kWh)"
-                        series={heatMapChartData}
-                        height={weekdaysChartHeight}
-                        timeZone={timeZone}
-                        showRouteBtn={false}
-                        labelsPosition={'top'}
-                        className={'h-100'}
-                    />
-                </div>
+                <EndUseTotals
+                    series={donutChartData}
+                    options={donutChartOpts}
+                    energyConsumption={energyConsumption}
+                    className={'h-100'}
+                />
+                <HeatMapWidget
+                    title="Hourly Average Consumption"
+                    subtitle="Energy Usage By Hour (kWh)"
+                    series={heatMapChartData}
+                    height={weekdaysChartHeight}
+                    timeZone={timeZone}
+                    showRouteBtn={false}
+                    labelsPosition={'top'}
+                    className={'h-100'}
+                />
             </div>
 
             <Brick sizeInRem={1.5} />
