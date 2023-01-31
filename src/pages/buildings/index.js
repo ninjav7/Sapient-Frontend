@@ -289,8 +289,6 @@ const BuildingOverview = () => {
 
                     let finalList = weekEndList.concat(weekDaysList);
 
-                    console.log('SSR finalList => ', finalList);
-
                     finalList.sort((a, b) => a - b);
 
                     let minVal = finalList[0];

@@ -127,6 +127,7 @@ const Login = (props) => {
                 setRefresh(false);
             });
     };
+
     const renderRedirectToRoot = () => {
         const isAuthTknValid = isUserAuthenticated();
         setisAuthTokenValid(isAuthTknValid);
@@ -143,6 +144,7 @@ const Login = (props) => {
             })
             .catch((error) => {});
     };
+
     return (
         <React.Fragment>
             {(_isMounted || !isAuthTokenValid) && (

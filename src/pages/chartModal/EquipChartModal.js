@@ -985,7 +985,6 @@ const EquipChartModal = ({
                                                         placeholder="Enter a Note..."
                                                         value={equipmentData?.note}
                                                         onChange={(e) => {
-                                                            console.log('SSR e => ', e.target.value);
                                                             handleChange('note', e.target.value);
                                                         }}
                                                         inputClassName="pt-2"
