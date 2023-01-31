@@ -327,7 +327,7 @@ const EndUseType = () => {
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
                 .then((res) => {
-                    let response = res?.data;
+                    let response = res?.data?.data;
                     let requestEndUseType = fetchEndUseType(endUseType);
                     let data = response.find((element) => element.device === requestEndUseType);
                     let obj = {
