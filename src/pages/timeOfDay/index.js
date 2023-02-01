@@ -54,119 +54,7 @@ const TimeOfDay = () => {
 
     const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
 
-    const [donutChartOpts, setDonutChartOpts] = useState({
-        chart: {
-            type: 'donut',
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 1);
-                },
-            },
-        },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
-        series: [12553, 11553, 6503, 2333],
-        plotOptions: {
-            pie: {
-                startAngle: 0,
-                endAngle: 360,
-                expandOnClick: false,
-                offsetX: 0,
-                offsetY: 0,
-                customScale: 1,
-                dataLabels: {
-                    offset: 0,
-                    minAngleToShowLabel: 10,
-                },
-                donut: {
-                    size: '80%',
-                    background: 'grey',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                            // fontSize: '22px',
-                            // fontFamily: 'Helvetica, Arial, sans-serif',
-                            // fontWeight: 600,
-                            // color: '#373d3f',
-                            // offsetY: -10,
-                            // formatter: function (val) {
-                            //     return val;
-                            // },
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 400,
-                            color: 'red',
-                            // offsetY: 16,
-                            formatter: function (val) {
-                                return `${val} kWh`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            // color: '#373d3f',
-                            fontSize: '22px',
-                            fontWeight: 600,
-                            // formatter: function (w) {
-                            //     return w.globals.seriesTotals.reduce((a, b) => {
-                            //         return a + b;
-                            //     }, 0);
-                            // },
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return a + b;
-                                }, 0);
-                                return `${sum} kWh`;
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 300,
-                    },
-                    // legend: {
-                    //     show: true,
-                    //     showForSingleSeries:true,
-                    //     onItemHover: {
-                    //         highlightDataSeries: true
-                    //     },
-                    //     onItemClick: {
-                    //         toggleDataSeries: true
-                    //     },
-                    // },
-                },
-            },
-        ],
-        dataLabels: {
-            enabled: false,
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        legend: {
-            show: true,
-            position: 'bottom',
-        },
-        stroke: {
-            width: 0,
-        },
-
-        itemMargin: {
-            horizontal: 10,
-        },
-    });
+    const metric = [{ value: 'energy', label: 'Energy', unit: 'kWh', Consumption: 'Energy' }];
 
     const getAverageValue = (value, min, max) => {
         if (min == undefined || max === undefined) {
@@ -213,6 +101,16 @@ const TimeOfDay = () => {
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
+                    if (response.length !== 0) {
+                        response.forEach((el) => {
+                            el.after_hours_energy_consumption.now = Math.round(
+                                el?.after_hours_energy_consumption?.now / 1000
+                            );
+                            el.after_hours_energy_consumption.old = Math.round(
+                                el?.after_hours_energy_consumption?.old / 1000
+                            );
+                        });
+                    }
                     setEnergyConsumption(response);
                     const energyData = response;
                     let newDonutData = [];
@@ -827,12 +725,7 @@ const TimeOfDay = () => {
             <Brick sizeInRem={1.5} />
 
             <div className="custom-time-of-day-grid">
-                <EndUseTotals
-                    series={donutChartData}
-                    options={donutChartOpts}
-                    energyConsumption={energyConsumption}
-                    className={'h-100'}
-                />
+                <EndUseTotals series={donutChartData} energyConsumption={energyConsumption} className={'h-100'} />
                 <HeatMapWidget
                     title="Hourly Average Consumption"
                     subtitle="Energy Usage By Hour (kWh)"
@@ -853,6 +746,8 @@ const TimeOfDay = () => {
                 handleMoreClick={null}
                 dateRange={dateFilter}
                 data={lineChartData}
+                tooltipUnit={metric[0].unit}
+                tooltipLabel={metric[0].label}
             />
         </React.Fragment>
     );
