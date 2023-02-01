@@ -92,10 +92,11 @@ const EndUsesPage = () => {
 
         const endUsesDataFetch = async () => {
             setIsEndUsesDataFetched(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchEndUses(bldgId, payload)
+            const params = `?building_id=${bldgId}`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUses(params, payload)
                 .then((res) => {
-                    let response = res?.data;
+                    const response = res?.data?.data;
                     response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
                     let endUsesList = [];
                     response.forEach((record, index) => {

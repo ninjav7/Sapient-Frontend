@@ -663,6 +663,7 @@ const EditBreakerPanel = () => {
             if (record.breaker_number + 2 > breakersData.length) {
                 return;
             }
+
             let obj = {
                 id: `breakerLink-${record?.breaker_number}`,
                 source: record?.id,

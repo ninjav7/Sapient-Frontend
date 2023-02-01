@@ -4,6 +4,9 @@ import './auth.scss';
 import Slide1 from '../../assets/images/login/building-1.jpg';
 import Slide2 from '../../assets/images/login/building-2.jpg';
 import Slide3 from '../../assets/images/login/building-3.jpg';
+import Building1 from '../../assets/icon/Building1.svg';
+import Building2 from '../../assets/icon/Building2.svg';
+import Building3 from '../../assets/icon/Building3.svg';
 import Carousel from 'react-bootstrap/Carousel';
 
 function Holder({ rightContent }) {
@@ -12,7 +15,7 @@ function Holder({ rightContent }) {
             <Col lg={6} className="pr-0 pl-0">
                 <Carousel controls={false} indicators={false}>
                     <Carousel.Item>
-                        <img className="backgroundStyle name" src={Slide3} />
+                        <img className="backgroundStyle name" src={Slide1} />
                         <Carousel.Caption>
                             <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
                         </Carousel.Caption>

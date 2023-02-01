@@ -1,6 +1,5 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as Download } from '../../assets/icon/download.svg';
 import LineAreaChart from './LineAreaChart';
 import Typography from '../../sharedComponents/typography';
 import { getAreaChartCSVExport } from '../../sharedComponents/helpers/chartsExport';
@@ -30,9 +29,7 @@ const DailyUsageByHour = ({ title, subtitle, options, series, className = '' }) 
         <div className={`daily-usage-by-hour-wrapper ${className}`}>
             <div className="d-flex justify-content-between">
                 <Titles {...{ title, subtitle }} />
-                <FontAwesomeIcon
-                    icon={faDownload}
-                    size="md"
+                <Download
                     className="download-chart-btn mouse-pointer mr-3 mt-3"
                     onClick={() => getAreaChartCSVExport(series)}
                 />

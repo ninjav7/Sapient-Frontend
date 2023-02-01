@@ -3,7 +3,7 @@ import { BrowserRouter, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import { connect } from 'react-redux';
 
-import { isUserAuthenticated } from '../helpers/authUtils';
+import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUtils';
 import * as layoutConstants from '../constants/layout';
 import { allFlattenRoutes as routes } from './index';
 
@@ -32,6 +32,15 @@ const VerticalLayout = Loadable({
 
 const HorizontalLayout = Loadable({
     loader: () => import('../layouts/Horizontal'),
+    render(loaded, props) {
+        let Component = loaded.default;
+        return <Component {...props} />;
+    },
+    loading,
+});
+
+const AdminLayout = Loadable({
+    loader: () => import('../layouts/Admin'),
     render(loaded, props) {
         let Component = loaded.default;
         return <Component {...props} />;

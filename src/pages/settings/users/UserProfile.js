@@ -23,8 +23,10 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 import CompareRoles from './CompareRoles';
+import { ReactComponent as DeactiveSVG } from '../../../assets/icon/redban.svg';
 import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
+import { ReactComponent as ActivateSVG } from '../../../assets/icon/activateCircleCheck.svg';
 import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 import { ReactComponent as InviteSVG } from '../../../assets/icon/share.svg';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -95,7 +97,6 @@ const UserProfile = () => {
 
                 if (response?.permissions.length !== 0) {
                     setOrginalUserRole(response?.permissions[0]);
-                    console.log('SSR user Role => ', response?.permissions[0]);
                     setUserRole(response?.permissions[0]);
                 }
             })
@@ -328,7 +329,7 @@ const UserProfile = () => {
                     label={userDetail?.is_active ? 'Deactivate User' : 'Activate User'}
                     size={Button.Sizes.lg}
                     type={userDetail?.is_active ? Button.Type.secondaryDistructive : Button.Type.secondary}
-                    icon={(userDetail?.is_active && <InactiveSVG />) || (!userDetail?.is_active && <ActiveSVG />)}
+                    icon={(userDetail?.is_active && <DeactiveSVG />) || (!userDetail?.is_active && <ActivateSVG />)}
                     iconAlignment={Button.IconAlignment.left}
                     className={`w-100 mr-2`}
                     onClick={() => {
@@ -483,7 +484,7 @@ const UserProfile = () => {
                                             setErrorObj({ ...errorObj, email: null });
                                         }}
                                         value={userDetail?.email}
-                                        disabled={userDetail?.is_verified}
+                                        disabled={userDetail?.is_active === false ? true : false}
                                         error={errorObj.email}
                                     />
                                 </div>

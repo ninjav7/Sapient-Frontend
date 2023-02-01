@@ -5,8 +5,9 @@ import '../style.css';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import colorPalette from '../../../assets/scss/_colors.scss';
-import { faCircleXmark, faPen, faEye } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as CircleXmarkSVG } from '../../../assets/icon/circle-xmark.svg';
+import { ReactComponent as Pen } from '../../../assets/icon/pen.svg';
+import { ReactComponent as Eye } from '../../../assets/icon/eye.svg';
 import Modal from 'react-bootstrap/Modal';
 import './styles.scss';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
@@ -52,7 +53,7 @@ const CompareRoles = ({ show, setShow }) => {
                     size={Typography.Sizes.md}
                     className="d-flex edit-container justify-content-center"
                     style={{ color: colorPalette.success700 }}>
-                    <FontAwesomeIcon icon={faPen} size="md" style={{ color: colorPalette.success700 }} />
+                    <Pen style={{ color: colorPalette.success700, width: '1.25rem', height: '1.25rem' }} />
                     Edit
                 </Typography.Subheader>
             );
@@ -62,7 +63,7 @@ const CompareRoles = ({ show, setShow }) => {
                     size={Typography.Sizes.md}
                     className="d-flex view-container justify-content-center"
                     style={{ color: colorPalette.view700 }}>
-                    <FontAwesomeIcon icon={faEye} size="md" style={{ color: colorPalette.primaryGray450 }} />
+                    <Eye style={{ color: colorPalette.primaryGray450 }} />
                     View
                 </Typography.Subheader>
             );
@@ -76,7 +77,7 @@ const CompareRoles = ({ show, setShow }) => {
                     size={Typography.Sizes.md}
                     className="d-flex edit-container justify-content-center"
                     style={{ color: colorPalette.success700 }}>
-                    <FontAwesomeIcon icon={faPen} size="md" style={{ color: colorPalette.success700 }} />
+                    <Pen style={{ color: colorPalette.success700, width: '1.25rem', height: '1.25rem' }} />
                     Edit
                 </Typography.Subheader>
             );
@@ -86,7 +87,7 @@ const CompareRoles = ({ show, setShow }) => {
                     size={Typography.Sizes.md}
                     className="d-flex no-access-container justify-content-center"
                     style={{ color: colorPalette.error700 }}>
-                    <FontAwesomeIcon icon={faCircleXmark} size="md" style={{ color: colorPalette.error700 }} />
+                    <CircleXmarkSVG style={{ color: colorPalette.error700 }} />
                     No Access
                 </Typography.Subheader>
             );
@@ -98,7 +99,7 @@ const CompareRoles = ({ show, setShow }) => {
                 size={Typography.Sizes.md}
                 className="d-flex view-container justify-content-center"
                 style={{ color: colorPalette.view700 }}>
-                <FontAwesomeIcon icon={faEye} size="md" style={{ color: colorPalette.primaryGray450 }} />
+                <Eye style={{ color: colorPalette.primaryGray450 }} />
                 View
             </Typography.Subheader>
         );
@@ -109,7 +110,7 @@ const CompareRoles = ({ show, setShow }) => {
                 size={Typography.Sizes.md}
                 className="d-flex view-container justify-content-center"
                 style={{ color: colorPalette.view700 }}>
-                <FontAwesomeIcon icon={faEye} size="md" style={{ color: colorPalette.primaryGray450 }} />
+                <Eye style={{ color: colorPalette.primaryGray450 }} />
                 View
             </Typography.Subheader>
         );

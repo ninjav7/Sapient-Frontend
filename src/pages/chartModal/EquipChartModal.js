@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
+import { Row, Col, FormGroup } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faArrowUpRightFromSquare, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../assets/icon/arrowUpRightFromSquare.svg';
+import { ReactComponent as PowerOff } from '../../assets/icon/power-off.svg';
 import { fetchExploreEquipmentChart } from '../explore/services';
 import {
     updateListSensor,
@@ -13,7 +12,6 @@ import {
     updateExploreEquipmentYTDUsage,
     getMetadataRequest,
 } from './services';
-import { Cookies } from 'react-cookie';
 import { useHistory, Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -21,9 +19,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
-import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import DoubleBreakerUninked from '../../assets/images/equip-modal/Double_Breaker_Unlinked.svg';
-import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import Header from '../../components/Header';
@@ -31,11 +27,17 @@ import { formatConsumptionValue } from '../../helpers/explorehelpers';
 import Button from '../../sharedComponents/button/Button';
 import './style.css';
 import '../../sharedComponents/typography/style.scss';
-import { apiRequestBody } from '../../helpers/helpers';
+import { apiRequestBody, compareObjData } from '../../helpers/helpers';
 import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
+import Brick from '../../sharedComponents/brick';
+import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/attached.svg';
+import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
+import './styles.scss';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -46,8 +48,6 @@ const EquipChartModal = ({
     setSelectedTab,
     activePage,
 }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
 
     const history = useHistory();
@@ -66,6 +66,11 @@ const EquipChartModal = ({
         { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
     ];
 
+    const rulesAlert = [
+        { value: 'desktop-pc', label: 'Desktop PC' },
+        { value: 'refigerator', label: 'Refigerator' },
+    ];
+
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
@@ -79,9 +84,12 @@ const EquipChartModal = ({
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [isDataChanged, setDataChanged] = useState(false);
+    const [isModified, setModification] = useState(false);
     const [defaultEquipData, setDefaultEquipData] = useState({});
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [equipmentData, setEquipmentData] = useState({});
+    const [equipData, setEquipData] = useState({});
+    const [originalEquipData, setOriginalEquipData] = useState({});
     const [equipBreakerLink, setEquipBreakerLink] = useState([]);
     const [equipResult, setEquipResult] = useState({});
 
@@ -146,6 +154,12 @@ const EquipChartModal = ({
             }
         }
         setDataChanged(true);
+    };
+
+    const handleDataChange = (key, value) => {
+        let obj = Object.assign({}, equipData);
+        obj[key] = value;
+        setEquipData(obj);
     };
 
     const handleChange = (key, value) => {
@@ -356,43 +370,58 @@ const EquipChartModal = ({
             });
     };
 
+    const fetchEquipmentDetails = async (equipId) => {
+        const params = `/${equipId}`;
+        await getEquipmentDetails(params)
+            .then((res) => {
+                const response = res?.data?.data;
+
+                if (response) {
+                    setOriginalEquipData(response);
+                    setEquipData(response);
+                }
+
+                setEquipmentData(response);
+            })
+            .catch((error) => {});
+    };
+
     useEffect(() => {
-        if (!equipmentFilter?.equipment_id) {
-            return;
-        }
-
-        const fetchEquipmentDetails = async (equipId) => {
-            let params = `/${equipId}`;
-            await getEquipmentDetails(params)
-                .then((res) => {
-                    let response = res.data.data;
-                    setLocation(response?.location_id);
-                    setEquipType(response?.equipments_type_id);
-
-                    setEquipBreakerLink(response?.breaker_link);
-                    setDefaultEquipData(response);
-                    setEquipmentData(response);
-                })
-                .catch((error) => {});
-        };
+        if (!equipmentFilter?.equipment_id) return;
 
         const fetchMetadata = async () => {
             await getMetadataRequest(bldgId)
                 .then((res) => {
-                    const { end_uses, equipment_type, location } = res.data;
+                    const { end_uses, equipment_type, location } = res?.data;
 
-                    const data = location.map((el) => {
+                    const endUseData = end_uses.map((el) => {
                         return {
-                            label: el.location_name,
-                            value: el.location_id,
+                            label: el?.name,
+                            value: el?.end_use_id,
                         };
                     });
-                    setEquipmentTypeData(equipment_type);
-                    setEndUse(end_uses);
-                    setLocationData(data);
+
+                    const locationData = location.map((el) => {
+                        return {
+                            label: el?.location_name,
+                            value: el?.location_id,
+                        };
+                    });
+
+                    const equipTypeData = equipment_type.map((el) => {
+                        return {
+                            label: el?.equipment_type,
+                            value: el?.equipment_id,
+                        };
+                    });
+
+                    setEquipmentTypeData(equipTypeData);
+                    setEndUse(endUseData);
+                    setLocationData(locationData);
                 })
                 .finally(() => {});
         };
+
         fetchEquipmentChart(equipmentFilter?.equipment_id, equipmentFilter?.equipment_name);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
@@ -462,6 +491,10 @@ const EquipChartModal = ({
         }
     }, [equipmentTypeData]);
 
+    useEffect(() => {
+        if (equipData) setModification(compareObjData(equipData, originalEquipData));
+    }, [equipData]);
+
     return (
         <div>
             <Modal
@@ -501,13 +534,7 @@ const EquipChartModal = ({
                                                     ?.edit ? (
                                                     <Button
                                                         label="Turn Off"
-                                                        icon={
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                style={{ color: 'red' }}
-                                                            />
-                                                        }
+                                                        icon={<PowerOff style={{ color: 'red' }} />}
                                                         size={Button.Sizes.md}
                                                         type={Button.Type.primaryDistructive}
                                                     />
@@ -539,11 +566,9 @@ const EquipChartModal = ({
                                                             onClick={() => {
                                                                 handleSave();
                                                             }}
-                                                            disabled={!isDataChanged}
+                                                            disabled={isModified}
                                                         />
-                                                    ) : (
-                                                        <></>
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                             ) : null}
                                         </div>
@@ -807,11 +832,7 @@ const EquipChartModal = ({
                                                         style={{ fontWeight: 'normal', textDecoration: 'underline' }}>
                                                         {equipmentData?.device_mac}
                                                         &nbsp;
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowUpRightFromSquare}
-                                                            size="md"
-                                                            style={{ color: 'base-black' }}
-                                                        />
+                                                        <ArrowUpRightFromSquare style={{ color: 'base-black' }} />
                                                     </span>
                                                 </Link>
                                             </Typography.Subheader>
@@ -855,851 +876,280 @@ const EquipChartModal = ({
 
                         {selectedTab === 1 && (
                             <>
-                                {equipmentData?.device_type === 'passive' ? (
-                                    <Row className="mt-4">
-                                        <Col lg={8}>
-                                            <Row>
-                                                <Col lg={12} className="mb-2">
-                                                    <Typography.Header
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Regular}>
-                                                        Equipment Details
-                                                    </Typography.Header>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
+                                {equipmentData?.device_type === 'passive' && (
+                                    <>
+                                        <Brick sizeInRem={1} />
+
+                                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                                            Equipment Details
+                                        </Typography.Header>
+
+                                        <Brick sizeInRem={1} />
+
+                                        <Row>
+                                            <Col xl={8}>
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
                                                             Equipment Name
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="Enter Equipment Name"
-                                                                defaultValue={equipmentData?.equipments_name}
-                                                                onChange={(e) => {
-                                                                    handleChange('name', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Name Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_name
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Type
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="exampleSelect"
-                                                                className="font-weight-bold"
-                                                                value={equipType}
-                                                                onChange={(e) => {
-                                                                    handleEquipTypeChange(
-                                                                        'equipment_type',
-                                                                        e.target.value,
-                                                                        'passive'
-                                                                    );
-                                                                }}>
-                                                                <option selected>Select Type</option>
-                                                                {equipmentTypeData?.map((record) => {
-                                                                    return (
-                                                                        <option value={record?.equipment_id}>
-                                                                            {record?.equipment_type}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Type Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_type
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            End Use Category
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="endUsePop"
-                                                                className="font-weight-bold"
-                                                                onChange={(e) => {
-                                                                    handleChange('end_use', e.target.value);
-                                                                }}
-                                                                value={equipmentData?.end_use_id}>
-                                                                <option selected>Select Category</option>
-                                                                {endUse?.map((record) => {
-                                                                    return (
-                                                                        <option value={record?.end_use_id}>
-                                                                            {record?.name}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No End Use Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.end_use_name
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Location
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Select
-                                                                defaultValue={location}
-                                                                options={locationData}
-                                                                onChange={(e) => {
-                                                                    handleChange('space_id', e.value);
-                                                                }}
-                                                                placeholder="Select Location"
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Location Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.location
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mt-1">
-                                                            Location this equipment is installed in.
-                                                        </Typography.Subheader>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Tags
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <TagsInput
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.tags : ''
-                                                                }
-                                                                onChange={(value) => {
-                                                                    handleChange('tags', value);
-                                                                }}
-                                                                name="tag"
-                                                                placeHolder="+ Add Tag"
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Tags Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.tags : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Notes
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="textarea"
-                                                                name="text"
-                                                                id="exampleText"
-                                                                rows="3"
-                                                                placeholder="Enter a Note..."
-                                                                defaultValue={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                onChange={(e) => {
-                                                                    handleChange('note', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Notes Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                        <Col lg={4}>
-                                            <div className="modal-right-container">
-                                                <div className="equip-panel-info">
-                                                    {equipBreakerLink?.length === 0 ? (
-                                                        <div className="equip-breaker-style">
-                                                            <img
-                                                                src={DoubleBreakerUninked}
-                                                                alt="DoubleBreakerUninked"
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            {equipBreakerLink?.length === 1 && (
-                                                                <div className="breaker-container-style">
-                                                                    <div className="breaker-number-style-single">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style-single">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[1]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-single-style"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {equipBreakerLink?.length === 2 && (
-                                                                <div className="breaker-container-style">
-                                                                    <div className="breaker-number-style">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[0]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[1]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-double-style"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {equipBreakerLink?.length === 3 && (
-                                                                <div className="breaker-container-style">
-                                                                    <div className="breaker-number-style">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[2]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[0]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[1]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[2]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-triple-style"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.lg}
-                                                            Type={Typography.Types.Light}
-                                                            className="modal-right-card-title">
-                                                            Energy Monitoring
-                                                        </Typography.Subheader>
-                                                        <Button
-                                                            label="View"
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondaryGrey}
-                                                            onClick={() => {
-                                                                redirectToConfigDevicePage(
-                                                                    equipmentData?.device_id,
-                                                                    'passive-device'
-                                                                );
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <InputTooltip
+                                                            placeholder="Enter Equipment Name"
+                                                            labelSize={Typography.Sizes.md}
+                                                            value={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
                                                             }}
-                                                            disabled={equipBreakerLink?.length === 0 ? true : false}
                                                         />
                                                     </div>
-                                                    <div className="equip-breaker-container">
-                                                        <div className="equip-breaker-detail">
-                                                            <div className="phase-style">
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.sm}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="equip-breaker-header mb-1">
-                                                                    Phases
-                                                                </Typography.Subheader>
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.md}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="equip-breaker-value float-left">
-                                                                    {equipBreakerLink[0]?.breaker_type}
-                                                                </Typography.Subheader>
-                                                            </div>
-                                                            <div className="installed-style">
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.sm}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="equip-breaker-header mb-1">
-                                                                    Installed at
-                                                                </Typography.Subheader>
-                                                                <Typography.Subheader
-                                                                    size={Typography.Sizes.md}
-                                                                    Type={Typography.Types.Light}
-                                                                    className="equip-breaker-value box float-left">
-                                                                    {equipBreakerLink?.length === 1 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
-                                                                    {equipBreakerLink?.length === 2 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
-                                                                    {equipBreakerLink?.length === 3 &&
-                                                                        `${equipBreakerLink[0]?.panel_name} 
-                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
-                                                                </Typography.Subheader>
-                                                            </div>
-                                                        </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Type
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={equipmentTypeData}
+                                                            currentValue={equipmentTypeData.filter(
+                                                                (option) => option.value === equipType
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'passive'
+                                                                );
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            End Use Category
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={endUse}
+                                                            currentValue={endUse.filter(
+                                                                (option) => option.value === equipmentData?.end_use_id
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleChange('end_use', e.target.value);
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                ) : (
-                                    ''
-                                )}
 
-                                {equipmentData?.device_type === '' ? (
-                                    <Row className="mt-4">
-                                        <Col lg={8}>
-                                            <Row>
-                                                <Col lg={12} className="mb-1">
-                                                    <Typography.Header
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Regular}>
-                                                        Equipment Details
-                                                    </Typography.Header>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Name
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="Enter Equipment Name"
-                                                                className="font-weight-bold"
-                                                                defaultValue={equipmentData?.equipments_name}
-                                                                onChange={(e) => {
-                                                                    handleChange('name', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Name Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_name
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
+                                                <Brick sizeInRem={1} />
+
+                                                <div>
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Select
+                                                        placeholder="Select Location"
+                                                        options={locationData}
+                                                        currentValue={locationData.filter(
+                                                            (option) => option.value === location
                                                         )}
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Type
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="exampleSelect"
-                                                                className="font-weight-bold disabled"
-                                                                value={equipType}
-                                                                onChange={(e) => {
-                                                                    handleEquipTypeChange(
-                                                                        'equipment_type',
-                                                                        e.target.value,
-                                                                        'passive'
-                                                                    );
-                                                                }}>
-                                                                <option selected>Select Type</option>
-                                                                {equipmentTypeData?.map((record) => {
-                                                                    return (
-                                                                        <option value={record?.equipment_id}>
-                                                                            {record?.equipment_type}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Type Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_type
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col lg={4}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            End Use Category
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="endUsePop"
-                                                                className="font-weight-bold"
-                                                                onChange={(e) => {
-                                                                    handleChange('end_use', e.target.value);
-                                                                }}
-                                                                value={equipmentData?.end_use_id}>
-                                                                <option selected>Select Category</option>
-                                                                {endUse?.map((record) => {
-                                                                    return (
-                                                                        <option value={record?.end_use_id}>
-                                                                            {record?.name}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No End Use Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.end_use_name
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Location
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="exampleSelect"
-                                                                className="font-weight-bold"
-                                                                onChange={(e) => {
-                                                                    handleChange('space_id', e.target.value);
-                                                                }}
-                                                                value={location}>
-                                                                <option value="" selected>
-                                                                    Select Location
-                                                                </option>
-                                                                {locationData?.map((record) => {
-                                                                    return (
-                                                                        <option value={record?.location_id}>
-                                                                            {record?.location_name}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Location Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.location
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mt-1">
-                                                            Location this equipment is installed in.
-                                                        </Typography.Subheader>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Tags
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <TagsInput
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.tags : ''
-                                                                }
-                                                                onChange={(value) => {
-                                                                    handleChange('tags', value);
-                                                                }}
-                                                                name="tag"
-                                                                placeHolder="+ Add Tag"
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Tags Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.tags : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Notes
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="textarea"
-                                                                name="text"
-                                                                id="exampleText"
-                                                                rows="3"
-                                                                placeholder="Enter a Note..."
-                                                                defaultValue={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                onChange={(e) => {
-                                                                    handleChange('note', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Notes Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                        <Col lg={4}>
-                                            <div className="modal-right-container">
-                                                <div className="equip-panel-info">
-                                                    {equipBreakerLink?.length === 0 ? (
-                                                        <div className="breaker-container-disabled-style">
-                                                            <div className="breaker-number-style">
-                                                                <div></div>
+                                                        onChange={(e) => {
+                                                            handleChange('space_id', e.value);
+                                                        }}
+                                                        isSearchable={true}
+                                                    />
+
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        Location this equipment is installed in.
+                                                    </Typography.Body>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <TagsInput
+                                                        value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                        onChange={(value) => {
+                                                            handleChange('tags', value);
+                                                        }}
+                                                        name="tag"
+                                                        placeHolder="+ Add Tag"
+                                                    />
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Notes</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Textarea
+                                                        type="textarea"
+                                                        rows="4"
+                                                        placeholder="Enter a Note..."
+                                                        value={equipmentData?.note}
+                                                        onChange={(e) => {
+                                                            handleChange('note', e.target.value);
+                                                        }}
+                                                        inputClassName="pt-2"
+                                                    />
+                                                </div>
+                                            </Col>
+                                            <Col xl={4}>
+                                                <div className="modal-right-container">
+                                                    <div className="equip-panel-info pt-0">
+                                                        {equipBreakerLink?.length === 0 ? (
+                                                            <div className="equip-breaker-style">
+                                                                <img
+                                                                    src={DoubleBreakerUninked}
+                                                                    alt="DoubleBreakerUninked"
+                                                                />
                                                             </div>
-                                                            <div className="breaker-number-style-single">
-                                                                <div className="breaker-offline-style"></div>
-                                                            </div>
-                                                            <div className="breaker-voltage-style">
-                                                                <div></div>
-                                                                <div></div>
-                                                            </div>
-                                                            <div className="breaker-number-style">
-                                                                <div className="breaker-socket1-style-disbaled"></div>
-                                                                <div className="breaker-socket-single-style-disabled"></div>
-                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                {equipBreakerLink?.length === 1 && (
+                                                                    <div className="breaker-container-style">
+                                                                        <div className="breaker-number-style-single">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style-single">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-single-style"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {equipBreakerLink?.length === 2 && (
+                                                                    <div className="breaker-container-style">
+                                                                        <div className="breaker-number-style">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[1]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[0]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-double-style"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {equipBreakerLink?.length === 3 && (
+                                                                    <div className="breaker-container-style">
+                                                                        <div className="breaker-number-style">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[1]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[2]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[0]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[2]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-triple-style"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
+
+                                                        <Brick sizeInRem={1} />
+
+                                                        <div className="d-flex justify-content-between">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.lg}
+                                                                Type={Typography.Types.Light}
+                                                                className="modal-right-card-title">
+                                                                Energy Monitoring
+                                                            </Typography.Subheader>
+                                                            <Button
+                                                                label="View"
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondaryGrey}
+                                                                onClick={() => {
+                                                                    redirectToConfigDevicePage(
+                                                                        equipmentData?.device_id,
+                                                                        'passive-device'
+                                                                    );
+                                                                }}
+                                                                disabled={equipBreakerLink?.length === 0 ? true : false}
+                                                            />
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            {equipBreakerLink?.length === 1 && (
-                                                                <div className="breaker-container-disabled-style">
-                                                                    <div className="breaker-number-style-single">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style-single">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[0]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-single-style-disabled"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {equipBreakerLink?.length === 2 && (
-                                                                <div className="breaker-container-disabled-style">
-                                                                    <div className="breaker-number-style">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[0]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[1]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-double-style-disabled"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {equipBreakerLink?.length === 3 && (
-                                                                <div className="breaker-container-disabled-style">
-                                                                    <div className="breaker-number-style">
-                                                                        <div>{equipBreakerLink[0]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[1]?.breaker_number}</div>
-                                                                        <div>{equipBreakerLink[2]?.breaker_number}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[0]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[1]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                        <div
-                                                                            className={
-                                                                                equipBreakerLink[2]?.sensor_id === ''
-                                                                                    ? 'breaker-offline-style'
-                                                                                    : 'breaker-online-style'
-                                                                            }></div>
-                                                                    </div>
-                                                                    <div className="breaker-voltage-style">
-                                                                        <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
-                                                                        <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
-                                                                    </div>
-                                                                    <div className="breaker-number-style">
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket1-style"></div>
-                                                                        <div className="breaker-socket-triple-style-disabled"></div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.lg}
-                                                            Type={Typography.Types.Light}
-                                                            className="modal-right-card-title">
-                                                            Energy Monitoring
-                                                        </Typography.Subheader>
-
-                                                        <Button
-                                                            label="View"
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondaryGrey}
-                                                            onClick={() => {
-                                                                redirectToConfigDevicePage(
-                                                                    equipmentData?.device_id,
-                                                                    'passive-device'
-                                                                );
-                                                            }}
-                                                            disabled
-                                                        />
-                                                    </div>
-                                                    {equipBreakerLink?.length === 0 ? (
-                                                        <></>
-                                                    ) : (
                                                         <div className="equip-breaker-container">
                                                             <div className="equip-breaker-detail">
                                                                 <div className="phase-style">
@@ -1726,7 +1176,7 @@ const EquipChartModal = ({
                                                                     <Typography.Subheader
                                                                         size={Typography.Sizes.md}
                                                                         Type={Typography.Types.Light}
-                                                                        className="equip-breaker-value justify-content-between box float-left">
+                                                                        className="equip-breaker-value box float-left">
                                                                         {equipBreakerLink?.length === 1 &&
                                                                             `${equipBreakerLink[0]?.panel_name} 
                                                                         > Breaker ${equipBreakerLink[0]?.breaker_number}`}
@@ -1740,389 +1190,564 @@ const EquipChartModal = ({
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                ) : (
-                                    ''
-                                )}
-
-                                {equipmentData?.device_type === 'active' ? (
-                                    <Row className="mt-4">
-                                        <Col lg={8}>
-                                            <Row>
-                                                <Col lg={12} className="mb-1">
-                                                    <Typography.Header
-                                                        size={Typography.Sizes.md}
-                                                        Type={Typography.Types.Regular}>
-                                                        Equipment Details
-                                                    </Typography.Header>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={6}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Name
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="Enter Equipment Name"
-                                                                className="font-weight-bold"
-                                                                defaultValue={equipmentData?.equipments_name}
-                                                                onChange={(e) => {
-                                                                    handleChange('name', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Name Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_name
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                                <Col lg={6}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Type
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="exampleSelect"
-                                                                className="font-weight-bold"
-                                                                value={equipType}
-                                                                onChange={(e) => {
-                                                                    handleEquipTypeChange(
-                                                                        'equipment_type',
-                                                                        e.target.value,
-                                                                        'active'
-                                                                    );
-                                                                }}>
-                                                                <option selected>Select Type</option>
-                                                                {equipmentTypeData.map((record) => {
-                                                                    return (
-                                                                        <option value={record.equipment_id}>
-                                                                            {record.equipment_type}
-                                                                        </option>
-                                                                    );
-                                                                })}
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Equipment Type Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.equipments_type
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Equipment Location
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Form.Control
-                                                                type="text"
-                                                                readOnly
-                                                                placeholder="Enter Location"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData.location : ''
-                                                                }
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Location Added"
-                                                                className="font-weight-bold"
-                                                                defaultValue={
-                                                                    equipmentData !== null
-                                                                        ? equipmentData?.location
-                                                                        : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mt-1">
-                                                            Location this equipment is installed in.
-                                                        </Typography.Subheader>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Applied Rule
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="select"
-                                                                name="select"
-                                                                id="exampleSelect"
-                                                                className="font-weight-bold"
-                                                                disabled>
-                                                                <option selected>Desktop PC</option>
-                                                                <option>Refigerator</option>
-                                                            </Input>
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Rule Applied Added"
-                                                                className="font-weight-bold"
-                                                                disabled
-                                                            />
-                                                        )}
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mt-1">
-                                                            The rule applied to this equipment to control when it is on.
-                                                        </Typography.Subheader>
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Tags
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <TagsInput
-                                                                value={equipmentData !== null ? equipmentData.tags : ''}
-                                                                onChange={(value) => {
-                                                                    handleChange('tags', value);
-                                                                }}
-                                                                name="tag"
-                                                                placeHolder="+ Add Tag"
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Tags Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.tags : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col lg={12}>
-                                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="text-muted mb-1">
-                                                            Notes
-                                                        </Typography.Subheader>
-                                                        {userPermission?.user_role === 'admin' ||
-                                                        userPermission?.permissions?.permissions
-                                                            ?.account_buildings_permission?.edit ? (
-                                                            <Input
-                                                                type="textarea"
-                                                                name="text"
-                                                                id="exampleText"
-                                                                rows="3"
-                                                                placeholder="Enter a Note..."
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                onChange={(e) => {
-                                                                    handleChange('note', e.target.value);
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <Form.Control
-                                                                type="text"
-                                                                placeholder="No Notes Added"
-                                                                className="font-weight-bold"
-                                                                value={
-                                                                    equipmentData !== null ? equipmentData?.note : ''
-                                                                }
-                                                                disabled
-                                                            />
-                                                        )}
-                                                    </Form.Group>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                        <Col lg={4}>
-                                            <div className="modal-right-container">
-                                                <div className="equip-socket-container">
-                                                    <div className="mt-2 sockets-slots-container">
-                                                        {sensors.map((record, index) => {
-                                                            return (
-                                                                <>
-                                                                    {record.status && (
-                                                                        <div>
-                                                                            <div className="power-off-style-equip">
-                                                                                <FontAwesomeIcon
-                                                                                    icon={faPowerOff}
-                                                                                    size="lg"
-                                                                                    color="#3C6DF5"
-                                                                                />
-                                                                            </div>
-                                                                            {record.equipment_type_id === '' ? (
-                                                                                <div className="socket-rect">
-                                                                                    <img
-                                                                                        src={SocketLogo}
-                                                                                        alt="Socket"
-                                                                                    />
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="online-socket-container-equip">
-                                                                                    <img
-                                                                                        src={UnionLogo}
-                                                                                        alt="Union"
-                                                                                        className="union-icon-style"
-                                                                                        width="35vw"
-                                                                                    />
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-
-                                                                    {!record.status && (
-                                                                        <div>
-                                                                            <div className="power-off-style-equip">
-                                                                                <FontAwesomeIcon
-                                                                                    icon={faPowerOff}
-                                                                                    size="lg"
-                                                                                    color="#EAECF0"
-                                                                                />
-                                                                            </div>
-                                                                            {record.equipment_type_id === '' ? (
-                                                                                <div className="socket-rect">
-                                                                                    <img
-                                                                                        src={SocketLogo}
-                                                                                        alt="Socket"
-                                                                                    />
-                                                                                </div>
-                                                                            ) : (
-                                                                                <div className="online-socket-container-equip">
-                                                                                    <img
-                                                                                        src={UnionLogo}
-                                                                                        alt="Union"
-                                                                                        className="union-icon-style"
-                                                                                        width="35vw"
-                                                                                    />
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-                                                                </>
-                                                            );
-                                                        })}
                                                     </div>
                                                 </div>
-                                                <div className="modal-right-card mt-2">
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.lg}
-                                                        Type={Typography.Types.Light}
-                                                        className="modal-right-card-title">
-                                                        Power Strip - Socket 2
-                                                    </Typography.Subheader>
+                                            </Col>
+                                        </Row>
+                                    </>
+                                )}
 
-                                                    <Button
-                                                        label="View Devices"
-                                                        size={Button.Sizes.md}
-                                                        type={Button.Type.secondaryGrey}
-                                                        onClick={() => {
-                                                            redirectToConfigDevicePage(
-                                                                equipmentData?.device_id,
-                                                                'active-device'
-                                                            );
+                                {equipmentData?.device_type === '' && (
+                                    <>
+                                        <Brick sizeInRem={1} />
+
+                                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                                            Equipment Details
+                                        </Typography.Header>
+
+                                        <Brick sizeInRem={1} />
+
+                                        <Row>
+                                            <Col xl={8}>
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Name
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <InputTooltip
+                                                            placeholder="Enter Equipment Name"
+                                                            labelSize={Typography.Sizes.md}
+                                                            value={equipmentData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleChange('name', e.target.value);
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Type
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={equipmentTypeData}
+                                                            currentValue={equipmentTypeData.filter(
+                                                                (option) => option.value === equipType
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleEquipTypeChange(
+                                                                    'equipment_type',
+                                                                    e.target.value,
+                                                                    'passive'
+                                                                );
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            End Use Category
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Role"
+                                                            options={endUse}
+                                                            currentValue={endUse.filter(
+                                                                (option) => option.value === equipmentData?.end_use_id
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleChange('end_use', e.target.value);
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div>
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Select
+                                                        placeholder="Select Location"
+                                                        options={locationData}
+                                                        currentValue={locationData.filter(
+                                                            (option) => option.value === location
+                                                        )}
+                                                        onChange={(e) => {
+                                                            handleChange('space_id', e.value);
                                                         }}
-                                                        disabled={
-                                                            equipmentData !== null
-                                                                ? equipmentData.device_id === ''
-                                                                    ? true
-                                                                    : false
-                                                                : true
-                                                        }
+                                                        isSearchable={true}
+                                                    />
+
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        Location this equipment is installed in.
+                                                    </Typography.Body>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <TagsInput
+                                                        value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                        onChange={(value) => {
+                                                            handleChange('tags', value);
+                                                        }}
+                                                        name="tag"
+                                                        placeHolder="+ Add Tag"
                                                     />
                                                 </div>
-                                                <div>
-                                                    {equipmentData !== null
-                                                        ? equipmentData.status === 'Online' && (
-                                                              <div className="icon-bg-pop-styling">
-                                                                  ONLINE{' '}
-                                                                  <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                              </div>
-                                                          )
-                                                        : ''}
-                                                    {equipmentData !== null
-                                                        ? equipmentData.status === 'Offline' && (
-                                                              <div className="icon-bg-pop-styling-slash">
-                                                                  OFFLINE{' '}
-                                                                  <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                              </div>
-                                                          )
-                                                        : ''}
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Notes</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Textarea
+                                                        type="textarea"
+                                                        rows="4"
+                                                        placeholder="Enter a Note..."
+                                                        value={equipmentData?.note}
+                                                        onChange={(e) => {
+                                                            handleChange('note', e.target.value);
+                                                        }}
+                                                        inputClassName="pt-2"
+                                                    />
                                                 </div>
-                                                <div className="mt-4 modal-right-group">
-                                                    <FormGroup>
-                                                        <div className="single-line-style">
+                                            </Col>
+                                            <Col xl={4}>
+                                                <div className="modal-right-container">
+                                                    <div className="equip-panel-info pt-0">
+                                                        {equipBreakerLink?.length === 0 ? (
+                                                            <div className="breaker-container-disabled-style">
+                                                                <div className="breaker-number-style">
+                                                                    <div></div>
+                                                                </div>
+                                                                <div className="breaker-number-style-single">
+                                                                    <div className="breaker-offline-style"></div>
+                                                                </div>
+                                                                <div className="breaker-voltage-style">
+                                                                    <div></div>
+                                                                    <div></div>
+                                                                </div>
+                                                                <div className="breaker-number-style">
+                                                                    <div className="breaker-socket1-style-disbaled"></div>
+                                                                    <div className="breaker-socket-single-style-disabled"></div>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                {equipBreakerLink?.length === 1 && (
+                                                                    <div className="breaker-container-disabled-style">
+                                                                        <div className="breaker-number-style-single">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style-single">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[0]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-single-style-disabled"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {equipBreakerLink?.length === 2 && (
+                                                                    <div className="breaker-container-disabled-style">
+                                                                        <div className="breaker-number-style">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[1]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[0]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-double-style-disabled"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {equipBreakerLink?.length === 3 && (
+                                                                    <div className="breaker-container-disabled-style">
+                                                                        <div className="breaker-number-style">
+                                                                            <div>
+                                                                                {equipBreakerLink[0]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[1]?.breaker_number}
+                                                                            </div>
+                                                                            <div>
+                                                                                {equipBreakerLink[2]?.breaker_number}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[0]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[1]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                            <div
+                                                                                className={
+                                                                                    equipBreakerLink[2]?.sensor_id ===
+                                                                                    ''
+                                                                                        ? 'breaker-offline-style'
+                                                                                        : 'breaker-online-style'
+                                                                                }></div>
+                                                                        </div>
+                                                                        <div className="breaker-voltage-style">
+                                                                            <div>{`${equipBreakerLink[0]?.rated_amps}A`}</div>
+                                                                            <div>{`${equipBreakerLink[0]?.voltage}V`}</div>
+                                                                        </div>
+                                                                        <div className="breaker-number-style">
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket1-style"></div>
+                                                                            <div className="breaker-socket-triple-style-disabled"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
+
+                                                        <Brick sizeInRem={1} />
+
+                                                        <div className="d-flex justify-content-between">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.lg}
+                                                                Type={Typography.Types.Light}
+                                                                className="modal-right-card-title">
+                                                                Energy Monitoring
+                                                            </Typography.Subheader>
+
+                                                            <Button
+                                                                label="View"
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondaryGrey}
+                                                                onClick={() => {
+                                                                    redirectToConfigDevicePage(
+                                                                        equipmentData?.device_id,
+                                                                        'passive-device'
+                                                                    );
+                                                                }}
+                                                                disabled={true}
+                                                            />
+                                                        </div>
+
+                                                        {equipBreakerLink?.length === 0 ? (
+                                                            <></>
+                                                        ) : (
+                                                            <div className="equip-breaker-container">
+                                                                <div className="equip-breaker-detail">
+                                                                    <div className="phase-style">
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.sm}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-header mb-1">
+                                                                            Phases
+                                                                        </Typography.Subheader>
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.md}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-value float-left">
+                                                                            {equipBreakerLink[0]?.breaker_type}
+                                                                        </Typography.Subheader>
+                                                                    </div>
+                                                                    <div className="installed-style">
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.sm}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-header mb-1">
+                                                                            Installed at
+                                                                        </Typography.Subheader>
+                                                                        <Typography.Subheader
+                                                                            size={Typography.Sizes.md}
+                                                                            Type={Typography.Types.Light}
+                                                                            className="equip-breaker-value justify-content-between box float-left">
+                                                                            {equipBreakerLink?.length === 1 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breaker ${equipBreakerLink[0]?.breaker_number}`}
+                                                                            {equipBreakerLink?.length === 2 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}`}
+                                                                            {equipBreakerLink?.length === 3 &&
+                                                                                `${equipBreakerLink[0]?.panel_name} 
+                                                                        > Breakers ${equipBreakerLink[0]?.breaker_number}, ${equipBreakerLink[1]?.breaker_number}, ${equipBreakerLink[2]?.breaker_number}`}
+                                                                        </Typography.Subheader>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                    </>
+                                )}
+
+                                {equipmentData?.device_type === 'active' && (
+                                    <>
+                                        <Brick sizeInRem={1} />
+
+                                        <Typography.Header size={Typography.Sizes.md} Type={Typography.Types.Regular}>
+                                            Equipment Details
+                                        </Typography.Header>
+
+                                        <Brick sizeInRem={1} />
+
+                                        <Row>
+                                            <Col xl={8}>
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Name
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <InputTooltip
+                                                            placeholder="Enter Equipment Name"
+                                                            labelSize={Typography.Sizes.md}
+                                                            value={equipData?.equipments_name}
+                                                            onChange={(e) => {
+                                                                handleDataChange('equipments_name', e.target.value);
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                    <div className="w-100 ml-2">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Type
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            placeholder="Select Equipment Type"
+                                                            options={equipmentTypeData}
+                                                            currentValue={equipmentTypeData.filter(
+                                                                (option) =>
+                                                                    option.value === equipData?.equipments_type_id
+                                                            )}
+                                                            onChange={(e) => {
+                                                                handleDataChange('equipments_type_id', e.value);
+                                                            }}
+                                                            isSearchable={true}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div>
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Equipment Location
+                                                    </Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Select
+                                                        placeholder="Select Location"
+                                                        options={locationData}
+                                                        currentValue={locationData.filter(
+                                                            (option) => option.value === equipData?.location_id
+                                                        )}
+                                                        onChange={(e) => {
+                                                            handleDataChange('location_id', e.value);
+                                                        }}
+                                                        isSearchable={true}
+                                                    />
+
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        Location this equipment is installed in.
+                                                    </Typography.Body>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div>
+                                                    <Typography.Body size={Typography.Sizes.md}>
+                                                        Applied Rule
+                                                    </Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Select
+                                                        placeholder="Select Location"
+                                                        options={rulesAlert}
+                                                        currentValue={rulesAlert.filter(
+                                                            (option) => option.value === 'desktop-pc'
+                                                        )}
+                                                        isSearchable={false}
+                                                    />
+
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Typography.Body size={Typography.Sizes.sm}>
+                                                        The rule applied to this equipment to control when it is on.
+                                                    </Typography.Body>
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Tags</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <TagsInput
+                                                        value={equipData?.tags}
+                                                        onChange={(value) => {
+                                                            handleDataChange('tags', value);
+                                                        }}
+                                                        name="tag"
+                                                        placeHolder="+ Add Tag"
+                                                    />
+                                                </div>
+
+                                                <Brick sizeInRem={1} />
+
+                                                <div className="w-100">
+                                                    <Typography.Body size={Typography.Sizes.md}>Notes</Typography.Body>
+                                                    <Brick sizeInRem={0.25} />
+                                                    <Textarea
+                                                        type="textarea"
+                                                        rows="4"
+                                                        placeholder="Enter a Note..."
+                                                        value={equipData?.note}
+                                                        onChange={(e) => {
+                                                            handleDataChange('note', e.target.value);
+                                                        }}
+                                                        inputClassName="pt-2"
+                                                    />
+                                                </div>
+                                            </Col>
+
+                                            <Col xl={4}>
+                                                <div className="modal-right-container">
+                                                    <div className="equip-type-socket">
+                                                        <div
+                                                            className={`socket-container-style p-2 d-flex ${
+                                                                sensors.length === 1
+                                                                    ? 'justify-content-center'
+                                                                    : 'justify-content-between'
+                                                            }`}>
+                                                            {sensors.map((record, index) => {
+                                                                return (
+                                                                    <div className="d-flex align-items-center">
+                                                                        {record?.name.toLowerCase() === 'unlabeled' ? (
+                                                                            <div>
+                                                                                <SocketSVG />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="attached-device-socket">
+                                                                                <AttachedSVG className="m-2" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+
+                                                    <Brick sizeInRem={1.5} />
+
+                                                    <div className="modal-right-card">
+                                                        <Typography.Subheader
+                                                            size={Typography.Sizes.lg}
+                                                            Type={Typography.Types.Light}
+                                                            className="modal-right-card-title">
+                                                            Power Strip - Socket 2
+                                                        </Typography.Subheader>
+
+                                                        <Button
+                                                            label="View Devices"
+                                                            size={Button.Sizes.md}
+                                                            type={Button.Type.secondaryGrey}
+                                                            onClick={() => {
+                                                                redirectToConfigDevicePage(
+                                                                    equipmentData?.device_id,
+                                                                    'active-device'
+                                                                );
+                                                            }}
+                                                            className="m-0"
+                                                            disabled={
+                                                                equipmentData !== null
+                                                                    ? equipmentData?.device_id === ''
+                                                                        ? true
+                                                                        : false
+                                                                    : true
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        {equipmentData !== null
+                                                            ? equipmentData.status === 'Online' && (
+                                                                  <div className="icon-bg-pop-styling">
+                                                                      ONLINE{' '}
+                                                                      <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                                  </div>
+                                                              )
+                                                            : ''}
+                                                        {equipmentData !== null
+                                                            ? equipmentData.status === 'Offline' && (
+                                                                  <div className="icon-bg-pop-styling-slash">
+                                                                      OFFLINE{' '}
+                                                                      <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                                  </div>
+                                                              )
+                                                            : ''}
+                                                    </div>
+
+                                                    <Brick sizeInRem={1.5} />
+
+                                                    <div className="d-flex justify-content-start">
+                                                        <div className="single-line-style mr-4">
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.sm}
                                                                 Type={Typography.Types.Light}
                                                                 className="card-title">
-                                                                MAC Address
+                                                                Device ID
                                                             </Typography.Subheader>
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.md}
@@ -2131,14 +1756,12 @@ const EquipChartModal = ({
                                                                 {equipmentData !== null ? equipmentData.device_mac : ''}
                                                             </Typography.Subheader>
                                                         </div>
-                                                    </FormGroup>
-                                                    <FormGroup>
                                                         <div className="single-line-style">
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.sm}
                                                                 Type={Typography.Types.Light}
                                                                 className="card-title">
-                                                                Device type
+                                                                Device Type
                                                             </Typography.Subheader>
                                                             <Typography.Subheader
                                                                 size={Typography.Sizes.md}
@@ -2149,29 +1772,30 @@ const EquipChartModal = ({
                                                                     : ''}
                                                             </Typography.Subheader>
                                                         </div>
-                                                    </FormGroup>
-                                                </div>
-                                                <FormGroup>
-                                                    <div className="single-line-style">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.sm}
-                                                            Type={Typography.Types.Light}
-                                                            className="card-title">
-                                                            Installed at
-                                                        </Typography.Subheader>
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            Type={Typography.Types.Light}
-                                                            className="card-subtitle mb-2 text-muted">
-                                                            {equipmentData !== null ? equipmentData.location : ''}
-                                                        </Typography.Subheader>
                                                     </div>
-                                                </FormGroup>
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                ) : (
-                                    ''
+
+                                                    {equipmentData?.location && (
+                                                        <FormGroup>
+                                                            <div className="single-line-style">
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.sm}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="card-title">
+                                                                    Installed at
+                                                                </Typography.Subheader>
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    Type={Typography.Types.Light}
+                                                                    className="card-subtitle mb-2 text-muted">
+                                                                    {equipmentData?.location}
+                                                                </Typography.Subheader>
+                                                            </div>
+                                                        </FormGroup>
+                                                    )}
+                                                </div>
+                                            </Col>
+                                        </Row>
+                                    </>
                                 )}
                             </>
                         )}

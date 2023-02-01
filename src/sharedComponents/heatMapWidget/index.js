@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import Button from '../button/Button';
 import { ReactComponent as ArrowRight } from '../assets/icons/arrow-right.svg';
 import { ReactComponent as Download } from '../assets/icons/download.svg';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/pro-regular-svg-icons';
 import HeatMapChart from './HeatMapChart';
 import { getHeatMapCSVExport } from '../helpers/chartsExport';
 import Brick from '../brick';
@@ -302,9 +300,7 @@ const HeatMapWidget = ({
                 ) : (
                     <div className="d-flex justify-content-between">
                         <Titles {...{ title, subtitle, pageType }} />
-                        <FontAwesomeIcon
-                            icon={faDownload}
-                            size="md"
+                        <Download
                             className="download-chart-btn mouse-pointer mr-3 mt-3"
                             onClick={() => getHeatMapCSVExport(series.reverse(), options?.xaxis?.categories)}
                         />

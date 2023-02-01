@@ -77,6 +77,7 @@ export const passiveDeviceModal = atom('');
 export const equipmentId = atom('');
 
 export const accountId = atom('');
+export const vendorId = atom('');
 
 // explorer
 export const selectedEquipment = atom('');
