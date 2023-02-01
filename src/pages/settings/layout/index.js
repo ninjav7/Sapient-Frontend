@@ -69,7 +69,6 @@ import InfiniteSpae from '../../../components/Layouts/InfiniteSpace';
 import EditSpace from '../../../components/Layouts/EditSpace';
 import InfiniteSpace from '../../../components/Layouts/InfiniteSpace';
 import Edit from '../../../assets/icon/pencil.png';
-import { Modal } from 'antd';
 
 const Layout = () => {
     let cookies = new Cookies();

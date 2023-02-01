@@ -116,8 +116,8 @@ const Accounts = () => {
     };
 
     const currentRow = () => {
-        if (selectedStatus === 0) return userData;
-        else if (selectedStatus === 1) {
+        if (selectedStatus === 2) return userData;
+        else if (selectedStatus === 0) {
             return userData.filter((ele) => ele?.status === true);
         } else {
             return userData.filter((ele) => ele?.status === false);
@@ -254,7 +254,7 @@ const Accounts = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
                         onSearch={(query) => {}}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Active' }, { label: 'Inactive' }]}
+                        buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
