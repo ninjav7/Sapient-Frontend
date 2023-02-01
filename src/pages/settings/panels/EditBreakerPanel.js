@@ -56,9 +56,6 @@ const EditBreakerPanel = () => {
 
     const { panelId } = useParams();
 
-    const { v4: uuidv4 } = require('uuid');
-    const generateBreakerLinkId = () => uuidv4();
-
     // Main Breaker Modal
     const [showMain, setShowMain] = useState(false);
     const handleMainClose = () => setShowMain(false);
@@ -667,8 +664,8 @@ const EditBreakerPanel = () => {
                 return;
             }
             let obj = {
-                id: generateBreakerLinkId(),
-                source: record.id,
+                id: `breakerLink-${record?.breaker_number}`,
+                source: record?.id,
                 target: getTargetBreakerId(record?.breaker_number + 2),
                 type: 'breakerLink',
             };
@@ -680,8 +677,8 @@ const EditBreakerPanel = () => {
                 return;
             }
             let obj = {
-                id: generateBreakerLinkId(),
-                source: record.id,
+                id: `breakerLink-${record?.breaker_number}`,
+                source: record?.id,
                 target: getTargetBreakerId(record?.breaker_number + 1),
                 type: 'disconnectBreakerLink',
             };
