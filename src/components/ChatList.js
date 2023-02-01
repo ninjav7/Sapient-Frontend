@@ -57,32 +57,7 @@ class ChatForm extends Component {
     };
 
     render() {
-        return (
-            <></>
-            // Commented for future Use
-            // <AvForm
-            //     onValidSubmit={this.handleValidMessageSubmit}
-            //     className="needs-validation mt-2"
-            //     noValidate
-            //     name="chat-form"
-            //     id="chat-form">
-            //     <Row form>
-            //         <Col>
-            //             <AvField
-            //                 name="text"
-            //                 type="text"
-            //                 errorMessage="Please enter your message"
-            //                 validate={{ required: { value: true } }}
-            //             />
-            //         </Col>
-            //         <Col className="col-auto">
-            //             <button type="submit" className="btn btn-danger chat-send btn-block">
-            //                 Send
-            //             </button>
-            //         </Col>
-            //     </Row>
-            // </AvForm>
-        );
+        return <></>;
     }
 }
 
