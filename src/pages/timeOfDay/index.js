@@ -213,6 +213,16 @@ const TimeOfDay = () => {
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
+                    if (response.length !== 0) {
+                        response.forEach((el) => {
+                            el.after_hours_energy_consumption.now = Math.round(
+                                el?.after_hours_energy_consumption?.now / 1000
+                            );
+                            el.after_hours_energy_consumption.old = Math.round(
+                                el?.after_hours_energy_consumption?.old / 1000
+                            );
+                        });
+                    }
                     setEnergyConsumption(response);
                     const energyData = response;
                     let newDonutData = [];

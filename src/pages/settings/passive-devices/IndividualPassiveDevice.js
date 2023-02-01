@@ -513,6 +513,11 @@ const IndividualPassiveDevice = () => {
                                             <div className="d-flex align-items-center mouse-pointer">
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
+                                                    className="sensor-index">
+                                                    {index + 1}
+                                                </Typography.Subheader>
+                                                <Typography.Subheader
+                                                    size={Typography.Sizes.md}
                                                     className="sensor-index mr-4">
                                                     {record?.index}
                                                 </Typography.Subheader>
