@@ -1,10 +1,10 @@
 // @flow
 import { Cookies } from 'react-cookie';
 import { all, call, fork, put, takeEvery } from 'redux-saga/effects';
-import { BaseUrl, signin, signup } from '../../services/Network';
+import { BaseUrl, signin, signup, sessionValidator } from '../../services/Network';
 import { fetchJSON } from '../../helpers/api';
 
-import { LOGIN_USER, LOGOUT_USER, REGISTER_USER, FORGET_PASSWORD } from './constants';
+import { LOGIN_USER, LOGOUT_USER, REGISTER_USER, FORGET_PASSWORD, GOOGLE_LOGIN_USER } from './constants';
 
 import {
     loginUserSuccess,
@@ -49,6 +49,51 @@ function* login({ payload: { username, password } }) {
 
     try {
         const response = yield call(fetchJSON, `${BaseUrl}${signin}`, options);
+        if (response.success === false) {
+            localStorage.setItem('login_success', false);
+            localStorage.setItem('failed_message', response.message);
+            UserStore.update((s) => {
+                s.message = response.message;
+                s.loginSuccess = false;
+            });
+        } else {
+            UserStore.update((s) => {
+                s.loginSuccess = true;
+            });
+            localStorage.setItem('login_success', true);
+        }
+        setSession(response.data);
+        yield put(loginUserSuccess(response.data));
+    } catch (error) {
+        let message;
+        switch (error.status) {
+            case 500:
+                message = 'Internal Server Error';
+                break;
+            case 401:
+                message = 'Invalid credentials';
+                break;
+            default:
+                message = error;
+        }
+
+        yield put(loginUserFailed(message));
+        setSession(null);
+    }
+}
+
+function* Googlelogin({ payload: { sessionId } }) {
+    const options = {
+        method: 'GET',
+        headers: {
+            'access-control-allow-origin': '*',
+            'Content-type': 'application/json; charset=UTF-8',
+            accept: 'application/json',
+        },
+    };
+    const params = `?session_id=${sessionId}`;
+    try {
+        const response = yield call(fetchJSON, `${BaseUrl}${sessionValidator}${params}`, options);
         if (response.success === false) {
             localStorage.setItem('login_success', false);
             localStorage.setItem('failed_message', response.message);
@@ -169,6 +214,9 @@ function* forgetPassword({ payload: { username } }) {
 export function* watchLoginUser() {
     yield takeEvery(LOGIN_USER, login);
 }
+export function* watchGoogleLoginUser() {
+    yield takeEvery(GOOGLE_LOGIN_USER, Googlelogin);
+}
 
 export function* watchLogoutUser() {
     yield takeEvery(LOGOUT_USER, logout);
@@ -183,7 +231,13 @@ export function* watchForgetPassword() {
 }
 
 function* authSaga() {
-    yield all([fork(watchLoginUser), fork(watchLogoutUser), fork(watchRegisterUser), fork(watchForgetPassword)]);
+    yield all([
+        fork(watchLoginUser),
+        fork(watchGoogleLoginUser),
+        fork(watchLogoutUser),
+        fork(watchRegisterUser),
+        fork(watchForgetPassword),
+    ]);
 }
 
 export default authSaga;

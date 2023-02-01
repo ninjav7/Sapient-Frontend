@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { Col, FormGroup, Alert } from 'reactstrap';
-import { loginUser } from '../../redux/actions';
-import { Cookies } from 'react-cookie';
+import { loginUser, googleLoginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
 import './auth.scss';
@@ -17,7 +16,7 @@ import Input from '../../sharedComponents/form/input/Input';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { UserStore } from '../../store/UserStore';
 import Button from '../../sharedComponents/button/Button';
-import { googleAuth, fetchSessionDetails } from './service';
+import { googleAuth } from './service';
 
 const Login = (props) => {
     const history = useHistory();
@@ -35,21 +34,16 @@ const Login = (props) => {
     const [refresh, setRefresh] = useState(false);
     let { user_found, link_type, account_linked, session_id } = useParams();
 
-    const setSession = (user) => {
-        let cookies = new Cookies();
-        if (user) {
-            localStorage.setItem('vendorName', user?.vendor_name);
-            localStorage.setItem('vendorId', user?.vendor_id);
-            cookies.set('user', JSON.stringify(user), { path: '/' });
-        } else cookies.remove('user', { path: '/' });
-    };
-
     useEffect(() => {
+        set_isMounted(true);
+        document.body.classList.add('authentication-bg');
+        renderRedirectToRoot();
         if (
             user_found !== undefined &&
             link_type !== undefined &&
             account_linked !== undefined &&
-            session_id !== undefined
+            session_id !== undefined &&
+            loginSuccess !== true
         ) {
             setRefresh(true);
             let usrFound = user_found.split('=');
@@ -57,7 +51,7 @@ const Login = (props) => {
                 let accountLinked = account_linked.split('=');
                 if (accountLinked[1] === 'true') {
                     let sessionId = session_id.split('=');
-                    fetchSession(sessionId[1]);
+                    props.googleLoginUser(sessionId[1]);
                 } else if (accountLinked[1] === 'false') {
                     let sessionId = session_id.split('=');
                     localStorage.setItem('session-id', sessionId[1]);
@@ -76,13 +70,6 @@ const Login = (props) => {
                 setMessage('Unable to Login');
             }
         }
-    }, []);
-
-    useEffect(() => {
-        set_isMounted(true);
-        document.body.classList.add('authentication-bg');
-
-        renderRedirectToRoot();
         return () => {
             set_isMounted(false);
             document.body.classList.remove('authentication-bg');
@@ -113,20 +100,6 @@ const Login = (props) => {
         }
     };
 
-    const fetchSession = async (sessionId) => {
-        let params = `?session_id=${sessionId}`;
-        await fetchSessionDetails(params)
-            .then((res) => {
-                let response = res.data;
-                setRefresh(false);
-                setSession(response.data);
-                window.location.reload();
-                history.push('/');
-            })
-            .catch((error) => {
-                setRefresh(false);
-            });
-    };
     const renderRedirectToRoot = () => {
         const isAuthTknValid = isUserAuthenticated();
         setisAuthTokenValid(isAuthTknValid);
@@ -143,6 +116,7 @@ const Login = (props) => {
             })
             .catch((error) => {});
     };
+
     return (
         <React.Fragment>
             {(_isMounted || !isAuthTokenValid) && (
@@ -274,4 +248,4 @@ const mapStateToProps = (state) => {
     return { user, loading, error };
 };
 
-export default connect(mapStateToProps, { loginUser })(Login);
+export default connect(mapStateToProps, { loginUser, googleLoginUser })(Login);

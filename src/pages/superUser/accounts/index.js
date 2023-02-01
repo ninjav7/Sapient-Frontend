@@ -71,8 +71,8 @@ const Accounts = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Users',
-                        path: '/settings/users',
+                        label: 'Accounts',
+                        path: '/super-user/accounts',
                         active: true,
                     },
                 ];
@@ -116,8 +116,8 @@ const Accounts = () => {
     };
 
     const currentRow = () => {
-        if (selectedStatus === 0) return userData;
-        else if (selectedStatus === 1) {
+        if (selectedStatus === 2) return userData;
+        else if (selectedStatus === 0) {
             return userData.filter((ele) => ele?.status === true);
         } else {
             return userData.filter((ele) => ele?.status === false);
@@ -190,8 +190,16 @@ const Accounts = () => {
                     <Typography.Body size={Typography.Sizes.sm}>{row.total_usage.toFixed(2)} kWh </Typography.Body>
                     &nbsp;&nbsp;
                     <TrendsBadge
-                        value={isNaN(Math.abs(Math.round(row.per))) ? 0 : Math.abs(Math.round(row.per))}
-                        type={row?.per < row?.per ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND}
+                        value={
+                            isNaN(Math.abs(Math.round(row.percent_change)))
+                                ? 0
+                                : Math.abs(Math.round(row.percent_change))
+                        }
+                        type={
+                            row?.percent_change < row?.percent_change
+                                ? TrendsBadge.Type.DOWNWARD_TREND
+                                : TrendsBadge.Type.UPWARD_TREND
+                        }
                     />
                 </Row>
             </>
@@ -216,6 +224,7 @@ const Accounts = () => {
             </>
         );
     };
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -245,7 +254,7 @@ const Accounts = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
                         onSearch={(query) => {}}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Active' }, { label: 'Inactive' }]}
+                        buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
@@ -296,7 +305,7 @@ const Accounts = () => {
                 isAddCustomerOpen={openCustomer}
                 closeAddCustomerModal={closeAddCustomer}
                 getCustomerList={getCustomerList}
-            />{' '}
+            />
         </React.Fragment>
     );
 };
