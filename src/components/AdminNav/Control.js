@@ -14,7 +14,6 @@ const Control = () => {
         });
         localStorage.clear();
         cookies.remove('user', { path: '/' });
-        history.push('/account/login');
         window.location.reload();
     };
 
