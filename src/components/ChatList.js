@@ -41,7 +41,6 @@ const ChatItem = ({ children, placement, className }) => {
 
 ChatItem.defaultProps = chatItemDefaultProps;
 
-
 /**
  * Renders the ChatList
  */
@@ -60,28 +59,30 @@ class ChatForm extends Component {
 
     render() {
         return (
-            <AvForm
-                onValidSubmit={this.handleValidMessageSubmit}
-                className="needs-validation mt-2"
-                noValidate
-                name="chat-form"
-                id="chat-form">
-                <Row form>
-                    <Col>
-                        <AvField
-                            name="text"
-                            type="text"
-                            errorMessage="Please enter your message"
-                            validate={{ required: { value: true } }}
-                        />
-                    </Col>
-                    <Col className="col-auto">
-                        <button type="submit" className="btn btn-danger chat-send btn-block">
-                            Send
-                        </button>
-                    </Col>
-                </Row>
-            </AvForm>
+            <></>
+            // Commented for future Use
+            // <AvForm
+            //     onValidSubmit={this.handleValidMessageSubmit}
+            //     className="needs-validation mt-2"
+            //     noValidate
+            //     name="chat-form"
+            //     id="chat-form">
+            //     <Row form>
+            //         <Col>
+            //             <AvField
+            //                 name="text"
+            //                 type="text"
+            //                 errorMessage="Please enter your message"
+            //                 validate={{ required: { value: true } }}
+            //             />
+            //         </Col>
+            //         <Col className="col-auto">
+            //             <button type="submit" className="btn btn-danger chat-send btn-block">
+            //                 Send
+            //             </button>
+            //         </Col>
+            //     </Row>
+            // </AvForm>
         );
     }
 }
@@ -115,7 +116,7 @@ class ChatList extends Component {
     };
 
     render() {
-        const height = this.props.height || "320px";
+        const height = this.props.height || '320px';
         return (
             <Card>
                 <CardBody className="pt-2 pb-1">
@@ -131,7 +132,9 @@ class ChatList extends Component {
                                 <i className="uil uil-exit mr-2"></i>Remove from Team
                             </DropdownItem>
                             <DropdownItem divider />
-                            <DropdownItem className="text-danger"><i className="uil uil-trash mr-2"></i>Delete</DropdownItem>
+                            <DropdownItem className="text-danger">
+                                <i className="uil uil-trash mr-2"></i>Delete
+                            </DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
 
