@@ -68,9 +68,10 @@ const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // explore
-// const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
+
+//superUser
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
 
