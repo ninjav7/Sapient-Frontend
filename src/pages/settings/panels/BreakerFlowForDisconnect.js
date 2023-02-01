@@ -945,6 +945,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     <>
                                         {isEditable && (
                                             <div
+                                                id={`breaker-${data?.breaker_number}`}
                                                 className="breaker-content-middle"
                                                 onClick={() => {
                                                     handleEditBreakerShow();
@@ -980,6 +981,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     <>
                                         {isEditable && (
                                             <div
+                                                id={`breaker-${data?.breaker_number}`}
                                                 className="breaker-content-middle"
                                                 onClick={() => {
                                                     handleEditBreakerShow();
