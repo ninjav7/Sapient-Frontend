@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Card, CardBody, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Row, Col } from 'reactstrap';
-import { AvForm, AvField } from 'availity-reactstrap-validation';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import classNames from 'classnames';
