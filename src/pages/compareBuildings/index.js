@@ -3,10 +3,8 @@ import Header from '../../components/Header';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col } from 'reactstrap';
 import { formatConsumptionValue } from '../../helpers/helpers';
-
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { useHistory } from 'react-router-dom';
-
 import { ComponentStore } from '../../store/ComponentStore';
 import { fetchCompareBuildings } from '../../services/compareBuildings';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -18,38 +16,36 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 import { Badge } from '../../sharedComponents/badge';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
 import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
-
 import { primaryGray1000 } from '../../assets/scss/_colors.scss';
+import { getAverageValue } from '../../helpers/AveragePercent';
+import Brick from '../../sharedComponents/brick';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray1000} height={35}>
-        <table cellPadding={5} className="table">
-            <tr>
-                <th>
-                    <Skeleton count={5} />
-                </th>
-                <th>
-                    <Skeleton count={5} />
-                </th>
+        <tr>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-                <th>
-                    <Skeleton count={5} />
-                </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
 
-                <th>
-                    <Skeleton count={5} />
-                </th>
-                <th>
-                    <Skeleton count={5} />
-                </th>
-            </tr>
-        </table>
+            <th>
+                <Skeleton count={5} />
+            </th>
+            <th>
+                <Skeleton count={5} />
+            </th>
+        </tr>
     </SkeletonTheme>
 );
 
@@ -62,11 +58,11 @@ const CompareBuildings = () => {
     const [search, setSearch] = useState('');
     const [topEnergyDensity, setTopEnergyDensity] = useState();
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
     let entryPoint = '';
+    let top = '';
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -118,6 +114,7 @@ const CompareBuildings = () => {
             .then((res) => {
                 let response = res?.data;
                 let topVal = Math.max(...response.map((o) => o.energy_density));
+                top = topVal;
                 setTopEnergyDensity(topVal);
                 setBuildingsData(response);
                 setIsLoadingBuildingData(false);
@@ -126,19 +123,19 @@ const CompareBuildings = () => {
                 setIsLoadingBuildingData(false);
             });
     };
+
     const renderEnergyDensity = (row) => {
-        const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
         return (
-            <div className="table-content-style" style={{ width: '100%' }}>
-                {row.energy_density.toFixed(2)} kWh / sq. ft.
-                <br />
-                <div style={{ width: '100%', display: 'inline-block' }}>
-                    {row.energy_density === 0 && <TinyBarChart percent={0} />}
-                    {row.energy_density > 0 && <TinyBarChart percent={densityData} />}
-                </div>
-            </div>
+            <>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {row.energy_density.toFixed(2)} kWh / sq. ft.
+                </Typography.Body>
+                <Brick sizeInRem={0.375} />
+                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
+            </>
         );
     };
+
     const renderName = (row) => {
         return (
             <>
@@ -234,40 +231,32 @@ const CompareBuildings = () => {
         fetchcompareBuildingsData();
     }, [search, sortBy, daysCount]);
 
-    useEffect(() => {
-        if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
-    }, [search]);
-
     return (
         <React.Fragment>
             <Header title="Compare Buildings" type="page" />
             <Row className="mt-4">
                 <Col lg={12}>
-                    {isLoadingBuildingData ? (
-                        <SkeletonLoading />
-                    ) : (
-                        <DataTableWidget
-                            isLoading={isLoadingBuildingData}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="compare-building"
-                            onSearch={(query) => {
-                                setSearch(query);
-                            }}
-                            rows={buildingsData}
-                            searchResultRows={buildingsData}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                            disableColumnDragging={true}
-                            buttonGroupFilterOptions={[]}
-                            totalCount={() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
+                    <DataTableWidget
+                        isLoading={isLoadingBuildingData}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="compare-building"
+                        onSearch={(query) => {
+                            setSearch(query);
+                        }}
+                        rows={buildingsData}
+                        searchResultRows={buildingsData}
+                        onDownload={() => handleDownloadCsv()}
+                        headers={headerProps}
+                        disableColumnDragging={true}
+                        buttonGroupFilterOptions={[]}
+                        totalCount={() => {
+                            if (search) {
+                                return totalItemsSearched;
+                            }
 
-                                return 0;
-                            }}
-                        />
-                    )}
+                            return 0;
+                        }}
+                    />
                 </Col>
             </Row>
         </React.Fragment>
