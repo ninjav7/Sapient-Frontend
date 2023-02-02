@@ -384,14 +384,14 @@ const EquipmentType = () => {
                         onEditRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => (row?.status.toLowerCase() === 'System' ? null : handleEdit(row))
+                                ? (record, id, row) => (row?.status.toLowerCase() === 'system' ? null : handleEdit(row))
                                 : null
                         }
                         onDeleteRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
                                 ? (record, id, row) =>
-                                      row?.status.toLowerCase() === 'System' ? null : handleDelete(row)
+                                      row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
                                 : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
