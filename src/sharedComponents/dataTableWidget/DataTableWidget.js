@@ -404,7 +404,6 @@ DataTableWidget.propTypes = {
     totalCount: PropTypes.number.isRequired,
     currentPage: PropTypes.number.isRequired,
     onPageSize: PropTypes.func.isRequired,
-
     pageSize: PropTypes.number,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
