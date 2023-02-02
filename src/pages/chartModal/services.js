@@ -19,7 +19,7 @@ export function getEquipmentDetails(params) {
     });
 }
 
-export function updateEquipmentDetails(payload, params) {
+export function updateEquipmentDetails(params, payload) {
     return axiosInstance.post(`${updateEquipment}${params}`, payload).then((res) => {
         return res;
     });
