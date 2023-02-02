@@ -128,7 +128,7 @@ const CompareBuildings = () => {
         return (
             <>
                 <Typography.Body size={Typography.Sizes.sm}>
-                    {row.energy_density.toFixed(2)} kWh / sq. ft.
+                    {(row.energy_density / 1000).toFixed(2)} kWh / sq. ft.
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
