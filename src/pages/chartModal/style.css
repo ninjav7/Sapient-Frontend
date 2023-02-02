@@ -459,15 +459,14 @@
     align-content: stretch;
     padding: 16px 12px;
     gap: 1.2rem;
-    /* position: absolute; */
-    width: 325px;
+    width: 100%;
     background: #3f4b5c;
     border: 2px solid #070c17;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);
     border-radius: 8px;
 }
 
-.breaker-container-disabled-style {
+.breaker-container-style-disabled {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -476,8 +475,7 @@
     align-content: stretch;
     padding: 16px 12px;
     gap: 1.2rem;
-    /* position: absolute; */
-    width: 325px;
+    width: 100%;
     background: grey;
     border: 2px solid grey;
     box-shadow: inset -20px 20px 44px rgba(255, 255, 255, 0.1), inset 20px -20px 34px rgba(0, 0, 0, 0.19);
