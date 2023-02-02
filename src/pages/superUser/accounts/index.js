@@ -15,7 +15,9 @@ import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import AddCustomer from './addCustomer';
-import { fetchCustomerList, fetchSelectedCustomer } from './services';
+import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from './services';
+import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
+import { getCustomerListCSVExport } from '../../../utils/tablesExport';
 import './style.scss';
 
 const SkeletonLoading = () => (
@@ -58,13 +60,17 @@ const Accounts = () => {
     const history = useHistory();
 
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
+    const [isDeviceDataFetched, setIsDeviceDataFetched] = useState(false);
     const [openCustomer, setOpenCustomer] = useState(false);
 
     const closeAddCustomer = () => setOpenCustomer(false);
     const [userData, setUserData] = useState([]);
+    const [offlineData, setOfflineData] = useState([]);
 
     const [totalItems, setTotalItems] = useState(0);
     const [selectedStatus, setSelectedStatus] = useState(0);
+    const [search, setSearch] = useState('');
+    const { download } = useCSVDownload();
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -83,12 +89,12 @@ const Accounts = () => {
             });
         };
         updateBreadcrumbStore();
-        getCustomerList();
     }, []);
 
     const getCustomerList = async () => {
         setIsUserDataFetched(true);
-        await fetchCustomerList()
+        let params = `?customer_search=${search}`;
+        await fetchCustomerList(params)
             .then((res) => {
                 let response = res.data;
                 setUserData(response?.data);
@@ -97,6 +103,38 @@ const Accounts = () => {
             .catch((error) => {
                 setIsUserDataFetched(false);
             });
+    };
+
+    const getOfflineDeviceData = async () => {
+        setIsDeviceDataFetched(true);
+        let params = `?customer_search=${search}`;
+        await fetchOfflineDevices(params)
+            .then((res) => {
+                let response = res.data;
+                setOfflineData(response?.data);
+                setIsDeviceDataFetched(false);
+            })
+            .catch((error) => {
+                setIsDeviceDataFetched(false);
+            });
+    };
+
+    useEffect(() => {
+        getCustomerList();
+        getOfflineDeviceData();
+    }, [search]);
+
+    const handleDownloadCsv = async () => {
+        const search = '';
+        await fetchCustomerList(search)
+            .then((res) => {
+                const responseData = res.data;
+                download(
+                    `Customer_Accounts_${new Date().toISOString().split('T')[0]}`,
+                    getCustomerListCSVExport(responseData?.data, headerProps)
+                );
+            })
+            .catch((error) => {});
     };
 
     const redirectToVendorPage = async (vendorID) => {
@@ -225,6 +263,44 @@ const Accounts = () => {
         );
     };
 
+    const headerProps = [
+        {
+            name: 'Account ID',
+            accessor: 'id',
+            callbackValue: renderAccountID,
+        },
+        {
+            name: 'Account Name',
+            accessor: 'company_name',
+            callbackValue: renderAccountName,
+        },
+        {
+            name: 'Status',
+            accessor: 'status',
+            callbackValue: renderStatus,
+        },
+        {
+            name: 'Active Devices',
+            accessor: 'active_devices',
+            callbackValue: renderActiveDevices,
+        },
+        {
+            name: 'Smart Meters',
+            accessor: 'passive_devices',
+            callbackValue: renderPassiveDevices,
+        },
+        {
+            name: 'Energy Used kWh',
+            accessor: 'total_usage',
+            callbackValue: renderEnergy,
+        },
+        {
+            name: 'Actions',
+            accessor: 'actions',
+            callbackValue: renderActions,
+        },
+    ];
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -253,48 +329,15 @@ const Accounts = () => {
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
-                        onSearch={(query) => {}}
+                        onSearch={(query) => {
+                            setSearch(query);
+                        }}
+                        onDownload={() => handleDownloadCsv()}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
-                        headers={[
-                            {
-                                name: 'Account ID',
-                                accessor: 'account_id',
-                                callbackValue: renderAccountID,
-                            },
-                            {
-                                name: 'Account Name',
-                                accessor: 'account_name',
-                                callbackValue: renderAccountName,
-                            },
-                            {
-                                name: 'Status',
-                                accessor: 'status',
-                                callbackValue: renderStatus,
-                            },
-                            {
-                                name: 'Active Devices',
-                                accessor: 'active_devices',
-                                callbackValue: renderActiveDevices,
-                            },
-                            {
-                                name: 'Smart Meters',
-                                accessor: 'passive_devices',
-                                callbackValue: renderPassiveDevices,
-                            },
-                            {
-                                name: 'Energy Used kWh',
-                                accessor: 'energy',
-                                callbackValue: renderEnergy,
-                            },
-                            {
-                                name: 'Actions',
-                                accessor: 'actions',
-                                callbackValue: renderActions,
-                            },
-                        ]}
+                        headers={headerProps}
                         totalCount={(() => {
                             return totalItems;
                         })()}

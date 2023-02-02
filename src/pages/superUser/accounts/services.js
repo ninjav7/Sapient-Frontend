@@ -1,8 +1,8 @@
 import axiosInstance from '../../../services/axiosInstance';
-import { customerList, selectCustomer, getCustomer } from '../../../services/Network';
+import { customerList, selectCustomer, getCustomer, offlineDevices } from '../../../services/Network';
 
-export function fetchCustomerList() {
-    return axiosInstance.get(`${customerList}`).then((res) => res);
+export function fetchCustomerList(params) {
+    return axiosInstance.get(`${customerList}${params}`).then((res) => res);
 }
 
 export function fetchSelectedCustomer(params) {
@@ -11,4 +11,8 @@ export function fetchSelectedCustomer(params) {
 
 export function createCustomer(payload) {
     return axiosInstance.post(`${getCustomer}`, payload).then((res) => res);
+}
+
+export function fetchOfflineDevices() {
+    return axiosInstance.get(`${offlineDevices}`).then((res) => res);
 }
