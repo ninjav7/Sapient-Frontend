@@ -103,6 +103,10 @@ const EquipmentType = () => {
         return row?.status.toLowerCase() === 'system' ? false : true;
     };
 
+    const handleAbleToEditRow = (row) => {
+        return row?.status.toLowerCase() === 'system' ? false : true;
+    };
+
     const fetchEquipTypeData = async (
         searchTxt,
         page_no = 1,
@@ -380,17 +384,18 @@ const EquipmentType = () => {
                         onEditRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-                                ? (record, id, row) => (row?.status.toLowerCase() === 'system' ? null : handleEdit(row))
+                                ? (record, id, row) => (row?.status.toLowerCase() === 'System' ? null : handleEdit(row))
                                 : null
                         }
                         onDeleteRow={
                             userPermission?.user_role === 'admin' ||
                             userPermission?.permissions?.permissions?.account_buildings_permission?.edit
                                 ? (record, id, row) =>
-                                      row?.status.toLowerCase() === 'system' ? null : handleDelete(row)
+                                      row?.status.toLowerCase() === 'System' ? null : handleDelete(row)
                                 : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
+                        isEditable={(row) => handleAbleToEditRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
