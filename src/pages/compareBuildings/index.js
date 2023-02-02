@@ -95,26 +95,16 @@ const CompareBuildings = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const fetchcompareBuildingsData = async () => {
+    const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by) => {
         setIsLoadingBuildingData(true);
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = ``;
-        if (sorting?.order_by && sorting?.sort_by) {
-            params += `?order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
-        }
-        if (search.length) {
-            params += `?building_search=${search}`;
-        }
+        let params = `?ordered_by=${ordered_by}`;
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
                 let topVal = Math.max(...response.map((o) => o.energy_density));
-                top = topVal;
                 setTopEnergyDensity(topVal);
                 setBuildingsData(response);
                 setIsLoadingBuildingData(false);
@@ -123,6 +113,13 @@ const CompareBuildings = () => {
                 setIsLoadingBuildingData(false);
             });
     };
+
+    useEffect(() => {
+        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+
+        fetchcompareBuildingsData(search, ordered_by, sort_by);
+    }, [search, sortBy, daysCount]);
 
     const renderEnergyDensity = (row) => {
         return (
@@ -178,9 +175,15 @@ const CompareBuildings = () => {
         return (
             <div>
                 {row.energy_consumption.now >= row.energy_consumption.old ? (
-                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        type={TRENDS_BADGE_TYPES.UPWARD_TREND}
+                    />
                 ) : (
-                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.DOWNWARD_TREND} />
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        type={TRENDS_BADGE_TYPES.DOWNWARD_TREND}
+                    />
                 )}
             </div>
         );
@@ -212,8 +215,9 @@ const CompareBuildings = () => {
         },
         {
             name: '% Change',
-            accessor: 'energy_consumption',
+            accessor: 'change',
             callbackValue: renderChangeEnergy,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sq. Ft.',
@@ -226,10 +230,6 @@ const CompareBuildings = () => {
     const handleDownloadCsv = async () => {
         download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, headerProps, topEnergyDensity));
     };
-
-    useEffect(() => {
-        fetchcompareBuildingsData();
-    }, [search, sortBy, daysCount]);
 
     return (
         <React.Fragment>
