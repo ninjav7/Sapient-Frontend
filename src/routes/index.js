@@ -81,6 +81,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         exact
         {...rest}
         render={(props) => {
+            // if (!isSuperUserAuthenticated()) {
+            //     return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
+            // }
             if (isSuperUserAuthenticated()) {
                 return <Component {...props} />;
             } else if (!isUserAuthenticated()) {
@@ -540,7 +543,7 @@ const adminRoutes = {
             path: '/super-user/accounts',
             name: 'Accounts',
             component: Accounts,
-            route: Route,
+            route: PrivateRoute,
             visibility: true,
         },
     ],
