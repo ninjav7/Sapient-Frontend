@@ -41,18 +41,6 @@ axiosInstance.interceptors.response.use(
             });
             return;
         }
-        // if (userdata === undefined) {
-        //     // not logged in so redirect to login page with the return url
-        //     localStorage.clear();
-        //     cookies.remove('user', { path: '/account/login' });
-        //     window.open('/account/login', '_self');
-        //     UserStore.update((s) => {
-        //         s.showNotification = true;
-        //         s.notificationMessage = 'Token expired / invalid. Please login again!';
-        //         s.notificationType = 'error';
-        //     });
-        //     return;
-        // }
 
         return error?.response;
     }

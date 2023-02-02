@@ -8,6 +8,7 @@ export const signup = '/api/user_role/user/signup';
 export const googleSignIn = '/api/user_role/sso/google/auth';
 export const sessionValidator = '/api/user_role/user/user-session-details';
 export const customerList = '/api/user_role/vendor/customer-list';
+export const offlineDevices = '/api/user_role/vendor/customer-offline-devices';
 export const selectCustomer = '/api/user_role/superuser-select-customer';
 export const getCustomer = '/api/user_role/vendor/create-customer';
 export const updateUsers = '/api/user_role/user/update-user';
