@@ -171,7 +171,6 @@ const CompareBuildings = () => {
     };
 
     const renderChangeEnergy = (row) => {
-        const diffPercentage = percentageHandler(row.energy_consumption.now, row.energy_consumption.old);
         return (
             <div>
                 {row.energy_consumption.now >= row.energy_consumption.old ? (
