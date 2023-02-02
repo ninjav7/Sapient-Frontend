@@ -180,7 +180,7 @@ const CompareBuildings = () => {
                 {row.energy_consumption.now >= row.energy_consumption.old ? (
                     <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
                 ) : (
-                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.DOWNWARD_TREND} />
                 )}
             </div>
         );
