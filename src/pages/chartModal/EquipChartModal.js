@@ -252,13 +252,6 @@ const EquipChartModal = ({
         }
     };
 
-    const isEditable = () => {
-        return !(
-            userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
-        );
-    };
-
     const fetchEquipmentYTDUsageData = async (equipId) => {
         setIsYtdDataFetching(true);
         let params = `?building_id=${bldgId}&equipment_id=${equipId}&consumption=energy`;
@@ -453,7 +446,14 @@ const EquipChartModal = ({
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
-                                                disabled={isModified}
+                                                disabled={
+                                                    isModified ||
+                                                    !(
+                                                        userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit
+                                                    )
+                                                }
                                                 className="ml-2"
                                             />
                                         </div>
@@ -634,7 +634,13 @@ const EquipChartModal = ({
                                                     onChange={(e) => {
                                                         handleDataChange('equipments_name', e.target.value);
                                                     }}
-                                                    disabled={isEditable}
+                                                    disabled={
+                                                        !(
+                                                            userPermission?.user_role === 'admin' ||
+                                                            userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        )
+                                                    }
                                                 />
                                             </div>
 
@@ -653,7 +659,13 @@ const EquipChartModal = ({
                                                         handleDataChange('equipments_type_id', e.value);
                                                     }}
                                                     isSearchable={true}
-                                                    disabled={isEditable}
+                                                    disabled={
+                                                        !(
+                                                            userPermission?.user_role === 'admin' ||
+                                                            userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        )
+                                                    }
                                                 />
                                             </div>
 
@@ -673,7 +685,13 @@ const EquipChartModal = ({
                                                             handleDataChange('end_use_id', e.value);
                                                         }}
                                                         isSearchable={true}
-                                                        disabled={isEditable}
+                                                        disabled={
+                                                            !(
+                                                                userPermission?.user_role === 'admin' ||
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.account_buildings_permission?.edit
+                                                            )
+                                                        }
                                                     />
                                                 </div>
                                             )}
@@ -696,7 +714,13 @@ const EquipChartModal = ({
                                                     handleDataChange('location_id', e.value);
                                                 }}
                                                 isSearchable={true}
-                                                disabled={isEditable}
+                                                disabled={
+                                                    !(
+                                                        userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit
+                                                    )
+                                                }
                                             />
 
                                             <Brick sizeInRem={0.25} />
@@ -721,7 +745,13 @@ const EquipChartModal = ({
                                                             (option) => option.value === 'desktop-pc'
                                                         )}
                                                         isSearchable={false}
-                                                        disabled={isEditable}
+                                                        disabled={
+                                                            !(
+                                                                userPermission?.user_role === 'admin' ||
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.account_buildings_permission?.edit
+                                                            )
+                                                        }
                                                     />
 
                                                     <Brick sizeInRem={0.25} />
@@ -743,7 +773,13 @@ const EquipChartModal = ({
                                                 }}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
-                                                disabled={isEditable}
+                                                disabled={
+                                                    !(
+                                                        userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit
+                                                    )
+                                                }
                                             />
                                         </div>
 
@@ -761,7 +797,13 @@ const EquipChartModal = ({
                                                     handleDataChange('note', e.target.value);
                                                 }}
                                                 inputClassName="pt-2"
-                                                disabled={isEditable}
+                                                disabled={
+                                                    !(
+                                                        userPermission?.user_role === 'admin' ||
+                                                        userPermission?.permissions?.permissions
+                                                            ?.account_buildings_permission?.edit
+                                                    )
+                                                }
                                             />
                                         </div>
                                     </Col>
