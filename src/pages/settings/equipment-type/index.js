@@ -103,6 +103,10 @@ const EquipmentType = () => {
         return row?.status.toLowerCase() === 'system' ? false : true;
     };
 
+    const handleAbleToEditRow = (row) => {
+        return row?.status.toLowerCase() === 'system' ? false : true;
+    };
+
     const fetchEquipTypeData = async (
         searchTxt,
         page_no = 1,
@@ -391,6 +395,7 @@ const EquipmentType = () => {
                                 : null
                         }
                         isDeletable={(row) => handleAbleToDeleteRow(row)}
+                        isEditable={(row) => handleAbleToEditRow(row)}
                         totalCount={(() => {
                             if (selectedFilter === 0) {
                                 return totalItems;
