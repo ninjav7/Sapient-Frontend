@@ -13,6 +13,7 @@ import {
     listLinkSocketRules,
     unLinkSocket,
     getFiltersForSensors,
+    reassignSensorsToRule,
     getSensorLastUsed,
 } from './Network';
 
@@ -27,10 +28,10 @@ export function fetchPlugRuleDetails(ruleId) {
     });
 }
 
-export function getAllConditions(){
-    return axiosInstance.get(`${listConditions}`).then((res)=>{
+export function getAllConditions() {
+    return axiosInstance.get(`${listConditions}`).then((res) => {
         return res.data;
-    })
+    });
 }
 
 export function updatePlugRuleRequest(currentData) {
@@ -151,6 +152,12 @@ export function getUnlinkedSocketRules(
 
 export function linkSensorsToRuleRequest(rulesToLink) {
     return axiosInstance.post(`${assignSensorsToRule}`, rulesToLink).then((res) => {
+        return res;
+    });
+}
+
+export function reassignSensorsToRuleRequest(rulesToLink) {
+    return axiosInstance.post(`${reassignSensorsToRule}`, rulesToLink).then((res) => {
         return res;
     });
 }
