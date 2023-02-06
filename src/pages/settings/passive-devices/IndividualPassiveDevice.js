@@ -256,7 +256,7 @@ const IndividualPassiveDevice = () => {
         let params = `?device_id=${deviceId}`;
         await getPassiveDeviceSensors(params)
             .then((res) => {
-                let response = res.data;
+                const response = res.data;
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
@@ -500,6 +500,7 @@ const IndividualPassiveDevice = () => {
                     ) : (
                         <>
                             {filtered.map((record, index) => {
+                                console.log('SSR record => ', record);
                                 return (
                                     <>
                                         <Brick sizeInRem={0.75} />
@@ -513,13 +514,8 @@ const IndividualPassiveDevice = () => {
                                             <div className="d-flex align-items-center mouse-pointer">
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
-                                                    className="sensor-index">
-                                                    {index + 1}
-                                                </Typography.Subheader>
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
                                                     className="sensor-index mr-4">
-                                                    {record?.index}
+                                                    {index + 1}
                                                 </Typography.Subheader>
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
