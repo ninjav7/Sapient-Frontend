@@ -21,7 +21,7 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...pr
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm}>{props.label}</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm} className='gray-550'>{props.label}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
             )}
