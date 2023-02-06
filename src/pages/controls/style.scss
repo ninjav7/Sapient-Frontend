@@ -10,6 +10,18 @@
     margin-left: 20px !important;
 }
 
+.sockets-modal-container-style{
+    width: 62.5rem;
+    max-width: 62.5rem;
+    .modal-header{
+        flex-direction: column;
+        .subtitle-sockets-modal{
+            font-size: .75rem;
+            font-weight: normal;
+        }
+    }
+}
+
 .spacing {
     margin: 10px;
 }
