@@ -13,6 +13,7 @@ import ReactFlow, { addEdge, applyNodeChanges, applyEdgeChanges } from 'react-fl
 import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakerFlowForDistribution';
+import BreakerConfiguration from './BreakerConfiguration';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
 import Select from '../../../sharedComponents/form/select';
 import Typography from '../../../sharedComponents/typography';
@@ -41,7 +42,7 @@ import './panel-style.css';
 
 // Added Node and Egde types
 const nodeTypes = {
-    breakerComponent: BreakersComponent,
+    breakerComponent: BreakerConfiguration,
     disconnectedBreakerComponent: DisconnectedBreakerComponent,
 };
 

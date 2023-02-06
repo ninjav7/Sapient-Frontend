@@ -8,7 +8,6 @@ import { TABS_TYPES } from './constants';
 
 import './Tabs.scss';
 
-
 const Tabs = (props) => {
     const [borders, setBorders] = useState(null);
 
@@ -38,7 +37,7 @@ const Tabs = (props) => {
 
     return (
         <div className={classNames}>
-            <TabsBt {...props}>
+            <TabsBt {...props} className={props.tabCustomStyle}>
                 {React.Children.map(props.children, (child, index) =>
                     React.cloneElement(child, { onEnter: (element) => handleOnEnter(element, index), tabClassName })
                 )}
@@ -59,6 +58,7 @@ Tabs.Item.propTypes = {
 Tabs.propTypes = {
     defaultActiveKey: PropTypes.string,
     type: PropTypes.oneOf(Object.values(TABS_TYPES)),
+    tabCustomStyle: PropTypes.string,
 };
 
 export default Tabs;
