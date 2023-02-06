@@ -84,20 +84,13 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const fetchSingleSensorList = async (deviceId) => {
-        if (deviceId === null) {
-            return;
-        }
-        if (deviceId === '') {
-            return;
-        }
-        if (deviceId === undefined) {
-            return;
-        }
+        if (deviceId === null || deviceId === undefined || deviceId === '') return;
 
         setIsSensorDataFetched(true);
         setIsSensorDataFetchedForDouble(true);
         setIsSensorDataFetchedForTriple(true);
-        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
         await getSensorsList(params)
             .then((res) => {
                 let response = res?.data;
@@ -119,27 +112,13 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const fetchMultipleSensorList = async (deviceId, breakerNo) => {
-        if (deviceId === null) {
-            return;
-        }
-        if (deviceId === '') {
-            return;
-        }
-        if (deviceId === undefined) {
-            return;
-        }
+        if (deviceId === null || deviceId === undefined || deviceId === '') return;
 
-        if (breakerNo === 'first') {
-            setIsSensorDataFetched(true);
-        }
-        if (breakerNo === 'second') {
-            setIsSensorDataFetchedForDouble(true);
-        }
-        if (breakerNo === 'third') {
-            setIsSensorDataFetchedForTriple(true);
-        }
+        if (breakerNo === 'first') setIsSensorDataFetched(true);
+        if (breakerNo === 'second') setIsSensorDataFetchedForDouble(true);
+        if (breakerNo === 'third') setIsSensorDataFetchedForTriple(true);
 
-        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
         await getSensorsList(params)
             .then((res) => {
                 let response = res?.data;
@@ -234,29 +213,16 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const fetchDeviceSensorData = async (deviceId) => {
-        if (deviceId === null) {
-            return;
-        }
-        if (deviceId === '') {
-            return;
-        }
-
-        setIsSensorDataFetchedForDouble(true);
-        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        if (deviceId === null || deviceId === '') return;
+        setIsSensorDataFetched(true);
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
         await getSensorsList(params)
             .then((res) => {
-                let response = res?.data;
+                const response = res?.data;
                 let linkedSensor = [];
                 let unlinkedSensor = [];
                 response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
-
                 setSensorData(unlinkedSensor.concat(linkedSensor));
-                if (doubleBreakerData.data.device_id !== '') {
-                    setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
-                }
-                if (tripleBreakerData.data.device_id !== '') {
-                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
-                }
                 setIsSensorDataFetched(false);
             })
             .catch(() => {
@@ -265,31 +231,44 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const fetchSensorDataForSelectionOne = async (deviceId, breakerLvl) => {
-        if (deviceId === null) {
-            return;
-        }
-        if (deviceId === '') {
-            return;
+        if (deviceId === null || deviceId === '') return;
+
+        setIsSensorDataFetched(true);
+
+        if (breakerLvl === 'double') setIsSensorDataFetchedForDouble(true);
+
+        if (breakerLvl === 'triple') {
+            setIsSensorDataFetchedForDouble(true);
+            setIsSensorDataFetchedForTriple(true);
         }
 
-        setIsSensorDataFetchedForDouble(true);
-        let params = `?device_id=${deviceId}&building_id=${bldgId}`;
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
         await getSensorsList(params)
             .then((res) => {
-                let response = res?.data;
+                const response = res?.data;
                 let linkedSensor = [];
                 let unlinkedSensor = [];
                 response.forEach((el) => (el?.breaker_id !== '' ? linkedSensor.push(el) : unlinkedSensor.push(el)));
 
                 setSensorData(unlinkedSensor.concat(linkedSensor));
-                setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
-                if (breakerLvl === 'triple') {
-                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
-                }
                 setIsSensorDataFetched(false);
+
+                if (breakerLvl === 'double') {
+                    setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
+                    setIsSensorDataFetchedForDouble(false);
+                }
+
+                if (breakerLvl === 'triple') {
+                    setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
+                    setTripleSensorData(unlinkedSensor.concat(linkedSensor));
+                    setIsSensorDataFetchedForDouble(false);
+                    setIsSensorDataFetchedForTriple(false);
+                }
             })
             .catch(() => {
                 setIsSensorDataFetched(false);
+                setIsSensorDataFetchedForDouble(false);
+                setIsSensorDataFetchedForTriple(false);
             });
     };
 
