@@ -500,7 +500,6 @@ const IndividualPassiveDevice = () => {
                     ) : (
                         <>
                             {filtered.map((record, index) => {
-                                console.log('SSR record => ', record);
                                 return (
                                     <>
                                         <Brick sizeInRem={0.75} />
