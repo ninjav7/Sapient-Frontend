@@ -1,0 +1,11 @@
+.panel-breakers-wrapper {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    padding: 0 1.625rem;
+    position: relative;
+
+    .breaker-wrapper {
+        width: 24.125rem;
+    }
+}
