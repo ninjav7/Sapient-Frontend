@@ -688,7 +688,6 @@ const EditBreakerPanel = () => {
 
         setDistributedBreakersEdges(breakerLinks);
         setDisconnectedBreakersEdges(disconnectBreakerLinks);
-        
 
         BreakersStore.update((s) => {
             s.breakerLinkData = breakerLinks;
