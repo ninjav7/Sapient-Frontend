@@ -1,21 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import pluralize from 'pluralize';
 import cx from 'classnames';
-import PropTypes from 'prop-types';
 
-import './Panel.scss';
 import Select from '../../form/select';
-import { stringOrNumberPropTypes } from '../../helpers/helper';
 import Input from '../../form/input/Input';
 import { Button } from '../../button';
 import { Breaker } from '../../breaker';
 import Brick from '../../brick';
 import { Toggles } from '../../toggles';
 import { DangerZone } from '../../dangerZone';
-import { ReactComponent as UnlinkSVG } from '../../assets/icons/link-slash.svg';
-import { BreakersWrapper } from './components/BreakersWrapper';
-import { PROP_TYPES } from './constants';
 import Typography from '../../typography';
-import pluralize from 'pluralize';
+
+import { BreakersWrapper } from './components/BreakersWrapper';
+
+import { ReactComponent as UnlinkSVG } from '../../assets/icons/link-slash.svg';
+import { PROP_TYPES } from './constants';
+
+import './Panel.scss';
 
 export const PanelWidgetContext = React.createContext({});
 
@@ -32,6 +33,7 @@ const Panel = (props) => {
         onPanelToggleDeviceView,
         states,
         dangerZoneProps,
+        className,
         style,
     } = props;
 
@@ -92,7 +94,7 @@ const Panel = (props) => {
                 isEditingMode,
                 viewDeviceIds,
             }}>
-            <div className="panel-wrapper" style={style}>
+            <div className={cx('panel-wrapper', className)} style={style}>
                 <div className="panel-header">
                     {panelHeaderControl()}
 

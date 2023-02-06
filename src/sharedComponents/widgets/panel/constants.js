@@ -15,11 +15,11 @@ const PROP_TYPES = {
         callBackBreakerProps: PropTypes.func,
         onBreakerLinkedClick: PropTypes.func.isRequired,
         isEditable: PropTypes.bool,
-
         states: {
             isEditingModeState: PropTypes.bool,
             isViewDeviceIdsState: PropTypes.bool,
         },
+        styles: PropTypes.object,
     },
     breakerColumn: {
         //breakerProps, breakerData, children - args
