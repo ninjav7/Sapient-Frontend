@@ -647,8 +647,6 @@ const EditBreakerPanel = () => {
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectedBreakersNodes(disconnectBreakerArray);
-        console.log(breakersData);
-        debugger
 
         BreakersStore.update((s) => {
             s.distributedBreakersData = distributedBreakerArray;
@@ -690,8 +688,7 @@ const EditBreakerPanel = () => {
 
         setDistributedBreakersEdges(breakerLinks);
         setDisconnectedBreakersEdges(disconnectBreakerLinks);
-
-        console.log(breakerLinks);
+        
 
         BreakersStore.update((s) => {
             s.breakerLinkData = breakerLinks;
@@ -1004,8 +1001,6 @@ const EditBreakerPanel = () => {
                                 )}
                             </>
                         )}
-                        
-                        {JSON.stringify(disconnectedBreakersNodes)}
 
                         {activePanelType === 'disconnect' && !isLoading && !panelDataFetched && (
                             <div className="row m-4">
