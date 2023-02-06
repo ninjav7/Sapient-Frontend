@@ -256,7 +256,7 @@ const IndividualPassiveDevice = () => {
         let params = `?device_id=${deviceId}`;
         await getPassiveDeviceSensors(params)
             .then((res) => {
-                let response = res.data;
+                const response = res.data;
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
@@ -513,13 +513,8 @@ const IndividualPassiveDevice = () => {
                                             <div className="d-flex align-items-center mouse-pointer">
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
-                                                    className="sensor-index">
-                                                    {index + 1}
-                                                </Typography.Subheader>
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
                                                     className="sensor-index mr-4">
-                                                    {record?.index}
+                                                    {index + 1}
                                                 </Typography.Subheader>
                                                 <Typography.Subheader
                                                     size={Typography.Sizes.md}
@@ -570,15 +565,18 @@ const IndividualPassiveDevice = () => {
                 </Col>
             </Row>
 
-            <div className="passive-container">
-                <DeleteDevice
-                    showDeleteModal={showDeleteModal}
-                    showDeleteAlert={showDeleteAlert}
-                    closeDeleteAlert={closeDeleteAlert}
-                    redirectToPassivePage={redirectToPassivePage}
-                    selectedPassiveDevice={selectedPassiveDevice}
-                />
-            </div>
+            {(userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit) && (
+                <div className="passive-container">
+                    <DeleteDevice
+                        showDeleteModal={showDeleteModal}
+                        showDeleteAlert={showDeleteAlert}
+                        closeDeleteAlert={closeDeleteAlert}
+                        redirectToPassivePage={redirectToPassivePage}
+                        selectedPassiveDevice={selectedPassiveDevice}
+                    />
+                </div>
+            )}
 
             <DeviceChartModel
                 showChart={showChart}
