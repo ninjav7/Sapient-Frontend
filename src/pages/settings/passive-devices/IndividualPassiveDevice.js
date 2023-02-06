@@ -570,15 +570,18 @@ const IndividualPassiveDevice = () => {
                 </Col>
             </Row>
 
-            <div className="passive-container">
-                <DeleteDevice
-                    showDeleteModal={showDeleteModal}
-                    showDeleteAlert={showDeleteAlert}
-                    closeDeleteAlert={closeDeleteAlert}
-                    redirectToPassivePage={redirectToPassivePage}
-                    selectedPassiveDevice={selectedPassiveDevice}
-                />
-            </div>
+            {(userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit) && (
+                <div className="passive-container">
+                    <DeleteDevice
+                        showDeleteModal={showDeleteModal}
+                        showDeleteAlert={showDeleteAlert}
+                        closeDeleteAlert={closeDeleteAlert}
+                        redirectToPassivePage={redirectToPassivePage}
+                        selectedPassiveDevice={selectedPassiveDevice}
+                    />
+                </div>
+            )}
 
             <DeviceChartModel
                 showChart={showChart}
