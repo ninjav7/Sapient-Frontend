@@ -295,10 +295,11 @@ const DataTableWidget = (props) => {
 
                             {!props.isLoading &&
                                 currentRows.map((row) => {
+                                    let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
 
                                     const menuListPerRowProps = {};
-                                    if (props.onEditRow) {
+                                    if (props.onEditRow && isEditable) {
                                         menuListPerRowProps.onEditRow = (event) =>
                                             props.onEditRow(event, row.id, row, props);
                                     }
@@ -397,12 +398,12 @@ DataTableWidget.propTypes = {
     onDeleteRow: PropTypes.func,
     isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
+    isEditable: PropTypes.func,
     /**** The following 4 props are responsible for showing pagination ****/
     onChangePage: PropTypes.func.isRequired,
     totalCount: PropTypes.number.isRequired,
     currentPage: PropTypes.number.isRequired,
     onPageSize: PropTypes.func.isRequired,
-    
     pageSize: PropTypes.number,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
