@@ -7,6 +7,7 @@ import LineChart from '../charts/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
+import { Spinner } from 'reactstrap';
 import { fetchPlugRules } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
@@ -35,6 +36,7 @@ import {
     unlinkSocketRequest,
     getUnlinkedSocketRules,
     getFiltersForSensorsRequest,
+    reassignSensorsToRuleRequest,
     getAllConditions,
 } from '../../services/plugRules';
 import './style.scss';
@@ -43,6 +45,7 @@ import { Badge } from '../../sharedComponents/badge';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
+import Typography from '../../sharedComponents/typography';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="#202020" height={35}>
@@ -103,6 +106,7 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
+    const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [rulesToUnLink, setRulesToUnLink] = useState({
@@ -131,7 +135,8 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
-
+    const [socketsToReassign, setSocketsToReassign] = useState({});
+    const [checkedAllReassignSockets, setCheckedAllReassignSockets] = useState(false);
     const [buildingError, setBuildingError] = useState({ text: '' });
     const [nameError, setNameError] = useState(false);
     const [preparedScheduleData, setPreparedScheduleData] = useState([]);
@@ -140,7 +145,9 @@ const PlugRule = () => {
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
-
+    const [loadingSocketsUpdate, setLoadingSocketsUpdate] = useState(false);
+    const [showSocketsModal, setShowSocketsModal] = useState(false);
+    const [dataToUnassign, setDataToUnassign] = useState([]);
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allSensors, setAllSensors] = useState([]);
@@ -290,16 +297,15 @@ const PlugRule = () => {
         const params = '';
         await fetchPlugRules(params, '').then((res) => {
             const plugRules = res.data.data;
-
             plugRules &&
                 plugRules.forEach((plugRule) => {
                     if (plugRule.name == currentData.name) {
                         setActiveBuildingId(plugRule.buildings[0].building_id);
                     }
                 });
+            setIsFetchedPlugRulesData(true);
         });
     };
-
     useEffect(() => {
         generateHours();
         getBuildingData();
@@ -309,6 +315,11 @@ const PlugRule = () => {
             fetchPlugRuleDetail();
         }
     }, []);
+    useEffect(() => {
+        if (!isFetchedPlugRulesData) {
+            fetchPlugRulesData();
+        }
+    }, [currentData.name, isFetchedPlugRulesData]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -321,6 +332,7 @@ const PlugRule = () => {
             }
             let response = Object.assign({}, res.data.data[0]);
             response.building_id = response.building[0].building_id;
+            setActiveBuildingId(response.building_id);
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
             setPreparedScheduleData(scheduleData);
@@ -754,15 +766,39 @@ const PlugRule = () => {
         if (rulesToLink.sensor_id.length === 0) {
             return;
         }
+        const { isAssignedToAnotherRule, dataToAssign } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
         setIsProcessing(true);
-        await linkSensorsToRuleRequest({
+        await reassignSensorsToRuleRequest({
             ...rulesToLink,
-            sensor_id: rulesToLink.sensor_id.filter((sensor) => !fetchedSelectedIds.includes(sensor.id)),
+            sensor_id: rulesToLink.sensor_id,
             building_id: activeBuildingId,
         }).then((res) => {});
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
+    };
+
+    const reassignSensorsToRule = async () => {
+        const listToRemoveForReassign = [];
+        dataToUnassign.forEach((el) => {
+            if (!socketsToReassign.includes(el.id)) {
+                listToRemoveForReassign.push(el.id);
+            }
+        });
+        let listOfsocketsToReassign = [];
+
+        if (listToRemoveForReassign.length) {
+            listOfsocketsToReassign = rulesToLink.sensor_id.filter(function (val) {
+                return listToRemoveForReassign.indexOf(val) == -1;
+            });
+        } else {
+            listOfsocketsToReassign = rulesToLink.sensor_id;
+        }
+        await reassignSensorsToRuleRequest({
+            rule_id: ruleId,
+            building_id: activeBuildingId,
+            sensor_id: listOfsocketsToReassign,
+        }).then((res) => {});
     };
 
     const updateSocketUnlink = async () => {
@@ -832,10 +868,20 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
+    const handleReassignSocketsCheckboxClick = (value, socket) => {
+        let newSocketsToReassign = [...socketsToReassign];
+        if (value) {
+            newSocketsToReassign = newSocketsToReassign.filter((el) => el !== socket.id);
+        } else {
+            newSocketsToReassign = newSocketsToReassign.push(socket.id);
+        }
+        setSocketsToReassign(newSocketsToReassign);
+    };
+
     const handleRuleStateChange = (value, rule) => {
         if (value === 'true') {
-            let linkedData = linkedRuleData;
-            let unLinkedData = unLinkedRuleData;
+            let linkedData = [...linkedRuleData];
+            let unLinkedData = [...unLinkedRuleData];
             let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
             rule.linked_rule = false;
             unLinkedData.push(rule);
@@ -846,7 +892,6 @@ const PlugRule = () => {
             recordToUnLink.rule_id = currentData.id;
             recordToUnLink.sensor_id.push(rule.id);
             setRulesToUnLink(recordToUnLink);
-
             let recordToLink = rulesToLink;
             let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
             recordToLink.sensor_id = newRecordToLink;
@@ -856,8 +901,8 @@ const PlugRule = () => {
         }
 
         if (value === 'false') {
-            let linkedData = linkedRuleData;
-            let unLinkedData = unLinkedRuleData;
+            let linkedData = [...linkedRuleData];
+            let unLinkedData = [...unLinkedRuleData];
             let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
             rule.linked_rule = true;
             linkedData.push(rule);
@@ -1035,14 +1080,13 @@ const PlugRule = () => {
     };
 
     useEffect(() => {
-        const selectedSensors = selectedIds
+        const selectedSensors = [...selectedIds]
             .map((id) => allSensors.find((sensor) => sensor.id === id))
             .map((sensor) => ({ ...sensor, linked_rule: true }));
 
         setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
-
         setLinkedRuleData(selectedSensors);
-    }, [allData.length, selectedIds, allSensors.length]);
+    }, [allData.length, allSensors.length]);
 
     useEffect(() => {
         unLinkedRuleData.length > 0 &&
@@ -1057,6 +1101,8 @@ const PlugRule = () => {
         fetchUnLinkedSocketRules();
     }, [
         ruleId,
+        currentData.name,
+        activeBuildingId,
         equpimentTypeFilterString,
         macTypeFilterString,
         locationTypeFilterString,
@@ -1083,7 +1129,6 @@ const PlugRule = () => {
         // INITIAL TABLE
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
-
     const currentRow = () => {
         if (selectedRuleFilter === 0) {
             return allSensors;
@@ -1143,7 +1188,44 @@ const PlugRule = () => {
         }
         return valid;
     };
+    const handleContinueAndSaveClick = async () => {
+        Promise.allSettled([reassignSensorsToRule(), updatePlugRuleData(), updateSocketUnlink()]).then((value) => {
+            handleCloseSocketsModal(true);
+            fetchUnLinkedSocketRules();
+            fetchFiltersForSensors();
+            fetchLinkedSocketRules();
+            fetchPlugRuleDetail();
+        });
+    };
+
+    const handleCheckIfSocketAssignedToAnotherRule = (rulesToLink) => {
+        const dataUnassign = [];
+        const idSocketsToAssign = [];
+        const socketsToReassign = [];
+        allSensors.forEach((sensor) => {
+            if (rulesToLink.sensor_id.includes(sensor.id)) {
+                if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
+                    socketsToReassign.push(sensor.id);
+                    dataUnassign.push(sensor);
+                } else {
+                    idSocketsToAssign.push(sensor.id);
+                }
+            }
+        });
+        setDataToUnassign(dataUnassign);
+        setSocketsToReassign(socketsToReassign);
+        if (dataUnassign.length) {
+            return { isAssignedToAnotherRule: true, dataToAssign: idSocketsToAssign };
+        } else {
+            return { isAssignedToAnotherRule: false, dataToAssign: idSocketsToAssign };
+        }
+    };
     const handleSaveClicked = async () => {
+        const { isAssignedToAnotherRule } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
+        if (isAssignedToAnotherRule) {
+            setShowSocketsModal(true);
+            return;
+        }
         if (isCreateRuleMode) {
             const isValid = validatePlugRuleForm(currentData);
             if (isValid) {
@@ -1169,10 +1251,11 @@ const PlugRule = () => {
                     });
             }
         } else {
-            Promise.allSettled([updatePlugRuleData(), updateSocketLink(), updateSocketUnlink()]).then((value) => {
-                history.push({
-                    pathname: `/control/plug-rules`,
-                });
+            Promise.allSettled([updatePlugRuleData(), reassignSensorsToRule(), updateSocketUnlink()]).then((value) => {
+                fetchUnLinkedSocketRules();
+                fetchFiltersForSensors();
+                fetchLinkedSocketRules();
+                fetchPlugRuleDetail();
             });
         }
     };
@@ -1493,6 +1576,9 @@ const PlugRule = () => {
         },
         options: buildingListData,
     };
+    const handleCloseSocketsModal = () => {
+        setShowSocketsModal(false);
+    };
 
     if (buildingError?.text?.length) {
         buildingIdProps.error = buildingError;
@@ -1711,14 +1797,14 @@ const PlugRule = () => {
                                 onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
                                 name: 'Location',
                                 accessor: 'equipment_link_location',
                                 callbackValue: renderLocation,
+                            },
+                            {
+                                name: 'Space Type',
+                                accessor: 'space_type',
+                                onSort: (method, name) => setSortBy({ method, name }),
                             },
                             {
                                 name: 'MAC Address',
@@ -1854,6 +1940,122 @@ const PlugRule = () => {
                             deleteScheduleCondition(currentScheduleIdToDelete);
                         }}
                     />
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+                show={showSocketsModal}
+                onHide={() => handleCloseSocketsModal()}
+                centered
+                backdrop="static"
+                dialogClassName="sockets-modal-container-style"
+                keyboard={false}>
+                <Modal.Header>
+                    <Modal.Title id="">Socket with existing rules</Modal.Title>
+                    <Typography.Subheader size={Typography.Sizes.md} className="subtitle-sockets-modal">
+                        These sockets are assigned to another rule. Please select the sockets you would like to unassign
+                        from their current rule
+                    </Typography.Subheader>
+                </Modal.Header>
+                <Modal.Body>
+                    <DataTableWidget
+                        isLoading={isLoadingRef.current}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="sockets-plug-rules-modal"
+                        rows={dataToUnassign}
+                        buttonGroupFilterOptions={[]}
+                        headers={[
+                            {
+                                name: 'Equipment Type',
+                                accessor: 'equipment_type_name',
+                                callbackValue: renderEquipType,
+                            },
+                            {
+                                name: 'Location',
+                                accessor: 'equipment_link_location',
+                                callbackValue: renderLocation,
+                            },
+                            {
+                                name: 'Space Type',
+                                accessor: 'space_type',
+                            },
+
+                            {
+                                name: 'MAC Address',
+                                accessor: 'device_link',
+                            },
+                            {
+                                name: 'Sensors',
+                                accessor: 'sensor_count',
+                            },
+                            {
+                                name: 'Assigned Rule',
+                                accessor: 'assigned_rule',
+                                callbackValue: renderAssignRule,
+                            },
+                            {
+                                name: 'Tags',
+                                accessor: 'tags',
+                                callbackValue: renderTagCell,
+                            },
+                            {
+                                name: 'Last Data',
+                                accessor: 'last_data',
+                                callbackValue: renderLastUsedCell,
+                            },
+                        ]}
+                        onCheckboxRow={() => {}}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="vehicle1"
+                                name="vehicle1"
+                                checked={checkedAllReassignSockets}
+                                onChange={() => {
+                                    setCheckedAllReassignSockets(!checkedAllReassignSockets);
+                                }}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="socket_rule"
+                                name="socket_rule"
+                                checked={socketsToReassign.includes(record?.id) || checkedAllReassignSockets}
+                                value={
+                                    socketsToReassign.includes(record?.id) || checkedAllReassignSockets ? true : false
+                                }
+                                onChange={(e) => {
+                                    handleReassignSocketsCheckboxClick(e.target.value, record);
+                                }}
+                            />
+                        )}
+                    />
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button
+                        type={Button.Type.secondary}
+                        size={Button.Sizes.md}
+                        onClick={() => handleCloseSocketsModal()}>
+                        Cancel
+                    </Button>
+                    {loadingSocketsUpdate ? (
+                        <Button color="primary" disabled>
+                            <Spinner size="sm">Loading...</Spinner>
+                            <span> Loading</span>
+                        </Button>
+                    ) : (
+                        <Button
+                            label="Continue & Save"
+                            type={Button.Type.primary}
+                            size={Button.Sizes.md}
+                            onClick={() => {
+                                handleContinueAndSaveClick();
+                            }}></Button>
+                    )}
                 </Modal.Footer>
             </Modal>
         </>
