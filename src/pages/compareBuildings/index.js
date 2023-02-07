@@ -115,7 +115,7 @@ const CompareBuildings = () => {
     };
 
     useEffect(() => {
-        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
+        const ordered_by = sortBy.name === undefined ? 'energy_density' : sortBy.name;
         const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
 
         fetchcompareBuildingsData(search, ordered_by, sort_by);
