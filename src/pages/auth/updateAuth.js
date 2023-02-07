@@ -134,4 +134,4 @@ const AuthUpdate = (props) => {
     );
 };
 
-export default connect({ googleLoginUser })(AuthUpdate);
+export default AuthUpdate;
