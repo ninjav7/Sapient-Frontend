@@ -1,0 +1,27 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.danger-zone {
+    &-wrapper {
+        @extend .borders;
+        @extend .box-shadow-sm;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    &-header {
+        @extend .borders-bottom;
+        padding: 0.6875rem 0.9375rem 0.75rem 0.9375rem;
+        background: $primary-gray-50;
+    }
+    
+    &-body {
+        padding: 1rem 0.9375rem 0.9375rem 0.875rem;
+    }
+
+    &-btn-icon {
+        path {
+            fill: $error-700;
+        }
+    }
+}
