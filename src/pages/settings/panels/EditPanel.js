@@ -311,6 +311,9 @@ const EditPanel = () => {
                 }}
                 nodes={breakersList}
                 edges={breakerLinks}
+                style={{
+                    width: 906,
+                }}
             />
         </>
     );
