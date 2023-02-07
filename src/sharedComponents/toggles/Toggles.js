@@ -1,12 +1,13 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+
+import Typography from '../typography';
+import Brick from '../brick';
 
 import { TEXT_ALIGN, TOGGLES_SIZES } from './constants';
 
 import './Toggles.scss';
-import Typography from '../typography';
-import Brick from '../brick';
 
 const Toggles = (props) => {
     const { size = TOGGLES_SIZES.sm, onChange, label, description, textAlignment = TEXT_ALIGN.right } = props;
@@ -35,14 +36,12 @@ const Toggles = (props) => {
             </label>
 
             {(!!label || !!description) && (
-                    <div className="toggle-label">
-                        <Brick sizeInRem={0.0625} />
-                        {label && <Typography.Body size={mapLabelsSizes.label}>{label}</Typography.Body>}
-                        {description && (
-                            <Typography.Body size={mapLabelsSizes.description}>{description}</Typography.Body>
-                        )}
-                    </div>
-                )}
+                <div className="toggle-label">
+                    <Brick sizeInRem={0.0625} />
+                    {label && <Typography.Body size={mapLabelsSizes.label}>{label}</Typography.Body>}
+                    {description && <Typography.Body size={mapLabelsSizes.description}>{description}</Typography.Body>}
+                </div>
+            )}
         </div>
     );
 };

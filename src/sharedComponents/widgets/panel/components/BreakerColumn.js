@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
-
 import { Breaker } from '../../../breaker';
 
-import { PanelWidgetContext } from '../Panel';
 import { mergePropsByAccessors } from '../helper';
+import { PanelWidgetContext } from '../Panel';
 
 import { PROP_TYPES } from '../constants';
 

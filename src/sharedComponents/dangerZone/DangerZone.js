@@ -2,9 +2,10 @@ import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
-import './DangerZone.scss';
 import Typography from '../typography';
 import { Button } from '../button';
+
+import './DangerZone.scss';
 
 const DangerZone = ({
     title,

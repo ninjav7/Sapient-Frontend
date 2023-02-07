@@ -16,11 +16,10 @@ const BreakersWrapper = (props) => {
     }
 
     const groupedEdges = groupEdgesToColumns(edges);
-    const edgesEntries = Object.entries(groupedEdges);
 
     return (
         <div className="panel-breakers-wrapper">
-            {edgesEntries.map((edge, index) => {
+            {Object.entries(groupedEdges).map((edge, index) => {
                 return (
                     <>
                         {isEditingMode && (
