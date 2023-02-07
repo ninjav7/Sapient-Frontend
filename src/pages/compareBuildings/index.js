@@ -95,7 +95,7 @@ const CompareBuildings = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const fetchcompareBuildingsData = async (search, ordered_by = 'building_name', sort_by) => {
+    const fetchcompareBuildingsData = async (search, ordered_by = 'energy_density', sort_by) => {
         setIsLoadingBuildingData(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
         let params = `?ordered_by=${ordered_by}`;
@@ -116,7 +116,7 @@ const CompareBuildings = () => {
 
     useEffect(() => {
         const ordered_by = sortBy.name === undefined ? 'energy_density' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
 
         fetchcompareBuildingsData(search, ordered_by, sort_by);
     }, [search, sortBy, daysCount]);
