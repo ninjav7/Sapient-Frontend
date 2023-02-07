@@ -20,7 +20,7 @@ const LinkModal = ({ showlink, handleLinkClose, error, message, handleAuthorize 
     const Submit = () => {
         let ct = 0;
 
-        if (email.length >= 0 && !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,11})+$/.test(email)) {
+        if (email.length >= 0 && !/^\w+([\+.-]?\w+)*@\w+([\+.-]?\w+)*(\.\w{2,11})+$/.test(email)) {
             setEmailError('Please Enter a Valid Email');
             ct++;
         }
