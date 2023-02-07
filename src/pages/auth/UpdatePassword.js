@@ -480,7 +480,8 @@ const Confirm = (props) => {
                                                 <Button
                                                     className="sub-button"
                                                     color="primary"
-                                                    onClick={handleValidSubmit}>
+                                                    onClick={handleValidSubmit}
+                                                    disabled={matchErr === 'success' ? false : true}>
                                                     Set Password
                                                 </Button>
                                             </FormGroup>

@@ -10,13 +10,13 @@
     margin-left: 20px !important;
 }
 
-.sockets-modal-container-style{
+.sockets-modal-container-style {
     width: 62.5rem;
     max-width: 62.5rem;
-    .modal-header{
+    .modal-header {
         flex-direction: column;
-        .subtitle-sockets-modal{
-            font-size: .75rem;
+        .subtitle-sockets-modal {
+            font-size: 0.75rem;
             font-weight: normal;
         }
     }
@@ -165,6 +165,10 @@
             align-items: center;
             align-content: stretch;
             gap: 20px;
+        }
+        .cancel-and-save-flex {
+            display: flex;
+            gap: 0.5rem;
         }
     }
     .single-plug-rule-tab {

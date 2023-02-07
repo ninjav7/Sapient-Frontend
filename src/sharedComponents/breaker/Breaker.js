@@ -6,8 +6,8 @@ import Typography from '../typography';
 import { Badge } from '../badge';
 import { Button } from '../button';
 
-import { removeProps, stringOrNumberPropTypes } from '../helpers/helper';
-import { BREAKER_CALLBACKS, BREAKER_STATUSES, BREAKER_TYPES } from './constants';
+import { generateID, removeProps, stringOrNumberPropTypes } from '../helpers/helper';
+import { BREAKER_CALLBACKS, BREAKER_ITEMS_PROP_MAP, BREAKER_STATUSES, BREAKER_TYPES } from './constants';
 
 import { ReactComponent as ChartSVG } from '../assets/icons/chart-mixed.svg';
 import { ReactComponent as PenSVG } from '../assets/icons/pen.svg';
@@ -28,6 +28,7 @@ const Breaker = (props) => {
         type = BREAKER_TYPES.configured,
         className,
         styleWrapper,
+        isMain,
     } = props;
     
     const onEdit = props[BREAKER_CALLBACKS.ON_EDIT];
@@ -56,13 +57,14 @@ const Breaker = (props) => {
                 [`breaker-items-${items?.length}`]: !!items?.length,
                 'is-flagged': isFlagged,
                 [type]: !!type,
+                'is-main': !!isMain,
                 className,
             })}
             style={styleWrapper}>
             {items && (
                 <div className="breaker-content-collector breaker-id-wrapper">
                     {items.map(({ id }) => (
-                        <div className="breaker-id">
+                        <div className="breaker-id" key={generateID()}>
                             <Typography.Subheader size={Typography.Sizes.md}>{id}</Typography.Subheader>
                         </div>
                     ))}
@@ -72,7 +74,7 @@ const Breaker = (props) => {
             {items && (
                 <div className="breaker-content-collector align-self-stretch">
                     {items.map(({ status }) => (
-                        <div className="breaker-indicator-wrapper">
+                        <div className="breaker-indicator-wrapper" key={generateID()}>
                             <Indicator status={status} />
                         </div>
                     ))}
@@ -99,7 +101,7 @@ const Breaker = (props) => {
                             {items.map(
                                 ({ deviceId }) =>
                                     deviceId && (
-                                        <div className="breaker-device-id">
+                                        <div className="breaker-device-id" key={generateID()}>
                                             <Badge className="breaker-device-id-badge d-flex" text={deviceId} />
                                         </div>
                                     )
@@ -112,7 +114,7 @@ const Breaker = (props) => {
             {items && (
                 <div className="breaker-content-collector breaker-sensor-id-wrapper ml-auto">
                     {items.map(({ sensorId }) => (
-                        <div className="breaker-sensor-id">
+                        <div className="breaker-sensor-id" key={generateID()}>
                             <Typography.Subheader size={Typography.Sizes.md}>{sensorId}</Typography.Subheader>
                         </div>
                     ))}
@@ -145,6 +147,7 @@ const Breaker = (props) => {
 
 Breaker.Status = BREAKER_STATUSES;
 Breaker.Type = BREAKER_TYPES;
+Breaker.ItemsPropMap = BREAKER_ITEMS_PROP_MAP
 
 Breaker.propTypes = {
     items: PropTypes.arrayOf(
@@ -163,6 +166,7 @@ Breaker.propTypes = {
     isFlagged: PropTypes.bool,
     type: PropTypes.oneOf(Object.values(Breaker.Type)),
     styleWrapper: PropTypes.object,
+    isMain: PropTypes.bool,
 };
 
 export default Breaker;
