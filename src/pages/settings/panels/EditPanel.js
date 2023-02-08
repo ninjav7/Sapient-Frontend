@@ -44,6 +44,7 @@ import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
 import './styles.scss';
+import BreakerConfiguration from './BreakerConfiguration';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -51,6 +52,11 @@ const EditPanel = () => {
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+
+    // Edit Breaker Modal
+    const [showBreakerConfigModal, setBreakerConfigModalState] = useState(false);
+    const closeBreakerConfigModal = () => setBreakerConfigModalState(false);
+    const openBreakerConfigModal = () => setBreakerConfigModalState(true);
 
     const [panelsList, setPanelsList] = useState([]);
     const [locationsList, setLocationsList] = useState([]);
@@ -62,6 +68,7 @@ const EditPanel = () => {
     const [isBreakersFetched, setBreakersFetching] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
+    const [selectedBreakerObj, setSelectedBreakerObj] = useState({});
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -1045,8 +1052,9 @@ const EditPanel = () => {
                     onClickButton: (event) => alert('dangerZoneProps onClick'),
                 }}
                 onEdit={(props) => {
-                    alert('OnEdit');
-                    console.log('OnEdit', props);
+                    const breakerObj = breakersList.find((el) => el?.id === props._id);
+                    setSelectedBreakerObj(breakerObj);
+                    if (breakerObj) openBreakerConfigModal();
                 }}
                 onShowChart={(props) => {
                     alert('onShowChart');
@@ -1067,7 +1075,7 @@ const EditPanel = () => {
                 breakerPropsAccessor={{
                     id: 'breaker_number',
                     status: 'status',
-                    deviceId: 'device_id',
+                    deviceId: 'device_name',
                     sensorId: 'sensor_id',
                     ratedAmps: 'rated_amps',
                     ratedVolts: 'voltage',
@@ -1076,6 +1084,7 @@ const EditPanel = () => {
                     type: 'type',
                     parentBreaker: 'parent_breaker',
                     _id: 'id',
+                    isLinked: 'is_linked',
                 }}
                 onBreakerLinkedClick={(props) => {
                     onBreakerLinkedClick(props);
@@ -1085,6 +1094,15 @@ const EditPanel = () => {
                 style={{
                     width: 906,
                 }}
+            />
+
+            <BreakerConfiguration
+                showBreakerConfigModal={showBreakerConfigModal}
+                openBreakerConfigModal={openBreakerConfigModal}
+                closeBreakerConfigModal={closeBreakerConfigModal}
+                selectedBreakerObj={selectedBreakerObj}
+                breakersList={breakersList}
+                panelObj={panelObj}
             />
         </React.Fragment>
     );
