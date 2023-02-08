@@ -12,25 +12,26 @@ import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
 import { fetchSessionDetails, updateUser } from './service';
 import { googleLoginUser } from '../../redux/actions';
+import { UserStore } from '../../store/UserStore';
+import { isUserAuthenticated } from '../../helpers/authUtils';
 
 const AuthUpdate = (props) => {
     let history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [titleText, setTitleText] = useState('Success');
-
-    const setSession = (user) => {
-        let cookies = new Cookies();
-        if (user) {
-            localStorage.setItem('vendorName', user?.vendor_name);
-            localStorage.setItem('vendorId', user?.vendor_id);
-            cookies.set('user', JSON.stringify(user), { path: '/' });
-        } else cookies.remove('user', { path: '/' });
-    };
+    const [isAuthTokenValid, setisAuthTokenValid] = useState();
+    const loginSuccess = UserStore.useState((s) => s.loginSuccess);
 
     useEffect(() => {
         set_isMounted(true);
         document.body.classList.add('authentication-bg');
+
+        if (loginSuccess === true) {
+            updateUserDetails();
+            renderRedirectToRoot();
+            setIsLoading(false);
+        }
 
         return () => {
             set_isMounted(false);
@@ -41,21 +42,16 @@ const AuthUpdate = (props) => {
     const fetchSession = async () => {
         setIsLoading(true);
         let sessionId = localStorage.getItem('session-id');
-        let params = `?session_id=${sessionId}`;
-        await fetchSessionDetails(params)
-            .then(async (res) => {
-                let response = res.data;
 
-                setSession(response.data);
-                await updateUserDetails();
-                setIsLoading(false);
-                history.push('/');
-            })
-            .catch((error) => {
-                setIsLoading(false);
-            });
+        props.googleLoginUser(sessionId);
     };
-
+    const renderRedirectToRoot = () => {
+        const isAuthTknValid = isUserAuthenticated();
+        setisAuthTokenValid(isAuthTknValid);
+        if (isAuthTknValid) {
+            history.push('/');
+        }
+    };
     const updateUserDetails = async () => {
         let payload = {
             linked_oauth: ['google'],
@@ -133,5 +129,9 @@ const AuthUpdate = (props) => {
         </React.Fragment>
     );
 };
+const mapStateToProps = (state) => {
+    const { user, loading, error } = state.Auth;
+    return { user, loading, error };
+};
 
-export default AuthUpdate;
+export default connect(mapStateToProps, { googleLoginUser })(AuthUpdate);

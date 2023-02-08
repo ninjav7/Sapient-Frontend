@@ -56,8 +56,8 @@ export const Default = (props) => {
 Default.args = {
     // Rendering
 
-    //callBackEachElemStack: [(props) => ({...props, title: 'Building Root2'})],
-    //callBackForAllStack: (props) => ({...props, title: 'Building Root'}),
+    //callBackEachColumn: [(props) => ({...props, title: 'Building Root2'})],
+    //callBackForAllColumns: (props) => ({...props, title: 'Building Root'}),
 
     //Click on items
 
