@@ -105,6 +105,7 @@ const CompareBuildings = () => {
             .then((res) => {
                 let response = res?.data;
                 let topVal = Math.max(...response.map((o) => o.energy_density));
+                top = Math.max(...response.map((o) => o.energy_density));
                 setTopEnergyDensity(topVal);
                 setBuildingsData(response);
                 setIsLoadingBuildingData(false);
