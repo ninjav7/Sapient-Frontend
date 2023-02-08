@@ -17,6 +17,7 @@ import { ReactComponent as UnlinkSVG } from '../../assets/icons/link-slash.svg';
 import { PROP_TYPES } from './constants';
 
 import './Panel.scss';
+import { mergePropsByAccessors } from './helper';
 
 export const PanelWidgetContext = React.createContext({});
 

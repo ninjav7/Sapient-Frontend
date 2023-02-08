@@ -10,12 +10,12 @@ import { PREFIXES_TO_BREAKERS_VALUES } from './constants';
  * @returns {Object.<string, Array.<{id: String, source: String, target: String}>>} - The lined list of edges
  */
 const groupEdgesToColumns = (edges) => {
-    const duplicateEdges = [...edges];
+    const duplicateEdges = [...edges].sort((a, b) => parseFloat(a.id.replace(/[a-z]|-/g, '')) - parseFloat(b.id.replace(/[a-z]|-/g, '')));
     const output = {};
     let index = 0;
 
     while (duplicateEdges.length) {
-        let trg = duplicateEdges[index].target;
+        let trg = duplicateEdges[index]?.target;
         output[output[index] ? ++index : index] = [duplicateEdges[0]];
         duplicateEdges.splice(0, 1);
 

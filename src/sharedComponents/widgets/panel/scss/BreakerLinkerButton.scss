@@ -56,11 +56,13 @@
     &::before {
         @extend .wires;
         top: -1rem;
+        border-bottom: 0;
     }
 
     &::after {
         @extend .wires;
         bottom: -1rem;
+        border-top: 0;
     }
 
     &:not(.is-linked) {
