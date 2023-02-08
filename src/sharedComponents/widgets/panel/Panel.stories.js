@@ -71,6 +71,7 @@ Default.args = {
         isFlagged: 'is_flagged',
         type: 'type',
         parentBreaker: 'parent_breaker',
+        isLinked: 'is_linked',
         // here you can specify custom props and catch them in handlers
         _id: 'id',
     },
