@@ -8,8 +8,8 @@ import Typography from '../../sharedComponents/typography';
 import axios from 'axios';
 import { BaseUrl, updateUsers } from '../../services/Network';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
-import { FormGroup, Button, Alert } from 'reactstrap';
+import { FormGroup, Button } from 'reactstrap';
+import { UserStore } from '../../store/UserStore';
 
 const VerifyAccount = (props) => {
     const history = useHistory();
@@ -21,6 +21,11 @@ const VerifyAccount = (props) => {
     useEffect(() => {
         set_isMounted(true);
         document.body.classList.add('authentication-bg');
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = 'Success - your email has been updated.';
+            s.notificationType = 'success';
+        });
         verifyUser();
         return () => {
             set_isMounted(false);
@@ -76,17 +81,6 @@ const VerifyAccount = (props) => {
                                     </Typography.Header>
                                 </div>
                                 <>
-                                    <Alert color="success" className="alertPop" isOpen={true}>
-                                        <div>
-                                            <Typography.Subheader className="alertText">
-                                                <CircleCheckSVG
-                                                    className="ml-2 mr-2"
-                                                    style={{ marginRight: '4px', color: 'green' }}
-                                                />
-                                                Success - your email has been updated.
-                                            </Typography.Subheader>
-                                        </div>
-                                    </Alert>
                                     <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                         You have successfully updated your email. You may now log in to the Sapient
                                         Energy Portal.
