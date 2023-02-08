@@ -14,6 +14,7 @@ const BreakerLinkerColumn = React.memo(({ columnIndex, edge, onBreakerLinkedClic
             {edgesData.map((edgeData) => {
                 let isLinked = nodesMap[edgeData.source].is_linked && nodesMap[edgeData.target].is_linked;
                 
+                //@TODO Hack, should be resolved by another approach
                 if(isLinked) {
                     if(countItemsRefAPI.current === 2) {
                         countItemsRefAPI.current = 0;
@@ -22,6 +23,8 @@ const BreakerLinkerColumn = React.memo(({ columnIndex, edge, onBreakerLinkedClic
                         countItemsRefAPI.current += 1;
                     }
                     
+                } else {
+                    countItemsRefAPI.current = 0;
                 }
                 
                 return (
