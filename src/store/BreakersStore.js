@@ -10,4 +10,5 @@ export const BreakersStore = new Store({
     disconnectBreakerLinkData: [],
     panelData: {},
     isEditable: false,
+    breakersList: [],
 });

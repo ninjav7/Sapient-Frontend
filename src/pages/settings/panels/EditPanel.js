@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
+import { useAtom } from 'jotai';
 
 import {
     deleteCurrentPanel,
@@ -9,6 +10,7 @@ import {
     getPanelsList,
     getPassiveDeviceList,
     resetAllBreakers,
+    updateBreakersLink,
     updatePanelDetails,
 } from './services';
 
@@ -17,15 +19,38 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
+
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
 import Brick from '../../../sharedComponents/brick';
 import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
-import { getVoltageConfigValue, voltsOption } from './utils';
-import { edges, nodes } from '../../../sharedComponents/widgets/panel/mock';
+import {
+    breakerLinkingAlerts,
+    getEquipmentForBreaker,
+    getPhaseConfigValue,
+    getVoltageConfigValue,
+    setProcessing,
+    unableLinkingAlerts,
+    validateConfiguredEquip,
+    validateDevicesForBreaker,
+    voltsOption,
+} from './utils';
+import { comparePanelData, panelType } from './utils';
+import { userPermissionData } from '../../../store/globalState';
+import { Button } from '../../../sharedComponents/button';
+import Typography from '../../../sharedComponents/typography';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import Select from '../../../sharedComponents/form/select';
+import './styles.scss';
 
 const EditPanel = () => {
+    const history = useHistory();
     const { panelId } = useParams();
+    const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
 
     const [panelsList, setPanelsList] = useState([]);
     const [locationsList, setLocationsList] = useState([]);
@@ -39,6 +64,7 @@ const EditPanel = () => {
     const [panelObj, setPanelObj] = useState({});
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [panelType, setPanelType] = useState('distribution');
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
@@ -67,9 +93,616 @@ const EditPanel = () => {
         isViewDeviceIdsState: false,
     });
 
+    const onCancelClick = () => {
+        history.push({
+            pathname: `/settings/panels`,
+        });
+    };
+
+    const triggerBreakerAPI = (status) => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = status;
+        });
+    };
+
+    const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo) => {
+        const params = `?building_id=${bldgId}`;
+        const payload = [breakerObjOne, breakerObjTwo];
+        await updateBreakersLink(params, payload)
+            .then((res) => {
+                triggerBreakerAPI(true);
+            })
+            .catch(() => {
+                setProcessing(false);
+            });
+    };
+
+    const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
+        const params = `?building_id=${bldgId}`;
+        const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
+        await updateBreakersLink(params, payload)
+            .then((res) => {
+                triggerBreakerAPI(true);
+            })
+            .catch(() => {
+                setProcessing(false);
+            });
+    };
+
+    const linkBreakers = (sourceBreakerObj, targetBreakerObj) => {
+        // --- breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3 ---
+        if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
+            breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+            return;
+        }
+
+        // --- breakerLink= 1:1 ---
+        if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+            if (panelObj?.voltage === '600') {
+                // Setup Triple Breaker
+                if (targetBreakerObj?.breaker_number + 2 > breakersList.length) {
+                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    return;
+                }
+
+                let thirdBreakerObj = breakersList.find(
+                    (record) => record?.breaker_number === targetBreakerObj?.breaker_number + 2
+                );
+
+                if (sourceBreakerObj?.breaker_type === 3) {
+                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    return;
+                }
+
+                if (targetBreakerObj?.breaker_type === 3) {
+                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    return;
+                }
+
+                if (thirdBreakerObj?.breaker_type === 3) {
+                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    return;
+                }
+
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
+                    sourceBreakerObj?.device_link,
+                    targetBreakerObj?.device_link,
+                    thirdBreakerObj?.device_link,
+                ]);
+
+                if (!isLinkable) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
+
+                let breakerOneEquip = sourceBreakerObj?.equipment_link[0] ? sourceBreakerObj?.equipment_link[0] : '';
+                let breakerTwoEquip = targetBreakerObj?.equipment_link[0] ? targetBreakerObj?.equipment_link[0] : '';
+                let breakerThreeEquip = thirdBreakerObj?.equipment_link[0] ? thirdBreakerObj?.equipment_link[0] : '';
+
+                let equipmentID = '';
+                let equipmentList = [breakerOneEquip, breakerTwoEquip, breakerThreeEquip];
+
+                if (!(breakerOneEquip === '' && breakerTwoEquip === '' && breakerThreeEquip === '')) {
+                    let configuredEquip = equipmentList.filter((el) => el !== '');
+                    if (configuredEquip.length === 1) {
+                        equipmentID = configuredEquip[0];
+                    } else {
+                        unableLinkingAlerts();
+                        return;
+                    }
+                }
+
+                setProcessing(true);
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj?.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: '',
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj?.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+                return;
+            }
+
+            const { isLinkable, uniqueList } = validateDevicesForBreaker([
+                sourceBreakerObj?.device_link,
+                targetBreakerObj?.device_link,
+            ]);
+
+            if (!isLinkable) {
+                unableLinkingAlerts();
+                return;
+            }
+
+            let deviceID = '';
+
+            if (uniqueList.length === 1) deviceID = uniqueList[0];
+            if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
+
+            const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
+
+            if (isEquipDiff) {
+                unableLinkingAlerts();
+                return;
+            }
+
+            setProcessing(true);
+
+            const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
+
+            let breakerObjOne = {
+                breaker_id: sourceBreakerObj.id,
+                voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                breaker_type: 2,
+                parent_breaker: '',
+                is_linked: true,
+                equipment_id: equipmentID,
+                device_id: deviceID,
+            };
+
+            let breakerObjTwo = {
+                breaker_id: targetBreakerObj.id,
+                voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                breaker_type: 2,
+                parent_breaker: sourceBreakerObj.id,
+                is_linked: true,
+                equipment_id: equipmentID,
+                device_id: deviceID,
+            };
+            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
+        }
+
+        // breakerLink= 2:2
+        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
+            breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+            return;
+        }
+
+        // breakerLink= 1:2 && breakerLink= 2:1
+        if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
+            if (panelObj?.voltage === '120/240') {
+                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                return;
+            }
+
+            // breakerLink= 2:1
+            if (sourceBreakerObj?.breaker_type === 2) {
+                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
+
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
+                    parentBreakerObj?.device_link,
+                    sourceBreakerObj?.device_link,
+                    targetBreakerObj?.device_link,
+                ]);
+
+                if (!isLinkable) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
+
+                const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
+
+                if (isEquipDiff) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
+                setProcessing(true);
+
+                const equipmentID = getEquipmentForBreaker([parentBreakerObj, targetBreakerObj]);
+
+                let breakerObjOne = {
+                    breaker_id: parentBreakerObj?.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: '',
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: parentBreakerObj?.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: parentBreakerObj?.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+                return;
+            }
+
+            // breakerLink= 1:2
+            if (targetBreakerObj?.breaker_type === 2) {
+                let thirdBreakerObj = breakersList.find((record) => record?.parent_breaker === targetBreakerObj?.id);
+
+                const { isLinkable, uniqueList } = validateDevicesForBreaker([
+                    sourceBreakerObj?.device_link,
+                    targetBreakerObj?.device_link,
+                    thirdBreakerObj?.device_link,
+                ]);
+
+                if (!isLinkable) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
+                let deviceID = '';
+
+                if (uniqueList.length === 1) deviceID = uniqueList[0];
+                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
+
+                const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
+
+                if (isEquipDiff) {
+                    unableLinkingAlerts();
+                    return;
+                }
+
+                setProcessing(true);
+
+                const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: '',
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj.id,
+                    is_linked: true,
+                    equipment_id: equipmentID,
+                    device_id: deviceID,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+                return;
+            }
+        }
+    };
+
+    const unlinkBreakers = (sourceBreakerObj, targetBreakerObj) => {
+        if (panelObj?.voltage === '600') {
+            // Parent Breaker in Triple Linking
+            if (sourceBreakerObj?.parent_breaker === '') {
+                let linkedBreakerObjs = breakersList.filter(
+                    (record) => record?.parent_breaker === sourceBreakerObj?.id
+                );
+                let thirdBreakerObj = linkedBreakerObjs[1];
+
+                let equipmentId =
+                    sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
+
+                setProcessing(true);
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: equipmentId,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+                return;
+            }
+            // Child Breaker in Triple Linking
+            if (sourceBreakerObj?.parent_breaker !== '') {
+                if (sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker) {
+                    return;
+                }
+                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
+
+                let equipmentId =
+                    parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
+
+                setProcessing(true);
+
+                let breakerObjOne = {
+                    breaker_id: parentBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: equipmentId,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+
+                let breakerObjThree = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+            }
+            return;
+        }
+        if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
+            // Parent Breaker in Triple Linking
+            if (sourceBreakerObj?.parent_breaker === '') {
+                let linkedBreakerObjs = breakersList.filter(
+                    (record) => record?.parent_breaker === sourceBreakerObj?.id
+                );
+                let thirdBreakerObj = linkedBreakerObjs[1];
+
+                let equipmentId =
+                    sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
+
+                setProcessing(true);
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                    breaker_type: 2,
+                    parent_breaker: '',
+                    is_linked: true,
+                    equipment_id: equipmentId,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                    breaker_type: 2,
+                    parent_breaker: targetBreakerObj.id,
+                    is_linked: true,
+                    equipment_id: equipmentId,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+                return;
+            }
+            // Child Breaker in Triple Linking
+            if (sourceBreakerObj?.parent_breaker !== '') {
+                if (sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker) {
+                    return;
+                }
+                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
+
+                let equipmentId =
+                    parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
+
+                setProcessing(true);
+
+                let breakerObjOne = {
+                    breaker_id: parentBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                    breaker_type: 2,
+                    parent_breaker: '',
+                    is_linked: true,
+                    equipment_id: equipmentId,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
+                    breaker_type: 2,
+                    parent_breaker: parentBreakerObj.id,
+                    is_linked: true,
+                    equipment_id: equipmentId,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                    equipment_id: '',
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+            }
+        }
+        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
+            let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
+
+            setProcessing(true);
+
+            let breakerObjOne = {
+                breaker_id: sourceBreakerObj.id,
+                voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                breaker_type: 1,
+                parent_breaker: '',
+                is_linked: false,
+                equipment_id: equipmentId,
+            };
+            let breakerObjTwo = {
+                breaker_id: targetBreakerObj.id,
+                voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
+                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
+                breaker_type: 1,
+                parent_breaker: '',
+                is_linked: false,
+                equipment_id: '',
+            };
+            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
+            return;
+        }
+    };
+
+    const onBreakerLinkedClick = (breakerLinkObj) => {
+        const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
+        const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
+
+        // linked - linked => user is trying to unlink 2 breakers
+        if (sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
+            unlinkBreakers(sourceBreakerObj, targetBreakerObj);
+        }
+
+        // not linked - not linked => user is trying to link 2 breakers
+        if (!sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
+        }
+
+        // linked - not linked && not-linked - linked
+        if (!sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
+            if (targetBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
+                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                return;
+            }
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
+        }
+
+        if (sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
+            if (sourceBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
+                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                return;
+            }
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
+        }
+    };
+
     const getTargetBreakerId = (targetBreakerNo) => {
         let targetObj = breakersList?.find((obj) => obj?.breaker_number === targetBreakerNo);
         return targetObj?.id;
+    };
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, panelObj);
+        obj[key] = value;
+        setPanelObj(obj);
+    };
+
+    const savePanelData = async () => {
+        setIsProcessing(true);
+        const params = `?panel_id=${panelId}`;
+        const panel_obj = {
+            name: panelObj?.panel_name,
+            parent_panel: panelObj?.parent_id,
+            space_id: panelObj?.location_id,
+        };
+        await updatePanelDetails(params, panel_obj)
+            .then((res) => {
+                setIsProcessing(false);
+                history.push({
+                    pathname: `/settings/panels`,
+                });
+            })
+            .catch(() => {
+                setIsProcessing(false);
+            });
     };
 
     const fetchSinglePanelData = async (panel_id, bldg_id) => {
@@ -122,6 +755,11 @@ const EditPanel = () => {
             .then((res) => {
                 const response = res?.data?.data;
                 setBreakersList(response);
+
+                BreakersStore.update((s) => {
+                    s.breakersList = response;
+                });
+
                 setBreakersFetching(false);
 
                 LoadingStore.update((s) => {
@@ -134,6 +772,9 @@ const EditPanel = () => {
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                     s.isLoading = false;
+                });
+                BreakersStore.update((s) => {
+                    s.breakersList = [];
                 });
             });
     };
@@ -168,9 +809,17 @@ const EditPanel = () => {
         await getPanelsList(params)
             .then((res) => {
                 const response = res?.data?.data;
-                setPanelsList(response);
+                if (response.length !== 0) {
+                    response.forEach((record) => {
+                        record.label = record?.panel_name;
+                        record.value = record?.panel_id;
+                    });
+                }
+                response.length === 0 ? setPanelsList([]) : setPanelsList(response);
             })
-            .catch(() => {});
+            .catch(() => {
+                setPanelsList([]);
+            });
     };
 
     const fetchPassiveDeviceData = async (bldg_id) => {
@@ -202,10 +851,18 @@ const EditPanel = () => {
         const params = `/${bldg_id}`;
         await getLocationData(params)
             .then((res) => {
-                const responseData = res?.data;
-                responseData.length === 0 ? setLocationsList([]) : setLocationsList(responseData);
+                const response = res?.data;
+                if (response.length !== 0) {
+                    response.forEach((record) => {
+                        record.label = record?.location_name;
+                        record.value = record?.location_id;
+                    });
+                }
+                response.length === 0 ? setLocationsList([]) : setLocationsList(response);
             })
-            .catch(() => {});
+            .catch(() => {
+                setLocationsList([]);
+            });
     };
 
     const pageDefaultStates = () => {
@@ -239,9 +896,15 @@ const EditPanel = () => {
             };
             links.push(obj);
         });
-        console.log('SSR links => ', links);
         setBreakerLinks(links);
     }, [breakersList]);
+
+    useEffect(() => {
+        if (!isBreakerApiTrigerred) return;
+
+        fetchBreakersData(panelId, bldgId);
+        fetchEquipmentData(bldgId);
+    }, [isBreakerApiTrigerred]);
 
     useEffect(() => {
         fetchSinglePanelData(panelId, bldgId);
@@ -256,13 +919,118 @@ const EditPanel = () => {
         pageDefaultStates();
     }, []);
 
-    console.log('SSR breakersList => ', breakersList);
-    console.log('SSR breakerLinks => ', breakerLinks);
-
     return (
-        <>
-            <h2>EditPanel</h2>;
+        <React.Fragment>
+            <div className="d-flex justify-content-between">
+                <div>
+                    <Typography.Header size={Typography.Sizes.lg}>Edit Panel</Typography.Header>
+                </div>
+                {isPanelFetched ? (
+                    <Skeleton count={1} height={35} width={135} />
+                ) : (
+                    <div className="d-flex">
+                        <div>
+                            <Button
+                                label="Cancel"
+                                size={Button.Sizes.md}
+                                type={Button.Type.secondaryGrey}
+                                onClick={onCancelClick}
+                            />
+                        </div>
+                        <div>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.building_panels_permission?.edit ? (
+                                <Button
+                                    label={isProcessing ? 'Saving' : 'Save'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={savePanelData}
+                                    className="ml-2"
+                                    disabled={comparePanelData(panelObj, originalPanelObj)}
+                                />
+                            ) : null}
+                        </div>
+                    </div>
+                )}
+            </div>
+
             <Brick sizeInRem={2} />
+
+            <div className="edit-panel-custom-grid">
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    {isPanelFetched ? (
+                        <Skeleton count={1} height={35} width={250} />
+                    ) : (
+                        <InputTooltip
+                            placeholder="Enter Panel Name"
+                            onChange={(e) => {
+                                handleChange('panel_name', e.target.value);
+                            }}
+                            labelSize={Typography.Sizes.md}
+                            value={panelObj?.panel_name}
+                            disabled={
+                                !(
+                                    userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                )
+                            }
+                        />
+                    )}
+                </div>
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    {isPanelFetched ? (
+                        <Skeleton count={1} height={35} width={250} />
+                    ) : (
+                        <Select
+                            placeholder="Select Parent Panel"
+                            options={panelsList}
+                            currentValue={panelsList.filter((option) => option.value === panelObj?.parent_id)}
+                            onChange={(e) => {
+                                handleChange('parent_id', e.value);
+                            }}
+                            isSearchable={true}
+                            disabled={
+                                !(
+                                    userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                )
+                            }
+                        />
+                    )}
+                </div>
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    {isPanelFetched ? (
+                        <Skeleton count={1} height={35} width={400} />
+                    ) : (
+                        <Select
+                            placeholder="Select Location"
+                            options={locationsList}
+                            currentValue={locationsList.filter((option) => option.value === panelObj?.location_id)}
+                            onChange={(e) => {
+                                handleChange('location_id', e.value);
+                            }}
+                            isSearchable={true}
+                            disabled={
+                                !(
+                                    userPermission?.user_role === 'admin' ||
+                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                )
+                            }
+                        />
+                    )}
+                </div>
+            </div>
+
+            <Brick sizeInRem={2} />
+
             <Panel
                 typeOptions={panelTypeList}
                 typeProps={{
@@ -309,13 +1077,16 @@ const EditPanel = () => {
                     parentBreaker: 'parent_breaker',
                     _id: 'id',
                 }}
+                onBreakerLinkedClick={(props) => {
+                    onBreakerLinkedClick(props);
+                }}
                 nodes={breakersList}
                 edges={breakerLinks}
                 style={{
                     width: 906,
                 }}
             />
-        </>
+        </React.Fragment>
     );
 };
 

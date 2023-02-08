@@ -16,8 +16,8 @@ export const unableLinkingAlerts = () => {
 
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
-    if (sourceBreakerObj?.data?.equipment_link[0] && targetBreakerObj?.data?.equipment_link[0]) {
-        if (sourceBreakerObj?.data?.equipment_link[0] !== targetBreakerObj?.data?.equipment_link[0]) {
+    if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {
+        if (sourceBreakerObj?.equipment_link[0] !== targetBreakerObj?.equipment_link[0]) {
             diff = true;
         }
     } else {
@@ -63,14 +63,14 @@ export const getEquipmentForBreaker = (breakers) => {
     let equipmentId = '';
     const [breakerOne, breakerTwo] = breakers;
 
-    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 0) {
+    if (breakerOne?.equipment_link.length === 0 && breakerTwo?.equipment_link.length === 0) {
         equipmentId = '';
     }
-    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 1) {
-        equipmentId = breakerTwo?.data?.equipment_link[0];
+    if (breakerOne?.equipment_link.length === 0 && breakerTwo?.equipment_link.length === 1) {
+        equipmentId = breakerTwo?.equipment_link[0];
     }
-    if (breakerOne?.data?.equipment_link.length === 1 && breakerTwo?.data?.equipment_link.length === 0) {
-        equipmentId = breakerOne?.data?.equipment_link[0];
+    if (breakerOne?.equipment_link.length === 1 && breakerTwo?.equipment_link.length === 0) {
+        equipmentId = breakerOne?.equipment_link[0];
     }
 
     return equipmentId;
