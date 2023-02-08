@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
@@ -6,6 +6,7 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { createCustomer } from './services';
+import { UserStore } from '../../../store/UserStore';
 
 const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerList }) => {
     const defaultCustomerObj = {
@@ -14,6 +15,7 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
 
     const [customerData, setCustomerData] = useState(defaultCustomerObj);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [validate, setValidate] = useState(true);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, customerData);
@@ -27,14 +29,36 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
         await createCustomer(payload)
             .then((res) => {
                 let response = res.data;
+                console.log(response);
+                if (response.success === false) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'error';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+
+                    getCustomerList();
+                }
                 setIsProcessing(false);
                 closeAddCustomerModal();
-                getCustomerList();
             })
             .catch((error) => {
                 setIsProcessing(false);
             });
     };
+    useEffect(() => {
+        if (customerData?.name?.length >= 3) {
+            setValidate(false);
+        } else {
+            setValidate(true);
+        }
+    }, [customerData]);
 
     return (
         <Modal
@@ -80,7 +104,7 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        disabled={isProcessing}
+                        disabled={isProcessing || validate}
                         onClick={() => {
                             createCustomers();
                         }}

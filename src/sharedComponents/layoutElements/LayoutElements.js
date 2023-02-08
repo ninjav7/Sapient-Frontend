@@ -23,8 +23,8 @@ const getHandlerFromArray = (array, index, ...props) => {
 const renderStackColumns = (
     state,
     {
-        callBackEachElemStack,
-        callBackForAllStack,
+        callBackEachColumn,
+        callBackForAllColumns,
         onColumnAdd,
         onColumnEdit,
         onColumnNameEdit,
@@ -49,10 +49,10 @@ const renderStackColumns = (
         };
 
         const customizedProps = (() => {
-            const callBackPropsComponent = callBackEachElemStack && callBackEachElemStack[key];
+            const callBackPropsComponent = callBackEachColumn && callBackEachColumn[key];
 
-            if (callBackForAllStack && !callBackPropsComponent) {
-                return callBackForAllStack(defaultProps);
+            if (callBackForAllColumns && !callBackPropsComponent) {
+                return callBackForAllColumns(defaultProps);
             }
 
             if (callBackPropsComponent) {
@@ -173,9 +173,9 @@ const LayoutElements = (props) => {
 
 LayoutElements.propTypes = {
     // Callbacks have the highest priority.
-    callBackEachElemStack: PropTypes.arrayOf(PropTypes.func),
-    // Won't be applied to item if there is callback found in "callBackEachElemStack".
-    callBackForAllStack: PropTypes.func,
+    callBackEachColumn: PropTypes.arrayOf(PropTypes.func),
+    // Won't be applied to item if there is callback found in "callBackEachColumn".
+    callBackForAllColumns: PropTypes.func,
 
     //Click handler for each item in the list
     onClickEachChild: PropTypes.arrayOf(PropTypes.func),

@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Col, FormGroup, Alert, Row } from 'reactstrap';
+import { Col, FormGroup, Row } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import { connect } from 'react-redux';
-import { Cookies } from 'react-cookie';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
-import { fetchSessionDetails, updateUser } from './service';
+import { updateUser } from './service';
 import { googleLoginUser } from '../../redux/actions';
 import { UserStore } from '../../store/UserStore';
 import { isUserAuthenticated } from '../../helpers/authUtils';
@@ -26,7 +24,11 @@ const AuthUpdate = (props) => {
     useEffect(() => {
         set_isMounted(true);
         document.body.classList.add('authentication-bg');
-
+        UserStore.update((s) => {
+            s.showNotification = true;
+            s.notificationMessage = 'Account Found';
+            s.notificationType = 'success';
+        });
         if (loginSuccess === true) {
             updateUserDetails();
             renderRedirectToRoot();
@@ -81,17 +83,6 @@ const AuthUpdate = (props) => {
                                 </div>
 
                                 <>
-                                    <Alert color="success" className="alertPop" isOpen={true}>
-                                        <div>
-                                            <Typography.Subheader size={Typography.Sizes.md} className="alertText">
-                                                <CircleCheckSVG
-                                                    className="ml-2 mr-2"
-                                                    style={{ marginRight: '4px', color: 'green' }}
-                                                />
-                                                Acount Found
-                                            </Typography.Subheader>
-                                        </div>
-                                    </Alert>
                                     <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                         We found an account associated with this email. Would you like to manage the
                                         existing account with Google Authentication?
