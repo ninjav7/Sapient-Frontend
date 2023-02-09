@@ -96,11 +96,13 @@ export const comparePanelData = (obj1, obj2) => {
 
 export const getVoltageConfigValue = (value, breakerType) => {
     if (breakerType === 'single') {
+        if (value === '120/240') return 120;
         if (value === '208/120') return 120;
         if (value === '480') return 277;
         if (value === '600') return 347;
     }
     if (breakerType === 'double') {
+        if (value === '120/240') return 240;
         if (value === '208/120') return 208;
         if (value === '480') return 480;
     }
