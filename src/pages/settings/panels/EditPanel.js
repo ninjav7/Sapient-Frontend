@@ -63,7 +63,7 @@ const EditPanel = () => {
     const [passiveDevicesList, setPassiveDevicesList] = useState([]);
     const [equipmentsList, setEquipmentsList] = useState([]);
 
-    const [breakersList, setBreakersList] = useState([]);
+    const breakersList = BreakersStore.useState((s) => s.breakersList);
     const [breakerLinks, setBreakerLinks] = useState([]);
     const [isBreakersFetched, setBreakersFetching] = useState(false);
 
@@ -246,6 +246,8 @@ const EditPanel = () => {
                 sourceBreakerObj?.device_link,
                 targetBreakerObj?.device_link,
             ]);
+
+            console.log('SSR uniqueList => ', uniqueList);
 
             if (!isLinkable) {
                 unableLinkingAlerts();
@@ -622,6 +624,7 @@ const EditPanel = () => {
             }
         }
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
+            console.log('SSR Double Breaker');
             let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
             setProcessing(true);
@@ -644,27 +647,36 @@ const EditPanel = () => {
                 is_linked: false,
                 equipment_id: '',
             };
+            console.log('SSR breakerObjOne => ', breakerObjOne);
+            console.log('SSR breakerObjTwo => ', breakerObjTwo);
             linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
             return;
         }
     };
 
-    const onBreakerLinkedClick = (breakerLinkObj) => {
+    const handleBreakerLinkClicked = (breakerLinkObj) => {
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
 
+        console.log('SSR breakersList => ', breakersList);
+        console.log('SSR sourceBreakerObj => ', sourceBreakerObj);
+        console.log('SSR targetBreakerObj => ', targetBreakerObj);
+
         // linked - linked => user is trying to unlink 2 breakers
         if (sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
+            console.log('SSR Loop 1 entered');
             unlinkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
         // not linked - not linked => user is trying to link 2 breakers
         if (!sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
+            console.log('SSR Loop 2 entered');
             linkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
         // linked - not linked && not-linked - linked
         if (!sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
+            console.log('SSR Loop 3 entered');
             if (targetBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
                 breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
                 return;
@@ -673,6 +685,7 @@ const EditPanel = () => {
         }
 
         if (sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
+            console.log('SSR Loop 4 entered');
             if (sourceBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
                 breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
                 return;
@@ -761,7 +774,7 @@ const EditPanel = () => {
         await getBreakersList(params)
             .then((res) => {
                 const response = res?.data?.data;
-                setBreakersList(response);
+                console.log('SSR Breakers List (received) => ', response);
 
                 BreakersStore.update((s) => {
                     s.breakersList = response;
@@ -904,6 +917,7 @@ const EditPanel = () => {
             links.push(obj);
         });
         setBreakerLinks(links);
+        console.log('SSR links => ', links);
     }, [breakersList]);
 
     useEffect(() => {
@@ -960,9 +974,7 @@ const EditPanel = () => {
                     </div>
                 )}
             </div>
-
             <Brick sizeInRem={2} />
-
             <div className="edit-panel-custom-grid">
                 <div>
                     <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
@@ -1035,9 +1047,7 @@ const EditPanel = () => {
                     )}
                 </div>
             </div>
-
             <Brick sizeInRem={2} />
-
             <Panel
                 typeOptions={panelTypeList}
                 typeProps={{
@@ -1086,9 +1096,7 @@ const EditPanel = () => {
                     _id: 'id',
                     isLinked: 'is_linked',
                 }}
-                onBreakerLinkedClick={(props) => {
-                    onBreakerLinkedClick(props);
-                }}
+                onBreakerLinkedClick={handleBreakerLinkClicked}
                 nodes={breakersList}
                 edges={breakerLinks}
                 style={{
