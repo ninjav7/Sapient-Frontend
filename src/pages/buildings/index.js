@@ -469,32 +469,64 @@ const BuildingOverview = () => {
                         />
                     )}
 
-                    <HourlyAvgConsumption
-                        title="Hourly Average Consumption"
-                        subtitle="Average by Hour (kWh)"
-                        isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                        startEndDayCount={startEndDayCount}
-                        series={hourlyAvgConsumpData}
-                        height={heatMapChartHeight}
-                        timeZone={timeZone}
-                        className="mt-4"
-                        pageType="building"
-                        handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
-                        showRouteBtn={true}
-                    />
+                    {isPlugOnly ? (
+                        <>
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
+                                series={buildingConsumptionChartData}
+                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                                pageType="building"
+                                className="mt-4"
+                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                                showRouteBtn={true}
+                            />
 
-                    <TotalEnergyConsumption
-                        title="Total Energy Consumption"
-                        subtitle="Hourly Energy Consumption (kWh)"
-                        series={buildingConsumptionChartData}
-                        isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
-                        startEndDayCount={startEndDayCount}
-                        timeZone={timeZone}
-                        pageType="building"
-                        className="mt-4"
-                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                        showRouteBtn={true}
-                    />
+                            <HourlyAvgConsumption
+                                title="Hourly Average Consumption"
+                                subtitle="Average by Hour (kWh)"
+                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                series={hourlyAvgConsumpData}
+                                height={heatMapChartHeight}
+                                timeZone={timeZone}
+                                className="mt-4"
+                                pageType="building"
+                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                                showRouteBtn={true}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <HourlyAvgConsumption
+                                title="Hourly Average Consumption"
+                                subtitle="Average by Hour (kWh)"
+                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                series={hourlyAvgConsumpData}
+                                height={heatMapChartHeight}
+                                timeZone={timeZone}
+                                className="mt-4"
+                                pageType="building"
+                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                                showRouteBtn={true}
+                            />
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
+                                series={buildingConsumptionChartData}
+                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                                pageType="building"
+                                className="mt-4"
+                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                                showRouteBtn={true}
+                            />
+                        </>
+                    )}
                 </div>
 
                 <TopConsumptionWidget
