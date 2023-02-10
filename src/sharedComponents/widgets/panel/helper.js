@@ -55,7 +55,7 @@ const groupEdgesToColumns = (edges) => {
  * @returns {BreakerProps}
  */
 
-const mergePropsByAccessors = (propsAccessor, props) => {
+const mergePropsByAccessors = (propsAccessor, props = {}) => {
     const breakerItem = {};
 
     return propsAccessor.reduce(
