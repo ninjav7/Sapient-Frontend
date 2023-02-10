@@ -3,6 +3,7 @@ import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
 import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
@@ -17,7 +18,7 @@ import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
-
+import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
@@ -32,6 +33,7 @@ const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
+    const [buildingListData] = useAtom(buildingData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -54,6 +56,7 @@ const BuildingOverview = () => {
         },
     });
 
+    const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
@@ -437,6 +440,13 @@ const BuildingOverview = () => {
         handleChartOpen();
     };
 
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.plug_only) setIsPlugOnly(bldgObj?.plug_only);
+        }
+    }, [buildingListData, bldgId]);
+
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -447,15 +457,17 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
-                    <EnergyConsumptionByEndUse
-                        title="Energy Consumption by End Use"
-                        subtitle="Energy Totals"
-                        energyConsumption={energyConsumption}
-                        bldgId={bldgId}
-                        pageType="building"
-                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                        showRouteBtn={true}
-                    />
+                    {!isPlugOnly && (
+                        <EnergyConsumptionByEndUse
+                            title="Energy Consumption by End Use"
+                            subtitle="Energy Totals"
+                            energyConsumption={energyConsumption}
+                            bldgId={bldgId}
+                            pageType="building"
+                            handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                            showRouteBtn={true}
+                        />
+                    )}
 
                     <HourlyAvgConsumption
                         title="Hourly Average Consumption"
