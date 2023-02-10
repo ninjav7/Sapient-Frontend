@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import Modal from 'react-bootstrap/Modal';
 
 import {
     deleteCurrentPanel,
@@ -44,10 +43,13 @@ import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import './styles.scss';
 import BreakerConfiguration from './BreakerConfiguration';
 import UnlinkAllBreakers from './UnlinkAllBreakers';
 import { UserStore } from '../../../store/UserStore';
+import { DangerZone } from '../../../sharedComponents/dangerZone';
+import DeletePanel from './DeletePanel';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -66,7 +68,13 @@ const EditPanel = () => {
     const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
     const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
 
+    // Delete Panel Modal
+    const [showDeletePanelAlert, setShowDeletePanelAlert] = useState(false);
+    const handleDeletePanelAlertClose = () => setShowDeletePanelAlert(false);
+    const handleDeletePanelAlertShow = () => setShowDeletePanelAlert(true);
+
     const [isResetting, setIsResetting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [panelsList, setPanelsList] = useState([]);
     const [locationsList, setLocationsList] = useState([]);
@@ -122,6 +130,24 @@ const EditPanel = () => {
         });
     };
 
+    const fetchBreakerType = (obj) => {
+        if (
+            obj?.equipment_link.length === 0 &&
+            obj?.sensor_link === '' &&
+            obj?.device_link === '' &&
+            obj?.breaker_type === 1 &&
+            obj?.parent_breaker === '' &&
+            obj?.is_linked === false
+        )
+            return Breaker.Type.notConfigured;
+
+        if (obj?.equipment_link.length !== 0 && obj?.device_link !== '' && obj?.sensor_link !== '') {
+            return Breaker.Type.configured;
+        } else {
+            return Breaker.Type.partiallyConfigured;
+        }
+    };
+
     const unLinkAllBreakers = async () => {
         setIsResetting(true);
         const params = `?panel_id=${panelId}`;
@@ -139,6 +165,37 @@ const EditPanel = () => {
             })
             .catch(() => {
                 setIsResetting(false);
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to reset Panel';
+                    s.notificationType = 'error';
+                });
+            });
+    };
+
+    const deletePanel = async () => {
+        setIsDeleting(true);
+        const params = `?panel_id=${panelId}`;
+        await deleteCurrentPanel(params)
+            .then((res) => {
+                setIsDeleting(false);
+                handleDeletePanelAlertClose();
+                history.push({
+                    pathname: `/settings/panels`,
+                });
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Panel has been deleted successfully';
+                    s.notificationType = 'success';
+                });
+            })
+            .catch(() => {
+                setIsDeleting(false);
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to delete Panel';
+                    s.notificationType = 'error';
+                });
             });
     };
 
@@ -1102,15 +1159,16 @@ const EditPanel = () => {
                     console.log('onShowChart', props);
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
-                    console.log(breakerProps, breakerData, children);
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = Breaker.Status.online;
+                    const type = fetchBreakerType(breakerData);
 
                     //here you can modify props for breakers
                     return {
                         ...breakerProps,
                         equipmentName,
                         items: breakerProps.items.map((breakerProp) => ({ ...breakerProp, status })),
+                        type,
                     };
                 }}
                 breakerPropsAccessor={{
@@ -1135,6 +1193,15 @@ const EditPanel = () => {
                 }}
             />
 
+            <Brick sizeInRem={2} />
+
+            <DangerZone
+                title="Danger Zone"
+                labelButton="Delete Panel"
+                iconButton={<DeleteSVG />}
+                onClickButton={(event) => handleDeletePanelAlertShow()}
+            />
+
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
                 closeBreakerConfigModal={closeBreakerConfigModal}
@@ -1150,6 +1217,14 @@ const EditPanel = () => {
                 handleUnlinkAlertShow={handleUnlinkAlertShow}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkAllBreakers={unLinkAllBreakers}
+            />
+
+            <DeletePanel
+                isDeleting={isDeleting}
+                showDeletePanelAlert={showDeletePanelAlert}
+                handleDeletePanelAlertShow={handleDeletePanelAlertShow}
+                handleDeletePanelAlertClose={handleDeletePanelAlertClose}
+                deletePanel={deletePanel}
             />
         </React.Fragment>
     );
