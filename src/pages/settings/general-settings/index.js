@@ -235,6 +235,7 @@ const GeneralBuildingSettings = () => {
                     active: data.active,
                     timezone: data.timezone,
                     time_format: data.time_format,
+                    plug_only: data.plug_only,
                 };
                 setBuildingDetails(buildingDetailsObj);
 
@@ -272,6 +273,12 @@ const GeneralBuildingSettings = () => {
         obj.active = !buildingDetails.active;
         localStorage.setItem('generalObjectActive', obj.active);
         handleBldgSettingChanges('active', obj.active);
+    };
+
+    const handlePlugChange = () => {
+        let obj = buildingDetails;
+        obj.plug_only = !buildingDetails.plug_only;
+        handleBldgSettingChanges('plug_only', obj.plug_only);
     };
 
     const handleDateTimeSwitch = () => {
@@ -368,6 +375,12 @@ const GeneralBuildingSettings = () => {
 
             obj[key] = value;
 
+            setBuildingDetails(obj);
+        }
+
+        if (key === 'plug_only') {
+            let obj = Object.assign({}, buildingDetails);
+            obj[key] = value;
             setBuildingDetails(obj);
         }
     };
@@ -787,6 +800,36 @@ const GeneralBuildingSettings = () => {
                                             disabled
                                         />
                                     )}
+                                </div>
+                            </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>Plug-only</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm}>
+                                        To view Plug only data of this building
+                                    </Typography.Body>
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Switch
+                                        onChange={() => {
+                                            if (
+                                                userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit
+                                            ) {
+                                                handlePlugChange();
+                                            }
+                                        }}
+                                        checked={buildingDetails.plug_only}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
                                 </div>
                             </div>
                         </CardBody>
