@@ -657,6 +657,15 @@ const EditPanel = () => {
 
         // linked - linked => user is trying to unlink 2 breakers
         if (sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
+            if (
+                !(
+                    targetBreakerObj?.parent_breaker === sourceBreakerObj?.id ||
+                    sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker
+                )
+            ) {
+                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                return;
+            }
             unlinkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
