@@ -17,39 +17,97 @@ import DeleteBreaker from './DeleteBreaker';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Tabs from '../../../sharedComponents/tabs/Tabs';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plusBlue.svg';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
+import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
 import { voltsOption } from './utils';
 import './breaker-config-styles.scss';
 
-import Form from 'react-bootstrap/Form';
-import Skeleton from 'react-loading-skeleton';
-import AsyncSelect from 'react-select/async';
 import Select from '../../../sharedComponents/form/select';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
-    openBreakerConfigModal,
     closeBreakerConfigModal,
     selectedBreakerObj,
-    breakersList,
     panelObj,
+    equipmentsList,
+    passiveDevicesList,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
+    const breakersList = BreakersStore.useState((s) => s.breakersList);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [parentBreakerObj, setParentBreakerObj] = useState({});
     const [firstBreakerObj, setFirstBreakerObj] = useState({});
     const [secondBreakerObj, setSecondBreakerObj] = useState({});
     const [thirdBreakerObj, setThirdBreakerObj] = useState({});
+    const [selectedEquipment, setSelectedEquipment] = useState('');
+
+    const [firstSensorList, setFirstSensorList] = useState([]);
+    const [secondSensorList, setSecondSensorList] = useState([]);
+    const [thirdSensorList, setThirdSensorList] = useState([]);
+
+    const fetchSingleSensorsList = async (deviceId) => {
+        if (deviceId === null || deviceId === undefined || deviceId === '') return;
+
+        // setIsSensorDataFetched(true);
+        // setIsSensorDataFetchedForDouble(true);
+        // setIsSensorDataFetchedForTriple(true);
+
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
+
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+
+                if (response.length !== 0) {
+                    response.forEach((record) => {
+                        record.label = record?.name;
+                        record.value = record?.id;
+                        record?.breaker_id !== '' ? linkedSensor.push(record) : unlinkedSensor.push(record);
+                    });
+                }
+
+                setFirstSensorList(unlinkedSensor.concat(linkedSensor));
+                setSecondSensorList(unlinkedSensor.concat(linkedSensor));
+                setThirdSensorList(unlinkedSensor.concat(linkedSensor));
+
+                // setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
+                // setTripleSensorData(unlinkedSensor.concat(linkedSensor));
+                // setIsSensorDataFetched(false);
+                // setIsSensorDataFetchedForDouble(false);
+                // setIsSensorDataFetchedForTriple(false);
+            })
+            .catch(() => {
+                // setIsSensorDataFetched(false);
+                // setIsSensorDataFetchedForDouble(false);
+                // setIsSensorDataFetchedForTriple(false);
+            });
+    };
 
     useEffect(() => {
         if (!selectedBreakerObj) return;
+
         setFirstBreakerObj(selectedBreakerObj);
         setParentBreakerObj(selectedBreakerObj);
+
+        if (selectedBreakerObj?.equipment_link) setSelectedEquipment(selectedBreakerObj?.equipment_link[0]);
+
+        if (selectedBreakerObj?.breaker_type === 1 && selectedBreakerObj?.device_link !== '') {
+            fetchSingleSensorsList(selectedBreakerObj?.device_link);
+        }
 
         if (selectedBreakerObj?.breaker_type === 2) {
             let obj = breakersList.find((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(obj);
+
+            if (selectedBreakerObj?.device_link !== '' && selectedBreakerObj?.device_link === obj?.device_link) {
+                fetchSingleSensorsList(selectedBreakerObj?.device_link);
+            }
         }
 
         if (selectedBreakerObj?.breaker_type === 3) {
@@ -131,7 +189,7 @@ const BreakerConfiguration = ({
                                             type="number"
                                             placeholder="Enter Phase"
                                             labelSize={Typography.Sizes.md}
-                                            value={1}
+                                            value={firstBreakerObj?.phase_configuration}
                                         />
                                     </div>
 
@@ -142,15 +200,19 @@ const BreakerConfiguration = ({
                                             type="number"
                                             placeholder="Enter Amperage"
                                             labelSize={Typography.Sizes.md}
-                                            value={100}
+                                            value={firstBreakerObj?.rated_amps}
                                         />
                                     </div>
 
                                     <div>
                                         <Typography.Body size={Typography.Sizes.md}>Volts</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <Brick sizeInRem={0.25} />
-                                        <Select placeholder="Select Volts" options={voltsOption} isSearchable={true} />
+                                        <InputTooltip
+                                            type="number"
+                                            placeholder="Enter Voltage"
+                                            labelSize={Typography.Sizes.md}
+                                            value={firstBreakerObj?.voltage}
+                                        />
                                     </div>
                                 </div>
 
@@ -163,7 +225,7 @@ const BreakerConfiguration = ({
                                         {/* Breaker 1 */}
                                         <div>
                                             <Typography.Subheader size={Typography.Sizes.md}>
-                                                Breaker 1
+                                                {firstBreakerObj?.name}
                                             </Typography.Subheader>
                                             <Brick sizeInRem={1} />
                                             <div className="d-flex justify-content-between">
@@ -172,15 +234,16 @@ const BreakerConfiguration = ({
                                                         Device ID
                                                     </Typography.Body>
                                                     <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
-                                                        placeholder="Enter Device ID Name"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
+                                                    <Select
+                                                        id="exampleSelect"
+                                                        placeholder="Select Device ID Name"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        options={passiveDevicesList}
+                                                        currentValue={passiveDevicesList.filter(
+                                                            (option) => option.value === firstBreakerObj?.device_link
+                                                        )}
+                                                        className="basic-single"
                                                     />
                                                 </div>
                                                 <div className="w-100">
@@ -188,111 +251,168 @@ const BreakerConfiguration = ({
                                                         Sensor #
                                                     </Typography.Body>
                                                     <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
+                                                    <Select
+                                                        id="exampleSelect"
                                                         placeholder="Select Sensor Number"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        options={firstSensorList}
+                                                        currentValue={firstSensorList.filter(
+                                                            (option) => option.value === firstBreakerObj?.sensor_link
+                                                        )}
+                                                        className="basic-single"
                                                     />
                                                 </div>
                                             </div>
-                                            <Brick sizeInRem={0.25} />
+                                            <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
                                             <hr />
-                                            <Brick sizeInRem={0.25} />
+                                            <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
                                         </div>
 
                                         {/* Breaker 2 */}
-                                        <div>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                Breaker 2
-                                            </Typography.Subheader>
-                                            <Brick sizeInRem={1} />
-                                            <div className="d-flex justify-content-between">
-                                                <div className="w-100 mr-4">
-                                                    <Typography.Body size={Typography.Sizes.md}>
-                                                        Device ID
-                                                    </Typography.Body>
-                                                    <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
-                                                        placeholder="Enter Device ID Name"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
-                                                    />
+                                        {(firstBreakerObj?.breaker_type === 2 ||
+                                            firstBreakerObj?.breaker_type === 3) && (
+                                            <div>
+                                                <Typography.Subheader size={Typography.Sizes.md}>
+                                                    {secondBreakerObj?.name}
+                                                </Typography.Subheader>
+                                                <Brick sizeInRem={1} />
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100 mr-4">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Device ID
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Device ID Name"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            options={passiveDevicesList}
+                                                            currentValue={passiveDevicesList.filter(
+                                                                (option) =>
+                                                                    option.value === secondBreakerObj?.device_link
+                                                            )}
+                                                            className="basic-single"
+                                                        />
+                                                    </div>
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Sensor #
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Sensor Number"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            options={secondSensorList}
+                                                            currentValue={secondSensorList.filter(
+                                                                (option) =>
+                                                                    option.value === secondBreakerObj?.sensor_link
+                                                            )}
+                                                            className="basic-single"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="w-100">
-                                                    <Typography.Body size={Typography.Sizes.md}>
-                                                        Sensor #
-                                                    </Typography.Body>
-                                                    <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
-                                                        placeholder="Select Sensor Number"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
-                                                    />
-                                                </div>
+                                                <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
+                                                <hr />
+                                                <Brick sizeInRem={firstBreakerObj?.breaker_type !== 3 ? 1 : 0.25} />
                                             </div>
-                                            <Brick sizeInRem={0.25} />
-                                            <hr />
-                                            <Brick sizeInRem={0.25} />
-                                        </div>
+                                        )}
 
                                         {/* Breaker 3 */}
-                                        <div>
-                                            <Typography.Subheader size={Typography.Sizes.md}>
-                                                Breaker 3
-                                            </Typography.Subheader>
-                                            <Brick sizeInRem={1} />
-                                            <div className="d-flex justify-content-between">
-                                                <div className="w-100 mr-4">
-                                                    <Typography.Body size={Typography.Sizes.md}>
-                                                        Device ID
-                                                    </Typography.Body>
-                                                    <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
-                                                        placeholder="Enter Device ID Name"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
-                                                    />
+                                        {firstBreakerObj?.breaker_type === 3 && (
+                                            <div>
+                                                <Typography.Subheader size={Typography.Sizes.md}>
+                                                    {thirdBreakerObj?.name}
+                                                </Typography.Subheader>
+                                                <Brick sizeInRem={1} />
+                                                <div className="d-flex justify-content-between">
+                                                    <div className="w-100 mr-4">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Device ID
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Device ID Name"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            options={passiveDevicesList}
+                                                            currentValue={passiveDevicesList.filter(
+                                                                (option) =>
+                                                                    option.value === thirdBreakerObj?.device_link
+                                                            )}
+                                                            className="basic-single"
+                                                        />
+                                                    </div>
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Sensor #
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Sensor Number"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            options={thirdSensorList}
+                                                            currentValue={thirdSensorList.filter(
+                                                                (option) =>
+                                                                    option.value === thirdBreakerObj?.sensor_link
+                                                            )}
+                                                            className="basic-single"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="w-100">
-                                                    <Typography.Body size={Typography.Sizes.md}>
-                                                        Sensor #
-                                                    </Typography.Body>
-                                                    <Brick sizeInRem={0.25} />
-                                                    <InputTooltip
-                                                        placeholder="Select Sensor Number"
-                                                        // onChange={(e) => {
-                                                        //     handleChange('name', e.target.value);
-                                                        //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                        // }}
-                                                        // value={equipmentObj?.name}
-                                                        labelSize={Typography.Sizes.md}
-                                                        // error={equipmentErrors?.name}
-                                                    />
-                                                </div>
+                                                <Brick sizeInRem={0.25} />
+                                                <hr />
+                                                <Brick sizeInRem={0.25} />
                                             </div>
+                                        )}
+
+                                        <div className="d-flex justify-content-between">
+                                            <div className="w-100">
+                                                <Button
+                                                    label="Reset Configuration"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryDistructive}
+                                                    // onClick={() => {
+                                                    //     handleEditBreakerClose();
+                                                    //     handleUnlinkAlertShow();
+                                                    // }}
+                                                    icon={<UnlinkOldSVG />}
+                                                    className="w-100 mr-3"
+                                                />
+                                            </div>
+
+                                            <div className="w-100">
+                                                <Button
+                                                    label="Delete Breaker"
+                                                    size={Button.Sizes.md}
+                                                    type={Button.Type.secondaryDistructive}
+                                                    // onClick={() => {
+                                                    //     handleEditBreakerClose();
+                                                    //     handleDeleteAlertShow();
+                                                    // }}
+                                                    icon={<DeleteSVG />}
+                                                    // disabled={
+                                                    //     distributedBreakersData.length !==
+                                                    //         breakerData.breaker_number ||
+                                                    //     breakerData.breakerType === 2 ||
+                                                    //     breakerData.breakerType === 3
+                                                    // }
+                                                    className="w-100 ml-3"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="float-right mr-2">
                                             <Brick sizeInRem={0.25} />
-                                            <hr />
-                                            <Brick sizeInRem={0.25} />
+                                            <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
+                                                Grouped breakers cannot be deleted
+                                            </Typography.Body>
                                         </div>
                                     </div>
                                     <div className="w-100">
@@ -310,12 +430,10 @@ const BreakerConfiguration = ({
                                                                     placeholder="Select Equipment"
                                                                     name="select"
                                                                     isSearchable={true}
-                                                                    // options={equipmentsList}
-                                                                    // currentValue={equipmentsList.filter(
-                                                                    //     (option) =>
-                                                                    //         (option.value === option.value) ===
-                                                                    //         breakerData.equipment_link[0]
-                                                                    // )}
+                                                                    options={equipmentsList}
+                                                                    currentValue={equipmentsList.filter(
+                                                                        (option) => option.value === selectedEquipment
+                                                                    )}
                                                                     className="basic-single"
                                                                 />
                                                             </div>
@@ -326,7 +444,7 @@ const BreakerConfiguration = ({
                                                                 <Radio name="radio-2" />
                                                             </div>
                                                             <Typography.Body size={Typography.Sizes.md}>
-                                                                Unlabelled
+                                                                Unlabeled
                                                             </Typography.Body>
                                                         </div>
                                                         <Brick sizeInRem={1} />
@@ -397,11 +515,11 @@ const BreakerConfiguration = ({
                                                         </div>
                                                         <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.md}>
-                                                                Quanity
+                                                                Quantity
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
                                                             <InputTooltip
-                                                                placeholder="Enter Equipment Quanity"
+                                                                placeholder="Enter Equipment Quantity"
                                                                 // onChange={(e) => {
                                                                 //     handleChange('name', e.target.value);
                                                                 //     setEquipmentErrors({ ...equipmentErrors, name: null });

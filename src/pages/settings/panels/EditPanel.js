@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
+import Modal from 'react-bootstrap/Modal';
 
 import {
     deleteCurrentPanel,
@@ -45,6 +46,8 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
 import './styles.scss';
 import BreakerConfiguration from './BreakerConfiguration';
+import UnlinkAllBreakers from './UnlinkAllBreakers';
+import { UserStore } from '../../../store/UserStore';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -58,11 +61,17 @@ const EditPanel = () => {
     const closeBreakerConfigModal = () => setBreakerConfigModalState(false);
     const openBreakerConfigModal = () => setBreakerConfigModalState(true);
 
+    // Unlink Alert Modal
+    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
+    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
+    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+
+    const [isResetting, setIsResetting] = useState(false);
+
     const [panelsList, setPanelsList] = useState([]);
     const [locationsList, setLocationsList] = useState([]);
     const [passiveDevicesList, setPassiveDevicesList] = useState([]);
     const [equipmentsList, setEquipmentsList] = useState([]);
-
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const [breakerLinks, setBreakerLinks] = useState([]);
     const [isBreakersFetched, setBreakersFetching] = useState(false);
@@ -111,6 +120,26 @@ const EditPanel = () => {
         LoadingStore.update((s) => {
             s.isBreakerDataFetched = status;
         });
+    };
+
+    const unLinkAllBreakers = async () => {
+        setIsResetting(true);
+        const params = `?panel_id=${panelId}`;
+        const payload = { panel_id: panelId };
+        await resetAllBreakers(params, payload)
+            .then((res) => {
+                setIsResetting(false);
+                handleUnlinkAlertClose();
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Panel has been reset successfully';
+                    s.notificationType = 'success';
+                });
+                triggerBreakerAPI(true);
+            })
+            .catch(() => {
+                setIsResetting(false);
+            });
     };
 
     const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo) => {
@@ -1060,7 +1089,8 @@ const EditPanel = () => {
                 states={panelStates}
                 mainBreaker={mainBreakerConfig}
                 dangerZoneProps={{
-                    onClickButton: (event) => alert('dangerZoneProps onClick'),
+                    labelButton: 'Reset all Equipment & Device Links',
+                    onClickButton: (event) => handleUnlinkAlertShow(),
                 }}
                 onEdit={(props) => {
                     const breakerObj = breakersList.find((el) => el?.id === props._id);
@@ -1107,11 +1137,19 @@ const EditPanel = () => {
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
-                openBreakerConfigModal={openBreakerConfigModal}
                 closeBreakerConfigModal={closeBreakerConfigModal}
                 selectedBreakerObj={selectedBreakerObj}
-                breakersList={breakersList}
                 panelObj={panelObj}
+                equipmentsList={equipmentsList}
+                passiveDevicesList={passiveDevicesList}
+            />
+
+            <UnlinkAllBreakers
+                isResetting={isResetting}
+                showUnlinkAlert={showUnlinkAlert}
+                handleUnlinkAlertShow={handleUnlinkAlertShow}
+                handleUnlinkAlertClose={handleUnlinkAlertClose}
+                unLinkAllBreakers={unLinkAllBreakers}
             />
         </React.Fragment>
     );
