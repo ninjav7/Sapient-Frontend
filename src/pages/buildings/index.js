@@ -443,7 +443,7 @@ const BuildingOverview = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.plug_only) setIsPlugOnly(bldgObj?.plug_only);
+            if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
 
