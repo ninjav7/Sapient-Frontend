@@ -1064,7 +1064,7 @@ const EditPanel = () => {
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
                     console.log(breakerProps, breakerData, children);
-                    const equipmentName = breakerData.equipment_links[0]?.name;
+                    const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = Breaker.Status.online;
 
                     //here you can modify props for breakers
