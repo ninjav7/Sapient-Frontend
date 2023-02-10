@@ -380,9 +380,7 @@ const GeneralBuildingSettings = () => {
 
         if (key === 'plug_only') {
             let obj = Object.assign({}, buildingDetails);
-
             obj[key] = value;
-
             setBuildingDetails(obj);
         }
     };
@@ -816,28 +814,22 @@ const GeneralBuildingSettings = () => {
                                     </Typography.Body>
                                 </div>
                                 <div className="col d-flex align-items-center">
-                                    {userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
-                                        <Switch
-                                            onChange={() => {
+                                    <Switch
+                                        onChange={() => {
+                                            if (
+                                                userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit
+                                            ) {
                                                 handlePlugChange();
-                                            }}
-                                            checked={buildingDetails.plug_only}
-                                            onColor={colorPalette.datavizBlue600}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                    ) : (
-                                        <Switch
-                                            onChange={() => {}}
-                                            checked={buildingDetails.plug_only}
-                                            onColor={colorPalette.datavizBlue600}
-                                            className="react-switch"
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                        />
-                                    )}
+                                            }
+                                        }}
+                                        checked={buildingDetails.plug_only}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
                                 </div>
                             </div>
                         </CardBody>
