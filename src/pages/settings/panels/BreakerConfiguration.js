@@ -114,6 +114,14 @@ const BreakerConfiguration = ({
             let childbreakers = breakersList.filter((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(childbreakers[0]);
             setThirdBreakerObj(childbreakers[1]);
+
+            if (
+                selectedBreakerObj?.device_link !== '' &&
+                selectedBreakerObj?.device_link === childbreakers[0]?.device_link &&
+                selectedBreakerObj?.device_link === childbreakers[1]?.device_link
+            ) {
+                fetchSingleSensorsList(selectedBreakerObj?.device_link);
+            }
         }
     }, [selectedBreakerObj]);
 
