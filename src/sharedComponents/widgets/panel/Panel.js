@@ -18,6 +18,7 @@ import { PROP_TYPES } from './constants';
 
 import './Panel.scss';
 
+
 export const PanelWidgetContext = React.createContext({});
 
 const Panel = (props) => {
