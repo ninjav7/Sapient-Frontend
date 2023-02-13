@@ -12,7 +12,7 @@ import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import Typography from '../../../sharedComponents/typography';
 import UnlinkBreaker from './UnlinkBreaker';
-import { getBreakerDeleted, getSensorsList, resetAllBreakers } from './services';
+import { getBreakerDeleted, getSensorsList, resetAllBreakers, updateBreakerDetails } from './services';
 import DeleteBreaker from './DeleteBreaker';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Tabs from '../../../sharedComponents/tabs/Tabs';
@@ -21,18 +21,22 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
-import { voltsOption } from './utils';
+import { comparePanelData, voltsOption } from './utils';
 import './breaker-config-styles.scss';
 
 import Select from '../../../sharedComponents/form/select';
+import { Notification } from '../../../sharedComponents/notification/Notification';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
+    openBreakerConfigModal,
     closeBreakerConfigModal,
     selectedBreakerObj,
+    setSelectedBreakerObj,
     panelObj,
     equipmentsList,
     passiveDevicesList,
+    triggerBreakerAPI,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
     const breakersList = BreakersStore.useState((s) => s.breakersList);
@@ -48,7 +52,161 @@ const BreakerConfiguration = ({
     const [secondSensorList, setSecondSensorList] = useState([]);
     const [thirdSensorList, setThirdSensorList] = useState([]);
 
-    const fetchSingleSensorsList = async (deviceId) => {
+    // Unlink Alert Modal
+    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
+    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
+    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+    const [isResetting, setIsResetting] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const closeModalWithoutSave = () => {
+        closeBreakerConfigModal();
+        setParentBreakerObj({});
+        setFirstBreakerObj({});
+        setSecondBreakerObj({});
+        setThirdBreakerObj({});
+        setSelectedEquipment('');
+        setFirstSensorList([]);
+        setSecondSensorList([]);
+        setThirdSensorList([]);
+        setActiveTab('edit-breaker');
+        setSelectedBreakerObj({});
+    };
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, firstBreakerObj);
+        obj[key] = value;
+        setFirstBreakerObj(obj);
+    };
+
+    const handleBreakerConfigChange = (key, value, breakerLvl) => {
+        if (breakerLvl === 'first') {
+            let obj = Object.assign({}, firstBreakerObj);
+            if (key === 'device_link') {
+                if (obj?.breaker_type === 2) {
+                    let obj = Object.assign({}, secondBreakerObj);
+                    obj['device_link'] = value;
+                    setSecondBreakerObj(obj);
+                    fetchSensorsList(value, 'first-second');
+                }
+                if (obj?.breaker_type === 3) {
+                    let objTwo = Object.assign({}, secondBreakerObj);
+                    let objThree = Object.assign({}, thirdBreakerObj);
+                    objTwo['device_link'] = value;
+                    objThree['device_link'] = value;
+                    setSecondBreakerObj(objTwo);
+                    setThirdBreakerObj(objThree);
+                    fetchSensorsList(value, 'all');
+                }
+            }
+            obj[key] = value;
+            console.log('SSR obj => ', obj);
+            console.log('SSR key => ', key);
+            console.log('SSR value => ', value);
+            console.log('SSR breakerLvl => ', breakerLvl);
+            setFirstBreakerObj(obj);
+            if (obj?.breaker_type === 1) fetchSensorsList(value, 'first');
+        }
+        if (breakerLvl === 'second') {
+            let obj = Object.assign({}, secondBreakerObj);
+            obj[key] = value;
+            setSecondBreakerObj(obj);
+            fetchSensorsList(value, 'second');
+        }
+        if (breakerLvl === 'third') {
+            let obj = Object.assign({}, thirdBreakerObj);
+            obj[key] = value;
+            setThirdBreakerObj(obj);
+            fetchSensorsList(value, 'third');
+        }
+    };
+
+    const unLinkCurrentBreaker = async () => {
+        setIsResetting(true);
+
+        const breakersList = [];
+        const params = `?building_id=${bldgId}`;
+
+        if (firstBreakerObj?.id) breakersList.push(firstBreakerObj?.id);
+        if (secondBreakerObj?.id) breakersList.push(secondBreakerObj?.id);
+        if (thirdBreakerObj?.id) breakersList.push(thirdBreakerObj?.id);
+
+        const payload = { breaker_id: breakersList };
+
+        await resetAllBreakers(params, payload)
+            .then((res) => {
+                setIsResetting(false);
+                window.scrollTo(0, 0);
+                handleUnlinkAlertClose();
+                closeBreakerConfigModal();
+                triggerBreakerAPI(true);
+            })
+            .catch(() => {
+                setIsResetting(false);
+            });
+    };
+
+    const handleBreakerUpdate = async () => {
+        setIsProcessing(true);
+
+        const params = `?building_id=${bldgId}`;
+        const breakersList = [];
+
+        // {
+        //     "breaker_id": "string",
+        //     "name": "string",
+        //     "breaker_number": 0,
+        //     "phase_configuration": 0,
+        //     "rated_amps": 0,
+        //     "voltage": 0,
+        //     "sensor_link": "string",
+        //     "device_link": "string",
+        //     "equipment_link": [
+        //       "string"
+        //     ]
+        //   }
+
+        let breakerObjOne = {
+            breaker_id: firstBreakerObj?.id,
+        };
+        let breakerObjTwo = {
+            breaker_id: secondBreakerObj?.id,
+        };
+        let breakerObjThree = {
+            breaker_id: thirdBreakerObj?.id,
+        };
+
+        if (firstBreakerObj?.rated_amps !== parentBreakerObj?.rated_amps) {
+            breakerObjOne.rated_amps = firstBreakerObj?.rated_amps;
+        }
+
+        if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
+            breakerObjOne.device_link = firstBreakerObj?.device_link;
+        }
+
+        if (firstBreakerObj?.sensor_link !== parentBreakerObj?.sensor_link) {
+            breakerObjOne.sensor_link = firstBreakerObj?.sensor_link;
+        }
+
+        if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
+            breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
+        }
+
+        console.log('SSR breakerObjOne => ', breakerObjOne);
+
+        // await updateBreakerDetails(params, breakersList)
+        //     .then((res) => {
+        //         setIsProcessing(false);
+        //         closeBreakerConfigModal();
+        //         window.scrollTo(0, 0);
+        //         triggerBreakerAPI(true);
+        //     })
+        //     .catch(() => {
+        //         setIsProcessing(false);
+        //     });
+    };
+
+    const onLoadSensorsListFetch = async (deviceId) => {
         if (deviceId === null || deviceId === undefined || deviceId === '') return;
 
         // setIsSensorDataFetched(true);
@@ -76,8 +234,6 @@ const BreakerConfiguration = ({
                 setSecondSensorList(unlinkedSensor.concat(linkedSensor));
                 setThirdSensorList(unlinkedSensor.concat(linkedSensor));
 
-                // setDoubleSensorData(unlinkedSensor.concat(linkedSensor));
-                // setTripleSensorData(unlinkedSensor.concat(linkedSensor));
                 // setIsSensorDataFetched(false);
                 // setIsSensorDataFetchedForDouble(false);
                 // setIsSensorDataFetchedForTriple(false);
@@ -89,8 +245,41 @@ const BreakerConfiguration = ({
             });
     };
 
+    const fetchSensorsList = async (deviceId, breakerLvl) => {
+        if (deviceId === null || deviceId === undefined || deviceId === '') return;
+
+        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
+
+        await getSensorsList(params)
+            .then((res) => {
+                let response = res?.data;
+
+                let linkedSensor = [];
+                let unlinkedSensor = [];
+
+                if (response.length !== 0) {
+                    response.forEach((record) => {
+                        record.label = record?.name;
+                        record.value = record?.id;
+                        record.isDisabled = record?.breaker_id !== '';
+                        record?.breaker_id !== '' ? linkedSensor.push(record) : unlinkedSensor.push(record);
+                    });
+                }
+
+                if (breakerLvl === 'first' || breakerLvl === 'first-second' || breakerLvl === 'all')
+                    setFirstSensorList(unlinkedSensor.concat(linkedSensor));
+
+                if (breakerLvl === 'second' || breakerLvl === 'first-second' || breakerLvl === 'all')
+                    setSecondSensorList(unlinkedSensor.concat(linkedSensor));
+
+                if (breakerLvl === 'third' || breakerLvl === 'all')
+                    setThirdSensorList(unlinkedSensor.concat(linkedSensor));
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
-        if (!selectedBreakerObj) return;
+        if (!selectedBreakerObj?.id) return;
 
         setFirstBreakerObj(selectedBreakerObj);
         setParentBreakerObj(selectedBreakerObj);
@@ -98,7 +287,7 @@ const BreakerConfiguration = ({
         if (selectedBreakerObj?.equipment_link) setSelectedEquipment(selectedBreakerObj?.equipment_link[0]);
 
         if (selectedBreakerObj?.breaker_type === 1 && selectedBreakerObj?.device_link !== '') {
-            fetchSingleSensorsList(selectedBreakerObj?.device_link);
+            onLoadSensorsListFetch(selectedBreakerObj?.device_link);
         }
 
         if (selectedBreakerObj?.breaker_type === 2) {
@@ -106,7 +295,7 @@ const BreakerConfiguration = ({
             setSecondBreakerObj(obj);
 
             if (selectedBreakerObj?.device_link !== '' && selectedBreakerObj?.device_link === obj?.device_link) {
-                fetchSingleSensorsList(selectedBreakerObj?.device_link);
+                onLoadSensorsListFetch(selectedBreakerObj?.device_link);
             }
         }
 
@@ -120,7 +309,7 @@ const BreakerConfiguration = ({
                 selectedBreakerObj?.device_link === childbreakers[0]?.device_link &&
                 selectedBreakerObj?.device_link === childbreakers[1]?.device_link
             ) {
-                fetchSingleSensorsList(selectedBreakerObj?.device_link);
+                onLoadSensorsListFetch(selectedBreakerObj?.device_link);
             }
         }
     }, [selectedBreakerObj]);
@@ -169,17 +358,18 @@ const BreakerConfiguration = ({
                                     label="Cancel"
                                     size={Button.Sizes.md}
                                     type={Button.Type.secondaryGrey}
-                                    // onClick={closeModalWithoutSave}
+                                    onClick={closeModalWithoutSave}
                                 />
                             </div>
 
                             <div>
                                 <Button
-                                    label="Save"
+                                    label={isProcessing ? 'Saving...' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    // onClick={handleEquipmentUpdate}
+                                    onClick={handleBreakerUpdate}
                                     className="ml-2"
+                                    disabled={comparePanelData(firstBreakerObj, parentBreakerObj)}
                                 />
                             </div>
                         </div>
@@ -209,6 +399,9 @@ const BreakerConfiguration = ({
                                             placeholder="Enter Amperage"
                                             labelSize={Typography.Sizes.md}
                                             value={firstBreakerObj?.rated_amps}
+                                            onChange={(e) => {
+                                                handleChange('rated_amps', +e.target.value);
+                                            }}
                                         />
                                     </div>
 
@@ -251,6 +444,9 @@ const BreakerConfiguration = ({
                                                         currentValue={passiveDevicesList.filter(
                                                             (option) => option.value === firstBreakerObj?.device_link
                                                         )}
+                                                        onChange={(e) => {
+                                                            handleBreakerConfigChange('device_link', e.value, 'first');
+                                                        }}
                                                         className="basic-single"
                                                     />
                                                 </div>
@@ -268,6 +464,9 @@ const BreakerConfiguration = ({
                                                         currentValue={firstSensorList.filter(
                                                             (option) => option.value === firstBreakerObj?.sensor_link
                                                         )}
+                                                        onChange={(e) => {
+                                                            handleBreakerConfigChange('sensor_link', e.value, 'first');
+                                                        }}
                                                         className="basic-single"
                                                     />
                                                 </div>
@@ -301,6 +500,13 @@ const BreakerConfiguration = ({
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.device_link
                                                             )}
+                                                            onChange={(e) => {
+                                                                handleBreakerConfigChange(
+                                                                    'device_link',
+                                                                    e.value,
+                                                                    'second'
+                                                                );
+                                                            }}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -319,6 +525,13 @@ const BreakerConfiguration = ({
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.sensor_link
                                                             )}
+                                                            onChange={(e) => {
+                                                                handleBreakerConfigChange(
+                                                                    'sensor_link',
+                                                                    e.value,
+                                                                    'second'
+                                                                );
+                                                            }}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -352,6 +565,13 @@ const BreakerConfiguration = ({
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.device_link
                                                             )}
+                                                            onChange={(e) => {
+                                                                handleBreakerConfigChange(
+                                                                    'device_link',
+                                                                    e.value,
+                                                                    'third'
+                                                                );
+                                                            }}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -370,6 +590,13 @@ const BreakerConfiguration = ({
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.sensor_link
                                                             )}
+                                                            onChange={(e) => {
+                                                                handleBreakerConfigChange(
+                                                                    'sensor_link',
+                                                                    e.value,
+                                                                    'third'
+                                                                );
+                                                            }}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -386,10 +613,10 @@ const BreakerConfiguration = ({
                                                     label="Reset Configuration"
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
-                                                    // onClick={() => {
-                                                    //     handleEditBreakerClose();
-                                                    //     handleUnlinkAlertShow();
-                                                    // }}
+                                                    onClick={() => {
+                                                        closeBreakerConfigModal();
+                                                        handleUnlinkAlertShow();
+                                                    }}
                                                     icon={<UnlinkOldSVG />}
                                                     className="w-100 mr-3"
                                                 />
@@ -416,17 +643,29 @@ const BreakerConfiguration = ({
                                             </div>
                                         </div>
 
-                                        <div className="float-right mr-2">
-                                            <Brick sizeInRem={0.25} />
-                                            <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
-                                                Grouped breakers cannot be deleted
-                                            </Typography.Body>
-                                        </div>
+                                        {firstBreakerObj?.breaker_type !== 1 && (
+                                            <div className="float-right mr-2">
+                                                <Brick sizeInRem={0.25} />
+                                                <Typography.Body size={Typography.Sizes.sm} className="txt-warn-color">
+                                                    Grouped breakers cannot be deleted
+                                                </Typography.Body>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="w-100">
                                         <Tabs type={Tabs.Types.subsection} tabCustomStyle="p-2">
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
+                                                    {/* <div>
+                                                        <Notification
+                                                            type={Notification.Types.success}
+                                                            component={Notification.ComponentTypes.alert}
+                                                            description={'Equipment created successfully.'}
+                                                            closeAutomatically={true}
+                                                        />
+                                                        <Brick sizeInRem={1.5} />
+                                                    </div> */}
+
                                                     <div>
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
@@ -442,6 +681,10 @@ const BreakerConfiguration = ({
                                                                     currentValue={equipmentsList.filter(
                                                                         (option) => option.value === selectedEquipment
                                                                     )}
+                                                                    onChange={(e) => {
+                                                                        handleChange('equipment_link', e.value);
+                                                                        setSelectedEquipment(e.value);
+                                                                    }}
                                                                     className="basic-single"
                                                                 />
                                                             </div>
@@ -504,6 +747,15 @@ const BreakerConfiguration = ({
                                             {/* Create Equipment  */}
                                             <Tabs.Item eventKey="create-equip" title="Create Equipment">
                                                 <div className="p-default">
+                                                    {/* <div>
+                                                        <Notification
+                                                            type={Notification.Types.error}
+                                                            component={Notification.ComponentTypes.alert}
+                                                            description={'Unable to create equipment.'}
+                                                            closeAutomatically={false}
+                                                        />
+                                                        <Brick sizeInRem={1.5} />
+                                                    </div> */}
                                                     <div className="d-flex justify-content-between">
                                                         <div className="w-100 mr-4">
                                                             <Typography.Body size={Typography.Sizes.md}>
@@ -538,9 +790,7 @@ const BreakerConfiguration = ({
                                                             />
                                                         </div>
                                                     </div>
-
                                                     <Brick sizeInRem={1.5} />
-
                                                     <div className="d-flex justify-content-between">
                                                         <div className="w-100 mr-4">
                                                             <Typography.Body size={Typography.Sizes.md}>
@@ -591,9 +841,7 @@ const BreakerConfiguration = ({
                                                             />
                                                         </div>
                                                     </div>
-
                                                     <Brick sizeInRem={1.5} />
-
                                                     <div>
                                                         <Typography.Body size={Typography.Sizes.md}>
                                                             Equipment Location
@@ -618,9 +866,7 @@ const BreakerConfiguration = ({
                                                             Select Equipment Location
                                                         </Typography.Body>
                                                     </div>
-
                                                     <Brick sizeInRem={1.5} />
-
                                                     <div className="d-flex justify-content-end">
                                                         <Button
                                                             label={'Add Equipment'}
@@ -643,15 +889,15 @@ const BreakerConfiguration = ({
                 </div>
             </Modal>
 
-            {/* <UnlinkBreaker
-                showUnlinkAlert={showUnlinkAlert}
-                handleUnlinkAlertClose={handleUnlinkAlertClose}
-                handleEditBreakerShow={openBreakerConfigModal}
+            <UnlinkBreaker
                 isResetting={isResetting}
+                showUnlinkAlert={showUnlinkAlert}
+                handleEditBreakerShow={openBreakerConfigModal}
+                handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkCurrentBreaker={unLinkCurrentBreaker}
             />
 
-            <DeleteBreaker
+            {/* <DeleteBreaker
                 showDeleteAlert={showDeleteAlert}
                 handleDeleteAlertClose={handleDeleteAlertClose}
                 handleEditBreakerShow={openBreakerConfigModal}

@@ -14,6 +14,7 @@ import {
     deleteBreaker,
     getFiltersForEquipment,
     listSensor,
+    updateBreakers,
 } from '../../../services/Network';
 
 export function getPanelsData(
@@ -105,4 +106,8 @@ export function getPanelsList(params) {
 
 export function getSensorsList(params) {
     return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
+}
+
+export function updateBreakerDetails(params, payload) {
+    return axiosInstance.patch(`${updateBreakers}${params}`, payload).then((res) => res);
 }

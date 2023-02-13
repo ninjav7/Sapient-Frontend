@@ -28,6 +28,7 @@ import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
 import {
     breakerLinkingAlerts,
+    compareSensorsCount,
     getEquipmentForBreaker,
     getPhaseConfigValue,
     getVoltageConfigValue,
@@ -936,6 +937,7 @@ const EditPanel = () => {
                     const obj = {
                         label: record?.identifier,
                         value: record?.equipments_id,
+                        isDisabled: compareSensorsCount(record?.sensor_number),
                     };
                     newArray.push(obj);
                 });
@@ -1141,6 +1143,10 @@ const EditPanel = () => {
                     onChange: null,
                     defaultValue: 'distribution',
                 }}
+                startingBreaker={{
+                    onChange: null,
+                    defaultValue: 1,
+                }}
                 numberOfBreakers={breakerCountObj}
                 isEditable={true}
                 states={panelStates}
@@ -1204,11 +1210,14 @@ const EditPanel = () => {
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
+                openBreakerConfigModal={openBreakerConfigModal}
                 closeBreakerConfigModal={closeBreakerConfigModal}
                 selectedBreakerObj={selectedBreakerObj}
+                setSelectedBreakerObj={setSelectedBreakerObj}
                 panelObj={panelObj}
                 equipmentsList={equipmentsList}
                 passiveDevicesList={passiveDevicesList}
+                triggerBreakerAPI={triggerBreakerAPI}
             />
 
             <UnlinkAllBreakers

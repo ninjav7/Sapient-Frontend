@@ -94,6 +94,13 @@ export const comparePanelData = (obj1, obj2) => {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
 
+export const compareSensorsCount = (inputTxt) => {
+    if (inputTxt) {
+        let sensors = inputTxt.split('/');
+        return sensors[0] === sensors[1];
+    }
+};
+
 export const getVoltageConfigValue = (value, breakerType) => {
     if (breakerType === 'single') {
         if (value === '120/240') return 120;
