@@ -862,8 +862,8 @@ const GeneralBuildingSettings = () => {
                                             label="Street Address"
                                             placeholder="Enter Address 1"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('street_address', e.value);
-                                                settextLocation(e.value);
+                                                handleBldgSettingChanges('street_address', e.target.value);
+                                                settextLocation(e.target.value);
                                                 if (getResponseOfPlaces) {
                                                     setopenDropdown(true);
                                                 }
@@ -889,8 +889,8 @@ const GeneralBuildingSettings = () => {
                                             label="Address 2 (optional)"
                                             placeholder="Enter Address 2 (optional)"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('address_2', e.value);
-                                                localStorage.setItem('generalStreetAddress2', e.value);
+                                                handleBldgSettingChanges('address_2', e.target.value);
+                                                localStorage.setItem('generalStreetAddress2', e.target.value);
                                             }}
                                             className="w-100"
                                             value={buildingAddress?.address_2}
@@ -918,7 +918,7 @@ const GeneralBuildingSettings = () => {
                                             label="City"
                                             placeholder="Enter City"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('city', e.value);
+                                                handleBldgSettingChanges('city', e.target.value);
                                                 localStorage.setItem(
                                                     'generalCity',
                                                     totalSelectedData?.properties?.locality
@@ -946,7 +946,7 @@ const GeneralBuildingSettings = () => {
                                             label="State"
                                             placeholder="Select State"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('state', e.value);
+                                                handleBldgSettingChanges('state', e.target.value);
                                                 localStorage.setItem(
                                                     'generalState',
                                                     totalSelectedData?.properties?.region
