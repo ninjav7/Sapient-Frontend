@@ -1162,8 +1162,6 @@ const EditPanel = () => {
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = Breaker.Status.online;
                     const type = fetchBreakerType(breakerData);
-
-                    //here you can modify props for breakers
                     return {
                         ...breakerProps,
                         equipmentName,
@@ -1195,12 +1193,14 @@ const EditPanel = () => {
 
             <Brick sizeInRem={2} />
 
-            <DangerZone
-                title="Danger Zone"
-                labelButton="Delete Panel"
-                iconButton={<DeleteSVG />}
-                onClickButton={(event) => handleDeletePanelAlertShow()}
-            />
+            <div className="w-75">
+                <DangerZone
+                    title="Danger Zone"
+                    labelButton="Delete Panel"
+                    iconButton={<DeleteSVG />}
+                    onClickButton={(event) => handleDeletePanelAlertShow()}
+                />
+            </div>
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
