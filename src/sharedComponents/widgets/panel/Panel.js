@@ -19,6 +19,7 @@ import { PROP_TYPES } from './constants';
 import './Panel.scss';
 import { mergePropsByAccessors } from './helper';
 
+
 export const PanelWidgetContext = React.createContext({});
 
 const Panel = (props) => {

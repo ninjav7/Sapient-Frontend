@@ -2,6 +2,13 @@ import { Breaker } from '../../breaker';
 import { PREFIXES_TO_BREAKERS_VALUES } from './constants';
 
 /***
+ * Just extracts id as integer.
+ * @param id - String, id with text, like: 'Breaker-1'.....
+ * @returns {number} - Integer is always positive.
+ */
+const getNumberOfBreaker = (id) => parseFloat(String(id).replace(/[a-z]|-/g, ''));
+
+/***
  * Takes edges {source: ...., target: ....} and creates grouped linked lists.
  * @param {Object[]} edges - Edges to connect breakers.
  * @param {string} edges[].id - The id of the edge.
@@ -10,7 +17,7 @@ import { PREFIXES_TO_BREAKERS_VALUES } from './constants';
  * @returns {Object.<string, Array.<{id: String, source: String, target: String}>>} - The lined list of edges
  */
 const groupEdgesToColumns = (edges) => {
-    const duplicateEdges = [...edges].sort((a, b) => parseFloat(a.id.replace(/[a-z]|-/g, '')) - parseFloat(b.id.replace(/[a-z]|-/g, '')));
+    const duplicateEdges = [...edges].sort((a, b) => getNumberOfBreaker(a.id) - getNumberOfBreaker(b.id));
     const output = {};
     let index = 0;
 
@@ -80,4 +87,4 @@ const mergePropsByAccessors = (propsAccessor, props = {}) => {
     );
 };
 
-export { mergePropsByAccessors, groupEdgesToColumns };
+export { mergePropsByAccessors, groupEdgesToColumns, getNumberOfBreaker };
