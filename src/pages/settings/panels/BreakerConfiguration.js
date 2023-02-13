@@ -12,7 +12,13 @@ import { Button } from '../../../sharedComponents/button';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import Typography from '../../../sharedComponents/typography';
 import UnlinkBreaker from './UnlinkBreaker';
-import { getBreakerDeleted, getSensorsList, resetAllBreakers, updateBreakerDetails } from './services';
+import {
+    createEquipmentData,
+    getBreakerDeleted,
+    getSensorsList,
+    resetAllBreakers,
+    updateBreakerDetails,
+} from './services';
 import DeleteBreaker from './DeleteBreaker';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Tabs from '../../../sharedComponents/tabs/Tabs';
@@ -26,6 +32,8 @@ import './breaker-config-styles.scss';
 
 import Select from '../../../sharedComponents/form/select';
 import { Notification } from '../../../sharedComponents/notification/Notification';
+import { addNewEquipment, getLocationDataRequest, getMetadataRequest } from '../../../services/equipment';
+import { UserStore } from '../../../store/UserStore';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -37,8 +45,10 @@ const BreakerConfiguration = ({
     equipmentsList,
     passiveDevicesList,
     triggerBreakerAPI,
+    fetchEquipmentData,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
+    const [activeEquipTab, setActiveEquipTab] = useState('equip');
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -58,6 +68,86 @@ const BreakerConfiguration = ({
     const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
     const [isResetting, setIsResetting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const defaultEquipmentObj = {
+        name: '',
+        equipment_type: '',
+        end_use: '',
+        space_id: '',
+        quantity: '',
+    };
+
+    const defaultErrors = {
+        name: null,
+        equipment_type: null,
+        end_use: null,
+        quantity: null,
+    };
+
+    const [equipmentObj, setEquipmentObj] = useState(defaultEquipmentObj);
+    const [locationData, setLocationData] = useState([]);
+    const [endUseData, setEndUseData] = useState([]);
+    const [equipmentTypeData, setEquipmentTypeData] = useState([]);
+    const [isAdding, setAdding] = useState(false);
+    const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
+
+    const handleCreateEquipChange = (key, value) => {
+        let obj = Object.assign({}, equipmentObj);
+        if (key === 'equipment_type') {
+            let equipTypeObj = equipmentTypeData.find((el) => el.value === value);
+            obj['end_use'] = equipTypeObj?.end_use_id;
+            let errorObj = Object.assign({}, equipmentErrors);
+            errorObj.equipment_type = null;
+            errorObj.end_use = null;
+            setEquipmentErrors(errorObj);
+        }
+        obj[key] = value;
+        setEquipmentObj(obj);
+    };
+
+    const addEquipment = async () => {
+        let alertObj = Object.assign({}, equipmentErrors);
+
+        if ((equipmentObj?.name.trim()).length === 0) alertObj.name = 'Please enter equipment name';
+        if (equipmentObj?.equipment_type.length === 0)
+            alertObj.equipment_type = { text: 'Please select equipment type' };
+        if (equipmentObj?.end_use.length === 0) alertObj.end_use = { text: 'Please select end use category' };
+        if (equipmentObj?.quantity === '') alertObj.quantity = 'Please enter quantity';
+
+        setEquipmentErrors(alertObj);
+
+        if (!alertObj.name && !alertObj.equipment_type && !alertObj.end_use && !alertObj.quantity) {
+            setAdding(true);
+            let obj = Object.assign({}, equipmentObj);
+            obj.building_id = bldgId;
+            const params = `?quantity=${obj.quantity}`;
+            await createEquipmentData(params, obj)
+                .then((res) => {
+                    const response = res;
+                    if (response?.status === 200) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Equipment created successfully.';
+                            s.notificationType = 'success';
+                        });
+                        setSelectedEquipment(response?.data);
+                        fetchEquipmentData(bldgId);
+                        setActiveEquipTab('equip');
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Unable to create Equipment.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    setAdding(false);
+                })
+                .catch((e) => {
+                    setAdding(false);
+                    setEquipmentErrors(defaultErrors);
+                });
+        }
+    };
 
     const closeModalWithoutSave = () => {
         closeBreakerConfigModal();
@@ -278,6 +368,33 @@ const BreakerConfiguration = ({
             .catch(() => {});
     };
 
+    const fetchMetadata = async () => {
+        await getMetadataRequest(bldgId)
+            .then((res) => {
+                const { end_uses, equipment_type, location } = res?.data;
+                location.forEach((record) => {
+                    record.label = record?.location_name;
+                    record.value = record?.location_id;
+                });
+                equipment_type.forEach((record) => {
+                    record.label = `${record?.equipment_type} (${record?.end_use_name})`;
+                    record.value = record?.equipment_id;
+                });
+                end_uses.forEach((record) => {
+                    record.label = record?.name;
+                    record.value = record?.end_use_id;
+                });
+                setEndUseData(end_uses);
+                setLocationData(location);
+                setEquipmentTypeData(equipment_type);
+            })
+            .catch((e) => {
+                setEndUseData([]);
+                setLocationData([]);
+                setEquipmentTypeData([]);
+            });
+    };
+
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
@@ -313,6 +430,10 @@ const BreakerConfiguration = ({
             }
         }
     }, [selectedBreakerObj]);
+
+    useEffect(() => {
+        if (activeEquipTab === 'create-equip') fetchMetadata();
+    }, [activeEquipTab]);
 
     return (
         <React.Fragment>
@@ -653,7 +774,13 @@ const BreakerConfiguration = ({
                                         )}
                                     </div>
                                     <div className="w-100">
-                                        <Tabs type={Tabs.Types.subsection} tabCustomStyle="p-2">
+                                        <Tabs
+                                            type={Tabs.Types.subsection}
+                                            tabCustomStyle="p-2"
+                                            defaultActiveKey={activeEquipTab}
+                                            onSelect={(e) => {
+                                                setActiveEquipTab(e);
+                                            }}>
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
                                                     {/* <div>
@@ -764,13 +891,12 @@ const BreakerConfiguration = ({
                                                             <Brick sizeInRem={0.25} />
                                                             <InputTooltip
                                                                 placeholder="Enter Equipment Name"
-                                                                // onChange={(e) => {
-                                                                //     handleChange('name', e.target.value);
-                                                                //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                                // }}
-                                                                // value={equipmentObj?.name}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('name', e.target.value);
+                                                                }}
+                                                                value={equipmentObj?.name}
                                                                 labelSize={Typography.Sizes.md}
-                                                                // error={equipmentErrors?.name}
+                                                                error={equipmentErrors?.name}
                                                             />
                                                         </div>
                                                         <div className="w-100">
@@ -779,14 +905,14 @@ const BreakerConfiguration = ({
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
                                                             <InputTooltip
+                                                                type="number"
                                                                 placeholder="Enter Equipment Quantity"
-                                                                // onChange={(e) => {
-                                                                //     handleChange('name', e.target.value);
-                                                                //     setEquipmentErrors({ ...equipmentErrors, name: null });
-                                                                // }}
-                                                                // value={equipmentObj?.name}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('quantity', e.target.value);
+                                                                }}
+                                                                value={equipmentObj?.quantity}
                                                                 labelSize={Typography.Sizes.md}
-                                                                // error={equipmentErrors?.name}
+                                                                error={equipmentErrors?.quantity}
                                                             />
                                                         </div>
                                                     </div>
@@ -802,16 +928,16 @@ const BreakerConfiguration = ({
                                                                 placeholder="Select Equipment Type"
                                                                 name="select"
                                                                 isSearchable={true}
-                                                                // currentValue={equipmentTypeDataAll.filter(
-                                                                //     (option) =>
-                                                                //         option.value === equipmentObj?.equipment_type
-                                                                // )}
-                                                                // options={equipmentTypeDataAll}
-                                                                // onChange={(e) => {
-                                                                //     handleChange('equipment_type', e.value);
-                                                                // }}
-                                                                // error={equipmentErrors?.equipment_type}
+                                                                currentValue={equipmentTypeData.filter(
+                                                                    (option) =>
+                                                                        option.value === equipmentObj?.equipment_type
+                                                                )}
+                                                                options={equipmentTypeData}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('equipment_type', e.value);
+                                                                }}
                                                                 className="basic-single"
+                                                                error={equipmentErrors?.equipment_type}
                                                             />
                                                         </div>
 
@@ -825,19 +951,15 @@ const BreakerConfiguration = ({
                                                                 placeholder="Select End Use"
                                                                 name="select"
                                                                 isSearchable={true}
-                                                                // currentValue={endUseDataNow.filter(
-                                                                //     (option) => option.value === equipmentObj?.end_use
-                                                                // )}
-                                                                // options={endUseDataNow}
-                                                                // onChange={(e) => {
-                                                                //     handleChange('end_use', e.value);
-                                                                //     setEquipmentErrors({
-                                                                //         ...equipmentErrors,
-                                                                //         end_use: null,
-                                                                //     });
-                                                                // }}
-                                                                // error={equipmentErrors?.end_use}
+                                                                currentValue={endUseData.filter(
+                                                                    (option) => option.value === equipmentObj?.end_use
+                                                                )}
+                                                                options={endUseData}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('end_use', e.value);
+                                                                }}
                                                                 className="basic-single"
+                                                                error={equipmentErrors?.end_use}
                                                             />
                                                         </div>
                                                     </div>
@@ -852,27 +974,25 @@ const BreakerConfiguration = ({
                                                             placeholder="Select Equipment Location"
                                                             name="select"
                                                             isSearchable={true}
-                                                            // currentValue={locationDataNow.filter(
-                                                            //     (option) => option.value === equipmentObj?.space_id
-                                                            // )}
-                                                            // options={locationDataNow}
-                                                            // onChange={(e) => {
-                                                            //     handleChange('space_id', e.value);
-                                                            // }}
+                                                            currentValue={locationData.filter(
+                                                                (option) => option.value === equipmentObj?.space_id
+                                                            )}
+                                                            options={locationData}
+                                                            onChange={(e) => {
+                                                                handleCreateEquipChange('space_id', e.value);
+                                                            }}
                                                             className="basic-single"
                                                         />
-                                                        <Brick sizeInRem={0.25} />
-                                                        <Typography.Body size={Typography.Sizes.sm}>
-                                                            Select Equipment Location
-                                                        </Typography.Body>
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
                                                     <div className="d-flex justify-content-end">
                                                         <Button
-                                                            label={'Add Equipment'}
+                                                            label={isAdding ? 'Adding...' : 'Add Equipment'}
                                                             size={Button.Sizes.md}
                                                             type={Button.Type.secondary}
+                                                            disabled={isAdding}
                                                             icon={<PlusSVG className="plus-icon-style" />}
+                                                            onClick={addEquipment}
                                                         />
                                                     </div>
                                                 </div>

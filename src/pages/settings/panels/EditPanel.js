@@ -890,13 +890,12 @@ const EditPanel = () => {
                 const responseData = res?.data?.data;
                 const equipArray = [];
                 responseData.forEach((record) => {
-                    if (record.equipments_name === '') {
-                        return;
-                    }
+                    if (record.equipments_name === '') return;
                     const obj = {
-                        label: record.equipments_name,
-                        value: record.equipments_id,
-                        breakerId: record.breaker_id,
+                        label: record?.equipments_name,
+                        value: record?.equipments_id,
+                        breakerId: record?.breaker_id,
+                        isDisabled: record?.breaker_id !== '',
                     };
                     equipArray.push(obj);
                 });
@@ -1218,6 +1217,7 @@ const EditPanel = () => {
                 equipmentsList={equipmentsList}
                 passiveDevicesList={passiveDevicesList}
                 triggerBreakerAPI={triggerBreakerAPI}
+                fetchEquipmentData={fetchEquipmentData}
             />
 
             <UnlinkAllBreakers
