@@ -110,7 +110,7 @@ const EditPanel = () => {
     ];
 
     const [breakerCountObj, setBreakerCountObj] = useState({
-        onChange: (e) => console.log('SSR breakerCountObj => ', e),
+        onChange: (e) => null,
         defaultValue: 0,
     });
 
@@ -1161,7 +1161,6 @@ const EditPanel = () => {
                 }}
                 onShowChart={(props) => {
                     alert('onShowChart');
-                    console.log('onShowChart', props);
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
                     const equipmentName = breakerData?.equipment_links[0]?.name;

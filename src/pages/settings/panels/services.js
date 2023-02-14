@@ -110,7 +110,7 @@ export function getSensorsList(params) {
 }
 
 export function updateBreakerDetails(params, payload) {
-    return axiosInstance.patch(`${updateBreakers}${params}`, payload).then((res) => res);
+    return axiosInstance.post(`${updateBreakers}${params}`, payload).then((res) => res);
 }
 
 export function createEquipmentData(params, payload) {

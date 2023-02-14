@@ -54,8 +54,13 @@ const BreakerConfiguration = ({
 
     const [parentBreakerObj, setParentBreakerObj] = useState({});
     const [firstBreakerObj, setFirstBreakerObj] = useState({});
+
+    const [secondBreakerObjOld, setSecondBreakerObjOld] = useState({});
     const [secondBreakerObj, setSecondBreakerObj] = useState({});
+
+    const [thirdBreakerObjOld, setThirdBreakerObjOld] = useState({});
     const [thirdBreakerObj, setThirdBreakerObj] = useState({});
+
     const [selectedEquipment, setSelectedEquipment] = useState('');
 
     const [firstSensorList, setFirstSensorList] = useState([]);
@@ -130,6 +135,7 @@ const BreakerConfiguration = ({
                             s.notificationMessage = 'Equipment created successfully.';
                             s.notificationType = 'success';
                         });
+                        handleChange('equipment_link', response?.data);
                         setSelectedEquipment(response?.data);
                         fetchEquipmentData(bldgId);
                         setActiveEquipTab('equip');
@@ -173,6 +179,9 @@ const BreakerConfiguration = ({
         if (breakerLvl === 'first') {
             let obj = Object.assign({}, firstBreakerObj);
             if (key === 'device_link') {
+                if (obj?.breaker_type === 1) {
+                    fetchSensorsList(value, 'first');
+                }
                 if (obj?.breaker_type === 2) {
                     let obj = Object.assign({}, secondBreakerObj);
                     obj['device_link'] = value;
@@ -190,24 +199,19 @@ const BreakerConfiguration = ({
                 }
             }
             obj[key] = value;
-            console.log('SSR obj => ', obj);
-            console.log('SSR key => ', key);
-            console.log('SSR value => ', value);
-            console.log('SSR breakerLvl => ', breakerLvl);
             setFirstBreakerObj(obj);
-            if (obj?.breaker_type === 1) fetchSensorsList(value, 'first');
         }
         if (breakerLvl === 'second') {
             let obj = Object.assign({}, secondBreakerObj);
             obj[key] = value;
             setSecondBreakerObj(obj);
-            fetchSensorsList(value, 'second');
+            if (key === 'device_link') fetchSensorsList(value, 'second');
         }
         if (breakerLvl === 'third') {
             let obj = Object.assign({}, thirdBreakerObj);
             obj[key] = value;
             setThirdBreakerObj(obj);
-            fetchSensorsList(value, 'third');
+            if (key === 'device_link') fetchSensorsList(value, 'third');
         }
     };
 
@@ -236,38 +240,32 @@ const BreakerConfiguration = ({
             });
     };
 
-    const handleBreakerUpdate = async () => {
-        setIsProcessing(true);
+    const saveBreakersDetails = async () => {
+        // setIsProcessing(true);
 
         const params = `?building_id=${bldgId}`;
         const breakersList = [];
 
-        // {
-        //     "breaker_id": "string",
-        //     "name": "string",
-        //     "breaker_number": 0,
-        //     "phase_configuration": 0,
-        //     "rated_amps": 0,
-        //     "voltage": 0,
-        //     "sensor_link": "string",
-        //     "device_link": "string",
-        //     "equipment_link": [
-        //       "string"
-        //     ]
-        //   }
-
-        let breakerObjOne = {
-            breaker_id: firstBreakerObj?.id,
-        };
-        let breakerObjTwo = {
-            breaker_id: secondBreakerObj?.id,
-        };
-        let breakerObjThree = {
-            breaker_id: thirdBreakerObj?.id,
-        };
+        let breakerObjOne = { breaker_id: firstBreakerObj?.id };
+        let breakerObjTwo = { breaker_id: secondBreakerObj?.id };
+        let breakerObjThree = { breaker_id: thirdBreakerObj?.id };
 
         if (firstBreakerObj?.rated_amps !== parentBreakerObj?.rated_amps) {
             breakerObjOne.rated_amps = firstBreakerObj?.rated_amps;
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.rated_amps = firstBreakerObj?.rated_amps;
+            if (breakerObjThree?.breaker_id) breakerObjThree.rated_amps = firstBreakerObj?.rated_amps;
+        }
+
+        if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
+            breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [firstBreakerObj?.equipment_link];
+            if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [firstBreakerObj?.equipment_link];
+        }
+
+        if (firstBreakerObj?.note !== parentBreakerObj?.note) {
+            breakerObjOne.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
+            if (breakerObjThree?.breaker_id) breakerObjThree.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
         }
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
@@ -278,30 +276,58 @@ const BreakerConfiguration = ({
             breakerObjOne.sensor_link = firstBreakerObj?.sensor_link;
         }
 
-        if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
-            breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
+        if (secondBreakerObj?.device_link !== secondBreakerObjOld?.device_link) {
+            breakerObjTwo.device_link = secondBreakerObj?.device_link;
         }
 
-        console.log('SSR breakerObjOne => ', breakerObjOne);
+        if (secondBreakerObj?.sensor_link !== secondBreakerObjOld?.sensor_link) {
+            breakerObjTwo.sensor_link = secondBreakerObj?.sensor_link;
+        }
 
-        // await updateBreakerDetails(params, breakersList)
-        //     .then((res) => {
-        //         setIsProcessing(false);
-        //         closeBreakerConfigModal();
-        //         window.scrollTo(0, 0);
-        //         triggerBreakerAPI(true);
-        //     })
-        //     .catch(() => {
-        //         setIsProcessing(false);
-        //     });
+        if (thirdBreakerObj?.device_link !== thirdBreakerObjOld?.device_link) {
+            breakerObjThree.device_link = thirdBreakerObj?.device_link;
+        }
+
+        if (thirdBreakerObj?.sensor_link !== thirdBreakerObjOld?.sensor_link) {
+            breakerObjThree.sensor_link = thirdBreakerObj?.sensor_link;
+        }
+
+        breakersList.push(breakerObjOne);
+        if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
+        if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
+
+        await updateBreakerDetails(params, breakersList)
+            .then((res) => {
+                const response = res;
+                setIsProcessing(false);
+                if (response?.status === 200) {
+                    closeBreakerConfigModal();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker configuration updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                    triggerBreakerAPI(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to update Breaker configuration.'
+                            : 'Unable to update Breaker configuration due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                setIsProcessing(false);
+            });
     };
 
     const onLoadSensorsListFetch = async (deviceId) => {
         if (deviceId === null || deviceId === undefined || deviceId === '') return;
-
-        // setIsSensorDataFetched(true);
-        // setIsSensorDataFetchedForDouble(true);
-        // setIsSensorDataFetchedForTriple(true);
 
         const params = `?device_id=${deviceId}&building_id=${bldgId}`;
 
@@ -323,15 +349,11 @@ const BreakerConfiguration = ({
                 setFirstSensorList(unlinkedSensor.concat(linkedSensor));
                 setSecondSensorList(unlinkedSensor.concat(linkedSensor));
                 setThirdSensorList(unlinkedSensor.concat(linkedSensor));
-
-                // setIsSensorDataFetched(false);
-                // setIsSensorDataFetchedForDouble(false);
-                // setIsSensorDataFetchedForTriple(false);
             })
             .catch(() => {
-                // setIsSensorDataFetched(false);
-                // setIsSensorDataFetchedForDouble(false);
-                // setIsSensorDataFetchedForTriple(false);
+                setFirstSensorList([]);
+                setSecondSensorList([]);
+                setThirdSensorList([]);
             });
     };
 
@@ -410,6 +432,7 @@ const BreakerConfiguration = ({
         if (selectedBreakerObj?.breaker_type === 2) {
             let obj = breakersList.find((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(obj);
+            setSecondBreakerObjOld(obj);
 
             if (selectedBreakerObj?.device_link !== '' && selectedBreakerObj?.device_link === obj?.device_link) {
                 onLoadSensorsListFetch(selectedBreakerObj?.device_link);
@@ -419,7 +442,9 @@ const BreakerConfiguration = ({
         if (selectedBreakerObj?.breaker_type === 3) {
             let childbreakers = breakersList.filter((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(childbreakers[0]);
+            setSecondBreakerObjOld(childbreakers[0]);
             setThirdBreakerObj(childbreakers[1]);
+            setThirdBreakerObjOld(childbreakers[1]);
 
             if (
                 selectedBreakerObj?.device_link !== '' &&
@@ -437,7 +462,13 @@ const BreakerConfiguration = ({
 
     return (
         <React.Fragment>
-            <Modal show={showBreakerConfigModal} onHide={closeBreakerConfigModal} size="xl" centered>
+            <Modal
+                show={showBreakerConfigModal}
+                onHide={closeBreakerConfigModal}
+                size="xl"
+                centered
+                backdrop="static"
+                keyboard={false}>
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"
@@ -488,7 +519,7 @@ const BreakerConfiguration = ({
                                     label={isProcessing ? 'Saving...' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={handleBreakerUpdate}
+                                    onClick={saveBreakersDetails}
                                     className="ml-2"
                                     disabled={comparePanelData(firstBreakerObj, parentBreakerObj)}
                                 />
@@ -854,18 +885,11 @@ const BreakerConfiguration = ({
                                                             type="textarea"
                                                             rows="4"
                                                             placeholder="Enter Notes here"
-                                                            // value={equipData?.note}
-                                                            // onChange={(e) => {
-                                                            //     handleDataChange('note', e.target.value);
-                                                            // }}
+                                                            value={firstBreakerObj?.note || ''}
+                                                            onChange={(e) => {
+                                                                handleChange('note', e.target.value);
+                                                            }}
                                                             inputClassName="pt-2"
-                                                            // disabled={
-                                                            //     !(
-                                                            //         userPermission?.user_role === 'admin' ||
-                                                            //         userPermission?.permissions?.permissions
-                                                            //             ?.account_buildings_permission?.edit
-                                                            //     )
-                                                            // }
                                                         />
                                                     </div>
                                                 </div>
