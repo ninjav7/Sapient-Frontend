@@ -12,7 +12,36 @@ export default {
     component: Panel,
 };
 
-export const Default = (props) => <Panel {...props} />;
+export const Default = (props) => {
+    return (
+        <>
+            <Panel {...props} />
+
+            <h5>In One Column</h5>
+            <Panel
+                {...props}
+                mainBreaker={null}
+                isOneColumn={true}
+                hideViewDeviceIdControl={true}
+                nodes={props.nodes.slice(1, 4)}
+                edges={[
+                    {
+                        id: 'breaker-1',
+                        source: '63091b68c5d9be0818f0fece',
+                        target: '63091b68c5d9be0818f0fecf',
+                        type: 'disconnectBreakerLink',
+                    },
+                    {
+                        id: 'breaker-2',
+                        source: '63091b68c5d9be0818f0fecf',
+                        target: '63091b68c5d9be0818f0fed0',
+                        type: 'disconnectBreakerLink',
+                    },
+                ]}
+            />
+        </>
+    );
+};
 
 /**
  * @namespace DefaultArgs

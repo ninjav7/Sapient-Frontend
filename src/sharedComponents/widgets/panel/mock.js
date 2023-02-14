@@ -688,348 +688,348 @@ const nodes = [
 
 const edges = [
     {
-        "id": "breaker-11",
-        "source": "63091b69c5d9be0818f0fed7",
-        "target": "63091b69c5d9be0818f0fed9",
-        "type": "breakerLink"
+        id: 'breaker-11',
+        source: '63091b69c5d9be0818f0fed7',
+        target: '63091b69c5d9be0818f0fed9',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-8",
-        "source": "63091b69c5d9be0818f0fed4",
-        "target": "63091b69c5d9be0818f0fed6",
-        "type": "breakerLink"
+        id: 'breaker-8',
+        source: '63091b69c5d9be0818f0fed4',
+        target: '63091b69c5d9be0818f0fed6',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-25",
-        "source": "63091b69c5d9be0818f0fee5",
-        "target": "63091b69c5d9be0818f0fee7",
-        "type": "breakerLink"
+        id: 'breaker-25',
+        source: '63091b69c5d9be0818f0fee5',
+        target: '63091b69c5d9be0818f0fee7',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-4",
-        "source": "63091b68c5d9be0818f0fed0",
-        "target": "63091b69c5d9be0818f0fed2",
-        "type": "breakerLink"
+        id: 'breaker-4',
+        source: '63091b68c5d9be0818f0fed0',
+        target: '63091b69c5d9be0818f0fed2',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-7",
-        "source": "63091b69c5d9be0818f0fed3",
-        "target": "63091b69c5d9be0818f0fed5",
-        "type": "breakerLink"
+        id: 'breaker-7',
+        source: '63091b69c5d9be0818f0fed3',
+        target: '63091b69c5d9be0818f0fed5',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-16",
-        "source": "63091b69c5d9be0818f0fedc",
-        "target": "63091b69c5d9be0818f0fede",
-        "type": "breakerLink"
+        id: 'breaker-16',
+        source: '63091b69c5d9be0818f0fedc',
+        target: '63091b69c5d9be0818f0fede',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-21",
-        "source": "63091b69c5d9be0818f0fee1",
-        "target": "63091b69c5d9be0818f0fee3",
-        "type": "breakerLink"
+        id: 'breaker-21',
+        source: '63091b69c5d9be0818f0fee1',
+        target: '63091b69c5d9be0818f0fee3',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-22",
-        "source": "63091b69c5d9be0818f0fee2",
-        "target": "63091b69c5d9be0818f0fee4",
-        "type": "breakerLink"
+        id: 'breaker-22',
+        source: '63091b69c5d9be0818f0fee2',
+        target: '63091b69c5d9be0818f0fee4',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-3",
-        "source": "63091b68c5d9be0818f0fecf",
-        "target": "63091b68c5d9be0818f0fed1",
-        "type": "breakerLink"
+        id: 'breaker-3',
+        source: '63091b68c5d9be0818f0fecf',
+        target: '63091b68c5d9be0818f0fed1',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-17",
-        "source": "63091b69c5d9be0818f0fedd",
-        "target": "63091b69c5d9be0818f0fedf",
-        "type": "breakerLink"
+        id: 'breaker-17',
+        source: '63091b69c5d9be0818f0fedd',
+        target: '63091b69c5d9be0818f0fedf',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-13",
-        "source": "63091b69c5d9be0818f0fed9",
-        "target": "63091b69c5d9be0818f0fedb",
-        "type": "breakerLink"
+        id: 'breaker-13',
+        source: '63091b69c5d9be0818f0fed9',
+        target: '63091b69c5d9be0818f0fedb',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-29",
-        "source": "63091b69c5d9be0818f0fee9",
-        "target": "63091b69c5d9be0818f0feeb",
-        "type": "breakerLink"
+        id: 'breaker-29',
+        source: '63091b69c5d9be0818f0fee9',
+        target: '63091b69c5d9be0818f0feeb',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-10",
-        "source": "63091b69c5d9be0818f0fed6",
-        "target": "63091b69c5d9be0818f0fed8",
-        "type": "breakerLink"
+        id: 'breaker-10',
+        source: '63091b69c5d9be0818f0fed6',
+        target: '63091b69c5d9be0818f0fed8',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-19",
-        "source": "63091b69c5d9be0818f0fedf",
-        "target": "63091b69c5d9be0818f0fee1",
-        "type": "breakerLink"
+        id: 'breaker-19',
+        source: '63091b69c5d9be0818f0fedf',
+        target: '63091b69c5d9be0818f0fee1',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-12",
-        "source": "63091b69c5d9be0818f0fed8",
-        "target": "63091b69c5d9be0818f0feda",
-        "type": "breakerLink"
+        id: 'breaker-12',
+        source: '63091b69c5d9be0818f0fed8',
+        target: '63091b69c5d9be0818f0feda',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-27",
-        "source": "63091b69c5d9be0818f0fee6",
-        "target": "63091b69c5d9be0818f0fee8",
-        "type": "breakerLink"
+        id: 'breaker-27',
+        source: '63091b69c5d9be0818f0fee6',
+        target: '63091b69c5d9be0818f0fee8',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-6",
-        "source": "63091b69c5d9be0818f0fed2",
-        "target": "63091b69c5d9be0818f0fed4",
-        "type": "breakerLink"
+        id: 'breaker-6',
+        source: '63091b69c5d9be0818f0fed2',
+        target: '63091b69c5d9be0818f0fed4',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-2",
-        "source": "63091b68c5d9be0818f0fece",
-        "target": "63091b68c5d9be0818f0fed0",
-        "type": "breakerLink"
+        id: 'breaker-2',
+        source: '63091b68c5d9be0818f0fece',
+        target: '63091b68c5d9be0818f0fed0',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-9",
-        "source": "63091b69c5d9be0818f0fed5",
-        "target": "63091b69c5d9be0818f0fed7",
-        "type": "breakerLink"
+        id: 'breaker-9',
+        source: '63091b69c5d9be0818f0fed5',
+        target: '63091b69c5d9be0818f0fed7',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-20",
-        "source": "63091b69c5d9be0818f0fee0",
-        "target": "63091b69c5d9be0818f0fee2",
-        "type": "breakerLink"
+        id: 'breaker-20',
+        source: '63091b69c5d9be0818f0fee0',
+        target: '63091b69c5d9be0818f0fee2',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-24",
-        "source": "63091b69c5d9be0818f0fee4",
-        "target": "63091b69c5d9be0818f0fee6",
-        "type": "breakerLink"
+        id: 'breaker-24',
+        source: '63091b69c5d9be0818f0fee4',
+        target: '63091b69c5d9be0818f0fee6',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-26",
-        "source": "63091b69c5d9be0818f0fee7",
-        "target": "63091b69c5d9be0818f0fee9",
-        "type": "breakerLink"
+        id: 'breaker-26',
+        source: '63091b69c5d9be0818f0fee7',
+        target: '63091b69c5d9be0818f0fee9',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-18",
-        "source": "63091b69c5d9be0818f0fede",
-        "target": "63091b69c5d9be0818f0fee0",
-        "type": "breakerLink"
+        id: 'breaker-18',
+        source: '63091b69c5d9be0818f0fede',
+        target: '63091b69c5d9be0818f0fee0',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-15",
-        "source": "63091b69c5d9be0818f0fedb",
-        "target": "63091b69c5d9be0818f0fedd",
-        "type": "breakerLink"
+        id: 'breaker-15',
+        source: '63091b69c5d9be0818f0fedb',
+        target: '63091b69c5d9be0818f0fedd',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-28",
-        "source": "63091b69c5d9be0818f0fee8",
-        "target": "63091b69c5d9be0818f0feea",
-        "type": "breakerLink"
+        id: 'breaker-28',
+        source: '63091b69c5d9be0818f0fee8',
+        target: '63091b69c5d9be0818f0feea',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-23",
-        "source": "63091b69c5d9be0818f0fee3",
-        "target": "63091b69c5d9be0818f0fee5",
-        "type": "breakerLink"
+        id: 'breaker-23',
+        source: '63091b69c5d9be0818f0fee3',
+        target: '63091b69c5d9be0818f0fee5',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-14",
-        "source": "63091b69c5d9be0818f0feda",
-        "target": "63091b69c5d9be0818f0fedc",
-        "type": "breakerLink"
+        id: 'breaker-14',
+        source: '63091b69c5d9be0818f0feda',
+        target: '63091b69c5d9be0818f0fedc',
+        type: 'breakerLink',
     },
     {
-        "id": "breaker-5",
-        "source": "63091b68c5d9be0818f0fed1",
-        "target": "63091b69c5d9be0818f0fed3",
-        "type": "breakerLink"
-    }
+        id: 'breaker-5',
+        source: '63091b68c5d9be0818f0fed1',
+        target: '63091b69c5d9be0818f0fed3',
+        type: 'breakerLink',
+    },
 ];
 
 const groupedEdges = {
-    "0": [
+    0: [
         {
-            "id": "breaker-2",
-            "source": "63091b68c5d9be0818f0fece",
-            "target": "63091b68c5d9be0818f0fed0",
-            "type": "breakerLink"
+            id: 'breaker-2',
+            source: '63091b68c5d9be0818f0fece',
+            target: '63091b68c5d9be0818f0fed0',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-4",
-            "source": "63091b68c5d9be0818f0fed0",
-            "target": "63091b69c5d9be0818f0fed2",
-            "type": "breakerLink"
+            id: 'breaker-4',
+            source: '63091b68c5d9be0818f0fed0',
+            target: '63091b69c5d9be0818f0fed2',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-6",
-            "source": "63091b69c5d9be0818f0fed2",
-            "target": "63091b69c5d9be0818f0fed4",
-            "type": "breakerLink"
+            id: 'breaker-6',
+            source: '63091b69c5d9be0818f0fed2',
+            target: '63091b69c5d9be0818f0fed4',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-8",
-            "source": "63091b69c5d9be0818f0fed4",
-            "target": "63091b69c5d9be0818f0fed6",
-            "type": "breakerLink"
+            id: 'breaker-8',
+            source: '63091b69c5d9be0818f0fed4',
+            target: '63091b69c5d9be0818f0fed6',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-10",
-            "source": "63091b69c5d9be0818f0fed6",
-            "target": "63091b69c5d9be0818f0fed8",
-            "type": "breakerLink"
+            id: 'breaker-10',
+            source: '63091b69c5d9be0818f0fed6',
+            target: '63091b69c5d9be0818f0fed8',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-12",
-            "source": "63091b69c5d9be0818f0fed8",
-            "target": "63091b69c5d9be0818f0feda",
-            "type": "breakerLink"
+            id: 'breaker-12',
+            source: '63091b69c5d9be0818f0fed8',
+            target: '63091b69c5d9be0818f0feda',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-14",
-            "source": "63091b69c5d9be0818f0feda",
-            "target": "63091b69c5d9be0818f0fedc",
-            "type": "breakerLink"
+            id: 'breaker-14',
+            source: '63091b69c5d9be0818f0feda',
+            target: '63091b69c5d9be0818f0fedc',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-16",
-            "source": "63091b69c5d9be0818f0fedc",
-            "target": "63091b69c5d9be0818f0fede",
-            "type": "breakerLink"
+            id: 'breaker-16',
+            source: '63091b69c5d9be0818f0fedc',
+            target: '63091b69c5d9be0818f0fede',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-18",
-            "source": "63091b69c5d9be0818f0fede",
-            "target": "63091b69c5d9be0818f0fee0",
-            "type": "breakerLink"
+            id: 'breaker-18',
+            source: '63091b69c5d9be0818f0fede',
+            target: '63091b69c5d9be0818f0fee0',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-20",
-            "source": "63091b69c5d9be0818f0fee0",
-            "target": "63091b69c5d9be0818f0fee2",
-            "type": "breakerLink"
+            id: 'breaker-20',
+            source: '63091b69c5d9be0818f0fee0',
+            target: '63091b69c5d9be0818f0fee2',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-22",
-            "source": "63091b69c5d9be0818f0fee2",
-            "target": "63091b69c5d9be0818f0fee4",
-            "type": "breakerLink"
+            id: 'breaker-22',
+            source: '63091b69c5d9be0818f0fee2',
+            target: '63091b69c5d9be0818f0fee4',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-24",
-            "source": "63091b69c5d9be0818f0fee4",
-            "target": "63091b69c5d9be0818f0fee6",
-            "type": "breakerLink"
+            id: 'breaker-24',
+            source: '63091b69c5d9be0818f0fee4',
+            target: '63091b69c5d9be0818f0fee6',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-27",
-            "source": "63091b69c5d9be0818f0fee6",
-            "target": "63091b69c5d9be0818f0fee8",
-            "type": "breakerLink"
+            id: 'breaker-27',
+            source: '63091b69c5d9be0818f0fee6',
+            target: '63091b69c5d9be0818f0fee8',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-28",
-            "source": "63091b69c5d9be0818f0fee8",
-            "target": "63091b69c5d9be0818f0feea",
-            "type": "breakerLink"
-        }
+            id: 'breaker-28',
+            source: '63091b69c5d9be0818f0fee8',
+            target: '63091b69c5d9be0818f0feea',
+            type: 'breakerLink',
+        },
     ],
-    "1": [
+    1: [
         {
-            "id": "breaker-3",
-            "source": "63091b68c5d9be0818f0fecf",
-            "target": "63091b68c5d9be0818f0fed1",
-            "type": "breakerLink"
+            id: 'breaker-3',
+            source: '63091b68c5d9be0818f0fecf',
+            target: '63091b68c5d9be0818f0fed1',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-5",
-            "source": "63091b68c5d9be0818f0fed1",
-            "target": "63091b69c5d9be0818f0fed3",
-            "type": "breakerLink"
+            id: 'breaker-5',
+            source: '63091b68c5d9be0818f0fed1',
+            target: '63091b69c5d9be0818f0fed3',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-7",
-            "source": "63091b69c5d9be0818f0fed3",
-            "target": "63091b69c5d9be0818f0fed5",
-            "type": "breakerLink"
+            id: 'breaker-7',
+            source: '63091b69c5d9be0818f0fed3',
+            target: '63091b69c5d9be0818f0fed5',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-9",
-            "source": "63091b69c5d9be0818f0fed5",
-            "target": "63091b69c5d9be0818f0fed7",
-            "type": "breakerLink"
+            id: 'breaker-9',
+            source: '63091b69c5d9be0818f0fed5',
+            target: '63091b69c5d9be0818f0fed7',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-11",
-            "source": "63091b69c5d9be0818f0fed7",
-            "target": "63091b69c5d9be0818f0fed9",
-            "type": "breakerLink"
+            id: 'breaker-11',
+            source: '63091b69c5d9be0818f0fed7',
+            target: '63091b69c5d9be0818f0fed9',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-13",
-            "source": "63091b69c5d9be0818f0fed9",
-            "target": "63091b69c5d9be0818f0fedb",
-            "type": "breakerLink"
+            id: 'breaker-13',
+            source: '63091b69c5d9be0818f0fed9',
+            target: '63091b69c5d9be0818f0fedb',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-15",
-            "source": "63091b69c5d9be0818f0fedb",
-            "target": "63091b69c5d9be0818f0fedd",
-            "type": "breakerLink"
+            id: 'breaker-15',
+            source: '63091b69c5d9be0818f0fedb',
+            target: '63091b69c5d9be0818f0fedd',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-17",
-            "source": "63091b69c5d9be0818f0fedd",
-            "target": "63091b69c5d9be0818f0fedf",
-            "type": "breakerLink"
+            id: 'breaker-17',
+            source: '63091b69c5d9be0818f0fedd',
+            target: '63091b69c5d9be0818f0fedf',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-19",
-            "source": "63091b69c5d9be0818f0fedf",
-            "target": "63091b69c5d9be0818f0fee1",
-            "type": "breakerLink"
+            id: 'breaker-19',
+            source: '63091b69c5d9be0818f0fedf',
+            target: '63091b69c5d9be0818f0fee1',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-21",
-            "source": "63091b69c5d9be0818f0fee1",
-            "target": "63091b69c5d9be0818f0fee3",
-            "type": "breakerLink"
+            id: 'breaker-21',
+            source: '63091b69c5d9be0818f0fee1',
+            target: '63091b69c5d9be0818f0fee3',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-23",
-            "source": "63091b69c5d9be0818f0fee3",
-            "target": "63091b69c5d9be0818f0fee5",
-            "type": "breakerLink"
+            id: 'breaker-23',
+            source: '63091b69c5d9be0818f0fee3',
+            target: '63091b69c5d9be0818f0fee5',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-25",
-            "source": "63091b69c5d9be0818f0fee5",
-            "target": "63091b69c5d9be0818f0fee7",
-            "type": "breakerLink"
+            id: 'breaker-25',
+            source: '63091b69c5d9be0818f0fee5',
+            target: '63091b69c5d9be0818f0fee7',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-26",
-            "source": "63091b69c5d9be0818f0fee7",
-            "target": "63091b69c5d9be0818f0fee9",
-            "type": "breakerLink"
+            id: 'breaker-26',
+            source: '63091b69c5d9be0818f0fee7',
+            target: '63091b69c5d9be0818f0fee9',
+            type: 'breakerLink',
         },
         {
-            "id": "breaker-29",
-            "source": "63091b69c5d9be0818f0fee9",
-            "target": "63091b69c5d9be0818f0feeb",
-            "type": "breakerLink"
-        }
-    ]
+            id: 'breaker-29',
+            source: '63091b69c5d9be0818f0fee9',
+            target: '63091b69c5d9be0818f0feeb',
+            type: 'breakerLink',
+        },
+    ],
 };
 
 export { nodes, edges, groupedEdges };
