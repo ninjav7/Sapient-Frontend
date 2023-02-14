@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { Col, FormGroup, Alert } from 'reactstrap';
+import { Col, FormGroup } from 'reactstrap';
 import { loginUser, googleLoginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
@@ -27,7 +27,6 @@ const Login = (props) => {
     const [message, setMessage] = useState('');
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
     const loginSuccess = UserStore.useState((s) => s.loginSuccess);
-    const failedMessage = UserStore.useState((s) => s.message);
     const [passwordType, setPasswordType] = useState('password');
     const [passwordError, setPasswordError] = useState(false);
     const [emailError, setEmailError] = useState(false);
@@ -59,15 +58,21 @@ const Login = (props) => {
                 }
             } else if (usrFound[1] === 'false') {
                 setRefresh(false);
-                setError(true);
-                setMessage('Unable to Login');
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to Login';
+                    s.notificationType = 'error';
+                });
             }
         } else if (user_found !== undefined) {
             let usrFound = user_found.split('=');
             if (usrFound[1] === 'false') {
                 setRefresh(false);
-                setError(true);
-                setMessage('Unable to Login');
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to Login';
+                    s.notificationType = 'error';
+                });
             }
         }
         return () => {
@@ -78,8 +83,11 @@ const Login = (props) => {
 
     useEffect(() => {
         if (loginSuccess === false) {
-            setError(true);
-            setMessage(failedMessage);
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Email or password entered is incorrect.';
+                s.notificationType = 'error';
+            });
         }
     }, [loginSuccess, message]);
 
@@ -134,17 +142,6 @@ const Login = (props) => {
                                         Sign in
                                     </Typography.Header>
                                 </div>
-
-                                {props.error && (
-                                    <Alert color="danger" isOpen={props.error ? true : false}>
-                                        <div>{props.error}</div>
-                                    </Alert>
-                                )}
-                                {error && (
-                                    <Alert color="danger" isOpen={error ? true : false}>
-                                        <div>{message}</div>
-                                    </Alert>
-                                )}
 
                                 <form className="authentication-form">
                                     <FormGroup>

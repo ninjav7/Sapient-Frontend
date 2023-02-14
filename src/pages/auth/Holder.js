@@ -1,38 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import './auth.scss';
 import Slide1 from '../../assets/images/login/building-1.jpg';
 import Slide2 from '../../assets/images/login/building-2.jpg';
 import Slide3 from '../../assets/images/login/building-3.jpg';
-import Building1 from '../../assets/icon/Building1.svg';
-import Building2 from '../../assets/icon/Building2.svg';
-import Building3 from '../../assets/icon/Building3.svg';
 import Carousel from 'react-bootstrap/Carousel';
 
 function Holder({ rightContent }) {
+    const [img, setImg] = useState();
+    var totalCount = 3;
+    function ChangeIt() {
+        var num = Math.ceil(Math.random() * totalCount);
+        return num;
+    }
+    useEffect(() => {
+        let i = ChangeIt();
+        setImg(i);
+    }, []);
     return (
         <Row>
             <Col lg={6} className="pr-0 pl-0">
                 <Carousel controls={false} indicators={false}>
                     <Carousel.Item>
-                        <img className="backgroundStyle name" src={Slide1} />
+                        <img className="backgroundStyle name" src={img === 1 ? Slide1 : img === 2 ? Slide2 : Slide3} />
                         <Carousel.Caption>
-                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
+                            <h3 className="name">"A radically better way of achieving efficient buildings."</h3>
                         </Carousel.Caption>
                     </Carousel.Item>
-                    {/* Commented for Future Use */}
-                    {/* <Carousel.Item>
-                        <img className="backgroundStyle name" src={Slide2} />
-                        <Carousel.Caption>
-                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
-                        </Carousel.Caption>
-                    </Carousel.Item>
-                    <Carousel.Item>
-                        <img className="backgroundStyle name" src={Slide1} />
-                        <Carousel.Caption>
-                            <h3 className="name">"A radically better way of achieving efficient buildings"</h3>
-                        </Carousel.Caption>
-                    </Carousel.Item> */}
                 </Carousel>
             </Col>
             <Col lg={6} className="pr-0 pl-0">

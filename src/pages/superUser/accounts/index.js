@@ -138,6 +138,7 @@ const Accounts = () => {
     };
 
     const redirectToVendorPage = async (vendorID) => {
+        localStorage.removeItem('vendorName');
         if (vendorID === '' || vendorID === null) {
             return '';
         }
@@ -146,6 +147,7 @@ const Accounts = () => {
         await fetchSelectedCustomer(params)
             .then((res) => {
                 let response = res.data;
+                localStorage.setItem('vendorName', response?.data.vendor_name);
                 window.open(`/energy/portfolio/overview`, '_blank');
             })
             .catch((error) => {
@@ -211,13 +213,18 @@ const Accounts = () => {
     };
 
     const renderAccountID = (row) => {
-        return <Typography.Body size={Typography.Sizes.sm}>{row?.id === '' ? '-' : row?.id}</Typography.Body>;
+        return (
+            <Typography.Body size={Typography.Sizes.sm}>{row?.vendor_id === '' ? '-' : row?.vendor_id}</Typography.Body>
+        );
     };
     const renderAccountName = (row) => {
         return (
-            <Typography.Body size={Typography.Sizes.sm}>
-                {row?.company_name === '' ? '-' : row?.company_name}
-            </Typography.Body>
+            <Typography.Link
+                size={Typography.Sizes.md}
+                className="mouse-pointer"
+                onClick={() => redirectToVendorPage(row?.vendor_id)}>
+                {row?.vendor_name === '' ? '-' : row?.vendor_name}
+            </Typography.Link>
         );
     };
 
@@ -255,7 +262,7 @@ const Accounts = () => {
                         type={Button.Type.secondaryGrey}
                         icon={<MiniLogo />}
                         onClick={() => {
-                            redirectToVendorPage(row?.id);
+                            redirectToVendorPage(row?.vendor_id);
                         }}
                     />
                 </Row>
@@ -266,12 +273,12 @@ const Accounts = () => {
     const headerProps = [
         {
             name: 'Account ID',
-            accessor: 'id',
+            accessor: 'vendor_id',
             callbackValue: renderAccountID,
         },
         {
             name: 'Account Name',
-            accessor: 'company_name',
+            accessor: 'vendor_name',
             callbackValue: renderAccountName,
         },
         {

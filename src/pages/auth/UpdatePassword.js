@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
-import { FormGroup, Button, Alert } from 'reactstrap';
+import { FormGroup, Button } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
@@ -11,12 +11,12 @@ import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg';
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
-import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import './auth.scss';
 import axios from 'axios';
 import { BaseUrl, UpdateUserPassword } from '../../services/Network';
 import Input from '../../sharedComponents/form/input/Input';
+import { UserStore } from '../../store/UserStore';
 
 const Confirm = (props) => {
     const history = useHistory();
@@ -87,6 +87,11 @@ const Confirm = (props) => {
                         setPasswordResetSuccessful(true);
                         setTitleText('Success');
                         setShowReset(true);
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Password Set';
+                            s.notificationType = 'success';
+                        });
                     });
             } catch (error) {
                 setIsLoading(false);
@@ -166,17 +171,6 @@ const Confirm = (props) => {
                                 </div>
                                 {showReset ? (
                                     <>
-                                        <Alert color="success" className="alertPop" isOpen={true}>
-                                            <div>
-                                                <Typography.Subheader className="alertText">
-                                                    <CircleCheckSVG
-                                                        className="ml-2 mr-2"
-                                                        style={{ marginRight: '4px', color: 'green' }}
-                                                    />
-                                                    Password Set
-                                                </Typography.Subheader>
-                                            </div>
-                                        </Alert>
                                         <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                             You have successfully set your password. You may now log in to the Sapient
                                             Energy Portal.
@@ -480,7 +474,8 @@ const Confirm = (props) => {
                                                 <Button
                                                     className="sub-button"
                                                     color="primary"
-                                                    onClick={handleValidSubmit}>
+                                                    onClick={handleValidSubmit}
+                                                    disabled={matchErr === 'success' ? false : true}>
                                                     Set Password
                                                 </Button>
                                             </FormGroup>

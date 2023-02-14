@@ -11,8 +11,8 @@ import { Spinner } from 'reactstrap';
 import { fetchPlugRules } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
-import { buildingData } from '../../store/globalState';
-import { useAtom } from 'jotai';
+import { useNotification } from '../../sharedComponents/notification/useNotification';
+import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { fetchBuildingsList } from '../../services/buildings';
 import { mockedData, mockedData2, mockedData3 } from '../../sharedComponents/lineChart/mock';
@@ -129,15 +129,21 @@ const generateLineChartData = (minDate, countOfDays, countOfLines) => {
     return res;
 };
 
+const notificationData = {
+    title: 'Rule has been updated',
+};
+
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
+    const  [isDisabledSaveButton,setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
+    const [openSnackbar] = useNotification();
     const [rulesToUnLink, setRulesToUnLink] = useState({
         rule_id: '',
         sensor_id: [],
@@ -702,6 +708,7 @@ const PlugRule = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
         handleCurrentDataChange('is_active', obj.is_active);
+        setIsDisabledSaveButton(false);
     };
 
     const handleCurrentDataChange = (key, value) => {
@@ -714,6 +721,7 @@ const PlugRule = () => {
             setNameError(false);
         }
         setCurrentData(obj);
+        setIsDisabledSaveButton(false);
     };
     const handleScheduleDayChange = (day, condition_group_id) => {
         let currentObj = [...preparedScheduleData];
@@ -729,7 +737,7 @@ const PlugRule = () => {
                 });
             }
         });
-
+        setIsDisabledSaveButton(false);
         setPreparedScheduleData(currentObj);
     };
     const makeId = (checkedArray) => {
@@ -776,6 +784,7 @@ const PlugRule = () => {
         };
         currentObj.push(obj);
         setPreparedScheduleData(currentObj);
+        setIsDisabledSaveButton(false);
     };
 
     const showOptionToDelete = (condition_id) => {
@@ -797,24 +806,10 @@ const PlugRule = () => {
             }
         });
         setPreparedScheduleData(resArray);
+        setIsDisabledSaveButton(false);
         setShowDeleteConditionModal(false);
     };
 
-    const updateSocketLink = async () => {
-        if (rulesToLink.sensor_id.length === 0) {
-            return;
-        }
-        const { isAssignedToAnotherRule, dataToAssign } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
-        setIsProcessing(true);
-        await reassignSensorsToRuleRequest({
-            ...rulesToLink,
-            sensor_id: rulesToLink.sensor_id,
-            building_id: activeBuildingId,
-        }).then((res) => {});
-
-        setIsProcessing(false);
-        setPageRefresh(!pageRefresh);
-    };
 
     const reassignSensorsToRule = async () => {
         const listToRemoveForReassign = [];
@@ -871,6 +866,7 @@ const PlugRule = () => {
                 });
             }
         });
+        setIsDisabledSaveButton(false);
         setPreparedScheduleData(currentObj);
     };
 
@@ -886,6 +882,7 @@ const PlugRule = () => {
                 });
             }
         });
+        setIsDisabledSaveButton(false);
         setPreparedScheduleData(currentObj);
     };
 
@@ -967,6 +964,7 @@ const PlugRule = () => {
         setSelectedIds((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
+        setIsDisabledSaveButton(false);
     };
 
     const updatePlugRuleData = async () => {
@@ -1233,6 +1231,8 @@ const PlugRule = () => {
             fetchFiltersForSensors();
             fetchLinkedSocketRules();
             fetchPlugRuleDetail();
+            openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
+            setIsDisabledSaveButton(true);
         });
     };
 
@@ -1288,6 +1288,8 @@ const PlugRule = () => {
             }
         } else {
             Promise.allSettled([updatePlugRuleData(), reassignSensorsToRule(), updateSocketUnlink()]).then((value) => {
+                openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
+                setIsDisabledSaveButton(true);
                 fetchUnLinkedSocketRules();
                 fetchFiltersForSensors();
                 fetchLinkedSocketRules();
@@ -1818,7 +1820,7 @@ const PlugRule = () => {
                             />
                             <span className="ml-2 plug-rule-switch-font">Not Active</span>
                         </div>
-                        <div>
+                        <div className='cancel-and-save-flex'>
                             <button
                                 type="button"
                                 size={Button.Sizes.md}
@@ -1830,15 +1832,15 @@ const PlugRule = () => {
                                 }}>
                                 Cancel
                             </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary plug-rule-save ml-2"
+                            <Button
+                            disabled={isDisabledSaveButton}
                                 size={Button.Sizes.md}
+                                label="Save"
+                                type={Button.Type.primary}
                                 onClick={() => {
                                     handleSaveClicked();
-                                }}>
-                                Save
-                            </button>
+                                }}
+                            />
                         </div>
                     </div>
                 </div>

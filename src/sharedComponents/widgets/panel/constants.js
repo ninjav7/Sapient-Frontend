@@ -19,6 +19,8 @@ const PROP_TYPES = {
             isEditingModeState: PropTypes.bool,
             isViewDeviceIdsState: PropTypes.bool,
         },
+        hideViewDeviceIdControl: PropTypes.bool,
+        isOneColumn: PropTypes.bool,
         styles: PropTypes.object,
     },
     breakerColumn: {
