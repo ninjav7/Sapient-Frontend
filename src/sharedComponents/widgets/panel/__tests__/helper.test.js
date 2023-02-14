@@ -2,7 +2,7 @@ import { groupEdgesToColumns, mergePropsByAccessors } from '../helper';
 import { edges, groupedEdges } from '../mock';
 
 describe('groupEdgesToColumns()', () => {
-    it('allow -1', () => {
+    it('Check if it groups correctly', () => {
         expect(groupEdgesToColumns(edges)).toEqual(groupedEdges);
     });
 });

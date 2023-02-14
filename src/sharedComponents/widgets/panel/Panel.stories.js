@@ -48,7 +48,7 @@ Default.args = {
     },
     callBackBreakerProps: ({ breakerProps, breakerData, children }) => {
         console.log(breakerProps, breakerData, children);
-        const equipmentName = breakerData.equipment_links[0]?.name;
+        const equipmentName = breakerData?.equipment_links[0]?.name;
         const status = Breaker.Status.online;
 
         //here you can modify props for breakers
@@ -71,6 +71,7 @@ Default.args = {
         isFlagged: 'is_flagged',
         type: 'type',
         parentBreaker: 'parent_breaker',
+        isLinked: 'is_linked',
         // here you can specify custom props and catch them in handlers
         _id: 'id',
     },

@@ -235,6 +235,7 @@ const GeneralBuildingSettings = () => {
                     active: data.active,
                     timezone: data.timezone,
                     time_format: data.time_format,
+                    plug_only: data.plug_only,
                 };
                 setBuildingDetails(buildingDetailsObj);
 
@@ -272,6 +273,12 @@ const GeneralBuildingSettings = () => {
         obj.active = !buildingDetails.active;
         localStorage.setItem('generalObjectActive', obj.active);
         handleBldgSettingChanges('active', obj.active);
+    };
+
+    const handlePlugChange = () => {
+        let obj = buildingDetails;
+        obj.plug_only = !buildingDetails.plug_only;
+        handleBldgSettingChanges('plug_only', obj.plug_only);
     };
 
     const handleDateTimeSwitch = () => {
@@ -368,6 +375,12 @@ const GeneralBuildingSettings = () => {
 
             obj[key] = value;
 
+            setBuildingDetails(obj);
+        }
+
+        if (key === 'plug_only') {
+            let obj = Object.assign({}, buildingDetails);
+            obj[key] = value;
             setBuildingDetails(obj);
         }
     };
@@ -789,6 +802,36 @@ const GeneralBuildingSettings = () => {
                                     )}
                                 </div>
                             </div>
+
+                            <Brick sizeInRem={1} />
+
+                            <div className="row">
+                                <div className="col">
+                                    <Typography.Subheader size={Typography.Sizes.md}>Plug-only</Typography.Subheader>
+                                    <Brick sizeInRem={0.25} />
+                                    <Typography.Body size={Typography.Sizes.sm}>
+                                        To view Plug only data of this building
+                                    </Typography.Body>
+                                </div>
+                                <div className="col d-flex align-items-center">
+                                    <Switch
+                                        onChange={() => {
+                                            if (
+                                                userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit
+                                            ) {
+                                                handlePlugChange();
+                                            }
+                                        }}
+                                        checked={buildingDetails.plug_only}
+                                        onColor={colorPalette.datavizBlue600}
+                                        uncheckedIcon={false}
+                                        checkedIcon={false}
+                                        className="react-switch"
+                                    />
+                                </div>
+                            </div>
                         </CardBody>
                     </div>
                 </Col>
@@ -819,8 +862,8 @@ const GeneralBuildingSettings = () => {
                                             label="Street Address"
                                             placeholder="Enter Address 1"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('street_address', e.value);
-                                                settextLocation(e.value);
+                                                handleBldgSettingChanges('street_address', e.target.value);
+                                                settextLocation(e.target.value);
                                                 if (getResponseOfPlaces) {
                                                     setopenDropdown(true);
                                                 }
@@ -846,8 +889,8 @@ const GeneralBuildingSettings = () => {
                                             label="Address 2 (optional)"
                                             placeholder="Enter Address 2 (optional)"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('address_2', e.value);
-                                                localStorage.setItem('generalStreetAddress2', e.value);
+                                                handleBldgSettingChanges('address_2', e.target.value);
+                                                localStorage.setItem('generalStreetAddress2', e.target.value);
                                             }}
                                             className="w-100"
                                             value={buildingAddress?.address_2}
@@ -875,7 +918,7 @@ const GeneralBuildingSettings = () => {
                                             label="City"
                                             placeholder="Enter City"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('city', e.value);
+                                                handleBldgSettingChanges('city', e.target.value);
                                                 localStorage.setItem(
                                                     'generalCity',
                                                     totalSelectedData?.properties?.locality
@@ -903,7 +946,7 @@ const GeneralBuildingSettings = () => {
                                             label="State"
                                             placeholder="Select State"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('state', e.value);
+                                                handleBldgSettingChanges('state', e.target.value);
                                                 localStorage.setItem(
                                                     'generalState',
                                                     totalSelectedData?.properties?.region
