@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import axios from 'axios';
-import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices, searchDevices } from '../../../services/Network';
-import { Cookies } from 'react-cookie';
-import { Handle } from 'react-flow-renderer';
-import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
-import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import Typography from '../../../sharedComponents/typography';
 import UnlinkBreaker from './UnlinkBreaker';
 import {
@@ -27,15 +21,15 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
-import { comparePanelData, voltsOption } from './utils';
-import './breaker-config-styles.scss';
-
+import { comparePanelData } from './utils';
 import Select from '../../../sharedComponents/form/select';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Notification } from '../../../sharedComponents/notification/Notification';
-import { addNewEquipment, getLocationDataRequest, getMetadataRequest } from '../../../services/equipment';
+import { useNotification } from '../../../sharedComponents/notification/useNotification';
+import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
+import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -49,9 +43,12 @@ const BreakerConfiguration = ({
     triggerBreakerAPI,
     fetchEquipmentData,
     isEquipmentListFetching,
+    fetchPassiveDeviceData,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
+    const [deviceID, setDeviceID] = useState('');
+
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -92,10 +89,7 @@ const BreakerConfiguration = ({
         quantity: null,
     };
 
-    const notificationData = {
-        successMessage: 'Equipment created successfully.',
-        errorMessage: 'Unable to create Equipment.',
-    };
+    const [openSnackbar] = useNotification();
 
     const [equipmentObj, setEquipmentObj] = useState(defaultEquipmentObj);
     const [locationData, setLocationData] = useState([]);
@@ -103,8 +97,6 @@ const BreakerConfiguration = ({
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
-
-    const [showNotification, setShowNotification] = useState(false);
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
@@ -141,20 +133,20 @@ const BreakerConfiguration = ({
                     const response = res;
 
                     if (response?.status === 200) {
-                        setShowNotification(true);
-                        handleChange('equipment_link', response?.data);
-                        setSelectedEquipment(response?.data);
-                        setEquipmentObj(defaultEquipmentObj);
                         fetchEquipmentData(bldgId);
+                        setSelectedEquipment(response?.data);
+                        openSnackbar({
+                            title: 'Equipment created successfully.',
+                            type: Notification.Types.success,
+                            duration: 5000,
+                        });
                         setActiveEquipTab('equip');
-                        setTimeout(() => {
-                            setShowNotification(false);
-                        }, 3500);
+                        handleChange('equipment_link', response?.data);
+                        setEquipmentObj(defaultEquipmentObj);
                     } else {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Unable to create Equipment.';
-                            s.notificationType = 'error';
+                        openSnackbar({
+                            title: 'Unable to create equipment.',
+                            type: Notification.Types.error,
                         });
                     }
                     setAdding(false);
@@ -472,6 +464,13 @@ const BreakerConfiguration = ({
         if (activeEquipTab === 'create-equip') fetchMetadata();
     }, [activeEquipTab]);
 
+    useEffect(() => {
+        if (showBreakerConfigModal) {
+            console.log('SSR fetchPassiveDeviceData API trigerred :>> ', deviceID);
+            fetchPassiveDeviceData(bldgId, deviceID);
+        }
+    }, [deviceID]);
+
     return (
         <React.Fragment>
             <Modal
@@ -610,8 +609,9 @@ const BreakerConfiguration = ({
                                                         )}
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('device_link', e.value, 'first');
+                                                            setDeviceID('default-list');
                                                         }}
-                                                        onInputChange={(e) => console.log('Sudhanshu => ', e)}
+                                                        onInputChange={(e) => setDeviceID(e)}
                                                         className="basic-single"
                                                     />
                                                 </div>
@@ -671,6 +671,7 @@ const BreakerConfiguration = ({
                                                                     e.value,
                                                                     'second'
                                                                 );
+                                                                setDeviceID('default-list');
                                                             }}
                                                             onInputChange={(e) => console.log('Sudhanshu => ', e)}
                                                             className="basic-single"
@@ -737,6 +738,7 @@ const BreakerConfiguration = ({
                                                                     e.value,
                                                                     'third'
                                                                 );
+                                                                setDeviceID('default-list');
                                                             }}
                                                             onInputChange={(e) => console.log('Sudhanshu => ', e)}
                                                             className="basic-single"
@@ -829,18 +831,6 @@ const BreakerConfiguration = ({
                                             }}>
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
-                                                    {showNotification && (
-                                                        <div>
-                                                            <Notification
-                                                                type={Notification.Types.success}
-                                                                component={Notification.ComponentTypes.alert}
-                                                                description={'Equipment created successfully.'}
-                                                                closeAutomatically={true}
-                                                            />
-                                                            <Brick sizeInRem={1.5} />
-                                                        </div>
-                                                    )}
-
                                                     <div>
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
@@ -920,15 +910,6 @@ const BreakerConfiguration = ({
                                             {/* Create Equipment  */}
                                             <Tabs.Item eventKey="create-equip" title="Create Equipment">
                                                 <div className="p-default">
-                                                    {/* <div>
-                                                        <Notification
-                                                            type={Notification.Types.error}
-                                                            component={Notification.ComponentTypes.alert}
-                                                            description={'Unable to create equipment.'}
-                                                            closeAutomatically={false}
-                                                        />
-                                                        <Brick sizeInRem={1.5} />
-                                                    </div> */}
                                                     <div className="d-flex justify-content-between">
                                                         <div className="w-100 mr-4">
                                                             <Typography.Body size={Typography.Sizes.md}>
