@@ -23,8 +23,6 @@ const Login = (props) => {
     const [_isMounted, set_isMounted] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(false);
-    const [message, setMessage] = useState('');
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
     const loginSuccess = UserStore.useState((s) => s.loginSuccess);
     const failedMessage = UserStore.useState((s) => s.message);
@@ -43,7 +41,6 @@ const Login = (props) => {
             user_found !== undefined &&
             link_type !== undefined &&
             account_linked !== undefined &&
-            session_id !== undefined &&
             is_active !== undefined &&
             is_verified !== undefined &&
             loginSuccess !== 'success'
@@ -58,7 +55,6 @@ const Login = (props) => {
                         let accountLinked = account_linked.split('=');
                         if (accountLinked[1] === 'true') {
                             let sessionId = session_id.split('=');
-                            console.log(sessionId);
                             props.googleLoginUser(sessionId[1]);
                         } else if (accountLinked[1] === 'false') {
                             let sessionId = session_id.split('=');
@@ -115,7 +111,7 @@ const Login = (props) => {
                 s.loginSuccess = '';
             });
         }
-    }, [loginSuccess, message]);
+    }, [loginSuccess]);
 
     const handleValidSubmit = async () => {
         let ct = 0;
