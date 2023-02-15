@@ -342,6 +342,7 @@ const BreakerConfiguration = ({
                     response.forEach((record) => {
                         record.label = record?.name;
                         record.value = record?.id;
+                        record.isDisabled = record?.breaker_id !== '';
                         record?.breaker_id !== '' ? linkedSensor.push(record) : unlinkedSensor.push(record);
                     });
                 }
@@ -459,8 +460,6 @@ const BreakerConfiguration = ({
     useEffect(() => {
         if (activeEquipTab === 'create-equip') fetchMetadata();
     }, [activeEquipTab]);
-
-    console.log('SSR activeEquipTab => ', activeEquipTab);
 
     return (
         <React.Fragment>
@@ -810,7 +809,7 @@ const BreakerConfiguration = ({
                                         <Tabs
                                             type={Tabs.Types.subsection}
                                             tabCustomStyle="p-2"
-                                            defaultActiveKey={activeEquipTab}
+                                            activeKey={activeEquipTab}
                                             onSelect={(e) => {
                                                 setActiveEquipTab(e);
                                             }}>

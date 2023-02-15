@@ -93,10 +93,10 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
                             s.notificationType = 'success';
                         });
                         const panelId = response?.id;
-                        closeCreatePanelModel();
-                        setPanelObj(defaultPanelObj);
                         setIsProcessing(false);
-                        if (panelId !== '') redirectUserToPanelPage(panelId);
+                        closeCreatePanelModel();
+                        if (panelId !== '') redirectUserToPanelPage(panelObj?.panel_type, panelId);
+                        setPanelObj(defaultPanelObj);
                     } else {
                         UserStore.update((s) => {
                             s.showNotification = true;
@@ -153,9 +153,9 @@ const CreatePanel = ({ isCreatePanelModalOpen, closeCreatePanelModel }) => {
         setPanelsData(data);
     };
 
-    const redirectUserToPanelPage = (panel_id) => {
+    const redirectUserToPanelPage = (panel_type, panel_id) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${panel_id}`,
+            pathname: `/settings/panels/edit-panel/${panel_type}/${panel_id}`,
         });
     };
 

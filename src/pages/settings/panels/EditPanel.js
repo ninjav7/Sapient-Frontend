@@ -54,7 +54,10 @@ import DeletePanel from './DeletePanel';
 
 const EditPanel = () => {
     const history = useHistory();
+
+    const { panelType } = useParams();
     const { panelId } = useParams();
+
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
@@ -91,7 +94,6 @@ const EditPanel = () => {
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [panelType, setPanelType] = useState('distribution');
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -816,8 +818,6 @@ const EditPanel = () => {
         await getPanelsList(params)
             .then((res) => {
                 const response = res?.data;
-
-                setPanelType(response?.panel_type);
                 setPanelObj(response);
                 setOriginalPanelObj(response);
 
@@ -989,13 +989,15 @@ const EditPanel = () => {
 
     useEffect(() => {
         const links = [];
+        let breakerCheckCount;
+        panelType === 'distribution' ? (breakerCheckCount = 2) : (breakerCheckCount = 1);
         breakersList.forEach((record) => {
-            if (record?.breaker_number + 2 > breakersList.length) return;
+            if (record?.breaker_number + breakerCheckCount > breakersList.length) return;
 
             const obj = {
                 id: `breaker-${record?.breaker_number}`,
                 source: record?.id,
-                target: getTargetBreakerId(record?.breaker_number + 2),
+                target: getTargetBreakerId(record?.breaker_number + breakerCheckCount),
                 type: 'breakerLink',
             };
             links.push(obj);
@@ -1149,7 +1151,7 @@ const EditPanel = () => {
                 numberOfBreakers={breakerCountObj}
                 isEditable={true}
                 states={panelStates}
-                mainBreaker={mainBreakerConfig}
+                mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
                 dangerZoneProps={{
                     labelButton: 'Reset all Equipment & Device Links',
                     onClickButton: (event) => handleUnlinkAlertShow(),
@@ -1190,6 +1192,7 @@ const EditPanel = () => {
                 onBreakerLinkedClick={(props) => setSelectedBreakerLink(props)}
                 nodes={breakersList}
                 edges={breakerLinks}
+                isOneColumn={panelType === 'disconnect'}
                 style={{
                     width: 906,
                 }}
