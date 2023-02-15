@@ -260,9 +260,12 @@ const Accounts = () => {
     };
     const renderAccountName = (row) => {
         return (
-            <Typography.Body size={Typography.Sizes.sm}>
+            <Typography.Link
+                size={Typography.Sizes.md}
+                className="mouse-pointer"
+                onClick={() => redirectToVendorPage(row?.vendor_id)}>
                 {row?.vendor_name === '' ? '-' : row?.vendor_name}
-            </Typography.Body>
+            </Typography.Link>
         );
     };
 
