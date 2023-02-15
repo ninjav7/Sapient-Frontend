@@ -58,6 +58,7 @@ Tabs.Item.propTypes = {
 
 Tabs.propTypes = {
     defaultActiveKey: PropTypes.string,
+    activeKey: PropTypes.string,
     type: PropTypes.oneOf(Object.values(TABS_TYPES)),
 };
 
