@@ -31,16 +31,15 @@
     border: 0.0625rem solid $error-100;
     border-radius: 0.375rem;
     justify-content: center;
-font-family: 'Inter' !important;
-font-style: normal !important;
-font-weight: 600 !important;
-font-size: 0.75rem !important;
-line-height: 1.125rem !important;
-display: flex;
-align-items: center;
-text-align: right;
-
-color: $error-200;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.125rem !important;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    color: $error-200;
 }
 
 .modal-active-deactive {
