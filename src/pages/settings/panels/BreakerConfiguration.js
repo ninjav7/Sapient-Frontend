@@ -460,6 +460,8 @@ const BreakerConfiguration = ({
         if (activeEquipTab === 'create-equip') fetchMetadata();
     }, [activeEquipTab]);
 
+    console.log('SSR activeEquipTab => ', activeEquipTab);
+
     return (
         <React.Fragment>
             <Modal
