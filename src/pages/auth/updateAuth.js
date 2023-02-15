@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Col, FormGroup, Row } from 'reactstrap';
+import { Col, FormGroup, Alert, Row } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import { connect } from 'react-redux';
+import { Cookies } from 'react-cookie';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
-import { updateUser } from './service';
+import { fetchSessionDetails, updateUser } from './service';
 import { googleLoginUser } from '../../redux/actions';
 import { UserStore } from '../../store/UserStore';
 import { isUserAuthenticated } from '../../helpers/authUtils';
@@ -29,7 +31,7 @@ const AuthUpdate = (props) => {
             s.notificationMessage = 'Account Found';
             s.notificationType = 'success';
         });
-        if (loginSuccess === true) {
+        if (loginSuccess === 'success') {
             updateUserDetails();
             renderRedirectToRoot();
             setIsLoading(false);

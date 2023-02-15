@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { Col, FormGroup } from 'reactstrap';
+import { Col, FormGroup, Alert } from 'reactstrap';
 import { loginUser, googleLoginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
@@ -27,11 +27,13 @@ const Login = (props) => {
     const [message, setMessage] = useState('');
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
     const loginSuccess = UserStore.useState((s) => s.loginSuccess);
+    const failedMessage = UserStore.useState((s) => s.message);
+    const notification = UserStore.useState((s) => s.showNotification);
     const [passwordType, setPasswordType] = useState('password');
     const [passwordError, setPasswordError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [refresh, setRefresh] = useState(false);
-    let { user_found, link_type, account_linked, session_id } = useParams();
+    let { user_found, link_type, account_linked, is_active, is_verified, session_id } = useParams();
 
     useEffect(() => {
         set_isMounted(true);
@@ -42,19 +44,42 @@ const Login = (props) => {
             link_type !== undefined &&
             account_linked !== undefined &&
             session_id !== undefined &&
-            loginSuccess !== true
+            is_active !== undefined &&
+            is_verified !== undefined &&
+            loginSuccess !== 'success'
         ) {
             setRefresh(true);
             let usrFound = user_found.split('=');
             if (usrFound[1] === 'true') {
-                let accountLinked = account_linked.split('=');
-                if (accountLinked[1] === 'true') {
-                    let sessionId = session_id.split('=');
-                    props.googleLoginUser(sessionId[1]);
-                } else if (accountLinked[1] === 'false') {
-                    let sessionId = session_id.split('=');
-                    localStorage.setItem('session-id', sessionId[1]);
-                    history.push('/account/update-auth');
+                let verified = is_verified.split('=');
+                if (verified[1] === 'true') {
+                    let active = is_active.split('=');
+                    if (active[1] === 'true') {
+                        let accountLinked = account_linked.split('=');
+                        if (accountLinked[1] === 'true') {
+                            let sessionId = session_id.split('=');
+                            console.log(sessionId);
+                            props.googleLoginUser(sessionId[1]);
+                        } else if (accountLinked[1] === 'false') {
+                            let sessionId = session_id.split('=');
+                            localStorage.setItem('session-id', sessionId[1]);
+                            history.push('/account/update-auth');
+                        }
+                    } else {
+                        setRefresh(false);
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Unable to Login';
+                            s.notificationType = 'error';
+                        });
+                    }
+                } else {
+                    setRefresh(false);
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to Login';
+                        s.notificationType = 'error';
+                    });
                 }
             } else if (usrFound[1] === 'false') {
                 setRefresh(false);
@@ -82,11 +107,12 @@ const Login = (props) => {
     }, []);
 
     useEffect(() => {
-        if (loginSuccess === false) {
+        if (loginSuccess === 'error') {
             UserStore.update((s) => {
                 s.showNotification = true;
                 s.notificationMessage = 'Email or password entered is incorrect.';
                 s.notificationType = 'error';
+                s.loginSuccess = '';
             });
         }
     }, [loginSuccess, message]);

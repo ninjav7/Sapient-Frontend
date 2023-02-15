@@ -20,6 +20,28 @@
     border-radius: 1rem;
     justify-content: center;
 }
+.offline-container{
+    margin-left: 0.5rem;
+    margin-top: 0.25rem !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    gap: 4px;
+    height: 20px;
+    background: $error-100;
+    border: 0.0625rem solid $error-100;
+    border-radius: 6px;
+    justify-content: center;
+font-family: 'Inter' !important;
+font-style: normal !important;
+font-weight: 600 !important;
+font-size: 12px !important;
+line-height: 18px !important;
+display: flex;
+align-items: center;
+text-align: right;
+
+color: $error-200;
+}
 
 .modal-active-deactive {
     max-width: 21.875rem !important;

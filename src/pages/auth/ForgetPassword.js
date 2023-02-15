@@ -7,6 +7,7 @@ import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { forgotPassword } from './service';
 import { UserStore } from '../../store/UserStore';

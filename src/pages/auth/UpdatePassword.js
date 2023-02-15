@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
-import { FormGroup, Button } from 'reactstrap';
+import { FormGroup, Button, Alert } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
@@ -11,6 +11,7 @@ import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg';
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import './auth.scss';
 import axios from 'axios';
@@ -83,15 +84,23 @@ const Confirm = (props) => {
                     )
                     .then((res) => {
                         let response = res.data;
+                        if (response.success === false) {
+                            UserStore.update((s) => {
+                                s.showNotification = true;
+                                s.notificationMessage = response?.message;
+                                s.notificationType = 'error';
+                            });
+                        } else {
+                            UserStore.update((s) => {
+                                s.showNotification = true;
+                                s.notificationMessage = 'Password Set';
+                                s.notificationType = 'success';
+                            });
+                            setPasswordResetSuccessful(true);
+                            setTitleText('Success');
+                            setShowReset(true);
+                        }
                         setIsLoading(false);
-                        setPasswordResetSuccessful(true);
-                        setTitleText('Success');
-                        setShowReset(true);
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Password Set';
-                            s.notificationType = 'success';
-                        });
                     });
             } catch (error) {
                 setIsLoading(false);
@@ -475,7 +484,16 @@ const Confirm = (props) => {
                                                     className="sub-button"
                                                     color="primary"
                                                     onClick={handleValidSubmit}
-                                                    disabled={matchErr === 'success' ? false : true}>
+                                                    disabled={
+                                                        matchErr === 'success' &&
+                                                        charErr === 'success' &&
+                                                        lowerCaseErr === 'success' &&
+                                                        upperCaseErr === 'success' &&
+                                                        specialCharErr === 'success' &&
+                                                        numberErr === 'success'
+                                                            ? false
+                                                            : true
+                                                    }>
                                                     Set Password
                                                 </Button>
                                             </FormGroup>

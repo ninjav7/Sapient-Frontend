@@ -468,7 +468,7 @@ const authRoutes = {
     visibility: true,
     children: [
         {
-            path: '/account/login/:user_found/:link_type/:account_linked/:session_id',
+            path: '/account/login/:user_found/:link_type/:account_linked/:is_active/:is_verified/:session_id',
             name: 'Login',
             component: Login,
             route: Route,
