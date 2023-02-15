@@ -236,14 +236,15 @@ const EditPanel = () => {
         // --- breakerLink= 1:1 ---
         if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
             if (panelObj?.voltage === '600') {
+                const breakerCountToAdd = panelType === 'distribution' ? 2 : 1;
                 // Setup Triple Breaker
-                if (targetBreakerObj?.breaker_number + 2 > breakersList.length) {
+                if (targetBreakerObj?.breaker_number + breakerCountToAdd > breakersList.length) {
                     breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
                     return;
                 }
 
                 let thirdBreakerObj = breakersList.find(
-                    (record) => record?.breaker_number === targetBreakerObj?.breaker_number + 2
+                    (record) => record?.breaker_number === targetBreakerObj?.breaker_number + breakerCountToAdd
                 );
 
                 if (sourceBreakerObj?.breaker_type === 3) {
@@ -989,15 +990,15 @@ const EditPanel = () => {
 
     useEffect(() => {
         const links = [];
-        let breakerCheckCount;
-        panelType === 'distribution' ? (breakerCheckCount = 2) : (breakerCheckCount = 1);
+        let breakerCountToAdd;
+        panelType === 'distribution' ? (breakerCountToAdd = 2) : (breakerCountToAdd = 1);
         breakersList.forEach((record) => {
-            if (record?.breaker_number + breakerCheckCount > breakersList.length) return;
+            if (record?.breaker_number + breakerCountToAdd > breakersList.length) return;
 
             const obj = {
                 id: `breaker-${record?.breaker_number}`,
                 source: record?.id,
-                target: getTargetBreakerId(record?.breaker_number + breakerCheckCount),
+                target: getTargetBreakerId(record?.breaker_number + breakerCountToAdd),
                 type: 'breakerLink',
             };
             links.push(obj);

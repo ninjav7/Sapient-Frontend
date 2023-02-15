@@ -600,6 +600,7 @@ const BreakerConfiguration = ({
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('device_link', e.value, 'first');
                                                         }}
+                                                        onInputChange={(e) => console.log('Sudhanshu => ', e)}
                                                         className="basic-single"
                                                     />
                                                 </div>
@@ -660,6 +661,7 @@ const BreakerConfiguration = ({
                                                                     'second'
                                                                 );
                                                             }}
+                                                            onInputChange={(e) => console.log('Sudhanshu => ', e)}
                                                             className="basic-single"
                                                         />
                                                     </div>
