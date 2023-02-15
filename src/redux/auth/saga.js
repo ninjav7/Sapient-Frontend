@@ -54,11 +54,11 @@ function* login({ payload: { username, password } }) {
             localStorage.setItem('failed_message', response.message);
             UserStore.update((s) => {
                 s.message = response.message;
-                s.loginSuccess = false;
+                s.loginSuccess = 'error';
             });
         } else {
             UserStore.update((s) => {
-                s.loginSuccess = true;
+                s.loginSuccess = 'success';
             });
             localStorage.setItem('login_success', true);
         }
@@ -99,11 +99,11 @@ function* Googlelogin({ payload: { sessionId } }) {
             localStorage.setItem('failed_message', response.message);
             UserStore.update((s) => {
                 s.message = response.message;
-                s.loginSuccess = false;
+                s.loginSuccess = 'error';
             });
         } else {
             UserStore.update((s) => {
-                s.loginSuccess = true;
+                s.loginSuccess = 'success';
             });
             localStorage.setItem('login_success', true);
         }

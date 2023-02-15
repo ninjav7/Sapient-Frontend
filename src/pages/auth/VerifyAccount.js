@@ -8,7 +8,8 @@ import Typography from '../../sharedComponents/typography';
 import axios from 'axios';
 import { BaseUrl, updateUsers } from '../../services/Network';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { FormGroup, Button } from 'reactstrap';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
+import { FormGroup, Button, Alert } from 'reactstrap';
 import { UserStore } from '../../store/UserStore';
 
 const VerifyAccount = (props) => {
