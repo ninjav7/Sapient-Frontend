@@ -87,6 +87,7 @@ const EditPanel = () => {
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const [breakerLinks, setBreakerLinks] = useState([]);
     const [isBreakersFetched, setBreakersFetching] = useState(false);
+    const [isEquipmentListFetching, setEquipmentFetching] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
     const [selectedBreakerLinkObj, setSelectedBreakerLink] = useState({});
@@ -885,6 +886,7 @@ const EditPanel = () => {
     };
 
     const fetchEquipmentData = async (bldg_id) => {
+        setEquipmentFetching(true);
         const params = `?building_id=${bldg_id}&occupancy_filter=true`;
         await getEquipmentsList(params)
             .then((res) => {
@@ -904,8 +906,12 @@ const EditPanel = () => {
                 BreakersStore.update((s) => {
                     s.equipmentData = equipArray;
                 });
+                setEquipmentFetching(false);
             })
-            .catch(() => {});
+            .catch(() => {
+                setEquipmentsList([]);
+                setEquipmentFetching(false);
+            });
     };
 
     const fetchPanelsData = async (bldg_id) => {
@@ -1221,6 +1227,7 @@ const EditPanel = () => {
                 passiveDevicesList={passiveDevicesList}
                 triggerBreakerAPI={triggerBreakerAPI}
                 fetchEquipmentData={fetchEquipmentData}
+                isEquipmentListFetching={isEquipmentListFetching}
             />
 
             <UnlinkAllBreakers

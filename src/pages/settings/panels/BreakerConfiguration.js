@@ -31,6 +31,8 @@ import { comparePanelData, voltsOption } from './utils';
 import './breaker-config-styles.scss';
 
 import Select from '../../../sharedComponents/form/select';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { Notification } from '../../../sharedComponents/notification/Notification';
 import { addNewEquipment, getLocationDataRequest, getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
@@ -46,6 +48,7 @@ const BreakerConfiguration = ({
     passiveDevicesList,
     triggerBreakerAPI,
     fetchEquipmentData,
+    isEquipmentListFetching,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
@@ -89,12 +92,19 @@ const BreakerConfiguration = ({
         quantity: null,
     };
 
+    const notificationData = {
+        successMessage: 'Equipment created successfully.',
+        errorMessage: 'Unable to create Equipment.',
+    };
+
     const [equipmentObj, setEquipmentObj] = useState(defaultEquipmentObj);
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
+
+    const [showNotification, setShowNotification] = useState(false);
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
@@ -129,16 +139,17 @@ const BreakerConfiguration = ({
             await createEquipmentData(params, obj)
                 .then((res) => {
                     const response = res;
+
                     if (response?.status === 200) {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Equipment created successfully.';
-                            s.notificationType = 'success';
-                        });
+                        setShowNotification(true);
                         handleChange('equipment_link', response?.data);
                         setSelectedEquipment(response?.data);
+                        setEquipmentObj(defaultEquipmentObj);
                         fetchEquipmentData(bldgId);
                         setActiveEquipTab('equip');
+                        setTimeout(() => {
+                            setShowNotification(false);
+                        }, 3500);
                     } else {
                         UserStore.update((s) => {
                             s.showNotification = true;
@@ -727,6 +738,7 @@ const BreakerConfiguration = ({
                                                                     'third'
                                                                 );
                                                             }}
+                                                            onInputChange={(e) => console.log('Sudhanshu => ', e)}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -817,15 +829,17 @@ const BreakerConfiguration = ({
                                             }}>
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
-                                                    {/* <div>
-                                                        <Notification
-                                                            type={Notification.Types.success}
-                                                            component={Notification.ComponentTypes.alert}
-                                                            description={'Equipment created successfully.'}
-                                                            closeAutomatically={true}
-                                                        />
-                                                        <Brick sizeInRem={1.5} />
-                                                    </div> */}
+                                                    {showNotification && (
+                                                        <div>
+                                                            <Notification
+                                                                type={Notification.Types.success}
+                                                                component={Notification.ComponentTypes.alert}
+                                                                description={'Equipment created successfully.'}
+                                                                closeAutomatically={true}
+                                                            />
+                                                            <Brick sizeInRem={1.5} />
+                                                        </div>
+                                                    )}
 
                                                     <div>
                                                         <div className="d-flex align-items-center">
@@ -833,21 +847,26 @@ const BreakerConfiguration = ({
                                                                 <Radio name="radio-1" checked={true} />
                                                             </div>
                                                             <div className="w-100">
-                                                                <Select
-                                                                    id="exampleSelect"
-                                                                    placeholder="Select Equipment"
-                                                                    name="select"
-                                                                    isSearchable={true}
-                                                                    options={equipmentsList}
-                                                                    currentValue={equipmentsList.filter(
-                                                                        (option) => option.value === selectedEquipment
-                                                                    )}
-                                                                    onChange={(e) => {
-                                                                        handleChange('equipment_link', e.value);
-                                                                        setSelectedEquipment(e.value);
-                                                                    }}
-                                                                    className="basic-single"
-                                                                />
+                                                                {isEquipmentListFetching ? (
+                                                                    <Skeleton count={1} height={35} />
+                                                                ) : (
+                                                                    <Select
+                                                                        id="exampleSelect"
+                                                                        placeholder="Select Equipment"
+                                                                        name="select"
+                                                                        isSearchable={true}
+                                                                        options={equipmentsList}
+                                                                        currentValue={equipmentsList.filter(
+                                                                            (option) =>
+                                                                                option.value === selectedEquipment
+                                                                        )}
+                                                                        onChange={(e) => {
+                                                                            handleChange('equipment_link', e.value);
+                                                                            setSelectedEquipment(e.value);
+                                                                        }}
+                                                                        className="basic-single"
+                                                                    />
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <Brick sizeInRem={0.65} />
