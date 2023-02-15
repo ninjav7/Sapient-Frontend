@@ -241,7 +241,7 @@ const BreakerConfiguration = ({
     };
 
     const saveBreakersDetails = async () => {
-        // setIsProcessing(true);
+        setIsProcessing(true);
 
         const params = `?building_id=${bldgId}`;
         const breakersList = [];
@@ -522,7 +522,7 @@ const BreakerConfiguration = ({
                                     type={Button.Type.primary}
                                     onClick={saveBreakersDetails}
                                     className="ml-2"
-                                    disabled={comparePanelData(firstBreakerObj, parentBreakerObj)}
+                                    disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
                                 />
                             </div>
                         </div>
