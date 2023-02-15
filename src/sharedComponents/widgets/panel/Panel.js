@@ -33,6 +33,7 @@ const Panel = (props) => {
         onPanelToggleDeviceView,
         states,
         dangerZoneProps,
+        hideViewDeviceIdControl,
         className,
         style,
     } = props;
@@ -120,12 +121,15 @@ const Panel = (props) => {
                         />
                     )}
 
-                    <Toggles
-                        size={Toggles.Sizes.sm}
-                        textAlignment={Toggles.TextAlignment.left}
-                        onChange={onToggleChangeHandler}
-                        label={`${viewDeviceIds ? 'View' : 'Hide'} Device IDs`}
-                    />
+                    {!hideViewDeviceIdControl && (
+                        <Toggles
+                            isChecked={viewDeviceIds}
+                            size={Toggles.Sizes.sm}
+                            textAlignment={Toggles.TextAlignment.left}
+                            onChange={onToggleChangeHandler}
+                            label={`${viewDeviceIds ? 'View' : 'Hide'} Device IDs`}
+                        />
+                    )}
                 </div>
                 <Brick sizeInRem={1.5} />
 

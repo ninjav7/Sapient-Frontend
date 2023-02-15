@@ -1,11 +1,16 @@
 .panel-breakers-wrapper {
     display: flex;
     gap: 2rem;
-    justify-content: center;
+    justify-content: space-between;
     padding: 0 1.625rem;
     position: relative;
 
     .breaker-wrapper {
         width: 24.125rem;
+    }
+
+    &.is-one-column {
+        width: 27.375rem;
+        margin: auto;
     }
 }
