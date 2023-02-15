@@ -128,7 +128,7 @@ const Panel = (props) => {
                             size={Toggles.Sizes.sm}
                             textAlignment={Toggles.TextAlignment.left}
                             onChange={onToggleChangeHandler}
-                            label={`${viewDeviceIds ? 'View' : 'Hide'} Device IDs`}
+                            label='Device IDs'
                         />
                     )}
                 </div>
