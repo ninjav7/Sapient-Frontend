@@ -398,7 +398,6 @@ const PlugRule = () => {
     };
 
     const getGraphData = async () => {
-        // thisi is requset
         if (selectedIds.length) {
             const preparedSelectedIds = selectedIds.join('+');
             await getGraphDataRequest(activeBuildingId, preparedSelectedIds, currentData.id).then((res) => {
@@ -410,209 +409,9 @@ const PlugRule = () => {
         }
     };
 
-    const [lineChartOptions, setLineChartOptions] = useState({
-        chart: {
-            type: 'line',
-            zoom: {
-                enabled: false,
-            },
-            id: 'areachart-2',
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#87AADE'],
-        stroke: {
-            curve: 'straight',
-        },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                format: 'dd/MMM',
-            },
-            y: {
-                formatter: function (value) {
-                    return value + ' K';
-                },
-            },
-        },
-
-        annotations: {
-            xaxis: [
-                {
-                    x: 'Mon 12 am',
-                    x2: 'Mon 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-                {
-                    x: 'Tue 12 am',
-                    x2: 'Tue 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-            ],
-        },
-
-        xaxis: {
-            categories: [
-                'Sun 12AM',
-                'Sun 12PM',
-                'Mon 12AM',
-                'Mon 12PM',
-                'Tue 12AM',
-                'Tue 12PM',
-                'Wed 12AM',
-                'Wed 12PM',
-                'Thu 12AM',
-                'Thu 12PM',
-                'Fri 12AM',
-                'Fri 12PM',
-                'Sat 12AM',
-                'Sat 12PM',
-                'Sun 12AM',
-            ],
-        },
-
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
-                },
-            },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                // cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
-
-    useEffect(() => {
-        setLineChartOptions({
-            chart: {
-                type: 'line',
-                zoom: {
-                    enabled: false,
-                },
-                id: 'areachart-2',
-            },
-            dataLabels: {
-                enabled: false,
-            },
-
-            colors: ['#87AADE'],
-            stroke: {
-                curve: 'straight',
-            },
-            stroke: {
-                width: [2, 2],
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '20%',
-                },
-            },
-            tooltip: {
-                shared: false,
-                intersect: false,
-                style: {
-                    fontSize: '12px',
-                    fontFamily: 'Inter, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                x: {
-                    show: true,
-                    format: 'dd/MMM',
-                },
-                y: {
-                    formatter: function (value) {
-                        return value + ' K';
-                    },
-                },
-            },
-
-            annotations: {
-                xaxis: annotationXAxis,
-            },
-
-            xaxis: {
-                categories: [
-                    'Sun 12AM',
-                    'Sun 12PM',
-                    'Mon 12AM',
-                    'Mon 12PM',
-                    'Tue 12AM',
-                    'Tue 12PM',
-                    'Wed 12AM',
-                    'Wed 12PM',
-                    'Thu 12AM',
-                    'Thu 12PM',
-                    'Fri 12AM',
-                    'Fri 12PM',
-                    'Sat 12AM',
-                    'Sat 12PM',
-                    'Sun 12AM',
-                ],
-            },
-
-            yaxis: {
-                labels: {
-                    formatter: function (value) {
-                        var val = Math.abs(value);
-                        if (val >= 1000) {
-                            val = (val / 1000).toFixed(0) + ' K';
-                        }
-                        return val;
-                    },
-                },
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                },
-            },
-        });
-    }, [annotationXAxis]);
-
     const [lineChartData, setLineChartData] = useState([]);
 
     const [totalGraphData, setTotalGraphData] = useState();
-    //setlinechartData
     useEffect(() => {
         setLineChartData([
             {
@@ -673,15 +472,6 @@ const PlugRule = () => {
             },
         ]);
     }, [hoursNew]);
-
-    // useEffect(() => {
-    //     totalGraphData?.length > 0 &&
-    //         setLineChartData([
-    //             {
-    //                 data: totalGraphData.map(({ x, y }) => ({ x: moment(x).format('ddd h a'), y })),
-    //             },
-    //         ]);
-    // }, [totalGraphData]);
 
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
@@ -1174,7 +964,6 @@ const PlugRule = () => {
         pageSize,
     ]);
 
-    // INITIAL TABLE
     useEffect(() => {
         let arr1 = [];
         let arr2 = [];
@@ -1184,7 +973,6 @@ const PlugRule = () => {
 
         const allRuleData = arr1.concat(arr2);
 
-        // INITIAL TABLE
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
     const currentRow = () => {
@@ -1623,8 +1411,6 @@ const PlugRule = () => {
             });
         });
 
-        // turn on logic
-        //this function is almost working
         let result = [];
         for (let i = 0; i < weekWithSchedule.length; i++) {
             let currentOff = weekWithSchedule[i]?.turnOff;
@@ -1702,7 +1488,7 @@ const PlugRule = () => {
         const offPeriods = [];
         rangeDates.forEach((day) => {
             const currentWeekDay = moment(day).weekday();
-            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result); //problem is here
+            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result);
             if (!_.isEmpty(weekDayOffSchedule)) {
                 let timeDiff;
 
@@ -1904,7 +1690,7 @@ const PlugRule = () => {
                         </div>
 
                         <div className="total-eng-consumtn">
-                            {lineChartData && lineChartOptions && (
+                            {lineChartData && (
                                 <LineChart
                                     data={data.map((d) => ({
                                         ...d,
