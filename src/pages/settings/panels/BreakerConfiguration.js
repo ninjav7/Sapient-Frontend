@@ -1201,7 +1201,7 @@ const BreakerConfiguration = ({
                                                             size={Button.Sizes.md}
                                                             type={Button.Type.secondary}
                                                             disabled={isAdding}
-                                                            icon={<PlusSVG className="plus-icon-style" />}
+                                                            icon={<PlusSVG />}
                                                             onClick={addEquipment}
                                                         />
                                                     </div>
