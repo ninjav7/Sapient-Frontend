@@ -57,7 +57,6 @@ export function deletePlugRuleRequest(ruleId) {
 }
 
 export function getGraphDataRequest(activeBuildingId, selectedIds, plugRuleId) {
-    console.log("selectedIds23324235435",selectedIds);
     let params = `?plug_rule_id=${plugRuleId}sensors=${selectedIds}`;
     return axiosInstance
         .get(`${graphData}${params}`, {
