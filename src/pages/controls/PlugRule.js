@@ -128,8 +128,11 @@ const generateLineChartData = (minDate, countOfDays, countOfLines) => {
     }
     return res;
 };
+const notificationCreateData = {
+    title: 'Rule has been created',
+};
 
-const notificationData = {
+const notificationUpdatedData = {
     title: 'Rule has been updated',
 };
 
@@ -139,7 +142,9 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
-    const  [isDisabledSaveButton,setIsDisabledSaveButton] = useState(true);
+    const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
+    const [isChangedSockets, setIsChangedSockets] = useState(false);
+    const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
@@ -332,6 +337,7 @@ const PlugRule = () => {
     const fetchPlugRulesData = async () => {
         const params = '';
         await fetchPlugRules(params, '').then((res) => {
+            setIsFetchedPlugRulesData(true);
             const plugRules = res.data.data;
             plugRules &&
                 plugRules.forEach((plugRule) => {
@@ -339,11 +345,9 @@ const PlugRule = () => {
                         setActiveBuildingId(plugRule.buildings[0].building_id);
                     }
                 });
-            setIsFetchedPlugRulesData(true);
         });
     };
     useEffect(() => {
-        console.log('TRIGGERED', preparedScheduleData);
         calculateOffHoursPlots();
     }, [preparedScheduleData]);
     useEffect(() => {
@@ -352,9 +356,12 @@ const PlugRule = () => {
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
         } else {
+            setIsCreateRuleMode(false);
+            setIsChangedRuleDetails(false);
             fetchPlugRuleDetail();
         }
-    }, []);
+    }, [ruleId]);
+
     useEffect(() => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
@@ -392,13 +399,10 @@ const PlugRule = () => {
 
     const getGraphData = async () => {
         // thisi is requset
-        console.log('selectedIds32432', selectedIds);
         if (selectedIds.length) {
             const preparedSelectedIds = selectedIds.join('+');
-            console.log('preparedSelectedIds34453', preparedSelectedIds);
             await getGraphDataRequest(activeBuildingId, preparedSelectedIds, currentData.id).then((res) => {
                 if (res.status) {
-                    console.log('RES432423432432', res);
                     let response = res.data;
                     setTotalGraphData(response);
                 }
@@ -682,6 +686,10 @@ const PlugRule = () => {
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
 
+    useEffect(() => {
+        currentData.building_id && setActiveBuildingId(currentData.building_id);
+    }, [currentData.building_id]);
+
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
 
     const [macTypeFilterString, setMacTypeFilterString] = useState('');
@@ -708,8 +716,15 @@ const PlugRule = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
         handleCurrentDataChange('is_active', obj.is_active);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
+    useEffect(() => {
+        if (isChangedSockets || isChangedRuleDetails) {
+            setIsDisabledSaveButton(false);
+        }else{
+            setIsDisabledSaveButton(true);
+        }
+    }, [isChangedRuleDetails, isChangedSockets]);
 
     const handleCurrentDataChange = (key, value) => {
         let obj = Object.assign({}, currentData);
@@ -721,7 +736,7 @@ const PlugRule = () => {
             setNameError(false);
         }
         setCurrentData(obj);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
     const handleScheduleDayChange = (day, condition_group_id) => {
         let currentObj = [...preparedScheduleData];
@@ -737,7 +752,8 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
     const makeId = (checkedArray) => {
@@ -784,7 +800,7 @@ const PlugRule = () => {
         };
         currentObj.push(obj);
         setPreparedScheduleData(currentObj);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
 
     const showOptionToDelete = (condition_id) => {
@@ -806,10 +822,9 @@ const PlugRule = () => {
             }
         });
         setPreparedScheduleData(resArray);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setShowDeleteConditionModal(false);
     };
-
 
     const reassignSensorsToRule = async () => {
         const listToRemoveForReassign = [];
@@ -866,7 +881,7 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
 
@@ -882,7 +897,7 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
 
@@ -915,6 +930,9 @@ const PlugRule = () => {
 
     const handleRuleStateChange = (value, rule) => {
         if (value === 'true') {
+            if (checkedAll) {
+                setCheckedAll(false);
+            }
             let linkedData = [...linkedRuleData];
             let unLinkedData = [...unLinkedRuleData];
             let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
@@ -936,6 +954,10 @@ const PlugRule = () => {
         }
 
         if (value === 'false') {
+            if (allSensors.length - selectedIds.length == 0) {
+                setCheckedAll(true);
+            }
+
             let linkedData = [...linkedRuleData];
             let unLinkedData = [...unLinkedRuleData];
             let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
@@ -964,7 +986,7 @@ const PlugRule = () => {
         setSelectedIds((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedSockets(true);
     };
 
     const updatePlugRuleData = async () => {
@@ -1183,6 +1205,20 @@ const PlugRule = () => {
 
         return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
     };
+    const selectAllRowsSensors = (checkedAll) => {
+        if (checkedAll) {
+            const res = allSensors.map((sensor) => {
+                return sensor.id;
+            });
+            setSelectedIds(res);
+            setTotalSocket(allSensors.length);
+        } else {
+            setSelectedIds([]);
+            setTotalSocket(0);
+        }
+        setIsChangedSockets(true);
+        setCheckedAll(checkedAll);
+    };
 
     const currentRowSearched = () => {
         if (selectedRuleFilter === 0) {
@@ -1225,14 +1261,19 @@ const PlugRule = () => {
         return valid;
     };
     const handleContinueAndSaveClick = async () => {
-        Promise.allSettled([reassignSensorsToRule(), updatePlugRuleData(), updateSocketUnlink()]).then((value) => {
+        Promise.allSettled([
+            isChangedRuleDetails && updatePlugRuleData(),
+            isChangedSockets && reassignSensorsToRule(),
+            isChangedSockets && updateSocketUnlink(),
+        ]).then((value) => {
             handleCloseSocketsModal(true);
             fetchUnLinkedSocketRules();
             fetchFiltersForSensors();
             fetchLinkedSocketRules();
             fetchPlugRuleDetail();
-            openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
-            setIsDisabledSaveButton(true);
+            openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+            setIsChangedRuleDetails(false);
+            setIsChangedSockets(false);
         });
     };
 
@@ -1277,19 +1318,28 @@ const PlugRule = () => {
                 });
                 currentDataCopy.action = formattedSchedule;
                 currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
+                openSnackbar({ ...notificationCreateData, type: Notification.Types.success, duration: 5000 });
 
                 await createPlugRuleRequest(currentDataCopy)
                     .then((res) => {
-                        // change logic here
+                        const { data } = res;
+                        history.push({
+                            pathname: `/control/plug-rules/${data.data.plug_rule_id}`,
+                        });
                     })
                     .catch((error) => {
                         setIsProcessing(false);
                     });
             }
         } else {
-            Promise.allSettled([updatePlugRuleData(), reassignSensorsToRule(), updateSocketUnlink()]).then((value) => {
-                openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
-                setIsDisabledSaveButton(true);
+            Promise.allSettled([
+                isChangedSockets && reassignSensorsToRule(),
+                isChangedSockets && updateSocketUnlink(),
+                isChangedRuleDetails && updatePlugRuleData(),
+            ]).then((value) => {
+                openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+                setIsChangedRuleDetails(false);
+                setIsChangedSockets(false);
                 fetchUnLinkedSocketRules();
                 fetchFiltersForSensors();
                 fetchLinkedSocketRules();
@@ -1418,61 +1468,6 @@ const PlugRule = () => {
 
         isLoadingRef.current = false;
     };
-    useEffect(() => {
-        if (activeBuildingId) {
-            fetchUnLinkedSocketRules();
-            fetchFiltersForSensors();
-            fetchLinkedSocketRules();
-        }
-    }, [
-        activeBuildingId,
-        macTypeFilterString,
-        equpimentTypeFilterString,
-        sensorTypeFilterString,
-        locationTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-    ]);
-
-    const fetchAllData = async () => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-
-        isLoadingRef.current = true;
-        await getUnlinkedSocketRules(
-            pageSize,
-            pageNo,
-            ruleId,
-            activeBuildingId,
-            equpimentTypeFilterString,
-            macTypeFilterString,
-            locationTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
-            {
-                sensor_search: search,
-                ...sorting,
-            }
-        ).then((res) => {
-            isLoadingRef.current = false;
-
-            setUnlinkedSocketRuleSuccess(res.status);
-            let response = res.data.data;
-            let unLinkedData = [];
-            response.data.forEach((record) => {
-                record.linked_rule = false;
-                unLinkedData.push(record);
-            });
-            setAllSearchData(unLinkedData);
-            setTotalItemsSearched(response.total_data);
-        });
-    };
 
     const getAvailableActionType = (anotherSelectedValue) => {
         const resultArr = actionTypeInitial.map((el) => {
@@ -1484,26 +1479,6 @@ const PlugRule = () => {
         });
         return resultArr;
     };
-
-    useEffect(() => {
-        setAllSearchData([]);
-
-        search && activeBuildingId && fetchAllData();
-    }, [
-        search,
-        activeBuildingId,
-        equpimentTypeFilterString,
-        macTypeFilterString,
-        locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
-    ]);
 
     const RenderScheduleActionItem = ({ record }) => {
         const firstCondition = record.data[0];
@@ -1661,7 +1636,6 @@ const PlugRule = () => {
                 nextOn = weekWithSchedule[0]?.turnOn;
                 nextOnDay = 0;
             } else {
-                // for (let j = i + 1; j < weekWithSchedule.length; j++) {
                 for (let j = i; j < weekWithSchedule.length; j++) {
                     if (weekWithSchedule[j]?.turnOn) {
                         if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
@@ -1689,48 +1663,15 @@ const PlugRule = () => {
                 }
             }
             if (currentOff && nextOn) {
-                console.log('nextOnDay213', nextOnDay);
-                console.log('currentOffDay12312', currentOffDay);
-                // console.log("currentOf435645654f",currentOff);
-                // console.log("nextOn2134234",nextOn);
-                // if(nextOnDay<currentOffDay){
-                //     res = (6-currentOffDay)+nextOnDay;
-                // }
-                // let currentOffTime = new Date(`2022-01-01T${currentOff}:00`);
-                // let nextOnTime = new Date(`2022-01-01T${nextOn}:00`);
-                // console.log("currentOffTime",currentOffTime);
-                // console.log("nextOnTime",nextOnTime);
-                // if (currentOffTime >= nextOnTime) {
-                //     result.push({
-                //         day: i,
-                //         currentOffDay,
-                //         nextOnDay,
-                //         currentOffTime: currentOff,
-                //         nextOnTime: nextOn,
-
-                //         // interval: [currentOff, '12:00 AM'],
-                //     });
-                //     result.push({
-                //         day: (i + 1) % 7,
-                //         currentOffDay,
-                //         nextOnDay,
-                //         // interval: ['12:00 AM', nextOn],
-                //         currentOffTime: currentOff,
-                //         nextOnTime: nextOn,
-                //     });
-                // } else {
                 result.push({
                     day: i,
                     currentOffDay,
                     nextOnDay,
                     currentOffTime: currentOff,
                     nextOnTime: nextOn,
-                    // interval: [currentOff, nextOn],
                 });
-                // }
             }
         }
-        console.log('result3453442323', result);
         getOffperiodsWithRealDate(result, getDateRange());
     };
 
@@ -1744,6 +1685,15 @@ const PlugRule = () => {
         }
         return dateArray;
     }
+    const checkIfDayInOffRange = (day, result) => {
+        let offDay = {};
+        result.forEach((el) => {
+            if (el.day == day) {
+                offDay = el;
+            }
+        });
+        return offDay;
+    };
 
     const getOffperiodsWithRealDate = (result, dateRange) => {
         const maxdateString = new Date(dateRange.maxDate);
@@ -1752,14 +1702,14 @@ const PlugRule = () => {
         const offPeriods = [];
         rangeDates.forEach((day) => {
             const currentWeekDay = moment(day).weekday();
-            const weekDayOffSchedule = result[currentWeekDay];
-            if (weekDayOffSchedule) {
+            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result); //problem is here
+            if (!_.isEmpty(weekDayOffSchedule)) {
                 let timeDiff;
 
                 if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
                     timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
                 } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
-                    timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay;
+                    timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
                 }
                 const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
                 const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
@@ -1775,7 +1725,7 @@ const PlugRule = () => {
     };
     const buildingIdProps = {
         label: 'Choose building',
-        defaultValue: localStorage.getItem('buildingId'),
+        defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
         onChange: (event) => {
             handleCurrentDataChange('building_id', event.value);
         },
@@ -1820,7 +1770,7 @@ const PlugRule = () => {
                             />
                             <span className="ml-2 plug-rule-switch-font">Not Active</span>
                         </div>
-                        <div className='cancel-and-save-flex'>
+                        <div className="cancel-and-save-flex">
                             <button
                                 type="button"
                                 size={Button.Sizes.md}
@@ -1833,7 +1783,7 @@ const PlugRule = () => {
                                 Cancel
                             </button>
                             <Button
-                            disabled={isDisabledSaveButton}
+                                disabled={isDisabledSaveButton}
                                 size={Button.Sizes.md}
                                 label="Save"
                                 type={Button.Type.primary}
@@ -1956,7 +1906,6 @@ const PlugRule = () => {
                         <div className="total-eng-consumtn">
                             {lineChartData && lineChartOptions && (
                                 <LineChart
-                                    // options={lineChartOptions}
                                     data={data.map((d) => ({
                                         ...d,
                                         fillColor: {
@@ -1993,102 +1942,112 @@ const PlugRule = () => {
 
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    <DataTableWidget
-                        isLoading={isLoadingRef.current}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="sockets-plug-rules"
-                        onSearch={(query) => {
-                            setPageNo(1);
-                            setSearch(query);
-                        }}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Selected' }, { label: 'Unselected' }]}
-                        onStatus={setSelectedRuleFilter}
-                        rows={currentRow()}
-                        searchResultRows={currentRowSearched()}
-                        filterOptions={filterOptions}
-                        headers={[
-                            {
-                                name: 'Equipment Type',
-                                accessor: 'equipment_type_name',
-                                callbackValue: renderEquipType,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Location',
-                                accessor: 'equipment_link_location',
-                                callbackValue: renderLocation,
-                            },
-                            {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'MAC Address',
-                                accessor: 'device_link',
-                            },
-                            {
-                                name: 'Sensors',
-                                accessor: 'sensor_count',
-                            },
-                            {
-                                name: 'Assigned Rule',
-                                accessor: 'assigned_rule',
-                                callbackValue: renderAssignRule,
-                            },
-                            {
-                                name: 'Tags',
-                                accessor: 'tags',
-                                callbackValue: renderTagCell,
-                            },
-                            {
-                                name: 'Last Data',
-                                accessor: 'last_data',
-                                callbackValue: renderLastUsedCell,
-                            },
-                        ]}
-                        onCheckboxRow={alert}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="vehicle1"
-                                name="vehicle1"
-                                checked={checkedAll}
-                                onChange={() => {
-                                    setCheckedAll(!checkedAll);
-                                }}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="socket_rule"
-                                name="socket_rule"
-                                checked={selectedIds.includes(record?.id) || checkedAll}
-                                value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                onChange={(e) => {
-                                    setSensorIdNow(record?.id);
-                                    handleRuleStateChange(e.target.value, record);
-                                }}
-                            />
-                        )}
-                        onPageSize={setPageSize}
-                        onChangePage={setPageNo}
-                        pageSize={pageSize}
-                        currentPage={pageNo}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
-                            if (selectedRuleFilter === 0) {
-                                return totalItems;
-                            }
+                    {currentData.building_id ? (
+                        <DataTableWidget
+                            isLoading={isLoadingRef.current}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="sockets-plug-rules"
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
+                            buttonGroupFilterOptions={[
+                                { label: 'All' },
+                                { label: 'Selected' },
+                                { label: 'Unselected' },
+                            ]}
+                            onStatus={setSelectedRuleFilter}
+                            rows={currentRow()}
+                            searchResultRows={currentRowSearched()}
+                            filterOptions={filterOptions}
+                            headers={[
+                                {
+                                    name: 'Equipment Type',
+                                    accessor: 'equipment_type_name',
+                                    callbackValue: renderEquipType,
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'Location',
+                                    accessor: 'equipment_link_location',
+                                    callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Space Type',
+                                    accessor: 'space_type',
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'MAC Address',
+                                    accessor: 'device_link',
+                                },
+                                {
+                                    name: 'Sensors',
+                                    accessor: 'sensor_count',
+                                },
+                                {
+                                    name: 'Assigned Rule',
+                                    accessor: 'assigned_rule',
+                                    callbackValue: renderAssignRule,
+                                },
+                                {
+                                    name: 'Tags',
+                                    accessor: 'tags',
+                                    callbackValue: renderTagCell,
+                                },
+                                {
+                                    name: 'Last Data',
+                                    accessor: 'last_data',
+                                    callbackValue: renderLastUsedCell,
+                                },
+                            ]}
+                            onCheckboxRow={alert}
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="vehicle1"
+                                    name="vehicle1"
+                                    checked={checkedAll}
+                                    onChange={() => selectAllRowsSensors(!checkedAll)}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="socket_rule"
+                                    name="socket_rule"
+                                    checked={selectedIds.includes(record?.id) || checkedAll}
+                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
+                                    onChange={(e) => {
+                                        setSensorIdNow(record?.id);
+                                        handleRuleStateChange(e.target.value, record);
+                                    }}
+                                />
+                            )}
+                            onPageSize={setPageSize}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            currentPage={pageNo}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
+                                if (selectedRuleFilter === 0) {
+                                    return totalItems;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            })()}
+                        />
+                    ) : (
+                        <div className="sockets-no-selected-building">
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Please choose building to see the list of sockets
+                            </Typography.Subheader>
+                        </div>
+                    )}
                 </div>
             )}
             <Modal
