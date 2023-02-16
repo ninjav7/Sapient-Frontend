@@ -932,10 +932,8 @@ const EditPanel = () => {
             });
     };
 
-    const fetchPassiveDeviceData = async (bldg_id, device_search) => {
+    const fetchPassiveDeviceData = async (bldg_id) => {
         let params = `?building_id=${bldg_id}&page_no=1&page_size=150`;
-        if (device_search && device_search !== 'default-list')
-            params = params.concat(`&device_search=${device_search}`);
 
         await getPassiveDeviceList(params)
             .then((res) => {
@@ -1231,7 +1229,6 @@ const EditPanel = () => {
                 triggerBreakerAPI={triggerBreakerAPI}
                 fetchEquipmentData={fetchEquipmentData}
                 isEquipmentListFetching={isEquipmentListFetching}
-                fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
             <UnlinkAllBreakers

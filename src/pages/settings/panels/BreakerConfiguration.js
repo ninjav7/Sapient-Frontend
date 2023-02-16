@@ -9,6 +9,7 @@ import UnlinkBreaker from './UnlinkBreaker';
 import {
     createEquipmentData,
     getBreakerDeleted,
+    getPassiveDeviceList,
     getSensorsList,
     resetAllBreakers,
     updateBreakerDetails,
@@ -21,7 +22,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
-import { comparePanelData } from './utils';
+import { comparePanelData, compareSensorsCount } from './utils';
 import Select from '../../../sharedComponents/form/select';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -29,6 +30,7 @@ import { Notification } from '../../../sharedComponents/notification/Notificatio
 import { useNotification } from '../../../sharedComponents/notification/useNotification';
 import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
+import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
@@ -43,7 +45,6 @@ const BreakerConfiguration = ({
     triggerBreakerAPI,
     fetchEquipmentData,
     isEquipmentListFetching,
-    fetchPassiveDeviceData,
 }) => {
     const [activeTab, setActiveTab] = useState('edit-breaker');
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
@@ -62,6 +63,18 @@ const BreakerConfiguration = ({
     const [thirdBreakerObj, setThirdBreakerObj] = useState({});
 
     const [selectedEquipment, setSelectedEquipment] = useState('');
+
+    const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
+    const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
+    const [thirdDeviceSearch, setThirdDeviceSearch] = useState('');
+
+    const debouncedFirstSearch = useDebounce(firstDeviceSearch, 500);
+    const debouncedSecondSearch = useDebounce(secondDeviceSearch, 500);
+    const debouncedThirdSearch = useDebounce(thirdDeviceSearch, 500);
+
+    const [passiveDevicesListOne, setFirstPassiveDevicesList] = useState([]);
+    const [passiveDevicesListTwo, setSecondPassiveDevicesList] = useState([]);
+    const [passiveDevicesListThree, setThirdPassiveDevicesList] = useState([]);
 
     const [firstSensorList, setFirstSensorList] = useState([]);
     const [secondSensorList, setSecondSensorList] = useState([]);
@@ -446,6 +459,36 @@ const BreakerConfiguration = ({
             });
     };
 
+    const fetchPassiveDeviceList = async (bldg_id, device_search, type) => {
+        let params = `?building_id=${bldg_id}&page_no=1&page_size=150`;
+        if (device_search && device_search !== 'default-list')
+            params = params.concat(`&device_search=${device_search}`);
+
+        await getPassiveDeviceList(params)
+            .then((res) => {
+                const responseData = res?.data?.data;
+                const newArray = [];
+
+                responseData.forEach((record) => {
+                    const obj = {
+                        label: record?.identifier,
+                        value: record?.equipments_id,
+                        isDisabled: compareSensorsCount(record?.sensor_number),
+                    };
+                    newArray.push(obj);
+                });
+
+                if (type === 'first') setFirstPassiveDevicesList(newArray);
+                if (type === 'second') setSecondPassiveDevicesList(newArray);
+                if (type === 'third') setThirdPassiveDevicesList(newArray);
+            })
+            .catch(() => {
+                if (type === 'first') setFirstPassiveDevicesList([]);
+                if (type === 'second') setSecondPassiveDevicesList([]);
+                if (type === 'third') setThirdPassiveDevicesList([]);
+            });
+    };
+
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
@@ -455,7 +498,6 @@ const BreakerConfiguration = ({
         if (selectedBreakerObj?.equipment_link) setSelectedEquipment(selectedBreakerObj?.equipment_link[0]);
 
         // Conditions to check if Sensors List is required to be fetched
-
         // For Breaker Type 1
         if (selectedBreakerObj?.breaker_type === 1 && selectedBreakerObj?.device_link !== '') {
             fetchSensorsList(selectedBreakerObj?.device_link, 'first');
@@ -512,11 +554,23 @@ const BreakerConfiguration = ({
     }, [activeEquipTab]);
 
     useEffect(() => {
-        if (showBreakerConfigModal) {
-            console.log('SSR fetchPassiveDeviceData API trigerred :>> ', deviceID);
-            fetchPassiveDeviceData(bldgId, deviceID);
-        }
-    }, [deviceID]);
+        if (showBreakerConfigModal) fetchPassiveDeviceList(bldgId, debouncedFirstSearch, 'first');
+    }, [debouncedFirstSearch]);
+
+    useEffect(() => {
+        if (showBreakerConfigModal) fetchPassiveDeviceList(bldgId, debouncedSecondSearch, 'second');
+    }, [debouncedSecondSearch]);
+
+    useEffect(() => {
+        if (showBreakerConfigModal) fetchPassiveDeviceList(bldgId, debouncedThirdSearch, 'third');
+    }, [debouncedThirdSearch]);
+
+    useEffect(() => {
+        const newList = passiveDevicesList;
+        setFirstPassiveDevicesList(newList);
+        setSecondPassiveDevicesList(newList);
+        setThirdPassiveDevicesList(newList);
+    }, [passiveDevicesList]);
 
     return (
         <React.Fragment>
@@ -650,15 +704,17 @@ const BreakerConfiguration = ({
                                                         placeholder="Select Device ID Name"
                                                         name="select"
                                                         isSearchable={true}
-                                                        options={passiveDevicesList}
+                                                        options={passiveDevicesListOne}
                                                         currentValue={passiveDevicesList.filter(
                                                             (option) => option.value === firstBreakerObj?.device_link
                                                         )}
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('device_link', e.value, 'first');
-                                                            setDeviceID('default-list');
+                                                            if (firstDeviceSearch !== '') {
+                                                                fetchPassiveDeviceList(bldgId, 'default-list', 'first');
+                                                            }
                                                         }}
-                                                        onInputChange={(e) => setDeviceID(e)}
+                                                        onInputChange={(e) => setFirstDeviceSearch(e)}
                                                         className="basic-single"
                                                     />
                                                 </div>
@@ -708,7 +764,7 @@ const BreakerConfiguration = ({
                                                             placeholder="Select Device ID Name"
                                                             name="select"
                                                             isSearchable={true}
-                                                            options={passiveDevicesList}
+                                                            options={passiveDevicesListTwo}
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.device_link
@@ -719,9 +775,15 @@ const BreakerConfiguration = ({
                                                                     e.value,
                                                                     'second'
                                                                 );
-                                                                setDeviceID('default-list');
+                                                                if (secondDeviceSearch !== '') {
+                                                                    fetchPassiveDeviceList(
+                                                                        bldgId,
+                                                                        'default-list',
+                                                                        'second'
+                                                                    );
+                                                                }
                                                             }}
-                                                            onInputChange={(e) => console.log('Sudhanshu => ', e)}
+                                                            onInputChange={(e) => setSecondDeviceSearch(e)}
                                                             className="basic-single"
                                                         />
                                                     </div>
@@ -779,7 +841,7 @@ const BreakerConfiguration = ({
                                                             placeholder="Select Device ID Name"
                                                             name="select"
                                                             isSearchable={true}
-                                                            options={passiveDevicesList}
+                                                            options={passiveDevicesListThree}
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.device_link
@@ -790,9 +852,15 @@ const BreakerConfiguration = ({
                                                                     e.value,
                                                                     'third'
                                                                 );
-                                                                setDeviceID('default-list');
+                                                                if (thirdDeviceSearch !== '') {
+                                                                    fetchPassiveDeviceList(
+                                                                        bldgId,
+                                                                        'default-list',
+                                                                        'third'
+                                                                    );
+                                                                }
                                                             }}
-                                                            onInputChange={(e) => console.log('Sudhanshu => ', e)}
+                                                            onInputChange={(e) => setThirdDeviceSearch(e)}
                                                             className="basic-single"
                                                         />
                                                     </div>
