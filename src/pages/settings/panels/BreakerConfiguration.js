@@ -53,6 +53,12 @@ const BreakerConfiguration = ({
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
+    const defaultErrorObj = {
+        rated_amps: null,
+    };
+
+    const [errorObj, setErrorObj] = useState(defaultErrorObj);
+
     const [parentBreakerObj, setParentBreakerObj] = useState({});
     const [firstBreakerObj, setFirstBreakerObj] = useState({});
 
@@ -353,6 +359,14 @@ const BreakerConfiguration = ({
     };
 
     const saveBreakersDetails = async () => {
+        let alertObj = Object.assign({}, errorObj);
+
+        if (firstBreakerObj?.rated_amps === '') alertObj.rated_amps = 'Please enter Amps';
+        if (firstBreakerObj?.rated_amps % 5 !== 0) alertObj.rated_amps = 'Amps must be in increments of 5';
+
+        setErrorObj(alertObj);
+        if (alertObj.rated_amps) return;
+
         setIsProcessing(true);
 
         const params = `?building_id=${bldgId}`;
@@ -704,10 +718,14 @@ const BreakerConfiguration = ({
                                             type="number"
                                             placeholder="Enter Amperage"
                                             labelSize={Typography.Sizes.md}
+                                            min={0}
+                                            step={firstBreakerObj?.rated_amps < 50 ? 5 : 10}
                                             value={firstBreakerObj?.rated_amps}
                                             onChange={(e) => {
                                                 handleChange('rated_amps', +e.target.value);
+                                                setErrorObj({ ...errorObj, ['rated_amps']: null });
                                             }}
+                                            error={errorObj?.rated_amps}
                                         />
                                     </div>
 
