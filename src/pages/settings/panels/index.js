@@ -140,7 +140,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${el.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 

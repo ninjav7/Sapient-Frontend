@@ -17,7 +17,7 @@ const BreakersWrapper = (props) => {
     }
 
     const groupedEdges = isOneColumn ? { edges: sortEdges(edges) } : groupEdgesToColumns(edges);
-    
+
     return (
         <div className={cx('panel-breakers-wrapper', { 'is-one-column': isOneColumn })}>
             {Object.entries(groupedEdges).map((edge, index) => {

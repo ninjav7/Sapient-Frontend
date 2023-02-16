@@ -43,14 +43,12 @@ const Toggles = (props) => {
             </label>
 
             {(!!label || !!description) && (
-                    <div className="toggle-label">
-                        <Brick sizeInRem={0.0625} />
-                        {label && <Typography.Body size={mapLabelsSizes.label}>{label}</Typography.Body>}
-                        {description && (
-                            <Typography.Body size={mapLabelsSizes.description}>{description}</Typography.Body>
-                        )}
-                    </div>
-                )}
+                <div className="toggle-label">
+                    <Brick sizeInRem={0.0625} />
+                    {label && <Typography.Body size={mapLabelsSizes.label}>{label}</Typography.Body>}
+                    {description && <Typography.Body size={mapLabelsSizes.description}>{description}</Typography.Body>}
+                </div>
+            )}
         </div>
     );
 };

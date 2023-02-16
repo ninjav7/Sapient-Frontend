@@ -17,6 +17,7 @@ import { ReactComponent as UnlinkSVG } from '../../assets/icons/link-slash.svg';
 import { PROP_TYPES } from './constants';
 
 import './Panel.scss';
+import { mergePropsByAccessors } from './helper';
 
 export const PanelWidgetContext = React.createContext({});
 
@@ -127,7 +128,7 @@ const Panel = (props) => {
                             size={Toggles.Sizes.sm}
                             textAlignment={Toggles.TextAlignment.left}
                             onChange={onToggleChangeHandler}
-                            label={`${viewDeviceIds ? 'View' : 'Hide'} Device IDs`}
+                            label='Device IDs'
                         />
                     )}
                 </div>

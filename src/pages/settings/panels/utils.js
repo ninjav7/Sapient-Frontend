@@ -16,8 +16,8 @@ export const unableLinkingAlerts = () => {
 
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
-    if (sourceBreakerObj?.data?.equipment_link[0] && targetBreakerObj?.data?.equipment_link[0]) {
-        if (sourceBreakerObj?.data?.equipment_link[0] !== targetBreakerObj?.data?.equipment_link[0]) {
+    if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {
+        if (sourceBreakerObj?.equipment_link[0] !== targetBreakerObj?.equipment_link[0]) {
             diff = true;
         }
     } else {
@@ -63,14 +63,14 @@ export const getEquipmentForBreaker = (breakers) => {
     let equipmentId = '';
     const [breakerOne, breakerTwo] = breakers;
 
-    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 0) {
+    if (breakerOne?.equipment_link.length === 0 && breakerTwo?.equipment_link.length === 0) {
         equipmentId = '';
     }
-    if (breakerOne?.data?.equipment_link.length === 0 && breakerTwo?.data?.equipment_link.length === 1) {
-        equipmentId = breakerTwo?.data?.equipment_link[0];
+    if (breakerOne?.equipment_link.length === 0 && breakerTwo?.equipment_link.length === 1) {
+        equipmentId = breakerTwo?.equipment_link[0];
     }
-    if (breakerOne?.data?.equipment_link.length === 1 && breakerTwo?.data?.equipment_link.length === 0) {
-        equipmentId = breakerOne?.data?.equipment_link[0];
+    if (breakerOne?.equipment_link.length === 1 && breakerTwo?.equipment_link.length === 0) {
+        equipmentId = breakerOne?.equipment_link[0];
     }
 
     return equipmentId;
@@ -94,13 +94,22 @@ export const comparePanelData = (obj1, obj2) => {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
 
+export const compareSensorsCount = (inputTxt) => {
+    if (inputTxt) {
+        let sensors = inputTxt.split('/');
+        return sensors[0] === sensors[1];
+    }
+};
+
 export const getVoltageConfigValue = (value, breakerType) => {
     if (breakerType === 'single') {
+        if (value === '120/240') return 120;
         if (value === '208/120') return 120;
         if (value === '480') return 277;
         if (value === '600') return 347;
     }
     if (breakerType === 'double') {
+        if (value === '120/240') return 240;
         if (value === '208/120') return 208;
         if (value === '480') return 480;
     }
