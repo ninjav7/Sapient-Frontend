@@ -37,7 +37,7 @@ const Tabs = (props) => {
 
     return (
         <div className={classNames}>
-            <TabsBt {...props} className={props.tabCustomStyle}>
+            <TabsBt {...props} className={props.tabClassName}>
                 {React.Children.map(props.children, (child, index) =>
                     React.cloneElement(child, { onEnter: (element) => handleOnEnter(element, index), tabClassName })
                 )}
