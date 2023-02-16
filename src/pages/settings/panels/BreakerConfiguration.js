@@ -218,6 +218,60 @@ const BreakerConfiguration = ({
         }
     };
 
+    const handleSensorChange = (previousSensorId, newSensorId) => {
+        if (firstSensorList.length !== 0) {
+            let sensorListOne = firstSensorList;
+            sensorListOne.forEach((record) => {
+                if (record?.id === previousSensorId) record.isDisabled = false;
+                if (record?.id === newSensorId) record.isDisabled = true;
+            });
+            sensorListOne.sort((a, b) => {
+                if (!a.isDisabled && b.isDisabled) {
+                    return -1;
+                } else if (a.isDisabled && !b.isDisabled) {
+                    return 1;
+                } else {
+                    return b.label - a.label;
+                }
+            });
+            setFirstSensorList(sensorListOne);
+        }
+        if (secondSensorList.length !== 0) {
+            let sensorListTwo = secondSensorList;
+            sensorListTwo.forEach((record) => {
+                if (record?.id === previousSensorId) record.isDisabled = false;
+                if (record?.id === newSensorId) record.isDisabled = true;
+            });
+            sensorListTwo.sort((a, b) => {
+                if (!a.isDisabled && b.isDisabled) {
+                    return -1;
+                } else if (a.isDisabled && !b.isDisabled) {
+                    return 1;
+                } else {
+                    return b.label - a.label;
+                }
+            });
+            setSecondSensorList(sensorListTwo);
+        }
+        if (thirdSensorList.length !== 0) {
+            let sensorListThree = thirdSensorList;
+            sensorListThree.forEach((record) => {
+                if (record?.id === previousSensorId) record.isDisabled = false;
+                if (record?.id === newSensorId) record.isDisabled = true;
+            });
+            sensorListThree.sort((a, b) => {
+                if (!a.isDisabled && b.isDisabled) {
+                    return -1;
+                } else if (a.isDisabled && !b.isDisabled) {
+                    return 1;
+                } else {
+                    return b.label - a.label;
+                }
+            });
+            setThirdSensorList(sensorListThree);
+        }
+    };
+
     const unLinkCurrentBreaker = async () => {
         setIsResetting(true);
 
@@ -277,6 +331,7 @@ const BreakerConfiguration = ({
 
         if (firstBreakerObj?.sensor_link !== parentBreakerObj?.sensor_link) {
             breakerObjOne.sensor_link = firstBreakerObj?.sensor_link;
+            breakerObjOne.device_link = firstBreakerObj?.device_link;
         }
 
         if (secondBreakerObj?.device_link !== secondBreakerObjOld?.device_link) {
@@ -285,6 +340,7 @@ const BreakerConfiguration = ({
 
         if (secondBreakerObj?.sensor_link !== secondBreakerObjOld?.sensor_link) {
             breakerObjTwo.sensor_link = secondBreakerObj?.sensor_link;
+            breakerObjTwo.device_link = secondBreakerObj?.device_link;
         }
 
         if (thirdBreakerObj?.device_link !== thirdBreakerObjOld?.device_link) {
@@ -293,6 +349,7 @@ const BreakerConfiguration = ({
 
         if (thirdBreakerObj?.sensor_link !== thirdBreakerObjOld?.sensor_link) {
             breakerObjThree.sensor_link = thirdBreakerObj?.sensor_link;
+            breakerObjThree.device_link = thirdBreakerObj?.device_link;
         }
 
         breakersList.push(breakerObjOne);
@@ -329,6 +386,8 @@ const BreakerConfiguration = ({
             });
     };
 
+    // Might be we need to implement this API with props for which Sensor List API response need to be set
+    // Scenario failing, if one of Device ID is '' out of Triple Breaker
     const onLoadSensorsListFetch = async (deviceId) => {
         if (deviceId === null || deviceId === undefined || deviceId === '') return;
 
@@ -631,6 +690,7 @@ const BreakerConfiguration = ({
                                                         )}
                                                         onChange={(e) => {
                                                             handleBreakerConfigChange('sensor_link', e.value, 'first');
+                                                            handleSensorChange(firstBreakerObj?.sensor_link, e.value);
                                                         }}
                                                         className="basic-single"
                                                     />
@@ -698,6 +758,10 @@ const BreakerConfiguration = ({
                                                                     e.value,
                                                                     'second'
                                                                 );
+                                                                handleSensorChange(
+                                                                    secondBreakerObj?.sensor_link,
+                                                                    e.value
+                                                                );
                                                             }}
                                                             className="basic-single"
                                                         />
@@ -764,6 +828,10 @@ const BreakerConfiguration = ({
                                                                     'sensor_link',
                                                                     e.value,
                                                                     'third'
+                                                                );
+                                                                handleSensorChange(
+                                                                    thirdBreakerObj?.sensor_link,
+                                                                    e.value
                                                                 );
                                                             }}
                                                             className="basic-single"
