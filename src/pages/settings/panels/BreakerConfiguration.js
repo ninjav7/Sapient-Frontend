@@ -386,40 +386,6 @@ const BreakerConfiguration = ({
             });
     };
 
-    // Might be we need to implement this API with props for which Sensor List API response need to be set
-    // Scenario failing, if one of Device ID is '' out of Triple Breaker
-    const onLoadSensorsListFetch = async (deviceId) => {
-        if (deviceId === null || deviceId === undefined || deviceId === '') return;
-
-        const params = `?device_id=${deviceId}&building_id=${bldgId}`;
-
-        await getSensorsList(params)
-            .then((res) => {
-                let response = res?.data;
-
-                let linkedSensor = [];
-                let unlinkedSensor = [];
-
-                if (response.length !== 0) {
-                    response.forEach((record) => {
-                        record.label = record?.name;
-                        record.value = record?.id;
-                        record.isDisabled = record?.breaker_id !== '';
-                        record?.breaker_id !== '' ? linkedSensor.push(record) : unlinkedSensor.push(record);
-                    });
-                }
-
-                setFirstSensorList(unlinkedSensor.concat(linkedSensor));
-                setSecondSensorList(unlinkedSensor.concat(linkedSensor));
-                setThirdSensorList(unlinkedSensor.concat(linkedSensor));
-            })
-            .catch(() => {
-                setFirstSensorList([]);
-                setSecondSensorList([]);
-                setThirdSensorList([]);
-            });
-    };
-
     const fetchSensorsList = async (deviceId, breakerLvl) => {
         if (deviceId === null || deviceId === undefined || deviceId === '') return;
 
@@ -484,37 +450,59 @@ const BreakerConfiguration = ({
         if (!selectedBreakerObj?.id) return;
 
         setFirstBreakerObj(selectedBreakerObj);
-        setParentBreakerObj(selectedBreakerObj);
+        setParentBreakerObj(selectedBreakerObj); // Added to track for any configuration change
 
         if (selectedBreakerObj?.equipment_link) setSelectedEquipment(selectedBreakerObj?.equipment_link[0]);
 
+        // Conditions to check if Sensors List is required to be fetched
+
+        // For Breaker Type 1
         if (selectedBreakerObj?.breaker_type === 1 && selectedBreakerObj?.device_link !== '') {
-            onLoadSensorsListFetch(selectedBreakerObj?.device_link);
+            fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+            return;
         }
 
+        // For Breaker Type 2
         if (selectedBreakerObj?.breaker_type === 2) {
             let obj = breakersList.find((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(obj);
-            setSecondBreakerObjOld(obj);
+            setSecondBreakerObjOld(obj); // Added to track for any configuration change
 
-            if (selectedBreakerObj?.device_link !== '' && selectedBreakerObj?.device_link === obj?.device_link) {
-                onLoadSensorsListFetch(selectedBreakerObj?.device_link);
+            if (selectedBreakerObj?.device_link === '' && obj?.device_link === '') return;
+
+            if (selectedBreakerObj?.device_link === obj?.device_link) {
+                fetchSensorsList(selectedBreakerObj?.device_link, 'first-second');
+            } else {
+                fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+                fetchSensorsList(obj?.device_link, 'second');
             }
         }
 
+        // For Breaker Type 3
         if (selectedBreakerObj?.breaker_type === 3) {
             let childbreakers = breakersList.filter((el) => el?.parent_breaker === selectedBreakerObj?.id);
             setSecondBreakerObj(childbreakers[0]);
-            setSecondBreakerObjOld(childbreakers[0]);
+            setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
             setThirdBreakerObj(childbreakers[1]);
-            setThirdBreakerObjOld(childbreakers[1]);
+            setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
 
             if (
-                selectedBreakerObj?.device_link !== '' &&
+                selectedBreakerObj?.device_link === '' &&
+                childbreakers[0]?.device_link === '' &&
+                childbreakers[1]?.device_link === ''
+            ) {
+                return;
+            }
+
+            if (
                 selectedBreakerObj?.device_link === childbreakers[0]?.device_link &&
                 selectedBreakerObj?.device_link === childbreakers[1]?.device_link
             ) {
-                onLoadSensorsListFetch(selectedBreakerObj?.device_link);
+                fetchSensorsList(selectedBreakerObj?.device_link, 'all');
+            } else {
+                if (selectedBreakerObj?.device_link !== '') fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+                if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
+                if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
             }
         }
     }, [selectedBreakerObj]);
