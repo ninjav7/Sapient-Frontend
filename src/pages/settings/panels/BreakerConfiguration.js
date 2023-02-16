@@ -1007,7 +1007,7 @@ const BreakerConfiguration = ({
                                     <div className="w-100">
                                         <Tabs
                                             type={Tabs.Types.subsection}
-                                            tabCustomStyle="p-2"
+                                            tabClassName="p-2"
                                             activeKey={activeEquipTab}
                                             onSelect={(e) => {
                                                 setActiveEquipTab(e);

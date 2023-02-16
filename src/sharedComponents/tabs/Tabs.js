@@ -59,7 +59,7 @@ Tabs.propTypes = {
     defaultActiveKey: PropTypes.string,
     activeKey: PropTypes.string,
     type: PropTypes.oneOf(Object.values(TABS_TYPES)),
-    tabCustomStyle: PropTypes.string,
+    tabClassName: PropTypes.string,
 };
 
 export default Tabs;
