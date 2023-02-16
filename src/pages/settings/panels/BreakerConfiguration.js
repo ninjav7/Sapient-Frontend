@@ -84,7 +84,14 @@ const BreakerConfiguration = ({
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
     const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
     const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+
+    // Delete Alert Modal
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
+    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
+
     const [isResetting, setIsResetting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
     const defaultEquipmentObj = {
@@ -307,6 +314,41 @@ const BreakerConfiguration = ({
             })
             .catch(() => {
                 setIsResetting(false);
+            });
+    };
+
+    const deleteCurrentBreaker = async () => {
+        setIsDeleting(true);
+        const params = `?breaker_id=${firstBreakerObj?.id}`;
+        await getBreakerDeleted(params)
+            .then((res) => {
+                setIsDeleting(false);
+                const response = res;
+                handleDeleteAlertClose();
+
+                if (response?.status === 200) {
+                    closeBreakerConfigModal();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                    triggerBreakerAPI(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Breaker.'
+                            : 'Unable to delete Breaker due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                setIsDeleting(false);
             });
     };
 
@@ -920,17 +962,16 @@ const BreakerConfiguration = ({
                                                     label="Delete Breaker"
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
-                                                    // onClick={() => {
-                                                    //     handleEditBreakerClose();
-                                                    //     handleDeleteAlertShow();
-                                                    // }}
+                                                    onClick={() => {
+                                                        if (
+                                                            firstBreakerObj?.breaker_type === 1 &&
+                                                            breakersList.length === firstBreakerObj?.breaker_number
+                                                        ) {
+                                                            closeBreakerConfigModal();
+                                                            handleDeleteAlertShow();
+                                                        }
+                                                    }}
                                                     icon={<DeleteSVG />}
-                                                    // disabled={
-                                                    //     distributedBreakersData.length !==
-                                                    //         breakerData.breaker_number ||
-                                                    //     breakerData.breakerType === 2 ||
-                                                    //     breakerData.breakerType === 3
-                                                    // }
                                                     className="w-100 ml-3"
                                                 />
                                             </div>
@@ -1168,13 +1209,13 @@ const BreakerConfiguration = ({
                 unLinkCurrentBreaker={unLinkCurrentBreaker}
             />
 
-            {/* <DeleteBreaker
+            <DeleteBreaker
+                isDeleting={isDeleting}
                 showDeleteAlert={showDeleteAlert}
                 handleDeleteAlertClose={handleDeleteAlertClose}
                 handleEditBreakerShow={openBreakerConfigModal}
-                isDeleting={isDeleting}
                 deleteCurrentBreaker={deleteCurrentBreaker}
-            /> */}
+            />
         </React.Fragment>
     );
 };
