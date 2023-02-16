@@ -953,7 +953,6 @@ const EditPanel = () => {
 
                 BreakersStore.update((s) => {
                     s.passiveDeviceData = newArray;
-                    s.totalPassiveDeviceCount = res?.data?.total_data;
                 });
             })
             .catch(() => {});
