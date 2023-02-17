@@ -286,11 +286,7 @@ const Accounts = () => {
                                 ? 0
                                 : Math.abs(Math.round(row.percent_change))
                         }
-                        type={
-                            row?.percent_change < row?.percent_change
-                                ? TrendsBadge.Type.DOWNWARD_TREND
-                                : TrendsBadge.Type.UPWARD_TREND
-                        }
+                        type={row?.percent_change < 0 ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND}
                     />
                 </Row>
             </>
