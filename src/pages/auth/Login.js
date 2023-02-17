@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { Col, FormGroup } from 'reactstrap';
+import { Col, FormGroup, Alert } from 'reactstrap';
 import { loginUser, googleLoginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
@@ -10,6 +10,7 @@ import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Google } from '../../assets/icon/google.svg';
+import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
 import Input from '../../sharedComponents/form/input/Input';
@@ -23,15 +24,16 @@ const Login = (props) => {
     const [_isMounted, set_isMounted] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(false);
-    const [message, setMessage] = useState('');
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
     const loginSuccess = UserStore.useState((s) => s.loginSuccess);
+    const error = UserStore.useState((s) => s.error);
+    const message = UserStore.useState((s) => s.errorMessage);
+    const notification = UserStore.useState((s) => s.showNotification);
     const [passwordType, setPasswordType] = useState('password');
     const [passwordError, setPasswordError] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [refresh, setRefresh] = useState(false);
-    let { user_found, link_type, account_linked, session_id } = useParams();
+    let { user_found, link_type, account_linked, is_active, is_verified, session_id } = useParams();
 
     useEffect(() => {
         set_isMounted(true);
@@ -41,38 +43,59 @@ const Login = (props) => {
             user_found !== undefined &&
             link_type !== undefined &&
             account_linked !== undefined &&
-            session_id !== undefined &&
-            loginSuccess !== true
+            is_active !== undefined &&
+            is_verified !== undefined &&
+            loginSuccess !== 'success'
         ) {
             setRefresh(true);
             let usrFound = user_found.split('=');
             if (usrFound[1] === 'true') {
-                let accountLinked = account_linked.split('=');
-                if (accountLinked[1] === 'true') {
-                    let sessionId = session_id.split('=');
-                    props.googleLoginUser(sessionId[1]);
-                } else if (accountLinked[1] === 'false') {
-                    let sessionId = session_id.split('=');
-                    localStorage.setItem('session-id', sessionId[1]);
-                    history.push('/account/update-auth');
+                let verified = is_verified.split('=');
+                if (verified[1] === 'true') {
+                    let active = is_active.split('=');
+                    if (active[1] === 'true') {
+                        let accountLinked = account_linked.split('=');
+                        if (accountLinked[1] === 'true') {
+                            let sessionId = session_id.split('=');
+                            props.googleLoginUser(sessionId[1]);
+                        } else if (accountLinked[1] === 'false') {
+                            let sessionId = session_id.split('=');
+                            localStorage.setItem('session-id', sessionId[1]);
+                            history.push('/account/update-auth');
+                        }
+                    } else {
+                        setRefresh(false);
+                        UserStore.update((s) => {
+                            s.error = true;
+                            s.errorMessage = 'Unable to Login';
+                        });
+                        history.push('/account/login');
+                    }
+                } else {
+                    setRefresh(false);
+                    UserStore.update((s) => {
+                        s.error = true;
+                        s.errorMessage = 'Unable to Login';
+                    });
+                    history.push('/account/login');
                 }
             } else if (usrFound[1] === 'false') {
                 setRefresh(false);
                 UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to Login';
-                    s.notificationType = 'error';
+                    s.error = true;
+                    s.errorMessage = 'Unable to Login';
                 });
+                history.push('/account/login');
             }
         } else if (user_found !== undefined) {
             let usrFound = user_found.split('=');
             if (usrFound[1] === 'false') {
                 setRefresh(false);
                 UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to Login';
-                    s.notificationType = 'error';
+                    s.error = true;
+                    s.errorMessage = 'Unable to Login';
                 });
+                history.push('/account/login');
             }
         }
         return () => {
@@ -82,14 +105,13 @@ const Login = (props) => {
     }, []);
 
     useEffect(() => {
-        if (loginSuccess === false) {
+        if (loginSuccess === 'error') {
             UserStore.update((s) => {
-                s.showNotification = true;
-                s.notificationMessage = 'Email or password entered is incorrect.';
-                s.notificationType = 'error';
+                s.error = true;
+                s.errorMessage = 'Email or password entered is incorrect.';
             });
         }
-    }, [loginSuccess, message]);
+    }, [loginSuccess]);
 
     const handleValidSubmit = async () => {
         let ct = 0;
@@ -102,6 +124,11 @@ const Login = (props) => {
             ct++;
         }
         if (ct === 0) {
+            UserStore.update((s) => {
+                s.error = false;
+                s.errorMessage = '';
+                s.loginSuccess = '';
+            });
             props.loginUser(username.trim(), password.trim(), props.history);
         } else {
             return;
@@ -117,6 +144,10 @@ const Login = (props) => {
     };
 
     const handleAdminPortal = async () => {
+        UserStore.update((s) => {
+            s.error = false;
+            s.errorMessage = '';
+        });
         await googleAuth()
             .then((res) => {
                 let response = res.data;
@@ -142,6 +173,19 @@ const Login = (props) => {
                                         Sign in
                                     </Typography.Header>
                                 </div>
+
+                                {props.error && (
+                                    <Alert color="danger" isOpen={props.error ? true : false}>
+                                        <div>{props.error}</div>
+                                    </Alert>
+                                )}
+                                {error && (
+                                    <div className="errorBlock">
+                                        <Typography.Subheader size={Typography.Sizes.md} className="errorText">
+                                            <Exclamation /> &nbsp;&nbsp;{message}
+                                        </Typography.Subheader>
+                                    </div>
+                                )}
 
                                 <form className="authentication-form">
                                     <FormGroup>

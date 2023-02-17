@@ -1,24 +1,25 @@
 import React from 'react';
+import cx from 'classnames';
 
 import { BreakerColumn } from './BreakerColumn';
 import { BreakerLinkerColumn } from './BreakerLinkerColumn';
 
-import { groupEdgesToColumns } from '../helper';
+import { groupEdgesToColumns, sortEdges } from '../helper';
 import { generateID } from '../../../helpers/helper';
 
 import { PROP_TYPES } from '../constants';
 
 const BreakersWrapper = (props) => {
-    const { edges, nodesMap, isEditingMode } = props;
+    const { edges, nodesMap, isEditingMode, isOneColumn } = props;
 
     if (!edges) {
         return null;
     }
 
-    const groupedEdges = groupEdgesToColumns(edges);
-    
+    const groupedEdges = isOneColumn ? { edges: sortEdges(edges) } : groupEdgesToColumns(edges);
+
     return (
-        <div className="panel-breakers-wrapper">
+        <div className={cx('panel-breakers-wrapper', { 'is-one-column': isOneColumn })}>
             {Object.entries(groupedEdges).map((edge, index) => {
                 return (
                     <>

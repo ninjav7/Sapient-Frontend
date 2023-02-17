@@ -7,6 +7,7 @@ import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { forgotPassword } from './service';
 import { UserStore } from '../../store/UserStore';
@@ -41,11 +42,6 @@ const ForgetPassword = () => {
                 setIsLoading(false);
                 setTitleText('Success');
                 setShowReset(true);
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Request Sent';
-                    s.notificationType = 'success';
-                });
             })
             .catch((error) => {
                 setIsLoading(false);
@@ -76,6 +72,11 @@ const ForgetPassword = () => {
                                 </div>
                                 {showReset ? (
                                     <>
+                                        <div className="successBlock">
+                                            <Typography.Subheader size={Typography.Sizes.md} className="successText">
+                                                <CircleCheckSVG /> &nbsp;&nbsp; Request Sent
+                                            </Typography.Subheader>
+                                        </div>
                                         <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                             If a login is associated with your email, an email will be sent with
                                             instructions on how to reset your password.

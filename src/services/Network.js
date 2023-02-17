@@ -12,6 +12,7 @@ export const offlineDevices = '/api/user_role/vendor/customer-offline-devices';
 export const selectCustomer = '/api/user_role/superuser-select-customer';
 export const getCustomer = '/api/user_role/vendor/create-customer';
 export const updateUsers = '/api/user_role/user/update-user';
+export const checkLinkValidity = '/api/user_role/user/check-token-validity';
 
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';

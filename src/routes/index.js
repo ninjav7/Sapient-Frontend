@@ -13,7 +13,7 @@ import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
 import Panels from '../pages/settings/panels';
-import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
+import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices';
 import Provision from '../pages/settings/active-devices/provision';
 import PassiveDevices from '../pages/settings/passive-devices';
@@ -74,6 +74,7 @@ const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBu
 //superUser
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
+const LinkExpired = React.lazy(() => import('../pages/auth/LinkExpired'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -257,9 +258,9 @@ const settingsRoutes = {
         //     parent: 'building-settings',
         // },
         {
-            path: '/settings/panels/edit-panel/:panelId',
-            name: 'Edit Breaker-Panel',
-            component: EditBreakerPanel,
+            path: '/settings/panels/edit-panel/:panelType/:panelId',
+            name: 'Edit Panel',
+            component: EditPanel,
             route: PrivateRoute,
             visibility: false,
             parent: 'building-settings',
@@ -468,7 +469,14 @@ const authRoutes = {
     visibility: true,
     children: [
         {
-            path: '/account/login/:user_found/:link_type/:account_linked/:session_id',
+            path: '/account/login/:user_found/:link_type/:account_linked/:is_active/:is_verified/:session_id',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/login/:user_found/:link_type/:account_linked/:is_active/:is_verified',
             name: 'Login',
             component: Login,
             route: Route,
@@ -521,6 +529,13 @@ const authRoutes = {
             path: '/account/update-auth',
             name: 'Update Auth',
             component: UpdateAuth,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/link-expired',
+            name: 'Link Expired',
+            component: LinkExpired,
             route: Route,
             visibility: true,
         },

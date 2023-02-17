@@ -19,6 +19,8 @@ import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from '.
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getCustomerListCSVExport } from '../../../utils/tablesExport';
 import './style.scss';
+import 'moment-timezone';
+import { timeZone } from '../../../utils/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -60,7 +62,6 @@ const Accounts = () => {
     const history = useHistory();
 
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
-    const [isDeviceDataFetched, setIsDeviceDataFetched] = useState(false);
     const [openCustomer, setOpenCustomer] = useState(false);
 
     const closeAddCustomer = () => setOpenCustomer(false);
@@ -71,6 +72,9 @@ const Accounts = () => {
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [search, setSearch] = useState('');
     const { download } = useCSVDownload();
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+    const [sortBy, setSortBy] = useState({});
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -93,36 +97,58 @@ const Accounts = () => {
 
     const getCustomerList = async () => {
         setIsUserDataFetched(true);
-        let params = `?customer_search=${search}`;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'vendor_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
+        let params = `?customer_search=${search}&timezone=${timeZone}&page_no=${pageNo}&page_size=${pageSize}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
         await fetchCustomerList(params)
-            .then((res) => {
+            .then(async (res) => {
                 let response = res.data;
-                setUserData(response?.data);
+                let userDt = response?.data;
+
+                let allArr = [];
+                userDt.map((ele) => {
+                    let match = offlineData.filter((el) => el?.vendor_id === ele?.vendor_id);
+                    if (match.length > 0)
+                        allArr.push({
+                            active_devices: ele?.active_devices,
+                            passive_devices: ele?.passive_devices,
+                            percent_change: ele?.percent_change,
+                            status: ele?.status,
+                            total_usage: ele?.total_usage,
+                            vendor_id: ele?.vendor_id,
+                            vendor_name: ele?.vendor_name,
+                            offline_active_devices: match[0]?.offline_active_devices,
+                            offline_passive_devices: match[0]?.offline_passive_devices,
+                        });
+                });
+                setTotalItems(response?.total_data);
+                setUserData(allArr);
                 setIsUserDataFetched(false);
             })
             .catch((error) => {
                 setIsUserDataFetched(false);
             });
     };
-
-    const getOfflineDeviceData = async () => {
-        setIsDeviceDataFetched(true);
-        let params = `?customer_search=${search}`;
-        await fetchOfflineDevices(params)
+    const getOfflineDevices = async () => {
+        setIsUserDataFetched(true);
+        await fetchOfflineDevices()
             .then((res) => {
                 let response = res.data;
                 setOfflineData(response?.data);
-                setIsDeviceDataFetched(false);
+                setIsUserDataFetched(false);
             })
             .catch((error) => {
-                setIsDeviceDataFetched(false);
+                setIsUserDataFetched(false);
             });
     };
 
     useEffect(() => {
-        getCustomerList();
-        getOfflineDeviceData();
-    }, [search]);
+        getOfflineDevices();
+    }, []);
+
+    useEffect(() => {
+        if (offlineData.length !== 0) getCustomerList();
+    }, [search, offlineData, pageNo, pageSize, sortBy]);
 
     const handleDownloadCsv = async () => {
         const search = '';
@@ -139,10 +165,14 @@ const Accounts = () => {
 
     const redirectToVendorPage = async (vendorID) => {
         localStorage.removeItem('vendorName');
+        localStorage.removeItem('daysCount');
+        localStorage.removeItem('filterPeriod');
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('endDate');
         if (vendorID === '' || vendorID === null) {
             return '';
         }
-        localStorage.setItem('vendor_id', vendorID);
+        localStorage.setItem('vendorId', vendorID);
         let params = `?vendor_id=${vendorID}`;
         await fetchSelectedCustomer(params)
             .then((res) => {
@@ -171,6 +201,14 @@ const Accounts = () => {
                     <Typography.Body size={Typography.Sizes.sm} className="mt-1">
                         {row?.active_devices}
                     </Typography.Body>
+                    {row?.offline_active_devices > 0 ? (
+                        <Typography.Subheader
+                            size={Typography.Sizes.sm}
+                            className="d-flex offline-container justify-content-center"
+                            style={{ color: colorPalette.error700 }}>
+                            {row?.offline_active_devices} offline
+                        </Typography.Subheader>
+                    ) : null}
                 </div>
             </>
         );
@@ -183,6 +221,14 @@ const Accounts = () => {
                     <Typography.Body size={Typography.Sizes.sm} className="mt-1">
                         {row?.passive_devices}
                     </Typography.Body>
+                    {row?.offline_passive_devices > 0 ? (
+                        <Typography.Subheader
+                            size={Typography.Sizes.sm}
+                            className="d-flex offline-container justify-content-center"
+                            style={{ color: colorPalette.error700 }}>
+                            {row?.offline_passive_devices} offline
+                        </Typography.Subheader>
+                    ) : null}
                 </div>
             </>
         );
@@ -275,26 +321,31 @@ const Accounts = () => {
             name: 'Account ID',
             accessor: 'vendor_id',
             callbackValue: renderAccountID,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Account Name',
             accessor: 'vendor_name',
             callbackValue: renderAccountName,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Status',
             accessor: 'status',
             callbackValue: renderStatus,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Active Devices',
             accessor: 'active_devices',
             callbackValue: renderActiveDevices,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Smart Meters',
             accessor: 'passive_devices',
             callbackValue: renderPassiveDevices,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Energy Used kWh',
@@ -307,7 +358,20 @@ const Accounts = () => {
             callbackValue: renderActions,
         },
     ];
-
+    const pageListSizes = [
+        {
+            label: '20 Rows',
+            value: '20',
+        },
+        {
+            label: '50 Rows',
+            value: '50',
+        },
+        {
+            label: '100 Rows',
+            value: '100',
+        },
+    ];
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -342,6 +406,11 @@ const Accounts = () => {
                         onDownload={() => handleDownloadCsv()}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
+                        onPageSize={setPageSize}
+                        onChangePage={setPageNo}
+                        pageSize={pageSize}
+                        currentPage={pageNo}
+                        pageListSizes={pageListSizes}
                         rows={currentRow()}
                         searchResultRows={currentRow()}
                         headers={headerProps}

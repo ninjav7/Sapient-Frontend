@@ -27,6 +27,9 @@
             padding-left: 1rem !important;
         }
     }
+    .highcharts-plot-band {
+        fill: $primary-gray-300;
+    }
 
     .more-details-wrapper {
         display: flex;
