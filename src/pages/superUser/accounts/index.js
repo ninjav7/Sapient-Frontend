@@ -19,6 +19,8 @@ import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from '.
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getCustomerListCSVExport } from '../../../utils/tablesExport';
 import './style.scss';
+import 'moment-timezone';
+import { timeZone } from '../../../utils/helper';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -60,7 +62,6 @@ const Accounts = () => {
     const history = useHistory();
 
     const [isUserDataFetched, setIsUserDataFetched] = useState(false);
-    const [isDeviceDataFetched, setIsDeviceDataFetched] = useState(false);
     const [openCustomer, setOpenCustomer] = useState(false);
 
     const closeAddCustomer = () => setOpenCustomer(false);
@@ -98,7 +99,7 @@ const Accounts = () => {
         setIsUserDataFetched(true);
         const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'vendor_name' : sortBy.name;
         const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
-        let params = `?customer_search=${search}&page_no=${pageNo}&page_size=${pageSize}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
+        let params = `?customer_search=${search}&timezone=${timeZone}&page_no=${pageNo}&page_size=${pageSize}&ordered_by=${ordered_by}&sort_by=${sort_by}`;
         await fetchCustomerList(params)
             .then(async (res) => {
                 let response = res.data;
@@ -164,10 +165,14 @@ const Accounts = () => {
 
     const redirectToVendorPage = async (vendorID) => {
         localStorage.removeItem('vendorName');
+        localStorage.removeItem('daysCount');
+        localStorage.removeItem('filterPeriod');
+        localStorage.removeItem('startDate');
+        localStorage.removeItem('endDate');
         if (vendorID === '' || vendorID === null) {
             return '';
         }
-        localStorage.setItem('vendor_id', vendorID);
+        localStorage.setItem('vendorId', vendorID);
         let params = `?vendor_id=${vendorID}`;
         await fetchSelectedCustomer(params)
             .then((res) => {

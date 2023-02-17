@@ -14,6 +14,7 @@ import { fetchSessionDetails, updateUser } from './service';
 import { googleLoginUser } from '../../redux/actions';
 import { UserStore } from '../../store/UserStore';
 import { isUserAuthenticated } from '../../helpers/authUtils';
+import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
 
 const AuthUpdate = (props) => {
     let history = useHistory();
@@ -85,6 +86,11 @@ const AuthUpdate = (props) => {
                                 </div>
 
                                 <>
+                                    <div className="successBlock">
+                                        <Typography.Subheader size={Typography.Sizes.md} className="successText">
+                                            <Check /> &nbsp;&nbsp;Account Found
+                                        </Typography.Subheader>
+                                    </div>
                                     <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                         We found an account associated with this email. Would you like to manage the
                                         existing account with Google Authentication?
