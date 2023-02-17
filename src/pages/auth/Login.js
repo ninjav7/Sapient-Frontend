@@ -127,6 +127,7 @@ const Login = (props) => {
             UserStore.update((s) => {
                 s.error = false;
                 s.errorMessage = '';
+                s.loginSuccess = '';
             });
             props.loginUser(username.trim(), password.trim(), props.history);
         } else {
