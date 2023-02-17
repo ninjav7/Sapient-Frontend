@@ -719,7 +719,7 @@ const BreakerConfiguration = ({
                                             placeholder="Enter Amperage"
                                             labelSize={Typography.Sizes.md}
                                             min={0}
-                                            step={firstBreakerObj?.rated_amps < 50 ? 5 : 10}
+                                            step={5}
                                             value={firstBreakerObj?.rated_amps}
                                             onChange={(e) => {
                                                 handleChange('rated_amps', +e.target.value);
