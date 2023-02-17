@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Input from '../../sharedComponents/form/input/Input';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
-import LineChart from '../charts/LineChart';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
@@ -13,7 +13,9 @@ import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icon
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
 import { Notification } from '../../sharedComponents/notification/Notification';
+import colors from '../../assets/scss/_colors.scss';
 import { fetchBuildingsList } from '../../services/buildings';
+import { mockedData, mockedData2, mockedData3 } from '../../sharedComponents/lineChart/mock';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -99,8 +101,38 @@ const actionTypeInitial = [
         value: 2,
     },
 ];
+const indexOfDay = {
+    mon: 0,
+    tue: 1,
+    wed: 2,
+    thr: 3,
+    fri: 4,
+    sat: 5,
+    sun: 6,
+};
+const generateLineChartData = (minDate, countOfDays, countOfLines) => {
+    const res = [];
+    const min = Math.ceil(15000);
+    const max = Math.floor(25000);
+    for (let a = 0; a < countOfLines; a++) {
+        const data = [];
 
-const notificationData = {
+        for (let i = 0; i < countOfDays; i++) {
+            const newDate = moment(minDate).add(i, 'days');
+            data.push({
+                x: moment(newDate),
+                y: Math.floor(Math.random() * (max - min) + min),
+            });
+        }
+        res.push({ name: `MockedData${a + 1}`, data: data });
+    }
+    return res;
+};
+const notificationCreateData = {
+    title: 'Rule has been created',
+};
+
+const notificationUpdatedData = {
     title: 'Rule has been updated',
 };
 
@@ -110,7 +142,9 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
-    const  [isDisabledSaveButton,setIsDisabledSaveButton] = useState(true);
+    const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
+    const [isChangedSockets, setIsChangedSockets] = useState(false);
+    const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
@@ -134,6 +168,7 @@ const PlugRule = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [offHoursPlots, setOffHoursPlots] = useState([]);
     const [showDeleteConditionModal, setShowDeleteConditionModal] = useState(false);
     const [currentScheduleIdToDelete, setCurrentScheduleIdToDelete] = useState();
 
@@ -302,6 +337,7 @@ const PlugRule = () => {
     const fetchPlugRulesData = async () => {
         const params = '';
         await fetchPlugRules(params, '').then((res) => {
+            setIsFetchedPlugRulesData(true);
             const plugRules = res.data.data;
             plugRules &&
                 plugRules.forEach((plugRule) => {
@@ -309,18 +345,23 @@ const PlugRule = () => {
                         setActiveBuildingId(plugRule.buildings[0].building_id);
                     }
                 });
-            setIsFetchedPlugRulesData(true);
         });
     };
+    useEffect(() => {
+        calculateOffHoursPlots();
+    }, [preparedScheduleData]);
     useEffect(() => {
         generateHours();
         getBuildingData();
         if (ruleId == 'create-plug-rule') {
             setIsCreateRuleMode(true);
         } else {
+            setIsCreateRuleMode(false);
+            setIsChangedRuleDetails(false);
             fetchPlugRuleDetail();
         }
-    }, []);
+    }, [ruleId]);
+
     useEffect(() => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
@@ -355,294 +396,89 @@ const PlugRule = () => {
             }
         });
     };
+
     const getGraphData = async () => {
-        await getGraphDataRequest(activeBuildingId, sensorsIdNow, currentData.id).then((res) => {
-            if (res.status) {
-                let response = res.data;
-                setTotalGraphData(response);
-            }
-        });
+        if (selectedIds.length) {
+            const preparedSelectedIds = selectedIds.join('+');
+            await getGraphDataRequest(activeBuildingId, preparedSelectedIds, currentData.id).then((res) => {
+                if (res.status) {
+                    let response = res.data;
+                    setTotalGraphData(response);
+                }
+            });
+        }
     };
-
-    const [lineChartOptions, setLineChartOptions] = useState({
-        chart: {
-            type: 'line',
-            zoom: {
-                enabled: false,
-            },
-            id: 'areachart-2',
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#87AADE'],
-        stroke: {
-            curve: 'straight',
-        },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                format: 'dd/MMM',
-            },
-            y: {
-                formatter: function (value) {
-                    return value + ' K';
-                },
-            },
-        },
-
-        annotations: {
-            xaxis: [
-                {
-                    x: 'Mon 12 am',
-                    x2: 'Mon 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-                {
-                    x: 'Tue 12 am',
-                    x2: 'Tue 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-            ],
-        },
-
-        xaxis: {
-            categories: [
-                'Sun 12AM',
-                'Sun 12PM',
-                'Mon 12AM',
-                'Mon 12PM',
-                'Tue 12AM',
-                'Tue 12PM',
-                'Wed 12AM',
-                'Wed 12PM',
-                'Thu 12AM',
-                'Thu 12PM',
-                'Fri 12AM',
-                'Fri 12PM',
-                'Sat 12AM',
-                'Sat 12PM',
-                'Sun 12AM',
-            ],
-        },
-
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
-                },
-            },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                // cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
-
-    useEffect(() => {
-        setLineChartOptions({
-            chart: {
-                type: 'line',
-                zoom: {
-                    enabled: false,
-                },
-                id: 'areachart-2',
-            },
-            dataLabels: {
-                enabled: false,
-            },
-
-            colors: ['#87AADE'],
-            stroke: {
-                curve: 'straight',
-            },
-            stroke: {
-                width: [2, 2],
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '20%',
-                },
-            },
-            tooltip: {
-                shared: false,
-                intersect: false,
-                style: {
-                    fontSize: '12px',
-                    fontFamily: 'Inter, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                x: {
-                    show: true,
-                    format: 'dd/MMM',
-                },
-                y: {
-                    formatter: function (value) {
-                        return value + ' K';
-                    },
-                },
-            },
-
-            annotations: {
-                xaxis: annotationXAxis,
-            },
-
-            xaxis: {
-                categories: [
-                    'Sun 12AM',
-                    'Sun 12PM',
-                    'Mon 12AM',
-                    'Mon 12PM',
-                    'Tue 12AM',
-                    'Tue 12PM',
-                    'Wed 12AM',
-                    'Wed 12PM',
-                    'Thu 12AM',
-                    'Thu 12PM',
-                    'Fri 12AM',
-                    'Fri 12PM',
-                    'Sat 12AM',
-                    'Sat 12PM',
-                    'Sun 12AM',
-                ],
-            },
-
-            yaxis: {
-                labels: {
-                    formatter: function (value) {
-                        var val = Math.abs(value);
-                        if (val >= 1000) {
-                            val = (val / 1000).toFixed(0) + ' K';
-                        }
-                        return val;
-                    },
-                },
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                },
-            },
-        });
-    }, [annotationXAxis]);
 
     const [lineChartData, setLineChartData] = useState([]);
 
     const [totalGraphData, setTotalGraphData] = useState();
-
     useEffect(() => {
         setLineChartData([
             {
-                data: [
-                    {
-                        x: `${hoursNew[2]}`,
-                        y: '0.07',
-                    },
-                    {
-                        x: `${hoursNew[3]}`,
-                        y: '49.1',
-                    },
-                    {
-                        x: `${hoursNew[4]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[5]}`,
-                        y: '49.3',
-                    },
-                    {
-                        x: `${hoursNew[6]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[7]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[8]}`,
-                        y: '45.1',
-                    },
-                    {
-                        x: `${hoursNew[9]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[10]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[11]}`,
-                        y: '91.3',
-                    },
-                    {
-                        x: `${hoursNew[12]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[13]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[14]}`,
-                        y: '20.3',
-                    },
-                    {
-                        x: `${hoursNew[15]}`,
-                        y: '10.3',
-                    },
-                ],
+                x: `${hoursNew[2]}`,
+                y: '0.07',
+            },
+            {
+                x: `${hoursNew[3]}`,
+                y: '49.1',
+            },
+            {
+                x: `${hoursNew[4]}`,
+                y: '10.3',
+            },
+            {
+                x: `${hoursNew[5]}`,
+                y: '49.3',
+            },
+            {
+                x: `${hoursNew[6]}`,
+                y: '45.3',
+            },
+            {
+                x: `${hoursNew[7]}`,
+                y: '45.3',
+            },
+            {
+                x: `${hoursNew[8]}`,
+                y: '45.1',
+            },
+            {
+                x: `${hoursNew[9]}`,
+                y: '10.3',
+            },
+            {
+                x: `${hoursNew[10]}`,
+                y: '45.3',
+            },
+            {
+                x: `${hoursNew[11]}`,
+                y: '91.3',
+            },
+            {
+                x: `${hoursNew[12]}`,
+                y: '45.3',
+            },
+            {
+                x: `${hoursNew[13]}`,
+                y: '10.3',
+            },
+            {
+                x: `${hoursNew[14]}`,
+                y: '20.3',
+            },
+            {
+                x: `${hoursNew[15]}`,
+                y: '10.3',
             },
         ]);
     }, [hoursNew]);
 
-    useEffect(() => {
-        totalGraphData?.length > 0 &&
-            setLineChartData([
-                {
-                    data: totalGraphData.map(({ x, y }) => ({ x: moment(x).format('ddd h a'), y })),
-                },
-            ]);
-    }, [totalGraphData]);
-
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
+
+    useEffect(() => {
+        currentData.building_id && setActiveBuildingId(currentData.building_id);
+    }, [currentData.building_id]);
 
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
 
@@ -661,17 +497,24 @@ const PlugRule = () => {
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
     useEffect(() => {
-        if (sensorsIdNow) {
+        if (selectedIds) {
             getGraphData();
         }
-    }, [sensorsIdNow]);
+    }, [selectedIds]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
         handleCurrentDataChange('is_active', obj.is_active);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
+    useEffect(() => {
+        if (isChangedSockets || isChangedRuleDetails) {
+            setIsDisabledSaveButton(false);
+        }else{
+            setIsDisabledSaveButton(true);
+        }
+    }, [isChangedRuleDetails, isChangedSockets]);
 
     const handleCurrentDataChange = (key, value) => {
         let obj = Object.assign({}, currentData);
@@ -683,7 +526,7 @@ const PlugRule = () => {
             setNameError(false);
         }
         setCurrentData(obj);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
     const handleScheduleDayChange = (day, condition_group_id) => {
         let currentObj = [...preparedScheduleData];
@@ -699,7 +542,8 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
     const makeId = (checkedArray) => {
@@ -746,7 +590,7 @@ const PlugRule = () => {
         };
         currentObj.push(obj);
         setPreparedScheduleData(currentObj);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
     };
 
     const showOptionToDelete = (condition_id) => {
@@ -768,10 +612,9 @@ const PlugRule = () => {
             }
         });
         setPreparedScheduleData(resArray);
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setShowDeleteConditionModal(false);
     };
-
 
     const reassignSensorsToRule = async () => {
         const listToRemoveForReassign = [];
@@ -828,7 +671,7 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
 
@@ -844,7 +687,7 @@ const PlugRule = () => {
                 });
             }
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedRuleDetails(true);
         setPreparedScheduleData(currentObj);
     };
 
@@ -877,6 +720,9 @@ const PlugRule = () => {
 
     const handleRuleStateChange = (value, rule) => {
         if (value === 'true') {
+            if (checkedAll) {
+                setCheckedAll(false);
+            }
             let linkedData = [...linkedRuleData];
             let unLinkedData = [...unLinkedRuleData];
             let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
@@ -898,6 +744,10 @@ const PlugRule = () => {
         }
 
         if (value === 'false') {
+            if (allSensors.length - selectedIds.length == 0) {
+                setCheckedAll(true);
+            }
+
             let linkedData = [...linkedRuleData];
             let unLinkedData = [...unLinkedRuleData];
             let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
@@ -926,7 +776,7 @@ const PlugRule = () => {
         setSelectedIds((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
-        setIsDisabledSaveButton(false);
+        setIsChangedSockets(true);
     };
 
     const updatePlugRuleData = async () => {
@@ -1114,7 +964,6 @@ const PlugRule = () => {
         pageSize,
     ]);
 
-    // INITIAL TABLE
     useEffect(() => {
         let arr1 = [];
         let arr2 = [];
@@ -1124,7 +973,6 @@ const PlugRule = () => {
 
         const allRuleData = arr1.concat(arr2);
 
-        // INITIAL TABLE
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
     const currentRow = () => {
@@ -1144,6 +992,20 @@ const PlugRule = () => {
         }
 
         return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+    };
+    const selectAllRowsSensors = (checkedAll) => {
+        if (checkedAll) {
+            const res = allSensors.map((sensor) => {
+                return sensor.id;
+            });
+            setSelectedIds(res);
+            setTotalSocket(allSensors.length);
+        } else {
+            setSelectedIds([]);
+            setTotalSocket(0);
+        }
+        setIsChangedSockets(true);
+        setCheckedAll(checkedAll);
     };
 
     const currentRowSearched = () => {
@@ -1187,14 +1049,19 @@ const PlugRule = () => {
         return valid;
     };
     const handleContinueAndSaveClick = async () => {
-        Promise.allSettled([reassignSensorsToRule(), updatePlugRuleData(), updateSocketUnlink()]).then((value) => {
+        Promise.allSettled([
+            isChangedRuleDetails && updatePlugRuleData(),
+            isChangedSockets && reassignSensorsToRule(),
+            isChangedSockets && updateSocketUnlink(),
+        ]).then((value) => {
             handleCloseSocketsModal(true);
             fetchUnLinkedSocketRules();
             fetchFiltersForSensors();
             fetchLinkedSocketRules();
             fetchPlugRuleDetail();
-            openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
-            setIsDisabledSaveButton(true);
+            openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+            setIsChangedRuleDetails(false);
+            setIsChangedSockets(false);
         });
     };
 
@@ -1239,11 +1106,13 @@ const PlugRule = () => {
                 });
                 currentDataCopy.action = formattedSchedule;
                 currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
+                openSnackbar({ ...notificationCreateData, type: Notification.Types.success, duration: 5000 });
 
                 await createPlugRuleRequest(currentDataCopy)
                     .then((res) => {
+                        const { data } = res;
                         history.push({
-                            pathname: `/control/plug-rules`,
+                            pathname: `/control/plug-rules/${data.data.plug_rule_id}`,
                         });
                     })
                     .catch((error) => {
@@ -1251,9 +1120,14 @@ const PlugRule = () => {
                     });
             }
         } else {
-            Promise.allSettled([updatePlugRuleData(), reassignSensorsToRule(), updateSocketUnlink()]).then((value) => {
-                openSnackbar({ ...notificationData, type: Notification.Types.success, duration: 5000 });
-                setIsDisabledSaveButton(true);
+            Promise.allSettled([
+                isChangedSockets && reassignSensorsToRule(),
+                isChangedSockets && updateSocketUnlink(),
+                isChangedRuleDetails && updatePlugRuleData(),
+            ]).then((value) => {
+                openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+                setIsChangedRuleDetails(false);
+                setIsChangedSockets(false);
                 fetchUnLinkedSocketRules();
                 fetchFiltersForSensors();
                 fetchLinkedSocketRules();
@@ -1382,61 +1256,6 @@ const PlugRule = () => {
 
         isLoadingRef.current = false;
     };
-    useEffect(() => {
-        if (activeBuildingId) {
-            fetchUnLinkedSocketRules();
-            fetchFiltersForSensors();
-            fetchLinkedSocketRules();
-        }
-    }, [
-        activeBuildingId,
-        macTypeFilterString,
-        equpimentTypeFilterString,
-        sensorTypeFilterString,
-        locationTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-    ]);
-
-    const fetchAllData = async () => {
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-
-        isLoadingRef.current = true;
-        await getUnlinkedSocketRules(
-            pageSize,
-            pageNo,
-            ruleId,
-            activeBuildingId,
-            equpimentTypeFilterString,
-            macTypeFilterString,
-            locationTypeFilterString,
-            sensorTypeFilterString,
-            floorTypeFilterString,
-            spaceTypeFilterString,
-            spaceTypeTypeFilterString,
-            {
-                sensor_search: search,
-                ...sorting,
-            }
-        ).then((res) => {
-            isLoadingRef.current = false;
-
-            setUnlinkedSocketRuleSuccess(res.status);
-            let response = res.data.data;
-            let unLinkedData = [];
-            response.data.forEach((record) => {
-                record.linked_rule = false;
-                unLinkedData.push(record);
-            });
-            setAllSearchData(unLinkedData);
-            setTotalItemsSearched(response.total_data);
-        });
-    };
 
     const getAvailableActionType = (anotherSelectedValue) => {
         const resultArr = actionTypeInitial.map((el) => {
@@ -1448,26 +1267,6 @@ const PlugRule = () => {
         });
         return resultArr;
     };
-
-    useEffect(() => {
-        setAllSearchData([]);
-
-        search && activeBuildingId && fetchAllData();
-    }, [
-        search,
-        activeBuildingId,
-        equpimentTypeFilterString,
-        macTypeFilterString,
-        locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
-    ]);
 
     const RenderScheduleActionItem = ({ record }) => {
         const firstCondition = record.data[0];
@@ -1570,9 +1369,149 @@ const PlugRule = () => {
             </>
         );
     };
+
+    const getDateRange = () => {
+        const maxDate = new Date();
+        maxDate.setUTCHours(23, 59, 59, 999);
+
+        const minDate = new Date();
+        minDate.setDate(maxDate.getDate() - 7);
+
+        return {
+            maxDate: maxDate.getTime(),
+            minDate: minDate.getTime(),
+        };
+    };
+    const data = generateLineChartData(getDateRange().minDate, 7, 5);
+
+    const calculateOffHoursPlots = () => {
+        let weekWithSchedule = [];
+        const copyOfPreparedScheduleData = [...preparedScheduleData];
+        copyOfPreparedScheduleData.map((groupId) => {
+            groupId.data.forEach((el) => {
+                switch (el.action_type) {
+                    case 0:
+                        el.action_day.forEach((day) => {
+                            weekWithSchedule[indexOfDay[day]] = {
+                                ...weekWithSchedule[indexOfDay[day]],
+                                turnOff: el.action_time,
+                            };
+                        });
+
+                        break;
+                    case 1:
+                        el.action_day.forEach((day) => {
+                            weekWithSchedule[indexOfDay[day]] = {
+                                ...weekWithSchedule[indexOfDay[day]],
+                                turnOn: el.action_time,
+                            };
+                        });
+                        break;
+                }
+            });
+        });
+
+        let result = [];
+        for (let i = 0; i < weekWithSchedule.length; i++) {
+            let currentOff = weekWithSchedule[i]?.turnOff;
+            let currentOffDay = i;
+
+            let nextOn;
+            let nextOnDay;
+            if (i === weekWithSchedule.length - 1) {
+                nextOn = weekWithSchedule[0]?.turnOn;
+                nextOnDay = 0;
+            } else {
+                for (let j = i; j < weekWithSchedule.length; j++) {
+                    if (weekWithSchedule[j]?.turnOn) {
+                        if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
+                            nextOnDay = j;
+                            nextOn = weekWithSchedule[j]?.turnOn;
+                            break;
+                        } else {
+                            nextOnDay = j + 1;
+                            nextOn = weekWithSchedule[j + 1]?.turnOn;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!currentOff) {
+                continue;
+            }
+            if (!nextOn) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = 0;
+                } else {
+                    nextOn = weekWithSchedule[i + 1]?.turnOn;
+                    nextOnDay = i + 1;
+                }
+            }
+            if (currentOff && nextOn) {
+                result.push({
+                    day: i,
+                    currentOffDay,
+                    nextOnDay,
+                    currentOffTime: currentOff,
+                    nextOnTime: nextOn,
+                });
+            }
+        }
+        getOffperiodsWithRealDate(result, getDateRange());
+    };
+
+    function getDatesInRange(startDate, stopDate) {
+        var dateArray = [];
+        var currentDate = moment(startDate);
+        var stopDate = moment(stopDate);
+        while (currentDate <= stopDate) {
+            dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
+            currentDate = moment(currentDate).add(1, 'days');
+        }
+        return dateArray;
+    }
+    const checkIfDayInOffRange = (day, result) => {
+        let offDay = {};
+        result.forEach((el) => {
+            if (el.day == day) {
+                offDay = el;
+            }
+        });
+        return offDay;
+    };
+
+    const getOffperiodsWithRealDate = (result, dateRange) => {
+        const maxdateString = new Date(dateRange.maxDate);
+        const mindateString = new Date(dateRange.minDate);
+        const rangeDates = getDatesInRange(mindateString, maxdateString);
+        const offPeriods = [];
+        rangeDates.forEach((day) => {
+            const currentWeekDay = moment(day).weekday();
+            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result);
+            if (!_.isEmpty(weekDayOffSchedule)) {
+                let timeDiff;
+
+                if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
+                    timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
+                } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
+                    timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
+                }
+                const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
+                const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
+                const to = moment(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
+                offPeriods.push({
+                    type: LineChart.PLOT_BANDS_TYPE.off_hours,
+                    from: from * 1000,
+                    to: to * 1000,
+                });
+            }
+        });
+        setOffHoursPlots(offPeriods);
+    };
     const buildingIdProps = {
         label: 'Choose building',
-        defaultValue: localStorage.getItem('buildingId'),
+        defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
         onChange: (event) => {
             handleCurrentDataChange('building_id', event.value);
         },
@@ -1617,7 +1556,7 @@ const PlugRule = () => {
                             />
                             <span className="ml-2 plug-rule-switch-font">Not Active</span>
                         </div>
-                        <div className='cancel-and-save-flex'>
+                        <div className="cancel-and-save-flex">
                             <button
                                 type="button"
                                 size={Button.Sizes.md}
@@ -1630,7 +1569,7 @@ const PlugRule = () => {
                                 Cancel
                             </button>
                             <Button
-                            disabled={isDisabledSaveButton}
+                                disabled={isDisabledSaveButton}
                                 size={Button.Sizes.md}
                                 label="Save"
                                 type={Button.Type.primary}
@@ -1751,8 +1690,19 @@ const PlugRule = () => {
                         </div>
 
                         <div className="total-eng-consumtn">
-                            {lineChartData && lineChartOptions && (
-                                <LineChart options={lineChartOptions} series={lineChartData} height={200} />
+                            {lineChartData && (
+                                <LineChart
+                                    data={data.map((d) => ({
+                                        ...d,
+                                        fillColor: {
+                                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                            stops: [[1, 'rgba(255,255,255,.01)']],
+                                        },
+                                    }))}
+                                    dateRange={getDateRange()}
+                                    height={200}
+                                    plotBands={offHoursPlots}
+                                />
                             )}
                         </div>
                     </div>
@@ -1778,102 +1728,112 @@ const PlugRule = () => {
 
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    <DataTableWidget
-                        isLoading={isLoadingRef.current}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="sockets-plug-rules"
-                        onSearch={(query) => {
-                            setPageNo(1);
-                            setSearch(query);
-                        }}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Selected' }, { label: 'Unselected' }]}
-                        onStatus={setSelectedRuleFilter}
-                        rows={currentRow()}
-                        searchResultRows={currentRowSearched()}
-                        filterOptions={filterOptions}
-                        headers={[
-                            {
-                                name: 'Equipment Type',
-                                accessor: 'equipment_type_name',
-                                callbackValue: renderEquipType,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Location',
-                                accessor: 'equipment_link_location',
-                                callbackValue: renderLocation,
-                            },
-                            {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'MAC Address',
-                                accessor: 'device_link',
-                            },
-                            {
-                                name: 'Sensors',
-                                accessor: 'sensor_count',
-                            },
-                            {
-                                name: 'Assigned Rule',
-                                accessor: 'assigned_rule',
-                                callbackValue: renderAssignRule,
-                            },
-                            {
-                                name: 'Tags',
-                                accessor: 'tags',
-                                callbackValue: renderTagCell,
-                            },
-                            {
-                                name: 'Last Data',
-                                accessor: 'last_data',
-                                callbackValue: renderLastUsedCell,
-                            },
-                        ]}
-                        onCheckboxRow={alert}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="vehicle1"
-                                name="vehicle1"
-                                checked={checkedAll}
-                                onChange={() => {
-                                    setCheckedAll(!checkedAll);
-                                }}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="socket_rule"
-                                name="socket_rule"
-                                checked={selectedIds.includes(record?.id) || checkedAll}
-                                value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                onChange={(e) => {
-                                    setSensorIdNow(record?.id);
-                                    handleRuleStateChange(e.target.value, record);
-                                }}
-                            />
-                        )}
-                        onPageSize={setPageSize}
-                        onChangePage={setPageNo}
-                        pageSize={pageSize}
-                        currentPage={pageNo}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
-                            if (selectedRuleFilter === 0) {
-                                return totalItems;
-                            }
+                    {currentData.building_id ? (
+                        <DataTableWidget
+                            isLoading={isLoadingRef.current}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="sockets-plug-rules"
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
+                            buttonGroupFilterOptions={[
+                                { label: 'All' },
+                                { label: 'Selected' },
+                                { label: 'Unselected' },
+                            ]}
+                            onStatus={setSelectedRuleFilter}
+                            rows={currentRow()}
+                            searchResultRows={currentRowSearched()}
+                            filterOptions={filterOptions}
+                            headers={[
+                                {
+                                    name: 'Equipment Type',
+                                    accessor: 'equipment_type_name',
+                                    callbackValue: renderEquipType,
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'Location',
+                                    accessor: 'equipment_link_location',
+                                    callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Space Type',
+                                    accessor: 'space_type',
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'MAC Address',
+                                    accessor: 'device_link',
+                                },
+                                {
+                                    name: 'Sensors',
+                                    accessor: 'sensor_count',
+                                },
+                                {
+                                    name: 'Assigned Rule',
+                                    accessor: 'assigned_rule',
+                                    callbackValue: renderAssignRule,
+                                },
+                                {
+                                    name: 'Tags',
+                                    accessor: 'tags',
+                                    callbackValue: renderTagCell,
+                                },
+                                {
+                                    name: 'Last Data',
+                                    accessor: 'last_data',
+                                    callbackValue: renderLastUsedCell,
+                                },
+                            ]}
+                            onCheckboxRow={alert}
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="vehicle1"
+                                    name="vehicle1"
+                                    checked={checkedAll}
+                                    onChange={() => selectAllRowsSensors(!checkedAll)}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="socket_rule"
+                                    name="socket_rule"
+                                    checked={selectedIds.includes(record?.id) || checkedAll}
+                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
+                                    onChange={(e) => {
+                                        setSensorIdNow(record?.id);
+                                        handleRuleStateChange(e.target.value, record);
+                                    }}
+                                />
+                            )}
+                            onPageSize={setPageSize}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            currentPage={pageNo}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
+                                if (selectedRuleFilter === 0) {
+                                    return totalItems;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            })()}
+                        />
+                    ) : (
+                        <div className="sockets-no-selected-building">
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Please choose building to see the list of sockets
+                            </Typography.Subheader>
+                        </div>
+                    )}
                 </div>
             )}
             <Modal
