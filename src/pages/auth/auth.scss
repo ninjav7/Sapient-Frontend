@@ -118,4 +118,46 @@ h3{
     display: flex;
     flex-direction: column;
 }
-    
+
+.errorBlock{
+    width:100% !important;
+    background-color: $error-100;
+    padding:1rem;
+    gap:.25rem;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+  
+}
+
+.errorText{
+    color: $error-900 !important;
+}
+
+.successBlock{
+    width:100% !important;
+    background-color: $success-100;
+    padding:1rem;
+    gap:.25rem;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+  
+}
+
+.successText{
+    color: $success-900 !important;
+}
+
+.btn-block{
+    text-align: center;
+}
+
+.alert-login-style {
+    max-width: 23.4375rem  !important;
+    max-height: 18.75rem !important;
+    height: 18.75rem !important;
+}
+
+.checkError{
+    height: 1.2rem;
+    width: 1.2rem;
+}

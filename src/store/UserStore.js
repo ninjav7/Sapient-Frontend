@@ -9,4 +9,6 @@ export const UserStore = new Store({
     notificationMessage: '',
     notificationType: '',
     componentType: 'alert',
+    error: false,
+    errorMessage: '',
 });

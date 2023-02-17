@@ -20,7 +20,6 @@ const AccountSettings = () => {
     const userdata = cookies.get('user');
 
     const vendorName = UserStore.useState((s) => s.vendorName);
-    const vendorId = UserStore.useState((s) => s.vendorId);
     const [vendorData, setVendorData] = useState(vendorName);
     const [userPermission] = useAtom(userPermissionData);
 
@@ -34,6 +33,7 @@ const AccountSettings = () => {
         const vendorNameData = {
             vendor_name: vendorData,
         };
+        const vendorId = localStorage.getItem('vendorId');
         let params = `?vendor_id=${vendorId}`;
         await updateVendorName(params, vendorNameData)
             .then(async (res) => {

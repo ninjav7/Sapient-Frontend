@@ -10,6 +10,7 @@ import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as EyeSVG } from '../../assets/icon/eye.svg';
 import { ReactComponent as EyeSlashSVG } from '../../assets/icon/eye-slash.svg';
 import { ReactComponent as Google } from '../../assets/icon/google.svg';
+import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
 import Typography from '../../sharedComponents/typography';
 import Holder from './Holder';
 import Input from '../../sharedComponents/form/input/Input';
@@ -25,7 +26,8 @@ const Login = (props) => {
     const [password, setPassword] = useState('');
     const [isAuthTokenValid, setisAuthTokenValid] = useState();
     const loginSuccess = UserStore.useState((s) => s.loginSuccess);
-    const failedMessage = UserStore.useState((s) => s.message);
+    const error = UserStore.useState((s) => s.error);
+    const message = UserStore.useState((s) => s.errorMessage);
     const notification = UserStore.useState((s) => s.showNotification);
     const [passwordType, setPasswordType] = useState('password');
     const [passwordError, setPasswordError] = useState(false);
@@ -64,36 +66,36 @@ const Login = (props) => {
                     } else {
                         setRefresh(false);
                         UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Unable to Login';
-                            s.notificationType = 'error';
+                            s.error = true;
+                            s.errorMessage = 'Unable to Login';
                         });
+                        history.push('/account/login');
                     }
                 } else {
                     setRefresh(false);
                     UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Unable to Login';
-                        s.notificationType = 'error';
+                        s.error = true;
+                        s.errorMessage = 'Unable to Login';
                     });
+                    history.push('/account/login');
                 }
             } else if (usrFound[1] === 'false') {
                 setRefresh(false);
                 UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to Login';
-                    s.notificationType = 'error';
+                    s.error = true;
+                    s.errorMessage = 'Unable to Login';
                 });
+                history.push('/account/login');
             }
         } else if (user_found !== undefined) {
             let usrFound = user_found.split('=');
             if (usrFound[1] === 'false') {
                 setRefresh(false);
                 UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to Login';
-                    s.notificationType = 'error';
+                    s.error = true;
+                    s.errorMessage = 'Unable to Login';
                 });
+                history.push('/account/login');
             }
         }
         return () => {
@@ -105,10 +107,8 @@ const Login = (props) => {
     useEffect(() => {
         if (loginSuccess === 'error') {
             UserStore.update((s) => {
-                s.showNotification = true;
-                s.notificationMessage = 'Email or password entered is incorrect.';
-                s.notificationType = 'error';
-                s.loginSuccess = '';
+                s.error = true;
+                s.errorMessage = 'Email or password entered is incorrect.';
             });
         }
     }, [loginSuccess]);
@@ -124,6 +124,11 @@ const Login = (props) => {
             ct++;
         }
         if (ct === 0) {
+            UserStore.update((s) => {
+                s.error = false;
+                s.errorMessage = '';
+                s.loginSuccess = '';
+            });
             props.loginUser(username.trim(), password.trim(), props.history);
         } else {
             return;
@@ -139,6 +144,10 @@ const Login = (props) => {
     };
 
     const handleAdminPortal = async () => {
+        UserStore.update((s) => {
+            s.error = false;
+            s.errorMessage = '';
+        });
         await googleAuth()
             .then((res) => {
                 let response = res.data;
@@ -164,6 +173,19 @@ const Login = (props) => {
                                         Sign in
                                     </Typography.Header>
                                 </div>
+
+                                {props.error && (
+                                    <Alert color="danger" isOpen={props.error ? true : false}>
+                                        <div>{props.error}</div>
+                                    </Alert>
+                                )}
+                                {error && (
+                                    <div className="errorBlock">
+                                        <Typography.Subheader size={Typography.Sizes.md} className="errorText">
+                                            <Exclamation /> &nbsp;&nbsp;{message}
+                                        </Typography.Subheader>
+                                    </div>
+                                )}
 
                                 <form className="authentication-form">
                                     <FormGroup>

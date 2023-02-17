@@ -74,6 +74,7 @@ const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBu
 //superUser
 const Accounts = React.lazy(() => import('../pages/superUser/accounts'));
 const UpdateAuth = React.lazy(() => import('../pages/auth/updateAuth'));
+const LinkExpired = React.lazy(() => import('../pages/auth/LinkExpired'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -475,6 +476,13 @@ const authRoutes = {
             visibility: true,
         },
         {
+            path: '/account/login/:user_found/:link_type/:account_linked/:is_active/:is_verified',
+            name: 'Login',
+            component: Login,
+            route: Route,
+            visibility: true,
+        },
+        {
             path: '/account/login/:user_found',
             name: 'Login',
             component: Login,
@@ -521,6 +529,13 @@ const authRoutes = {
             path: '/account/update-auth',
             name: 'Update Auth',
             component: UpdateAuth,
+            route: Route,
+            visibility: true,
+        },
+        {
+            path: '/account/link-expired',
+            name: 'Link Expired',
+            component: LinkExpired,
             route: Route,
             visibility: true,
         },

@@ -3,56 +3,25 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Col } from 'reactstrap';
 import Holder from './Holder';
-import Loader from '../../components/Loader';
 import Typography from '../../sharedComponents/typography';
-import axios from 'axios';
-import { BaseUrl, updateUsers } from '../../services/Network';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { FormGroup, Button } from 'reactstrap';
-import { UserStore } from '../../store/UserStore';
-import { ReactComponent as Check } from '../../assets/icon/circle-check.svg';
+import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
 
-const VerifyAccount = (props) => {
+const LinkExpired = (props) => {
     const history = useHistory();
     const [_isMounted, set_isMounted] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [titleText, setTitleText] = useState('Success');
     const [redirectToLogin, setRedirectToLogin] = useState(false);
 
     useEffect(() => {
         set_isMounted(true);
         document.body.classList.add('authentication-bg');
-        verifyUser();
+
         return () => {
             set_isMounted(false);
             document.body.classList.remove('authentication-bg');
         };
     }, []);
-
-    const verifyUser = async () => {
-        setIsLoading(true);
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${props.match.params.token}`,
-        };
-        await axios
-            .patch(
-                `${BaseUrl}${updateUsers}`,
-                {
-                    is_verified: true,
-                },
-                { headers }
-            )
-            .then((res) => {
-                let response = res.data;
-                setIsLoading(false);
-                setTitleText('Success');
-            })
-            .catch((error) => {
-                setIsLoading(false);
-            });
-    };
 
     useEffect(() => {
         if (redirectToLogin) {
@@ -66,25 +35,25 @@ const VerifyAccount = (props) => {
                 <Holder
                     rightContent={
                         <>
-                            {isLoading && <Loader />}
                             <Col lg={8}>
                                 <div className="logoContainer">
                                     <a href="/">
                                         <LogoSVG className="logoDesign" />
                                     </a>
                                     <Typography.Header size={Typography.Sizes.sm} className="text-muted">
-                                        {titleText}
+                                        Expired Link
                                     </Typography.Header>
                                 </div>
                                 <>
-                                    <div className="successBlock">
-                                        <Typography.Subheader size={Typography.Sizes.md} className="successText">
-                                            <Check /> &nbsp;&nbsp; Success - your email has been updated.
+                                    <div className="errorBlock">
+                                        <Typography.Subheader size={Typography.Sizes.md} className="errorText">
+                                            <Exclamation /> &nbsp;&nbsp; Link Expired
                                         </Typography.Subheader>
                                     </div>
+
                                     <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
-                                        You have successfully updated your email. You may now log in to the Sapient
-                                        Energy Portal.
+                                        The link that led you here is expired. Please contact your Portfolio
+                                        Administrator to have a new one sent.
                                     </Typography.Subheader>
 
                                     <FormGroup className="form-group mt-5 pt-4 mb-0 text-center">
@@ -94,7 +63,7 @@ const VerifyAccount = (props) => {
                                             onClick={async () => {
                                                 setRedirectToLogin(true);
                                             }}>
-                                            Go to Login
+                                            Return to Login
                                         </Button>
                                     </FormGroup>
                                 </>
@@ -107,4 +76,4 @@ const VerifyAccount = (props) => {
     );
 };
 
-export default connect()(VerifyAccount);
+export default connect()(LinkExpired);

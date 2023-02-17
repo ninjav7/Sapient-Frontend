@@ -61,7 +61,7 @@ const BarChartWidget = ({
                         headerCategory: 'Timestamp',
                         headerValue: 'value',
                         dateFormatter(timestamp) {
-                            return moment.utc(timestamp).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+                            return moment.utc(timestamp).format(`MMM D 'YY @ hh:mm A`);
                         },
                     },
                     svg: {
@@ -116,8 +116,8 @@ const BarChartWidget = ({
                         <div class="bar-chart-widget-tooltip-value">
                     
                         ${ch} kWh</div>
-                        <div class="bar-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
+                        <div class="bar-chart-widget-tooltip-time-period">${moment
+                            .utc(timestamp)
                             .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
@@ -125,7 +125,7 @@ const BarChartWidget = ({
         xaxis: {
             labels: {
                 formatter: function (val) {
-                    return moment(val).tz(timeZone).format('MM/DD HH:00');
+                    return moment.utc(val).format('MM/DD HH:00');
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -170,7 +170,7 @@ const BarChartWidget = ({
     });
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
+        let xaxisObj = xaxisFilters(startEndDayCount, 'utc');
         setConfigBarChartWidget({ ...configBarChartWidget, xaxis: xaxisObj });
     }, [startEndDayCount]);
 

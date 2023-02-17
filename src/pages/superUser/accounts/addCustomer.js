@@ -29,7 +29,6 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
         await createCustomer(payload)
             .then((res) => {
                 let response = res.data;
-                console.log(response);
                 if (response.success === false) {
                     UserStore.update((s) => {
                         s.showNotification = true;
