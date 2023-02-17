@@ -359,20 +359,11 @@ const Confirm = (props) => {
                                                         <div className="rowField">
                                                             <div className="mr-2">
                                                                 {lowerCaseErr == '' ? (
-                                                                    <CheckMinusMark
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
+                                                                    <CheckMinusMark className="mt-2 checkError" />
                                                                 ) : lowerCaseErr === 'success' ? (
-                                                                    <Check
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
+                                                                    <Check className="mt-2 checkError" />
                                                                 ) : (
-                                                                    <CheckXmark
-                                                                        className="mt-2"
-                                                                        style={{ height: '1.2rem', width: '1.2rem' }}
-                                                                    />
+                                                                    <CheckXmark className="mt-2 checkError" />
                                                                 )}
                                                             </div>
                                                             <div>
