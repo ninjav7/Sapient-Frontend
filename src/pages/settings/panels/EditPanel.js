@@ -18,7 +18,6 @@ import {
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 
 import Skeleton from 'react-loading-skeleton';
@@ -37,19 +36,19 @@ import {
     validateConfiguredEquip,
     validateDevicesForBreaker,
 } from './utils';
-import { comparePanelData, panelType } from './utils';
+import { comparePanelData } from './utils';
 import { userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import './styles.scss';
 import BreakerConfiguration from './BreakerConfiguration';
 import UnlinkAllBreakers from './UnlinkAllBreakers';
 import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
+import './styles.scss';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -59,7 +58,7 @@ const EditPanel = () => {
 
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+    const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
     // Edit Breaker Modal
     const [showBreakerConfigModal, setBreakerConfigModalState] = useState(false);
@@ -118,6 +117,11 @@ const EditPanel = () => {
         defaultValue: 0,
     });
 
+    const [breakerType, setBreakerType] = useState({
+        onChange: null,
+        defaultValue: 'distribution',
+    });
+
     const [panelStates, setPanelStates] = useState({
         isEditingModeState: false,
         isViewDeviceIdsState: false,
@@ -126,12 +130,6 @@ const EditPanel = () => {
     const onCancelClick = () => {
         history.push({
             pathname: `/settings/panels`,
-        });
-    };
-
-    const triggerBreakerAPI = (status) => {
-        LoadingStore.update((s) => {
-            s.isBreakerDataFetched = status;
         });
     };
 
@@ -213,7 +211,7 @@ const EditPanel = () => {
                     s.notificationMessage = 'Panel has been reset successfully';
                     s.notificationType = 'success';
                 });
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
             })
             .catch(() => {
                 setIsResetting(false);
@@ -256,7 +254,7 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
                 setBreakerLinking(false);
                 setSelectedBreakerLink({});
             })
@@ -271,7 +269,7 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
                 setBreakerLinking(false);
                 setSelectedBreakerLink({});
             })
@@ -898,6 +896,7 @@ const EditPanel = () => {
                 }
 
                 setBreakerCountObj({ ...breakerCountObj, defaultValue: response?.breakers });
+                setBreakerType({ ...breakerType, defaultValue: response?.panel_type });
 
                 BreakersStore.update((s) => {
                     s.panelData = response;
@@ -925,16 +924,12 @@ const EditPanel = () => {
                 setBreakersFetching(false);
                 setSelectedBreakerLink({});
 
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                });
+                setBreakerAPITrigerred(false);
             })
             .catch(() => {
                 setBreakersFetching(false);
                 setSelectedBreakerLink({});
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                });
+                setBreakerAPITrigerred(false);
                 BreakersStore.update((s) => {
                     s.breakersList = [];
                 });
@@ -1213,10 +1208,7 @@ const EditPanel = () => {
 
             <Panel
                 typeOptions={panelTypeList}
-                typeProps={{
-                    onChange: null,
-                    defaultValue: 'distribution',
-                }}
+                typeProps={breakerType}
                 startingBreaker={{
                     onChange: null,
                     defaultValue: 1,
@@ -1297,7 +1289,7 @@ const EditPanel = () => {
                 panelObj={panelObj}
                 equipmentsList={equipmentsList}
                 passiveDevicesList={passiveDevicesList}
-                triggerBreakerAPI={triggerBreakerAPI}
+                setBreakerAPITrigerred={setBreakerAPITrigerred}
                 fetchEquipmentData={fetchEquipmentData}
                 isEquipmentListFetching={isEquipmentListFetching}
                 activeTab={activeTab}

@@ -42,7 +42,7 @@ const BreakerConfiguration = ({
     panelObj,
     equipmentsList,
     passiveDevicesList,
-    triggerBreakerAPI,
+    setBreakerAPITrigerred,
     fetchEquipmentData,
     isEquipmentListFetching,
     activeTab,
@@ -317,7 +317,7 @@ const BreakerConfiguration = ({
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
                 closeBreakerConfigModal();
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
             })
             .catch(() => {
                 setIsResetting(false);
@@ -341,7 +341,7 @@ const BreakerConfiguration = ({
                         s.notificationType = 'success';
                     });
                     window.scrollTo(0, 0);
-                    triggerBreakerAPI(true);
+                    setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -438,7 +438,7 @@ const BreakerConfiguration = ({
                         s.notificationType = 'success';
                     });
                     window.scrollTo(0, 0);
-                    triggerBreakerAPI(true);
+                    setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
