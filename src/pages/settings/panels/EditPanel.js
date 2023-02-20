@@ -67,6 +67,7 @@ const EditPanel = () => {
     const [showBreakerConfigModal, setBreakerConfigModalState] = useState(false);
     const closeBreakerConfigModal = () => setBreakerConfigModalState(false);
     const openBreakerConfigModal = () => setBreakerConfigModalState(true);
+    const [activeTab, setActiveTab] = useState('edit-breaker');
 
     // Unlink Alert Modal
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
@@ -1224,10 +1225,14 @@ const EditPanel = () => {
                 onEdit={(props) => {
                     const breakerObj = breakersList.find((el) => el?.id === props._id);
                     setSelectedBreakerObj(breakerObj);
+                    setActiveTab('edit-breaker');
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 onShowChart={(props) => {
-                    alert('onShowChart');
+                    const breakerObj = breakersList.find((el) => el?.id === props._id);
+                    setSelectedBreakerObj(breakerObj);
+                    setActiveTab('metrics');
+                    if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
                     const equipmentName = breakerData?.equipment_links[0]?.name;
@@ -1258,9 +1263,7 @@ const EditPanel = () => {
                 nodes={breakersList}
                 edges={breakerLinks}
                 isOneColumn={panelType === 'disconnect'}
-                style={{
-                    width: '66vw',
-                }}
+                style={{ width: '66vw' }}
             />
 
             <Brick sizeInRem={2} />
@@ -1290,6 +1293,8 @@ const EditPanel = () => {
                 triggerBreakerAPI={triggerBreakerAPI}
                 fetchEquipmentData={fetchEquipmentData}
                 isEquipmentListFetching={isEquipmentListFetching}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
             />
 
             <UnlinkAllBreakers

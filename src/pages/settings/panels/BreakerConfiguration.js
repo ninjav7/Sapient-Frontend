@@ -45,8 +45,9 @@ const BreakerConfiguration = ({
     triggerBreakerAPI,
     fetchEquipmentData,
     isEquipmentListFetching,
+    activeTab,
+    setActiveTab,
 }) => {
-    const [activeTab, setActiveTab] = useState('edit-breaker');
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
     const [deviceID, setDeviceID] = useState('');
 
@@ -1214,7 +1215,7 @@ const BreakerConfiguration = ({
                         )}
 
                         {/* Metrics  */}
-                        {activeTab === 'metrics' && <div>Edit Metrices</div>}
+                        {activeTab === 'metrics' && <div>Edit Metric Page</div>}
                     </div>
                 </div>
             </Modal>
