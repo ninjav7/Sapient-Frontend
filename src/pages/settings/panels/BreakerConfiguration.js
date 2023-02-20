@@ -42,11 +42,12 @@ const BreakerConfiguration = ({
     panelObj,
     equipmentsList,
     passiveDevicesList,
-    triggerBreakerAPI,
+    setBreakerAPITrigerred,
     fetchEquipmentData,
     isEquipmentListFetching,
+    activeTab,
+    setActiveTab,
 }) => {
-    const [activeTab, setActiveTab] = useState('edit-breaker');
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
     const [deviceID, setDeviceID] = useState('');
 
@@ -154,24 +155,30 @@ const BreakerConfiguration = ({
             let obj = Object.assign({}, equipmentObj);
             obj.building_id = bldgId;
             const params = `?quantity=${obj.quantity}`;
+            delete obj.quantity;
+
             await createEquipmentData(params, obj)
                 .then((res) => {
-                    const response = res;
-
-                    if (response?.status === 200) {
+                    const response = res?.data;
+                    if (response?.success) {
                         fetchEquipmentData(bldgId);
-                        setSelectedEquipment(response?.data);
+                        if (response?.id) setSelectedEquipment(response?.id);
                         openSnackbar({
                             title: 'Equipment created successfully.',
                             type: Notification.Types.success,
                             duration: 5000,
                         });
+
                         setActiveEquipTab('equip');
-                        handleChange('equipment_link', response?.data);
+                        handleChange('equipment_link', response?.id);
                         setEquipmentObj(defaultEquipmentObj);
                     } else {
                         openSnackbar({
-                            title: 'Unable to create equipment.',
+                            title: response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to create equipment.'
+                                : 'Unable to create equipment due to Internal Server Error!.',
                             type: Notification.Types.error,
                         });
                     }
@@ -316,7 +323,7 @@ const BreakerConfiguration = ({
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
                 closeBreakerConfigModal();
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
             })
             .catch(() => {
                 setIsResetting(false);
@@ -340,7 +347,7 @@ const BreakerConfiguration = ({
                         s.notificationType = 'success';
                     });
                     window.scrollTo(0, 0);
-                    triggerBreakerAPI(true);
+                    setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -437,7 +444,7 @@ const BreakerConfiguration = ({
                         s.notificationType = 'success';
                     });
                     window.scrollTo(0, 0);
-                    triggerBreakerAPI(true);
+                    setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -1214,7 +1221,7 @@ const BreakerConfiguration = ({
                         )}
 
                         {/* Metrics  */}
-                        {activeTab === 'metrics' && <div>Edit Metrices</div>}
+                        {activeTab === 'metrics' && <div>Edit Metric Page</div>}
                     </div>
                 </div>
             </Modal>
