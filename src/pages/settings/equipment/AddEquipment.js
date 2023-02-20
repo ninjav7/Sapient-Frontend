@@ -65,8 +65,9 @@ const AddEquipment = ({
             setIsProcessing(true);
             await addNewEquipment(bldgId, equipmentObj)
                 .then((res) => {
-                    const response = res;
-                    if (response?.status === 200) {
+                    const response = res?.data;
+
+                    if (response?.success) {
                         UserStore.update((s) => {
                             s.showNotification = true;
                             s.notificationMessage = 'Equipment created successfully.';
@@ -77,7 +78,11 @@ const AddEquipment = ({
                     } else {
                         UserStore.update((s) => {
                             s.showNotification = true;
-                            s.notificationMessage = 'Unable to create Equipment.';
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to create Equipment.'
+                                : 'Unable to create Equipment due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
                     }
