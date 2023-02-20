@@ -70,6 +70,7 @@ const LineChart = (props) => {
         plotBands: plotBandsProp,
         plotBandsLegends,
         isLoadingData,
+        renderExtraInformationInHeader,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -209,6 +210,12 @@ const LineChart = (props) => {
                 </div>
                 {!!renderPlotBandsLegends?.length && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
+                )}
+                {renderExtraInformationInHeader && (
+                    <div className="d-flex flex-column mr-3">
+                        <p className="plug-rule-chart-subtitle mb-1">{renderExtraInformationInHeader.title}</p>
+                        <h5 className="plug-rule-chart-title float-right">{renderExtraInformationInHeader.value}</h5>
+                    </div>
                 )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
                     <DropDownIcon

@@ -56,18 +56,23 @@ export function deletePlugRuleRequest(ruleId) {
     });
 }
 
-export function getGraphDataRequest(activeBuildingId, selectedIds, plugRuleId) {
-    let params = `?plug_rule_id=${plugRuleId}sensors=${selectedIds}`;
+export function getGraphDataRequest(selectedIds, plugRuleId) {
+    let params = `?plug_rule_id=${plugRuleId}`;
     return axiosInstance
         .get(`${graphData}${params}`, {
             params: {
                 //@TODO Hardcoded because it doesn't have default values on backend side, but we don't need them right now.
                 tz_info: 'US/Eastern',
-                num_of_days: 14,
+                num_of_days: 7,
+                sensors: selectedIds.join('+'),
             },
         })
         .then((res) => {
+            console.log('RESSS', res);
             return res;
+        })
+        .catch((err) => {
+            console.log('ERROR', err);
         });
 }
 

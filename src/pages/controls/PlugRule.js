@@ -110,22 +110,11 @@ const indexOfDay = {
     sat: 5,
     sun: 6,
 };
-const generateLineChartData = (minDate, countOfDays, countOfLines) => {
+const formatAveragedata = (data) => {
     const res = [];
-    const min = Math.ceil(15000);
-    const max = Math.floor(25000);
-    for (let a = 0; a < countOfLines; a++) {
-        const data = [];
-
-        for (let i = 0; i < countOfDays; i++) {
-            const newDate = moment(minDate).add(i, 'days');
-            data.push({
-                x: moment(newDate),
-                y: Math.floor(Math.random() * (max - min) + min),
-            });
-        }
-        res.push({ name: `MockedData${a + 1}`, data: data });
-    }
+    data.forEach((el) => {
+        res.push({ x: moment(el.x), y: el.y });
+    });
     return res;
 };
 const notificationCreateData = {
@@ -397,87 +386,27 @@ const PlugRule = () => {
         });
     };
 
+    const [lineChartData, setLineChartData] = useState([]);
+
     const getGraphData = async () => {
         if (selectedIds.length) {
-            const preparedSelectedIds = selectedIds.join('+');
-            await getGraphDataRequest(activeBuildingId, preparedSelectedIds, currentData.id).then((res) => {
-                if (res.status) {
-                    let response = res.data;
-                    setTotalGraphData(response);
+            await getGraphDataRequest(selectedIds, currentData.id).then((res) => {
+                if (res?.status) {
+                    const formattedData = formatAveragedata(res.data);
+                    let response = [{ name: `Average Energy demand`, data: formattedData }];
+                    setLineChartData(response);
                 }
             });
         }
     };
 
-    const [lineChartData, setLineChartData] = useState([]);
-
-    const [totalGraphData, setTotalGraphData] = useState();
-    useEffect(() => {
-        setLineChartData([
-            {
-                x: `${hoursNew[2]}`,
-                y: '0.07',
-            },
-            {
-                x: `${hoursNew[3]}`,
-                y: '49.1',
-            },
-            {
-                x: `${hoursNew[4]}`,
-                y: '10.3',
-            },
-            {
-                x: `${hoursNew[5]}`,
-                y: '49.3',
-            },
-            {
-                x: `${hoursNew[6]}`,
-                y: '45.3',
-            },
-            {
-                x: `${hoursNew[7]}`,
-                y: '45.3',
-            },
-            {
-                x: `${hoursNew[8]}`,
-                y: '45.1',
-            },
-            {
-                x: `${hoursNew[9]}`,
-                y: '10.3',
-            },
-            {
-                x: `${hoursNew[10]}`,
-                y: '45.3',
-            },
-            {
-                x: `${hoursNew[11]}`,
-                y: '91.3',
-            },
-            {
-                x: `${hoursNew[12]}`,
-                y: '45.3',
-            },
-            {
-                x: `${hoursNew[13]}`,
-                y: '10.3',
-            },
-            {
-                x: `${hoursNew[14]}`,
-                y: '20.3',
-            },
-            {
-                x: `${hoursNew[15]}`,
-                y: '10.3',
-            },
-        ]);
-    }, [hoursNew]);
-
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
-
     useEffect(() => {
-        currentData.building_id && setActiveBuildingId(currentData.building_id);
+        if (currentData.building_id) {
+            setActiveBuildingId(currentData.building_id);
+            fetchLinkedSocketRules();
+        }
     }, [currentData.building_id]);
 
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
@@ -511,7 +440,7 @@ const PlugRule = () => {
     useEffect(() => {
         if (isChangedSockets || isChangedRuleDetails) {
             setIsDisabledSaveButton(false);
-        }else{
+        } else {
             setIsDisabledSaveButton(true);
         }
     }, [isChangedRuleDetails, isChangedSockets]);
@@ -1382,8 +1311,6 @@ const PlugRule = () => {
             minDate: minDate.getTime(),
         };
     };
-    const data = generateLineChartData(getDateRange().minDate, 7, 5);
-
     const calculateOffHoursPlots = () => {
         let weekWithSchedule = [];
         const copyOfPreparedScheduleData = [...preparedScheduleData];
@@ -1678,21 +1605,10 @@ const PlugRule = () => {
                     </div>
 
                     <div className="plug-rule-demand-chart-container">
-                        <div className="plug-rule-chart-header m-3">
-                            <div>
-                                <h5 className="plug-rule-chart-title mb-1">Average Energy Demand</h5>
-                                <p className="plugrule-chart-subtitle">Last 2 Weeks</p>
-                            </div>
-                            <div>
-                                <p className="plug-rule-chart-subtitle mb-1">Estimated Energy Savings</p>
-                                <h5 className="plug-rule-chart-title float-right">1,722 kWh</h5>
-                            </div>
-                        </div>
-
                         <div className="total-eng-consumtn">
                             {lineChartData && (
                                 <LineChart
-                                    data={data.map((d) => ({
+                                    data={lineChartData.map((d) => ({
                                         ...d,
                                         fillColor: {
                                             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
@@ -1702,6 +1618,23 @@ const PlugRule = () => {
                                     dateRange={getDateRange()}
                                     height={200}
                                     plotBands={offHoursPlots}
+                                    title={'Average Energy Demand'}
+                                    subTitle={'Last 2 Weeks'}
+                                    plotBandsLegends={[
+                                        { label: 'Plug Rule Off-Hours', color: 'rgb(16 24 40 / 25%)' },
+                                        {
+                                            label: 'After-Hours',
+                                            color: {
+                                                background: 'rgba(180, 35, 24, 0.1)',
+                                                borderColor: colors.error700,
+                                            },
+                                            onClick: () => {},
+                                        },
+                                    ]}
+                                    renderExtraInformationInHeader={{
+                                        title: 'Estimated Energy Savings',
+                                        value: '1,722 kwh',
+                                    }}
                                 />
                             )}
                         </div>
