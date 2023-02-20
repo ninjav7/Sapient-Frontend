@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
 
@@ -1118,80 +1119,90 @@ const EditPanel = () => {
                     </div>
                 )}
             </div>
-            <Brick sizeInRem={2} />
-            <div className="edit-panel-custom-grid">
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={250} />
-                    ) : (
-                        <InputTooltip
-                            placeholder="Enter Panel Name"
-                            onChange={(e) => {
-                                handleChange('panel_name', e.target.value);
-                            }}
-                            labelSize={Typography.Sizes.md}
-                            value={panelObj?.panel_name}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
 
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={250} />
-                    ) : (
-                        <Select
-                            placeholder="Select Parent Panel"
-                            options={panelsList}
-                            currentValue={panelsList.filter((option) => option.value === panelObj?.parent_id)}
-                            onChange={(e) => {
-                                handleChange('parent_id', e.value);
-                            }}
-                            isSearchable={true}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
-
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={400} />
-                    ) : (
-                        <Select
-                            placeholder="Select Location"
-                            options={locationsList}
-                            currentValue={locationsList.filter((option) => option.value === panelObj?.location_id)}
-                            onChange={(e) => {
-                                handleChange('location_id', e.value);
-                            }}
-                            isSearchable={true}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
-            </div>
             <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={10}>
+                    <div className="edit-panel-custom-grid">
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <InputTooltip
+                                    placeholder="Enter Panel Name"
+                                    onChange={(e) => {
+                                        handleChange('panel_name', e.target.value);
+                                    }}
+                                    labelSize={Typography.Sizes.md}
+                                    value={panelObj?.panel_name}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Parent Panel"
+                                    options={panelsList}
+                                    currentValue={panelsList.filter((option) => option.value === panelObj?.parent_id)}
+                                    onChange={(e) => {
+                                        handleChange('parent_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={475} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Location"
+                                    options={locationsList}
+                                    currentValue={locationsList.filter(
+                                        (option) => option.value === panelObj?.location_id
+                                    )}
+                                    onChange={(e) => {
+                                        handleChange('location_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
             <Panel
                 typeOptions={panelTypeList}
                 typeProps={{
@@ -1248,20 +1259,24 @@ const EditPanel = () => {
                 edges={breakerLinks}
                 isOneColumn={panelType === 'disconnect'}
                 style={{
-                    width: 906,
+                    width: 1010,
                 }}
             />
 
             <Brick sizeInRem={2} />
 
-            <div className="w-75">
-                <DangerZone
-                    title="Danger Zone"
-                    labelButton="Delete Panel"
-                    iconButton={<DeleteSVG />}
-                    onClickButton={(event) => handleDeletePanelAlertShow()}
-                />
-            </div>
+            <Row>
+                <Col lg={10}>
+                    <div>
+                        <DangerZone
+                            title="Danger Zone"
+                            labelButton="Delete Panel"
+                            iconButton={<DeleteSVG />}
+                            onClickButton={(event) => handleDeletePanelAlertShow()}
+                        />
+                    </div>
+                </Col>
+            </Row>
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
