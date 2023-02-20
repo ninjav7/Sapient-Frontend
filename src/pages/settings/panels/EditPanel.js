@@ -915,7 +915,11 @@ const EditPanel = () => {
 
         await getBreakersList(params)
             .then((res) => {
-                const response = res?.data?.data;
+                let response = res?.data?.data;
+
+                response.forEach((record) => {
+                    if (record?.rated_amps === 0) record.rated_amps = undefined;
+                });
 
                 BreakersStore.update((s) => {
                     s.breakersList = response;
@@ -923,7 +927,6 @@ const EditPanel = () => {
 
                 setBreakersFetching(false);
                 setSelectedBreakerLink({});
-
                 setBreakerAPITrigerred(false);
             })
             .catch(() => {
