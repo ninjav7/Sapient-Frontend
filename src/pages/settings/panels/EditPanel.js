@@ -1259,7 +1259,7 @@ const EditPanel = () => {
                 edges={breakerLinks}
                 isOneColumn={panelType === 'disconnect'}
                 style={{
-                    width: 1010,
+                    width: '66vw',
                 }}
             />
 
