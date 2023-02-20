@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
 
@@ -17,7 +18,6 @@ import {
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
 
 import Skeleton from 'react-loading-skeleton';
@@ -32,25 +32,23 @@ import {
     getEquipmentForBreaker,
     getPhaseConfigValue,
     getVoltageConfigValue,
-    setProcessing,
     unableLinkingAlerts,
     validateConfiguredEquip,
     validateDevicesForBreaker,
-    voltsOption,
 } from './utils';
-import { comparePanelData, panelType } from './utils';
+import { comparePanelData } from './utils';
 import { userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
 import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
-import './styles.scss';
 import BreakerConfiguration from './BreakerConfiguration';
 import UnlinkAllBreakers from './UnlinkAllBreakers';
 import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
+import './styles.scss';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -60,12 +58,13 @@ const EditPanel = () => {
 
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+    const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
     // Edit Breaker Modal
     const [showBreakerConfigModal, setBreakerConfigModalState] = useState(false);
     const closeBreakerConfigModal = () => setBreakerConfigModalState(false);
     const openBreakerConfigModal = () => setBreakerConfigModalState(true);
+    const [activeTab, setActiveTab] = useState('edit-breaker');
 
     // Unlink Alert Modal
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
@@ -88,6 +87,7 @@ const EditPanel = () => {
     const [breakerLinks, setBreakerLinks] = useState([]);
     const [isBreakersFetched, setBreakersFetching] = useState(false);
     const [isEquipmentListFetching, setEquipmentFetching] = useState(false);
+    const [isBreakerLinking, setBreakerLinking] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
     const [selectedBreakerLinkObj, setSelectedBreakerLink] = useState({});
@@ -117,6 +117,11 @@ const EditPanel = () => {
         defaultValue: 0,
     });
 
+    const [breakerType, setBreakerType] = useState({
+        onChange: null,
+        defaultValue: 'distribution',
+    });
+
     const [panelStates, setPanelStates] = useState({
         isEditingModeState: false,
         isViewDeviceIdsState: false,
@@ -125,12 +130,6 @@ const EditPanel = () => {
     const onCancelClick = () => {
         history.push({
             pathname: `/settings/panels`,
-        });
-    };
-
-    const triggerBreakerAPI = (status) => {
-        LoadingStore.update((s) => {
-            s.isBreakerDataFetched = status;
         });
     };
 
@@ -212,7 +211,7 @@ const EditPanel = () => {
                     s.notificationMessage = 'Panel has been reset successfully';
                     s.notificationType = 'success';
                 });
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
             })
             .catch(() => {
                 setIsResetting(false);
@@ -255,10 +254,13 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
+                setBreakerLinking(false);
+                setSelectedBreakerLink({});
             })
             .catch(() => {
-                setProcessing(false);
+                setBreakerLinking(false);
+                setSelectedBreakerLink({});
             });
     };
 
@@ -267,10 +269,13 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                triggerBreakerAPI(true);
+                setBreakerAPITrigerred(true);
+                setBreakerLinking(false);
+                setSelectedBreakerLink({});
             })
             .catch(() => {
-                setProcessing(false);
+                setBreakerLinking(false);
+                setSelectedBreakerLink({});
             });
     };
 
@@ -343,7 +348,7 @@ const EditPanel = () => {
                     }
                 }
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj?.id,
@@ -403,7 +408,7 @@ const EditPanel = () => {
                 return;
             }
 
-            setProcessing(true);
+            setBreakerLinking(true);
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -471,7 +476,7 @@ const EditPanel = () => {
                     return;
                 }
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 const equipmentID = getEquipmentForBreaker([parentBreakerObj, targetBreakerObj]);
 
@@ -538,7 +543,7 @@ const EditPanel = () => {
                     return;
                 }
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -592,7 +597,7 @@ const EditPanel = () => {
                 let equipmentId =
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -636,7 +641,7 @@ const EditPanel = () => {
                 let equipmentId =
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -682,7 +687,7 @@ const EditPanel = () => {
                 let equipmentId =
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -726,7 +731,7 @@ const EditPanel = () => {
                 let equipmentId =
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
-                setProcessing(true);
+                setBreakerLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -763,7 +768,7 @@ const EditPanel = () => {
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
             let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-            setProcessing(true);
+            setBreakerLinking(true);
 
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
@@ -789,6 +794,12 @@ const EditPanel = () => {
     };
 
     const handleBreakerLinkClicked = (breakerLinkObj) => {
+        console.log('SSR isBreakerLinking => ', isBreakerLinking);
+        console.log('SSR isBreakersFetched => ', isBreakersFetched);
+        console.log('SSR breakerLinkObj => ', breakerLinkObj);
+
+        if (isBreakerLinking || isBreakersFetched) return;
+
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
         setSelectedBreakerLink({});
@@ -885,6 +896,7 @@ const EditPanel = () => {
                 }
 
                 setBreakerCountObj({ ...breakerCountObj, defaultValue: response?.breakers });
+                setBreakerType({ ...breakerType, defaultValue: response?.panel_type });
 
                 BreakersStore.update((s) => {
                     s.panelData = response;
@@ -899,12 +911,8 @@ const EditPanel = () => {
 
     const fetchBreakersData = async (panel_id, bldg_id) => {
         setBreakersFetching(true);
-
-        LoadingStore.update((s) => {
-            s.isLoading = true;
-        });
-
         const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
+
         await getBreakersList(params)
             .then((res) => {
                 const response = res?.data?.data;
@@ -914,18 +922,14 @@ const EditPanel = () => {
                 });
 
                 setBreakersFetching(false);
+                setSelectedBreakerLink({});
 
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
+                setBreakerAPITrigerred(false);
             })
             .catch(() => {
                 setBreakersFetching(false);
-                LoadingStore.update((s) => {
-                    s.isBreakerDataFetched = false;
-                    s.isLoading = false;
-                });
+                setSelectedBreakerLink({});
+                setBreakerAPITrigerred(false);
                 BreakersStore.update((s) => {
                     s.breakersList = [];
                 });
@@ -1118,86 +1122,93 @@ const EditPanel = () => {
                     </div>
                 )}
             </div>
-            <Brick sizeInRem={2} />
-            <div className="edit-panel-custom-grid">
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={250} />
-                    ) : (
-                        <InputTooltip
-                            placeholder="Enter Panel Name"
-                            onChange={(e) => {
-                                handleChange('panel_name', e.target.value);
-                            }}
-                            labelSize={Typography.Sizes.md}
-                            value={panelObj?.panel_name}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
 
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={250} />
-                    ) : (
-                        <Select
-                            placeholder="Select Parent Panel"
-                            options={panelsList}
-                            currentValue={panelsList.filter((option) => option.value === panelObj?.parent_id)}
-                            onChange={(e) => {
-                                handleChange('parent_id', e.value);
-                            }}
-                            isSearchable={true}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
-
-                <div>
-                    <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isPanelFetched ? (
-                        <Skeleton count={1} height={35} width={400} />
-                    ) : (
-                        <Select
-                            placeholder="Select Location"
-                            options={locationsList}
-                            currentValue={locationsList.filter((option) => option.value === panelObj?.location_id)}
-                            onChange={(e) => {
-                                handleChange('location_id', e.value);
-                            }}
-                            isSearchable={true}
-                            disabled={
-                                !(
-                                    userPermission?.user_role === 'admin' ||
-                                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
-                                )
-                            }
-                        />
-                    )}
-                </div>
-            </div>
             <Brick sizeInRem={2} />
+
+            <Row>
+                <Col lg={10}>
+                    <div className="edit-panel-custom-grid">
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Name</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <InputTooltip
+                                    placeholder="Enter Panel Name"
+                                    onChange={(e) => {
+                                        handleChange('panel_name', e.target.value);
+                                    }}
+                                    labelSize={Typography.Sizes.md}
+                                    value={panelObj?.panel_name}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Parent Panel</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={250} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Parent Panel"
+                                    options={panelsList}
+                                    currentValue={panelsList.filter((option) => option.value === panelObj?.parent_id)}
+                                    onChange={(e) => {
+                                        handleChange('parent_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            {isPanelFetched ? (
+                                <Skeleton count={1} height={35} width={475} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Location"
+                                    options={locationsList}
+                                    currentValue={locationsList.filter(
+                                        (option) => option.value === panelObj?.location_id
+                                    )}
+                                    onChange={(e) => {
+                                        handleChange('location_id', e.value);
+                                    }}
+                                    isSearchable={true}
+                                    disabled={
+                                        !(
+                                            userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                        )
+                                    }
+                                />
+                            )}
+                        </div>
+                    </div>
+                </Col>
+            </Row>
+
+            <Brick sizeInRem={2} />
+
             <Panel
                 typeOptions={panelTypeList}
-                typeProps={{
-                    onChange: null,
-                    defaultValue: 'distribution',
-                }}
+                typeProps={breakerType}
                 startingBreaker={{
                     onChange: null,
                     defaultValue: 1,
@@ -1213,10 +1224,14 @@ const EditPanel = () => {
                 onEdit={(props) => {
                     const breakerObj = breakersList.find((el) => el?.id === props._id);
                     setSelectedBreakerObj(breakerObj);
+                    setActiveTab('edit-breaker');
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 onShowChart={(props) => {
-                    alert('onShowChart');
+                    const breakerObj = breakersList.find((el) => el?.id === props._id);
+                    setSelectedBreakerObj(breakerObj);
+                    setActiveTab('metrics');
+                    if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
                     const equipmentName = breakerData?.equipment_links[0]?.name;
@@ -1247,21 +1262,23 @@ const EditPanel = () => {
                 nodes={breakersList}
                 edges={breakerLinks}
                 isOneColumn={panelType === 'disconnect'}
-                style={{
-                    width: 906,
-                }}
+                style={{ width: '66vw' }}
             />
 
             <Brick sizeInRem={2} />
 
-            <div className="w-75">
-                <DangerZone
-                    title="Danger Zone"
-                    labelButton="Delete Panel"
-                    iconButton={<DeleteSVG />}
-                    onClickButton={(event) => handleDeletePanelAlertShow()}
-                />
-            </div>
+            <Row>
+                <Col lg={10}>
+                    <div>
+                        <DangerZone
+                            title="Danger Zone"
+                            labelButton="Delete Panel"
+                            iconButton={<DeleteSVG />}
+                            onClickButton={(event) => handleDeletePanelAlertShow()}
+                        />
+                    </div>
+                </Col>
+            </Row>
 
             <BreakerConfiguration
                 showBreakerConfigModal={showBreakerConfigModal}
@@ -1272,9 +1289,11 @@ const EditPanel = () => {
                 panelObj={panelObj}
                 equipmentsList={equipmentsList}
                 passiveDevicesList={passiveDevicesList}
-                triggerBreakerAPI={triggerBreakerAPI}
+                setBreakerAPITrigerred={setBreakerAPITrigerred}
                 fetchEquipmentData={fetchEquipmentData}
                 isEquipmentListFetching={isEquipmentListFetching}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
             />
 
             <UnlinkAllBreakers
