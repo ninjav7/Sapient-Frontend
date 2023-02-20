@@ -917,6 +917,7 @@ const EditPanel = () => {
             .then((res) => {
                 let response = res?.data?.data;
 
+                // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                 response.forEach((record) => {
                     if (record?.rated_amps === 0) record.rated_amps = undefined;
                 });
