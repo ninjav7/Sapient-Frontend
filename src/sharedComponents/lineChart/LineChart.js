@@ -70,7 +70,7 @@ const LineChart = (props) => {
         plotBands: plotBandsProp,
         plotBandsLegends,
         isLoadingData,
-        renderExtraInformationInHeader,
+        estimatedEnergySavings,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -211,10 +211,10 @@ const LineChart = (props) => {
                 {!!renderPlotBandsLegends?.length && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
                 )}
-                {renderExtraInformationInHeader && (
+                {estimatedEnergySavings && (
                     <div className="d-flex flex-column mr-3">
-                        <p className="plug-rule-chart-subtitle mb-1">{renderExtraInformationInHeader.title}</p>
-                        <h5 className="plug-rule-chart-title float-right">{renderExtraInformationInHeader.value}</h5>
+                        <p className="plug-rule-chart-subtitle mb-1">{estimatedEnergySavings.title}</p>
+                        <h5 className="plug-rule-chart-title float-right">{estimatedEnergySavings.value}</h5>
                     </div>
                 )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
@@ -298,6 +298,10 @@ LineChart.propTypes = {
             }),
         })
     ),
+    estimatedEnergySavings: PropTypes.shape({
+        title: PropTypes.string,
+        value: PropTypes.string,
+    }),
     plotBandsLegends: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string,

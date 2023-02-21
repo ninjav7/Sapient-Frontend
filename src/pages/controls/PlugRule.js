@@ -110,7 +110,7 @@ const indexOfDay = {
     sat: 5,
     sun: 6,
 };
-const formatAveragedata = (data) => {
+const formatAverageData = (data) => {
     const res = [];
     data.forEach((el) => {
         res.push({ x: moment(el.x), y: el.y });
@@ -391,8 +391,8 @@ const PlugRule = () => {
     const getGraphData = async () => {
         if (selectedIds.length) {
             await getGraphDataRequest(selectedIds, currentData.id).then((res) => {
-                if (res?.status) {
-                    const formattedData = formatAveragedata(res.data);
+                if (res && res?.data.length) {
+                    const formattedData = formatAverageData(res.data);
                     let response = [{ name: `Average Energy demand`, data: formattedData }];
                     setLineChartData(response);
                 }
@@ -1631,7 +1631,7 @@ const PlugRule = () => {
                                             onClick: () => {},
                                         },
                                     ]}
-                                    renderExtraInformationInHeader={{
+                                    estimatedEnergySavings={{
                                         title: 'Estimated Energy Savings',
                                         value: '1,722 kwh',
                                     }}
