@@ -395,10 +395,11 @@ const BreakerConfiguration = ({
             if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [firstBreakerObj?.equipment_link];
         }
 
-        if (firstBreakerObj?.note !== parentBreakerObj?.note) {
-            breakerObjOne.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
-            if (breakerObjTwo?.breaker_id) breakerObjTwo.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
-            if (breakerObjThree?.breaker_id) breakerObjThree.note = firstBreakerObj?.note ? firstBreakerObj?.note : '';
+        if (firstBreakerObj?.notes !== parentBreakerObj?.notes) {
+            breakerObjOne.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
+            if (breakerObjThree?.breaker_id)
+                breakerObjThree.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
         }
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
@@ -1087,9 +1088,9 @@ const BreakerConfiguration = ({
                                                             type="textarea"
                                                             rows="4"
                                                             placeholder="Enter Notes here"
-                                                            value={firstBreakerObj?.note || ''}
+                                                            value={firstBreakerObj?.notes || ''}
                                                             onChange={(e) => {
-                                                                handleChange('note', e.target.value);
+                                                                handleChange('notes', e.target.value);
                                                             }}
                                                             inputClassName="pt-2"
                                                         />
