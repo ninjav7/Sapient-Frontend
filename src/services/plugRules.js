@@ -71,9 +71,6 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
             console.log('RESSS', res);
             return res;
         })
-        .catch((err) => {
-            console.log('ERROR', err);
-        });
 }
 
 export function getListSensorsForBuildingsRequest(page_size, pageNo, ruleId, activeBuildingId, getParams) {

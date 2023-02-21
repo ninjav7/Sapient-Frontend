@@ -149,7 +149,7 @@ const PlugRule = () => {
     const getConditionId = () => uuidv4();
     const initialCurrentData = {
         name: '',
-        building_id: '',
+        building_id: localStorage.getItem('buildingId'),
         description: '',
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
@@ -927,10 +927,10 @@ const PlugRule = () => {
             const res = allSensors.map((sensor) => {
                 return sensor.id;
             });
-            setSelectedIds(res);
+            setRulesToLink((prevState) => ({ ...prevState, sensor_id: res }));
             setTotalSocket(allSensors.length);
         } else {
-            setSelectedIds([]);
+            setRulesToLink([]);
             setTotalSocket(0);
         }
         setIsChangedSockets(true);
