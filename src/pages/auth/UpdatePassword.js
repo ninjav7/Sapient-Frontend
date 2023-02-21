@@ -31,7 +31,7 @@ const Confirm = (props) => {
     const [_isMounted, set_isMounted] = useState(false);
     const [passwordResetSuccessful, setPasswordResetSuccessful] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [titleText, setTitleText] = useState('Set  New Password');
+    const [titleText, setTitleText] = useState('Set New Password');
     const [showReset, setShowReset] = useState(false);
     const [redirectToLogin, setRedirectToLogin] = useState(false);
     const [matchError, setMatchError] = useState(false);
