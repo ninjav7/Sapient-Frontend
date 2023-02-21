@@ -174,3 +174,35 @@
     max-height: 25rem !important;
     height: 25rem !important;
 }
+
+.errorText{
+    color: $error-700 !important;
+}
+
+.viewNormal{
+    border-color: $base-black !important;
+}
+
+.viewError{
+    border-color:$error-700 !important;
+}
+
+.user-update-style {
+    max-width: 23.4375rem  !important;
+    max-height: 18.75rem !important;
+    height: 18.75rem !important;
+}
+
+.userErrorBlock{
+    width:100% !important;
+    background-color: $error-100;
+    padding:1rem;
+    gap:.25rem;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+}
+.ok-btn{
+    width:100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
