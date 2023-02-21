@@ -401,12 +401,17 @@ const Accounts = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
                         onSearch={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
                             setSearch(query);
                         }}
                         onDownload={() => handleDownloadCsv()}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
-                        onPageSize={setPageSize}
+                        onPageSize={(currentPageSize) => {
+                            setPageNo(1);
+                            setPageSize(currentPageSize);
+                        }}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         currentPage={pageNo}
