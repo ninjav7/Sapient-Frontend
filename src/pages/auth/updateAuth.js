@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Col, FormGroup, Alert, Row } from 'reactstrap';
+import { Col, FormGroup, Row } from 'reactstrap';
 import Loader from '../../components/Loader';
 import Holder from './Holder';
 import { connect } from 'react-redux';
-import { Cookies } from 'react-cookie';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import Button from '../../sharedComponents/button/Button';
 import { useHistory } from 'react-router-dom';
-import { fetchSessionDetails, updateUser } from './service';
+import { updateUser } from './service';
 import { googleLoginUser } from '../../redux/actions';
 import { UserStore } from '../../store/UserStore';
 import { isUserAuthenticated } from '../../helpers/authUtils';
@@ -27,11 +25,6 @@ const AuthUpdate = (props) => {
     useEffect(() => {
         set_isMounted(true);
         document.body.classList.add('authentication-bg');
-        UserStore.update((s) => {
-            s.showNotification = true;
-            s.notificationMessage = 'Account Found';
-            s.notificationType = 'success';
-        });
         if (loginSuccess === 'success') {
             updateUserDetails();
             renderRedirectToRoot();
@@ -104,6 +97,10 @@ const AuthUpdate = (props) => {
                                                     size={Button.Sizes.md}
                                                     onClick={() => {
                                                         history.push('/account/login');
+                                                        UserStore.update((s) => {
+                                                            s.error = true;
+                                                            s.errorMessage = 'Unable to Login';
+                                                        });
                                                     }}
                                                     label="No"></Button>
                                             </Col>
