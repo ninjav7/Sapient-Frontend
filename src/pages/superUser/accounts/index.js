@@ -286,7 +286,11 @@ const Accounts = () => {
                                 ? 0
                                 : Math.abs(Math.round(row.percent_change))
                         }
-                        type={row?.percent_change < 0 ? TrendsBadge.Type.DOWNWARD_TREND : TrendsBadge.Type.UPWARD_TREND}
+                        type={
+                            row?.percent_change < row?.percent_change
+                                ? TrendsBadge.Type.DOWNWARD_TREND
+                                : TrendsBadge.Type.UPWARD_TREND
+                        }
                     />
                 </Row>
             </>
@@ -397,12 +401,17 @@ const Accounts = () => {
                         isLoadingComponent={<SkeletonLoading />}
                         id="admin-accounts"
                         onSearch={(query) => {
+                            setPageNo(1);
+                            setPageSize(20);
                             setSearch(query);
                         }}
                         onDownload={() => handleDownloadCsv()}
                         buttonGroupFilterOptions={[{ label: 'Active' }, { label: 'Inactive' }, { label: 'All' }]}
                         onStatus={setSelectedStatus}
-                        onPageSize={setPageSize}
+                        onPageSize={(currentPageSize) => {
+                            setPageNo(1);
+                            setPageSize(currentPageSize);
+                        }}
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         currentPage={pageNo}
