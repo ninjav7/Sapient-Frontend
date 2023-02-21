@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import LineChart from './LineChart';
 import { mockedData, mockedData2, mockedData3 } from './mock';
 import colors from '../../assets/scss/_colors.scss';
+import { UNITS } from '../../constants/units';
 
 export default {
     title: 'Charts/LineChart',
@@ -145,9 +146,10 @@ export const Default = (args) => {
                         to: 1663300800000,
                     },
                 ]}
-                estimatedEnergySavings={{
+                unitInfo={{
                     title: 'Estimated Energy Savings',
-                    value: '1,722 kwh',
+                    value: '1,722',
+                    unit: UNITS.KWH,
                 }}
             />
         </>

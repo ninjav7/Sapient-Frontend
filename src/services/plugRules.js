@@ -123,11 +123,19 @@ export function getUnlinkedSocketRules(
     floorTypeFilterString,
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
+    withPagination,
     getParams
 ) {
-    let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${ruleId}&building_id=${activeBuildingId}&equipment_types=${encodeURIComponent(
-        equpimentTypeFilterString
-    )}&location=${locationTypeFilterString}&sensor_number=${encodeURIComponent(sensorTypeFilterString)}`;
+    let params = '';
+    if (withPagination) {
+        params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${ruleId}&building_id=${activeBuildingId}&equipment_types=${encodeURIComponent(
+            equpimentTypeFilterString
+        )}&location=${locationTypeFilterString}&sensor_number=${encodeURIComponent(sensorTypeFilterString)}`;
+    } else {
+        params = `?rule_id=${ruleId}&building_id=${activeBuildingId}&equipment_types=${encodeURIComponent(
+            equpimentTypeFilterString
+        )}&location=${locationTypeFilterString}&sensor_number=${encodeURIComponent(sensorTypeFilterString)}`;
+    }
 
     if (pageSize === 0) {
         return;

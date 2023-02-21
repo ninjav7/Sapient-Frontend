@@ -15,7 +15,7 @@ import { useNotification } from '../../sharedComponents/notification/useNotifica
 import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { fetchBuildingsList } from '../../services/buildings';
-import { mockedData, mockedData2, mockedData3 } from '../../sharedComponents/lineChart/mock';
+import { UNITS } from '../../constants/units';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -149,7 +149,7 @@ const PlugRule = () => {
     const getConditionId = () => uuidv4();
     const initialCurrentData = {
         name: '',
-        building_id: localStorage.getItem('buildingId'),
+        building_id: '' || ruleId,
         description: '',
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
@@ -403,7 +403,7 @@ const PlugRule = () => {
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     useEffect(() => {
-        if (currentData.building_id) {
+        if (currentData.building_id.length && currentData.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
             fetchLinkedSocketRules();
         }
@@ -809,6 +809,7 @@ const PlugRule = () => {
                 floorTypeFilterString,
                 spaceTypeFilterString,
                 spaceTypeTypeFilterString,
+                true,
                 {
                     ...sorting,
                 }
@@ -834,7 +835,7 @@ const PlugRule = () => {
     };
 
     const fetchLinkedSocketRules = async () => {
-        await listLinkSocketRulesRequest(ruleId, activeBuildingId, sortBy)
+        await listLinkSocketRulesRequest(ruleId, currentData.building_id, sortBy)
             .then((res) => {
                 let response = res.data;
                 let linkedData = [];
@@ -922,13 +923,47 @@ const PlugRule = () => {
 
         return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
     };
-    const selectAllRowsSensors = (checkedAll) => {
+
+    const selectAllRowsSensors = async (checkedAll) => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
         if (checkedAll) {
-            const res = allSensors.map((sensor) => {
-                return sensor.id;
-            });
-            setRulesToLink((prevState) => ({ ...prevState, sensor_id: res }));
-            setTotalSocket(allSensors.length);
+            activeBuildingId &&
+                (await getUnlinkedSocketRules(
+                    pageSize,
+                    pageNo,
+                    ruleId,
+                    activeBuildingId,
+                    equpimentTypeFilterString,
+                    macTypeFilterString,
+                    locationTypeFilterString,
+                    sensorTypeFilterString,
+                    floorTypeFilterString,
+                    spaceTypeFilterString,
+                    spaceTypeTypeFilterString,
+                    false,
+                    {
+                        ...sorting,
+                    }
+                ).then((res) => {
+                    isLoadingRef.current = false;
+
+                    let response = res.data.data;
+                    const preparedIdofSockets = [];
+                    _.cloneDeep(_.uniqBy(response.data, 'id')).forEach((socket) => {
+                        preparedIdofSockets.push(socket.id);
+                    });
+                    setRulesToLink((prevState) => ({
+                        ...prevState,
+                        sensor_id: preparedIdofSockets,
+                    }));
+
+                    setTotalSocket(response.total_data);
+                }));
         } else {
             setRulesToLink([]);
             setTotalSocket(0);
@@ -1036,7 +1071,6 @@ const PlugRule = () => {
                 currentDataCopy.action = formattedSchedule;
                 currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
                 openSnackbar({ ...notificationCreateData, type: Notification.Types.success, duration: 5000 });
-
                 await createPlugRuleRequest(currentDataCopy)
                     .then((res) => {
                         const { data } = res;
@@ -1631,8 +1665,9 @@ const PlugRule = () => {
                                             onClick: () => {},
                                         },
                                     ]}
-                                    estimatedEnergySavings={{
+                                    unitInfo={{
                                         title: 'Estimated Energy Savings',
+                                        unit: UNITS.KWH,
                                         value: '1,722 kwh',
                                     }}
                                 />

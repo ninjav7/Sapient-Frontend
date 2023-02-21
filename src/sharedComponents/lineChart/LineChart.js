@@ -17,7 +17,9 @@ import colors from '../../assets/scss/_colors.scss';
 
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
-import { generateID } from '../helpers/helper';
+import { generateID, stringOrNumberPropTypes } from '../helpers/helper';
+import { UNITS } from '../../constants/units';
+
 import Brick from '../brick';
 
 HighchartsExporting(Highcharts);
@@ -70,7 +72,7 @@ const LineChart = (props) => {
         plotBands: plotBandsProp,
         plotBandsLegends,
         isLoadingData,
-        estimatedEnergySavings,
+        unitInfo,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -211,12 +213,10 @@ const LineChart = (props) => {
                 {!!renderPlotBandsLegends?.length && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
                 )}
-                {estimatedEnergySavings && (
+                {unitInfo && (
                     <div className="d-flex flex-column mr-3">
-                        <Typography.Body size={Typography.Sizes.xs}>{estimatedEnergySavings.title}</Typography.Body>
-                        <Typography.Subheader size={Typography.Sizes.md}>
-                            {estimatedEnergySavings.value}
-                        </Typography.Subheader>
+                        <Typography.Body size={Typography.Sizes.xs}>{unitInfo.title}</Typography.Body>
+                        <Typography.Subheader size={Typography.Sizes.md}>{unitInfo.value}</Typography.Subheader>
                     </div>
                 )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
@@ -300,9 +300,10 @@ LineChart.propTypes = {
             }),
         })
     ),
-    estimatedEnergySavings: PropTypes.shape({
+    unitInfo: PropTypes.shape({
         title: PropTypes.string,
-        value: PropTypes.string,
+        unit: PropTypes.oneOf(Object.values(UNITS)),
+        value: stringOrNumberPropTypes,
     }),
     plotBandsLegends: PropTypes.arrayOf(
         PropTypes.shape({
