@@ -108,7 +108,7 @@ const Login = (props) => {
         if (loginSuccess === 'error') {
             UserStore.update((s) => {
                 s.error = true;
-                s.errorMessage = 'Email or password entered is incorrect.';
+                s.errorMessage = 'Unable to Login';
             });
         }
     }, [loginSuccess]);
