@@ -31,11 +31,11 @@ import { ReactComponent as PendingSVG } from '../../../assets/icon/clock.svg';
 import { ReactComponent as InviteSVG } from '../../../assets/icon/share.svg';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { compareObjData } from '../../../helpers/helpers';
+import { ReactComponent as Exclamation } from '../../../assets/icon/circleExclamation.svg';
 
 const UserProfile = () => {
     const { userId } = useParams();
     const history = useHistory();
-
     const defaultErrorObj = {
         first_name: null,
         last_name: null,
@@ -43,6 +43,9 @@ const UserProfile = () => {
     };
 
     const [errorObj, setErrorObj] = useState(defaultErrorObj);
+
+    const [error, setError] = useState(false);
+    const [message, setMessage] = useState(false);
 
     const [isDataChanged, setDataChanged] = useState(false);
     const [isRoleChanged, setRoleChanged] = useState(false);
@@ -66,6 +69,7 @@ const UserProfile = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [isRoleUpdating, setRoleUpdating] = useState(false);
+    const [errorDeactivate, setErrorDeactivate] = useState(false);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -200,14 +204,18 @@ const UserProfile = () => {
                     });
                     getUserDetails();
                 } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage =
-                            requestType === 'Deactivate'
-                                ? 'Unable to Deactivate user Account.'
-                                : 'Unable to Activate user Account.';
-                        s.notificationType = 'error';
-                    });
+                    if (response.message === 'User cannot be deactivated.') {
+                        setErrorDeactivate(true);
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage =
+                                requestType === 'Deactivate'
+                                    ? 'Unable to Deactivate user Account.'
+                                    : 'Unable to Activate user Account.';
+                            s.notificationType = 'error';
+                        });
+                    }
                 }
                 setIsUpdating(false);
                 handleModalClose();
@@ -233,11 +241,8 @@ const UserProfile = () => {
                         s.notificationType = 'success';
                     });
                 } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Unable to update User details.';
-                        s.notificationType = 'error';
-                    });
+                    setError(true);
+                    setMessage(response.message);
                 }
                 setRoleUpdating(false);
                 getUserDetails();
@@ -526,6 +531,7 @@ const UserProfile = () => {
 
                                 <div className="align-items-center" style={{ width: '40%' }}>
                                     <Select
+                                        className={error ? 'viewError' : 'viewNormal'}
                                         id="roles"
                                         placeholder="Select Role to assign"
                                         options={rolesData}
@@ -533,10 +539,18 @@ const UserProfile = () => {
                                         currentValue={rolesData.filter(
                                             (option) => option.value === userRole?.permission_id
                                         )}
+                                        error={error}
                                         onChange={(e) => {
                                             handleRoleChange('permission_id', e.value);
                                         }}
                                     />
+                                    {error ? (
+                                        <div className="mt-2">
+                                            <Typography.Subheader size={Typography.Sizes.sm} className="errorText">
+                                                <Exclamation /> &nbsp;&nbsp;{message}
+                                            </Typography.Subheader>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -601,6 +615,48 @@ const UserProfile = () => {
                         />
                     )}
                 </Modal.Footer>
+            </Modal>
+            <Modal
+                show={errorDeactivate}
+                onHide={() => {
+                    setErrorDeactivate(false);
+                }}
+                centered
+                backdrop="static"
+                dialogClassName="user-update-style"
+                keyboard={false}>
+                <Modal.Body className="p-4">
+                    <div className="userErrorBlock">
+                        <Typography.Subheader size={Typography.Sizes.md} className="errorText">
+                            <Exclamation /> &nbsp;&nbsp;{'User cannot be deactivated'}
+                        </Typography.Subheader>
+                    </div>
+                    <Brick sizeInRem={1} />
+                    <div>
+                        <Row>
+                            <Col lg={12}>
+                                <Typography.Body size={Typography.Sizes.md}>
+                                    {orginalUserData?.email} is the only administrator on the account, please assign
+                                    another administrator before deactivating.
+                                </Typography.Body>
+                            </Col>
+                        </Row>
+                    </div>
+                    <Brick sizeInRem={1.5} />
+                    <Row>
+                        <Col lg={12}>
+                            <Button
+                                label={'OK'}
+                                size={Button.Sizes.lg}
+                                type={Button.Type.primary}
+                                onClick={() => {
+                                    setErrorDeactivate(false);
+                                }}
+                                className="ok-btn"
+                            />
+                        </Col>
+                    </Row>
+                </Modal.Body>
             </Modal>
         </React.Fragment>
     );
