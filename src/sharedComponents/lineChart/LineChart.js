@@ -213,8 +213,10 @@ const LineChart = (props) => {
                 )}
                 {estimatedEnergySavings && (
                     <div className="d-flex flex-column mr-3">
-                        <p className="plug-rule-chart-subtitle mb-1">{estimatedEnergySavings.title}</p>
-                        <h5 className="plug-rule-chart-title float-right">{estimatedEnergySavings.value}</h5>
+                        <Typography.Body size={Typography.Sizes.xs}>{estimatedEnergySavings.title}</Typography.Body>
+                        <Typography.Subheader size={Typography.Sizes.md}>
+                            {estimatedEnergySavings.value}
+                        </Typography.Subheader>
                     </div>
                 )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
