@@ -495,6 +495,12 @@ const BreakerConfiguration = ({
                 breakerObjThree.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
         }
 
+        if (firstBreakerObj?.type !== parentBreakerObj?.type) {
+            breakerObjOne.type = firstBreakerObj?.type;
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.notes = firstBreakerObj?.type;
+            if (breakerObjThree?.breaker_id) breakerObjThree.notes = firstBreakerObj?.type;
+        }
+
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
             breakerObjOne.device_link = firstBreakerObj?.device_link;
         }
