@@ -106,7 +106,7 @@ const BreakerConfiguration = ({
         equipment_type: '',
         end_use: '',
         space_id: '',
-        quantity: '',
+        quantity: '1',
     };
 
     const defaultErrors = {
@@ -591,7 +591,19 @@ const BreakerConfiguration = ({
                 const response = res;
 
                 if (response?.status === 200) {
-                    saveBreakerTypeData(breakerTypeObj);
+                    if (breakerTypeObj?.notes || breakerTypeObj?.type) {
+                        saveBreakerTypeData(breakerTypeObj);
+                    } else {
+                        closeBreakerConfigModal();
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Breaker configuration updated successfully.';
+                            s.notificationType = 'success';
+                        });
+                        setIsProcessing(false);
+                        window.scrollTo(0, 0);
+                        setBreakerAPITrigerred(true);
+                    }
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -1201,6 +1213,7 @@ const BreakerConfiguration = ({
                                             tabClassName="p-2"
                                             activeKey={activeEquipTab}
                                             onSelect={(e) => {
+                                                if (e === 'equip') setEquipmentObj(defaultEquipmentObj);
                                                 setActiveEquipTab(e);
                                             }}>
                                             <Tabs.Item eventKey="equip" title="Equipment">
