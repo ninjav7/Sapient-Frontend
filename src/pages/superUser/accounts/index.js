@@ -429,6 +429,9 @@ const Accounts = () => {
                 isAddCustomerOpen={openCustomer}
                 closeAddCustomerModal={closeAddCustomer}
                 getCustomerList={getCustomerList}
+                getOfflineDevices={getOfflineDevices}
+                pageSize={setPageSize}
+                pageNo={setPageNo}
             />
         </React.Fragment>
     );
