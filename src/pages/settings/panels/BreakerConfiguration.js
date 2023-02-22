@@ -49,7 +49,6 @@ const BreakerConfiguration = ({
     setActiveTab,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
-    const [deviceID, setDeviceID] = useState('');
 
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -251,6 +250,74 @@ const BreakerConfiguration = ({
         }
     };
 
+    const handleBreakerTypeChange = (key, previousBreakerType, newBreakerType) => {
+        let obj = Object.assign({}, firstBreakerObj);
+
+        if (newBreakerType === 'unlabeled') {
+            if (parentBreakerObj?.equipment_link.length === 0) {
+                setSelectedEquipment('');
+                handleChange('equipment_link', '');
+            } else {
+                setSelectedEquipment(parentBreakerObj?.equipment_link[0]);
+                handleChange('equipment_link', parentBreakerObj?.equipment_link[0]);
+            }
+        }
+
+        if (newBreakerType === 'unwired' || newBreakerType === 'blank') {
+            // For Single Breaker Config OR Parent Breaker
+            obj.device_link = '';
+            obj.sensor_link = '';
+            obj.equipment_links = [];
+            if (newBreakerType === 'blank') {
+                obj.rated_amps = null;
+                obj.voltage = null;
+            }
+            setFirstSensorList([]);
+
+            // For Double Breaker
+            if (obj?.breaker_type === 2 && obj?.is_linked) {
+                let objTwo = Object.assign({}, secondBreakerObj);
+                objTwo[key] = newBreakerType;
+                objTwo.device_link = '';
+                objTwo.sensor_link = '';
+                objTwo.equipment_links = [];
+                if (newBreakerType === 'blank') {
+                    objTwo.rated_amps = null;
+                    objTwo.voltage = null;
+                }
+                setSecondBreakerObj(objTwo);
+                setSecondSensorList([]);
+            }
+
+            // For Triple Breaker
+            if (obj?.breaker_type === 3 && obj?.is_linked) {
+                let objTwo = Object.assign({}, secondBreakerObj);
+                let objThree = Object.assign({}, thirdBreakerObj);
+                objTwo[key] = newBreakerType;
+                objThree[key] = newBreakerType;
+                objTwo.device_link = '';
+                objTwo.sensor_link = '';
+                objTwo.equipment_links = [];
+                objThree.device_link = '';
+                objThree.sensor_link = '';
+                objThree.equipment_links = [];
+                if (newBreakerType === 'blank') {
+                    objTwo.rated_amps = null;
+                    objTwo.voltage = null;
+                    objThree.rated_amps = null;
+                    objThree.voltage = null;
+                }
+                setSecondBreakerObj(objTwo);
+                setThirdBreakerObj(objThree);
+                setSecondSensorList([]);
+                setThirdSensorList([]);
+            }
+        }
+
+        obj[key] = newBreakerType;
+        setFirstBreakerObj(obj);
+    };
+
     const handleSensorChange = (previousSensorId, newSensorId) => {
         if (firstSensorList.length !== 0) {
             let sensorListOne = firstSensorList;
@@ -433,6 +500,9 @@ const BreakerConfiguration = ({
         if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
+        console.log('SSR breakersList => ', breakersList);
+        return;
+
         await updateBreakerDetails(params, breakersList)
             .then((res) => {
                 const response = res;
@@ -555,7 +625,6 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
-
         setFirstBreakerObj(selectedBreakerObj);
         setParentBreakerObj(selectedBreakerObj); // Added to track for any configuration change
 
@@ -715,7 +784,12 @@ const BreakerConfiguration = ({
                                             type="number"
                                             placeholder="Enter Phase"
                                             labelSize={Typography.Sizes.md}
-                                            value={firstBreakerObj?.phase_configuration}
+                                            value={
+                                                firstBreakerObj?.phase_configuration
+                                                    ? firstBreakerObj?.phase_configuration
+                                                    : ''
+                                            }
+                                            disabled
                                         />
                                     </div>
 
@@ -728,11 +802,12 @@ const BreakerConfiguration = ({
                                             labelSize={Typography.Sizes.md}
                                             min={0}
                                             step={5}
-                                            value={firstBreakerObj?.rated_amps}
+                                            value={firstBreakerObj?.rated_amps ? firstBreakerObj?.rated_amps : ''}
                                             onChange={(e) => {
                                                 handleChange('rated_amps', +e.target.value);
                                                 setErrorObj({ ...errorObj, ['rated_amps']: null });
                                             }}
+                                            disabled={firstBreakerObj?.type === 'blank'}
                                             error={errorObj?.rated_amps}
                                         />
                                     </div>
@@ -744,7 +819,8 @@ const BreakerConfiguration = ({
                                             type="number"
                                             placeholder="Enter Voltage"
                                             labelSize={Typography.Sizes.md}
-                                            value={firstBreakerObj?.voltage}
+                                            value={firstBreakerObj?.voltage ? firstBreakerObj?.voltage : ''}
+                                            disabled
                                         />
                                     </div>
                                 </div>
@@ -777,6 +853,11 @@ const BreakerConfiguration = ({
                                                             (option) => option.value === firstBreakerObj?.device_link
                                                         )}
                                                         onChange={(e) => {
+                                                            if (
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            )
+                                                                return;
                                                             handleBreakerConfigChange('device_link', e.value, 'first');
                                                             if (firstDeviceSearch !== '') {
                                                                 fetchPassiveDeviceList(bldgId, 'default-list', 'first');
@@ -801,6 +882,11 @@ const BreakerConfiguration = ({
                                                             (option) => option.value === firstBreakerObj?.sensor_link
                                                         )}
                                                         onChange={(e) => {
+                                                            if (
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            )
+                                                                return;
                                                             handleBreakerConfigChange('sensor_link', e.value, 'first');
                                                             handleSensorChange(firstBreakerObj?.sensor_link, e.value);
                                                         }}
@@ -838,6 +924,11 @@ const BreakerConfiguration = ({
                                                                     option.value === secondBreakerObj?.device_link
                                                             )}
                                                             onChange={(e) => {
+                                                                if (
+                                                                    firstBreakerObj?.type === 'unwired' ||
+                                                                    firstBreakerObj?.type === 'blank'
+                                                                )
+                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'device_link',
                                                                     e.value,
@@ -871,6 +962,11 @@ const BreakerConfiguration = ({
                                                                     option.value === secondBreakerObj?.sensor_link
                                                             )}
                                                             onChange={(e) => {
+                                                                if (
+                                                                    firstBreakerObj?.type === 'unwired' ||
+                                                                    firstBreakerObj?.type === 'blank'
+                                                                )
+                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
                                                                     e.value,
@@ -915,6 +1011,11 @@ const BreakerConfiguration = ({
                                                                     option.value === thirdBreakerObj?.device_link
                                                             )}
                                                             onChange={(e) => {
+                                                                if (
+                                                                    firstBreakerObj?.type === 'unwired' ||
+                                                                    firstBreakerObj?.type === 'blank'
+                                                                )
+                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'device_link',
                                                                     e.value,
@@ -948,6 +1049,11 @@ const BreakerConfiguration = ({
                                                                     option.value === thirdBreakerObj?.sensor_link
                                                             )}
                                                             onChange={(e) => {
+                                                                if (
+                                                                    firstBreakerObj?.type === 'unwired' ||
+                                                                    firstBreakerObj?.type === 'blank'
+                                                                )
+                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
                                                                     e.value,
@@ -1025,7 +1131,17 @@ const BreakerConfiguration = ({
                                                     <div>
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
-                                                                <Radio name="radio-1" checked={true} />
+                                                                <Radio
+                                                                    name="radio-1"
+                                                                    checked={firstBreakerObj?.type === 'none'}
+                                                                    onClick={(e) => {
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            firstBreakerObj?.type,
+                                                                            'none'
+                                                                        );
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <div className="w-100">
                                                                 {isEquipmentListFetching ? (
@@ -1042,6 +1158,8 @@ const BreakerConfiguration = ({
                                                                                 option.value === selectedEquipment
                                                                         )}
                                                                         onChange={(e) => {
+                                                                            if (firstBreakerObj?.type !== 'none')
+                                                                                return;
                                                                             handleChange('equipment_link', e.value);
                                                                             setSelectedEquipment(e.value);
                                                                         }}
@@ -1053,7 +1171,17 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={0.65} />
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
-                                                                <Radio name="radio-2" />
+                                                                <Radio
+                                                                    name="radio-2"
+                                                                    checked={firstBreakerObj?.type === 'unlabeled'}
+                                                                    onClick={(e) => {
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            firstBreakerObj?.type,
+                                                                            'unlabeled'
+                                                                        );
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Unlabeled
@@ -1062,7 +1190,17 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={1} />
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
-                                                                <Radio name="radio-3" />
+                                                                <Radio
+                                                                    name="radio-3"
+                                                                    checked={firstBreakerObj?.type === 'unwired'}
+                                                                    onClick={(e) => {
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            firstBreakerObj?.type,
+                                                                            'unwired'
+                                                                        );
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Unwired Breaker
@@ -1071,7 +1209,17 @@ const BreakerConfiguration = ({
                                                         <Brick sizeInRem={1} />
                                                         <div className="d-flex align-items-center">
                                                             <div className="mr-2">
-                                                                <Radio name="radio-4" />
+                                                                <Radio
+                                                                    name="radio-4"
+                                                                    checked={firstBreakerObj?.type === 'blank'}
+                                                                    onClick={(e) => {
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            firstBreakerObj?.type,
+                                                                            'blank'
+                                                                        );
+                                                                    }}
+                                                                />
                                                             </div>
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Blank
