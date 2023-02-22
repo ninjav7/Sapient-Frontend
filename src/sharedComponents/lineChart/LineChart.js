@@ -17,7 +17,9 @@ import colors from '../../assets/scss/_colors.scss';
 
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
-import { generateID } from '../helpers/helper';
+import { generateID, stringOrNumberPropTypes } from '../helpers/helper';
+import { UNITS } from '../../constants/units';
+
 import Brick from '../brick';
 
 HighchartsExporting(Highcharts);
@@ -70,6 +72,7 @@ const LineChart = (props) => {
         plotBands: plotBandsProp,
         plotBandsLegends,
         isLoadingData,
+        unitInfo,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -210,6 +213,17 @@ const LineChart = (props) => {
                 {!!renderPlotBandsLegends?.length && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
                 )}
+                {unitInfo && (
+                    <div className="d-flex flex-column mr-4">
+                        <Typography.Body size={Typography.Sizes.xs}>{unitInfo.title}</Typography.Body>
+                        <div className="d-flex align-items-baseline gap-4 unit-wrapper">
+                            <Typography.Header size={Typography.Sizes.md} className="unit-value">
+                                {unitInfo.value}
+                            </Typography.Header>
+                            <Typography.Subheader size={Typography.Sizes.sm} className="unit"> {unitInfo.unit}</Typography.Subheader>
+                        </div>
+                    </div>
+                )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
                     <DropDownIcon
                         options={[
@@ -291,6 +305,11 @@ LineChart.propTypes = {
             }),
         })
     ),
+    unitInfo: PropTypes.shape({
+        title: PropTypes.string,
+        unit: PropTypes.oneOf(Object.values(UNITS)),
+        value: stringOrNumberPropTypes,
+    }),
     plotBandsLegends: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string,
