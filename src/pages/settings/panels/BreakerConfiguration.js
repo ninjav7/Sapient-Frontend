@@ -254,7 +254,9 @@ const BreakerConfiguration = ({
         let obj = Object.assign({}, firstBreakerObj);
 
         // Type 1
-        if (newBreakerType === 'none') {
+        if (newBreakerType === '') {
+            obj.rated_amps = parentBreakerObj?.rated_amps;
+            obj.voltage = parentBreakerObj?.voltage;
             if (defaultBreakerType === 'blank') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
@@ -270,6 +272,8 @@ const BreakerConfiguration = ({
                 setSelectedEquipment(parentBreakerObj?.equipment_link[0]);
                 handleChange('equipment_link', parentBreakerObj?.equipment_link[0]);
             }
+            obj.rated_amps = parentBreakerObj?.rated_amps;
+            obj.voltage = parentBreakerObj?.voltage;
             if (defaultBreakerType === 'blank') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
@@ -282,6 +286,8 @@ const BreakerConfiguration = ({
             obj.device_link = '';
             obj.sensor_link = '';
             obj.equipment_links = [];
+            obj.rated_amps = parentBreakerObj?.rated_amps;
+            obj.voltage = parentBreakerObj?.voltage;
             if (defaultBreakerType === 'blank' && newBreakerType === 'unwired') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
@@ -526,7 +532,7 @@ const BreakerConfiguration = ({
         let breakerTypeUpdateList = [];
 
         if (firstBreakerObj?.type !== parentBreakerObj?.type) {
-            breakerTypeObj.type = firstBreakerObj?.type === 'none' ? '' : firstBreakerObj?.type;
+            breakerTypeObj.type = firstBreakerObj?.type === '';
         }
 
         if (firstBreakerObj?.notes !== parentBreakerObj?.notes) {
@@ -1178,12 +1184,12 @@ const BreakerConfiguration = ({
                                                             <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-1"
-                                                                    checked={firstBreakerObj?.type === 'none'}
+                                                                    checked={firstBreakerObj?.type === ''}
                                                                     onClick={(e) => {
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
-                                                                            'none'
+                                                                            ''
                                                                         );
                                                                     }}
                                                                 />
@@ -1203,8 +1209,7 @@ const BreakerConfiguration = ({
                                                                                 option.value === selectedEquipment
                                                                         )}
                                                                         onChange={(e) => {
-                                                                            if (firstBreakerObj?.type !== 'none')
-                                                                                return;
+                                                                            if (firstBreakerObj?.type !== '') return;
                                                                             handleChange('equipment_link', e.value);
                                                                             setSelectedEquipment(e.value);
                                                                         }}
