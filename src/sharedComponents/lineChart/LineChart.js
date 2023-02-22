@@ -216,11 +216,11 @@ const LineChart = (props) => {
                 {unitInfo && (
                     <div className="d-flex flex-column mr-3">
                         <Typography.Body size={Typography.Sizes.xs}>{unitInfo.title}</Typography.Body>
-                        <div className="d-flex align-items-baseline gap-4">
-                            <Typography.Header size={Typography.Sizes.md} className="mr-1">
+                        <div className="d-flex align-items-baseline gap-4 unit-wrapper">
+                            <Typography.Header size={Typography.Sizes.md} className="unit-value">
                                 {unitInfo.value}
                             </Typography.Header>
-                            <Typography.Subheader size={Typography.Sizes.md}> {unitInfo.unit}</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm} className="unit"> {unitInfo.unit}</Typography.Subheader>
                         </div>
                     </div>
                 )}
