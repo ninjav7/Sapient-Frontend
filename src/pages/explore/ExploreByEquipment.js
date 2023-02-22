@@ -1336,7 +1336,7 @@ const ExploreByEquipment = () => {
                                     id="equip"
                                     name="equip"
                                     checked={selectedIds.includes(record?.equipment_id) || checkedAll}
-                                    value={selectedIds.includes(record?.equipment_id) || checkedAll ? true : false}
+                                    value={selectedIds.includes(record?.equipment_id) || checkedAll}
                                     onChange={(e) => {
                                         handleEquipStateChange(e.target.value, record);
                                     }}

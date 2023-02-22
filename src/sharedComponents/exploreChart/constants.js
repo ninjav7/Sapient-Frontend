@@ -17,11 +17,10 @@ export const preparedData = (data) => {
     return result;
 };
 
-export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
+export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, widgetProps }) => {
     return {
         chart: {
             type: 'line',
-            alignTicks: false,
             animation: {
                 duration: 1000,
             },
@@ -45,9 +44,6 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
             borderWidth: 0,
             className: 'legend-text',
         },
-        rangeSelector: {
-            enabled: false,
-        },
         navigator: {
             enabled: true,
             adaptToUpdatedData: true,
@@ -62,7 +58,7 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
             },
         },
         tooltip: {
-            headerFormat: `<div class="chart-tooltip">${renderComponents(
+            headerFormat: `<div class='chart-tooltip'>${renderComponents(
                 <>
                     <Typography.Subheader size={Typography.Sizes.md} className="gray-550">
                         {tooltipLabel && tooltipLabel}
@@ -72,13 +68,13 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
                     </Typography.Subheader>
                 </>
             )} <table>`,
-            pointFormat: `<tr> <td style="color:{series.color};padding:0">
+            pointFormat: `<tr> <td style='color:{series.color};padding:0'>
                 ${renderComponents(
                     <Typography.Header className="gray-900" size={Typography.Sizes.xs}>
                         content
                     </Typography.Header>
                 ).replace('content', '<span style="color:{series.color};">{series.name}:</span>')}
-                </td><td class="d-flex align-items-center justify-content-end" style="padding:0; gap: 0.25rem;">${renderComponents(
+                </td><td class='d-flex align-items-center justify-content-end' style='padding:0; gap: 0.25rem;'>${renderComponents(
                     <Typography.Header size={Typography.Sizes.xs}>{'{point.y:.2f}'}</Typography.Header>
                 )}${renderComponents(
                 <Typography.Subheader className="gray-550 mt-1" size={Typography.Sizes.sm}>
@@ -88,8 +84,6 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
             footerFormat: '</table></div>',
             shared: true,
             split: false,
-            shared: true,
-            useHTML: true,
             snap: 0,
             useHTML: true,
             shape: 'div',
@@ -112,7 +106,7 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
             gridLineWidth: 1,
             max: dateRange.maxDate,
             min: dateRange.minDate,
-            alternateGridColor: '#F2F4F7',
+            alternateGridColor: !widgetProps.disableDefaultPlotBands && '#F2F4F7',
             type: 'datetime',
             labels: {
                 format: '{value: %e %b `%y}',
@@ -129,6 +123,6 @@ export const options = ({ data, dateRange, tooltipUnit, tooltipLabel }) => {
         time: {
             useUTC: true,
         },
-        series: preparedData(data),
+        series: series || preparedData(data),
     };
 };
