@@ -132,3 +132,9 @@ export const getPhaseConfigValue = (value, breakerType) => {
         if (value === '600') return 3;
     }
 };
+
+export const getBreakerType = (breaker_lvl) => {
+    if (breaker_lvl === 1) return 'single';
+    if (breaker_lvl === 2) return 'double';
+    if (breaker_lvl === 3) return 'triple';
+};

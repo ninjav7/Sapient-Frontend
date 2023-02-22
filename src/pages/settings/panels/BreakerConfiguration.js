@@ -22,7 +22,7 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
-import { comparePanelData, compareSensorsCount } from './utils';
+import { comparePanelData, compareSensorsCount, getBreakerType, getVoltageConfigValue } from './utils';
 import Select from '../../../sharedComponents/form/select';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -250,9 +250,18 @@ const BreakerConfiguration = ({
         }
     };
 
-    const handleBreakerTypeChange = (key, previousBreakerType, newBreakerType) => {
+    const handleBreakerTypeChange = (key, defaultBreakerType, newBreakerType) => {
         let obj = Object.assign({}, firstBreakerObj);
 
+        // Type 1
+        if (newBreakerType === 'none') {
+            if (defaultBreakerType === 'blank') {
+                obj.rated_amps = 0;
+                obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+            }
+        }
+
+        // Type 2
         if (newBreakerType === 'unlabeled') {
             if (parentBreakerObj?.equipment_link.length === 0) {
                 setSelectedEquipment('');
@@ -261,13 +270,22 @@ const BreakerConfiguration = ({
                 setSelectedEquipment(parentBreakerObj?.equipment_link[0]);
                 handleChange('equipment_link', parentBreakerObj?.equipment_link[0]);
             }
+            if (defaultBreakerType === 'blank') {
+                obj.rated_amps = 0;
+                obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+            }
         }
 
+        // Type 3 & Type 4
         if (newBreakerType === 'unwired' || newBreakerType === 'blank') {
             // For Single Breaker Config OR Parent Breaker
             obj.device_link = '';
             obj.sensor_link = '';
             obj.equipment_links = [];
+            if (defaultBreakerType === 'blank' && newBreakerType === 'unwired') {
+                obj.rated_amps = 0;
+                obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+            }
             if (newBreakerType === 'blank') {
                 obj.rated_amps = null;
                 obj.voltage = null;
@@ -435,8 +453,10 @@ const BreakerConfiguration = ({
     const saveBreakersDetails = async () => {
         let alertObj = Object.assign({}, errorObj);
 
-        if (firstBreakerObj?.rated_amps === '') alertObj.rated_amps = 'Please enter Amps';
-        if (firstBreakerObj?.rated_amps % 5 !== 0) alertObj.rated_amps = 'Amps must be in increments of 5';
+        if (firstBreakerObj?.rated_amps === '' && firstBreakerObj?.type !== 'blank')
+            alertObj.rated_amps = 'Please enter Amps';
+        if (firstBreakerObj?.rated_amps % 5 !== 0 && firstBreakerObj?.type !== 'blank')
+            alertObj.rated_amps = 'Amps must be in increments of 5';
 
         setErrorObj(alertObj);
         if (alertObj.rated_amps) return;
@@ -454,6 +474,12 @@ const BreakerConfiguration = ({
             breakerObjOne.rated_amps = firstBreakerObj?.rated_amps;
             if (breakerObjTwo?.breaker_id) breakerObjTwo.rated_amps = firstBreakerObj?.rated_amps;
             if (breakerObjThree?.breaker_id) breakerObjThree.rated_amps = firstBreakerObj?.rated_amps;
+        }
+
+        if (firstBreakerObj?.voltage !== parentBreakerObj?.voltage && firstBreakerObj?.type === 'blank') {
+            breakerObjOne.voltage = firstBreakerObj?.voltage;
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.voltage = firstBreakerObj?.voltage;
+            if (breakerObjThree?.breaker_id) breakerObjThree.voltage = firstBreakerObj?.voltage;
         }
 
         if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
@@ -1137,7 +1163,7 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         handleBreakerTypeChange(
                                                                             'type',
-                                                                            firstBreakerObj?.type,
+                                                                            parentBreakerObj?.type,
                                                                             'none'
                                                                         );
                                                                     }}
@@ -1177,7 +1203,7 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         handleBreakerTypeChange(
                                                                             'type',
-                                                                            firstBreakerObj?.type,
+                                                                            parentBreakerObj?.type,
                                                                             'unlabeled'
                                                                         );
                                                                     }}
@@ -1196,7 +1222,7 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         handleBreakerTypeChange(
                                                                             'type',
-                                                                            firstBreakerObj?.type,
+                                                                            parentBreakerObj?.type,
                                                                             'unwired'
                                                                         );
                                                                     }}
@@ -1215,7 +1241,7 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         handleBreakerTypeChange(
                                                                             'type',
-                                                                            firstBreakerObj?.type,
+                                                                            parentBreakerObj?.type,
                                                                             'blank'
                                                                         );
                                                                     }}
