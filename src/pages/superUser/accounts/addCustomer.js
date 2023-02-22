@@ -8,7 +8,14 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import { createCustomer } from './services';
 import { UserStore } from '../../../store/UserStore';
 
-const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerList }) => {
+const CreateCustomer = ({
+    isAddCustomerOpen,
+    closeAddCustomerModal,
+    getCustomerList,
+    getOfflineDevices,
+    setPageSize,
+    setPageNo,
+}) => {
     const defaultCustomerObj = {
         name: '',
     };
@@ -41,8 +48,11 @@ const CreateCustomer = ({ isAddCustomerOpen, closeAddCustomerModal, getCustomerL
                         s.notificationMessage = response?.message;
                         s.notificationType = 'success';
                     });
-
+                    closeAddCustomerModal();
                     getCustomerList();
+                    getOfflineDevices();
+                    setPageNo(1);
+                    setPageSize(20);
                 }
                 setIsProcessing(false);
                 closeAddCustomerModal();
