@@ -463,6 +463,8 @@ const BreakerConfiguration = ({
 
         setIsProcessing(true);
 
+        let breakerTypeObj = {};
+
         const params = `?building_id=${bldgId}`;
         const breakersList = [];
 
@@ -486,19 +488,6 @@ const BreakerConfiguration = ({
             breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [firstBreakerObj?.equipment_link];
-        }
-
-        if (firstBreakerObj?.notes !== parentBreakerObj?.notes) {
-            breakerObjOne.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
-            if (breakerObjTwo?.breaker_id) breakerObjTwo.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
-            if (breakerObjThree?.breaker_id)
-                breakerObjThree.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
-        }
-
-        if (firstBreakerObj?.type !== parentBreakerObj?.type) {
-            breakerObjOne.type = firstBreakerObj?.type;
-            if (breakerObjTwo?.breaker_id) breakerObjTwo.notes = firstBreakerObj?.type;
-            if (breakerObjThree?.breaker_id) breakerObjThree.notes = firstBreakerObj?.type;
         }
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
@@ -533,6 +522,30 @@ const BreakerConfiguration = ({
         if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
         console.log('SSR breakersList => ', breakersList);
+
+        let breakerTypeUpdateList = [];
+
+        if (firstBreakerObj?.type !== parentBreakerObj?.type) {
+            breakerTypeObj.type = firstBreakerObj?.type === 'none' ? '' : firstBreakerObj?.type;
+        }
+
+        if (firstBreakerObj?.notes !== parentBreakerObj?.notes) {
+            breakerTypeObj.notes = firstBreakerObj?.notes ? firstBreakerObj?.notes : '';
+        }
+
+        breakerTypeUpdateList.push(firstBreakerObj?.id);
+
+        if (firstBreakerObj?.breaker_type === 2) breakerTypeUpdateList.push(secondBreakerObj?.id);
+
+        if (firstBreakerObj?.breaker_type === 3) {
+            breakerTypeUpdateList.push(secondBreakerObj?.id);
+            breakerTypeUpdateList.push(thirdBreakerObj?.id);
+        }
+
+        breakerTypeObj.breaker_id = breakerTypeUpdateList;
+
+        console.log('SSR breakerTypeObj => ', breakerTypeObj);
+
         return;
 
         await updateBreakerDetails(params, breakersList)
