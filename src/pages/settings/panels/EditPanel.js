@@ -131,6 +131,9 @@ const EditPanel = () => {
         history.push({
             pathname: `/settings/panels`,
         });
+        BreakersStore.update((s) => {
+            s.breakersList = [];
+        });
     };
 
     const fetchBreakerType = (obj) => {
@@ -1494,6 +1497,9 @@ const EditPanel = () => {
     };
 
     const pageDefaultStates = () => {
+        BreakersStore.update((s) => {
+            s.breakersList = [];
+        });
         BreadcrumbStore.update((bs) => {
             const newList = [
                 {
