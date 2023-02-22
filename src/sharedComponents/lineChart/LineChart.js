@@ -214,7 +214,7 @@ const LineChart = (props) => {
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
                 )}
                 {unitInfo && (
-                    <div className="d-flex flex-column mr-3">
+                    <div className="d-flex flex-column mr-4">
                         <Typography.Body size={Typography.Sizes.xs}>{unitInfo.title}</Typography.Body>
                         <div className="d-flex align-items-baseline gap-4 unit-wrapper">
                             <Typography.Header size={Typography.Sizes.md} className="unit-value">
