@@ -147,10 +147,14 @@ const EditPanel = () => {
             obj?.device_link === '' &&
             obj?.breaker_type === 1 &&
             obj?.parent_breaker === '' &&
-            obj?.is_linked === false
+            obj?.is_linked === false &&
+            obj?.type === ''
         ) {
             return Breaker.Type.notConfigured;
         }
+
+        // If Breaker Type is Unwired, Unlabeled or Blank it is considered as Fully Configured
+        if (obj?.type !== '') return Breaker.Type.configured;
 
         // Below condition is for Single Lvl Breaker
         if (obj?.breaker_type === 1) {
@@ -918,7 +922,8 @@ const EditPanel = () => {
 
                 // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                 response.forEach((record) => {
-                    if (record?.rated_amps === 0) record.rated_amps = undefined;
+                    if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
+                    if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                 });
 
                 BreakersStore.update((s) => {

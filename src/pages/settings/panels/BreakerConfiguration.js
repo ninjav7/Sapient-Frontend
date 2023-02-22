@@ -13,6 +13,7 @@ import {
     getSensorsList,
     resetAllBreakers,
     updateBreakerDetails,
+    updateBreakersTypeLink,
 } from './services';
 import DeleteBreaker from './DeleteBreaker';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -456,6 +457,39 @@ const BreakerConfiguration = ({
             });
     };
 
+    const saveBreakerTypeData = async (updateBreakerObj) => {
+        await updateBreakersTypeLink(updateBreakerObj)
+            .then((res) => {
+                const response = res;
+
+                if (response?.status === 200) {
+                    closeBreakerConfigModal();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker configuration updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    setIsProcessing(false);
+                    window.scrollTo(0, 0);
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to update Breaker configuration.'
+                            : 'Unable to update Breaker configuration due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                    setIsProcessing(false);
+                }
+            })
+            .catch(() => {
+                setIsProcessing(false);
+            });
+    };
+
     const saveBreakersDetails = async () => {
         let alertObj = Object.assign({}, errorObj);
 
@@ -527,12 +561,12 @@ const BreakerConfiguration = ({
         if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
-        console.log('SSR breakersList => ', breakersList);
+        // console.log('SSR breakersList => ', breakersList);
 
         let breakerTypeUpdateList = [];
 
         if (firstBreakerObj?.type !== parentBreakerObj?.type) {
-            breakerTypeObj.type = firstBreakerObj?.type === '';
+            breakerTypeObj.type = firstBreakerObj?.type;
         }
 
         if (firstBreakerObj?.notes !== parentBreakerObj?.notes) {
@@ -550,23 +584,14 @@ const BreakerConfiguration = ({
 
         breakerTypeObj.breaker_id = breakerTypeUpdateList;
 
-        console.log('SSR breakerTypeObj => ', breakerTypeObj);
-
-        return;
+        // console.log('SSR breakerTypeObj => ', breakerTypeObj);
 
         await updateBreakerDetails(params, breakersList)
             .then((res) => {
                 const response = res;
-                setIsProcessing(false);
+
                 if (response?.status === 200) {
-                    closeBreakerConfigModal();
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Breaker configuration updated successfully.';
-                        s.notificationType = 'success';
-                    });
-                    window.scrollTo(0, 0);
-                    setBreakerAPITrigerred(true);
+                    saveBreakerTypeData(breakerTypeObj);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -577,6 +602,7 @@ const BreakerConfiguration = ({
                             : 'Unable to update Breaker configuration due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
+                    setIsProcessing(false);
                 }
             })
             .catch(() => {
