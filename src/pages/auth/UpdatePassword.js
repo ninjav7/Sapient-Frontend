@@ -186,6 +186,26 @@ const Confirm = (props) => {
     }, [password]);
 
     useEffect(() => {
+        let ct = 0;
+        if (charErr === 'error') {
+            ct++;
+        }
+        if (numberErr === 'error') {
+            ct++;
+        }
+        if (lowerCaseErr === 'error') {
+            ct++;
+        }
+        if (upperCaseErr === 'error') {
+            ct++;
+        }
+        if (specialCharErr === 'error') {
+            ct++;
+        }
+        setErrorCount(ct);
+    }, [charErr, numberErr, lowerCaseErr, upperCaseErr, specialCharErr]);
+
+    useEffect(() => {
         if (cpassword.length >= 8) {
             if (cpassword === password) {
                 setMatchErr('success');
