@@ -1210,6 +1210,7 @@ const BreakerConfiguration = ({
                                                                     name="radio-1"
                                                                     checked={firstBreakerObj?.type === ''}
                                                                     onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === '') return;
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
@@ -1249,6 +1250,8 @@ const BreakerConfiguration = ({
                                                                     name="radio-2"
                                                                     checked={firstBreakerObj?.type === 'unlabeled'}
                                                                     onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'unlabeled')
+                                                                            return;
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
@@ -1268,6 +1271,7 @@ const BreakerConfiguration = ({
                                                                     name="radio-3"
                                                                     checked={firstBreakerObj?.type === 'unwired'}
                                                                     onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'unwired') return;
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
@@ -1287,6 +1291,7 @@ const BreakerConfiguration = ({
                                                                     name="radio-4"
                                                                     checked={firstBreakerObj?.type === 'blank'}
                                                                     onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'blank') return;
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
