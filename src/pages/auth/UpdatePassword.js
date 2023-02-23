@@ -262,7 +262,16 @@ const Confirm = (props) => {
                                                         <Input
                                                             placeholder="Enter your password"
                                                             type={passwordType}
-                                                            error={passwordError ? 'Password is Required' : null}
+                                                            error={
+                                                                matchErr === 'error' ||
+                                                                charErr === 'error' ||
+                                                                lowerCaseErr === 'error' ||
+                                                                upperCaseErr === 'error' ||
+                                                                specialCharErr === 'error' ||
+                                                                numberErr === 'error'
+                                                                    ? 'Please correct the errors'
+                                                                    : null
+                                                            }
                                                             elementEnd={
                                                                 passwordType === 'password' ? (
                                                                     <EyeSVG
@@ -462,6 +471,17 @@ const Confirm = (props) => {
 
                                                         <Input
                                                             placeholder="Enter your password"
+                                                            disabled={
+                                                                matchErr === 'error' ||
+                                                                charErr === 'error' ||
+                                                                lowerCaseErr === 'error' ||
+                                                                upperCaseErr === 'error' ||
+                                                                specialCharErr === 'error' ||
+                                                                numberErr === 'error' ||
+                                                                password === ''
+                                                                    ? true
+                                                                    : false
+                                                            }
                                                             type={cPasswordType}
                                                             error={
                                                                 cpasswordError ? 'Confirm Password is Required' : null
