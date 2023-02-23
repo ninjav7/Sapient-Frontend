@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap';
+import {
+    Row,
+    Col,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownItem,
+    DropdownToggle,
+    // Modal,
+    Form,
+    Button,
+} from 'reactstrap';
 import { useAtom } from 'jotai';
 import '../style.css';
 import axios from 'axios';
-import { BaseUrl, createSpace, getFloors, getSpaces, getSpaceTypes } from '../../../services/Network';
+import { BaseUrl, createSpace, getFloors, getLayouts, getSpaces, getSpaceTypes } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
-import EditFloorModal from './EditFloorModal';
-import EditSpace from './EditSpace';
+import EditFloorModal from '../../../components/Layouts/EditFloorModal';
 import {
     closedEditFloorModal,
     closeEditSpaceModal,
@@ -23,12 +32,16 @@ import {
     currentFloorIdNow8,
     currentFloorIdNow9,
     deleteFloor,
+    floorid,
     flooridNew,
     floorIdState,
     floorState,
     floorStaticId,
     getFloorsData,
+    iterationDataList,
+    iterationNumber,
     reloadSpaces,
+    spaceId,
     spaceName,
     spaceName10,
     spaceName11,
@@ -49,8 +62,13 @@ import {
     spaceName7,
     spaceName8,
     spaceName9,
+    spaceNameList,
+    userPermissionData,
 } from '../../../store/globalState';
-import { userPermissionData } from '../../../store/globalState';
+import InfiniteSpae from '../../../components/Layouts/InfiniteSpace';
+import EditSpace from '../../../components/Layouts/EditSpace';
+import InfiniteSpace from '../../../components/Layouts/InfiniteSpace';
+import Edit from '../../../assets/icon/pencil.png';
 
 const Layout = () => {
     let cookies = new Cookies();

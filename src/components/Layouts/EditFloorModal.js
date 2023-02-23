@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
+
 import { Button, Input, Label } from 'reactstrap';
-import { closedEditFloorModal, deleteFloor, floorList } from '../../../store/globalState';
-import { BuildingStore } from '../../../store/BuildingStore';
-import { floorIdState } from '../../../store/globalState';
+import { closedEditFloorModal, deleteFloor, floorList } from '../../store/globalState';
+import { BuildingStore } from '../../store/BuildingStore';
+import { floorIdState } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import axios from 'axios';
-import { BaseUrl, createFloors, updateSpace } from '../../../services/Network';
-import Delete from '../../../assets/images/delete.png';
+import { BaseUrl, createFloors, getFloors, updateSpace } from '../../services/Network';
+import Delete from '../../assets/images/delete.png';
 
 const EditFloorModal = (props) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -35,7 +37,8 @@ const EditFloorModal = (props) => {
             Authorization: `Bearer ${userdata.token}`,
         };
         let params = `?building_id=${bldgId}`;
-        axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {});
+        axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {
+        });
     };
 
     const updateFloorsFunc = () => {
@@ -45,8 +48,10 @@ const EditFloorModal = (props) => {
             Authorization: `Bearer ${userdata.token}`,
         };
         const params = `${floorid}`;
-        axios.patch(`${BaseUrl}${updateSpace}?floor_id=${params}`, floorNameApi, { headers }).then((res) => {});
+        axios.patch(`${BaseUrl}${updateSpace}?floor_id=${params}`, floorNameApi, { headers }).then((res) => {
+        });
     };
+
 
     const [deletingFloor, setDeletingFloor] = useAtom(deleteFloor);
 
