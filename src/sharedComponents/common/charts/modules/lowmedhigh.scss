@@ -1,0 +1,17 @@
+@import '../../../../assets/scss/colors';
+
+.tooltip-low-med-high {
+    display: inline-block;
+
+    &-min-temp {
+        background: url(../../../assets/icons/temp-min-styled.svg) no-repeat center center;
+        width: 0.375rem;
+        height: 0.375rem;
+    }
+
+    &-max-temp {
+        background: url(../../../assets/icons/temp-max-styled.svg) no-repeat center center;
+        width: 0.375rem;
+        height: 0.375rem;
+    }
+}
