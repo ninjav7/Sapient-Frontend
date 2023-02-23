@@ -457,39 +457,6 @@ const BreakerConfiguration = ({
             });
     };
 
-    const saveBreakerTypeData = async (updateBreakerObj) => {
-        await updateBreakersTypeLink(updateBreakerObj)
-            .then((res) => {
-                const response = res;
-
-                if (response?.status === 200) {
-                    closeBreakerConfigModal();
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'Breaker configuration updated successfully.';
-                        s.notificationType = 'success';
-                    });
-                    setIsProcessing(false);
-                    window.scrollTo(0, 0);
-                    setBreakerAPITrigerred(true);
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to update Breaker configuration.'
-                            : 'Unable to update Breaker configuration due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                    setIsProcessing(false);
-                }
-            })
-            .catch(() => {
-                setIsProcessing(false);
-            });
-    };
-
     const saveBreakersDetails = async () => {
         let alertObj = Object.assign({}, errorObj);
 
@@ -585,33 +552,36 @@ const BreakerConfiguration = ({
         breakerTypeObj.breaker_id = breakerTypeUpdateList;
 
         // console.log('SSR breakerTypeObj => ', breakerTypeObj);
+        const promisesList = [];
 
-        await updateBreakerDetails(params, breakersList)
+        const promiseOne = updateBreakerDetails(params, breakersList);
+        promisesList.push(promiseOne);
+
+        if (breakerTypeObj?.notes || breakerTypeObj?.type) {
+            const promiseTwo = updateBreakersTypeLink(breakerTypeObj);
+            promisesList.push(promiseTwo);
+        }
+
+        Promise.all(promisesList)
             .then((res) => {
                 const response = res;
-
-                if (response?.status === 200) {
-                    if (breakerTypeObj?.notes || breakerTypeObj?.type) {
-                        saveBreakerTypeData(breakerTypeObj);
-                    } else {
-                        closeBreakerConfigModal();
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Breaker configuration updated successfully.';
-                            s.notificationType = 'success';
-                        });
-                        setIsProcessing(false);
-                        window.scrollTo(0, 0);
-                        setBreakerAPITrigerred(true);
-                    }
+                if (
+                    (response.length === 1 && response[0]?.status === 200) ||
+                    (response.length === 2 && response[0]?.status === 200 && response[1]?.status === 200)
+                ) {
+                    closeBreakerConfigModal();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker configuration updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    setIsProcessing(false);
+                    window.scrollTo(0, 0);
+                    setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to update Breaker configuration.'
-                            : 'Unable to update Breaker configuration due to Internal Server Error!.';
+                        s.notificationMessage = 'Unable to update Breaker configuration.';
                         s.notificationType = 'error';
                     });
                     setIsProcessing(false);
