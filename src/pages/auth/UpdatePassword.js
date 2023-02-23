@@ -49,6 +49,7 @@ const Confirm = (props) => {
     const [matchErr, setMatchErr] = useState('');
     const [alreadyLogin, setAlreadyLogin] = useState(false);
     const [userDetails, setUserDetails] = useState({});
+    const [errorCount, setErrorCount] = useState(0);
 
     useEffect(() => {
         set_isMounted(true);
@@ -263,13 +264,18 @@ const Confirm = (props) => {
                                                             placeholder="Enter your password"
                                                             type={passwordType}
                                                             error={
-                                                                matchErr === 'error' ||
-                                                                charErr === 'error' ||
-                                                                lowerCaseErr === 'error' ||
-                                                                upperCaseErr === 'error' ||
-                                                                specialCharErr === 'error' ||
-                                                                numberErr === 'error'
+                                                                errorCount > 1
                                                                     ? 'Please correct the errors'
+                                                                    : errorCount === 1 && charErr === 'error'
+                                                                    ? 'You must have a character'
+                                                                    : errorCount === 1 && numberErr === 'error'
+                                                                    ? 'You must have a number'
+                                                                    : errorCount === 1 && specialCharErr === 'error'
+                                                                    ? 'You must have a special character'
+                                                                    : errorCount === 1 && upperCaseErr === 'error'
+                                                                    ? 'You must have a upper case character'
+                                                                    : errorCount === 1 && lowerCaseErr === 'error'
+                                                                    ? 'You must have a lower case character'
                                                                     : null
                                                             }
                                                             elementEnd={
