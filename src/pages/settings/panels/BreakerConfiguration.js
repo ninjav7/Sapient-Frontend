@@ -39,6 +39,7 @@ import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import './breaker-config-styles.scss';
+import UnlabelEquipAlert from './UnlabelEquipAlert';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -103,9 +104,15 @@ const BreakerConfiguration = ({
     const handleDeleteAlertClose = () => setShowDeleteAlert(false);
     const handleDeleteAlertShow = () => setShowDeleteAlert(true);
 
+    // Unlabeled Equip Alert Modal
+    const [showUnlabeledAlert, setUnlabeledAlert] = useState(false);
+    const closeUnlabelAlertModal = () => setUnlabeledAlert(false);
+    const openUnlabelAlertModal = () => setUnlabeledAlert(true);
+
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [forceUpdate, setForceUpdate] = useState(false);
 
     const defaultEquipmentObj = {
         name: '',
@@ -209,6 +216,7 @@ const BreakerConfiguration = ({
         setThirdSensorList([]);
         setActiveTab('edit-breaker');
         setSelectedBreakerObj({});
+        setForceUpdate(false);
     };
 
     const handleChange = (key, value) => {
@@ -255,6 +263,12 @@ const BreakerConfiguration = ({
             setThirdBreakerObj(obj);
             if (key === 'device_link') fetchSensorsList(value, 'third');
         }
+    };
+
+    const validateUnlabledChange = () => {
+        if (parentBreakerObj?.equipment_link.length === 0 || equipmentsList.length === 0) return;
+        const equipment = equipmentsList.find((record) => (record?.label).toLowerCase() === 'unlabeled');
+        if (equipment?.value) openUnlabelAlertModal();
     };
 
     const handleBreakerTypeChange = (key, defaultBreakerType, newBreakerType) => {
@@ -787,7 +801,8 @@ const BreakerConfiguration = ({
                 size="xl"
                 centered
                 backdrop="static"
-                keyboard={false}>
+                keyboard={false}
+                style={{ opacity: showUnlabeledAlert ? '0.5' : '1' }}>
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"
@@ -1257,6 +1272,7 @@ const BreakerConfiguration = ({
                                                                             parentBreakerObj?.type,
                                                                             'unlabeled'
                                                                         );
+                                                                        validateUnlabledChange();
                                                                     }}
                                                                 />
                                                             </div>
@@ -1468,6 +1484,12 @@ const BreakerConfiguration = ({
                 handleDeleteAlertClose={handleDeleteAlertClose}
                 handleEditBreakerShow={openBreakerConfigModal}
                 deleteCurrentBreaker={deleteCurrentBreaker}
+            />
+
+            <UnlabelEquipAlert
+                showUnlabeledAlert={showUnlabeledAlert}
+                closeUnlabelAlertModal={closeUnlabelAlertModal}
+                setForceUpdate={setForceUpdate}
             />
         </React.Fragment>
     );
