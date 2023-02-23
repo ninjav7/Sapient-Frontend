@@ -23,7 +23,13 @@ import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as UnlinkOldSVG } from '../../../assets/icon/panels/unlink_old.svg';
 import Radio from '../../../sharedComponents/form/radio/Radio';
 import Textarea from '../../../sharedComponents/form/textarea/Textarea';
-import { comparePanelData, compareSensorsCount, getBreakerType, getVoltageConfigValue } from './utils';
+import {
+    comparePanelData,
+    compareSensorsCount,
+    getBreakerType,
+    getPhaseConfigValue,
+    getVoltageConfigValue,
+} from './utils';
 import Select from '../../../sharedComponents/form/select';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -258,9 +264,11 @@ const BreakerConfiguration = ({
         if (newBreakerType === '') {
             obj.rated_amps = parentBreakerObj?.rated_amps;
             obj.voltage = parentBreakerObj?.voltage;
+            obj.phase_configuration = parentBreakerObj?.phase_configuration;
             if (defaultBreakerType === 'blank') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+                obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
         }
 
@@ -275,9 +283,11 @@ const BreakerConfiguration = ({
             }
             obj.rated_amps = parentBreakerObj?.rated_amps;
             obj.voltage = parentBreakerObj?.voltage;
+            obj.phase_configuration = parentBreakerObj?.phase_configuration;
             if (defaultBreakerType === 'blank') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+                obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
         }
 
@@ -289,12 +299,15 @@ const BreakerConfiguration = ({
             obj.equipment_links = [];
             obj.rated_amps = parentBreakerObj?.rated_amps;
             obj.voltage = parentBreakerObj?.voltage;
+            obj.phase_configuration = parentBreakerObj?.phase_configuration;
             if (defaultBreakerType === 'blank' && newBreakerType === 'unwired') {
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+                obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
             if (newBreakerType === 'blank') {
                 obj.rated_amps = null;
+                obj.phase_configuration = null;
                 obj.voltage = null;
             }
             setFirstSensorList([]);
@@ -554,8 +567,10 @@ const BreakerConfiguration = ({
         // console.log('SSR breakerTypeObj => ', breakerTypeObj);
         const promisesList = [];
 
-        const promiseOne = updateBreakerDetails(params, breakersList);
-        promisesList.push(promiseOne);
+        if (breakerTypeObj?.type !== 'blank' || breakerTypeObj?.type !== 'unwired') {
+            const promiseOne = updateBreakerDetails(params, breakersList);
+            promisesList.push(promiseOne);
+        }
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type) {
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj);
