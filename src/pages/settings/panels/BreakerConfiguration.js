@@ -718,44 +718,48 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
-        setFirstBreakerObj(selectedBreakerObj);
-        setParentBreakerObj(selectedBreakerObj); // Added to track for any configuration change
 
-        if (selectedBreakerObj?.equipment_link) setSelectedEquipment(selectedBreakerObj?.equipment_link[0]);
+        const breakerObj = Object.assign({}, selectedBreakerObj);
+        if (breakerObj?.rated_amps === undefined) breakerObj.rated_amps = '0';
+
+        setFirstBreakerObj(breakerObj);
+        setParentBreakerObj(breakerObj); // Added to track for any configuration change
+
+        if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
 
         // Conditions to check if Sensors List is required to be fetched
         // For Breaker Type 1
-        if (selectedBreakerObj?.breaker_type === 1 && selectedBreakerObj?.device_link !== '') {
-            fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+        if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
+            fetchSensorsList(breakerObj?.device_link, 'first');
             return;
         }
 
         // For Breaker Type 2
-        if (selectedBreakerObj?.breaker_type === 2) {
-            let obj = breakersList.find((el) => el?.parent_breaker === selectedBreakerObj?.id);
+        if (breakerObj?.breaker_type === 2) {
+            let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
             setSecondBreakerObj(obj);
             setSecondBreakerObjOld(obj); // Added to track for any configuration change
 
-            if (selectedBreakerObj?.device_link === '' && obj?.device_link === '') return;
+            if (breakerObj?.device_link === '' && obj?.device_link === '') return;
 
-            if (selectedBreakerObj?.device_link === obj?.device_link) {
-                fetchSensorsList(selectedBreakerObj?.device_link, 'first-second');
+            if (breakerObj?.device_link === obj?.device_link) {
+                fetchSensorsList(breakerObj?.device_link, 'first-second');
             } else {
-                fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+                fetchSensorsList(breakerObj?.device_link, 'first');
                 fetchSensorsList(obj?.device_link, 'second');
             }
         }
 
         // For Breaker Type 3
-        if (selectedBreakerObj?.breaker_type === 3) {
-            let childbreakers = breakersList.filter((el) => el?.parent_breaker === selectedBreakerObj?.id);
+        if (breakerObj?.breaker_type === 3) {
+            let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
             setSecondBreakerObj(childbreakers[0]);
             setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
             setThirdBreakerObj(childbreakers[1]);
             setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
 
             if (
-                selectedBreakerObj?.device_link === '' &&
+                breakerObj?.device_link === '' &&
                 childbreakers[0]?.device_link === '' &&
                 childbreakers[1]?.device_link === ''
             ) {
@@ -763,12 +767,12 @@ const BreakerConfiguration = ({
             }
 
             if (
-                selectedBreakerObj?.device_link === childbreakers[0]?.device_link &&
-                selectedBreakerObj?.device_link === childbreakers[1]?.device_link
+                breakerObj?.device_link === childbreakers[0]?.device_link &&
+                breakerObj?.device_link === childbreakers[1]?.device_link
             ) {
-                fetchSensorsList(selectedBreakerObj?.device_link, 'all');
+                fetchSensorsList(breakerObj?.device_link, 'all');
             } else {
-                if (selectedBreakerObj?.device_link !== '') fetchSensorsList(selectedBreakerObj?.device_link, 'first');
+                if (breakerObj?.device_link !== '') fetchSensorsList(breakerObj?.device_link, 'first');
                 if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
                 if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
             }
@@ -797,6 +801,10 @@ const BreakerConfiguration = ({
         setSecondPassiveDevicesList(newList);
         setThirdPassiveDevicesList(newList);
     }, [passiveDevicesList]);
+
+    useEffect(() => {
+        console.log('SSR firstBreakerObj => ', firstBreakerObj);
+    });
 
     return (
         <React.Fragment>
