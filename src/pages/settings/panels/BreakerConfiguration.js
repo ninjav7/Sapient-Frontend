@@ -274,7 +274,7 @@ const BreakerConfiguration = ({
     };
 
     const validateUnlabledChange = () => {
-        if (parentBreakerObj?.equipment_link.length === 0 || equipmentsList.length === 0) return;
+        if (equipmentsList.length === 0) return;
         const equipment = equipmentsList.find((record) => (record?.label).toLowerCase() === 'unlabeled');
         if (equipment?.value) openUnlabelAlertModal();
     };
@@ -1324,6 +1324,7 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         if (firstBreakerObj?.type === 'unlabeled')
                                                                             return;
+
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
