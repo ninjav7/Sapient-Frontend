@@ -120,4 +120,9 @@
         width: 1.3125rem;
         height: 1.3125rem;
     }
+
+    &-loader {
+        max-width: 1.125rem;
+        fill: $primary-gray-400;
+    }
 }
