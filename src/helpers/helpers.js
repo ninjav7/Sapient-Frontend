@@ -204,7 +204,7 @@ export const apiRequestBody = (start_date, end_date, time_zone) => {
     return {
         date_from: start_date,
         date_to: end_date,
-        tz_info: time_zone,
+        tz_info: time_zone ? time_zone : undefined,
     };
 };
 

@@ -6,7 +6,7 @@ import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../help
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
@@ -30,7 +30,7 @@ import './style.css';
 import EquipChartModal from '../chartModal/EquipChartModal';
 
 const BuildingOverview = () => {
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
     const [buildingListData] = useAtom(buildingData);
@@ -60,110 +60,6 @@ const BuildingOverview = () => {
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
-
-    const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
-    const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
-        chart: {
-            type: 'bar',
-            height: 350,
-            toolbar: {
-                show: true,
-            },
-            zoom: {
-                enabled: false,
-            },
-            animations: {
-                enabled: false,
-            },
-        },
-        stroke: {
-            width: 0.2,
-            show: true,
-            curve: 'straight',
-        },
-        dataLabels: {
-            enabled: true,
-            enabledOnSeries: [1],
-        },
-        animations: {
-            enabled: false,
-        },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                const timestamp = seriesX[seriesIndex][dataPointIndex];
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                            series[seriesIndex][dataPointIndex],
-                            4
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        },
-        xaxis: {
-            labels: {
-                formatter: function (val) {
-                    return moment(val).tz(timeZone).format('MM/DD HH:00');
-                },
-                hideOverlappingLabels: Boolean,
-                rotate: 0,
-                trim: false,
-            },
-            tickAmount: 12,
-            axisTicks: {
-                show: true,
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 2,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = Math.round(val);
-                    return `${print}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
 
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
 
@@ -202,8 +98,24 @@ const BuildingOverview = () => {
             pathname: `${path}/${bldgId}`,
         });
     };
+
+    const handleClick = (row) => {
+        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
+        setEquipmentFilter({
+            equipment_id: arr[0]?.id,
+            equipment_name: arr[0]?.label,
+        });
+        localStorage.setItem('exploreEquipName', arr[0]?.label);
+        handleChartOpen();
+    };
+
     const builidingEquipmentsData = async () => {
-        let payload = apiRequestBody(startDate, endDate, timeZone);
+        let time_zone = 'US/Eastern';
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            time_zone = bldgObj?.timezone;
+        }
+        const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
                 let response = res.data[0].top_contributors;
@@ -228,16 +140,43 @@ const BuildingOverview = () => {
             .catch((error) => {});
     };
 
+    const pageDefaultState = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Building Overview',
+                    path: '/energy/building/overview',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
+    };
+
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
+        if (startDate === null || endDate === null) return;
+
+        let time_zone = 'US/Eastern';
+
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
         }
 
         const buildingOverallData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchOverallBldgData(bldgId, payload)
                 .then((res) => {
                     setOverallBldgData(res.data);
@@ -247,25 +186,19 @@ const BuildingOverview = () => {
 
         const buildingEndUserData = async () => {
             const params = `?building_id=${bldgId}&off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
                     response.sort((a, b) => b?.energy_consumption.now - a?.energy_consumption.now);
                     setEnergyConsumption(response);
-                    let newDonutData = [];
-                    response.forEach((record) => {
-                        let fixedConsumption = Math.round(record?.energy_consumption.now);
-                        newDonutData.push(fixedConsumption);
-                    });
-                    setDonutChartData(newDonutData);
                 })
                 .catch((error) => {});
         };
 
         const buildingHourlyData = async () => {
             setIsAvgConsumptionDataLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -375,7 +308,7 @@ const BuildingOverview = () => {
 
         const buildingConsumptionChart = async () => {
             setIsEnergyConsumptionDataLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            let payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEnergyConsumption(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -407,45 +340,15 @@ const BuildingOverview = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Building Overview',
-                        path: '/energy/building/overview',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
-        setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
-    }, [startEndDayCount]);
-
-    const handleClick = (row) => {
-        let arr = topEnergyConsumptionData.filter((item) => item.label === row);
-        setEquipmentFilter({
-            equipment_id: arr[0]?.id,
-            equipment_name: arr[0]?.label,
-        });
-        localStorage.setItem('exploreEquipName', arr[0]?.label);
-        handleChartOpen();
-    };
-
-    useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
+
+    useEffect(() => {
+        pageDefaultState();
+    }, []);
 
     return (
         <React.Fragment>

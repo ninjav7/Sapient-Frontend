@@ -11,9 +11,10 @@ import { apiRequestBody } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import './style.css';
 import Brick from '../../sharedComponents/brick';
+import { useParams } from 'react-router-dom';
 
 const TimeOfDay = () => {
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);

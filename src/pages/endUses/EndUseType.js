@@ -21,8 +21,8 @@ import { fetchTrendType } from './utils';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
+    const { bldgId } = useParams();
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
