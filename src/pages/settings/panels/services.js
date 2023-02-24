@@ -85,8 +85,8 @@ export function updateBreakersLink(params, payload) {
     return axiosInstance.post(`${updateLinkBreakers}${params}`, payload).then((res) => res);
 }
 
-export function updateBreakersTypeLink(payload) {
-    return axiosInstance.patch(`${updateBreakerTypes}`, payload).then((res) => res);
+export function updateBreakersTypeLink(payload, params) {
+    return axiosInstance.patch(`${updateBreakerTypes}${params}`, payload).then((res) => res);
 }
 
 export function fetchPanelsFilter(args) {

@@ -113,6 +113,7 @@ const BreakerConfiguration = ({
     const [isDeleting, setIsDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [forceUpdate, setForceUpdate] = useState(false);
+    const [existingEquipId, setExistingEquipId] = useState('');
 
     const defaultEquipmentObj = {
         name: '',
@@ -225,6 +226,7 @@ const BreakerConfiguration = ({
         setForceUpdate(false);
         setEquipmentObj(defaultEquipmentObj);
         setEquipmentErrors(defaultErrors);
+        setExistingEquipId('');
     };
 
     const handleChange = (key, value) => {
@@ -276,7 +278,10 @@ const BreakerConfiguration = ({
     const validateUnlabledChange = () => {
         if (equipmentsList.length === 0) return;
         const equipment = equipmentsList.find((record) => (record?.label).toLowerCase() === 'unlabeled');
-        if (equipment?.value) openUnlabelAlertModal();
+        if (equipment?.value) {
+            setExistingEquipId(equipment?.value);
+            openUnlabelAlertModal();
+        }
     };
 
     const handleBreakerTypeChange = (key, defaultBreakerType, newBreakerType) => {
@@ -586,7 +591,7 @@ const BreakerConfiguration = ({
 
         breakerTypeObj.breaker_id = breakerTypeUpdateList;
 
-        console.log('SSRai breakerTypeObj => ', breakerTypeObj);
+        console.log('SSRai breakerTypeObj 1 => ', breakerTypeObj);
 
         const promisesList = [];
 
@@ -596,10 +601,16 @@ const BreakerConfiguration = ({
         }
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === '') {
-            const promiseTwo = updateBreakersTypeLink(breakerTypeObj);
+            let params = '';
+            if (forceUpdate) {
+                params = `?force_save=true`;
+                if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
+            }
+            const promiseTwo = updateBreakersTypeLink(breakerTypeObj, params);
             promisesList.push(promiseTwo);
         }
 
+        console.log('SSRai breakerTypeObj 2 => ', breakerTypeObj);
         console.log('SSRai promisesList => ', promisesList);
 
         Promise.all(promisesList)
