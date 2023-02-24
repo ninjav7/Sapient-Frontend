@@ -140,6 +140,11 @@ const BreakerConfiguration = ({
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
+
+        if (key === 'name' || key === 'quantity') setEquipmentErrors({ ...equipmentErrors, [key]: null });
+        if (key === 'end_use' || key === 'equipment_type')
+            setEquipmentErrors({ ...equipmentErrors, [key]: { text: null } });
+
         if (key === 'equipment_type') {
             let equipTypeObj = equipmentTypeData.find((el) => el.value === value);
             obj['end_use'] = equipTypeObj?.end_use_id;
