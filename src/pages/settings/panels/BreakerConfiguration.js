@@ -143,8 +143,7 @@ const BreakerConfiguration = ({
         let obj = Object.assign({}, equipmentObj);
 
         if (key === 'name' || key === 'quantity') setEquipmentErrors({ ...equipmentErrors, [key]: null });
-        if (key === 'end_use' || key === 'equipment_type')
-            setEquipmentErrors({ ...equipmentErrors, [key]: { text: null } });
+        if (key === 'end_use' || key === 'equipment_type') setEquipmentErrors({ ...equipmentErrors, [key]: null });
 
         if (key === 'equipment_type') {
             let equipTypeObj = equipmentTypeData.find((el) => el.value === value);
@@ -1275,7 +1274,6 @@ const BreakerConfiguration = ({
                                             tabClassName="p-2"
                                             activeKey={activeEquipTab}
                                             onSelect={(e) => {
-                                                if (e === 'equip') setEquipmentObj(defaultEquipmentObj);
                                                 setActiveEquipTab(e);
                                             }}>
                                             <Tabs.Item eventKey="equip" title="Equipment">
