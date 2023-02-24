@@ -1319,7 +1319,7 @@ const EditPanel = () => {
                     id: 'breaker_number',
                     status: 'status',
                     deviceId: 'device_name',
-                    sensorId: 'sensor_id',
+                    sensorId: 'sensor_name',
                     ratedAmps: 'rated_amps',
                     ratedVolts: 'voltage',
                     equipmentName: 'equipment_name',
