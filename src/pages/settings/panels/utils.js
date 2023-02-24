@@ -1,11 +1,3 @@
-export const breakerLinkingAlerts = (numberOne, numberTwo) => {
-    alert(`Breaker ${numberOne} & Breaker ${numberTwo} cannot be linked!`);
-};
-
-export const unableLinkingAlerts = () => {
-    alert(`Breaker cannot be linked due to different Device/Equipment configuration!`);
-};
-
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
     if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {

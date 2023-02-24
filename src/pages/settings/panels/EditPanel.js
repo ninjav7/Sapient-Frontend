@@ -27,12 +27,10 @@ import Brick from '../../../sharedComponents/brick';
 import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
 import {
-    breakerLinkingAlerts,
     compareSensorsCount,
     getEquipmentForBreaker,
     getPhaseConfigValue,
     getVoltageConfigValue,
-    unableLinkingAlerts,
     validateConfiguredEquip,
     validateDevicesForBreaker,
 } from './utils';
@@ -49,6 +47,7 @@ import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import './styles.scss';
+import UngroupAlert from './UngroupAlert';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -75,6 +74,12 @@ const EditPanel = () => {
     const [showDeletePanelAlert, setShowDeletePanelAlert] = useState(false);
     const handleDeletePanelAlertClose = () => setShowDeletePanelAlert(false);
     const handleDeletePanelAlertShow = () => setShowDeletePanelAlert(true);
+
+    // Ungroup Alert Modal
+    const [alertMessage, setAlertMessage] = useState('');
+    const [showUngroupAlert, setUngroupAlert] = useState(false);
+    const handleUngroupAlertClose = () => setUngroupAlert(false);
+    const handleUngroupAlertOpen = () => setUngroupAlert(true);
 
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -289,7 +294,10 @@ const EditPanel = () => {
     const linkBreakers = (sourceBreakerObj, targetBreakerObj) => {
         // --- breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3 ---
         if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
-            breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+            setAlertMessage(
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+            );
+            handleUngroupAlertOpen();
             return;
         }
 
@@ -299,7 +307,10 @@ const EditPanel = () => {
                 const breakerCountToAdd = panelType === 'distribution' ? 2 : 1;
                 // Setup Triple Breaker
                 if (targetBreakerObj?.breaker_number + breakerCountToAdd > breakersList.length) {
-                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    setAlertMessage(
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                    );
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -308,17 +319,26 @@ const EditPanel = () => {
                 );
 
                 if (sourceBreakerObj?.breaker_type === 3) {
-                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    setAlertMessage(
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                    );
+                    handleUngroupAlertOpen();
                     return;
                 }
 
                 if (targetBreakerObj?.breaker_type === 3) {
-                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    setAlertMessage(
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                    );
+                    handleUngroupAlertOpen();
                     return;
                 }
 
                 if (thirdBreakerObj?.breaker_type === 3) {
-                    breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                    setAlertMessage(
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                    );
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -329,7 +349,8 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    unableLinkingAlerts();
+                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -350,7 +371,8 @@ const EditPanel = () => {
                     if (configuredEquip.length === 1) {
                         equipmentID = configuredEquip[0];
                     } else {
-                        unableLinkingAlerts();
+                        setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                        handleUngroupAlertOpen();
                         return;
                     }
                 }
@@ -399,7 +421,8 @@ const EditPanel = () => {
             ]);
 
             if (!isLinkable) {
-                unableLinkingAlerts();
+                setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                handleUngroupAlertOpen();
                 return;
             }
 
@@ -411,7 +434,8 @@ const EditPanel = () => {
             const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
             if (isEquipDiff) {
-                unableLinkingAlerts();
+                setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                handleUngroupAlertOpen();
                 return;
             }
 
@@ -445,14 +469,20 @@ const EditPanel = () => {
 
         // breakerLink= 2:2
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
-            breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+            setAlertMessage(
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+            );
+            handleUngroupAlertOpen();
             return;
         }
 
         // breakerLink= 1:2 && breakerLink= 2:1
         if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
             if (panelObj?.voltage === '120/240') {
-                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                setAlertMessage(
+                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                );
+                handleUngroupAlertOpen();
                 return;
             }
 
@@ -467,7 +497,8 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    unableLinkingAlerts();
+                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -479,7 +510,8 @@ const EditPanel = () => {
                 const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    unableLinkingAlerts();
+                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -534,7 +566,8 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    unableLinkingAlerts();
+                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -546,7 +579,8 @@ const EditPanel = () => {
                 const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    unableLinkingAlerts();
+                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
@@ -815,7 +849,10 @@ const EditPanel = () => {
                     sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker
                 )
             ) {
-                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                setAlertMessage(
+                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                );
+                handleUngroupAlertOpen();
                 return;
             }
             unlinkBreakers(sourceBreakerObj, targetBreakerObj);
@@ -829,7 +866,10 @@ const EditPanel = () => {
         // linked - not linked && not-linked - linked
         if (!sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
             if (targetBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
-                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                setAlertMessage(
+                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                );
+                handleUngroupAlertOpen();
                 return;
             }
             linkBreakers(sourceBreakerObj, targetBreakerObj);
@@ -837,7 +877,10 @@ const EditPanel = () => {
 
         if (sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
             if (sourceBreakerObj?.breaker_type !== 2 || panelObj?.voltage === '120/240') {
-                breakerLinkingAlerts(sourceBreakerObj?.breaker_number, targetBreakerObj?.breaker_number);
+                setAlertMessage(
+                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                );
+                handleUngroupAlertOpen();
                 return;
             }
             linkBreakers(sourceBreakerObj, targetBreakerObj);
@@ -1321,6 +1364,13 @@ const EditPanel = () => {
                 handleDeletePanelAlertShow={handleDeletePanelAlertShow}
                 handleDeletePanelAlertClose={handleDeletePanelAlertClose}
                 deletePanel={deletePanel}
+            />
+
+            <UngroupAlert
+                showUngroupAlert={showUngroupAlert}
+                handleUngroupAlertClose={handleUngroupAlertClose}
+                alertMessage={alertMessage}
+                setAlertMessage={setAlertMessage}
             />
         </React.Fragment>
     );

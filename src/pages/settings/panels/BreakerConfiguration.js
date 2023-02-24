@@ -38,8 +38,8 @@ import { useNotification } from '../../../sharedComponents/notification/useNotif
 import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
-import './breaker-config-styles.scss';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
+import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
