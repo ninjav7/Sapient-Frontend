@@ -292,6 +292,23 @@ const EditPanel = () => {
     };
 
     const linkBreakers = (sourceBreakerObj, targetBreakerObj) => {
+        // Different Breaker Types cannot be linked -- restricted till all the conditions are shared
+        if (!(sourceBreakerObj?.type === '' && targetBreakerObj?.type === '')) {
+            setAlertMessage(
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked due to different Breaker Type!`
+            );
+            handleUngroupAlertOpen();
+            return;
+        }
+
+        if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
+            setAlertMessage(
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+            );
+            handleUngroupAlertOpen();
+            return;
+        }
+
         // --- breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3 ---
         if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
             setAlertMessage(
