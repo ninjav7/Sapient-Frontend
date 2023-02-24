@@ -1175,6 +1175,11 @@ const BreakerConfiguration = ({
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
                                                     onClick={() => {
+                                                        if (
+                                                            parentBreakerObj?.type === 'blank' ||
+                                                            parentBreakerObj?.type === 'unwired'
+                                                        )
+                                                            return;
                                                         closeBreakerConfigModal();
                                                         handleUnlinkAlertShow();
                                                     }}
@@ -1451,16 +1456,21 @@ const BreakerConfiguration = ({
                                                         />
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
-                                                    <div className="d-flex justify-content-end">
-                                                        <Button
-                                                            label={isAdding ? 'Adding...' : 'Add Equipment'}
-                                                            size={Button.Sizes.md}
-                                                            type={Button.Type.secondary}
-                                                            disabled={isAdding}
-                                                            icon={<PlusSVG />}
-                                                            onClick={addEquipment}
-                                                        />
-                                                    </div>
+                                                    {!(
+                                                        firstBreakerObj?.type === 'blank' ||
+                                                        firstBreakerObj?.type === 'unwired'
+                                                    ) && (
+                                                        <div className="d-flex justify-content-end">
+                                                            <Button
+                                                                label={isAdding ? 'Adding...' : 'Add Equipment'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondary}
+                                                                disabled={isAdding}
+                                                                icon={<PlusSVG />}
+                                                                onClick={addEquipment}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </Tabs.Item>
                                         </Tabs>
