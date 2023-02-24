@@ -567,8 +567,6 @@ const BreakerConfiguration = ({
         if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
-        console.log('SSRai breakersList => ', breakersList);
-
         let breakerTypeUpdateList = [];
 
         if (firstBreakerObj?.type !== parentBreakerObj?.type) {
@@ -590,8 +588,6 @@ const BreakerConfiguration = ({
 
         breakerTypeObj.breaker_id = breakerTypeUpdateList;
 
-        console.log('SSRai breakerTypeObj 1 => ', breakerTypeObj);
-
         const promisesList = [];
 
         if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired')) {
@@ -608,9 +604,6 @@ const BreakerConfiguration = ({
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj, params);
             promisesList.push(promiseTwo);
         }
-
-        console.log('SSRai breakerTypeObj 2 => ', breakerTypeObj);
-        console.log('SSRai promisesList => ', promisesList);
 
         Promise.all(promisesList)
             .then((res) => {
