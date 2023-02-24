@@ -560,7 +560,7 @@ const BreakerConfiguration = ({
         if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
 
-        // console.log('SSR breakersList => ', breakersList);
+        console.log('SSRai breakersList => ', breakersList);
 
         let breakerTypeUpdateList = [];
 
@@ -583,10 +583,11 @@ const BreakerConfiguration = ({
 
         breakerTypeObj.breaker_id = breakerTypeUpdateList;
 
-        // console.log('SSR breakerTypeObj => ', breakerTypeObj);
+        console.log('SSRai breakerTypeObj => ', breakerTypeObj);
+
         const promisesList = [];
 
-        if (breakerTypeObj?.type !== 'blank' || breakerTypeObj?.type !== 'unwired') {
+        if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired')) {
             const promiseOne = updateBreakerDetails(params, breakersList);
             promisesList.push(promiseOne);
         }
@@ -595,6 +596,8 @@ const BreakerConfiguration = ({
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj);
             promisesList.push(promiseTwo);
         }
+
+        console.log('SSRai promisesList => ', promisesList);
 
         Promise.all(promisesList)
             .then((res) => {
@@ -720,7 +723,7 @@ const BreakerConfiguration = ({
         if (!selectedBreakerObj?.id) return;
 
         const breakerObj = Object.assign({}, selectedBreakerObj);
-        if (breakerObj?.rated_amps === undefined) breakerObj.rated_amps = '0';
+        if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
 
         setFirstBreakerObj(breakerObj);
         setParentBreakerObj(breakerObj); // Added to track for any configuration change
@@ -949,8 +952,18 @@ const BreakerConfiguration = ({
                                                         id="exampleSelect"
                                                         placeholder="Select Device ID Name"
                                                         name="select"
-                                                        isSearchable={true}
-                                                        options={passiveDevicesListOne}
+                                                        isSearchable={
+                                                            firstBreakerObj?.type === 'unwired' ||
+                                                            firstBreakerObj?.type === 'blank'
+                                                                ? false
+                                                                : true
+                                                        }
+                                                        options={
+                                                            firstBreakerObj?.type === 'unwired' ||
+                                                            firstBreakerObj?.type === 'blank'
+                                                                ? []
+                                                                : passiveDevicesListOne
+                                                        }
                                                         currentValue={passiveDevicesList.filter(
                                                             (option) => option.value === firstBreakerObj?.device_link
                                                         )}
@@ -978,7 +991,7 @@ const BreakerConfiguration = ({
                                                         id="exampleSelect"
                                                         placeholder="Select Sensor Number"
                                                         name="select"
-                                                        isSearchable={true}
+                                                        isSearchable={firstSensorList.length === 0 ? false : true}
                                                         options={firstSensorList}
                                                         currentValue={firstSensorList.filter(
                                                             (option) => option.value === firstBreakerObj?.sensor_link
@@ -1019,8 +1032,18 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Device ID Name"
                                                             name="select"
-                                                            isSearchable={true}
-                                                            options={passiveDevicesListTwo}
+                                                            isSearchable={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                                    ? false
+                                                                    : true
+                                                            }
+                                                            options={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                                    ? []
+                                                                    : passiveDevicesListTwo
+                                                            }
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.device_link
@@ -1057,7 +1080,7 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Sensor Number"
                                                             name="select"
-                                                            isSearchable={true}
+                                                            isSearchable={secondSensorList.length === 0 ? false : true}
                                                             options={secondSensorList}
                                                             currentValue={secondSensorList.filter(
                                                                 (option) =>
@@ -1106,8 +1129,18 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Device ID Name"
                                                             name="select"
-                                                            isSearchable={true}
-                                                            options={passiveDevicesListThree}
+                                                            isSearchable={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                                    ? false
+                                                                    : true
+                                                            }
+                                                            options={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                                    ? []
+                                                                    : passiveDevicesListThree
+                                                            }
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.device_link
@@ -1144,7 +1177,7 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Sensor Number"
                                                             name="select"
-                                                            isSearchable={true}
+                                                            isSearchable={thirdSensorList.length === 0 ? false : true}
                                                             options={thirdSensorList}
                                                             currentValue={thirdSensorList.filter(
                                                                 (option) =>
@@ -1260,8 +1293,14 @@ const BreakerConfiguration = ({
                                                                         id="exampleSelect"
                                                                         placeholder="Select Equipment"
                                                                         name="select"
-                                                                        isSearchable={true}
-                                                                        options={equipmentsList}
+                                                                        isSearchable={
+                                                                            firstBreakerObj?.type === '' ? true : false
+                                                                        }
+                                                                        options={
+                                                                            firstBreakerObj?.type === ''
+                                                                                ? equipmentsList
+                                                                                : []
+                                                                        }
                                                                         currentValue={equipmentsList.filter(
                                                                             (option) =>
                                                                                 option.value === selectedEquipment
