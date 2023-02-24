@@ -220,8 +220,11 @@ const BreakerConfiguration = ({
         setSecondSensorList([]);
         setThirdSensorList([]);
         setActiveTab('edit-breaker');
+        setActiveEquipTab('equip');
         setSelectedBreakerObj({});
         setForceUpdate(false);
+        setEquipmentObj(defaultEquipmentObj);
+        setEquipmentErrors(defaultErrors);
     };
 
     const handleChange = (key, value) => {
@@ -592,7 +595,7 @@ const BreakerConfiguration = ({
             promisesList.push(promiseOne);
         }
 
-        if (breakerTypeObj?.notes || breakerTypeObj?.type) {
+        if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === '') {
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj);
             promisesList.push(promiseTwo);
         }
@@ -805,10 +808,6 @@ const BreakerConfiguration = ({
         setThirdPassiveDevicesList(newList);
     }, [passiveDevicesList]);
 
-    useEffect(() => {
-        console.log('SSR firstBreakerObj => ', firstBreakerObj);
-    });
-
     return (
         <React.Fragment>
             <Modal
@@ -818,7 +817,8 @@ const BreakerConfiguration = ({
                 centered
                 backdrop="static"
                 keyboard={false}
-                style={{ opacity: showUnlabeledAlert ? '0.5' : '1' }}>
+                // style={{ opacity: showUnlabeledAlert ? '0.5' : '1' }}
+            >
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"
