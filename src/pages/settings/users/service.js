@@ -33,6 +33,6 @@ export function updateSingleUserDetails(payload, params) {
     return axiosInstance.patch(`${updateSingleUserDetail}${params}`, payload).then((res) => res);
 }
 
-export function updateUserRolePermission(payload) {
-    return axiosInstance.patch(`${updateUserRole}`, payload).then((res) => res);
+export function updateUserRolePermission(payload, params) {
+    return axiosInstance.patch(`${updateUserRole}${params === '' ? '' : params}`, payload).then((res) => res);
 }

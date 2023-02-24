@@ -225,30 +225,41 @@ const UserProfile = () => {
             });
     };
 
-    const updateUserRoles = async () => {
-        setRoleUpdating(true);
+    const updateUserRoles = async (user, check) => {
+        if (!check) setRoleUpdating(true);
         const userRoleObj = {
             user: userId,
-            permission_role: userRole?.permission_id,
+            permission_role: user?.permission_id,
         };
-        await updateUserRolePermission(userRoleObj)
+        let params = '';
+        if (check) {
+            params = `?change_check=true`;
+        }
+        await updateUserRolePermission(userRoleObj, params)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = 'User details updated successfully.';
-                        s.notificationType = 'success';
-                    });
+                    if (!check) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'User details updated successfully.';
+                            s.notificationType = 'success';
+                        });
+                    }
+                    setError(false);
+                    setMessage('');
                 } else {
+                    setRoleChanged(true);
                     setError(true);
                     setMessage(response.message);
                 }
-                setRoleUpdating(false);
-                getUserDetails();
+                if (!check) {
+                    setRoleUpdating(false);
+                    getUserDetails();
+                }
             })
             .catch((error) => {
-                setRoleUpdating(false);
+                if (!check) setRoleUpdating(false);
             });
     };
 
@@ -261,6 +272,7 @@ const UserProfile = () => {
     const handleRoleChange = (key, value) => {
         let obj = Object.assign({}, userRole);
         obj[key] = value;
+        updateUserRoles(obj, true);
         setUserRole(obj);
     };
 
@@ -369,7 +381,7 @@ const UserProfile = () => {
 
     const handleSaveClick = () => {
         if (!isDataChanged) updateUserDetails();
-        if (!isRoleChanged) updateUserRoles();
+        if (!isRoleChanged) updateUserRoles(userRole, false);
     };
 
     return (
