@@ -158,8 +158,17 @@ const EditPanel = () => {
             return Breaker.Type.notConfigured;
         }
 
-        // If Breaker Type is Unwired, Unlabeled or Blank it is considered as Fully Configured
-        if (obj?.type !== '') return Breaker.Type.configured;
+        // For Breaker Type is Blank it is considered as Fully Configured
+        if (obj?.type === 'blank') return Breaker.Type.configured;
+
+        // If Breaker Type is Unwired
+        if (obj?.type === 'unwired') {
+            if (obj?.rated_amps > 0) {
+                return Breaker.Type.configured;
+            } else {
+                return Breaker.Type.partiallyConfigured;
+            }
+        }
 
         // Below condition is for Single Lvl Breaker
         if (obj?.breaker_type === 1) {
