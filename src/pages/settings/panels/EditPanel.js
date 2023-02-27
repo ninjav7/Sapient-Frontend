@@ -95,6 +95,7 @@ const EditPanel = () => {
     const [isBreakerLinking, setBreakerLinking] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
+    const [selectedBreakerLinkObj, setSelectedBreakerLink] = useState({});
     const [selectedBreakerObj, setSelectedBreakerObj] = useState({});
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
@@ -260,37 +261,37 @@ const EditPanel = () => {
             });
     };
 
-    const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo, setIsLoading) => {
+    const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo) => {
         const params = `?building_id=${bldgId}`;
         const payload = [breakerObjOne, breakerObjTwo];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
+                setBreakerAPITrigerred(true);
                 setBreakerLinking(false);
+                setSelectedBreakerLink({});
             })
             .catch(() => {
                 setBreakerLinking(false);
-                setIsLoading(false);
+                setSelectedBreakerLink({});
             });
     };
 
-    const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading) => {
+    const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree) => {
         const params = `?building_id=${bldgId}`;
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
+                setBreakerAPITrigerred(true);
                 setBreakerLinking(false);
+                setSelectedBreakerLink({});
             })
             .catch(() => {
                 setBreakerLinking(false);
-                setIsLoading(false);
+                setSelectedBreakerLink({});
             });
     };
 
-    const linkBreakers = (sourceBreakerObj, targetBreakerObj, setIsLoading) => {
+    const linkBreakers = (sourceBreakerObj, targetBreakerObj) => {
         // Different Breaker Types cannot be linked -- restricted till all the conditions are shared
         if (!(sourceBreakerObj?.type === '' && targetBreakerObj?.type === '')) {
             setAlertMessage(
@@ -394,7 +395,6 @@ const EditPanel = () => {
                 }
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj?.id,
@@ -428,7 +428,7 @@ const EditPanel = () => {
                     equipment_id: equipmentID,
                     device_id: deviceID,
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
 
@@ -457,7 +457,6 @@ const EditPanel = () => {
             }
 
             setBreakerLinking(true);
-            setIsLoading(true);
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -482,7 +481,7 @@ const EditPanel = () => {
                 equipment_id: equipmentID,
                 device_id: deviceID,
             };
-            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo, setIsLoading);
+            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
         }
 
         // breakerLink= 2:2
@@ -534,7 +533,6 @@ const EditPanel = () => {
                 }
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 const equipmentID = getEquipmentForBreaker([parentBreakerObj, targetBreakerObj]);
 
@@ -570,7 +568,7 @@ const EditPanel = () => {
                     equipment_id: equipmentID,
                     device_id: deviceID,
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
 
@@ -604,7 +602,6 @@ const EditPanel = () => {
                 }
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -640,13 +637,13 @@ const EditPanel = () => {
                     equipment_id: equipmentID,
                     device_id: deviceID,
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
         }
     };
 
-    const unlinkBreakers = (sourceBreakerObj, targetBreakerObj, setIsLoading) => {
+    const unlinkBreakers = (sourceBreakerObj, targetBreakerObj) => {
         if (panelObj?.voltage === '600') {
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.parent_breaker === '') {
@@ -659,7 +656,6 @@ const EditPanel = () => {
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -690,7 +686,7 @@ const EditPanel = () => {
                     is_linked: false,
                     equipment_id: '',
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
             // Child Breaker in Triple Linking
@@ -704,7 +700,6 @@ const EditPanel = () => {
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -735,7 +730,7 @@ const EditPanel = () => {
                     is_linked: false,
                     equipment_id: '',
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
             }
             return;
         }
@@ -751,7 +746,6 @@ const EditPanel = () => {
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -782,7 +776,7 @@ const EditPanel = () => {
                     is_linked: true,
                     equipment_id: equipmentId,
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
             // Child Breaker in Triple Linking
@@ -796,7 +790,6 @@ const EditPanel = () => {
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
                 setBreakerLinking(true);
-                setIsLoading(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -827,14 +820,13 @@ const EditPanel = () => {
                     is_linked: false,
                     equipment_id: '',
                 };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
             }
         }
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
             let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
             setBreakerLinking(true);
-            setIsLoading(true);
 
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
@@ -854,12 +846,12 @@ const EditPanel = () => {
                 is_linked: false,
                 equipment_id: '',
             };
-            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo, setIsLoading);
+            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo);
             return;
         }
     };
 
-    const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading) => {
+    const handleBreakerLinkClicked = (breakerLinkObj) => {
         if (isBreakerLinking || isBreakersFetched) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
@@ -879,12 +871,12 @@ const EditPanel = () => {
                 handleUngroupAlertOpen();
                 return;
             }
-            unlinkBreakers(sourceBreakerObj, targetBreakerObj, setIsLoading);
+            unlinkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
         // not linked - not linked => user is trying to link 2 breakers
         if (!sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
-            linkBreakers(sourceBreakerObj, targetBreakerObj, setIsLoading);
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
         // linked - not linked && not-linked - linked
@@ -896,7 +888,7 @@ const EditPanel = () => {
                 handleUngroupAlertOpen();
                 return;
             }
-            linkBreakers(sourceBreakerObj, targetBreakerObj, setIsLoading);
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
         }
 
         if (sourceBreakerObj?.is_linked && !targetBreakerObj?.is_linked) {
@@ -907,7 +899,7 @@ const EditPanel = () => {
                 handleUngroupAlertOpen();
                 return;
             }
-            linkBreakers(sourceBreakerObj, targetBreakerObj, setIsLoading);
+            linkBreakers(sourceBreakerObj, targetBreakerObj);
         }
     };
 
@@ -979,7 +971,7 @@ const EditPanel = () => {
             });
     };
 
-    const fetchBreakersData = async (panel_id, bldg_id, setIsLoading) => {
+    const fetchBreakersData = async (panel_id, bldg_id) => {
         setBreakersFetching(true);
         const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
 
@@ -997,7 +989,6 @@ const EditPanel = () => {
                     s.breakersList = response;
                 });
 
-                if (setIsLoading) setIsLoading(false);
                 setBreakersFetching(false);
                 setBreakerAPITrigerred(false);
             })
@@ -1155,6 +1146,11 @@ const EditPanel = () => {
         fetchPassiveDeviceData(bldgId);
         fetchLocationData(bldgId);
     }, [panelId]);
+
+    useEffect(() => {
+        if (selectedBreakerLinkObj?.source && selectedBreakerLinkObj?.target)
+            handleBreakerLinkClicked(selectedBreakerLinkObj);
+    }, [selectedBreakerLinkObj]);
 
     useEffect(() => {
         pageDefaultStates();
@@ -1330,9 +1326,7 @@ const EditPanel = () => {
                     _id: 'id',
                     isLinked: 'is_linked',
                 }}
-                onBreakerLinkedClick={(props, setIsLoading) => {
-                    if (props?.source && props?.target) handleBreakerLinkClicked(props, setIsLoading);
-                }}
+                onBreakerLinkedClick={(props) => setSelectedBreakerLink(props)}
                 nodes={breakersList}
                 edges={breakerLinks}
                 isOneColumn={panelType === 'disconnect'}
