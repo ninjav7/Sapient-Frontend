@@ -939,6 +939,271 @@ const BreakerConfiguration = ({
 
                                 <div className="breaker-main-config">
                                     <div className="w-100">
+                                        <Tabs
+                                            type={Tabs.Types.subsection}
+                                            tabClassName="p-2"
+                                            activeKey={activeEquipTab}
+                                            onSelect={(e) => {
+                                                setActiveEquipTab(e);
+                                            }}>
+                                            <Tabs.Item eventKey="equip" title="Equipment">
+                                                <div className="p-default">
+                                                    <div>
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="mr-2">
+                                                                <Radio
+                                                                    name="radio-1"
+                                                                    checked={firstBreakerObj?.type === ''}
+                                                                    onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === '') return;
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            parentBreakerObj?.type,
+                                                                            ''
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <div className="w-100">
+                                                                {isEquipmentListFetching ? (
+                                                                    <Skeleton count={1} height={35} />
+                                                                ) : (
+                                                                    <Select
+                                                                        id="exampleSelect"
+                                                                        placeholder="Select Equipment"
+                                                                        name="select"
+                                                                        isSearchable={
+                                                                            firstBreakerObj?.type === '' ? true : false
+                                                                        }
+                                                                        options={
+                                                                            firstBreakerObj?.type === ''
+                                                                                ? equipmentsList
+                                                                                : []
+                                                                        }
+                                                                        currentValue={equipmentsList.filter(
+                                                                            (option) =>
+                                                                                option.value === selectedEquipment
+                                                                        )}
+                                                                        onChange={(e) => {
+                                                                            if (firstBreakerObj?.type !== '') return;
+                                                                            handleChange('equipment_link', e.value);
+                                                                            setSelectedEquipment(e.value);
+                                                                        }}
+                                                                        className="basic-single"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <Brick sizeInRem={0.65} />
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="mr-2">
+                                                                <Radio
+                                                                    name="radio-2"
+                                                                    checked={firstBreakerObj?.type === 'unlabeled'}
+                                                                    onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'unlabeled')
+                                                                            return;
+
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            parentBreakerObj?.type,
+                                                                            'unlabeled'
+                                                                        );
+                                                                        validateUnlabledChange();
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Unlabeled
+                                                            </Typography.Body>
+                                                        </div>
+                                                        <Brick sizeInRem={1} />
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="mr-2">
+                                                                <Radio
+                                                                    name="radio-3"
+                                                                    checked={firstBreakerObj?.type === 'unwired'}
+                                                                    onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'unwired') return;
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            parentBreakerObj?.type,
+                                                                            'unwired'
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Unwired Breaker
+                                                            </Typography.Body>
+                                                        </div>
+                                                        <Brick sizeInRem={1} />
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="mr-2">
+                                                                <Radio
+                                                                    name="radio-4"
+                                                                    checked={firstBreakerObj?.type === 'blank'}
+                                                                    onClick={(e) => {
+                                                                        if (firstBreakerObj?.type === 'blank') return;
+                                                                        handleBreakerTypeChange(
+                                                                            'type',
+                                                                            parentBreakerObj?.type,
+                                                                            'blank'
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Blank
+                                                            </Typography.Body>
+                                                        </div>
+                                                    </div>
+                                                    <Brick sizeInRem={2} />
+                                                    <div className="w-100">
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Notes
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Textarea
+                                                            type="textarea"
+                                                            rows="4"
+                                                            placeholder="Enter Notes here"
+                                                            value={firstBreakerObj?.notes || ''}
+                                                            onChange={(e) => {
+                                                                handleChange('notes', e.target.value);
+                                                            }}
+                                                            inputClassName="pt-2"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </Tabs.Item>
+
+                                            {/* Create Equipment  */}
+                                            <Tabs.Item eventKey="create-equip" title="Create Equipment">
+                                                <div className="p-default">
+                                                    <div className="d-flex justify-content-between">
+                                                        <div className="w-100 mr-4">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Name
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <InputTooltip
+                                                                placeholder="Enter Equipment Name"
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('name', e.target.value);
+                                                                }}
+                                                                value={equipmentObj?.name}
+                                                                labelSize={Typography.Sizes.md}
+                                                                error={equipmentErrors?.name}
+                                                            />
+                                                        </div>
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Quantity
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <InputTooltip
+                                                                type="number"
+                                                                placeholder="Enter Equipment Quantity"
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('quantity', e.target.value);
+                                                                }}
+                                                                value={equipmentObj?.quantity}
+                                                                labelSize={Typography.Sizes.md}
+                                                                error={equipmentErrors?.quantity}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <Brick sizeInRem={1.5} />
+                                                    <div className="d-flex justify-content-between">
+                                                        <div className="w-100 mr-4">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                Equipment Type
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <Select
+                                                                id="exampleSelect"
+                                                                placeholder="Select Equipment Type"
+                                                                name="select"
+                                                                isSearchable={true}
+                                                                currentValue={equipmentTypeData.filter(
+                                                                    (option) =>
+                                                                        option.value === equipmentObj?.equipment_type
+                                                                )}
+                                                                options={equipmentTypeData}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('equipment_type', e.value);
+                                                                }}
+                                                                className="basic-single"
+                                                                error={equipmentErrors?.equipment_type}
+                                                            />
+                                                        </div>
+
+                                                        <div className="w-100">
+                                                            <Typography.Body size={Typography.Sizes.md}>
+                                                                End Use Category
+                                                            </Typography.Body>
+                                                            <Brick sizeInRem={0.25} />
+                                                            <Select
+                                                                id="endUseSelect"
+                                                                placeholder="Select End Use"
+                                                                name="select"
+                                                                isSearchable={true}
+                                                                currentValue={endUseData.filter(
+                                                                    (option) => option.value === equipmentObj?.end_use
+                                                                )}
+                                                                options={endUseData}
+                                                                onChange={(e) => {
+                                                                    handleCreateEquipChange('end_use', e.value);
+                                                                }}
+                                                                className="basic-single"
+                                                                error={equipmentErrors?.end_use}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <Brick sizeInRem={1.5} />
+                                                    <div>
+                                                        <Typography.Body size={Typography.Sizes.md}>
+                                                            Equipment Location
+                                                        </Typography.Body>
+                                                        <Brick sizeInRem={0.25} />
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            placeholder="Select Equipment Location"
+                                                            name="select"
+                                                            isSearchable={true}
+                                                            currentValue={locationData.filter(
+                                                                (option) => option.value === equipmentObj?.space_id
+                                                            )}
+                                                            options={locationData}
+                                                            onChange={(e) => {
+                                                                handleCreateEquipChange('space_id', e.value);
+                                                            }}
+                                                            className="basic-single"
+                                                        />
+                                                    </div>
+                                                    <Brick sizeInRem={1.5} />
+                                                    {!(
+                                                        firstBreakerObj?.type === 'blank' ||
+                                                        firstBreakerObj?.type === 'unwired'
+                                                    ) && (
+                                                        <div className="d-flex justify-content-end">
+                                                            <Button
+                                                                label={isAdding ? 'Adding...' : 'Add Equipment'}
+                                                                size={Button.Sizes.md}
+                                                                type={Button.Type.secondary}
+                                                                disabled={isAdding}
+                                                                icon={<PlusSVG />}
+                                                                onClick={addEquipment}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Tabs.Item>
+                                        </Tabs>
+                                    </div>
+
+                                    <div className="w-100">
                                         {/* Breaker 1 */}
                                         <div>
                                             <Typography.Subheader size={Typography.Sizes.md}>
@@ -1260,270 +1525,6 @@ const BreakerConfiguration = ({
                                                 </Typography.Body>
                                             </div>
                                         )}
-                                    </div>
-                                    <div className="w-100">
-                                        <Tabs
-                                            type={Tabs.Types.subsection}
-                                            tabClassName="p-2"
-                                            activeKey={activeEquipTab}
-                                            onSelect={(e) => {
-                                                setActiveEquipTab(e);
-                                            }}>
-                                            <Tabs.Item eventKey="equip" title="Equipment">
-                                                <div className="p-default">
-                                                    <div>
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
-                                                                <Radio
-                                                                    name="radio-1"
-                                                                    checked={firstBreakerObj?.type === ''}
-                                                                    onClick={(e) => {
-                                                                        if (firstBreakerObj?.type === '') return;
-                                                                        handleBreakerTypeChange(
-                                                                            'type',
-                                                                            parentBreakerObj?.type,
-                                                                            ''
-                                                                        );
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <div className="w-100">
-                                                                {isEquipmentListFetching ? (
-                                                                    <Skeleton count={1} height={35} />
-                                                                ) : (
-                                                                    <Select
-                                                                        id="exampleSelect"
-                                                                        placeholder="Select Equipment"
-                                                                        name="select"
-                                                                        isSearchable={
-                                                                            firstBreakerObj?.type === '' ? true : false
-                                                                        }
-                                                                        options={
-                                                                            firstBreakerObj?.type === ''
-                                                                                ? equipmentsList
-                                                                                : []
-                                                                        }
-                                                                        currentValue={equipmentsList.filter(
-                                                                            (option) =>
-                                                                                option.value === selectedEquipment
-                                                                        )}
-                                                                        onChange={(e) => {
-                                                                            if (firstBreakerObj?.type !== '') return;
-                                                                            handleChange('equipment_link', e.value);
-                                                                            setSelectedEquipment(e.value);
-                                                                        }}
-                                                                        className="basic-single"
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <Brick sizeInRem={0.65} />
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
-                                                                <Radio
-                                                                    name="radio-2"
-                                                                    checked={firstBreakerObj?.type === 'unlabeled'}
-                                                                    onClick={(e) => {
-                                                                        if (firstBreakerObj?.type === 'unlabeled')
-                                                                            return;
-
-                                                                        handleBreakerTypeChange(
-                                                                            'type',
-                                                                            parentBreakerObj?.type,
-                                                                            'unlabeled'
-                                                                        );
-                                                                        validateUnlabledChange();
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Unlabeled
-                                                            </Typography.Body>
-                                                        </div>
-                                                        <Brick sizeInRem={1} />
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
-                                                                <Radio
-                                                                    name="radio-3"
-                                                                    checked={firstBreakerObj?.type === 'unwired'}
-                                                                    onClick={(e) => {
-                                                                        if (firstBreakerObj?.type === 'unwired') return;
-                                                                        handleBreakerTypeChange(
-                                                                            'type',
-                                                                            parentBreakerObj?.type,
-                                                                            'unwired'
-                                                                        );
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Unwired Breaker
-                                                            </Typography.Body>
-                                                        </div>
-                                                        <Brick sizeInRem={1} />
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
-                                                                <Radio
-                                                                    name="radio-4"
-                                                                    checked={firstBreakerObj?.type === 'blank'}
-                                                                    onClick={(e) => {
-                                                                        if (firstBreakerObj?.type === 'blank') return;
-                                                                        handleBreakerTypeChange(
-                                                                            'type',
-                                                                            parentBreakerObj?.type,
-                                                                            'blank'
-                                                                        );
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Blank
-                                                            </Typography.Body>
-                                                        </div>
-                                                    </div>
-                                                    <Brick sizeInRem={2} />
-                                                    <div className="w-100">
-                                                        <Typography.Body size={Typography.Sizes.md}>
-                                                            Notes
-                                                        </Typography.Body>
-                                                        <Brick sizeInRem={0.25} />
-                                                        <Textarea
-                                                            type="textarea"
-                                                            rows="4"
-                                                            placeholder="Enter Notes here"
-                                                            value={firstBreakerObj?.notes || ''}
-                                                            onChange={(e) => {
-                                                                handleChange('notes', e.target.value);
-                                                            }}
-                                                            inputClassName="pt-2"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </Tabs.Item>
-
-                                            {/* Create Equipment  */}
-                                            <Tabs.Item eventKey="create-equip" title="Create Equipment">
-                                                <div className="p-default">
-                                                    <div className="d-flex justify-content-between">
-                                                        <div className="w-100 mr-4">
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Name
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <InputTooltip
-                                                                placeholder="Enter Equipment Name"
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('name', e.target.value);
-                                                                }}
-                                                                value={equipmentObj?.name}
-                                                                labelSize={Typography.Sizes.md}
-                                                                error={equipmentErrors?.name}
-                                                            />
-                                                        </div>
-                                                        <div className="w-100">
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Quantity
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <InputTooltip
-                                                                type="number"
-                                                                placeholder="Enter Equipment Quantity"
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('quantity', e.target.value);
-                                                                }}
-                                                                value={equipmentObj?.quantity}
-                                                                labelSize={Typography.Sizes.md}
-                                                                error={equipmentErrors?.quantity}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <Brick sizeInRem={1.5} />
-                                                    <div className="d-flex justify-content-between">
-                                                        <div className="w-100 mr-4">
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                Equipment Type
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <Select
-                                                                id="exampleSelect"
-                                                                placeholder="Select Equipment Type"
-                                                                name="select"
-                                                                isSearchable={true}
-                                                                currentValue={equipmentTypeData.filter(
-                                                                    (option) =>
-                                                                        option.value === equipmentObj?.equipment_type
-                                                                )}
-                                                                options={equipmentTypeData}
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('equipment_type', e.value);
-                                                                }}
-                                                                className="basic-single"
-                                                                error={equipmentErrors?.equipment_type}
-                                                            />
-                                                        </div>
-
-                                                        <div className="w-100">
-                                                            <Typography.Body size={Typography.Sizes.md}>
-                                                                End Use Category
-                                                            </Typography.Body>
-                                                            <Brick sizeInRem={0.25} />
-                                                            <Select
-                                                                id="endUseSelect"
-                                                                placeholder="Select End Use"
-                                                                name="select"
-                                                                isSearchable={true}
-                                                                currentValue={endUseData.filter(
-                                                                    (option) => option.value === equipmentObj?.end_use
-                                                                )}
-                                                                options={endUseData}
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('end_use', e.value);
-                                                                }}
-                                                                className="basic-single"
-                                                                error={equipmentErrors?.end_use}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <Brick sizeInRem={1.5} />
-                                                    <div>
-                                                        <Typography.Body size={Typography.Sizes.md}>
-                                                            Equipment Location
-                                                        </Typography.Body>
-                                                        <Brick sizeInRem={0.25} />
-                                                        <Select
-                                                            id="exampleSelect"
-                                                            placeholder="Select Equipment Location"
-                                                            name="select"
-                                                            isSearchable={true}
-                                                            currentValue={locationData.filter(
-                                                                (option) => option.value === equipmentObj?.space_id
-                                                            )}
-                                                            options={locationData}
-                                                            onChange={(e) => {
-                                                                handleCreateEquipChange('space_id', e.value);
-                                                            }}
-                                                            className="basic-single"
-                                                        />
-                                                    </div>
-                                                    <Brick sizeInRem={1.5} />
-                                                    {!(
-                                                        firstBreakerObj?.type === 'blank' ||
-                                                        firstBreakerObj?.type === 'unwired'
-                                                    ) && (
-                                                        <div className="d-flex justify-content-end">
-                                                            <Button
-                                                                label={isAdding ? 'Adding...' : 'Add Equipment'}
-                                                                size={Button.Sizes.md}
-                                                                type={Button.Type.secondary}
-                                                                disabled={isAdding}
-                                                                icon={<PlusSVG />}
-                                                                onClick={addEquipment}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </Tabs.Item>
-                                        </Tabs>
                                     </div>
                                 </div>
                             </>

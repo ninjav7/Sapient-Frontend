@@ -158,54 +158,125 @@ const EditPanel = () => {
             return Breaker.Type.notConfigured;
         }
 
-        // If Breaker Type is Unwired, Unlabeled or Blank it is considered as Fully Configured
-        if (obj?.type !== '') return Breaker.Type.configured;
+        // For Breaker Type is Blank it is considered as Fully Configured
+        if (obj?.type === 'blank') return Breaker.Type.configured;
 
-        // Below condition is for Single Lvl Breaker
-        if (obj?.breaker_type === 1) {
-            if (obj?.equipment_link.length !== 0 && obj?.device_link !== '' && obj?.sensor_link !== '') {
+        // If Breaker Type is Unwired
+        if (obj?.type === 'unwired') {
+            if (obj?.rated_amps > 0) {
                 return Breaker.Type.configured;
             } else {
                 return Breaker.Type.partiallyConfigured;
             }
         }
 
-        // Below condition is for Double Lvl Breaker
-        if (obj?.breaker_type === 2) {
-            const objTwo = breakersList.find((record) => record?.parent_breaker === obj?.id);
+        if (obj?.type === 'unlabeled') {
+            // Below condition is for Single Lvl Breaker
+            if (obj?.breaker_type === 1) {
+                if (obj?.device_link !== '' && obj?.sensor_link !== '' && obj?.rated_amps > 0) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
+            }
 
-            if (
-                obj?.equipment_link.length !== 0 &&
-                objTwo?.equipment_link.length !== 0 &&
-                obj?.device_link !== '' &&
-                objTwo?.device_link !== '' &&
-                obj?.sensor_link !== '' &&
-                objTwo?.sensor_link !== ''
-            ) {
-                return Breaker.Type.configured;
-            } else {
-                return Breaker.Type.partiallyConfigured;
+            // Below condition is for Double Lvl Breaker
+            if (obj?.breaker_type === 2) {
+                const objTwo = breakersList.find((record) => record?.parent_breaker === obj?.id);
+
+                if (
+                    obj?.device_link !== '' &&
+                    objTwo?.device_link !== '' &&
+                    obj?.sensor_link !== '' &&
+                    objTwo?.sensor_link !== '' &&
+                    obj?.rated_amps > 0 &&
+                    objTwo?.rated_amps > 0
+                ) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
+            }
+
+            // Below condition is for Triple Lvl Breaker
+            if (obj?.breaker_type === 3) {
+                const [objTwo, objThree] = breakersList.filter((record) => record?.parent_breaker === obj?.id);
+
+                if (
+                    obj?.device_link !== '' &&
+                    objTwo?.device_link !== '' &&
+                    objThree?.device_link !== '' &&
+                    obj?.sensor_link !== '' &&
+                    objTwo?.sensor_link !== '' &&
+                    objThree?.sensor_link !== '' &&
+                    obj?.rated_amps > 0 &&
+                    objTwo?.rated_amps > 0 &&
+                    objThree?.rated_amps > 0
+                ) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
             }
         }
 
-        // Below condition is for Triple Lvl Breaker
-        if (obj?.breaker_type === 3) {
-            const [objTwo, objThree] = breakersList.filter((record) => record?.parent_breaker === obj?.id);
+        if (obj?.type === '') {
+            // Below condition is for Single Lvl Breaker
+            if (obj?.breaker_type === 1) {
+                if (
+                    obj?.equipment_link.length !== 0 &&
+                    obj?.device_link !== '' &&
+                    obj?.sensor_link !== '' &&
+                    obj?.rated_amps > 0
+                ) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
+            }
 
-            if (
-                obj?.equipment_link.length !== 0 &&
-                objTwo?.equipment_link.length !== 0 &&
-                objThree?.equipment_link.length !== 0 &&
-                obj?.device_link !== '' &&
-                objTwo?.device_link !== '' &&
-                objThree?.device_link !== '' &&
-                obj?.sensor_link !== '' &&
-                objTwo?.sensor_link !== '' &&
-                objThree?.sensor_link !== ''
-            ) {
-                return Breaker.Type.configured;
-            } else {
-                return Breaker.Type.partiallyConfigured;
+            // Below condition is for Double Lvl Breaker
+            if (obj?.breaker_type === 2) {
+                const objTwo = breakersList.find((record) => record?.parent_breaker === obj?.id);
+
+                if (
+                    obj?.equipment_link.length !== 0 &&
+                    objTwo?.equipment_link.length !== 0 &&
+                    obj?.device_link !== '' &&
+                    objTwo?.device_link !== '' &&
+                    obj?.sensor_link !== '' &&
+                    objTwo?.sensor_link !== '' &&
+                    obj?.rated_amps > 0 &&
+                    objTwo?.rated_amps > 0
+                ) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
+            }
+
+            // Below condition is for Triple Lvl Breaker
+            if (obj?.breaker_type === 3) {
+                const [objTwo, objThree] = breakersList.filter((record) => record?.parent_breaker === obj?.id);
+
+                if (
+                    obj?.equipment_link.length !== 0 &&
+                    objTwo?.equipment_link.length !== 0 &&
+                    objThree?.equipment_link.length !== 0 &&
+                    obj?.device_link !== '' &&
+                    objTwo?.device_link !== '' &&
+                    objThree?.device_link !== '' &&
+                    obj?.sensor_link !== '' &&
+                    objTwo?.sensor_link !== '' &&
+                    objThree?.sensor_link !== '' &&
+                    obj?.rated_amps > 0 &&
+                    objTwo?.rated_amps > 0 &&
+                    objThree?.rated_amps > 0
+                ) {
+                    return Breaker.Type.configured;
+                } else {
+                    return Breaker.Type.partiallyConfigured;
+                }
             }
         }
     };
@@ -856,7 +927,6 @@ const EditPanel = () => {
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
-        setSelectedBreakerLink({});
 
         // linked - linked => user is trying to unlink 2 breakers
         if (sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
@@ -991,12 +1061,10 @@ const EditPanel = () => {
                 });
 
                 setBreakersFetching(false);
-                setSelectedBreakerLink({});
                 setBreakerAPITrigerred(false);
             })
             .catch(() => {
                 setBreakersFetching(false);
-                setSelectedBreakerLink({});
                 setBreakerAPITrigerred(false);
                 BreakersStore.update((s) => {
                     s.breakersList = [];
