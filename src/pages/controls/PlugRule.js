@@ -581,7 +581,6 @@ const PlugRule = () => {
         if (rulesToUnLink.sensor_id.length === 0) {
             return;
         }
-        console.log('rulesToUnLink', rulesToUnLink);
         setIsProcessing(true);
 
         await unlinkSocketRequest(rulesToUnLink)
@@ -880,7 +879,6 @@ const PlugRule = () => {
                 isLoadingRef.current = false;
 
                 let response = res.data;
-                console.log('response222', response);
                 setAllSensors(response?.data);
 
                 setUnlinkedSocketRuleSuccess(res.status);
@@ -1072,8 +1070,6 @@ const PlugRule = () => {
         setIsChangedSockets(true);
         setCheckedAll(checkedAll);
     };
-    console.log('RULESTOLINK', rulesToLink);
-    console.log('RULESTOUNINK', rulesToUnLink);
     const currentRowSearched = () => {
         if (selectedRuleFilter === 0) {
             return allSearchData;
