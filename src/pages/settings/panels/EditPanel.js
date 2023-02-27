@@ -265,9 +265,9 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                setBreakerAPITrigerred(true);
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
                 setBreakerLinking(false);
-                setIsLoading(false);
             })
             .catch(() => {
                 setBreakerLinking(false);
@@ -280,9 +280,9 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                setBreakerAPITrigerred(true);
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
                 setBreakerLinking(false);
-                setIsLoading(false);
             })
             .catch(() => {
                 setBreakerLinking(false);
@@ -979,7 +979,7 @@ const EditPanel = () => {
             });
     };
 
-    const fetchBreakersData = async (panel_id, bldg_id) => {
+    const fetchBreakersData = async (panel_id, bldg_id, setIsLoading) => {
         setBreakersFetching(true);
         const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
 
@@ -997,6 +997,7 @@ const EditPanel = () => {
                     s.breakersList = response;
                 });
 
+                if (setIsLoading) setIsLoading(false);
                 setBreakersFetching(false);
                 setBreakerAPITrigerred(false);
             })
