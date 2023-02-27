@@ -11,6 +11,7 @@ import {
     generalEquipments,
     generalPassiveDevices,
     updateLinkBreakers,
+    updateBreakerTypes,
     deleteBreaker,
     getFiltersForEquipment,
     listSensor,
@@ -82,6 +83,10 @@ export function getPassiveDeviceList(params) {
 
 export function updateBreakersLink(params, payload) {
     return axiosInstance.post(`${updateLinkBreakers}${params}`, payload).then((res) => res);
+}
+
+export function updateBreakersTypeLink(payload, params) {
+    return axiosInstance.patch(`${updateBreakerTypes}${params}`, payload).then((res) => res);
 }
 
 export function fetchPanelsFilter(args) {

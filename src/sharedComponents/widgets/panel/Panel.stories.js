@@ -112,7 +112,12 @@ Default.args = {
         alert('onShowChart');
         console.log('onShowChart', props);
     },
-    onBreakerLinkedClick: (props) => {
+    onBreakerLinkedClick: (props, setIsLoading) => {
+        setIsLoading(true);
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 5000);
+
         alert('onBreakerLinkedClick: ' + `${props.source} - ${props.target}`);
         console.log('onBreakerLinkedClick', props);
     },

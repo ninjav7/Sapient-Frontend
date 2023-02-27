@@ -111,6 +111,7 @@ export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const updateBreakerTypes = '/api/config/panels/update_breaker_config';
 export const resetBreakers = '/api/config/panels/reset/breakers';
 export const deletePanel = '/api/config/panels/delete';
 export const deleteBreaker = '/api/config/panels/delete/breaker';

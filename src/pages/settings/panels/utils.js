@@ -1,11 +1,3 @@
-export const breakerLinkingAlerts = (numberOne, numberTwo) => {
-    alert(`Breaker ${numberOne} & Breaker ${numberTwo} cannot be linked!`);
-};
-
-export const unableLinkingAlerts = () => {
-    alert(`Breaker cannot be linked due to different Device/Equipment configuration!`);
-};
-
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
     if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {
@@ -131,4 +123,10 @@ export const getPhaseConfigValue = (value, breakerType) => {
         if (value === '480') return 3;
         if (value === '600') return 3;
     }
+};
+
+export const getBreakerType = (breaker_lvl) => {
+    if (breaker_lvl === 1) return 'single';
+    if (breaker_lvl === 2) return 'double';
+    if (breaker_lvl === 3) return 'triple';
 };

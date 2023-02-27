@@ -295,8 +295,10 @@ const DataTableWidget = (props) => {
 
                             {!props.isLoading &&
                                 currentRows.map((row) => {
+                                    //@TODO Needs to be refactored
                                     let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
+                                    const isActionButtonShown = props.onEditRow && isEditable || props.onDeleteRow && isDeletable;
 
                                     const menuListPerRowProps = {};
                                     if (props.onEditRow && isEditable) {
@@ -307,6 +309,8 @@ const DataTableWidget = (props) => {
                                         menuListPerRowProps.onDeleteRow = (event) =>
                                             props.onDeleteRow(event, row.id, row, props);
                                     }
+                                    /********/
+                                    
                                     return (
                                         <Table.Row {...(row.rowProps || {})} key={generateID()}>
                                             {props.onCheckboxRow &&
@@ -341,9 +345,9 @@ const DataTableWidget = (props) => {
                                             {isActionsAvailable && (
                                                 <Table.Cell align="center" width={36}>
                                                     <div className="d-flex justify-content-center">
-                                                        <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                        {isActionButtonShown && <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
                                                             <MenuListPerRow {...menuListPerRowProps} />
-                                                        </DropDownIcon>
+                                                        </DropDownIcon>}
                                                     </div>
                                                 </Table.Cell>
                                             )}
