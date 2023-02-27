@@ -163,7 +163,12 @@ const EditPanel = () => {
 
         // Below condition is for Single Lvl Breaker
         if (obj?.breaker_type === 1) {
-            if (obj?.equipment_link.length !== 0 && obj?.device_link !== '' && obj?.sensor_link !== '') {
+            if (
+                obj?.equipment_link.length !== 0 &&
+                obj?.device_link !== '' &&
+                obj?.sensor_link !== '' &&
+                obj?.rated_amps > 0
+            ) {
                 return Breaker.Type.configured;
             } else {
                 return Breaker.Type.partiallyConfigured;
@@ -180,7 +185,9 @@ const EditPanel = () => {
                 obj?.device_link !== '' &&
                 objTwo?.device_link !== '' &&
                 obj?.sensor_link !== '' &&
-                objTwo?.sensor_link !== ''
+                objTwo?.sensor_link !== '' &&
+                obj?.rated_amps > 0 &&
+                objTwo?.rated_amps > 0
             ) {
                 return Breaker.Type.configured;
             } else {
@@ -201,7 +208,10 @@ const EditPanel = () => {
                 objThree?.device_link !== '' &&
                 obj?.sensor_link !== '' &&
                 objTwo?.sensor_link !== '' &&
-                objThree?.sensor_link !== ''
+                objThree?.sensor_link !== '' &&
+                obj?.rated_amps > 0 &&
+                objTwo?.rated_amps > 0 &&
+                objThree?.rated_amps > 0
             ) {
                 return Breaker.Type.configured;
             } else {
