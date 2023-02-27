@@ -22,7 +22,7 @@ const StatusFilter = (props) => {
     return (
         <ButtonGroup
             currentButtonId={status || 0}
-            buttons={buttonGroupFilterOptions || STATUS_FILTER_OPTIONS}
+            buttons={props?.customStatusOptions || buttonGroupFilterOptions || STATUS_FILTER_OPTIONS}
             {...props}
             handleButtonClick={handlerClick}
         />

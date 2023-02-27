@@ -22,7 +22,14 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
+import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
 
+const customStatusOptions = [
+    { label: 'All' },
+    { label: 'Active', icon: <ActiveSVG className="bg-grey"/> },
+    { label: 'Inactive', icon: <InactiveSVG className="bg-grey"/> },
+];
 const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
     const history = useHistory();
 
@@ -332,9 +339,32 @@ const PlugRules = () => {
             return newRow;
         });
 
+    const renderStatus = (row) => {
+        return (
+            <>
+                {row.is_active ? (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="active-container justify-content-center">
+                        <ActiveSVG style={{ marginTop: '0.125rem' }} />
+                        Active
+                    </Typography.Subheader>
+                ) : (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="inactive-container justify-content-center">
+                        <InactiveSVG style={{ marginTop: '0.125rem' }} />
+                        Inactive
+                    </Typography.Subheader>
+                )}
+            </>
+        );
+    };
+
     const headerProps = [
         { name: 'Name', accessor: 'name' },
         { name: 'Description', accessor: 'description' },
+        { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
         { name: 'Socket Count', accessor: 'sensors_count' },
     ];
@@ -426,6 +456,7 @@ const PlugRules = () => {
                             id="plugRulesTable1"
                             onSearch={setSearch}
                             onStatus={setSelectedTab}
+                            customStatusOptions={customStatusOptions}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             onDownload={() => handleDownloadCsv()}

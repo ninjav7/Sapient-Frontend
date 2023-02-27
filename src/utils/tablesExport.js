@@ -132,6 +132,34 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
+export const getSocketsForPlugRulePageTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'assigned_rule':
+                    const result = tableRow['assigned_rules'];
+
+                    arr.push(result);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getBuildingsTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 

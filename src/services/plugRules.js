@@ -68,7 +68,6 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
             },
         })
         .then((res) => {
-            console.log('RESSS', res);
             return res;
         })
 }
@@ -155,7 +154,7 @@ export function getUnlinkedSocketRules(
             ),
         })
         .then((res) => {
-            return res;
+            return res.data;
         });
 }
 
