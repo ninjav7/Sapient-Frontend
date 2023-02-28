@@ -826,8 +826,7 @@ const BreakerConfiguration = ({
                 centered
                 backdrop="static"
                 keyboard={false}
-                // style={{ opacity: showUnlabeledAlert ? '0.5' : '1' }}
-            >
+                dialogClassName={showUnlabeledAlert || showReassignAlert ? 'child-modal-style' : ''}>
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"
