@@ -249,7 +249,6 @@ const DataTableWidget = (props) => {
                 <div className="table-filter-widget-wrapper d-flex">
                     <Filters
                         selectedFiltersValues={selectedFiltersValues}
-                        customStatusOptions={props.customStatusOptions}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
                         filterOptions={props.filterOptions}
@@ -447,12 +446,6 @@ DataTableWidget.propTypes = {
     customCheckAll: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     isLoadingComponent: PropTypes.node.isRequired,
     isLoading: PropTypes.bool.isRequired,
-    customStatusOptions: PropTypes.arrayOf(
-        PropTypes.shape({
-            label: PropTypes.string.isRequired,
-            icon: PropTypes.node,
-        })
-    ).isRequired,
     filters: PropTypes.shape({
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,

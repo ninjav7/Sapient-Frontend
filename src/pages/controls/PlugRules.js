@@ -25,7 +25,7 @@ import _ from 'lodash';
 import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
 
-const customStatusOptions = [
+const buttonGroupFilterOptions = [
     { label: 'All' },
     { label: 'Active', icon: <ActiveSVG className="bg-grey"/> },
     { label: 'Inactive', icon: <InactiveSVG className="bg-grey"/> },
@@ -456,7 +456,7 @@ const PlugRules = () => {
                             id="plugRulesTable1"
                             onSearch={setSearch}
                             onStatus={setSelectedTab}
-                            customStatusOptions={customStatusOptions}
+                            buttonGroupFilterOptions={buttonGroupFilterOptions}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             onDownload={() => handleDownloadCsv()}

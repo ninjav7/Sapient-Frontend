@@ -10,8 +10,8 @@
                 margin: 0;
                 padding: 0;
             }
-            .bg-grey path{
-                fill:#7C879C;
+            .bg-grey path {
+                fill: $primary-gray-450;
             }
         }
 
@@ -63,7 +63,7 @@
                 }
             }
         }
-        
+
         .table-head {
             .on-sort {
                 &:hover {
@@ -73,7 +73,7 @@
                     background: $primary-gray-50;
                     &:hover {
                         background: $primary-gray-150;
-                    } 
+                    }
                 }
             }
         }

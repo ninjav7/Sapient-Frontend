@@ -429,6 +429,9 @@ const PlugRule = () => {
     const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
 
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+    const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
+    const [tagsFilterString, setTagsFilterString] = useState('');
+    const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
@@ -871,6 +874,8 @@ const PlugRule = () => {
                 floorTypeFilterString,
                 spaceTypeFilterString,
                 spaceTypeTypeFilterString,
+                assignedRuleFilterString,
+                tagsFilterString,
                 true,
                 {
                     ...sorting,
@@ -914,6 +919,8 @@ const PlugRule = () => {
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeTypeFilterString,
+            assignedRuleFilterString,
+            tagsFilterString,
             false,
             {
                 ...sorting,
@@ -983,6 +990,8 @@ const PlugRule = () => {
         sensorTypeFilterString,
         floorTypeFilterString,
         spaceTypeFilterString,
+        assignedRuleFilterString,
+        tagsFilterString,
         spaceTypeTypeFilterString,
         sortBy.method,
         sortBy.name,
@@ -1041,6 +1050,8 @@ const PlugRule = () => {
                     floorTypeFilterString,
                     spaceTypeFilterString,
                     spaceTypeTypeFilterString,
+                    assignedRuleFilterString,
+                    tagsFilterString,
                     false,
                     {
                         ...sorting,
@@ -1226,22 +1237,8 @@ const PlugRule = () => {
             spaceTypeTypeFilterString,
         }).then((filters) => {
             const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            console.log('filterOptions345345', filterOptions);
             const filterOptionsFetched = [
-                {
-                    label: 'MAC Address',
-                    value: 'macAddresses',
-                    placeholder: 'All Mac addresses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.mac_address.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                    onDelete: () => {
-                        setSelectedOptionMac([]);
-                        setMacTypeFilterString('');
-                    },
-                },
                 {
                     label: 'Equipment Type',
                     value: 'equipmentType',
@@ -1256,18 +1253,6 @@ const PlugRule = () => {
                         setSelectedOption([]);
                         setEqupimentTypeFilterString('');
                     },
-                },
-                {
-                    label: 'Sensors',
-                    value: 'sensors',
-                    placeholder: 'All Sensors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                    onDelete: setSensorTypeFilterString(''),
                 },
                 {
                     label: 'Floor',
@@ -1304,6 +1289,69 @@ const PlugRule = () => {
                     })),
                     onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
                     onDelete: () => setSpaceTypeTypeFilterString(''),
+                },
+                {
+                    label: 'MAC Address',
+                    value: 'macAddresses',
+                    placeholder: 'All Mac addresses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOptionMac([]);
+                        setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_count',
+                    placeholder: 'All Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                    onDelete: setSensorTypeFilterString(''),
+                },
+                {
+                    label: 'Assigned rule',
+                    value: 'assigned_rule',
+                    placeholder: 'All assigned rule',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                        value: filterItem.plug_rule_id,
+                        label: filterItem.plug_rule_name,
+                    })),
+                    onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
+                    onDelete: setAssignedRuleFilterString(''),
+                },
+                {
+                    label: 'Tags',
+                    value: 'tags',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setTagsFilterString, options),
+                    onDelete: setTagsFilterString(''),
+                },
+                {
+                    label: 'Last used data',
+                    value: 'last_used_data',
+                    placeholder: 'All last used data',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
+                    onDelete: setLastUsedDataFilterString(''),
                 },
             ];
             setFilterOptions(filterOptionsFetched);
