@@ -279,10 +279,6 @@ const EditPanel = () => {
     };
 
     const fetchBreakerStatus = (breaker_type, breaker_obj) => {
-        if (breaker_obj?.breaker_number === 2 || breaker_obj?.breaker_number === 4) {
-            console.log('SSR breaker_obj => ', breaker_obj);
-            console.log('SSR breaker_type => ', breaker_type);
-        }
         if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
         if (breaker_type === 'not-configured') return Breaker.Status.noSenors;
         if (breaker_type === 'configured') return Breaker.Status.online;
