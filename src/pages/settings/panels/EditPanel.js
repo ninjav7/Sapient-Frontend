@@ -80,6 +80,7 @@ const EditPanel = () => {
     const [showUngroupAlert, setUngroupAlert] = useState(false);
     const handleUngroupAlertClose = () => setUngroupAlert(false);
     const handleUngroupAlertOpen = () => setUngroupAlert(true);
+    const [additionalMessage, setAdditionalMessage] = useState(false);
 
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -371,10 +372,17 @@ const EditPanel = () => {
 
     const linkBreakers = (sourceBreakerObj, targetBreakerObj) => {
         // Different Breaker Types cannot be linked -- restricted till all the conditions are shared
-        if (!(sourceBreakerObj?.type === '' && targetBreakerObj?.type === '')) {
-            setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked due to different Breaker Type!`
-            );
+        if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
+            const source =
+                sourceBreakerObj?.type !== ''
+                    ? sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1)
+                    : 'Equipment';
+            const target =
+                targetBreakerObj?.type !== ''
+                    ? targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1)
+                    : 'Equipment';
+            setAdditionalMessage(true);
+            setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
             handleUngroupAlertOpen();
             return;
         }
@@ -1231,6 +1239,10 @@ const EditPanel = () => {
     }, [selectedBreakerLinkObj]);
 
     useEffect(() => {
+        if (!showUngroupAlert) setSelectedBreakerLink({});
+    }, [showUngroupAlert]);
+
+    useEffect(() => {
         pageDefaultStates();
     }, []);
 
@@ -1463,6 +1475,8 @@ const EditPanel = () => {
                 handleUngroupAlertClose={handleUngroupAlertClose}
                 alertMessage={alertMessage}
                 setAlertMessage={setAlertMessage}
+                additionalMessage={additionalMessage}
+                setAdditionalMessage={setAdditionalMessage}
             />
         </React.Fragment>
     );
