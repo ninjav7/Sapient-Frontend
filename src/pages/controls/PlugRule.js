@@ -16,6 +16,8 @@ import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -128,6 +130,7 @@ const notificationUpdatedData = {
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
+    const { download } = useCSVDownload();
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
@@ -135,6 +138,7 @@ const PlugRule = () => {
     const [isChangedSockets, setIsChangedSockets] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
+    const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [openSnackbar] = useNotification();
@@ -149,7 +153,7 @@ const PlugRule = () => {
     const getConditionId = () => uuidv4();
     const initialCurrentData = {
         name: '',
-        building_id: '' || ruleId,
+        building_id: '' || localStorage.getItem('buildingId'),
         description: '',
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
@@ -351,6 +355,11 @@ const PlugRule = () => {
         }
     }, [ruleId]);
 
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
+
     useEffect(() => {
         if (!isFetchedPlugRulesData) {
             fetchPlugRulesData();
@@ -403,7 +412,7 @@ const PlugRule = () => {
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     useEffect(() => {
-        if (currentData.building_id.length && currentData.building_id !== 'create-plug-rule') {
+        if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
             fetchLinkedSocketRules();
         }
@@ -420,6 +429,9 @@ const PlugRule = () => {
     const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
 
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+    const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
+    const [tagsFilterString, setTagsFilterString] = useState('');
+    const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
@@ -580,10 +592,6 @@ const PlugRule = () => {
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
-
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
     };
 
     const handleSchedularConditionChange = (key, value, condition_id, condition_group_id) => {
@@ -637,6 +645,7 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
+
     const handleReassignSocketsCheckboxClick = (value, socket) => {
         let newSocketsToReassign = [...socketsToReassign];
         if (value) {
@@ -755,9 +764,65 @@ const PlugRule = () => {
             addOptions();
         }
     }, [allData]);
-
+    const headerProps = [
+        {
+            name: 'Equipment Type',
+            accessor: 'equipment_type_name',
+            callbackValue: renderEquipType,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'equipment_link_location',
+            callbackValue: renderLocation,
+        },
+        {
+            name: 'Space Type',
+            accessor: 'space_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'MAC Address',
+            accessor: 'device_link',
+        },
+        {
+            name: 'Sensors',
+            accessor: 'sensor_count',
+        },
+        {
+            name: 'Assigned Rule',
+            accessor: 'assigned_rule',
+            callbackValue: renderAssignRule,
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTagCell,
+        },
+        {
+            name: 'Last Data',
+            accessor: 'last_data',
+            callbackValue: renderLastUsedCell,
+        },
+    ];
     const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
 
+    const dataForCSV = () => {
+        let newPlugRuleData = [];
+
+        if (selectedTab === 0) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = allSensors;
+        }
+        return newPlugRuleData;
+    };
     const uniqueMacIds = [];
     const [removeMacDuplication, setRemoveMacDuplication] = useState();
 
@@ -809,6 +874,8 @@ const PlugRule = () => {
                 floorTypeFilterString,
                 spaceTypeFilterString,
                 spaceTypeTypeFilterString,
+                assignedRuleFilterString,
+                tagsFilterString,
                 true,
                 {
                     ...sorting,
@@ -816,22 +883,57 @@ const PlugRule = () => {
             ).then((res) => {
                 isLoadingRef.current = false;
 
-                let response = res.data.data;
-
-                setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
+                let response = res.data;
+                setAllSensors(response?.data);
 
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                _.uniqBy(response.data, 'id').forEach((record) => {
+                _.uniqBy(response, 'id').forEach((record) => {
                     record.linked_rule = false;
                     unLinkedData.push(record);
                 });
 
                 setUnLinkedRuleData(unLinkedData);
                 setAllUnlinkedRuleAdded((el) => [...el, '1']);
-                setTotalItems(response.total_data);
+                setTotalItems(response?.total_data);
             }));
+    };
+
+    const handleDownloadCsv = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        await getUnlinkedSocketRules(
+            pageSize,
+            pageNo,
+            ruleId,
+            activeBuildingId,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            assignedRuleFilterString,
+            tagsFilterString,
+            false,
+            {
+                ...sorting,
+            }
+        )
+            .then((res) => {
+                let responseData = res?.data;
+                download(
+                    `Sockets${new Date().toISOString().split('T')[0]}`,
+                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerProps)
+                );
+            })
+            .catch((error) => {});
     };
 
     const fetchLinkedSocketRules = async () => {
@@ -875,6 +977,7 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
+        fetchFiltersForSensors();
 
         fetchUnLinkedSocketRules();
     }, [
@@ -887,6 +990,8 @@ const PlugRule = () => {
         sensorTypeFilterString,
         floorTypeFilterString,
         spaceTypeFilterString,
+        assignedRuleFilterString,
+        tagsFilterString,
         spaceTypeTypeFilterString,
         sortBy.method,
         sortBy.name,
@@ -945,6 +1050,8 @@ const PlugRule = () => {
                     floorTypeFilterString,
                     spaceTypeFilterString,
                     spaceTypeTypeFilterString,
+                    assignedRuleFilterString,
+                    tagsFilterString,
                     false,
                     {
                         ...sorting,
@@ -952,7 +1059,7 @@ const PlugRule = () => {
                 ).then((res) => {
                     isLoadingRef.current = false;
 
-                    let response = res.data.data;
+                    let response = res.data;
                     const preparedIdofSockets = [];
                     _.cloneDeep(_.uniqBy(response.data, 'id')).forEach((socket) => {
                         preparedIdofSockets.push(socket.id);
@@ -966,12 +1073,14 @@ const PlugRule = () => {
                 }));
         } else {
             setRulesToLink([]);
+            setSelectedIds([]);
+
+            setRulesToUnLink((prev) => ({ rule_id: prev.rule_id, sensor_id: fetchedSelectedIds }));
             setTotalSocket(0);
         }
         setIsChangedSockets(true);
         setCheckedAll(checkedAll);
     };
-
     const currentRowSearched = () => {
         if (selectedRuleFilter === 0) {
             return allSearchData;
@@ -1034,7 +1143,7 @@ const PlugRule = () => {
         const idSocketsToAssign = [];
         const socketsToReassign = [];
         allSensors.forEach((sensor) => {
-            if (rulesToLink.sensor_id.includes(sensor.id)) {
+            if (rulesToLink?.sensor_id?.includes(sensor.id)) {
                 if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
                     socketsToReassign.push(sensor.id);
                     dataUnassign.push(sensor);
@@ -1116,13 +1225,9 @@ const PlugRule = () => {
 
     const [filterOptions, setFilterOptions] = useState([]);
 
-    const filterHandler = (setter, options) => {
-        setter(options.map(({ value }) => value).join('+'));
-        setPageNo(1);
-    };
     const fetchFiltersForSensors = async () => {
         isLoadingRef.current = true;
-        const filters = await getFiltersForSensorsRequest({
+        await getFiltersForSensorsRequest({
             activeBuildingId,
             macTypeFilterString,
             equpimentTypeFilterString,
@@ -1130,31 +1235,16 @@ const PlugRule = () => {
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeTypeFilterString,
-        });
-
-        filters.data.forEach((filterOptions) => {
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            console.log('filterOptions345345', filterOptions);
             const filterOptionsFetched = [
-                {
-                    label: 'MAC Address',
-                    value: 'macAddresses',
-                    placeholder: 'All Mac addresses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                    onDelete: () => {
-                        setSelectedOptionMac([]);
-                        setMacTypeFilterString('');
-                    },
-                },
                 {
                     label: 'Equipment Type',
                     value: 'equipmentType',
                     placeholder: 'All Equipment Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.equipment_type.map((filterItem) => ({
+                    filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
                         value: filterItem.equipment_type_id,
                         label: filterItem.equipment_type_name,
                     })),
@@ -1165,23 +1255,11 @@ const PlugRule = () => {
                     },
                 },
                 {
-                    label: 'Sensors',
-                    value: 'sensors',
-                    placeholder: 'All Sensors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                    onDelete: setSensorTypeFilterString(''),
-                },
-                {
                     label: 'Floor',
                     value: 'floor',
                     placeholder: 'All Floors',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_floor.map((filterItem) => ({
+                    filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
                         value: filterItem.floor_id,
                         label: filterItem.floor_name,
                     })),
@@ -1193,7 +1271,7 @@ const PlugRule = () => {
                     value: 'space',
                     placeholder: 'All Spaces',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space.map((filterItem) => ({
+                    filterOptions: filterOptions?.installed_space.map((filterItem) => ({
                         value: filterItem.space_id,
                         label: filterItem.space_name,
                     })),
@@ -1205,15 +1283,77 @@ const PlugRule = () => {
                     value: 'spaceType',
                     placeholder: 'All Space Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
+                    filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
                         value: filterItem.space_type_id,
                         label: filterItem.space_type_name,
                     })),
                     onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
                     onDelete: () => setSpaceTypeTypeFilterString(''),
                 },
+                {
+                    label: 'MAC Address',
+                    value: 'macAddresses',
+                    placeholder: 'All Mac addresses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOptionMac([]);
+                        setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_count',
+                    placeholder: 'All Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                    onDelete: setSensorTypeFilterString(''),
+                },
+                {
+                    label: 'Assigned rule',
+                    value: 'assigned_rule',
+                    placeholder: 'All assigned rule',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                        value: filterItem.plug_rule_id,
+                        label: filterItem.plug_rule_name,
+                    })),
+                    onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
+                    onDelete: setAssignedRuleFilterString(''),
+                },
+                {
+                    label: 'Tags',
+                    value: 'tags',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setTagsFilterString, options),
+                    onDelete: setTagsFilterString(''),
+                },
+                {
+                    label: 'Last used data',
+                    value: 'last_used_data',
+                    placeholder: 'All last used data',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
+                    onDelete: setLastUsedDataFilterString(''),
+                },
             ];
-
             setFilterOptions(filterOptionsFetched);
         });
 
@@ -1668,7 +1808,7 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: '1,722 kwh',
+                                        value: '1,722',
                                     }}
                                 />
                             )}
@@ -1705,11 +1845,13 @@ const PlugRule = () => {
                                 setPageNo(1);
                                 setSearch(query);
                             }}
+                            filterOptions={filterOptions}
                             buttonGroupFilterOptions={[
                                 { label: 'All' },
                                 { label: 'Selected' },
                                 { label: 'Unselected' },
                             ]}
+                            onDownload={() => handleDownloadCsv()}
                             onStatus={setSelectedRuleFilter}
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
