@@ -40,6 +40,7 @@ import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
 import './breaker-config-styles.scss';
+import ReassignAlert from './ReassignAlert';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -108,6 +109,11 @@ const BreakerConfiguration = ({
     const [showUnlabeledAlert, setUnlabeledAlert] = useState(false);
     const closeUnlabelAlertModal = () => setUnlabeledAlert(false);
     const openUnlabelAlertModal = () => setUnlabeledAlert(true);
+
+    // Reassign Alert Modal
+    const [showReassignAlert, setReassignAlert] = useState(false);
+    const closeReassignAlert = () => setReassignAlert(false);
+    const openReassignAlert = () => setReassignAlert(true);
 
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -1557,6 +1563,8 @@ const BreakerConfiguration = ({
                 closeUnlabelAlertModal={closeUnlabelAlertModal}
                 setForceUpdate={setForceUpdate}
             />
+
+            <ReassignAlert showReassignAlert={showReassignAlert} closeReassignAlert={closeReassignAlert} />
         </React.Fragment>
     );
 };

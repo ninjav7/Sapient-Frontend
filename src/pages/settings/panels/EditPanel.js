@@ -142,9 +142,6 @@ const EditPanel = () => {
     };
 
     const fetchBreakerType = (obj) => {
-        // TO avoid extra Processing if Breaker is not single lvl / parent breaker
-        if (obj?.parent_breaker !== '' && obj?.is_linked && obj?.breaker_type !== 1) return;
-
         // Below condition is for Initial Breaker state
         if (
             obj?.equipment_link.length === 0 &&
@@ -278,6 +275,20 @@ const EditPanel = () => {
                     return Breaker.Type.partiallyConfigured;
                 }
             }
+        }
+    };
+
+    const fetchBreakerStatus = (breaker_type, breaker_obj) => {
+        if (breaker_obj?.breaker_number === 2 || breaker_obj?.breaker_number === 4) {
+            console.log('SSR breaker_obj => ', breaker_obj);
+            console.log('SSR breaker_type => ', breaker_type);
+        }
+        if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
+        if (breaker_type === 'not-configured') return Breaker.Status.noSenors;
+        if (breaker_type === 'configured') return Breaker.Status.online;
+        if (breaker_obj?.type === '') {
+            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
+            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
         }
     };
 
@@ -1373,9 +1384,9 @@ const EditPanel = () => {
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
-                    const equipmentName = breakerData?.equipment_links[0]?.name;
-                    const status = Breaker.Status.online;
                     const type = fetchBreakerType(breakerData);
+                    const equipmentName = breakerData?.equipment_links[0]?.name;
+                    const status = fetchBreakerStatus(type, breakerData);
                     return {
                         ...breakerProps,
                         equipmentName,
