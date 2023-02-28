@@ -118,8 +118,12 @@ const BreakerConfiguration = ({
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+
     const [forceUpdate, setForceUpdate] = useState(false);
     const [existingEquipId, setExistingEquipId] = useState('');
+
+    const [forceSave, setForceSave] = useState(false);
+    const [unlabeledEquipObj, setUnlabeledEquipObj] = useState({});
 
     const defaultEquipmentObj = {
         name: '',
@@ -229,9 +233,11 @@ const BreakerConfiguration = ({
         setActiveEquipTab('equip');
         setSelectedBreakerObj({});
         setForceUpdate(false);
+        setForceSave(false);
         setEquipmentObj(defaultEquipmentObj);
         setEquipmentErrors(defaultErrors);
         setExistingEquipId('');
+        setUnlabeledEquipObj({});
     };
 
     const handleChange = (key, value) => {
@@ -286,6 +292,17 @@ const BreakerConfiguration = ({
         if (equipment?.value) {
             setExistingEquipId(equipment?.value);
             openUnlabelAlertModal();
+        }
+    };
+
+    const validateReassignAlert = (breaker_obj) => {
+        if (breaker_obj?.type === 'unlabeled') {
+            let obj = {
+                id: breaker_obj?.equipment_links[0]?.id,
+                name: breaker_obj?.equipment_links[0]?.name,
+            };
+            setUnlabeledEquipObj(obj);
+            openReassignAlert();
         }
     };
 
@@ -459,7 +476,7 @@ const BreakerConfiguration = ({
                 setIsResetting(false);
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
-                closeBreakerConfigModal();
+                closeModalWithoutSave();
                 setBreakerAPITrigerred(true);
             })
             .catch(() => {
@@ -477,7 +494,7 @@ const BreakerConfiguration = ({
                 handleDeleteAlertClose();
 
                 if (response?.status === 200) {
-                    closeBreakerConfigModal();
+                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker deleted successfully.';
@@ -517,7 +534,10 @@ const BreakerConfiguration = ({
 
         let breakerTypeObj = {};
 
-        const params = `?building_id=${bldgId}`;
+        let params = `?building_id=${bldgId}`;
+
+        if (forceSave) params = params.concat(`&force_save=true`);
+
         const breakersList = [];
 
         let breakerObjOne = { breaker_id: firstBreakerObj?.id };
@@ -618,7 +638,7 @@ const BreakerConfiguration = ({
                     (response.length === 1 && response[0]?.status === 200) ||
                     (response.length === 2 && response[0]?.status === 200 && response[1]?.status === 200)
                 ) {
-                    closeBreakerConfigModal();
+                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker configuration updated successfully.';
@@ -821,7 +841,7 @@ const BreakerConfiguration = ({
         <React.Fragment>
             <Modal
                 show={showBreakerConfigModal}
-                onHide={closeBreakerConfigModal}
+                onHide={closeModalWithoutSave}
                 size="xl"
                 centered
                 backdrop="static"
@@ -974,6 +994,7 @@ const BreakerConfiguration = ({
                                                                             parentBreakerObj?.type,
                                                                             ''
                                                                         );
+                                                                        validateReassignAlert(parentBreakerObj);
                                                                     }}
                                                                 />
                                                             </div>
@@ -1495,7 +1516,7 @@ const BreakerConfiguration = ({
                                                             parentBreakerObj?.type === 'unwired'
                                                         )
                                                             return;
-                                                        closeBreakerConfigModal();
+                                                        closeModalWithoutSave();
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
@@ -1513,7 +1534,7 @@ const BreakerConfiguration = ({
                                                             firstBreakerObj?.breaker_type === 1 &&
                                                             breakersList.length === firstBreakerObj?.breaker_number
                                                         ) {
-                                                            closeBreakerConfigModal();
+                                                            closeModalWithoutSave();
                                                             handleDeleteAlertShow();
                                                         }
                                                     }}
@@ -1564,7 +1585,13 @@ const BreakerConfiguration = ({
                 setForceUpdate={setForceUpdate}
             />
 
-            <ReassignAlert showReassignAlert={showReassignAlert} closeReassignAlert={closeReassignAlert} />
+            <ReassignAlert
+                showReassignAlert={showReassignAlert}
+                closeReassignAlert={closeReassignAlert}
+                setForceSave={setForceSave}
+                unlabeledEquipObj={unlabeledEquipObj}
+                setUnlabeledEquipObj={setUnlabeledEquipObj}
+            />
         </React.Fragment>
     );
 };
