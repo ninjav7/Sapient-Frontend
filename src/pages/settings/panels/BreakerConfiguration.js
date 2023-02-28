@@ -40,6 +40,7 @@ import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
 import './breaker-config-styles.scss';
+import ReassignAlert from './ReassignAlert';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -108,6 +109,11 @@ const BreakerConfiguration = ({
     const [showUnlabeledAlert, setUnlabeledAlert] = useState(false);
     const closeUnlabelAlertModal = () => setUnlabeledAlert(false);
     const openUnlabelAlertModal = () => setUnlabeledAlert(true);
+
+    // Reassign Alert Modal
+    const [showReassignAlert, setReassignAlert] = useState(false);
+    const closeReassignAlert = () => setReassignAlert(false);
+    const openReassignAlert = () => setReassignAlert(true);
 
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -888,48 +894,56 @@ const BreakerConfiguration = ({
                                     <div>
                                         <Typography.Body size={Typography.Sizes.md}>Phase</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <InputTooltip
-                                            type="number"
-                                            placeholder="Enter Phase"
-                                            labelSize={Typography.Sizes.md}
-                                            value={
-                                                firstBreakerObj?.phase_configuration
-                                                    ? firstBreakerObj?.phase_configuration
-                                                    : ''
-                                            }
-                                            disabled
-                                        />
+                                        {firstBreakerObj?.phase_configuration ? (
+                                            <InputTooltip
+                                                type="number"
+                                                placeholder="Enter Phase"
+                                                labelSize={Typography.Sizes.md}
+                                                value={firstBreakerObj?.phase_configuration}
+                                                disabled
+                                            />
+                                        ) : (
+                                            <Select placeholder="Enter Phase" isDisabled={true} />
+                                        )}
                                     </div>
 
                                     <div>
                                         <Typography.Body size={Typography.Sizes.md}>Rated Amps</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <InputTooltip
-                                            type="number"
-                                            placeholder="Enter Amperage"
-                                            labelSize={Typography.Sizes.md}
-                                            min={0}
-                                            step={5}
-                                            value={firstBreakerObj?.rated_amps ? firstBreakerObj?.rated_amps : ''}
-                                            onChange={(e) => {
-                                                handleChange('rated_amps', +e.target.value);
-                                                setErrorObj({ ...errorObj, ['rated_amps']: null });
-                                            }}
-                                            disabled={firstBreakerObj?.type === 'blank'}
-                                            error={errorObj?.rated_amps}
-                                        />
+                                        {firstBreakerObj?.type !== 'blank' ? (
+                                            <InputTooltip
+                                                type="number"
+                                                placeholder="Enter Amperage"
+                                                labelSize={Typography.Sizes.md}
+                                                min={0}
+                                                step={5}
+                                                value={firstBreakerObj?.rated_amps}
+                                                onChange={(e) => {
+                                                    handleChange('rated_amps', +e.target.value);
+                                                    setErrorObj({ ...errorObj, ['rated_amps']: null });
+                                                }}
+                                                disabled={firstBreakerObj?.type === 'blank'}
+                                                error={errorObj?.rated_amps}
+                                            />
+                                        ) : (
+                                            <Select placeholder="Enter Amperage" isDisabled={true} />
+                                        )}
                                     </div>
 
                                     <div>
                                         <Typography.Body size={Typography.Sizes.md}>Volts</Typography.Body>
                                         <Brick sizeInRem={0.25} />
-                                        <InputTooltip
-                                            type="number"
-                                            placeholder="Enter Voltage"
-                                            labelSize={Typography.Sizes.md}
-                                            value={firstBreakerObj?.voltage ? firstBreakerObj?.voltage : ''}
-                                            disabled
-                                        />
+                                        {firstBreakerObj?.voltage ? (
+                                            <InputTooltip
+                                                type="number"
+                                                placeholder="Enter Voltage"
+                                                labelSize={Typography.Sizes.md}
+                                                value={firstBreakerObj?.voltage}
+                                                disabled
+                                            />
+                                        ) : (
+                                            <Select placeholder="Enter Voltage" isDisabled={true} />
+                                        )}
                                     </div>
                                 </div>
 
@@ -972,24 +986,18 @@ const BreakerConfiguration = ({
                                                                         id="exampleSelect"
                                                                         placeholder="Select Equipment"
                                                                         name="select"
-                                                                        isSearchable={
-                                                                            firstBreakerObj?.type === '' ? true : false
-                                                                        }
-                                                                        options={
-                                                                            firstBreakerObj?.type === ''
-                                                                                ? equipmentsList
-                                                                                : []
-                                                                        }
+                                                                        isSearchable={true}
+                                                                        options={equipmentsList}
                                                                         currentValue={equipmentsList.filter(
                                                                             (option) =>
                                                                                 option.value === selectedEquipment
                                                                         )}
                                                                         onChange={(e) => {
-                                                                            if (firstBreakerObj?.type !== '') return;
                                                                             handleChange('equipment_link', e.value);
                                                                             setSelectedEquipment(e.value);
                                                                         }}
                                                                         className="basic-single"
+                                                                        isDisabled={firstBreakerObj?.type !== ''}
                                                                     />
                                                                 )}
                                                             </div>
@@ -1087,31 +1095,54 @@ const BreakerConfiguration = ({
                                                                 Name
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
-                                                            <InputTooltip
-                                                                placeholder="Enter Equipment Name"
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('name', e.target.value);
-                                                                }}
-                                                                value={equipmentObj?.name}
-                                                                labelSize={Typography.Sizes.md}
-                                                                error={equipmentErrors?.name}
-                                                            />
+                                                            {!(
+                                                                firstBreakerObj?.type === 'blank' ||
+                                                                firstBreakerObj?.type === 'unwired'
+                                                            ) ? (
+                                                                <InputTooltip
+                                                                    placeholder="Enter Equipment Name"
+                                                                    onChange={(e) => {
+                                                                        handleCreateEquipChange('name', e.target.value);
+                                                                    }}
+                                                                    value={equipmentObj?.name}
+                                                                    labelSize={Typography.Sizes.md}
+                                                                    error={equipmentErrors?.name}
+                                                                />
+                                                            ) : (
+                                                                <Select
+                                                                    placeholder="Enter Equipment Name"
+                                                                    isDisabled={true}
+                                                                />
+                                                            )}
                                                         </div>
                                                         <div className="w-100">
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Quantity
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
-                                                            <InputTooltip
-                                                                type="number"
-                                                                placeholder="Enter Equipment Quantity"
-                                                                onChange={(e) => {
-                                                                    handleCreateEquipChange('quantity', e.target.value);
-                                                                }}
-                                                                value={equipmentObj?.quantity}
-                                                                labelSize={Typography.Sizes.md}
-                                                                error={equipmentErrors?.quantity}
-                                                            />
+                                                            {!(
+                                                                firstBreakerObj?.type === 'blank' ||
+                                                                firstBreakerObj?.type === 'unwired'
+                                                            ) ? (
+                                                                <InputTooltip
+                                                                    type="number"
+                                                                    placeholder="Enter Equipment Quantity"
+                                                                    onChange={(e) => {
+                                                                        handleCreateEquipChange(
+                                                                            'quantity',
+                                                                            e.target.value
+                                                                        );
+                                                                    }}
+                                                                    value={equipmentObj?.quantity}
+                                                                    labelSize={Typography.Sizes.md}
+                                                                    error={equipmentErrors?.quantity}
+                                                                />
+                                                            ) : (
+                                                                <Select
+                                                                    placeholder="Enter Equipment Quantity"
+                                                                    isDisabled={true}
+                                                                />
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
@@ -1136,6 +1167,10 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.equipment_type}
+                                                                isDisabled={
+                                                                    firstBreakerObj?.type === 'blank' ||
+                                                                    firstBreakerObj?.type === 'unwired'
+                                                                }
                                                             />
                                                         </div>
 
@@ -1158,6 +1193,10 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.end_use}
+                                                                isDisabled={
+                                                                    firstBreakerObj?.type === 'blank' ||
+                                                                    firstBreakerObj?.type === 'unwired'
+                                                                }
                                                             />
                                                         </div>
                                                     </div>
@@ -1180,6 +1219,10 @@ const BreakerConfiguration = ({
                                                                 handleCreateEquipChange('space_id', e.value);
                                                             }}
                                                             className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'blank' ||
+                                                                firstBreakerObj?.type === 'unwired'
+                                                            }
                                                         />
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
@@ -1220,27 +1263,12 @@ const BreakerConfiguration = ({
                                                         id="exampleSelect"
                                                         placeholder="Select Device ID Name"
                                                         name="select"
-                                                        isSearchable={
-                                                            firstBreakerObj?.type === 'unwired' ||
-                                                            firstBreakerObj?.type === 'blank'
-                                                                ? false
-                                                                : true
-                                                        }
-                                                        options={
-                                                            firstBreakerObj?.type === 'unwired' ||
-                                                            firstBreakerObj?.type === 'blank'
-                                                                ? []
-                                                                : passiveDevicesListOne
-                                                        }
+                                                        isSearchable={true}
+                                                        options={passiveDevicesListOne}
                                                         currentValue={passiveDevicesList.filter(
                                                             (option) => option.value === firstBreakerObj?.device_link
                                                         )}
                                                         onChange={(e) => {
-                                                            if (
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                            )
-                                                                return;
                                                             handleBreakerConfigChange('device_link', e.value, 'first');
                                                             if (firstDeviceSearch !== '') {
                                                                 fetchPassiveDeviceList(bldgId, 'default-list', 'first');
@@ -1248,6 +1276,10 @@ const BreakerConfiguration = ({
                                                         }}
                                                         onInputChange={(e) => setFirstDeviceSearch(e)}
                                                         className="basic-single"
+                                                        isDisabled={
+                                                            firstBreakerObj?.type === 'unwired' ||
+                                                            firstBreakerObj?.type === 'blank'
+                                                        }
                                                     />
                                                 </div>
                                                 <div className="w-100">
@@ -1259,21 +1291,20 @@ const BreakerConfiguration = ({
                                                         id="exampleSelect"
                                                         placeholder="Select Sensor Number"
                                                         name="select"
-                                                        isSearchable={firstSensorList.length === 0 ? false : true}
+                                                        isSearchable={true}
                                                         options={firstSensorList}
                                                         currentValue={firstSensorList.filter(
                                                             (option) => option.value === firstBreakerObj?.sensor_link
                                                         )}
                                                         onChange={(e) => {
-                                                            if (
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                            )
-                                                                return;
                                                             handleBreakerConfigChange('sensor_link', e.value, 'first');
                                                             handleSensorChange(firstBreakerObj?.sensor_link, e.value);
                                                         }}
                                                         className="basic-single"
+                                                        isDisabled={
+                                                            firstBreakerObj?.type === 'unwired' ||
+                                                            firstBreakerObj?.type === 'blank'
+                                                        }
                                                     />
                                                 </div>
                                             </div>
@@ -1300,28 +1331,13 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Device ID Name"
                                                             name="select"
-                                                            isSearchable={
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                                    ? false
-                                                                    : true
-                                                            }
-                                                            options={
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                                    ? []
-                                                                    : passiveDevicesListTwo
-                                                            }
+                                                            isSearchable={true}
+                                                            options={passiveDevicesListTwo}
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.device_link
                                                             )}
                                                             onChange={(e) => {
-                                                                if (
-                                                                    firstBreakerObj?.type === 'unwired' ||
-                                                                    firstBreakerObj?.type === 'blank'
-                                                                )
-                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'device_link',
                                                                     e.value,
@@ -1337,6 +1353,10 @@ const BreakerConfiguration = ({
                                                             }}
                                                             onInputChange={(e) => setSecondDeviceSearch(e)}
                                                             className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            }
                                                         />
                                                     </div>
                                                     <div className="w-100">
@@ -1348,18 +1368,13 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Sensor Number"
                                                             name="select"
-                                                            isSearchable={secondSensorList.length === 0 ? false : true}
+                                                            isSearchable={true}
                                                             options={secondSensorList}
                                                             currentValue={secondSensorList.filter(
                                                                 (option) =>
                                                                     option.value === secondBreakerObj?.sensor_link
                                                             )}
                                                             onChange={(e) => {
-                                                                if (
-                                                                    firstBreakerObj?.type === 'unwired' ||
-                                                                    firstBreakerObj?.type === 'blank'
-                                                                )
-                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
                                                                     e.value,
@@ -1371,6 +1386,10 @@ const BreakerConfiguration = ({
                                                                 );
                                                             }}
                                                             className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            }
                                                         />
                                                     </div>
                                                 </div>
@@ -1397,28 +1416,13 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Device ID Name"
                                                             name="select"
-                                                            isSearchable={
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                                    ? false
-                                                                    : true
-                                                            }
-                                                            options={
-                                                                firstBreakerObj?.type === 'unwired' ||
-                                                                firstBreakerObj?.type === 'blank'
-                                                                    ? []
-                                                                    : passiveDevicesListThree
-                                                            }
+                                                            isSearchable={true}
+                                                            options={passiveDevicesListThree}
                                                             currentValue={passiveDevicesList.filter(
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.device_link
                                                             )}
                                                             onChange={(e) => {
-                                                                if (
-                                                                    firstBreakerObj?.type === 'unwired' ||
-                                                                    firstBreakerObj?.type === 'blank'
-                                                                )
-                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'device_link',
                                                                     e.value,
@@ -1434,6 +1438,10 @@ const BreakerConfiguration = ({
                                                             }}
                                                             onInputChange={(e) => setThirdDeviceSearch(e)}
                                                             className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            }
                                                         />
                                                     </div>
                                                     <div className="w-100">
@@ -1445,18 +1453,13 @@ const BreakerConfiguration = ({
                                                             id="exampleSelect"
                                                             placeholder="Select Sensor Number"
                                                             name="select"
-                                                            isSearchable={thirdSensorList.length === 0 ? false : true}
+                                                            isSearchable={true}
                                                             options={thirdSensorList}
                                                             currentValue={thirdSensorList.filter(
                                                                 (option) =>
                                                                     option.value === thirdBreakerObj?.sensor_link
                                                             )}
                                                             onChange={(e) => {
-                                                                if (
-                                                                    firstBreakerObj?.type === 'unwired' ||
-                                                                    firstBreakerObj?.type === 'blank'
-                                                                )
-                                                                    return;
                                                                 handleBreakerConfigChange(
                                                                     'sensor_link',
                                                                     e.value,
@@ -1468,6 +1471,10 @@ const BreakerConfiguration = ({
                                                                 );
                                                             }}
                                                             className="basic-single"
+                                                            isDisabled={
+                                                                firstBreakerObj?.type === 'unwired' ||
+                                                                firstBreakerObj?.type === 'blank'
+                                                            }
                                                         />
                                                     </div>
                                                 </div>
@@ -1557,6 +1564,8 @@ const BreakerConfiguration = ({
                 closeUnlabelAlertModal={closeUnlabelAlertModal}
                 setForceUpdate={setForceUpdate}
             />
+
+            <ReassignAlert showReassignAlert={showReassignAlert} closeReassignAlert={closeReassignAlert} />
         </React.Fragment>
     );
 };
