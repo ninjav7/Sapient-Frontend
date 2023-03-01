@@ -17,7 +17,7 @@ const ReassignAlert = ({
                 <Typography.Header size={Typography.Sizes.lg}>Re-assign Existing Data?</Typography.Header>
                 <Brick sizeInRem={2} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`Would you like the data from <${unlabeledEquipObj?.name}> associated with with this equipment?`}
+                    {`Would you like the data from <${unlabeledEquipObj?.name}> associated with this equipment?`}
                 </Typography.Body>
                 <Brick sizeInRem={1} />
                 <Typography.Body size={Typography.Sizes.lg}>
