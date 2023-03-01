@@ -348,9 +348,9 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                setBreakerAPITrigerred(true);
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
                 setBreakerLinking(false);
-                setIsLoading(false);
             })
             .catch(() => {
                 setBreakerLinking(false);
@@ -363,9 +363,9 @@ const EditPanel = () => {
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
             .then((res) => {
-                setBreakerAPITrigerred(true);
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
                 setBreakerLinking(false);
-                setIsLoading(false);
             })
             .catch(() => {
                 setBreakerLinking(false);
@@ -950,6 +950,8 @@ const EditPanel = () => {
     };
 
     const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading) => {
+        console.log('SSR isBreakerLinking => ', isBreakerLinking);
+        console.log('SSR isBreakersFetched => ', isBreakersFetched);
         if (isBreakerLinking || isBreakersFetched) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
@@ -1069,7 +1071,7 @@ const EditPanel = () => {
             });
     };
 
-    const fetchBreakersData = async (panel_id, bldg_id) => {
+    const fetchBreakersData = async (panel_id, bldg_id, setIsLoading) => {
         setBreakersFetching(true);
         const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
 
@@ -1088,6 +1090,7 @@ const EditPanel = () => {
                 });
 
                 setBreakersFetching(false);
+                if (setIsLoading) setIsLoading(false);
                 setBreakerAPITrigerred(false);
             })
             .catch(() => {
