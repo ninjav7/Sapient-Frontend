@@ -287,6 +287,10 @@ const EditPanel = () => {
             if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
             if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
         }
+        if (breaker_obj?.type === 'unlabeled') {
+            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
+            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
+        }
     };
 
     const unLinkAllBreakers = async () => {
