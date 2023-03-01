@@ -10,6 +10,8 @@ const ReassignAlert = ({
     setForceSave,
     unlabeledEquipObj,
     setUnlabeledEquipObj,
+    selectedEquipObj,
+    setSelectedEquipObj,
 }) => {
     return (
         <Modal show={showReassignAlert} onHide={closeReassignAlert} centered backdrop="static" keyboard={false}>
@@ -17,26 +19,33 @@ const ReassignAlert = ({
                 <Typography.Header size={Typography.Sizes.lg}>Re-assign Existing Data?</Typography.Header>
                 <Brick sizeInRem={2} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`Would you like the data from <${unlabeledEquipObj?.name}> associated with this equipment?`}
+                    {`Would you like the data already recorded as “${unlabeledEquipObj?.name}” associated with
+                    “${selectedEquipObj?.name}”?`}
                 </Typography.Body>
-                <Brick sizeInRem={1} />
+                <Brick sizeInRem={1.25} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`Historical data can be found under <${unlabeledEquipObj?.name}> if you choose not to reassign.`}
+                    {`If you re-assign records, “${unlabeledEquipObj?.name}” will be updated to “${selectedEquipObj?.name}” in all
+                    historical data, and the duplicate “${unlabeledEquipObj?.name}” will be removed.`}
+                </Typography.Body>
+                <Brick sizeInRem={1.25} />
+                <Typography.Body size={Typography.Sizes.lg}>
+                    {`If you do not re-assign records, “${unlabeledEquipObj?.name}” will retain historical data, and “${selectedEquipObj?.name}” will record data from now
+                    forward.`}
                 </Typography.Body>
                 <Brick sizeInRem={2.5} />
                 <div className="d-flex justify-content-between">
                     <Button
-                        label="No - Start Fresh"
+                        label={`No - Don’t Re-assign`}
                         size={Button.Sizes.lg}
                         type={Button.Type.secondaryGrey}
                         onClick={() => {
                             closeReassignAlert();
                             setUnlabeledEquipObj({});
                         }}
-                        className="w-100 button-size"
+                        className="w-100"
                     />
                     <Button
-                        label="Yes - Re-assign"
+                        label={`Yes - Re-assign`}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         onClick={() => {

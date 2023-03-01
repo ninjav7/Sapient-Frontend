@@ -123,6 +123,7 @@ const BreakerConfiguration = ({
     const [existingEquipId, setExistingEquipId] = useState('');
 
     const [forceSave, setForceSave] = useState(false);
+    const [selectedEquipObj, setSelectedEquipObj] = useState({});
     const [unlabeledEquipObj, setUnlabeledEquipObj] = useState({});
 
     const defaultEquipmentObj = {
@@ -238,6 +239,7 @@ const BreakerConfiguration = ({
         setEquipmentErrors(defaultErrors);
         setExistingEquipId('');
         setUnlabeledEquipObj({});
+        setSelectedEquipObj({});
     };
 
     const handleChange = (key, value) => {
@@ -295,17 +297,6 @@ const BreakerConfiguration = ({
         }
     };
 
-    const validateReassignAlert = (breaker_obj) => {
-        if (breaker_obj?.type === 'unlabeled') {
-            let obj = {
-                id: breaker_obj?.equipment_links[0]?.id,
-                name: breaker_obj?.equipment_links[0]?.name,
-            };
-            setUnlabeledEquipObj(obj);
-            openReassignAlert();
-        }
-    };
-
     const handleBreakerTypeChange = (key, defaultBreakerType, newBreakerType) => {
         let obj = Object.assign({}, firstBreakerObj);
 
@@ -318,6 +309,12 @@ const BreakerConfiguration = ({
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
                 obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+            }
+            if (defaultBreakerType === 'unlabeled') {
+                if (parentBreakerObj?.equipment_links.length !== 0)
+                    setUnlabeledEquipObj(parentBreakerObj?.equipment_links[0]);
+                obj.equipment_link = [];
+                setSelectedEquipment('');
             }
         }
 
@@ -837,6 +834,15 @@ const BreakerConfiguration = ({
     }, [debouncedThirdSearch]);
 
     useEffect(() => {
+        if (selectedEquipment === '') setSelectedEquipObj({});
+
+        if (equipmentsList.length !== 0 && selectedEquipment !== '') {
+            let equipObj = equipmentsList.find((record) => record?.value === selectedEquipment);
+            if (equipObj?.value) setSelectedEquipObj({ id: equipObj?.value, name: equipObj?.label });
+        }
+    }, [selectedEquipment]);
+
+    useEffect(() => {
         const newList = passiveDevicesList;
         setFirstPassiveDevicesList(newList);
         setSecondPassiveDevicesList(newList);
@@ -1000,7 +1006,6 @@ const BreakerConfiguration = ({
                                                                             parentBreakerObj?.type,
                                                                             ''
                                                                         );
-                                                                        validateReassignAlert(parentBreakerObj);
                                                                     }}
                                                                 />
                                                             </div>
@@ -1037,7 +1042,6 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         if (firstBreakerObj?.type === 'unlabeled')
                                                                             return;
-
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
@@ -1597,6 +1601,8 @@ const BreakerConfiguration = ({
                 setForceSave={setForceSave}
                 unlabeledEquipObj={unlabeledEquipObj}
                 setUnlabeledEquipObj={setUnlabeledEquipObj}
+                selectedEquipObj={selectedEquipObj}
+                setSelectedEquipObj={setSelectedEquipObj}
             />
         </React.Fragment>
     );
