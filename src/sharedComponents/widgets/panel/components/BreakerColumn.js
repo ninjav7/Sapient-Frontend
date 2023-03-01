@@ -34,10 +34,10 @@ const BreakerColumn = ({ edge: [_, columnData], nodes, callBackBreakerProps, bre
         const parentBreakerItems = acc[parentBreaker]?.items;
 
         if (parentBreaker) {
-            if (parentBreakerItems.length > 2) {
+            if (parentBreakerItems?.length > 2) {
                 return { ...acc, [key]: componentProps };
             }
-            parentBreakerItems.push(componentProps.items[0]);
+            parentBreakerItems && parentBreakerItems.push(componentProps.items[0]);
         } else {
             acc[key] = componentProps;
         }

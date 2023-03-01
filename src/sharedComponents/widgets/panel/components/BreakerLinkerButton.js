@@ -12,7 +12,7 @@ const BreakerLinkerButton = ({ isLinked, onClick, edgeData, side }) => {
 
     const clickHandler = useCallback(() => {
         onClick && onClick(edgeData, setIsLoading);
-    }, []);
+    }, [edgeData]);
 
     return (
         <button
