@@ -950,8 +950,6 @@ const EditPanel = () => {
     };
 
     const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading) => {
-        console.log('SSR isBreakerLinking => ', isBreakerLinking);
-        console.log('SSR isBreakersFetched => ', isBreakersFetched);
         if (isBreakerLinking || isBreakersFetched) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
