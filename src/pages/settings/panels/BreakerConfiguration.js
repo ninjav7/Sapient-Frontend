@@ -550,10 +550,16 @@ const BreakerConfiguration = ({
             if (breakerObjThree?.breaker_id) breakerObjThree.rated_amps = firstBreakerObj?.rated_amps;
         }
 
-        if (firstBreakerObj?.voltage !== parentBreakerObj?.voltage && firstBreakerObj?.type === 'blank') {
+        if (firstBreakerObj?.voltage !== parentBreakerObj?.voltage) {
             breakerObjOne.voltage = firstBreakerObj?.voltage;
             if (breakerObjTwo?.breaker_id) breakerObjTwo.voltage = firstBreakerObj?.voltage;
             if (breakerObjThree?.breaker_id) breakerObjThree.voltage = firstBreakerObj?.voltage;
+        }
+
+        if (firstBreakerObj?.phase_configuration !== parentBreakerObj?.phase_configuration) {
+            breakerObjOne.phase_configuration = firstBreakerObj?.phase_configuration;
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.phase_configuration = firstBreakerObj?.phase_configuration;
+            if (breakerObjThree?.breaker_id) breakerObjThree.phase_configuration = firstBreakerObj?.phase_configuration;
         }
 
         if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {

@@ -947,7 +947,6 @@ const EditPanel = () => {
     };
 
     const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading, is_linking) => {
-        console.log('SSR isLinking on button click => ', is_linking);
         if (is_linking) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
@@ -1248,10 +1247,6 @@ const EditPanel = () => {
     useEffect(() => {
         pageDefaultStates();
     }, []);
-
-    useEffect(() => {
-        console.log('SSR current isLinking state ........... => ', isLinking);
-    }, [isLinking]);
 
     return (
         <React.Fragment>
