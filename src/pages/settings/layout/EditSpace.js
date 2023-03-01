@@ -1,21 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
-
 import { Button, Input, Label, Spinner } from 'reactstrap';
-import {
-    closeEditSpaceModal,
-    floorid,
-    flooridNew,
-    floorState,
-    floorStaticId,
-    reloadSpaces,
-    spaceName2,
-    spacesList,
-} from '../../store/globalState';
+import { closeEditSpaceModal, floorState, floorStaticId, reloadSpaces, spacesList } from '../../../store/globalState';
 import { Cookies } from 'react-cookie';
-import { BuildingStore } from '../../store/BuildingStore';
-import { BaseUrl, createSpace, getSpaceTypes } from '../../services/Network';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BaseUrl, createSpace } from '../../../services/Network';
 import axios from 'axios';
 
 const EditSpace = (props) => {
@@ -38,7 +28,6 @@ const EditSpace = (props) => {
     const [spaceBody, setSpaceBody] = useState({
         building_id: bldgId,
     });
-
 
     useEffect(() => {
         if (props.currentFloorId) {
