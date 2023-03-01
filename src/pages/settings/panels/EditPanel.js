@@ -91,9 +91,8 @@ const EditPanel = () => {
     const [equipmentsList, setEquipmentsList] = useState([]);
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const [breakerLinks, setBreakerLinks] = useState([]);
-    const [isBreakersFetched, setBreakersFetching] = useState(false);
     const [isEquipmentListFetching, setEquipmentFetching] = useState(false);
-    const [isBreakerLinking, setBreakerLinking] = useState(false);
+    const [isLinking, setLinking] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
     const [selectedBreakerObj, setSelectedBreakerObj] = useState({});
@@ -350,11 +349,10 @@ const EditPanel = () => {
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
                 fetchEquipmentData(bldgId);
-                setBreakerLinking(false);
             })
             .catch(() => {
-                setBreakerLinking(false);
                 setIsLoading(false);
+                setLinking(false);
             });
     };
 
@@ -365,11 +363,10 @@ const EditPanel = () => {
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
                 fetchEquipmentData(bldgId);
-                setBreakerLinking(false);
             })
             .catch(() => {
-                setBreakerLinking(false);
                 setIsLoading(false);
+                setLinking(false);
             });
     };
 
@@ -483,8 +480,8 @@ const EditPanel = () => {
                     }
                 }
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj?.id,
@@ -546,8 +543,8 @@ const EditPanel = () => {
                 return;
             }
 
-            setBreakerLinking(true);
             setIsLoading(true);
+            setLinking(true);
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -623,8 +620,8 @@ const EditPanel = () => {
                     return;
                 }
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 const equipmentID = getEquipmentForBreaker([parentBreakerObj, targetBreakerObj]);
 
@@ -693,8 +690,8 @@ const EditPanel = () => {
                     return;
                 }
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
@@ -748,8 +745,8 @@ const EditPanel = () => {
                 let equipmentId =
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -793,8 +790,8 @@ const EditPanel = () => {
                 let equipmentId =
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -840,8 +837,8 @@ const EditPanel = () => {
                 let equipmentId =
                     sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
@@ -885,8 +882,8 @@ const EditPanel = () => {
                 let equipmentId =
                     parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
 
-                setBreakerLinking(true);
                 setIsLoading(true);
+                setLinking(true);
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
@@ -923,8 +920,8 @@ const EditPanel = () => {
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
             let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
 
-            setBreakerLinking(true);
             setIsLoading(true);
+            setLinking(true);
 
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
@@ -949,8 +946,9 @@ const EditPanel = () => {
         }
     };
 
-    const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading) => {
-        if (isBreakerLinking || isBreakersFetched) return;
+    const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading, is_linking) => {
+        console.log('SSR isLinking on button click => ', is_linking);
+        if (is_linking) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
@@ -1070,7 +1068,6 @@ const EditPanel = () => {
     };
 
     const fetchBreakersData = async (panel_id, bldg_id, setIsLoading) => {
-        setBreakersFetching(true);
         const params = `?panel_id=${panel_id}&building_id=${bldg_id}`;
 
         await getBreakersList(params)
@@ -1087,16 +1084,18 @@ const EditPanel = () => {
                     s.breakersList = response;
                 });
 
-                setBreakersFetching(false);
+                setLinking(false);
                 if (setIsLoading) setIsLoading(false);
+
                 setBreakerAPITrigerred(false);
             })
             .catch(() => {
-                setBreakersFetching(false);
                 setBreakerAPITrigerred(false);
                 BreakersStore.update((s) => {
                     s.breakersList = [];
                 });
+                if (setIsLoading) setIsLoading(false);
+                setLinking(false);
             });
     };
 
@@ -1249,6 +1248,10 @@ const EditPanel = () => {
     useEffect(() => {
         pageDefaultStates();
     }, []);
+
+    useEffect(() => {
+        console.log('SSR current isLinking state ........... => ', isLinking);
+    }, [isLinking]);
 
     return (
         <React.Fragment>
@@ -1421,7 +1424,7 @@ const EditPanel = () => {
                     isLinked: 'is_linked',
                 }}
                 onBreakerLinkedClick={(props, setIsLoading) => {
-                    if (props?.source && props?.target) handleBreakerLinkClicked(props, setIsLoading);
+                    if (props?.source && props?.target) handleBreakerLinkClicked(props, setIsLoading, isLinking);
                 }}
                 nodes={breakersList}
                 edges={breakerLinks}
