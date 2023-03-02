@@ -35,7 +35,7 @@ export function addSpace(params, payload) {
     return axiosInstance.post(`${createSpace}${params}`, payload).then((res) => res);
 }
 
-export function updateSpaces(payload, params) {
+export function updateSpaces(params, payload) {
     return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
 }
 

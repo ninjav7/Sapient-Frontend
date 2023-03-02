@@ -2,18 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import { useAtom } from 'jotai';
 import '../style.css';
-import axios from 'axios';
-import { BaseUrl, createSpace, getFloors, getSpaces } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import EditFloorModal from './EditFloorModal';
-import EditSpace from './EditSpace';
+import DeleteModal from './DeleteModal';
 import { deleteFloor, getFloorsData } from '../../../store/globalState';
 import { userPermissionData } from '../../../store/globalState';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
 import Brick from '../../../sharedComponents/brick';
+import { fetchFloors, fetchSpaces, addSpace, removeFloor } from './services';
 
 const Layout = () => {
     let cookies = new Cookies();
@@ -27,6 +26,10 @@ const Layout = () => {
     const [floor, setFloor] = useState([]);
     const [floorid, setFloorid] = useState('');
     const [currentFloorId, setCurrentFloorId] = useState('');
+    const [currentSpaceId, setCurrentSpaceId] = useState('');
+    const [parentSpace, setParentSpace] = useState('');
+    const [typeName, setTypeName] = useState('');
+    const [typeId, setTypeId] = useState('');
     const [modalType, setModalType] = useState('');
 
     const [modalShow, setModalShow] = useState(false);
@@ -37,18 +40,14 @@ const Layout = () => {
         building_id: bldgId,
     });
 
-    const getFloorsFunc = () => {
-        try {
-            const headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            const params = `?building_id=${bldgId}`;
-            axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
-                setFloorData(res.data.data);
-            });
-        } catch (err) {}
+    const getFloorsFunc = async () => {
+        const params = `?building_id=${bldgId}`;
+        await fetchFloors(params)
+            .then((res) => {
+                const responseData = res?.data;
+                setFloorData(responseData?.data);
+            })
+            .catch(() => {});
     };
 
     useEffect(() => {
@@ -78,14 +77,13 @@ const Layout = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const createSpacesAPI = () => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
+    const createSpacesAPI = async () => {
         let params = `?building_id=${bldgId}`;
-        axios.post(`${BaseUrl}${createSpace}${params}`, spaceBody, { headers }).then((res) => {});
+        await addSpace(params, spaceBody)
+            .then((res) => {
+                const responseData = res?.data;
+            })
+            .catch(() => {});
     };
 
     const [userPermission] = useAtom(userPermissionData);
@@ -95,21 +93,12 @@ const Layout = () => {
         setDeletingFloorModal(false);
     };
 
-    const DeleteFloorsFunc = () => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-
-        axios.delete(`${BaseUrl}${deleteFloor}/${floorid}`, { headers }).then((res) => {});
-    };
-
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const handleDeleteAlertClose = () => setShowDeleteAlert(false);
     const handleDeleteAlertShow = () => setShowDeleteAlert(true);
 
     const [floorName, setFloorName] = useState('');
+    const [spaceName, setSpaceName] = useState('');
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
         nativeHandler();
@@ -118,17 +107,16 @@ const Layout = () => {
         }
 
         setIsLoadingLastColumn(true);
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
         const params = `?floor_id=${data.floor_id}&building_id=${bldgId}`;
-        axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
-            setSpaces(res.data.data);
-
-            setIsLoadingLastColumn(false);
-        });
+        await fetchSpaces(params)
+            .then((res) => {
+                const responseData = res?.data;
+                setSpaces(responseData.data);
+                setIsLoadingLastColumn(false);
+            })
+            .catch(() => {
+                setIsLoadingLastColumn(false);
+            });
     };
 
     return (
@@ -141,7 +129,18 @@ const Layout = () => {
                 handleDeleteAlertShow={handleDeleteAlertShow}
                 modalType={modalType}
                 currentFloorId={currentFloorId}
+                currentSpaceId={currentSpaceId}
+                spaceName={spaceName}
+                typeId={typeId}
+                getFloorsFunc={getFloorsFunc}
                 onHide={() => setModalShow(false)}
+            />
+            <DeleteModal
+                show={showDeleteAlert}
+                modalType={modalType}
+                currentFloorId={currentFloorId}
+                getFloorsFunc={getFloorsFunc}
+                onHide={() => handleDeleteAlertClose()}
             />
 
             <Row className="page-title">
@@ -164,11 +163,31 @@ const Layout = () => {
                                 setEditFloor(false);
                                 setModalType('floor');
                                 setCurrentFloorId('');
+                                setSpaceName('');
+                                setFloorName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
                             } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
                                 setModalShow(true);
                                 setEditFloor(false);
                                 setModalType('spaces');
                                 setCurrentFloorId(args?.floor_id);
+                                setSpaceName('');
+                                setFloorName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
+                            } else {
+                                setModalShow(true);
+                                setEditFloor(false);
+                                setModalType('spaces');
+                                setCurrentFloorId(args?.parents);
+                                setCurrentSpaceId(args?._id);
+                                setSpaceName('');
+                                setFloorName('');
+                                setParentSpace('');
+                                setTypeId('');
                             }
                         }}
                         onColumnNameEdit={(args) => {
@@ -176,15 +195,45 @@ const Layout = () => {
                                 setModalShow(true);
                                 setEditFloor(true);
                                 setModalType('floor');
-                                setCurrentFloorId('');
+                                setCurrentFloorId(args?.floor_id);
+                                setFloorName(args?.name);
+                                setSpaceName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
+                            } else {
+                                setModalShow(true);
+                                setEditFloor(true);
+                                setModalType('spaces');
+                                setCurrentFloorId(args?.parents);
+                                setFloorName('');
+                                setSpaceName(args?.name);
+                                setCurrentSpaceId(args?._id);
+                                setParentSpace(args?.parent_space);
+                                setTypeId(args?.type_id);
                             }
                         }}
                         onItemEdit={(args) => {
                             if (args?.floor_id !== undefined && args?.floor_id !== '') {
                                 setModalShow(true);
                                 setEditFloor(true);
-                                setModalType('floor');
-                                setCurrentFloorId('');
+                                setModalType('spaces');
+                                setCurrentFloorId(args?.parents);
+                                setFloorName(args?.name);
+                                setSpaceName('');
+                                setCurrentSpaceId('');
+                                setParentSpace('');
+                                setTypeId('');
+                            } else {
+                                setModalShow(true);
+                                setEditFloor(true);
+                                setModalType('spaces');
+                                setFloorName('');
+                                setCurrentFloorId(args?.parents);
+                                setSpaceName(args?.name);
+                                setCurrentSpaceId(args?._id);
+                                setParentSpace(args?.parent_space);
+                                setTypeId(args?.type_id);
                             }
                         }}
                         onClickEachChild={[onClickForAllItems]}
