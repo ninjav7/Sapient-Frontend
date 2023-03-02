@@ -7,8 +7,8 @@ import Brick from '../../../sharedComponents/brick';
 const ReassignAlert = ({
     showReassignAlert,
     closeReassignAlert,
-    unlabeledEquipObj,
-    selectedEquipObj,
+    currentEquipObj,
+    newEquipObj,
     saveBreakersDetails,
     openBreakerConfigModal,
 }) => {
@@ -18,17 +18,17 @@ const ReassignAlert = ({
                 <Typography.Header size={Typography.Sizes.lg}>Re-assign Existing Data?</Typography.Header>
                 <Brick sizeInRem={2} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`Would you like the data already recorded as “${unlabeledEquipObj?.name}” associated with
-                    “${selectedEquipObj?.name}”?`}
+                    {`Would you like the data already recorded as “${currentEquipObj?.name}” associated with
+                    “${newEquipObj?.name}”?`}
                 </Typography.Body>
                 <Brick sizeInRem={1.25} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`If you re-assign records, “${unlabeledEquipObj?.name}” will be updated to “${selectedEquipObj?.name}” in all
-                    historical data, and the duplicate “${unlabeledEquipObj?.name}” will be removed.`}
+                    {`If you re-assign records, “${currentEquipObj?.name}” will be updated to “${newEquipObj?.name}” in all
+                    historical data, and the duplicate “${currentEquipObj?.name}” will be removed.`}
                 </Typography.Body>
                 <Brick sizeInRem={1.25} />
                 <Typography.Body size={Typography.Sizes.lg}>
-                    {`If you do not re-assign records, “${unlabeledEquipObj?.name}” will retain historical data, and “${selectedEquipObj?.name}” will record data from now
+                    {`If you do not re-assign records, “${currentEquipObj?.name}” will retain historical data, and “${newEquipObj?.name}” will record data from now
                     forward.`}
                 </Typography.Body>
                 <Brick sizeInRem={2.5} />
