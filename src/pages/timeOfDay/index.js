@@ -392,18 +392,18 @@ const TimeOfDay = () => {
 
                     let finalList = [];
 
-                    mon.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    tue.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    wed.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    thu.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    fri.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    sat.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    mon.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    tue.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    wed.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    thu.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    fri.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    sat.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    sun.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
 
                     finalList.sort((a, b) => a - b);
 
-                    let minVal = finalList[0];
-                    let maxVal = finalList[finalList.length - 1];
+                    let minVal = parseFloat(finalList[0]);
+                    let maxVal = parseFloat(finalList[finalList.length - 1]);
 
                     if (minVal === maxVal) {
                         minVal = 0;
