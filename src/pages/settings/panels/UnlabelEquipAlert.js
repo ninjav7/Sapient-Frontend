@@ -4,7 +4,12 @@ import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
 
-const UnlabelEquipAlert = ({ showUnlabeledAlert, closeUnlabelAlertModal, setForceUpdate }) => {
+const UnlabelEquipAlert = ({
+    showUnlabeledAlert,
+    closeUnlabelAlertModal,
+    saveBreakersDetails,
+    openBreakerConfigModal,
+}) => {
     return (
         <>
             <Modal
@@ -26,8 +31,9 @@ const UnlabelEquipAlert = ({ showUnlabeledAlert, closeUnlabelAlertModal, setForc
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         onClick={() => {
-                            setForceUpdate(true);
                             closeUnlabelAlertModal();
+                            openBreakerConfigModal();
+                            saveBreakersDetails('forceUpdate');
                         }}
                     />
                     <Button
@@ -35,8 +41,9 @@ const UnlabelEquipAlert = ({ showUnlabeledAlert, closeUnlabelAlertModal, setForc
                         size={Button.Sizes.lg}
                         type={Button.Type.secondaryGrey}
                         onClick={() => {
-                            setForceUpdate(false);
                             closeUnlabelAlertModal();
+                            openBreakerConfigModal();
+                            saveBreakersDetails('forceUpdate');
                         }}
                     />
                 </Modal.Footer>

@@ -68,9 +68,8 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
             },
         })
         .then((res) => {
-            console.log('RESSS', res);
             return res;
-        })
+        });
 }
 
 export function getListSensorsForBuildingsRequest(page_size, pageNo, ruleId, activeBuildingId, getParams) {
@@ -123,6 +122,7 @@ export function getUnlinkedSocketRules(
     floorTypeFilterString,
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
+    assignedRuleFilterString,
     withPagination,
     getParams
 ) {
@@ -148,6 +148,7 @@ export function getUnlinkedSocketRules(
                     floor_id: floorTypeFilterString,
                     space_id: spaceTypeFilterString,
                     space_type_id: spaceTypeTypeFilterString,
+                    assigned_rule: assignedRuleFilterString,
                     mac_address: macTypeFilterString,
                     ...getParams,
                 },
@@ -155,7 +156,7 @@ export function getUnlinkedSocketRules(
             ),
         })
         .then((res) => {
-            return res;
+            return res.data;
         });
 }
 

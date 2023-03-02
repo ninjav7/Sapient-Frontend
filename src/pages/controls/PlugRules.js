@@ -22,7 +22,14 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
+import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
 
+const buttonGroupFilterOptions = [
+    { label: 'All' },
+    { label: 'Active', icon: <ActiveSVG className="bg-grey" /> },
+    { label: 'Inactive', icon: <InactiveSVG className="bg-grey" /> },
+];
 const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
     const history = useHistory();
 
@@ -332,9 +339,32 @@ const PlugRules = () => {
             return newRow;
         });
 
+    const renderStatus = (row) => {
+        return (
+            <>
+                {row.is_active ? (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="active-container justify-content-center">
+                        <ActiveSVG style={{ marginTop: '0.125rem' }} />
+                        Active
+                    </Typography.Subheader>
+                ) : (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="inactive-container justify-content-center">
+                        <InactiveSVG style={{ marginTop: '0.125rem' }} />
+                        Inactive
+                    </Typography.Subheader>
+                )}
+            </>
+        );
+    };
+
     const headerProps = [
         { name: 'Name', accessor: 'name' },
         { name: 'Description', accessor: 'description' },
+        { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
         { name: 'Socket Count', accessor: 'sensors_count' },
     ];
@@ -395,45 +425,47 @@ const PlugRules = () => {
                     </div>
                 </div>
             </div>
+            <div className="plug-rules-body">
+                <Row>
+                    <Col lg={12}>
+                        <Brick sizeInRem={2} />
+                        {skeletonLoading ? (
+                            <SkeletonTheme color="#202020" height={35}>
+                                <table cellPadding={5} className="table">
+                                    <tr>
+                                        <th width={130}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-            <Row>
-                <Col lg={12}>
-                    <Brick sizeInRem={2} />
-                    {skeletonLoading ? (
-                        <SkeletonTheme color="#202020" height={35}>
-                            <table cellPadding={5} className="table">
-                                <tr>
-                                    <th width={130}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={190}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={190}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={200}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={200}>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                </tr>
-                            </table>
-                        </SkeletonTheme>
-                    ) : (
-                        <DataTableWidget
-                            id="plugRulesTable1"
-                            onSearch={setSearch}
-                            onStatus={setSelectedTab}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                        />
-                    )}
-                </Col>
-            </Row>
+                                        <th>
+                                            <Skeleton count={5} />
+                                        </th>
+                                    </tr>
+                                </table>
+                            </SkeletonTheme>
+                        ) : (
+                            <DataTableWidget
+                                id="plugRulesTable1"
+                                onSearch={setSearch}
+                                onStatus={setSelectedTab}
+                                buttonGroupFilterOptions={buttonGroupFilterOptions}
+                                rows={currentRow()}
+                                searchResultRows={currentRow()}
+                                onDownload={() => handleDownloadCsv()}
+                                headers={headerProps}
+                            />
+                        )}
+                    </Col>
+                </Row>
+            </div>
 
             {/* Add Rule Model  */}
             <Modal show={showAddRule} onHide={handleAddRuleClose} centered>
