@@ -118,8 +118,12 @@ const BreakerConfiguration = ({
     const [isResetting, setIsResetting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+
     const [forceUpdate, setForceUpdate] = useState(false);
     const [existingEquipId, setExistingEquipId] = useState('');
+
+    const [selectedEquipObj, setSelectedEquipObj] = useState({});
+    const [unlabeledEquipObj, setUnlabeledEquipObj] = useState({});
 
     const defaultEquipmentObj = {
         name: '',
@@ -228,10 +232,11 @@ const BreakerConfiguration = ({
         setActiveTab('edit-breaker');
         setActiveEquipTab('equip');
         setSelectedBreakerObj({});
-        setForceUpdate(false);
         setEquipmentObj(defaultEquipmentObj);
         setEquipmentErrors(defaultErrors);
         setExistingEquipId('');
+        setUnlabeledEquipObj({});
+        setSelectedEquipObj({});
     };
 
     const handleChange = (key, value) => {
@@ -281,11 +286,17 @@ const BreakerConfiguration = ({
     };
 
     const validateUnlabledChange = () => {
-        if (equipmentsList.length === 0) return;
+        if (equipmentsList.length === 0) {
+            saveBreakersDetails();
+            return;
+        }
         const equipment = equipmentsList.find((record) => (record?.label).toLowerCase() === 'unlabeled');
         if (equipment?.value) {
             setExistingEquipId(equipment?.value);
+            closeBreakerConfigModal();
             openUnlabelAlertModal();
+        } else {
+            saveBreakersDetails();
         }
     };
 
@@ -301,6 +312,13 @@ const BreakerConfiguration = ({
                 obj.rated_amps = 0;
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
                 obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
+            }
+            if (defaultBreakerType === 'unlabeled') {
+                if (parentBreakerObj?.equipment_links.length !== 0) {
+                    setUnlabeledEquipObj(parentBreakerObj?.equipment_links[0]);
+                }
+                obj.equipment_link = [];
+                setSelectedEquipment('');
             }
         }
 
@@ -459,7 +477,7 @@ const BreakerConfiguration = ({
                 setIsResetting(false);
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
-                closeBreakerConfigModal();
+                closeModalWithoutSave();
                 setBreakerAPITrigerred(true);
             })
             .catch(() => {
@@ -477,7 +495,7 @@ const BreakerConfiguration = ({
                 handleDeleteAlertClose();
 
                 if (response?.status === 200) {
-                    closeBreakerConfigModal();
+                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker deleted successfully.';
@@ -502,22 +520,24 @@ const BreakerConfiguration = ({
             });
     };
 
-    const saveBreakersDetails = async () => {
+    const saveBreakersDetails = async (update_type) => {
         let alertObj = Object.assign({}, errorObj);
-
         if (firstBreakerObj?.rated_amps === '' && firstBreakerObj?.type !== 'blank')
             alertObj.rated_amps = 'Please enter Amps';
         if (firstBreakerObj?.rated_amps % 5 !== 0 && firstBreakerObj?.type !== 'blank')
             alertObj.rated_amps = 'Amps must be in increments of 5';
-
         setErrorObj(alertObj);
+
         if (alertObj.rated_amps) return;
 
         setIsProcessing(true);
 
         let breakerTypeObj = {};
 
-        const params = `?building_id=${bldgId}`;
+        let params = `?building_id=${bldgId}`;
+
+        if (update_type === 'forceSave') params = params.concat(`&force_save=true`);
+
         const breakersList = [];
 
         let breakerObjOne = { breaker_id: firstBreakerObj?.id };
@@ -530,16 +550,30 @@ const BreakerConfiguration = ({
             if (breakerObjThree?.breaker_id) breakerObjThree.rated_amps = firstBreakerObj?.rated_amps;
         }
 
-        if (firstBreakerObj?.voltage !== parentBreakerObj?.voltage && firstBreakerObj?.type === 'blank') {
+        if (firstBreakerObj?.voltage !== parentBreakerObj?.voltage) {
             breakerObjOne.voltage = firstBreakerObj?.voltage;
             if (breakerObjTwo?.breaker_id) breakerObjTwo.voltage = firstBreakerObj?.voltage;
             if (breakerObjThree?.breaker_id) breakerObjThree.voltage = firstBreakerObj?.voltage;
         }
 
-        if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
+        if (firstBreakerObj?.phase_configuration !== parentBreakerObj?.phase_configuration) {
+            breakerObjOne.phase_configuration = firstBreakerObj?.phase_configuration;
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.phase_configuration = firstBreakerObj?.phase_configuration;
+            if (breakerObjThree?.breaker_id) breakerObjThree.phase_configuration = firstBreakerObj?.phase_configuration;
+        }
+
+        if (
+            firstBreakerObj?.equipment_link.length !== 0 &&
+            parentBreakerObj?.equipment_link.length !== 0 &&
+            firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]
+        ) {
             breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [firstBreakerObj?.equipment_link];
+        } else {
+            breakerObjOne.equipment_link = [];
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [];
+            if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [];
         }
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
@@ -603,7 +637,7 @@ const BreakerConfiguration = ({
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === '') {
             let params = '';
-            if (forceUpdate) {
+            if (update_type === 'forceUpdate') {
                 params = `?force_save=true`;
                 if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
             }
@@ -618,7 +652,7 @@ const BreakerConfiguration = ({
                     (response.length === 1 && response[0]?.status === 200) ||
                     (response.length === 2 && response[0]?.status === 200 && response[1]?.status === 200)
                 ) {
-                    closeBreakerConfigModal();
+                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker configuration updated successfully.';
@@ -639,6 +673,22 @@ const BreakerConfiguration = ({
             .catch(() => {
                 setIsProcessing(false);
             });
+    };
+
+    const onSaveButonClick = () => {
+        if (
+            parentBreakerObj?.type === 'unlabeled' &&
+            firstBreakerObj?.type === '' &&
+            firstBreakerObj?.equipment_link.length !== 0
+        ) {
+            openReassignAlert();
+            return;
+        }
+        if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
+            validateUnlabledChange();
+            return;
+        }
+        saveBreakersDetails();
     };
 
     const fetchSensorsList = async (deviceId, breakerLvl) => {
@@ -811,6 +861,15 @@ const BreakerConfiguration = ({
     }, [debouncedThirdSearch]);
 
     useEffect(() => {
+        if (selectedEquipment === '') setSelectedEquipObj({});
+
+        if (equipmentsList.length !== 0 && selectedEquipment !== '') {
+            let equipObj = equipmentsList.find((record) => record?.value === selectedEquipment);
+            if (equipObj?.value) setSelectedEquipObj({ id: equipObj?.value, name: equipObj?.label });
+        }
+    }, [selectedEquipment]);
+
+    useEffect(() => {
         const newList = passiveDevicesList;
         setFirstPassiveDevicesList(newList);
         setSecondPassiveDevicesList(newList);
@@ -821,13 +880,12 @@ const BreakerConfiguration = ({
         <React.Fragment>
             <Modal
                 show={showBreakerConfigModal}
-                onHide={closeBreakerConfigModal}
+                onHide={closeModalWithoutSave}
                 size="xl"
                 centered
                 backdrop="static"
                 keyboard={false}
-                // style={{ opacity: showUnlabeledAlert ? '0.5' : '1' }}
-            >
+                dialogClassName={showUnlabeledAlert || showReassignAlert ? 'child-modal-style' : ''}>
                 <div>
                     <div
                         className="passive-header-wrapper d-flex justify-content-between"
@@ -878,7 +936,7 @@ const BreakerConfiguration = ({
                                     label={isProcessing ? 'Saving...' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={saveBreakersDetails}
+                                    onClick={onSaveButonClick}
                                     className="ml-2"
                                     disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
                                 />
@@ -1011,13 +1069,11 @@ const BreakerConfiguration = ({
                                                                     onClick={(e) => {
                                                                         if (firstBreakerObj?.type === 'unlabeled')
                                                                             return;
-
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
                                                                             'unlabeled'
                                                                         );
-                                                                        validateUnlabledChange();
                                                                     }}
                                                                 />
                                                             </div>
@@ -1496,7 +1552,7 @@ const BreakerConfiguration = ({
                                                             parentBreakerObj?.type === 'unwired'
                                                         )
                                                             return;
-                                                        closeBreakerConfigModal();
+                                                        closeModalWithoutSave();
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
@@ -1514,7 +1570,7 @@ const BreakerConfiguration = ({
                                                             firstBreakerObj?.breaker_type === 1 &&
                                                             breakersList.length === firstBreakerObj?.breaker_number
                                                         ) {
-                                                            closeBreakerConfigModal();
+                                                            closeModalWithoutSave();
                                                             handleDeleteAlertShow();
                                                         }
                                                     }}
@@ -1562,10 +1618,18 @@ const BreakerConfiguration = ({
             <UnlabelEquipAlert
                 showUnlabeledAlert={showUnlabeledAlert}
                 closeUnlabelAlertModal={closeUnlabelAlertModal}
-                setForceUpdate={setForceUpdate}
+                saveBreakersDetails={saveBreakersDetails}
+                openBreakerConfigModal={openBreakerConfigModal}
             />
 
-            <ReassignAlert showReassignAlert={showReassignAlert} closeReassignAlert={closeReassignAlert} />
+            <ReassignAlert
+                showReassignAlert={showReassignAlert}
+                closeReassignAlert={closeReassignAlert}
+                unlabeledEquipObj={unlabeledEquipObj}
+                selectedEquipObj={selectedEquipObj}
+                saveBreakersDetails={saveBreakersDetails}
+                openBreakerConfigModal={openBreakerConfigModal}
+            />
         </React.Fragment>
     );
 };
