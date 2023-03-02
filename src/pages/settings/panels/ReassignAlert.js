@@ -12,6 +12,8 @@ const ReassignAlert = ({
     setUnlabeledEquipObj,
     selectedEquipObj,
     setSelectedEquipObj,
+    saveBreakersDetails,
+    openBreakerConfigModal,
 }) => {
     return (
         <Modal show={showReassignAlert} onHide={closeReassignAlert} centered backdrop="static" keyboard={false}>
@@ -40,7 +42,8 @@ const ReassignAlert = ({
                         type={Button.Type.secondaryGrey}
                         onClick={() => {
                             closeReassignAlert();
-                            setUnlabeledEquipObj({});
+                            openBreakerConfigModal();
+                            saveBreakersDetails();
                         }}
                         className="w-100"
                     />
@@ -51,6 +54,8 @@ const ReassignAlert = ({
                         onClick={() => {
                             setForceSave(true);
                             closeReassignAlert();
+                            openBreakerConfigModal();
+                            saveBreakersDetails('forceSave');
                         }}
                         className="w-100"
                     />

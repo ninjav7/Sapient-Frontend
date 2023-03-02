@@ -516,15 +516,14 @@ const BreakerConfiguration = ({
             });
     };
 
-    const saveBreakersDetails = async () => {
+    const saveBreakersDetails = async (update_type) => {
         let alertObj = Object.assign({}, errorObj);
-
         if (firstBreakerObj?.rated_amps === '' && firstBreakerObj?.type !== 'blank')
             alertObj.rated_amps = 'Please enter Amps';
         if (firstBreakerObj?.rated_amps % 5 !== 0 && firstBreakerObj?.type !== 'blank')
             alertObj.rated_amps = 'Amps must be in increments of 5';
-
         setErrorObj(alertObj);
+
         if (alertObj.rated_amps) return;
 
         setIsProcessing(true);
@@ -533,7 +532,7 @@ const BreakerConfiguration = ({
 
         let params = `?building_id=${bldgId}`;
 
-        if (forceSave) params = params.concat(`&force_save=true`);
+        if (update_type === 'forceSave') params = params.concat(`&force_save=true`);
 
         const breakersList = [];
 
@@ -626,7 +625,7 @@ const BreakerConfiguration = ({
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === '') {
             let params = '';
-            if (forceUpdate) {
+            if (update_type === 'forceUpdate') {
                 params = `?force_save=true`;
                 if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
             }
@@ -662,6 +661,18 @@ const BreakerConfiguration = ({
             .catch(() => {
                 setIsProcessing(false);
             });
+    };
+
+    const onSaveButonClick = () => {
+        if (
+            parentBreakerObj?.type === 'unlabeled' &&
+            firstBreakerObj?.type === '' &&
+            firstBreakerObj?.equipment_link.length !== 0
+        ) {
+            openReassignAlert();
+        } else {
+            saveBreakersDetails();
+        }
     };
 
     const fetchSensorsList = async (deviceId, breakerLvl) => {
@@ -909,7 +920,7 @@ const BreakerConfiguration = ({
                                     label={isProcessing ? 'Saving...' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={saveBreakersDetails}
+                                    onClick={onSaveButonClick}
                                     className="ml-2"
                                     disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
                                 />
@@ -1593,6 +1604,7 @@ const BreakerConfiguration = ({
                 showUnlabeledAlert={showUnlabeledAlert}
                 closeUnlabelAlertModal={closeUnlabelAlertModal}
                 setForceUpdate={setForceUpdate}
+                saveBreakersDetails={saveBreakersDetails}
             />
 
             <ReassignAlert
@@ -1603,6 +1615,8 @@ const BreakerConfiguration = ({
                 setUnlabeledEquipObj={setUnlabeledEquipObj}
                 selectedEquipObj={selectedEquipObj}
                 setSelectedEquipObj={setSelectedEquipObj}
+                saveBreakersDetails={saveBreakersDetails}
+                openBreakerConfigModal={openBreakerConfigModal}
             />
         </React.Fragment>
     );
