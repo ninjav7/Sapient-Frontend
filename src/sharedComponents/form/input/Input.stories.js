@@ -31,9 +31,18 @@ export const Default = (props) => {
             <Brick />
             <Input label="Label text" />
             <Brick />
-            <InputTooltip tooltipText="Help text" label="Input with Label text and Tooltip" />
+            <InputTooltip disabled tooltipText="Help text" label="Input with Label text and Tooltip" />
             <Brick />
-            <InputTooltip tooltipText="Help text" label="Input with Tooltip and with Error" error="Error message" />
+            <InputTooltip disabled tooltipText="Help text" label="Input with Tooltip and with Error" error="Error message" />
+            <Brick />
+            <h5>Placeholder</h5>
+            <Input placeholder='olivia@untitledui.com' disabled />
+            <Brick />
+            <h5>Disabled</h5>
+            <Input value='olivia@untitledui.com' disabled />
+            <Brick />
+            <h5>Focused</h5>
+            <Input value='olivia@untitledui.com' autoFocus />
         </>
     );
 };
