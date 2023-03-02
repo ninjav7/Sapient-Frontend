@@ -122,7 +122,6 @@ const BreakerConfiguration = ({
     const [forceUpdate, setForceUpdate] = useState(false);
     const [existingEquipId, setExistingEquipId] = useState('');
 
-    const [forceSave, setForceSave] = useState(false);
     const [selectedEquipObj, setSelectedEquipObj] = useState({});
     const [unlabeledEquipObj, setUnlabeledEquipObj] = useState({});
 
@@ -233,8 +232,6 @@ const BreakerConfiguration = ({
         setActiveTab('edit-breaker');
         setActiveEquipTab('equip');
         setSelectedBreakerObj({});
-        setForceUpdate(false);
-        setForceSave(false);
         setEquipmentObj(defaultEquipmentObj);
         setEquipmentErrors(defaultErrors);
         setExistingEquipId('');
@@ -289,11 +286,17 @@ const BreakerConfiguration = ({
     };
 
     const validateUnlabledChange = () => {
-        if (equipmentsList.length === 0) return;
+        if (equipmentsList.length === 0) {
+            saveBreakersDetails();
+            return;
+        }
         const equipment = equipmentsList.find((record) => (record?.label).toLowerCase() === 'unlabeled');
         if (equipment?.value) {
             setExistingEquipId(equipment?.value);
+            closeBreakerConfigModal();
             openUnlabelAlertModal();
+        } else {
+            saveBreakersDetails();
         }
     };
 
@@ -311,8 +314,9 @@ const BreakerConfiguration = ({
                 obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
             if (defaultBreakerType === 'unlabeled') {
-                if (parentBreakerObj?.equipment_links.length !== 0)
+                if (parentBreakerObj?.equipment_links.length !== 0) {
                     setUnlabeledEquipObj(parentBreakerObj?.equipment_links[0]);
+                }
                 obj.equipment_link = [];
                 setSelectedEquipment('');
             }
@@ -558,10 +562,18 @@ const BreakerConfiguration = ({
             if (breakerObjThree?.breaker_id) breakerObjThree.phase_configuration = firstBreakerObj?.phase_configuration;
         }
 
-        if (firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]) {
+        if (
+            firstBreakerObj?.equipment_link.length !== 0 &&
+            parentBreakerObj?.equipment_link.length !== 0 &&
+            firstBreakerObj?.equipment_link[0] !== parentBreakerObj?.equipment_link[0]
+        ) {
             breakerObjOne.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [firstBreakerObj?.equipment_link];
             if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [firstBreakerObj?.equipment_link];
+        } else {
+            breakerObjOne.equipment_link = [];
+            if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = [];
+            if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = [];
         }
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
@@ -670,9 +682,13 @@ const BreakerConfiguration = ({
             firstBreakerObj?.equipment_link.length !== 0
         ) {
             openReassignAlert();
-        } else {
-            saveBreakersDetails();
+            return;
         }
+        if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
+            validateUnlabledChange();
+            return;
+        }
+        saveBreakersDetails();
     };
 
     const fetchSensorsList = async (deviceId, breakerLvl) => {
@@ -1058,7 +1074,6 @@ const BreakerConfiguration = ({
                                                                             parentBreakerObj?.type,
                                                                             'unlabeled'
                                                                         );
-                                                                        validateUnlabledChange();
                                                                     }}
                                                                 />
                                                             </div>
@@ -1603,18 +1618,15 @@ const BreakerConfiguration = ({
             <UnlabelEquipAlert
                 showUnlabeledAlert={showUnlabeledAlert}
                 closeUnlabelAlertModal={closeUnlabelAlertModal}
-                setForceUpdate={setForceUpdate}
                 saveBreakersDetails={saveBreakersDetails}
+                openBreakerConfigModal={openBreakerConfigModal}
             />
 
             <ReassignAlert
                 showReassignAlert={showReassignAlert}
                 closeReassignAlert={closeReassignAlert}
-                setForceSave={setForceSave}
                 unlabeledEquipObj={unlabeledEquipObj}
-                setUnlabeledEquipObj={setUnlabeledEquipObj}
                 selectedEquipObj={selectedEquipObj}
-                setSelectedEquipObj={setSelectedEquipObj}
                 saveBreakersDetails={saveBreakersDetails}
                 openBreakerConfigModal={openBreakerConfigModal}
             />

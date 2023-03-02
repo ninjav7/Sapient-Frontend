@@ -7,11 +7,8 @@ import Brick from '../../../sharedComponents/brick';
 const ReassignAlert = ({
     showReassignAlert,
     closeReassignAlert,
-    setForceSave,
     unlabeledEquipObj,
-    setUnlabeledEquipObj,
     selectedEquipObj,
-    setSelectedEquipObj,
     saveBreakersDetails,
     openBreakerConfigModal,
 }) => {
@@ -52,7 +49,6 @@ const ReassignAlert = ({
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         onClick={() => {
-                            setForceSave(true);
                             closeReassignAlert();
                             openBreakerConfigModal();
                             saveBreakersDetails('forceSave');
