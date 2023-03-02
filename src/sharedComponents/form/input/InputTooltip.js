@@ -19,12 +19,14 @@ const InputTooltip = ({
     tooltipId = generateID(),
     inputClassName = '',
     className = '',
+    disabled,
     labelSize = Typography.Sizes.sm,
     ...props
 }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
         'element-end': !!tooltipText,
         error: !!props.error,
+        disabled,
     });
 
     return (
@@ -38,7 +40,7 @@ const InputTooltip = ({
 
             <div className="input-inner-wrapper">
                 {iconUrl && <img className="input-icon" src={iconUrl} />}
-                <FormControl {...props} className={`input-control ${inputClassName}`} />
+                <FormControl {...props} disabled={disabled} className={`input-control ${inputClassName}`} />
 
                 {tooltipText && !props.error && (
                     <>
