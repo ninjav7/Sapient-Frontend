@@ -10,6 +10,8 @@ const UngroupAlert = ({
     handleUngroupAlertClose,
     alertMessage = 'Unable to group Breakers.',
     setAlertMessage,
+    additionalMessage,
+    setAdditionalMessage,
 }) => {
     return (
         <Modal show={showUngroupAlert} onHide={handleUngroupAlertClose} centered backdrop="static" keyboard={false}>
@@ -22,7 +24,18 @@ const UngroupAlert = ({
                     title={alertMessage}
                     isShownCloseBtn={false}
                 />
-                <Brick sizeInRem={2.5} />
+
+                {additionalMessage && (
+                    <>
+                        <Brick sizeInRem={1.5} />
+                        <Typography.Body size={Typography.Sizes.lg}>
+                            Please reset the configuration of at least one of the breakers to group these two breakers
+                            together.
+                        </Typography.Body>
+                    </>
+                )}
+
+                <Brick sizeInRem={additionalMessage ? 2 : 2.5} />
                 <Button
                     label="OK"
                     size={Button.Sizes.lg}
@@ -30,6 +43,7 @@ const UngroupAlert = ({
                     onClick={() => {
                         handleUngroupAlertClose();
                         setAlertMessage('');
+                        setAdditionalMessage(false);
                     }}
                     className="w-100 justify-content-center align-items-center"
                 />
