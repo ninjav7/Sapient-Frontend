@@ -479,7 +479,7 @@ const BuildingOverview = () => {
                                 startEndDayCount={startEndDayCount}
                                 timeZone={timeZone}
                                 pageType="building"
-                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                                handleRouteChange={() => handleRouteChange('/energy/end-uses/plug')}
                                 showRouteBtn={true}
                             />
 
