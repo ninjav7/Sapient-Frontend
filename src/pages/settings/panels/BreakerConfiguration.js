@@ -189,7 +189,13 @@ const BreakerConfiguration = ({
                     const response = res?.data;
                     if (response?.success) {
                         fetchEquipmentData(bldgId);
-                        if (response?.id) setSelectedEquipment(response?.id);
+                        if (response?.id) {
+                            setSelectedEquipment(response?.id);
+                            setNewEquipObj({
+                                id: response?.id,
+                                name: obj?.name
+                            })
+                        }
                         openSnackbar({
                             title: 'Equipment created successfully.',
                             type: Notification.Types.success,
