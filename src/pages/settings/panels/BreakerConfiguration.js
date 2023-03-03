@@ -568,9 +568,6 @@ const BreakerConfiguration = ({
 
         let equipLink;
 
-        console.log('SSR currentEquipObj => ', currentEquipObj);
-        console.log('SSR newEquipObj => ', newEquipObj);
-
         // Equip TO No-Equip attached
         if (currentEquipObj?.id && !newEquipObj?.id) equipLink = [];
 
@@ -583,8 +580,6 @@ const BreakerConfiguration = ({
         breakerObjOne.equipment_link = equipLink;
         if (breakerObjTwo?.breaker_id) breakerObjTwo.equipment_link = equipLink;
         if (breakerObjThree?.breaker_id) breakerObjThree.equipment_link = equipLink;
-
-        console.log('SSR equipLink => ', equipLink);
 
         if (firstBreakerObj?.device_link !== parentBreakerObj?.device_link) {
             breakerObjOne.device_link = firstBreakerObj?.device_link;
