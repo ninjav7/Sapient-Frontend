@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
 import { Row } from 'reactstrap';
@@ -18,6 +19,7 @@ import './style.css';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
+import { buildingData } from '../../store/globalState';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -27,6 +29,8 @@ const EndUseType = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const [buildingListData] = useAtom(buildingData);
+    const [isPlugOnly, setIsPlugOnly] = useState(false);
 
     const [equipTypeChartOptions, setEquipTypeChartOptions] = useState({
         chart: {
@@ -237,6 +241,7 @@ const EndUseType = () => {
                         active: true,
                     },
                 ];
+                if (isPlugOnly) newList.shift();
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
@@ -284,11 +289,18 @@ const EndUseType = () => {
             });
         };
         updateBreadcrumbStore();
-    }, [endUseName]);
+    }, [endUseName, isPlugOnly]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         if (endUseType === 'hvac') {

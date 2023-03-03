@@ -37,6 +37,7 @@ import { ReactComponent as AttachedSVG } from '../../assets/icon/active-devices/
 import { ReactComponent as SocketSVG } from '../../assets/icon/active-devices/socket.svg';
 import './styles.scss';
 import '../settings/passive-devices/styles.scss';
+import { UserStore } from '../../store/UserStore';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -80,6 +81,7 @@ const EquipChartModal = ({
     const [ytdData, setYtdData] = useState({});
     const [sensors, setSensors] = useState([]);
     const [isModified, setModification] = useState(false);
+    const [isProcessing, setProcessing] = useState(false);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [equipData, setEquipData] = useState({});
     const [originalEquipData, setOriginalEquipData] = useState({});
@@ -102,14 +104,17 @@ const EquipChartModal = ({
     };
 
     const handleEquipmentUpdate = async () => {
+        setProcessing(true);
         let obj = {};
 
         if (originalEquipData?.equipments_name !== equipData?.equipments_name) obj.name = equipData?.equipments_name;
 
         if (originalEquipData?.location_id !== equipData?.location_id) obj.space_id = equipData?.location_id;
 
-        if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id)
+        if (originalEquipData?.equipments_type_id !== equipData?.equipments_type_id) {
             obj.equipment_type = equipData?.equipments_type_id;
+            obj.end_use = equipData?.end_use_id;
+        }
 
         if (originalEquipData?.end_use_id !== equipData?.end_use_id) obj.end_use = equipData?.end_use_id;
 
@@ -120,22 +125,42 @@ const EquipChartModal = ({
         const params = `?equipment_id=${equipData?.equipments_id}`;
         await updateEquipmentDetails(params, obj)
             .then((res) => {
-                let arr = apiRequestBody(startDate, endDate, timeZone);
-                setSelectedTab(0);
-                setEquipData({});
-                setOriginalEquipData({});
-                setModification(false);
+                const response = res?.data;
                 if (activePage === 'explore') setSelectedTab(0);
                 if (activePage === 'equipment') setSelectedTab(1);
                 if (activePage === 'buildingOverview') setSelectedTab(0);
-                handleChartClose();
-                fetchEquipmentData(arr);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Equipment updated Successfully!';
+                        s.notificationType = 'success';
+                    });
+                    const arr = apiRequestBody(startDate, endDate, timeZone);
+                    setEquipData({});
+                    setOriginalEquipData({});
+                    setModification(false);
+                    setProcessing(false);
+                    handleChartClose();
+                    fetchEquipmentData(arr);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? 'Unable to update Equipment.'
+                            : res
+                            ? 'Unable to update Equipment.'
+                            : 'Unable to update Equipment due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                    setProcessing(false);
+                }
             })
-            .catch((error) => {});
+            .catch((error) => {
+                setProcessing(false);
+            });
     };
 
     const handleCloseWithoutSave = () => {
-        let arr = apiRequestBody(startDate, endDate, timeZone);
         setOriginalEquipData({});
         setEquipData({});
         setCloseFlag(true);
@@ -154,6 +179,7 @@ const EquipChartModal = ({
         if (activePage === 'buildingOverview') {
             setSelectedTab(0);
         }
+        setProcessing(false);
         handleChartClose();
     };
 
@@ -442,12 +468,13 @@ const EquipChartModal = ({
                                     {selectedTab === 1 && (
                                         <div>
                                             <Button
-                                                label="Save"
+                                                label={isProcessing ? 'Saving' : 'Save'}
                                                 size={Button.Sizes.md}
                                                 type={Button.Type.primary}
                                                 onClick={handleEquipmentUpdate}
                                                 disabled={
                                                     isModified ||
+                                                    isProcessing ||
                                                     !(
                                                         userPermission?.user_role === 'admin' ||
                                                         userPermission?.permissions?.permissions
