@@ -691,6 +691,7 @@ const BreakerConfiguration = ({
             return;
         }
         if (currentEquipObj?.id && newEquipObj?.id && currentEquipObj?.id !== newEquipObj?.id) {
+            closeBreakerConfigModal();
             openReassignAlert();
             return;
         }
