@@ -73,6 +73,7 @@ const LineChart = (props) => {
         plotBandsLegends,
         isLoadingData,
         unitInfo,
+        chartProps
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
@@ -202,6 +203,19 @@ const LineChart = (props) => {
         }),
         []
     );
+    const chartConfig = _.merge(
+        options({
+            data,
+            dateRange,
+            Highcharts,
+            tooltipUnit,
+            tooltipLabel,
+            widthOfWrapper,
+            plotBands,
+        }),
+        chartProps
+    );
+    console.log("chartConfig",chartConfig);
 
     return (
         <div className="line-chart-wrapper" ref={wrapperRef}>
@@ -258,15 +272,7 @@ const LineChart = (props) => {
                     <HighchartsReact
                         highcharts={Highcharts}
                         constructorType={'stockChart'}
-                        options={options({
-                            data,
-                            dateRange,
-                            Highcharts,
-                            tooltipUnit,
-                            tooltipLabel,
-                            widthOfWrapper,
-                            plotBands,
-                        })}
+                        options={chartConfig}
                         ref={chartComponentRef}
                     />
                     {handleMoreClick && (
