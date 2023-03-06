@@ -193,8 +193,8 @@ const BreakerConfiguration = ({
                             setSelectedEquipment(response?.id);
                             setNewEquipObj({
                                 id: response?.id,
-                                name: obj?.name
-                            })
+                                name: obj?.name,
+                            });
                         }
                         openSnackbar({
                             title: 'Equipment created successfully.',
