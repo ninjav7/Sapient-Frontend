@@ -1077,6 +1077,8 @@ const EditPanel = () => {
                 response.forEach((record) => {
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
+                    record.config_type = fetchBreakerType(record);
+                    record.status = fetchBreakerStatus(record.config_type, record);
                 });
 
                 BreakersStore.update((s) => {
@@ -1394,9 +1396,9 @@ const EditPanel = () => {
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData, children }) => {
-                    const type = fetchBreakerType(breakerData);
+                    const type = breakerData?.config_type;
                     const equipmentName = breakerData?.equipment_links[0]?.name;
-                    const status = fetchBreakerStatus(type, breakerData);
+                    const status = breakerData?.status;
                     return {
                         ...breakerProps,
                         equipmentName,
