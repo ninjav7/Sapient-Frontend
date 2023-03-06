@@ -215,7 +215,6 @@ const LineChart = (props) => {
         }),
         chartProps
     );
-    console.log("chartConfig",chartConfig);
 
     return (
         <div className="line-chart-wrapper" ref={wrapperRef}>
@@ -311,6 +310,7 @@ LineChart.propTypes = {
             }),
         })
     ),
+    chartProps: PropTypes.object,
     unitInfo: PropTypes.shape({
         title: PropTypes.string,
         unit: PropTypes.oneOf(Object.values(UNITS)),
