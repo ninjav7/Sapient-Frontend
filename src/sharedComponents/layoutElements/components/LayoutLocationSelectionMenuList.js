@@ -9,7 +9,7 @@ import { ReactComponent as PenSVG } from '../../assets/icons/pen.svg';
 import { ReactComponent as ArrowRightSVG } from '../../assets/icons/arrow-right.svg';
 
 const LayoutLocationSelectionMenuList = (props) => {
-    const { title, onEdit, onClick, isActive, level, isArrowShown } = props;
+    const { title, onEdit, onClick, isActive, notEditable, level, isArrowShown } = props;
 
     const onEditHandlerMemoized = useCallback((event) => {
         event.stopPropagation();
@@ -19,7 +19,11 @@ const LayoutLocationSelectionMenuList = (props) => {
     }, []);
 
     const classNameWrapper = useMemo(
-        () => cx('layout-location-selection-menu-list d-flex align-items-center', { 'is-active': isActive }),
+        () =>
+            cx('layout-location-selection-menu-list d-flex align-items-center', {
+                'is-active': isActive,
+                'not-editable': notEditable,
+            }),
         [isActive]
     );
 
@@ -55,6 +59,7 @@ LayoutLocationSelectionMenuList.propTypes = {
     onEdit: PropTypes.func,
     onClick: PropTypes.func,
     isActive: PropTypes.bool,
+    notEditable: PropTypes.bool,
     level: PropTypes.string.isRequired,
     isArrowShown: PropTypes.bool.isRequired,
 };

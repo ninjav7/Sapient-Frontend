@@ -4,7 +4,7 @@
     width: 17.1875rem;
     min-height: 2.125rem;
     background: $base-white;
-    
+
     svg {
         display: block;
     }
@@ -16,14 +16,7 @@
         padding-right: 0.3125rem;
     }
 
-    &-action-buttons {
-        display: flex;
-        gap: 0.5625rem;
-        align-items: center;
-        margin-top: -0.0625rem;
-        position: relative;
-        align-self: stretch;
-
+    &:not(.not-editable) &-action-buttons {
         &::before {
             position: absolute;
             content: '';
@@ -33,6 +26,15 @@
             width: 1.875rem;
             background: linear-gradient(90deg, rgba(245, 245, 248, 0) 0%, var(--default-bg) 80%);
         }
+    }
+
+    &-action-buttons {
+        display: flex;
+        gap: 0.5625rem;
+        align-items: center;
+        margin-top: -0.0625rem;
+        position: relative;
+        align-self: stretch;
 
         .badge-wrapper {
             padding: 0.0625rem 0.375rem;
@@ -75,7 +77,7 @@
 
         svg {
             height: 0.75rem;
-            
+
             path {
                 fill: $primary-gray-450;
             }
@@ -86,7 +88,7 @@
         &:before {
             display: none;
         }
-        
+
         &-edit {
             display: none;
         }
@@ -94,7 +96,7 @@
 
     &:hover {
         background: var(--default-bg);
-        
+
         .badge-wrapper {
             background: $primary-gray-200;
         }
@@ -110,7 +112,7 @@
                     fill: $primary-indigo-100;
                 }
             }
-            
+
             &:hover {
                 svg {
                     path {

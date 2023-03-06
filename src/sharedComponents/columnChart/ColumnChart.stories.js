@@ -1,10 +1,11 @@
 import React from 'react';
+import moment from 'moment';
 
 import ColumnChart from './ColumnChart';
 import { UNITS } from '../../constants/units';
 
 import '../assets/scss/stories.scss';
-import moment from 'moment';
+import colors from '../../assets/scss/_colors.scss';
 
 export default {
     title: 'Charts/ColumnChart',
@@ -18,10 +19,24 @@ Default.args = {
     title: 'Chart title',
     subTitle: 'Sub title',
     onMoreDetail: () => alert(),
-    colors: ['#B863CF', '#5E94E4'],
+    colors: [colors.datavizMain1, colors.datavizMain2],
     xAxisCallBackValue: ({ value }) => {
         return moment(value).format('MM/DD H:00 A');
     },
+    //callback to tooltip header
+    // tooltipCallBackValue: ({value}) => {
+    //     return  moment(value).format(`MMM D 'YY @ hh:mm A`);
+    // },
+
+    // You can overwrite base config we used for chart, pls refer to Official Highcharts doc.
+    // restChartProps: {
+    //     xAxis: {
+    //         labels: {
+    //             enabled: false,
+    //         },
+    //     },
+    // },
+
     //Categories should be timestamps
     categories: [
         '2022-11-28T00:30:00+00:00',
@@ -37,7 +52,7 @@ Default.args = {
     series: [
         {
             name: 'HVAC',
-            data: [13.93, 13.63, 13.73, 13.67, 14.37, 14.89, 14.56, 14.32,],
+            data: [13.93, 13.63, 13.73, 13.67, 14.37, 14.89, 14.56, 14.32],
         },
         {
             name: 'AVSC',

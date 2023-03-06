@@ -187,6 +187,7 @@ export const deletePlugRule = '/api/energy/plug_rule/delete-plug-rule';
 
 export const listLinkSocketRules = '/api/energy/plug_rule/list-link-socket';
 export const getListSensorsForBuildings = '/api/energy/plug_rule/sensor-for-buildings';
+export const getEstimateSensorSavings = '/api/energy/plug_rule/estimate-sensor-savings';
 export const getFiltersForSensors = '/api/energy/plug_rule/sensor-for-buildings-filter';
 export const assignSensorsToRule = '/api/energy/plug_rule/assign-sensor-rule';
 export const reassignSensorsToRule = '/api/energy/plug_rule/reassign-socket-rule';
