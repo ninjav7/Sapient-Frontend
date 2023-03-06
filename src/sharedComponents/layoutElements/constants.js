@@ -13,8 +13,16 @@ const ACCESSORS = Object.freeze({
     FLOOR_ID: 'floor_id',
     NAME: 'name',
     SPACE_ID: '_id',
+    _ID: '_id',
     PARENT_SPACE: 'parent_space',
     SPACES: 'spaces',
 });
 
-export { ACTIONS, LEVELS, ACCESSORS };
+const MAP_PROPERTIES_ACTIONS = {
+    canAddNewSpace: 'onColumnAdd',
+    isEditable: 'onColumnEdit',
+    canChangeName: 'onColumnNameEdit',
+    canFilter: 'onColumnFilter',
+};
+
+export { ACTIONS, LEVELS, ACCESSORS, MAP_PROPERTIES_ACTIONS };
