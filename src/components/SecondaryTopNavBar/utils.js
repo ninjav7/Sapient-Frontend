@@ -6,14 +6,14 @@ export const configRoutes = [
     '/settings/equipment',
     '/settings/panels',
     '/settings/active-devices',
-    '/settings/passive-devices',
+    '/settings/smart-meters',
     '/settings/active-devices/provision',
 ];
 
 export const configChildRoutes = [
     '/settings/panels/edit-panel',
     '/settings/active-devices/single/',
-    '/settings/passive-devices/single/',
+    '/settings/smart-meters/single/',
     '/settings/active-devices/provision',
 ];
 

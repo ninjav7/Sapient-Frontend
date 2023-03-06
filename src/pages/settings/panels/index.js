@@ -13,7 +13,7 @@ import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { pageListSizes } from '../../../helpers/helpers';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { getPanelsTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import CreatePanel from './CreatePanel';
@@ -62,6 +62,7 @@ const Panels = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
@@ -139,7 +140,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${el.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 
@@ -149,7 +150,7 @@ const Panels = () => {
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPanelsTableCSVExport(responseData, headerProps);
-                download('Panels_List', csvData);
+                download(`${bldgName}_Panels_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };
@@ -171,12 +172,11 @@ const Panels = () => {
 
     const renderPanelName = (row) => {
         return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper link mouse-pointer"
-                onClick={() => handleClick(row)}>
-                {row?.panel_name === '' ? '-' : row?.panel_name}
-            </div>
+            <Link to={`/settings/panels/edit-panel/${row?.panel_type}/${row?.panel_id}`}>
+                <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
+                    {row?.panel_name === '' ? '-' : row?.panel_name}
+                </div>
+            </Link>
         );
     };
 
@@ -467,7 +467,12 @@ const Panels = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) => handleClick(row)}
+                        onEditRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleClick(row)
+                                : null
+                        }
                         onDeleteRow={(record, id, row) => handlePanelDelete(row)}
                         isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {

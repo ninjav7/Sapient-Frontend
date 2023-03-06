@@ -6,6 +6,7 @@ import Typography from '../typography';
 import Brick from '../brick';
 import Input from '../form/input/Input';
 import { ButtonGroup } from '../buttonGroup';
+import { NoFilteredDataAlert } from '../noFilteredDataAlert';
 
 import { sanitizeNumbers } from './helper';
 import { ReactComponent as TrendUpSVG } from '../assets/icons/arrow-trend-up.svg';
@@ -62,6 +63,7 @@ const RangeSlider = ({
     currentButtonId,
     returnLastValueIfEmpty = true,
     title = 'Threshold',
+    onRefreshClick,
     ...props
 }) => {
     const [values, setValues] = useState(props.range || []);
@@ -231,6 +233,14 @@ const RangeSlider = ({
                     <Brick />
                 </>
             )}
+
+            {onRefreshClick && (
+                <>
+                    <NoFilteredDataAlert onRefreshClick={onRefreshClick} />
+                    <Brick />
+                </>
+            )}
+
             <div className="range-slider-controls">
                 <Input
                     value={from}
@@ -295,6 +305,7 @@ RangeSlider.propTypes = {
     title: PropTypes.string,
     isDisabledValidation: PropTypes.bool,
     returnLastValueIfEmpty: PropTypes.bool,
+    // onRefreshClick: PropTypes.func,
 };
 
 export default RangeSlider;

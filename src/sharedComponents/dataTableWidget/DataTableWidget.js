@@ -295,10 +295,13 @@ const DataTableWidget = (props) => {
 
                             {!props.isLoading &&
                                 currentRows.map((row) => {
+                                    //@TODO Needs to be refactored
+                                    let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
+                                    const isActionButtonShown = props.onEditRow && isEditable || props.onDeleteRow && isDeletable;
 
                                     const menuListPerRowProps = {};
-                                    if (props.onEditRow) {
+                                    if (props.onEditRow && isEditable) {
                                         menuListPerRowProps.onEditRow = (event) =>
                                             props.onEditRow(event, row.id, row, props);
                                     }
@@ -306,6 +309,8 @@ const DataTableWidget = (props) => {
                                         menuListPerRowProps.onDeleteRow = (event) =>
                                             props.onDeleteRow(event, row.id, row, props);
                                     }
+                                    /********/
+                                    
                                     return (
                                         <Table.Row {...(row.rowProps || {})} key={generateID()}>
                                             {props.onCheckboxRow &&
@@ -340,9 +345,9 @@ const DataTableWidget = (props) => {
                                             {isActionsAvailable && (
                                                 <Table.Cell align="center" width={36}>
                                                     <div className="d-flex justify-content-center">
-                                                        <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                        {isActionButtonShown && <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
                                                             <MenuListPerRow {...menuListPerRowProps} />
-                                                        </DropDownIcon>
+                                                        </DropDownIcon>}
                                                     </div>
                                                 </Table.Cell>
                                             )}
@@ -381,6 +386,7 @@ const DataTableWidget = (props) => {
                         onPageChange={handlePageChange}
                         setPageSize={handlePageSize}
                         pageListSizes={props.pageListSizes}
+                        isAlwaysShown={!props.hidePaginationIfNotEnoughItems}
                     />
                 </div>
             )}
@@ -396,11 +402,13 @@ DataTableWidget.propTypes = {
     onDeleteRow: PropTypes.func,
     isDeletable: PropTypes.func,
     onEditRow: PropTypes.func,
-    onChangePage: PropTypes.func,
-    totalCount: PropTypes.number,
-    currentPage: PropTypes.number,
+    isEditable: PropTypes.func,
+    /**** The following 4 props are responsible for showing pagination ****/
+    onChangePage: PropTypes.func.isRequired,
+    totalCount: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    onPageSize: PropTypes.func.isRequired,
     pageSize: PropTypes.number,
-    onPageSize: PropTypes.func,
     //@TODO More generic func, now it is not important
     onStatus: PropTypes.func,
     status: PropTypes.number,
@@ -409,6 +417,7 @@ DataTableWidget.propTypes = {
     disableColumnDragging: PropTypes.bool,
     filterOptions: PropTypes.arrayOf(
         PropTypes.shape({
+            id: stringOrNumberPropTypes,
             label: PropTypes.string.isRequired,
             value: PropTypes.string.isRequired,
             placeholder: PropTypes.string.isRequired,
@@ -445,6 +454,7 @@ DataTableWidget.propTypes = {
         selectedFilters: PropTypes.object,
         selectedFiltersValues: PropTypes.object,
     }),
+    hidePaginationIfNotEnoughItems: PropTypes.bool,
 };
 
 export default DataTableWidget;

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { ComposableMap, Geographies, Graticule, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 
 const SimpleMaps = ({ markers }) => {
-    const geoUrl =
-        'https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json';
+    // Commented for future Use
+    // const geoUrl ='';
 
     // const markers = [
     //     { markerOffset: -15, name: 'La Paz', coordinates: [-68.1193, -16.4897] },

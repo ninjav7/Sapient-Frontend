@@ -2,22 +2,23 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, convertDateTime, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
 import { useHistory } from 'react-router-dom';
 import {
     fetchOverallBldgData,
-    fetchOverallEndUse,
     fetchBuildingEquipments,
     fetchBuilidingHourly,
     fetchEnergyConsumption,
+    fetchEndUseByBuilding,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
-
+import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
 import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
@@ -35,6 +36,7 @@ const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
+    const [buildingListData] = useAtom(buildingData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -57,6 +59,7 @@ const BuildingOverview = () => {
         },
     });
 
+    const [isPlugOnly, setIsPlugOnly] = useState(false);
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
     const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
@@ -248,15 +251,16 @@ const BuildingOverview = () => {
         };
 
         const buildingEndUserData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchOverallEndUse(bldgId, payload)
+            const params = `?building_id=${bldgId}&off_hours=false`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
-                    let response = res?.data;
-                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                    const response = res?.data?.data;
+                    response.sort((a, b) => b?.energy_consumption.now - a?.energy_consumption.now);
                     setEnergyConsumption(response);
                     let newDonutData = [];
                     response.forEach((record) => {
-                        let fixedConsumption = Math.round(record.energy_consumption.now);
+                        let fixedConsumption = Math.round(record?.energy_consumption.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
@@ -277,22 +281,23 @@ const BuildingOverview = () => {
                     let weekDaysList = [];
 
                     const weekDaysData = weekDaysResData.map((el) => {
-                        weekDaysList.push(Math.round(el.y / 1000));
+                        weekDaysList.push(parseFloat(el.y / 1000).toFixed(2));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: Math.round(el.y / 1000),
+                            y: (el.y / 1000).toFixed(2),
                         };
                     });
 
                     const weekendsData = weekEndResData.map((el) => {
-                        weekEndList.push(Math.round(el.y / 1000));
+                        weekEndList.push(parseFloat(el.y / 1000).toFixed(2));
                         return {
                             x: parseInt(moment.utc(el.x).format('HH')),
-                            y: Math.round(el.y / 1000),
+                            y: (el.y / 1000).toFixed(2),
                         };
                     });
 
                     let finalList = weekEndList.concat(weekDaysList);
+
                     finalList.sort((a, b) => a - b);
 
                     let minVal = finalList[0];
@@ -395,7 +400,7 @@ const BuildingOverview = () => {
                     response.forEach((record) => {
                         newArray[0].data.push({
                             x: record?.x,
-                            y: Math.round(record?.y / 1000),
+                            y: (record?.y / 1000).toFixed(2),
                         });
                         energyCategories.push(record?.x);
                         energyData[0].data.push(Math.round(record?.y / 1000));
@@ -452,9 +457,11 @@ const BuildingOverview = () => {
     };
 
     useEffect(() => {
-        console.log('SSR energyConsumptionsData', energyConsumptionsData);
-        console.log('SSR energyConsumptionsCategories', energyConsumptionsCategories);
-    });
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
+        }
+    }, [buildingListData, bldgId]);
 
     return (
         <React.Fragment>
@@ -466,55 +473,75 @@ const BuildingOverview = () => {
 
             <div className="bldg-page-grid-style">
                 <div>
-                    <EnergyConsumptionByEndUse
-                        title="Energy Consumption by End Use"
-                        subtitle="Energy Totals"
-                        series={donutChartData}
-                        energyConsumption={energyConsumption}
-                        bldgId={bldgId}
-                        pageType="building"
-                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                        showRouteBtn={true}
-                    />
+                    {!isPlugOnly && (
+                        <EnergyConsumptionByEndUse
+                            title="Energy Consumption by End Use"
+                            subtitle="Energy Totals"
+                            energyConsumption={energyConsumption}
+                            bldgId={bldgId}
+                            pageType="building"
+                            handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                            showRouteBtn={true}
+                        />
+                    )}
 
-                    <HourlyAvgConsumption
-                        title="Hourly Average Consumption"
-                        subtitle="Average by Hour (kWh)"
-                        isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                        startEndDayCount={startEndDayCount}
-                        series={hourlyAvgConsumpData}
-                        height={heatMapChartHeight}
-                        timeZone={timeZone}
-                        className="mt-4"
-                        pageType="building"
-                        handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
-                        showRouteBtn={true}
-                    />
+                    {isPlugOnly ? (
+                        <>
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
+                                series={buildingConsumptionChartData}
+                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                                pageType="building"
+                                handleRouteChange={() => handleRouteChange('/energy/end-uses/plug')}
+                                showRouteBtn={true}
+                            />
 
-                    <TotalEnergyConsumption
-                        title="Total Energy Consumption"
-                        subtitle="Hourly Energy Consumption (kWh)"
-                        series={buildingConsumptionChartData}
-                        isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
-                        startEndDayCount={startEndDayCount}
-                        timeZone={timeZone}
-                        pageType="building"
-                        className="mt-4"
-                        handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                        showRouteBtn={true}
-                    />
-
-                    <Brick sizeInRem={1.5} />
-
-                    <ColumnChart
-                        title="Total Energy Consumption"
-                        subTitle="Hourly Energy Consumption (kWh)"
-                        onMoreDetail={() => handleRouteChange('/energy/end-uses')}
-                        colors={[colors.datavizMain2]}
-                        categories={energyConsumptionsCategories}
-                        tooltipUnit={UNITS.KWH}
-                        series={energyConsumptionsData}
-                    />
+                            <HourlyAvgConsumption
+                                title="Hourly Average Consumption"
+                                subtitle="Average by Hour (kWh)"
+                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                series={hourlyAvgConsumpData}
+                                height={heatMapChartHeight}
+                                timeZone={timeZone}
+                                className="mt-4"
+                                pageType="building"
+                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                                showRouteBtn={true}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <HourlyAvgConsumption
+                                title="Hourly Average Consumption"
+                                subtitle="Average by Hour (kWh)"
+                                isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                series={hourlyAvgConsumpData}
+                                height={heatMapChartHeight}
+                                timeZone={timeZone}
+                                className="mt-4"
+                                pageType="building"
+                                handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
+                                showRouteBtn={true}
+                            />
+                            <TotalEnergyConsumption
+                                title="Total Energy Consumption"
+                                subtitle="Hourly Energy Consumption (kWh)"
+                                series={buildingConsumptionChartData}
+                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
+                                startEndDayCount={startEndDayCount}
+                                timeZone={timeZone}
+                                pageType="building"
+                                className="mt-4"
+                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
+                                showRouteBtn={true}
+                            />
+                        </>
+                    )}
                 </div>
 
                 <TopConsumptionWidget

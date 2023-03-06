@@ -5,12 +5,10 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { UserStore } from '../../../store/UserStore';
-import axios from 'axios';
-import { BaseUrl, updateAccount } from '../../../services/Network';
+import { updateVendorName } from './services';
 import '../style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
-import { accountId } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
@@ -21,33 +19,30 @@ const AccountSettings = () => {
     const cookies = new Cookies();
     const userdata = cookies.get('user');
 
-    const accountName = UserStore.useState((s) => s.accountName);
-    const [name, setName] = useState(accountName);
-    const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
+    const vendorName = UserStore.useState((s) => s.vendorName);
+    const [vendorData, setVendorData] = useState(vendorName);
     const [userPermission] = useAtom(userPermissionData);
 
     let entryPoint = '';
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
-    const updateAccountName = async () => {
-        localStorage.removeItem('accountName');
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
 
-        const accountData = {
-            account_id: accoutnIdData,
+    const updateVendorNames = async () => {
+        localStorage.removeItem('vendorName');
+        const vendorNameData = {
+            vendor_name: vendorData,
         };
-
-        await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
-            let response = res.data.data;
-            localStorage.setItem('accountName', accoutnIdData);
-            setAccoutnIdData(response.account_id);
-            setInputValidation(false);
-        });
+        const vendorId = localStorage.getItem('vendorId');
+        let params = `?vendor_id=${vendorId}`;
+        await updateVendorName(params, vendorNameData)
+            .then(async (res) => {
+                let response = res.data.data;
+                localStorage.setItem('vendorName', response?.vendor_name);
+                setVendorData(response.vendor_name);
+                setInputValidation(false);
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -81,15 +76,15 @@ const AccountSettings = () => {
 
     useEffect(() => {
         if (entryPoint === 'entered') {
-            let usr_acc = localStorage.getItem('accountName');
+            let usr_acc = localStorage.getItem('vendorName');
             UserStore.update((s) => {
-                s.accountName = usr_acc;
+                s.vendorName = usr_acc;
             });
         }
     }, [userdata]);
 
     useEffect(() => {
-        setAccoutnIdData(localStorage.getItem('accountName'));
+        setVendorData(localStorage.getItem('vendorName'));
     }, []);
 
     const [inputValidation, setInputValidation] = useState(false);
@@ -111,7 +106,7 @@ const AccountSettings = () => {
                                         size={Button.Sizes.md}
                                         type={Button.Type.secondaryGrey}
                                         onClick={() => {
-                                            setAccoutnIdData(localStorage.getItem('accountName'));
+                                            setVendorData(localStorage.getItem('vendorName'));
                                             setInputValidation(false);
                                         }}
                                         disabled={!inputValidation}
@@ -121,7 +116,7 @@ const AccountSettings = () => {
                                         size={Button.Sizes.md}
                                         type={Button.Type.primary}
                                         onClick={(e) => {
-                                            updateAccountName();
+                                            updateVendorNames();
                                         }}
                                         className="ml-2"
                                         disabled={!inputValidation}
@@ -164,11 +159,11 @@ const AccountSettings = () => {
                                         type="text"
                                         placeholder="Enter Account Name"
                                         onChange={(e) => {
-                                            setAccoutnIdData(e.target.value);
+                                            setVendorData(e.target.value);
                                             setInputValidation(true);
                                         }}
                                         className="w-100"
-                                        value={accoutnIdData}
+                                        defaultValue={vendorName}
                                         style={
                                             userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.account_general_permission?.edit

@@ -3,10 +3,8 @@ import Header from '../../components/Header';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { Row, Col } from 'reactstrap';
 import { formatConsumptionValue } from '../../helpers/helpers';
-
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { useHistory } from 'react-router-dom';
-
 import { ComponentStore } from '../../store/ComponentStore';
 import { fetchCompareBuildings } from '../../services/compareBuildings';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -18,22 +16,21 @@ import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 import { getCompareBuildingTableCSVExport } from '../../utils/tablesExport';
 import { Badge } from '../../sharedComponents/badge';
 import { TinyBarChart } from '../../sharedComponents/tinyBarChart';
-
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { timeZone } from '../../utils/helper';
 import { BuildingStore } from '../../store/BuildingStore';
 import { apiRequestBody } from '../../helpers/helpers';
-
-import { primaryGray100, primaryGray800 } from '../../assets/scss/_colors.scss';
+import { primaryGray1000 } from '../../assets/scss/_colors.scss';
+import { getAverageValue } from '../../helpers/AveragePercent';
+import Brick from '../../sharedComponents/brick';
 
 const SkeletonLoading = () => (
-    <SkeletonTheme color={primaryGray100} height={35}>
+    <SkeletonTheme color={primaryGray1000} height={35}>
         <tr>
             <th>
                 <Skeleton count={5} />
             </th>
-
             <th>
                 <Skeleton count={5} />
             </th>
@@ -45,7 +42,6 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={5} />
             </th>
-
             <th>
                 <Skeleton count={5} />
             </th>
@@ -62,11 +58,11 @@ const CompareBuildings = () => {
     const [search, setSearch] = useState('');
     const [topEnergyDensity, setTopEnergyDensity] = useState();
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
-
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState([]);
+    const [isLoadingBuildingData, setIsLoadingBuildingData] = useState(false);
     let entryPoint = '';
+    let top = '';
 
     useEffect(() => {
         entryPoint = 'entered';
@@ -99,25 +95,17 @@ const CompareBuildings = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const fetchcompareBuildingsData = async () => {
+    const fetchcompareBuildingsData = async (search, ordered_by = 'energy_density', sort_by) => {
         setIsLoadingBuildingData(true);
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = ``;
-        if (sorting?.order_by && sorting?.sort_by) {
-            params += `?order_by=${sorting?.order_by}&sort_by=${sorting?.sort_by}`;
-        }
-        if (search.length) {
-            params += `?building_search=${search}`;
-        }
+        let params = `?ordered_by=${ordered_by}`;
+        if (search) params = params.concat(`&building_search=${encodeURIComponent(search)}`);
+        if (sort_by) params = params.concat(`&sort_by=${sort_by}`);
         await fetchCompareBuildings(params, payload)
             .then((res) => {
                 let response = res?.data;
                 let topVal = Math.max(...response.map((o) => o.energy_density));
+                top = Math.max(...response.map((o) => o.energy_density));
                 setTopEnergyDensity(topVal);
                 setBuildingsData(response);
                 setIsLoadingBuildingData(false);
@@ -126,19 +114,26 @@ const CompareBuildings = () => {
                 setIsLoadingBuildingData(false);
             });
     };
+
+    useEffect(() => {
+        const ordered_by = sortBy.name === undefined ? 'energy_density' : sortBy.name;
+        const sort_by = sortBy.method === undefined ? 'dce' : sortBy.method;
+
+        fetchcompareBuildingsData(search, ordered_by, sort_by);
+    }, [search, sortBy, daysCount]);
+
     const renderEnergyDensity = (row) => {
-        const densityData = buildingsData.length > 1 ? (row.energy_density / topEnergyDensity) * 100 : topEnergyDensity;
         return (
-            <div className="table-content-style" style={{ width: '100%' }}>
-                {row.energy_density.toFixed(2)} kWh / sq. ft.
-                <br />
-                <div style={{ width: '100%', display: 'inline-block' }}>
-                    {row.energy_density === 0 && <TinyBarChart percent={0} />}
-                    {row.energy_density > 0 && <TinyBarChart percent={densityData} />}
-                </div>
-            </div>
+            <>
+                <Typography.Body size={Typography.Sizes.sm}>
+                    {(row.energy_density / 1000).toFixed(2)} kWh / sq. ft.
+                </Typography.Body>
+                <Brick sizeInRem={0.375} />
+                <TinyBarChart percent={getAverageValue(row.energy_density, 0, top)} />
+            </>
         );
     };
+
     const renderName = (row) => {
         return (
             <>
@@ -177,13 +172,18 @@ const CompareBuildings = () => {
     };
 
     const renderChangeEnergy = (row) => {
-        const diffPercentage = percentageHandler(row.energy_consumption.now, row.energy_consumption.old);
         return (
             <div>
                 {row.energy_consumption.now >= row.energy_consumption.old ? (
-                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        type={TRENDS_BADGE_TYPES.UPWARD_TREND}
+                    />
                 ) : (
-                    <TrendsBadge value={diffPercentage} type={TRENDS_BADGE_TYPES.UPWARD_TREND} />
+                    <TrendsBadge
+                        value={Math.abs(Math.round(row.energy_consumption.change))}
+                        type={TRENDS_BADGE_TYPES.DOWNWARD_TREND}
+                    />
                 )}
             </div>
         );
@@ -215,8 +215,9 @@ const CompareBuildings = () => {
         },
         {
             name: '% Change',
-            accessor: 'energy_consumption',
+            accessor: 'change',
             callbackValue: renderChangeEnergy,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sq. Ft.',
@@ -229,14 +230,6 @@ const CompareBuildings = () => {
     const handleDownloadCsv = async () => {
         download('Compare_Buildings', getCompareBuildingTableCSVExport(buildingsData, headerProps, topEnergyDensity));
     };
-
-    useEffect(() => {
-        fetchcompareBuildingsData();
-    }, [search, sortBy, daysCount]);
-
-    useEffect(() => {
-        if (search === '' && entryPoint !== 'entered') fetchcompareBuildingsData();
-    }, [search]);
 
     return (
         <React.Fragment>
@@ -256,13 +249,13 @@ const CompareBuildings = () => {
                         headers={headerProps}
                         disableColumnDragging={true}
                         buttonGroupFilterOptions={[]}
-                        totalCount={(() => {
+                        totalCount={() => {
                             if (search) {
                                 return totalItemsSearched;
                             }
 
                             return 0;
-                        })()}
+                        }}
                     />
                 </Col>
             </Row>

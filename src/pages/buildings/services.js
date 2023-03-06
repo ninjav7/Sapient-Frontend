@@ -3,7 +3,7 @@ import {
     builidingEquipments,
     builidingHourly,
     getEnergyConsumption,
-    portfolioEndUser,
+    energyEndUseInfo,
     portfolioOverall,
 } from '../../services/Network';
 
@@ -12,9 +12,8 @@ export function fetchOverallBldgData(bldgId, payload) {
     return axiosInstance.post(`${portfolioOverall}${params}`, payload).then((res) => res);
 }
 
-export function fetchOverallEndUse(bldgId, payload) {
-    let params = `?building_id=${bldgId}`;
-    return axiosInstance.post(`${portfolioEndUser}${params}`, payload).then((res) => res);
+export function fetchEndUseByBuilding(params, payload) {
+    return axiosInstance.post(`${energyEndUseInfo}${params}`, payload).then((res) => res);
 }
 
 export function fetchBuildingEquipments(bldgId, payload) {

@@ -2,16 +2,16 @@ $base-white: #ffffff;
 $base-black: #000000;
 $base-background: #fdfeff;
 
-
 $success: #d1fadf;
-$success-25: #F6FEF9;
+$success-25: #f6fef9;
 $success-50: #ecfdf3;
 $success-100: #d1fadf;
+$success-500: #12b76a;
 $success-600: #039855;
 $success-700: #027a48;
 $success-700: #027a48;
 $success-800: #05603a;
-$success-900: #054F31;
+$success-900: #054f31;
 
 $sapient-specific-hvac: #66a4ce;
 $sapient-specific-lighting: #fbe384;
@@ -97,14 +97,15 @@ $error-500: #f04438;
 $error-600: #d92d20;
 $error-700: #b42318;
 $error-800: #912018;
-$error-900: #7A271A;
+$error-900: #7a271a;
 
-$warning-25: #FFFCF5;
+$warning-25: #fffcf5;
+$warning-50: #fffaeb;
 $warning-100: #fef0c7;
 $warning-200: #f9eabd;
-$warning-600: #DC6803;
-$warning-700: #B54708;
-$warning-900: #7A2E0E;
+$warning-600: #dc6803;
+$warning-700: #b54708;
+$warning-900: #7a2e0e;
 
 $primary-indigo-25: #f5f8ff;
 $primary-indigo-50: #eef4ff;
@@ -115,6 +116,7 @@ $primary-indigo-400: #8098f9;
 $primary-indigo-500: #6172f3;
 $primary-indigo-600: #444ce7;
 $primary-indigo-700: #3538cd;
+$primary-indigo-800: #2D31A6;
 $primary-indigo-900: #2d3282;
 
 $primary-gray-25: #fcfcfd;
@@ -137,9 +139,8 @@ $primary-gray-1000: #202020;
 
 $secondary-purple-600: #6b08db;
 
-$view-50:#F0F9FF;
-$view-700:#026AA2;
-
+$view-50: #f0f9ff;
+$view-700: #026aa2;
 
 :export {
     baseWhite: $base-white;
@@ -172,6 +173,7 @@ $view-700:#026AA2;
     primaryIndigo500: $primary-indigo-500;
     primaryIndigo600: $primary-indigo-600;
     primaryIndigo700: $primary-indigo-700;
+    primaryIndigo800: $primary-indigo-800;
     primaryIndigo900: $primary-indigo-900;
 
     secondaryPurple600: $secondary-purple-600;
@@ -179,6 +181,7 @@ $view-700:#026AA2;
     success: $success;
     success25: $success-25;
     success100: $success-100;
+    success500: $success-500;
     success600: $success-600;
     success700: $success-700;
     success800: $success-800;
@@ -271,6 +274,7 @@ $view-700:#026AA2;
     error900: $error-900;
 
     warning25: $warning-25;
+    warning50: $warning-50;
     warning100: $warning-100;
     warning600: $warning-600;
     warning700: $warning-700;

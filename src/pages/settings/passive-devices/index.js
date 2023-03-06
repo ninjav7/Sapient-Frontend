@@ -5,7 +5,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
@@ -19,8 +19,8 @@ import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import { ReactComponent as WifiSlashSVG } from '../../../sharedComponents/assets/icons/wifislash.svg';
 import { ReactComponent as WifiSVG } from '../../../sharedComponents/assets/icons/wifi.svg';
 import { Badge } from '../../../sharedComponents/badge';
-import { getPassiveDeviceData, fetchPassiveFilter } from './services';
-import DeletePassiveDevice from './DeletePassiveDevice';
+import { getPassiveDeviceData, fetchPassiveFilter, getSinglePassiveDevice } from './services';
+import DeletePassiveAlert from './DeletePassiveAlert';
 import EditPassiveDevice from './EditPassiveDevice';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
@@ -60,6 +60,7 @@ const SkeletonLoading = () => (
 const PassiveDevices = () => {
     const history = useHistory();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -96,7 +97,7 @@ const PassiveDevices = () => {
     const fetchPassiveDeviceData = async () => {
         const sorting = sortBy.method &&
             sortBy.name && {
-                order_by: sortBy.name,
+                order_by: sortBy.name === 'status' ? 'stat' : sortBy.name,
                 sort_by: sortBy.method,
             };
         let macAddressSelected = encodeURIComponent(deviceIdFilterString.join('+'));
@@ -227,13 +228,12 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/passive-devices/single/${el.equipments_id}`,
+            pathname: `/settings/smart-meters/single/${el.equipments_id}`,
         });
     };
 
     const handleDeviceEdit = (record) => {
-        setSelectedPassiveDevice(record);
-        openEditDeviceModal();
+        handleClick(record);
     };
 
     const handleDeviceDelete = (record) => {
@@ -247,11 +247,11 @@ const PassiveDevices = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getPassiveDeviceData(params)
+        await getSinglePassiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getPassiveDeviceTableCSVExport(responseData, headerProps);
-                download('Passive_Device_List', csvData);
+                download(`${bldgName}_Smart Meter_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };
@@ -268,14 +268,15 @@ const PassiveDevices = () => {
 
     const renderIdentifierName = (row) => {
         return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper link mouse-pointer"
-                onClick={() => {
-                    handleClick(row);
+            <Link
+                className="typography-wrapper link"
+                to={{
+                    pathname: `/settings/smart-meters/single/${row.equipments_id}`,
                 }}>
-                {row?.identifier === '' ? '-' : row?.identifier}
-            </div>
+                <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
+                    {row?.identifier === '' ? '-' : row?.identifier}
+                </div>
+            </Link>
         );
     };
 
@@ -347,8 +348,8 @@ const PassiveDevices = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Passive Devices',
-                        path: '/settings/passive-devices',
+                        label: 'Smart Meters',
+                        path: '/settings/smart-meters',
                         active: true,
                     },
                 ];
@@ -367,18 +368,16 @@ const PassiveDevices = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>Passive Devices</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>Smart Meters</Typography.Header>
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
                             <div className="d-flex">
                                 <Button
-                                    label={'Add Passive Device'}
+                                    label={'Add Smart Meter'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={() => {
-                                        openAddDeviceModal();
-                                    }}
+                                    onClick={openAddDeviceModal}
                                     icon={<PlusSVG />}
                                 />
                             </div>
@@ -394,7 +393,7 @@ const PassiveDevices = () => {
                     <DataTableWidget
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
-                        id="passive_devices_list"
+                        id="smart_meter_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
@@ -447,11 +446,11 @@ const PassiveDevices = () => {
                 fetchPassiveDeviceData={fetchPassiveDeviceData}
             />
 
-            <DeletePassiveDevice
+            <DeletePassiveAlert
                 isDeleteDeviceModalOpen={isDeleteDeviceModalOpen}
                 closeDeleteDeviceModal={closeDeleteDeviceModal}
                 selectedPassiveDevice={selectedPassiveDevice}
-                fetchPassiveDeviceData={fetchPassiveDeviceData}
+                nextActionAfterDeletion={fetchPassiveDeviceData}
             />
         </React.Fragment>
     );

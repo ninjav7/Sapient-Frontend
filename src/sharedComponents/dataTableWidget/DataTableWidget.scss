@@ -4,6 +4,12 @@
 .data-table-widget {
     &-wrapper {
         @extend .box-shadow-sm;
+        
+        .table-body .table-row {
+            &:hover {
+                background: $primary-indigo-50;
+            }
+        }
 
         .button-group-wrapper {
             ul {
@@ -60,7 +66,7 @@
                 }
             }
         }
-        
+
         .table-head {
             .on-sort {
                 &:hover {
@@ -70,7 +76,7 @@
                     background: $primary-gray-50;
                     &:hover {
                         background: $primary-gray-150;
-                    } 
+                    }
                 }
             }
         }

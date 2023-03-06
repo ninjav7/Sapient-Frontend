@@ -94,6 +94,8 @@ const ExploreByEquipment = () => {
     const [checkedAll, setCheckedAll] = useState(false);
     const [equipIdNow, setEquipIdNow] = useState('');
 
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
+
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
@@ -1222,7 +1224,10 @@ const ExploreByEquipment = () => {
         )
             .then((res) => {
                 let responseData = res.data;
-                download('Explore_By_Equipment', getExploreByEquipmentTableCSVExport(responseData.data, headerProps));
+                download(
+                    `${bldgName}_Explore_By_Equipment_${new Date().toISOString().split('T')[0]}`,
+                    getExploreByEquipmentTableCSVExport(responseData.data, headerProps)
+                );
             })
             .catch((error) => {});
     };
@@ -1331,7 +1336,7 @@ const ExploreByEquipment = () => {
                                     id="equip"
                                     name="equip"
                                     checked={selectedIds.includes(record?.equipment_id) || checkedAll}
-                                    value={selectedIds.includes(record?.equipment_id) || checkedAll ? true : false}
+                                    value={selectedIds.includes(record?.equipment_id) || checkedAll}
                                     onChange={(e) => {
                                         handleEquipStateChange(e.target.value, record);
                                     }}

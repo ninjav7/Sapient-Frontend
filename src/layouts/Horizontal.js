@@ -5,6 +5,7 @@ import './style.css';
 import { changeLayout } from '../redux/actions';
 import SideNav from '../components/SideNav/SideNav';
 import TopNav from '../components/TopNav/TopNav';
+import AdminNav from '../components/AdminNav/AdminNav';
 import { useLocation } from 'react-router-dom';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
@@ -16,18 +17,32 @@ const HorizontalLayout = (props) => {
     const children = props.children || null;
     const location = useLocation();
     const [showSideNav, setShowSideNav] = useState(true);
+    const [showTopNav, setShowTopNav] = useState(true);
     const showNotification = UserStore.useState((s) => s.showNotification);
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
     const notificationType = UserStore.useState((s) => s.notificationType);
+    const componentType = UserStore.useState((s) => s.componentType);
     useEffect(() => {
+        if (!location.pathname.includes('/super-user/')) {
+            setShowTopNav(true);
+        }
+        if (location.pathname.includes('/super-user/')) {
+            setShowTopNav(false);
+        }
         if (!location.pathname.includes('/explore-page/')) {
             setShowSideNav(true);
         }
         if (location.pathname.includes('/explore-page/')) {
             setShowSideNav(false);
         }
-
+        if (location.pathname.includes('/super-user/')) {
+            setShowSideNav(false);
+        }
         if (location.pathname.includes('/control/plug-rules/')) {
+            setShowSideNav(false);
+        }
+        if (location.pathname.includes('/login')) {
+            setShowTopNav(false);
             setShowSideNav(false);
         }
     }, [location]);
@@ -37,16 +52,15 @@ const HorizontalLayout = (props) => {
             s.showNotification = false;
         });
     };
+
+    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meters/single'];
+
     return (
         <React.Fragment>
             <div id="wrapper">
-                <div>
-                    <TopNav />
-                </div>
+                <div>{showTopNav ? <TopNav /> : <AdminNav />}</div>
 
-                <div>
-                    <SecondaryTopNavBar />
-                </div>
+                <div>{showTopNav ? <SecondaryTopNavBar /> : null}</div>
 
                 <div>
                     {showSideNav && (
@@ -56,7 +70,15 @@ const HorizontalLayout = (props) => {
                     )}
 
                     {showSideNav ? (
-                        <div className="energy-page-content">
+                        <div
+                            className="energy-page-content"
+                            style={{
+                                padding:
+                                    location.pathname.includes(deviceRouteList[0]) ||
+                                    location.pathname.includes(deviceRouteList[1])
+                                        ? '0rem'
+                                        : '2rem',
+                            }}>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
@@ -69,18 +91,21 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
                     {showNotification ? (
-                        <div style={{ position: 'fixed', width: '18.75rem', top: '44.375rem' }}>
+                        <div className="notification-alignment">
                             <Notification
                                 type={
                                     notificationType === 'success'
                                         ? Notification.Types.success
                                         : Notification.Types.error
                                 }
-                                component={Notification.ComponentTypes.alert}
+                                component={
+                                    componentType === 'alert'
+                                        ? Notification.ComponentTypes.alert
+                                        : Notification.ComponentTypes.snackBar
+                                }
                                 description={notificationMessage}
-                                onClose={() => {
-                                    updateNotification();
-                                }}
+                                closeAutomatically={true}
+                                onClose={updateNotification}
                             />
                         </div>
                     ) : null}

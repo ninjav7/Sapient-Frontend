@@ -36,8 +36,9 @@ const TopNav = () => {
                     setBuildingListData([]);
                 });
         };
-
-        getBuildingData(activeBldgList);
+        if (!location.pathname.includes('/super-user/') && !location.pathname.includes('/account/login')) {
+            getBuildingData(activeBldgList);
+        }
     }, [activeBldgList]);
 
     useEffect(() => {
@@ -56,7 +57,6 @@ const TopNav = () => {
                 setActiveBldgList(false);
             }
         };
-
         checkCurrentRoute(location.pathname);
     }, [location.pathname]);
 
@@ -73,12 +73,15 @@ const TopNav = () => {
                 });
             });
         };
-
-        getBuildingData(activeBldgList);
+        if (!location.pathname.includes('/super-user/') && !location.pathname.includes('/account/login')) {
+            getBuildingData(activeBldgList);
+        }
     }, [pageRefresh]);
 
     useEffect(() => {
-        getUserPermissionDetail();
+        if (!location.pathname.includes('/super-user/') && !location.pathname.includes('/account/login')) {
+            getUserPermissionDetail();
+        }
     }, []);
 
     return (

@@ -2,7 +2,8 @@
 
 .pagination-wrapper {
     display: flex;
-    column-gap: 8px;
+    column-gap: 0.5rem;
+    align-items: flex-end;
 }
 .pagination-container {
     display: flex;

@@ -4,6 +4,7 @@ import DonutChartWidget from '../donutChartWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../trendsBadge';
+import { useHistory } from 'react-router-dom';
 
 // MOCK
 const donutChartDataMock = [
@@ -29,30 +30,50 @@ const EnergyConsumptionByEndUse = ({
     bldgId,
     ...props
 }) => {
+    const history = useHistory();
+
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(0);
+        let val = Math.round(energy_consumption.now / 1000);
         let value = parseFloat(val);
         const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
         const trendType =
             energy_consumption.now <= energy_consumption.old
                 ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 : TRENDS_BADGE_TYPES.UPWARD_TREND;
+        const onClick =
+            pageType === 'building'
+                ? () =>
+                      history.push({
+                          pathname: `/energy/end-uses/${label.toLowerCase()}/${bldgId}`,
+                      })
+                : null;
 
-        return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType };
+        const link = pageType === 'building' ? '#' : null;
+
+        return {
+            unit: UNITS.KWH,
+            color: COLOR_SCHEME_BY_DEVICE[label],
+            label,
+            value,
+            trendValue,
+            trendType,
+            onClick,
+            link,
+        };
     });
 
     return (
-            <DonutChartWidget
-                id="consumptionEnergyDonut"
-                title={title}
-                subtitle={subtitle}
-                items={donutChartData}
-                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                pageType={pageType}
-                bldgId={bldgId}
-                onMoreDetail={props.showRouteBtn ? props.handleRouteChange : null}
-                {...props}
-            />
+        <DonutChartWidget
+            id="consumptionEnergyDonut"
+            title={title}
+            subtitle={subtitle}
+            items={donutChartData}
+            isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+            pageType={pageType}
+            bldgId={bldgId}
+            onMoreDetail={props.showRouteBtn ? props.handleRouteChange : null}
+            {...props}
+        />
     );
 };
 

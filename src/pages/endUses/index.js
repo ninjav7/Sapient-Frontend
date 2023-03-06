@@ -92,10 +92,11 @@ const EndUsesPage = () => {
 
         const endUsesDataFetch = async () => {
             setIsEndUsesDataFetched(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchEndUses(bldgId, payload)
+            const params = `?building_id=${bldgId}`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchEndUses(params, payload)
                 .then((res) => {
-                    let response = res?.data;
+                    const response = res?.data?.data;
                     response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
                     let endUsesList = [];
                     response.forEach((record, index) => {
@@ -191,7 +192,9 @@ const EndUsesPage = () => {
                         record.data.forEach((el) => {
                             if (index === 0) formattedTimestamp.push(el?.time_stamp);
                             obj.data.push(
-                                isNaN(el?.consumption) ? el?.consumption : Math.round(el?.consumption / 1000)
+                                isNaN(el?.consumption)
+                                    ? el?.consumption
+                                    : parseFloat((el?.consumption / 1000).toFixed(2))
                             );
                         });
                         return obj;

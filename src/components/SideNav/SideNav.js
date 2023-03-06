@@ -4,7 +4,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { allFlattenRoutes } from '../../routes';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import { userPermissionData } from '../../store/globalState';
+import { buildingData, userPermissionData } from '../../store/globalState';
 
 import './SideNav.scss';
 
@@ -14,6 +14,7 @@ const SideNav = () => {
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [buildingListData] = useAtom(buildingData);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');
@@ -33,6 +34,12 @@ const SideNav = () => {
 
         if (route.parent === 'buildings') {
             let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
+
+            if (pathName.includes('/energy/end-uses') && buildingListData.length !== 0) {
+                const bldgObj = buildingListData.find((record) => record?.building_id === bldgId);
+                if (bldgObj?.plug_only) pathName = '/energy/end-uses/plug';
+            }
+
             history.push({
                 pathname: `${pathName}/${bldgId}`,
             });
@@ -138,6 +145,7 @@ const SideNav = () => {
                     activeSideRoutes.push(route);
                 }
             });
+
         setActiveRoute(activeSideRoutes);
     }, [
         parentRoute,

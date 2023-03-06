@@ -1,0 +1,48 @@
+@import '../../../assets/scss/colors';
+@import '../../assets/scss/helpers';
+
+@import 'scss/BreakersWrapper';
+@import 'scss/BreakerColumn';
+@import 'scss/BreakerLinkerButton';
+@import 'scss/BreakerLinkerColumn';
+
+.panel {
+    &-wrapper {
+        @extend .borders;
+        background: #fafbfc;
+        border-radius: 2rem;
+        padding: 1.5rem;
+    }
+
+    &-header {
+        display: flex;
+        gap: 0.5rem;
+        min-height: 3.625rem;
+
+        .react-select-wrapper,
+        .input-wrapper {
+            width: 8.75rem;
+
+            [class*='-menu'] {
+                min-width: unset;
+            }
+        }
+    }
+
+    &-main-breaker {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        align-items: center;
+
+        .breaker-wrapper {
+            grid-column-start: 2;
+            grid-column-end: 4;
+            justify-self: center;
+        }
+
+        .toggles-wrapper {
+            justify-content: end;
+            grid-column-start: 4;
+        }
+    }
+}

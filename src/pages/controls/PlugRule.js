@@ -3,11 +3,21 @@ import Modal from 'react-bootstrap/Modal';
 import Input from '../../sharedComponents/form/input/Input';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
-import LineChart from '../charts/LineChart';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
-import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete.svg';
+import { Spinner } from 'reactstrap';
+import { fetchPlugRules } from '../../services/plugRules';
+import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
+import { ConditionGroup } from '../../sharedComponents/conditionGroup';
+import { useNotification } from '../../sharedComponents/notification/useNotification';
+import { Notification } from '../../sharedComponents/notification/Notification';
+import colors from '../../assets/scss/_colors.scss';
+import { fetchBuildingsList } from '../../services/buildings';
+import { UNITS } from '../../constants/units';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
@@ -21,24 +31,25 @@ import moment from 'moment';
 
 import {
     updatePlugRuleRequest,
+    createPlugRuleRequest,
     fetchPlugRuleDetails,
     deletePlugRuleRequest,
     getGraphDataRequest,
-    getListSensorsForBuildingsRequest,
     linkSensorsToRuleRequest,
     listLinkSocketRulesRequest,
     unlinkSocketRequest,
     getUnlinkedSocketRules,
     getFiltersForSensorsRequest,
+    reassignSensorsToRuleRequest,
+    getAllConditions,
 } from '../../services/plugRules';
 import './style.scss';
-import { ceil } from 'lodash';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Badge } from '../../sharedComponents/badge';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import { generateID } from '../../sharedComponents/helpers/helper';
+import Typography from '../../sharedComponents/typography';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="#202020" height={35}>
@@ -78,27 +89,79 @@ const SkeletonLoading = () => (
         </tr>
     </SkeletonTheme>
 );
+const actionTypeInitial = [
+    {
+        label: 'Turn Off',
+        value: 0,
+    },
+    {
+        label: 'Turn On',
+        value: 1,
+    },
+    {
+        label: 'Do nothing',
+        value: 2,
+    },
+];
+const indexOfDay = {
+    mon: 0,
+    tue: 1,
+    wed: 2,
+    thr: 3,
+    fri: 4,
+    sat: 5,
+    sun: 6,
+};
+const formatAverageData = (data) => {
+    const res = [];
+    data.forEach((el) => {
+        res.push({ x: moment(el.x), y: el.y });
+    });
+    return res;
+};
+const notificationCreateData = {
+    title: 'Rule has been created',
+};
+
+const notificationUpdatedData = {
+    title: 'Rule has been updated',
+};
 
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
+    const { download } = useCSVDownload();
+
+    const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
+    const [buildingListData, setBuildingListData] = useState([]);
+    const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
+    const [isChangedSockets, setIsChangedSockets] = useState(false);
+    const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
+    const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
+    const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
+    const [openSnackbar] = useNotification();
     const [rulesToUnLink, setRulesToUnLink] = useState({
         rule_id: '',
         sensor_id: [],
     });
 
-    const activeBuildingId = localStorage.getItem('buildingId');
-
     const { v4: uuidv4 } = require('uuid');
     const history = useHistory();
 
     const getConditionId = () => uuidv4();
-    const [currentData, setCurrentData] = useState([]);
+    const initialCurrentData = {
+        name: '',
+        building_id: '' || localStorage.getItem('buildingId'),
+        description: '',
+    };
+    const [currentData, setCurrentData] = useState(initialCurrentData);
+    const [activeBuildingId, setActiveBuildingId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [offHoursPlots, setOffHoursPlots] = useState([]);
     const [showDeleteConditionModal, setShowDeleteConditionModal] = useState(false);
     const [currentScheduleIdToDelete, setCurrentScheduleIdToDelete] = useState();
 
@@ -106,12 +169,19 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [socketsToReassign, setSocketsToReassign] = useState({});
+    const [checkedAllReassignSockets, setCheckedAllReassignSockets] = useState(false);
+    const [buildingError, setBuildingError] = useState({ text: '' });
+    const [nameError, setNameError] = useState(false);
+    const [preparedScheduleData, setPreparedScheduleData] = useState([]);
+    const [conditionDisabledDays, setConditionDisabledDays] = useState();
     const [skeletonLoading, setSkeletonLoading] = useState(true);
-
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
-
+    const [loadingSocketsUpdate, setLoadingSocketsUpdate] = useState(false);
+    const [showSocketsModal, setShowSocketsModal] = useState(false);
+    const [dataToUnassign, setDataToUnassign] = useState([]);
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allSensors, setAllSensors] = useState([]);
@@ -181,6 +251,52 @@ const PlugRule = () => {
     const [totalItems, setTotalItems] = useState(0);
     const [totalItemsSearched, setTotalItemsSearched] = useState(0);
 
+    useEffect(() => {
+        const preparedScheduleDataCopy = preparedScheduleData ? [...preparedScheduleData] : [];
+        const workingDaysPerCondition = {};
+        const data = preparedScheduleDataCopy?.forEach((curr) => {
+            const { title } = curr;
+            workingDaysPerCondition[title] = curr.data[0].action_day;
+        });
+
+        const flat = Object.values(workingDaysPerCondition).flat(1);
+        const disabledDays = {};
+
+        for (const [key, value] of Object.entries(workingDaysPerCondition)) {
+            const restOfDays = flat.filter((el) => !value.includes(el));
+            disabledDays[key] = restOfDays;
+        }
+
+        setConditionDisabledDays(disabledDays);
+    }, [preparedScheduleData]);
+
+    const groupedCurrentDataById = (actions) => {
+        return (
+            actions &&
+            actions.reduce((acc, curr) => {
+                const { condition_group_id } = curr;
+                const objInAcc = acc.find((o) => o.title === condition_group_id);
+                if (objInAcc) objInAcc.data.push(curr);
+                else acc.push({ title: condition_group_id, data: [curr] });
+                return acc;
+            }, [])
+        );
+    };
+    const formatBuildingListData = (data) => {
+        return data.map((el) => {
+            return { value: el.building_id, label: el.building_name };
+        });
+    };
+
+    const getBuildingData = async () => {
+        await fetchBuildingsList(false).then((res) => {
+            let data = res.data;
+            const formattedData = formatBuildingListData(data);
+
+            setBuildingListData(formattedData);
+        });
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -211,11 +327,44 @@ const PlugRule = () => {
             }
         }
     };
-
+    const fetchPlugRulesData = async () => {
+        const params = '';
+        await fetchPlugRules(params, '').then((res) => {
+            setIsFetchedPlugRulesData(true);
+            const plugRules = res.data.data;
+            plugRules &&
+                plugRules.forEach((plugRule) => {
+                    if (plugRule.name == currentData.name) {
+                        setActiveBuildingId(plugRule.buildings[0].building_id);
+                    }
+                });
+        });
+    };
+    useEffect(() => {
+        calculateOffHoursPlots();
+    }, [preparedScheduleData]);
     useEffect(() => {
         generateHours();
-        fetchPlugRuleDetail();
-    }, []);
+        getBuildingData();
+        if (ruleId == 'create-plug-rule') {
+            setIsCreateRuleMode(true);
+        } else {
+            setIsCreateRuleMode(false);
+            setIsChangedRuleDetails(false);
+            fetchPlugRuleDetail();
+        }
+    }, [ruleId]);
+
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
+
+    useEffect(() => {
+        if (!isFetchedPlugRulesData) {
+            fetchPlugRulesData();
+        }
+    }, [currentData.name, isFetchedPlugRulesData]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -226,10 +375,15 @@ const PlugRule = () => {
             if (res.status) {
                 setSkeletonLoading(false);
             }
-            let response = res.data;
-            setCurrentData(response.data);
+            let response = Object.assign({}, res.data.data[0]);
+            response.building_id = response.building[0].building_id;
+            setActiveBuildingId(response.building_id);
+            setCurrentData(response);
+            const scheduleData = groupedCurrentDataById(response.action);
+            setPreparedScheduleData(scheduleData);
         });
     };
+
     const deletePlugRule = async () => {
         setIsDeletting(true);
         await deletePlugRuleRequest(ruleId).then((res) => {
@@ -240,294 +394,29 @@ const PlugRule = () => {
             }
         });
     };
-    const getGraphData = async () => {
-        await getGraphDataRequest(activeBuildingId, sensorsIdNow, currentData.id).then((res) => {
-            if (res.status) {
-                let response = res.data;
-                setTotalGraphData(response);
-            }
-        });
-    };
-
-    const [lineChartOptions, setLineChartOptions] = useState({
-        chart: {
-            type: 'line',
-            zoom: {
-                enabled: false,
-            },
-            id: 'areachart-2',
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#87AADE'],
-        stroke: {
-            curve: 'straight',
-        },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                format: 'dd/MMM',
-            },
-            y: {
-                formatter: function (value) {
-                    return value + ' K';
-                },
-            },
-        },
-
-        annotations: {
-            xaxis: [
-                {
-                    x: 'Mon 12 am',
-                    x2: 'Mon 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-                {
-                    x: 'Tue 12 am',
-                    x2: 'Tue 12 pm',
-                    strokeDashArray: 0,
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#000',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-            ],
-        },
-
-        xaxis: {
-            categories: [
-                'Sun 12AM',
-                'Sun 12PM',
-                'Mon 12AM',
-                'Mon 12PM',
-                'Tue 12AM',
-                'Tue 12PM',
-                'Wed 12AM',
-                'Wed 12PM',
-                'Thu 12AM',
-                'Thu 12PM',
-                'Fri 12AM',
-                'Fri 12PM',
-                'Sat 12AM',
-                'Sat 12PM',
-                'Sun 12AM',
-            ],
-        },
-
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
-                },
-            },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                // cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
-
-    useEffect(() => {
-        setLineChartOptions({
-            chart: {
-                type: 'line',
-                zoom: {
-                    enabled: false,
-                },
-                id: 'areachart-2',
-            },
-            dataLabels: {
-                enabled: false,
-            },
-
-            colors: ['#87AADE'],
-            stroke: {
-                curve: 'straight',
-            },
-            stroke: {
-                width: [2, 2],
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '20%',
-                },
-            },
-            tooltip: {
-                shared: false,
-                intersect: false,
-                style: {
-                    fontSize: '12px',
-                    fontFamily: 'Inter, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                x: {
-                    show: true,
-                    format: 'dd/MMM',
-                },
-                y: {
-                    formatter: function (value) {
-                        return value + ' K';
-                    },
-                },
-            },
-
-            annotations: {
-                xaxis: annotationXAxis,
-            },
-
-            xaxis: {
-                categories: [
-                    'Sun 12AM',
-                    'Sun 12PM',
-                    'Mon 12AM',
-                    'Mon 12PM',
-                    'Tue 12AM',
-                    'Tue 12PM',
-                    'Wed 12AM',
-                    'Wed 12PM',
-                    'Thu 12AM',
-                    'Thu 12PM',
-                    'Fri 12AM',
-                    'Fri 12PM',
-                    'Sat 12AM',
-                    'Sat 12PM',
-                    'Sun 12AM',
-                ],
-            },
-
-            yaxis: {
-                labels: {
-                    formatter: function (value) {
-                        var val = Math.abs(value);
-                        if (val >= 1000) {
-                            val = (val / 1000).toFixed(0) + ' K';
-                        }
-                        return val;
-                    },
-                },
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                },
-            },
-        });
-    }, [annotationXAxis]);
 
     const [lineChartData, setLineChartData] = useState([]);
 
-    const [totalGraphData, setTotalGraphData] = useState();
-
-    useEffect(() => {
-        setLineChartData([
-            {
-                data: [
-                    {
-                        x: `${hoursNew[2]}`,
-                        y: '0.07',
-                    },
-                    {
-                        x: `${hoursNew[3]}`,
-                        y: '49.1',
-                    },
-                    {
-                        x: `${hoursNew[4]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[5]}`,
-                        y: '49.3',
-                    },
-                    {
-                        x: `${hoursNew[6]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[7]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[8]}`,
-                        y: '45.1',
-                    },
-                    {
-                        x: `${hoursNew[9]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[10]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[11]}`,
-                        y: '91.3',
-                    },
-                    {
-                        x: `${hoursNew[12]}`,
-                        y: '45.3',
-                    },
-                    {
-                        x: `${hoursNew[13]}`,
-                        y: '10.3',
-                    },
-                    {
-                        x: `${hoursNew[14]}`,
-                        y: '20.3',
-                    },
-                    {
-                        x: `${hoursNew[15]}`,
-                        y: '10.3',
-                    },
-                ],
-            },
-        ]);
-    }, [hoursNew]);
-
-    useEffect(() => {
-        totalGraphData?.length > 0 &&
-            setLineChartData([
-                {
-                    data: totalGraphData.map(({ x, y }) => ({ x: moment(x).format('ddd h a'), y })),
-                },
-            ]);
-    }, [totalGraphData]);
+    const getGraphData = async () => {
+        if (selectedIds.length) {
+            await getGraphDataRequest(selectedIds, currentData.id).then((res) => {
+                if (res && res?.data.length) {
+                    const formattedData = formatAverageData(res.data);
+                    let response = [{ name: `Average Energy demand`, data: formattedData }];
+                    setLineChartData(response);
+                }
+            });
+        }
+    };
 
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
+    useEffect(() => {
+        if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
+            setActiveBuildingId(currentData.building_id);
+            fetchLinkedSocketRules();
+        }
+    }, [currentData.building_id]);
 
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
 
@@ -540,40 +429,109 @@ const PlugRule = () => {
     const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
 
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+    const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
+    const [tagsFilterString, setTagsFilterString] = useState('');
+    const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
     useEffect(() => {
-        if (sensorsIdNow) {
+        if (selectedIds) {
             getGraphData();
         }
-    }, [sensorsIdNow]);
+    }, [selectedIds]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
         handleCurrentDataChange('is_active', obj.is_active);
+        setIsChangedRuleDetails(true);
     };
+    useEffect(() => {
+        if (isChangedSockets || isChangedRuleDetails) {
+            setIsDisabledSaveButton(false);
+        } else {
+            setIsDisabledSaveButton(true);
+        }
+    }, [isChangedRuleDetails, isChangedSockets]);
 
     const handleCurrentDataChange = (key, value) => {
         let obj = Object.assign({}, currentData);
         obj[key] = value;
+        if (key == 'building_id' && value) {
+            setBuildingError({ text: '' });
+        }
+        if (key == 'name' && value) {
+            setNameError(false);
+        }
         setCurrentData(obj);
+        setIsChangedRuleDetails(true);
+    };
+    const handleScheduleDayChange = (day, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.action_day.includes(day)) {
+                        row.action_day = row.action_day.filter((e) => e !== day);
+                    } else {
+                        row.action_day.push(day);
+                    }
+                });
+            }
+        });
+
+        setIsChangedRuleDetails(true);
+        setPreparedScheduleData(currentObj);
+    };
+    const makeId = (checkedArray) => {
+        const newId = getConditionId();
+        if (!checkedArray.includes(newId)) {
+            return newId;
+        } else {
+            makeId(checkedArray);
+        }
     };
 
-    const createScheduleCondition = () => {
-        let currentObj = currentData;
+    const createScheduleCondition = async () => {
+        const allConditions = await getAllConditions()
+            .then((res) => {
+                const { data } = res;
+                return data;
+            })
+            .catch((error) => {});
+        let currentObj = [...preparedScheduleData];
+
+        const generateConditionGroupId = makeId(allConditions.condition_group_id);
+        const generateFirstConditionId = makeId(allConditions.condition_id);
+        const generateSecondConditionId = makeId(allConditions.condition_id);
         let obj = {
-            action_type: false,
-            action_time: '08:00 AM',
-            action_day: [],
-            condition_id: getConditionId(),
-            is_deleted: false,
+            title: generateConditionGroupId,
+            data: [
+                {
+                    action_type: 1,
+                    action_time: '08:00 AM',
+                    action_day: [],
+                    condition_id: generateFirstConditionId,
+                    condition_group_id: generateConditionGroupId,
+                    is_deleted: false,
+                },
+                {
+                    action_type: 0,
+                    action_time: '09:00 AM',
+                    action_day: [],
+                    condition_id: generateSecondConditionId,
+                    condition_group_id: generateConditionGroupId,
+                    is_deleted: false,
+                },
+            ],
         };
-        currentObj.action.push(obj);
-        handleCurrentDataChange('action', currentObj.action);
+        currentObj.push(obj);
+        setPreparedScheduleData(currentObj);
+        setIsChangedRuleDetails(true);
     };
 
     const showOptionToDelete = (condition_id) => {
@@ -586,32 +544,40 @@ const PlugRule = () => {
         handleCurrentDataChange('action', currentObj.action);
     };
 
-    const deleteScheduleCondition = (condition_id) => {
-        let currentObj = currentData;
-        let newArray = [];
-        currentObj.action.forEach((record) => {
-            if (record.condition_id !== condition_id) {
-                newArray.push(record);
+    const deleteScheduleCondition = (condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+        let resArray = [];
+        currentObj.forEach((record) => {
+            if (record.title !== condition_group_id) {
+                resArray.push(record);
             }
         });
-        currentObj.action = newArray;
-        handleCurrentDataChange('action', currentObj.action);
+        setPreparedScheduleData(resArray);
+        setIsChangedRuleDetails(true);
         setShowDeleteConditionModal(false);
     };
 
-    const updateSocketLink = async () => {
-        if (rulesToLink.sensor_id.length === 0) {
-            return;
-        }
-        setIsProcessing(true);
-        await linkSensorsToRuleRequest({
-            ...rulesToLink,
-            sensor_id: rulesToLink.sensor_id.filter((sensor) => !fetchedSelectedIds.includes(sensor.id)),
-            building_id: activeBuildingId,
-        }).then((res) => {});
+    const reassignSensorsToRule = async () => {
+        const listToRemoveForReassign = [];
+        dataToUnassign.forEach((el) => {
+            if (!socketsToReassign.includes(el.id)) {
+                listToRemoveForReassign.push(el.id);
+            }
+        });
+        let listOfsocketsToReassign = [];
 
-        setIsProcessing(false);
-        setPageRefresh(!pageRefresh);
+        if (listToRemoveForReassign.length) {
+            listOfsocketsToReassign = rulesToLink.sensor_id.filter(function (val) {
+                return listToRemoveForReassign.indexOf(val) == -1;
+            });
+        } else {
+            listOfsocketsToReassign = rulesToLink.sensor_id;
+        }
+        await reassignSensorsToRuleRequest({
+            rule_id: ruleId,
+            building_id: activeBuildingId,
+            sensor_id: listOfsocketsToReassign,
+        }).then((res) => {});
     };
 
     const updateSocketUnlink = async () => {
@@ -626,30 +592,40 @@ const PlugRule = () => {
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
-
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
     };
 
-    const handleSchedularConditionChange = (key, value, condition_id) => {
-        let currentObj = currentData;
-        currentObj.action.forEach((record) => {
-            if (record.condition_id === condition_id) {
-                record[key] = value === true;
+    const handleSchedularConditionChange = (key, value, condition_id, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.condition_id === condition_id) {
+                        if (value == '2') {
+                            row['action_time'] = null;
+                        }
+                        row[key] = value;
+                    }
+                });
             }
         });
-        handleCurrentDataChange('action', currentObj.action);
+        setIsChangedRuleDetails(true);
+        setPreparedScheduleData(currentObj);
     };
 
-    const handleSchedularTimeChange = (key, value, condition_id) => {
-        let currentObj = currentData;
-        currentObj.action.forEach((record) => {
-            if (record.condition_id === condition_id) {
-                record[key] = value;
+    const handleSchedularTimeChange = (key, value, condition_id, condition_group_id) => {
+        let currentObj = [...preparedScheduleData];
+
+        currentObj.forEach((record) => {
+            if (record.title === condition_group_id) {
+                record.data.forEach((row) => {
+                    if (row.condition_id === condition_id) {
+                        row[key] = value;
+                    }
+                });
             }
         });
-        handleCurrentDataChange('action', currentObj.action);
+        setIsChangedRuleDetails(true);
+        setPreparedScheduleData(currentObj);
     };
 
     const handleActionDayChange = (day, condition_id) => {
@@ -669,10 +645,24 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
+
+    const handleReassignSocketsCheckboxClick = (value, socket) => {
+        let newSocketsToReassign = [...socketsToReassign];
+        if (value) {
+            newSocketsToReassign = newSocketsToReassign.filter((el) => el !== socket.id);
+        } else {
+            newSocketsToReassign = newSocketsToReassign.push(socket.id);
+        }
+        setSocketsToReassign(newSocketsToReassign);
+    };
+
     const handleRuleStateChange = (value, rule) => {
         if (value === 'true') {
-            let linkedData = linkedRuleData;
-            let unLinkedData = unLinkedRuleData;
+            if (checkedAll) {
+                setCheckedAll(false);
+            }
+            let linkedData = [...linkedRuleData];
+            let unLinkedData = [...unLinkedRuleData];
             let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
             rule.linked_rule = false;
             unLinkedData.push(rule);
@@ -683,7 +673,6 @@ const PlugRule = () => {
             recordToUnLink.rule_id = currentData.id;
             recordToUnLink.sensor_id.push(rule.id);
             setRulesToUnLink(recordToUnLink);
-
             let recordToLink = rulesToLink;
             let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
             recordToLink.sensor_id = newRecordToLink;
@@ -693,8 +682,12 @@ const PlugRule = () => {
         }
 
         if (value === 'false') {
-            let linkedData = linkedRuleData;
-            let unLinkedData = unLinkedRuleData;
+            if (allSensors.length - selectedIds.length == 0) {
+                setCheckedAll(true);
+            }
+
+            let linkedData = [...linkedRuleData];
+            let unLinkedData = [...unLinkedRuleData];
             let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
             rule.linked_rule = true;
             linkedData.push(rule);
@@ -721,11 +714,22 @@ const PlugRule = () => {
         setSelectedIds((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
+        setIsChangedSockets(true);
     };
 
     const updatePlugRuleData = async () => {
         setIsProcessing(true);
-        await updatePlugRuleRequest(currentData)
+        let currentDataCopy = Object.assign({}, currentData);
+
+        const formattedSchedule = [];
+        preparedScheduleData.forEach((currentCondition) => {
+            currentCondition.data.forEach((currentRow) => {
+                formattedSchedule.push(currentRow);
+            });
+        });
+        currentDataCopy.action = formattedSchedule;
+        currentDataCopy.building_id = [currentDataCopy.building_id];
+        await updatePlugRuleRequest(currentDataCopy)
             .then((res) => {
                 setIsProcessing(false);
                 setPageRefresh(!pageRefresh);
@@ -760,9 +764,65 @@ const PlugRule = () => {
             addOptions();
         }
     }, [allData]);
-
+    const headerProps = [
+        {
+            name: 'Equipment Type',
+            accessor: 'equipment_type_name',
+            callbackValue: renderEquipType,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'equipment_link_location',
+            callbackValue: renderLocation,
+        },
+        {
+            name: 'Space Type',
+            accessor: 'space_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'MAC Address',
+            accessor: 'device_link',
+        },
+        {
+            name: 'Sensors',
+            accessor: 'sensor_count',
+        },
+        {
+            name: 'Assigned Rule',
+            accessor: 'assigned_rule',
+            callbackValue: renderAssignRule,
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTagCell,
+        },
+        {
+            name: 'Last Data',
+            accessor: 'last_data',
+            callbackValue: renderLastUsedCell,
+        },
+    ];
     const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
 
+    const dataForCSV = () => {
+        let newPlugRuleData = [];
+
+        if (selectedTab === 0) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = allSensors;
+        }
+        return newPlugRuleData;
+    };
     const uniqueMacIds = [];
     const [removeMacDuplication, setRemoveMacDuplication] = useState();
 
@@ -801,6 +861,52 @@ const PlugRule = () => {
 
         isLoadingRef.current = true;
 
+        activeBuildingId &&
+            (await getUnlinkedSocketRules(
+                pageSize,
+                pageNo,
+                ruleId,
+                activeBuildingId,
+                equpimentTypeFilterString,
+                macTypeFilterString,
+                locationTypeFilterString,
+                sensorTypeFilterString,
+                floorTypeFilterString,
+                spaceTypeFilterString,
+                spaceTypeTypeFilterString,
+                assignedRuleFilterString,
+                tagsFilterString,
+                true,
+                {
+                    ...sorting,
+                }
+            ).then((res) => {
+                isLoadingRef.current = false;
+
+                let response = res.data;
+                setAllSensors(response?.data);
+
+                setUnlinkedSocketRuleSuccess(res.status);
+
+                let unLinkedData = [];
+                _.uniqBy(response, 'id').forEach((record) => {
+                    record.linked_rule = false;
+                    unLinkedData.push(record);
+                });
+
+                setUnLinkedRuleData(unLinkedData);
+                setAllUnlinkedRuleAdded((el) => [...el, '1']);
+                setTotalItems(response?.total_data);
+            }));
+    };
+
+    const handleDownloadCsv = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
         await getUnlinkedSocketRules(
             pageSize,
             pageNo,
@@ -813,32 +919,25 @@ const PlugRule = () => {
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeTypeFilterString,
+            assignedRuleFilterString,
+            tagsFilterString,
+            false,
             {
                 ...sorting,
             }
-        ).then((res) => {
-            isLoadingRef.current = false;
-
-            let response = res.data.data;
-
-            setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
-
-            setUnlinkedSocketRuleSuccess(res.status);
-
-            let unLinkedData = [];
-            _.uniqBy(response.data, 'id').forEach((record) => {
-                record.linked_rule = false;
-                unLinkedData.push(record);
-            });
-
-            setUnLinkedRuleData(unLinkedData);
-            setAllUnlinkedRuleAdded((el) => [...el, '1']);
-            setTotalItems(response.total_data);
-        });
+        )
+            .then((res) => {
+                let responseData = res?.data;
+                download(
+                    `Sockets${new Date().toISOString().split('T')[0]}`,
+                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerProps)
+                );
+            })
+            .catch((error) => {});
     };
 
     const fetchLinkedSocketRules = async () => {
-        await listLinkSocketRulesRequest(ruleId, activeBuildingId, sortBy)
+        await listLinkSocketRulesRequest(ruleId, currentData.building_id, sortBy)
             .then((res) => {
                 let response = res.data;
                 let linkedData = [];
@@ -861,18 +960,13 @@ const PlugRule = () => {
     };
 
     useEffect(() => {
-        fetchLinkedSocketRules();
-    }, []);
-
-    useEffect(() => {
-        const selectedSensors = selectedIds
+        const selectedSensors = [...selectedIds]
             .map((id) => allSensors.find((sensor) => sensor.id === id))
             .map((sensor) => ({ ...sensor, linked_rule: true }));
 
         setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
-
         setLinkedRuleData(selectedSensors);
-    }, [allData.length, selectedIds, allSensors.length]);
+    }, [allData.length, allSensors.length]);
 
     useEffect(() => {
         unLinkedRuleData.length > 0 &&
@@ -883,16 +977,21 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
+        fetchFiltersForSensors();
 
         fetchUnLinkedSocketRules();
     }, [
         ruleId,
+        currentData.name,
+        activeBuildingId,
         equpimentTypeFilterString,
         macTypeFilterString,
         locationTypeFilterString,
         sensorTypeFilterString,
         floorTypeFilterString,
         spaceTypeFilterString,
+        assignedRuleFilterString,
+        tagsFilterString,
         spaceTypeTypeFilterString,
         sortBy.method,
         sortBy.name,
@@ -900,7 +999,6 @@ const PlugRule = () => {
         pageSize,
     ]);
 
-    // INITIAL TABLE
     useEffect(() => {
         let arr1 = [];
         let arr2 = [];
@@ -910,10 +1008,8 @@ const PlugRule = () => {
 
         const allRuleData = arr1.concat(arr2);
 
-        // INITIAL TABLE
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
-
     const currentRow = () => {
         if (selectedRuleFilter === 0) {
             return allSensors;
@@ -933,6 +1029,58 @@ const PlugRule = () => {
         return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
     };
 
+    const selectAllRowsSensors = async (checkedAll) => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        if (checkedAll) {
+            activeBuildingId &&
+                (await getUnlinkedSocketRules(
+                    pageSize,
+                    pageNo,
+                    ruleId,
+                    activeBuildingId,
+                    equpimentTypeFilterString,
+                    macTypeFilterString,
+                    locationTypeFilterString,
+                    sensorTypeFilterString,
+                    floorTypeFilterString,
+                    spaceTypeFilterString,
+                    spaceTypeTypeFilterString,
+                    assignedRuleFilterString,
+                    tagsFilterString,
+                    false,
+                    {
+                        ...sorting,
+                    }
+                ).then((res) => {
+                    isLoadingRef.current = false;
+
+                    let response = res.data;
+                    const preparedIdofSockets = [];
+                    _.cloneDeep(_.uniqBy(response.data, 'id')).forEach((socket) => {
+                        preparedIdofSockets.push(socket.id);
+                    });
+                    setRulesToLink((prevState) => ({
+                        ...prevState,
+                        sensor_id: preparedIdofSockets,
+                    }));
+
+                    setTotalSocket(response.total_data);
+                }));
+        } else {
+            setRulesToLink([]);
+            setSelectedIds([]);
+
+            setRulesToUnLink((prev) => ({ rule_id: prev.rule_id, sensor_id: fetchedSelectedIds }));
+            setTotalSocket(0);
+        }
+        setIsChangedSockets(true);
+        setCheckedAll(checkedAll);
+    };
     const currentRowSearched = () => {
         if (selectedRuleFilter === 0) {
             return allSearchData;
@@ -961,6 +1109,104 @@ const PlugRule = () => {
 
         return childrenTemplate(last_used_data ? moment(last_used_data).fromNow() : '');
     };
+    const validatePlugRuleForm = (data) => {
+        let valid = true;
+        if (!data.name.length) {
+            setNameError(true);
+            valid = false;
+        }
+        if (!data.building_id.length) {
+            setBuildingError({ text: 'please select building' });
+            valid = false;
+        }
+        return valid;
+    };
+    const handleContinueAndSaveClick = async () => {
+        Promise.allSettled([
+            isChangedRuleDetails && updatePlugRuleData(),
+            isChangedSockets && reassignSensorsToRule(),
+            isChangedSockets && updateSocketUnlink(),
+        ]).then((value) => {
+            handleCloseSocketsModal(true);
+            fetchUnLinkedSocketRules();
+            fetchFiltersForSensors();
+            fetchLinkedSocketRules();
+            fetchPlugRuleDetail();
+            openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+            setIsChangedRuleDetails(false);
+            setIsChangedSockets(false);
+        });
+    };
+
+    const handleCheckIfSocketAssignedToAnotherRule = (rulesToLink) => {
+        const dataUnassign = [];
+        const idSocketsToAssign = [];
+        const socketsToReassign = [];
+        allSensors.forEach((sensor) => {
+            if (rulesToLink?.sensor_id?.includes(sensor.id)) {
+                if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
+                    socketsToReassign.push(sensor.id);
+                    dataUnassign.push(sensor);
+                } else {
+                    idSocketsToAssign.push(sensor.id);
+                }
+            }
+        });
+        setDataToUnassign(dataUnassign);
+        setSocketsToReassign(socketsToReassign);
+        if (dataUnassign.length) {
+            return { isAssignedToAnotherRule: true, dataToAssign: idSocketsToAssign };
+        } else {
+            return { isAssignedToAnotherRule: false, dataToAssign: idSocketsToAssign };
+        }
+    };
+    const handleSaveClicked = async () => {
+        const { isAssignedToAnotherRule } = handleCheckIfSocketAssignedToAnotherRule(rulesToLink);
+        if (isAssignedToAnotherRule) {
+            setShowSocketsModal(true);
+            return;
+        }
+        if (isCreateRuleMode) {
+            const isValid = validatePlugRuleForm(currentData);
+            if (isValid) {
+                let currentDataCopy = Object.assign({}, currentData);
+
+                const formattedSchedule = [];
+                preparedScheduleData.forEach((currentCondition) => {
+                    currentCondition.data.forEach((currentRow) => {
+                        formattedSchedule.push(currentRow);
+                    });
+                });
+                currentDataCopy.action = formattedSchedule;
+                currentDataCopy.building_id = [currentData.building_id || localStorage.getItem('buildingId')];
+                openSnackbar({ ...notificationCreateData, type: Notification.Types.success, duration: 5000 });
+                await createPlugRuleRequest(currentDataCopy)
+                    .then((res) => {
+                        const { data } = res;
+                        history.push({
+                            pathname: `/control/plug-rules/${data.data.plug_rule_id}`,
+                        });
+                    })
+                    .catch((error) => {
+                        setIsProcessing(false);
+                    });
+            }
+        } else {
+            Promise.allSettled([
+                isChangedSockets && reassignSensorsToRule(),
+                isChangedSockets && updateSocketUnlink(),
+                isChangedRuleDetails && updatePlugRuleData(),
+            ]).then((value) => {
+                openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
+                setIsChangedRuleDetails(false);
+                setIsChangedSockets(false);
+                fetchUnLinkedSocketRules();
+                fetchFiltersForSensors();
+                fetchLinkedSocketRules();
+                fetchPlugRuleDetail();
+            });
+        }
+    };
 
     const renderAssignRule = useCallback(
         (row, childrenTemplate) => childrenTemplate(row.assigned_rules?.length === 0 ? 'None' : row.assigned_rules),
@@ -979,180 +1225,406 @@ const PlugRule = () => {
 
     const [filterOptions, setFilterOptions] = useState([]);
 
-    const filterHandler = (setter, options) => {
-        setter(options.map(({ value }) => value).join('+'));
-        setPageNo(1);
+    const fetchFiltersForSensors = async () => {
+        isLoadingRef.current = true;
+        await getFiltersForSensorsRequest({
+            activeBuildingId,
+            macTypeFilterString,
+            equpimentTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            console.log('filterOptions345345', filterOptions);
+            const filterOptionsFetched = [
+                {
+                    label: 'Equipment Type',
+                    value: 'equipmentType',
+                    placeholder: 'All Equipment Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                        value: filterItem.equipment_type_id,
+                        label: filterItem.equipment_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOption([]);
+                        setEqupimentTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Floor',
+                    value: 'floor',
+                    placeholder: 'All Floors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                        value: filterItem.floor_id,
+                        label: filterItem.floor_name,
+                    })),
+                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+                    onDelete: () => setFloorTypeFilterString(''),
+                },
+                {
+                    label: 'Space',
+                    value: 'space',
+                    placeholder: 'All Spaces',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                        value: filterItem.space_id,
+                        label: filterItem.space_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                    onDelete: () => setSpaceTypeFilterString(''),
+                },
+                {
+                    label: 'Space Type',
+                    value: 'spaceType',
+                    placeholder: 'All Space Types',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                        value: filterItem.space_type_id,
+                        label: filterItem.space_type_name,
+                    })),
+                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+                    onDelete: () => setSpaceTypeTypeFilterString(''),
+                },
+                {
+                    label: 'MAC Address',
+                    value: 'macAddresses',
+                    placeholder: 'All Mac addresses',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                    onDelete: () => {
+                        setSelectedOptionMac([]);
+                        setMacTypeFilterString('');
+                    },
+                },
+                {
+                    label: 'Sensors',
+                    value: 'sensor_count',
+                    placeholder: 'All Sensors',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                    onDelete: setSensorTypeFilterString(''),
+                },
+                {
+                    label: 'Assigned rule',
+                    value: 'assigned_rule',
+                    placeholder: 'All assigned rule',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                        value: filterItem.plug_rule_id,
+                        label: filterItem.plug_rule_name,
+                    })),
+                    onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
+                    onDelete: setAssignedRuleFilterString(''),
+                },
+                {
+                    label: 'Tags',
+                    value: 'tags',
+                    placeholder: 'All tags',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.tags.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setTagsFilterString, options),
+                    onDelete: setTagsFilterString(''),
+                },
+                {
+                    label: 'Last used data',
+                    value: 'last_used_data',
+                    placeholder: 'All last used data',
+                    filterType: FILTER_TYPES.MULTISELECT,
+                    filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                        value: filterItem,
+                        label: filterItem,
+                    })),
+                    onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
+                    onDelete: setLastUsedDataFilterString(''),
+                },
+            ];
+            setFilterOptions(filterOptionsFetched);
+        });
+
+        isLoadingRef.current = false;
     };
 
-    useEffect(() => {
-        (async () => {
-            isLoadingRef.current = true;
-            const filters = await getFiltersForSensorsRequest({
-                activeBuildingId,
-                macTypeFilterString,
-                equpimentTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-            });
+    const getAvailableActionType = (anotherSelectedValue) => {
+        const resultArr = actionTypeInitial.map((el) => {
+            if (el.value === anotherSelectedValue) {
+                return { ...el, isDisabled: true };
+            } else {
+                return { ...el, isDisabled: false };
+            }
+        });
+        return resultArr;
+    };
 
-            filters.data.forEach((filterOptions) => {
-                const filterOptionsFetched = [
-                    {
-                        label: 'MAC Address',
-                        value: 'macAddresses',
-                        placeholder: 'All Mac addresses',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOptionMac([]);
-                            setMacTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Equipment Type',
-                        value: 'equipmentType',
-                        placeholder: 'All Equipment Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-                            value: filterItem.equipment_type_id,
-                            label: filterItem.equipment_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-                        onDelete: () => {
-                            setSelectedOption([]);
-                            setEqupimentTypeFilterString('');
-                        },
-                    },
-                    {
-                        label: 'Sensors',
-                        value: 'sensors',
-                        placeholder: 'All Sensors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-                            value: filterItem,
-                            label: filterItem,
-                        })),
-                        onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                        onDelete: setSensorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Floor',
-                        value: 'floor',
-                        placeholder: 'All Floors',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                            value: filterItem.floor_id,
-                            label: filterItem.floor_name,
-                        })),
-                        onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                        onDelete: () => setFloorTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space',
-                        value: 'space',
-                        placeholder: 'All Spaces',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                            value: filterItem.space_id,
-                            label: filterItem.space_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                        onDelete: () => setSpaceTypeFilterString(''),
-                    },
-                    {
-                        label: 'Space Type',
-                        value: 'spaceType',
-                        placeholder: 'All Space Types',
-                        filterType: FILTER_TYPES.MULTISELECT,
-                        filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                            value: filterItem.space_type_id,
-                            label: filterItem.space_type_name,
-                        })),
-                        onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                        onDelete: () => setSpaceTypeTypeFilterString(''),
-                    },
-                ];
+    const RenderScheduleActionItem = ({ record }) => {
+        const firstCondition = record.data[0];
+        const secondCondition = record.data[1];
+        return (
+            <>
+                <div className="plug-rule-schedule-row mb-1">
+                    <div className="schedule-left-flex">
+                        <div>
+                            <Select
+                                defaultValue={firstCondition.action_type}
+                                onChange={(event) => {
+                                    handleSchedularConditionChange(
+                                        'action_type',
+                                        event.value,
+                                        firstCondition.condition_id,
+                                        firstCondition.condition_group_id
+                                    );
+                                }}
+                                options={getAvailableActionType(secondCondition.action_type)}
+                            />
+                        </div>
+                        <div>at</div>
+                        <div>
+                            <Select
+                                defaultValue={firstCondition.action_time}
+                                onChange={(event) => {
+                                    handleSchedularTimeChange(
+                                        'action_time',
+                                        event.value,
+                                        firstCondition.condition_id,
+                                        firstCondition.condition_group_id
+                                    );
+                                }}
+                                isDisabled={firstCondition.action_type == '2'}
+                                options={firstCondition.action_type == '2' ? [] : timePicker15MinutesIntervalOption}
+                            />
+                        </div>
+                        <div>on</div>
+                        <div className="schedular-weekday-group">
+                            <ConditionGroup
+                                handleButtonClick={(day) =>
+                                    handleScheduleDayChange(day, firstCondition.condition_group_id)
+                                }
+                                disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
+                                selectedItemsList={firstCondition.action_day}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="plug-rule-schedule-row mb-1">
+                    <div className="schedule-left-flex">
+                        <div>
+                            <Select
+                                defaultValue={secondCondition.action_type}
+                                onChange={(event) => {
+                                    handleSchedularConditionChange(
+                                        'action_type',
+                                        event.value,
+                                        secondCondition.condition_id,
+                                        secondCondition.condition_group_id
+                                    );
+                                }}
+                                options={getAvailableActionType(firstCondition.action_type)}
+                            />
+                        </div>
+                        <div>at</div>
+                        <div>
+                            <Select
+                                defaultValue={secondCondition.action_time}
+                                onChange={(event) => {
+                                    handleSchedularTimeChange(
+                                        'action_time',
+                                        event.value,
+                                        secondCondition.condition_id,
+                                        secondCondition.condition_group_id
+                                    );
+                                }}
+                                isDisabled={secondCondition.action_type == '2'}
+                                options={timePicker15MinutesIntervalOption}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <Button
+                            label="Delete Condition"
+                            onClick={() => {
+                                showOptionToDelete(firstCondition.condition_group_id);
+                                setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
+                                setShowDeleteConditionModal(true);
+                            }}
+                            size={Button.Sizes.md}
+                            icon={<DeleteIcon />}
+                            type={Button.Type.secondaryDistructive}
+                        />
+                    </div>
+                </div>
 
-                setFilterOptions(filterOptionsFetched);
-            });
+                <hr className="plug-rule-schedule-breaker" />
+            </>
+        );
+    };
 
-            isLoadingRef.current = false;
-        })();
-    }, [
-        activeBuildingId,
-        macTypeFilterString,
-        equpimentTypeFilterString,
-        sensorTypeFilterString,
-        locationTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-    ]);
+    const getDateRange = () => {
+        const maxDate = new Date();
+        maxDate.setUTCHours(23, 59, 59, 999);
 
-    useEffect(() => {
-        setAllSearchData([]);
+        const minDate = new Date();
+        minDate.setDate(maxDate.getDate() - 7);
 
-        const fetchAllData = async () => {
-            const sorting = sortBy.method &&
-                sortBy.name && {
-                    order_by: sortBy.name,
-                    sort_by: sortBy.method,
-                };
-
-            isLoadingRef.current = true;
-            await getUnlinkedSocketRules(
-                pageSize,
-                pageNo,
-                ruleId,
-                activeBuildingId,
-                equpimentTypeFilterString,
-                macTypeFilterString,
-                locationTypeFilterString,
-                sensorTypeFilterString,
-                floorTypeFilterString,
-                spaceTypeFilterString,
-                spaceTypeTypeFilterString,
-                {
-                    sensor_search: search,
-                    ...sorting,
-                }
-            ).then((res) => {
-                isLoadingRef.current = false;
-
-                setUnlinkedSocketRuleSuccess(res.status);
-                let response = res.data.data;
-                let unLinkedData = [];
-                response.data.forEach((record) => {
-                    record.linked_rule = false;
-                    unLinkedData.push(record);
-                });
-                setAllSearchData(unLinkedData);
-                setTotalItemsSearched(response.total_data);
-            });
+        return {
+            maxDate: maxDate.getTime(),
+            minDate: minDate.getTime(),
         };
+    };
+    const calculateOffHoursPlots = () => {
+        let weekWithSchedule = [];
+        const copyOfPreparedScheduleData = [...preparedScheduleData];
+        copyOfPreparedScheduleData.map((groupId) => {
+            groupId.data.forEach((el) => {
+                switch (el.action_type) {
+                    case 0:
+                        el.action_day.forEach((day) => {
+                            weekWithSchedule[indexOfDay[day]] = {
+                                ...weekWithSchedule[indexOfDay[day]],
+                                turnOff: el.action_time,
+                            };
+                        });
 
-        search && fetchAllData();
-    }, [
-        search,
-        equpimentTypeFilterString,
-        macTypeFilterString,
-        locationTypeFilterString,
-        sensorTypeFilterString,
-        floorTypeFilterString,
-        spaceTypeFilterString,
-        spaceTypeTypeFilterString,
-        sortBy.method,
-        sortBy.name,
-        pageNo,
-        pageSize,
-    ]);
+                        break;
+                    case 1:
+                        el.action_day.forEach((day) => {
+                            weekWithSchedule[indexOfDay[day]] = {
+                                ...weekWithSchedule[indexOfDay[day]],
+                                turnOn: el.action_time,
+                            };
+                        });
+                        break;
+                }
+            });
+        });
 
+        let result = [];
+        for (let i = 0; i < weekWithSchedule.length; i++) {
+            let currentOff = weekWithSchedule[i]?.turnOff;
+            let currentOffDay = i;
+
+            let nextOn;
+            let nextOnDay;
+            if (i === weekWithSchedule.length - 1) {
+                nextOn = weekWithSchedule[0]?.turnOn;
+                nextOnDay = 0;
+            } else {
+                for (let j = i; j < weekWithSchedule.length; j++) {
+                    if (weekWithSchedule[j]?.turnOn) {
+                        if (weekWithSchedule[j]?.turnOn >= weekWithSchedule[j]?.turnOff) {
+                            nextOnDay = j;
+                            nextOn = weekWithSchedule[j]?.turnOn;
+                            break;
+                        } else {
+                            nextOnDay = j + 1;
+                            nextOn = weekWithSchedule[j + 1]?.turnOn;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!currentOff) {
+                continue;
+            }
+            if (!nextOn) {
+                if (i === weekWithSchedule.length - 1) {
+                    nextOn = weekWithSchedule[0]?.turnOn;
+                    nextOnDay = 0;
+                } else {
+                    nextOn = weekWithSchedule[i + 1]?.turnOn;
+                    nextOnDay = i + 1;
+                }
+            }
+            if (currentOff && nextOn) {
+                result.push({
+                    day: i,
+                    currentOffDay,
+                    nextOnDay,
+                    currentOffTime: currentOff,
+                    nextOnTime: nextOn,
+                });
+            }
+        }
+        getOffperiodsWithRealDate(result, getDateRange());
+    };
+
+    function getDatesInRange(startDate, stopDate) {
+        var dateArray = [];
+        var currentDate = moment(startDate);
+        var stopDate = moment(stopDate);
+        while (currentDate <= stopDate) {
+            dateArray.push(moment(currentDate).format('YYYY-MM-DD'));
+            currentDate = moment(currentDate).add(1, 'days');
+        }
+        return dateArray;
+    }
+    const checkIfDayInOffRange = (day, result) => {
+        let offDay = {};
+        result.forEach((el) => {
+            if (el.day == day) {
+                offDay = el;
+            }
+        });
+        return offDay;
+    };
+
+    const getOffperiodsWithRealDate = (result, dateRange) => {
+        const maxdateString = new Date(dateRange.maxDate);
+        const mindateString = new Date(dateRange.minDate);
+        const rangeDates = getDatesInRange(mindateString, maxdateString);
+        const offPeriods = [];
+        rangeDates.forEach((day) => {
+            const currentWeekDay = moment(day).weekday();
+            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result);
+            if (!_.isEmpty(weekDayOffSchedule)) {
+                let timeDiff;
+
+                if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
+                    timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
+                } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
+                    timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
+                }
+                const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
+                const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
+                const to = moment(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
+                offPeriods.push({
+                    type: LineChart.PLOT_BANDS_TYPE.off_hours,
+                    from: from * 1000,
+                    to: to * 1000,
+                });
+            }
+        });
+        setOffHoursPlots(offPeriods);
+    };
+    const buildingIdProps = {
+        label: 'Choose building',
+        defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
+        onChange: (event) => {
+            handleCurrentDataChange('building_id', event.value);
+        },
+        options: buildingListData,
+    };
+    const handleCloseSocketsModal = () => {
+        setShowSocketsModal(false);
+    };
+
+    if (buildingError?.text?.length) {
+        buildingIdProps.error = buildingError;
+    }
     return (
         <>
             <div className="single-plug-rule-container">
@@ -1185,9 +1657,10 @@ const PlugRule = () => {
                             />
                             <span className="ml-2 plug-rule-switch-font">Not Active</span>
                         </div>
-                        <div>
+                        <div className="cancel-and-save-flex">
                             <button
                                 type="button"
+                                size={Button.Sizes.md}
                                 className="btn btn-default plug-rule-cancel"
                                 onClick={() => {
                                     history.push({
@@ -1196,22 +1669,15 @@ const PlugRule = () => {
                                 }}>
                                 Cancel
                             </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary plug-rule-save ml-2"
+                            <Button
+                                disabled={isDisabledSaveButton}
+                                size={Button.Sizes.md}
+                                label="Save"
+                                type={Button.Type.primary}
                                 onClick={() => {
-                                    Promise.allSettled([
-                                        updatePlugRuleData(),
-                                        updateSocketLink(),
-                                        updateSocketUnlink(),
-                                    ]).then((value) => {
-                                        history.push({
-                                            pathname: `/control/plug-rules`,
-                                        });
-                                    });
-                                }}>
-                                Save
-                            </button>
+                                    handleSaveClicked();
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
@@ -1248,7 +1714,24 @@ const PlugRule = () => {
                                             onChange={(e) => {
                                                 handleCurrentDataChange('name', e.target.value);
                                             }}
+                                            error={nameError}
                                         />
+                                        <div className="my-3">
+                                            {isCreateRuleMode ? (
+                                                <Select {...buildingIdProps} />
+                                            ) : (
+                                                <Select
+                                                    label="Choose building"
+                                                    defaultValue={currentData.building_id}
+                                                    onChange={(event) => {
+                                                        handleCurrentDataChange('building_id', event.value);
+                                                    }}
+                                                    isDisabled={true}
+                                                    options={buildingListData}
+                                                />
+                                            )}
+                                        </div>
+
                                         <Textarea
                                             type="textarea"
                                             label="Description"
@@ -1277,403 +1760,9 @@ const PlugRule = () => {
                                     </div>
 
                                     <hr className="plug-rule-schedule-breaker" />
-
-                                    {currentData.action &&
-                                        currentData.action.map((record, index) => {
-                                            return (
-                                                <>
-                                                    <div className="plug-rule-schedule-row mb-1">
-                                                        <div className="schedule-left-flex">
-                                                            <div>
-                                                                <Select
-                                                                    defaultValue={record.action_type}
-                                                                    label="Select"
-                                                                    onChange={(event) => {
-                                                                        handleSchedularConditionChange(
-                                                                            'action_type',
-                                                                            event.value,
-                                                                            record.condition_id
-                                                                        );
-                                                                    }}
-                                                                    options={[
-                                                                        {
-                                                                            label: 'Turn Off',
-                                                                            value: false,
-                                                                        },
-                                                                        {
-                                                                            label: 'Turn On',
-                                                                            value: true,
-                                                                        },
-                                                                    ]}
-                                                                />
-                                                            </div>
-                                                            <div>at</div>
-                                                            <div>
-                                                                <Select
-                                                                    defaultValue={record.action_time}
-                                                                    label="Select"
-                                                                    onChange={(event) => {
-                                                                        handleSchedularTimeChange(
-                                                                            'action_time',
-                                                                            event.value,
-                                                                            record.condition_id
-                                                                        );
-                                                                    }}
-                                                                    options={timePicker15MinutesIntervalOption}
-                                                                />
-                                                            </div>
-                                                            <div>on</div>
-                                                            <div className="schedular-weekday-group">
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('mon')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'mon',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('mon')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Mon 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('mon')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Mon 12 am',
-                                                                                    x2: 'Mon 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Mo
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('tue')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'tue',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('tue')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Tue 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('tue')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Tue 12 am',
-                                                                                    x2: 'Tue 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Tu
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('wed')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'wed',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('wed')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Wed 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('wed')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Wed 12 am',
-                                                                                    x2: 'Wed 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    We
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('thr')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'thr',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('thr')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Thu 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('thr')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Thu 12 am',
-                                                                                    x2: 'Thu 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Th
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('fri')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'fri',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('fri')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Fri 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('fri')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Fri 12 am',
-                                                                                    x2: 'Fri 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Fr
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('sat')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'sat',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('sat')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Sat 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('sat')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Sat 12 am',
-                                                                                    x2: 'Sat 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Sa
-                                                                </div>
-                                                                <div
-                                                                    className={
-                                                                        record.action_day.includes('sun')
-                                                                            ? 'schedular-weekday'
-                                                                            : 'schedular-weekday-active'
-                                                                    }
-                                                                    onClick={() => {
-                                                                        handleActionDayChange(
-                                                                            'sun',
-                                                                            record.condition_id
-                                                                        );
-                                                                        if (record.action_day.includes('sun')) {
-                                                                            setAnnotationXAxis((current) =>
-                                                                                current.filter((item) => {
-                                                                                    return item?.x !== 'Sun 12 am';
-                                                                                })
-                                                                            );
-                                                                        }
-                                                                        if (!record.action_day.includes('sun')) {
-                                                                            setAnnotationXAxis((prev) => [
-                                                                                ...prev,
-                                                                                {
-                                                                                    x: 'Sun 12 am',
-                                                                                    x2: 'Sun 12 pm',
-                                                                                    label: {
-                                                                                        borderColor: '#000',
-                                                                                        borderWidth: 1,
-                                                                                        borderRadius: 2,
-                                                                                        text: 'off',
-                                                                                        textAnchor: 'middle',
-                                                                                        position: 'top',
-                                                                                        orientation: 'horizontal',
-                                                                                        offsetX: 60,
-                                                                                        offsetY: -15,
-
-                                                                                        style: {
-                                                                                            background: '#333',
-                                                                                            fontSize: '15px',
-                                                                                            fontWeight: 400,
-                                                                                        },
-                                                                                    },
-                                                                                },
-                                                                            ]);
-                                                                        }
-                                                                    }}>
-                                                                    Su
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div>
-                                                            <Button
-                                                                label=""
-                                                                onClick={() => {
-                                                                    showOptionToDelete(record.condition_id);
-                                                                    setCurrentScheduleIdToDelete(record.condition_id);
-                                                                    setShowDeleteConditionModal(true);
-                                                                }}
-                                                                size={Button.Sizes.md}
-                                                                icon={<DeleteIcon />}
-                                                                type={Button.Type.primaryDistructive}
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <hr className="plug-rule-schedule-breaker" />
-                                                </>
-                                            );
+                                    {preparedScheduleData &&
+                                        preparedScheduleData.map((record, index) => {
+                                            return <RenderScheduleActionItem record={record} key={index} />;
                                         })}
 
                                     <button
@@ -1690,20 +1779,38 @@ const PlugRule = () => {
                     </div>
 
                     <div className="plug-rule-demand-chart-container">
-                        <div className="plug-rule-chart-header m-3">
-                            <div>
-                                <h5 className="plug-rule-chart-title mb-1">Average Energy Demand</h5>
-                                <p className="plugrule-chart-subtitle">Last 2 Weeks</p>
-                            </div>
-                            <div>
-                                <p className="plug-rule-chart-subtitle mb-1">Estimated Energy Savings</p>
-                                <h5 className="plug-rule-chart-title float-right">1,722 kWh</h5>
-                            </div>
-                        </div>
-
                         <div className="total-eng-consumtn">
-                            {lineChartData && lineChartOptions && (
-                                <LineChart options={lineChartOptions} series={lineChartData} height={200} />
+                            {lineChartData && (
+                                <LineChart
+                                    data={lineChartData.map((d) => ({
+                                        ...d,
+                                        fillColor: {
+                                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                                            stops: [[1, 'rgba(255,255,255,.01)']],
+                                        },
+                                    }))}
+                                    dateRange={getDateRange()}
+                                    height={200}
+                                    plotBands={offHoursPlots}
+                                    title={'Average Energy Demand'}
+                                    subTitle={'Last 2 Weeks'}
+                                    plotBandsLegends={[
+                                        { label: 'Plug Rule Off-Hours', color: 'rgb(16 24 40 / 25%)' },
+                                        {
+                                            label: 'After-Hours',
+                                            color: {
+                                                background: 'rgba(180, 35, 24, 0.1)',
+                                                borderColor: colors.error700,
+                                            },
+                                            onClick: () => {},
+                                        },
+                                    ]}
+                                    unitInfo={{
+                                        title: 'Estimated Energy Savings',
+                                        unit: UNITS.KWH,
+                                        value: '1,722',
+                                    }}
+                                />
                             )}
                         </div>
                     </div>
@@ -1729,102 +1836,114 @@ const PlugRule = () => {
 
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    <DataTableWidget
-                        isLoading={isLoadingRef.current}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="sockets-plug-rules"
-                        onSearch={(query) => {
-                            setPageNo(1);
-                            setSearch(query);
-                        }}
-                        buttonGroupFilterOptions={[{ label: 'All' }, { label: 'Selected' }, { label: 'Unselected' }]}
-                        onStatus={setSelectedRuleFilter}
-                        rows={currentRow()}
-                        searchResultRows={currentRowSearched()}
-                        filterOptions={filterOptions}
-                        headers={[
-                            {
-                                name: 'Equipment Type',
-                                accessor: 'equipment_type_name',
-                                callbackValue: renderEquipType,
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                                onSort: (method, name) => setSortBy({ method, name }),
-                            },
-                            {
-                                name: 'Location',
-                                accessor: 'equipment_link_location',
-                                callbackValue: renderLocation,
-                            },
-                            {
-                                name: 'MAC Address',
-                                accessor: 'device_link',
-                            },
-                            {
-                                name: 'Sensors',
-                                accessor: 'sensor_count',
-                            },
-                            {
-                                name: 'Assigned Rule',
-                                accessor: 'assigned_rule',
-                                callbackValue: renderAssignRule,
-                            },
-                            {
-                                name: 'Tags',
-                                accessor: 'tags',
-                                callbackValue: renderTagCell,
-                            },
-                            {
-                                name: 'Last Data',
-                                accessor: 'last_data',
-                                callbackValue: renderLastUsedCell,
-                            },
-                        ]}
-                        onCheckboxRow={alert}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="vehicle1"
-                                name="vehicle1"
-                                checked={checkedAll}
-                                onChange={() => {
-                                    setCheckedAll(!checkedAll);
-                                }}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="socket_rule"
-                                name="socket_rule"
-                                checked={selectedIds.includes(record?.id) || checkedAll}
-                                value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                onChange={(e) => {
-                                    setSensorIdNow(record?.id);
-                                    handleRuleStateChange(e.target.value, record);
-                                }}
-                            />
-                        )}
-                        onPageSize={setPageSize}
-                        onChangePage={setPageNo}
-                        pageSize={pageSize}
-                        currentPage={pageNo}
-                        totalCount={(() => {
-                            if (search) {
-                                return totalItemsSearched;
-                            }
-                            if (selectedRuleFilter === 0) {
-                                return totalItems;
-                            }
+                    {currentData.building_id ? (
+                        <DataTableWidget
+                            isLoading={isLoadingRef.current}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="sockets-plug-rules"
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
+                            filterOptions={filterOptions}
+                            buttonGroupFilterOptions={[
+                                { label: 'All' },
+                                { label: 'Selected' },
+                                { label: 'Unselected' },
+                            ]}
+                            onDownload={() => handleDownloadCsv()}
+                            onStatus={setSelectedRuleFilter}
+                            rows={currentRow()}
+                            searchResultRows={currentRowSearched()}
+                            filterOptions={filterOptions}
+                            headers={[
+                                {
+                                    name: 'Equipment Type',
+                                    accessor: 'equipment_type_name',
+                                    callbackValue: renderEquipType,
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'Location',
+                                    accessor: 'equipment_link_location',
+                                    callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Space Type',
+                                    accessor: 'space_type',
+                                    onSort: (method, name) => setSortBy({ method, name }),
+                                },
+                                {
+                                    name: 'MAC Address',
+                                    accessor: 'device_link',
+                                },
+                                {
+                                    name: 'Sensors',
+                                    accessor: 'sensor_count',
+                                },
+                                {
+                                    name: 'Assigned Rule',
+                                    accessor: 'assigned_rule',
+                                    callbackValue: renderAssignRule,
+                                },
+                                {
+                                    name: 'Tags',
+                                    accessor: 'tags',
+                                    callbackValue: renderTagCell,
+                                },
+                                {
+                                    name: 'Last Data',
+                                    accessor: 'last_data',
+                                    callbackValue: renderLastUsedCell,
+                                },
+                            ]}
+                            onCheckboxRow={alert}
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="vehicle1"
+                                    name="vehicle1"
+                                    checked={checkedAll}
+                                    onChange={() => selectAllRowsSensors(!checkedAll)}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="socket_rule"
+                                    name="socket_rule"
+                                    checked={selectedIds.includes(record?.id) || checkedAll}
+                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
+                                    onChange={(e) => {
+                                        setSensorIdNow(record?.id);
+                                        handleRuleStateChange(e.target.value, record);
+                                    }}
+                                />
+                            )}
+                            onPageSize={setPageSize}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            currentPage={pageNo}
+                            totalCount={(() => {
+                                if (search) {
+                                    return totalItemsSearched;
+                                }
+                                if (selectedRuleFilter === 0) {
+                                    return totalItems;
+                                }
 
-                            return 0;
-                        })()}
-                    />
+                                return 0;
+                            })()}
+                        />
+                    ) : (
+                        <div className="sockets-no-selected-building">
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Please choose building to see the list of sockets
+                            </Typography.Subheader>
+                        </div>
+                    )}
                 </div>
             )}
             <Modal
@@ -1893,6 +2012,122 @@ const PlugRule = () => {
                             deleteScheduleCondition(currentScheduleIdToDelete);
                         }}
                     />
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+                show={showSocketsModal}
+                onHide={() => handleCloseSocketsModal()}
+                centered
+                backdrop="static"
+                dialogClassName="sockets-modal-container-style"
+                keyboard={false}>
+                <Modal.Header>
+                    <Modal.Title id="">Socket with existing rules</Modal.Title>
+                    <Typography.Subheader size={Typography.Sizes.md} className="subtitle-sockets-modal">
+                        These sockets are assigned to another rule. Please select the sockets you would like to unassign
+                        from their current rule
+                    </Typography.Subheader>
+                </Modal.Header>
+                <Modal.Body>
+                    <DataTableWidget
+                        isLoading={isLoadingRef.current}
+                        isLoadingComponent={<SkeletonLoading />}
+                        id="sockets-plug-rules-modal"
+                        rows={dataToUnassign}
+                        buttonGroupFilterOptions={[]}
+                        headers={[
+                            {
+                                name: 'Equipment Type',
+                                accessor: 'equipment_type_name',
+                                callbackValue: renderEquipType,
+                            },
+                            {
+                                name: 'Location',
+                                accessor: 'equipment_link_location',
+                                callbackValue: renderLocation,
+                            },
+                            {
+                                name: 'Space Type',
+                                accessor: 'space_type',
+                            },
+
+                            {
+                                name: 'MAC Address',
+                                accessor: 'device_link',
+                            },
+                            {
+                                name: 'Sensors',
+                                accessor: 'sensor_count',
+                            },
+                            {
+                                name: 'Assigned Rule',
+                                accessor: 'assigned_rule',
+                                callbackValue: renderAssignRule,
+                            },
+                            {
+                                name: 'Tags',
+                                accessor: 'tags',
+                                callbackValue: renderTagCell,
+                            },
+                            {
+                                name: 'Last Data',
+                                accessor: 'last_data',
+                                callbackValue: renderLastUsedCell,
+                            },
+                        ]}
+                        onCheckboxRow={() => {}}
+                        customCheckAll={() => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="vehicle1"
+                                name="vehicle1"
+                                checked={checkedAllReassignSockets}
+                                onChange={() => {
+                                    setCheckedAllReassignSockets(!checkedAllReassignSockets);
+                                }}
+                            />
+                        )}
+                        customCheckboxForCell={(record) => (
+                            <Checkbox
+                                label=""
+                                type="checkbox"
+                                id="socket_rule"
+                                name="socket_rule"
+                                checked={socketsToReassign.includes(record?.id) || checkedAllReassignSockets}
+                                value={
+                                    socketsToReassign.includes(record?.id) || checkedAllReassignSockets ? true : false
+                                }
+                                onChange={(e) => {
+                                    handleReassignSocketsCheckboxClick(e.target.value, record);
+                                }}
+                            />
+                        )}
+                    />
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button
+                        type={Button.Type.secondary}
+                        size={Button.Sizes.md}
+                        onClick={() => handleCloseSocketsModal()}>
+                        Cancel
+                    </Button>
+                    {loadingSocketsUpdate ? (
+                        <Button color="primary" disabled>
+                            <Spinner size="sm">Loading...</Spinner>
+                            <span> Loading</span>
+                        </Button>
+                    ) : (
+                        <Button
+                            label="Continue & Save"
+                            type={Button.Type.primary}
+                            size={Button.Sizes.md}
+                            onClick={() => {
+                                handleContinueAndSaveClick();
+                            }}></Button>
+                    )}
                 </Modal.Footer>
             </Modal>
         </>

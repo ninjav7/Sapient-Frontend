@@ -6,13 +6,9 @@ import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { updatePassiveDeviceData } from './services';
 import { isInputLetterOrNumber } from '../../../helpers/helpers';
+import { UserStore } from '../../../store/UserStore';
 
-const EditPassiveDevice = ({
-    isEditDeviceModalOpen,
-    closeEditDeviceModal,
-    selectedPassiveDevice,
-    fetchPassiveDeviceData,
-}) => {
+const EditPassiveDevice = ({ isEditDeviceModalOpen, closeEditDeviceModal, passiveDeviceData, fetchPassiveDevice }) => {
     const defaultDeviceObj = {
         identifier: '',
         model: '',
@@ -37,15 +33,37 @@ const EditPassiveDevice = ({
     const updateDeviceDetails = async () => {
         setIsProcessing(true);
         const params = `?device_id=${passiveDeviceObj?.equipments_id}`;
-        const dataToUpdate = {
+        const payload = {
             mac_address: passiveDeviceObj?.identifier,
         };
-        await updatePassiveDeviceData(params, dataToUpdate)
+        await updatePassiveDeviceData(params, payload)
             .then((res) => {
-                closeEditDeviceModal();
-                setPassiveDeviceObj(defaultDeviceObj);
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Device updated Successfully.';
+                        s.notificationType = 'success';
+                    });
+                    closeEditDeviceModal();
+                    setPassiveDeviceObj(defaultDeviceObj);
+                    fetchPassiveDevice();
+                } else {
+                    if (!response?.success && response?.message.includes('identifier already exists')) {
+                        setIdentifierAlert('Identifier with given name already exists.');
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update Smart Meter.'
+                                : 'Unable to update Smart Meter due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                }
                 setIsProcessing(false);
-                fetchPassiveDeviceData();
             })
             .catch(() => {
                 setIsProcessing(false);
@@ -70,18 +88,18 @@ const EditPassiveDevice = ({
             return;
         }
         let obj = {
-            identifier: selectedPassiveDevice?.identifier,
-            model: selectedPassiveDevice?.model,
-            equipments_id: selectedPassiveDevice?.equipments_id,
+            identifier: passiveDeviceData?.identifier,
+            model: passiveDeviceData?.model,
+            equipments_id: passiveDeviceData?.equipments_id,
         };
         setPassiveDeviceObj(obj);
-        setPreviousIdentifier(selectedPassiveDevice?.identifier);
+        setPreviousIdentifier(passiveDeviceData?.identifier);
     }, [isEditDeviceModalOpen]);
 
     return (
         <Modal show={isEditDeviceModalOpen} onHide={closeEditDeviceModal} backdrop="static" keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Update Passive Device</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Update Smart Meter</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
@@ -96,8 +114,13 @@ const EditPassiveDevice = ({
                     value={passiveDeviceObj?.identifier}
                     defaultValue={passiveDeviceObj?.identifier}
                 />
+                <Brick sizeInRem={0.25} />
 
-                <Brick sizeInRem={1.5} />
+                {!identifierAlert && (
+                    <Typography.Body size={Typography.Sizes.sm}>16 digit serial number</Typography.Body>
+                )}
+
+                <Brick sizeInRem={1.25} />
 
                 <InputTooltip
                     label="Model"
@@ -127,9 +150,7 @@ const EditPassiveDevice = ({
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={!formValidation || isProcessing || identifierAlert !== null}
-                        onClick={() => {
-                            updateDeviceDetails();
-                        }}
+                        onClick={updateDeviceDetails}
                     />
                 </div>
 

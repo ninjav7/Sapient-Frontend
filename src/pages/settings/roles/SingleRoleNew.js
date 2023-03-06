@@ -31,8 +31,7 @@ import {
     singleUserPermissionDetail,
     updatePermissionDetail,
 } from '../../../services/Network';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as MagnifyingGlassSVG } from '../../../assets/icon/magnifying-glass.svg';
 import Skeleton from 'react-loading-skeleton';
 import { userPermissionData } from '../../../store/globalState';
 import { useAtom } from 'jotai';
@@ -2262,11 +2261,11 @@ const SingleRoleNew = () => {
 
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-title">Passive Devices</h6>
+                                                    <h6 className="card-title">Smart Meters</h6>
                                                     <h6
                                                         className="card-subtitle mb-2 text-muted"
                                                         htmlFor="customSwitches">
-                                                        Ability to manage passive devices in a building.
+                                                        Ability to manage Smart Meters in a building.
                                                     </h6>
                                                 </div>
                                             </FormGroup>
@@ -2502,7 +2501,7 @@ const SingleRoleNew = () => {
                                     <div>
                                         <div className="active-sensor-header">
                                             <div className="search-container mr-2">
-                                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                                <MagnifyingGlassSVG />
                                                 <input
                                                     className="search-box ml-2"
                                                     type="search"

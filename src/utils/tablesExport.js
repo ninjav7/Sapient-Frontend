@@ -132,6 +132,34 @@ export const getExploreByBuildingTableCSVExport = (tableData, columns) => {
     return csv;
 };
 
+export const getSocketsForPlugRulePageTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'assigned_rule':
+                    const result = tableRow['assigned_rules'];
+
+                    arr.push(result);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
 export const getBuildingsTableCSVExport = (tableData, columns) => {
     let dataToExport = [];
 
@@ -199,6 +227,46 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
                 case 'square_footage':
                     const squareFootage = formatConsumptionValue(tableRow.square_footage);
                     arr.push(squareFootage);
+                    break;
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+
+    let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getPlugRulesTableCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'days':
+                    const days = [
+                        ...new Set(
+                            tableRow.action.reduce((acc, actionItem) => {
+                                actionItem.action_day &&
+                                    actionItem.action_day.forEach((item) => {
+                                        acc.push(item);
+                                    });
+
+                                return acc;
+                            }, [])
+                        ),
+                    ];
+
+                    arr.push(days.join(' '));
                     break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);
@@ -404,6 +472,65 @@ export const getPanelsTableCSVExport = (tableData, columns) => {
     });
 
     let csv = `${getTableHeadersList(columns)}\n`;
+
+    dataToExport.forEach(function (row) {
+        csv += row.join(',');
+        csv += '\n';
+    });
+    return csv;
+};
+
+export const getCustomerListCSVExport = (tableData, columns) => {
+    let dataToExport = [];
+
+    tableData.forEach((tableRow, index) => {
+        let arr = [];
+
+        for (let i = 0; i <= columns.length - 1; i++) {
+            switch (columns[i].accessor) {
+                case 'id':
+                    const accountID = tableRow['id'];
+                    arr.push(`${accountID}`);
+                    break;
+
+                case 'company_name':
+                    const name = tableRow['company_name'];
+                    const search = ',';
+                    const replaceWith = ' ';
+                    const result = name.split(search).join(replaceWith);
+                    arr.push(result);
+                    break;
+
+                case 'status':
+                    const status = tableRow['status'];
+                    const stat = status === true ? 'Active' : 'Inactive';
+                    arr.push(stat);
+                    break;
+
+                case 'active_devices':
+                    const activeDevices = tableRow['active_devices'];
+                    arr.push(`${activeDevices}`);
+                    break;
+
+                case 'passive_devices':
+                    const passiveDevices = tableRow['passive_devices'];
+                    arr.push(`${passiveDevices}`);
+                    break;
+
+                case 'total_usage':
+                    const energy = tableRow['total_usage'];
+                    arr.push(`${energy} kWh`);
+                    break;
+
+                default:
+                    arr.push(tableRow[columns[i].accessor]);
+                    break;
+            }
+        }
+        dataToExport.push(arr);
+    });
+    let col = columns.filter((ele) => ele?.accessor !== 'actions');
+    let csv = `${getTableHeadersList(col)}\n`;
 
     dataToExport.forEach(function (row) {
         csv += row.join(',');

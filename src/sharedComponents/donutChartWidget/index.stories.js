@@ -15,9 +15,9 @@ const donatChartMock = [
         value: '12.553',
         unit: 'kWh',
         trendValue: 1,
-        link: '#',
+        onClick: () => alert(1),
     },
-    { label: 'Lighting', color: '#FBE384', value: '11.553', unit: 'kWh', trendValue: 5, link: '#' },
+    { label: 'Lighting', color: '#FBE384', value: '11.553', unit: 'kWh', trendValue: 5 },
     { label: 'Plug', color: '#59BAA4', value: '1.553', unit: 'kWh', trendValue: 2, link: '#' },
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 1, link: '#' },
 ];
@@ -41,6 +41,14 @@ export const Default = () => {
 export const Vertical = () => {
     return (
         <BrowserRouter>
+            <small>
+                Just for demo purposes:
+                <ul>
+                    <li>HVAC - is clickable, for that we use onClick property</li>
+                    <li>Lighting - is not clickable</li>
+                    <li>Other items are Link component from react-route</li>
+                </ul>
+            </small>
             <DonutChartWidget
                 items={donatChartMock}
                 type={DONUT_CHART_TYPES.VERTICAL}

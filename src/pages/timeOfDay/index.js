@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -9,9 +7,10 @@ import EndUseTotals from './EndUseTotals';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
-import { convertDateTime, apiRequestBody } from '../../helpers/helpers';
-import DailyUsageByHour from './DailyUsageByHour';
+import { apiRequestBody } from '../../helpers/helpers';
+import LineChart from '../../sharedComponents/lineChart/LineChart';
 import './style.css';
+import Brick from '../../sharedComponents/brick';
 
 const TimeOfDay = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -39,304 +38,23 @@ const TimeOfDay = () => {
         }
     };
 
-    const areaChartOptions = {
-        chart: {
-            height: 380,
-            type: 'area',
-            zoom: {
-                enabled: false,
-            },
-            toolbar: {
-                show: false,
-            },
-        },
-        colors: ['#5369f8', '#43d39e'],
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            width: [3, 3],
-            curve: 'straight',
-        },
-        grid: {
-            row: {
-                colors: ['transparent', 'transparent'],
-                opacity: 0.2,
-            },
-            borderColor: '#f1f3fa',
-        },
-        xaxis: {
-            categories: [
-                '12AM',
-                '1AM',
-                '2AM',
-                '3AM',
-                '4AM',
-                '5AM',
-                '6AM',
-                '7AM',
-                '8AM',
-                '9AM',
-                '10AM',
-                '11AM',
-                '12PM',
-                '1PM',
-                '2PM',
-                '3PM',
-                '4PM',
-                '5PM',
-                '6PM',
-                '7PM',
-                '8PM',
-                '9PM',
-                '10PM',
-                '11PM',
-            ],
-            tickAmount: 12,
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = val.toFixed(0);
-                    return `${print}`;
-                },
-            },
-        },
-        legend: {
-            show: true,
-            showForNullSeries: true,
-            showForZeroSeries: true,
-            showForSingleSeries: true,
-            position: 'top',
-            horizontalAlign: 'right',
-            floating: true,
-            onItemClick: {
-                toggleDataSeries: false,
-            },
-            onItemHover: {
-                highlightDataSeries: true,
-            },
-            markers: {
-                onClick: { toggleDataSeries: false },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 600,
-                options: {
-                    chart: {
-                        toolbar: {
-                            show: false,
-                        },
-                    },
-                    legend: {
-                        show: false,
-                    },
-                },
-            },
-        ],
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { colors } = w.globals;
-                const { seriesX } = w.globals;
-                const { seriesNames } = w.globals;
-                const timestamp = seriesX[seriesIndex][dataPointIndex];
-                const day = seriesNames[seriesIndex];
-                let ch = '';
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">Time: ${getTimeData(
-                        w.globals.labels[dataPointIndex]
-                    )}</div><table style="border:none;">`;
-                for (let i = 0; i < series.length; i++) {
-                    ch =
-                        ch +
-                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
-                            colors[i]
-                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                            0
-                        )} kWh </td></tr>`;
-                }
+    const [lineChartData, setLineChartData] = useState([]);
 
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
-                        ${ch}
-                    </table></div>`;
-            },
-        },
-    };
-    const [areaChartData, setAreaChartData] = useState([]);
-    const [isAvgUsageChartLoading, setIsAvgUsageChartLoading] = useState(false);
+    const [dateFilter, setDateRange] = useState({
+        minDate: '',
+        maxDate: '',
+    });
 
     const [heatMapChartData, setHeatMapChartData] = useState([]);
     const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
-    const weekdaysChartHeight = '300px';
+    const weekdaysChartHeight = '400px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
 
-    const [donutChartOpts, setDonutChartOpts] = useState({
-        chart: {
-            type: 'donut',
-            events: {
-                mounted: function (chartContext, config) {
-                    chartContext.toggleDataPointSelection(0, 1);
-                },
-            },
-        },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
-        series: [12553, 11553, 6503, 2333],
-        plotOptions: {
-            pie: {
-                startAngle: 0,
-                endAngle: 360,
-                expandOnClick: false,
-                offsetX: 0,
-                offsetY: 0,
-                customScale: 1,
-                dataLabels: {
-                    offset: 0,
-                    minAngleToShowLabel: 10,
-                },
-                donut: {
-                    size: '80%',
-                    background: 'grey',
-                    labels: {
-                        show: true,
-                        name: {
-                            show: false,
-                            // fontSize: '22px',
-                            // fontFamily: 'Helvetica, Arial, sans-serif',
-                            // fontWeight: 600,
-                            // color: '#373d3f',
-                            // offsetY: -10,
-                            // formatter: function (val) {
-                            //     return val;
-                            // },
-                        },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 400,
-                            color: 'red',
-                            // offsetY: 16,
-                            formatter: function (val) {
-                                return `${val} kWh`;
-                            },
-                        },
-                        total: {
-                            show: true,
-                            showAlways: false,
-                            label: 'Total',
-                            // color: '#373d3f',
-                            fontSize: '22px',
-                            fontWeight: 600,
-                            // formatter: function (w) {
-                            //     return w.globals.seriesTotals.reduce((a, b) => {
-                            //         return a + b;
-                            //     }, 0);
-                            // },
-                            formatter: function (w) {
-                                let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                    return a + b;
-                                }, 0);
-                                return `${sum} kWh`;
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 300,
-                    },
-                    // legend: {
-                    //     show: true,
-                    //     showForSingleSeries:true,
-                    //     onItemHover: {
-                    //         highlightDataSeries: true
-                    //     },
-                    //     onItemClick: {
-                    //         toggleDataSeries: true
-                    //     },
-                    // },
-                },
-            },
-        ],
-        dataLabels: {
-            enabled: false,
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        legend: {
-            show: true,
-            position: 'bottom',
-        },
-        stroke: {
-            width: 0,
-        },
-
-        itemMargin: {
-            horizontal: 10,
-        },
-    });
+    const metric = [{ value: 'energy', label: 'Energy', unit: 'kWh', Consumption: 'Energy' }];
 
     const getAverageValue = (value, min, max) => {
         if (min == undefined || max === undefined) {
@@ -348,22 +66,23 @@ const TimeOfDay = () => {
 
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333, 5452]);
 
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Time Of Day',
+                    path: '/energy/time-of-day',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
+    };
+
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Time Of Day',
-                        path: '/energy/time-of-day',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
         updateBreadcrumbStore();
     }, []);
 
@@ -377,18 +96,29 @@ const TimeOfDay = () => {
 
         const endUsesByOfHour = async () => {
             setIsEndUsageChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchBuildingAfterHours(bldgId, payload)
+            const params = `?building_id=${bldgId}&off_hours=true`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
-                    setEnergyConsumption(res?.data || []);
-                    const energyData = res?.data;
+                    const response = res?.data?.data;
+                    if (response.length !== 0) {
+                        response.forEach((el) => {
+                            el.after_hours_energy_consumption.now = Math.round(
+                                el?.after_hours_energy_consumption?.now / 1000
+                            );
+                            el.after_hours_energy_consumption.old = Math.round(
+                                el?.after_hours_energy_consumption?.old / 1000
+                            );
+                        });
+                    }
+                    setEnergyConsumption(response);
+                    const energyData = response;
                     let newDonutData = [];
                     energyData.forEach((record) => {
-                        let fixedConsumption = parseInt(record.energy_consumption.now);
+                        let fixedConsumption = parseInt(record?.after_hours_energy_consumption?.now);
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
-                    //setDonutChartOpts();
                     setIsEndUsageChartLoading(false);
                 })
                 .catch((error) => {
@@ -397,28 +127,10 @@ const TimeOfDay = () => {
         };
 
         const dailyUsageByHour = async () => {
-            setIsAvgUsageChartLoading(true);
             let payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
-                    let response = res?.data;
-
-                    let weekDaysResData = response[0]?.weekdays;
-                    let weekEndResData = response[0]?.weekend;
-
-                    const weekDaysData = weekDaysResData.map((el) => {
-                        return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
-                            y: el.y.toFixed(0),
-                        };
-                    });
-
-                    const weekendsData = weekEndResData.map((el) => {
-                        return {
-                            x: parseInt(moment.utc(el.x).format('HH')),
-                            y: el.y.toFixed(0),
-                        };
-                    });
+                    const response = res?.data;
 
                     const newWeekdaysData = {
                         name: 'Weekdays',
@@ -429,34 +141,57 @@ const TimeOfDay = () => {
                         data: [],
                     };
 
+                    const range = {
+                        minDate: '',
+                        maxDate: '',
+                    };
+
+                    const weekDaysResData = response[0]?.weekdays;
+                    const weekEndResData = response[0]?.weekend;
+
+                    weekDaysResData.forEach((el, index) => {
+                        if (index === 0) range.minDate = new Date(el.x).getTime();
+                        if (index === weekDaysResData.length - 1) range.maxDate = new Date(el.x).getTime();
+
+                        newWeekdaysData.data.push({
+                            x: new Date(el.x).getTime(),
+                            y: parseFloat((el.y / 1000).toFixed(2)),
+                        });
+
+                        newWeekendsData.data.push({
+                            x: new Date(el.x).getTime(),
+                            y: weekEndResData[index].y ? parseFloat((weekEndResData[index].y / 1000).toFixed(2)) : 0,
+                        });
+                    });
+
+                    if (weekDaysResData.length === 0) {
+                        weekEndResData.forEach((el, index) => {
+                            if (index === 0) range.minDate = new Date(el.x).getTime();
+                            if (index === weekEndResData.length - 1) range.maxDate = new Date(el.x).getTime();
+
+                            newWeekendsData.data.push({
+                                x: new Date(el.x).getTime(),
+                                y: parseFloat((el.y / 1000).toFixed(2)),
+                            });
+
+                            newWeekdaysData.data.push({
+                                x: new Date(el.x).getTime(),
+                                y: weekDaysResData[index].y
+                                    ? parseFloat((weekDaysResData[index].y / 1000).toFixed(2))
+                                    : 0,
+                            });
+                        });
+                    }
+
                     const chartDataToDisplay = [];
 
-                    for (let i = 0; i < 24; i++) {
-                        let matchedRecord = weekDaysData.find((record) => record.x === i);
-                        if (matchedRecord) {
-                            newWeekdaysData.data.push(parseInt(matchedRecord.y / 1000));
-                        } else {
-                            newWeekdaysData.data.push(0);
-                        }
-                    }
-
-                    for (let i = 0; i < 24; i++) {
-                        let matchedRecord = weekendsData.find((record) => record.x === i);
-
-                        if (matchedRecord) {
-                            newWeekendsData.data.push(parseInt(matchedRecord.y / 1000));
-                        } else {
-                            newWeekendsData.data.push(0);
-                        }
-                    }
                     chartDataToDisplay.push(newWeekdaysData);
                     chartDataToDisplay.push(newWeekendsData);
-                    setAreaChartData(chartDataToDisplay);
-                    setIsAvgUsageChartLoading(false);
+
+                    setLineChartData(chartDataToDisplay);
+                    setDateRange(range);
                 })
-                .catch((error) => {
-                    setIsAvgUsageChartLoading(false);
-                });
+                .catch((error) => {});
         };
 
         const averageUsageByHourFetch = async () => {
@@ -657,18 +392,18 @@ const TimeOfDay = () => {
 
                     let finalList = [];
 
-                    mon.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    tue.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    wed.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    thu.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    fri.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    sat.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
-                    sun.forEach((record) => finalList.push(Math.round(record?.energy_consuption / 1000)));
+                    mon.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    tue.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    wed.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    thu.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    fri.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    sat.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
+                    sun.forEach((record) => finalList.push((record?.energy_consuption / 1000).toFixed(2)));
 
                     finalList.sort((a, b) => a - b);
 
-                    let minVal = finalList[0];
-                    let maxVal = finalList[finalList.length - 1];
+                    let minVal = parseFloat(finalList[0]);
+                    let maxVal = parseFloat(finalList[finalList.length - 1]);
 
                     if (minVal === maxVal) {
                         minVal = 0;
@@ -697,11 +432,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -739,11 +474,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -781,11 +516,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -823,11 +558,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -865,11 +600,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -907,11 +642,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -949,11 +684,11 @@ const TimeOfDay = () => {
                                         newData.push({
                                             x: xval,
                                             y: getAverageValue(
-                                                (found.energy_consuption / 1000).toFixed(0),
+                                                (found.energy_consuption / 1000).toFixed(2),
                                                 minVal,
                                                 maxVal
                                             ),
-                                            z: (found.energy_consuption / 1000).toFixed(0),
+                                            z: (found.energy_consuption / 1000).toFixed(2),
                                         });
                                     } else {
                                         newData.push({
@@ -985,41 +720,35 @@ const TimeOfDay = () => {
 
     return (
         <React.Fragment>
-            <div>
-                <Header title="Time of Day" type="page" />
-            </div>
+            <Header title="Time of Day" type="page" />
 
-            <div className="custom-time-of-day-grid mt-4 mb-3">
-                <div>
-                    <EndUseTotals
-                        series={donutChartData}
-                        options={donutChartOpts}
-                        energyConsumption={energyConsumption}
-                        className={'container-height'}
-                    />
-                </div>
-                <div>
-                    <HeatMapWidget
-                        title="Hourly Average Consumption"
-                        subtitle="Energy Usage By Hour (kWh)"
-                        series={heatMapChartData}
-                        height={weekdaysChartHeight}
-                        timeZone={timeZone}
-                        showRouteBtn={false}
-                        labelsPosition={'top'}
-                        className={'container-height'}
-                    />
-                </div>
-            </div>
+            <Brick sizeInRem={1.5} />
 
-            <div className="mt-2">
-                <DailyUsageByHour
-                    title="Average Daily Usage by Hour"
+            <div className="custom-time-of-day-grid">
+                <EndUseTotals series={donutChartData} energyConsumption={energyConsumption} className={'h-100'} />
+                <HeatMapWidget
+                    title="Hourly Average Consumption"
                     subtitle="Energy Usage By Hour (kWh)"
-                    options={areaChartOptions}
-                    series={areaChartData}
+                    series={heatMapChartData}
+                    height={weekdaysChartHeight}
+                    timeZone={timeZone}
+                    showRouteBtn={false}
+                    labelsPosition={'top'}
+                    className={'h-100'}
                 />
             </div>
+
+            <Brick sizeInRem={1.5} />
+
+            <LineChart
+                title="Average Daily Usage by Hour"
+                subTitle="Energy Usage By Hour (kWh)"
+                handleMoreClick={null}
+                dateRange={dateFilter}
+                data={lineChartData}
+                tooltipUnit={metric[0].unit}
+                tooltipLabel={metric[0].label}
+            />
         </React.Fragment>
     );
 };

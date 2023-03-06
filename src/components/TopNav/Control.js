@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/pro-regular-svg-icons';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
+import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
+import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
 
 const Control = () => {
     const location = useLocation();
@@ -36,6 +36,9 @@ const Control = () => {
     ]);
 
     const handleLogout = () => {
+        ComponentStore.update((s) => {
+            s.parent = '';
+        });
         localStorage.clear();
         cookies.remove('user', { path: '/' });
         window.location.reload();
@@ -46,11 +49,13 @@ const Control = () => {
             ComponentStore.update((s) => {
                 s.parent = 'account';
             });
+            return;
         }
         if (configRoutes.includes(location.pathname)) {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
+            return;
         }
     };
 
@@ -61,7 +66,7 @@ const Control = () => {
         if (currentPath.includes('/control/plug-rules')) {
             bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
         } else {
-            routesForAccountSettings.includes(currentPath)
+            routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
                 ? (pathName = accountRoutes[0])
                 : (pathName = configRoutes[0]);
         }
@@ -271,7 +276,7 @@ const Control = () => {
                                 handleSideNavChange();
                                 handleRouteChange();
                             }}>
-                            <FontAwesomeIcon icon={faGear} size="lg" />
+                            <Gear />
                         </button>
                     </div>
                 </div>

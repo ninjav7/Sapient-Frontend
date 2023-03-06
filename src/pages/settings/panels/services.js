@@ -11,8 +11,12 @@ import {
     generalEquipments,
     generalPassiveDevices,
     updateLinkBreakers,
+    updateBreakerTypes,
     deleteBreaker,
     getFiltersForEquipment,
+    listSensor,
+    updateBreakers,
+    createEquipment,
 } from '../../../services/Network';
 
 export function getPanelsData(
@@ -81,6 +85,10 @@ export function updateBreakersLink(params, payload) {
     return axiosInstance.post(`${updateLinkBreakers}${params}`, payload).then((res) => res);
 }
 
+export function updateBreakersTypeLink(payload, params) {
+    return axiosInstance.patch(`${updateBreakerTypes}${params}`, payload).then((res) => res);
+}
+
 export function fetchPanelsFilter(args) {
     return axiosInstance
         .get(`${getFiltersForEquipment}`, {
@@ -100,4 +108,16 @@ export function fetchPanelsFilter(args) {
 // This Service is created to fetch Panel List without Filters
 export function getPanelsList(params) {
     return axiosInstance.get(`${generalPanels}${params}`).then((res) => res);
+}
+
+export function getSensorsList(params) {
+    return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
+}
+
+export function updateBreakerDetails(params, payload) {
+    return axiosInstance.post(`${updateBreakers}${params}`, payload).then((res) => res);
+}
+
+export function createEquipmentData(params, payload) {
+    return axiosInstance.post(`${createEquipment}${params}`, payload).then((res) => res);
 }

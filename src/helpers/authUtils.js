@@ -10,9 +10,25 @@ const isUserAuthenticated = () => {
     if (!user) {
         return false;
     }
+
     const decoded = jwtDecode(user.token);
     const currentTime = Date.now() / 1000;
-    if (decoded.exp < currentTime) {
+    if (decoded.expiry < currentTime) {
+        console.warn('access token expired');
+        return false;
+    } else {
+        return true;
+    }
+};
+
+const isSuperUserAuthenticated = () => {
+    const user = getLoggedInUser();
+    if (user?.is_superuser === undefined || user?.is_superuser === false) {
+        return false;
+    }
+    const decoded = jwtDecode(user.token);
+    const currentTime = Date.now() / 1000;
+    if (decoded.expiry < currentTime) {
         console.warn('access token expired');
         return false;
     } else {
@@ -29,4 +45,4 @@ const getLoggedInUser = () => {
     return user ? (typeof user == 'object' ? user : JSON.parse(user)) : null;
 };
 
-export { isUserAuthenticated, getLoggedInUser };
+export { isUserAuthenticated, getLoggedInUser, isSuperUserAuthenticated };

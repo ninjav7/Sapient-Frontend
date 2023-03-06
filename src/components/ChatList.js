@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Card, CardBody, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Row, Col } from 'reactstrap';
-import { AvForm, AvField } from 'availity-reactstrap-validation';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import classNames from 'classnames';
@@ -41,7 +40,6 @@ const ChatItem = ({ children, placement, className }) => {
 
 ChatItem.defaultProps = chatItemDefaultProps;
 
-
 /**
  * Renders the ChatList
  */
@@ -59,30 +57,7 @@ class ChatForm extends Component {
     };
 
     render() {
-        return (
-            <AvForm
-                onValidSubmit={this.handleValidMessageSubmit}
-                className="needs-validation mt-2"
-                noValidate
-                name="chat-form"
-                id="chat-form">
-                <Row form>
-                    <Col>
-                        <AvField
-                            name="text"
-                            type="text"
-                            errorMessage="Please enter your message"
-                            validate={{ required: { value: true } }}
-                        />
-                    </Col>
-                    <Col className="col-auto">
-                        <button type="submit" className="btn btn-danger chat-send btn-block">
-                            Send
-                        </button>
-                    </Col>
-                </Row>
-            </AvForm>
-        );
+        return <></>;
     }
 }
 
@@ -115,7 +90,7 @@ class ChatList extends Component {
     };
 
     render() {
-        const height = this.props.height || "320px";
+        const height = this.props.height || '320px';
         return (
             <Card>
                 <CardBody className="pt-2 pb-1">
@@ -131,7 +106,9 @@ class ChatList extends Component {
                                 <i className="uil uil-exit mr-2"></i>Remove from Team
                             </DropdownItem>
                             <DropdownItem divider />
-                            <DropdownItem className="text-danger"><i className="uil uil-trash mr-2"></i>Delete</DropdownItem>
+                            <DropdownItem className="text-danger">
+                                <i className="uil uil-trash mr-2"></i>Delete
+                            </DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
 

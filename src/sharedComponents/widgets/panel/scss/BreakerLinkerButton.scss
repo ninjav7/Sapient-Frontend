@@ -1,0 +1,128 @@
+.wires {
+    content: ' ';
+    position: absolute;
+    height: 0.9375rem;
+    width: 0.6875rem;
+    border-top: 0.0625rem solid var(--border-color);
+    border-bottom: 0.0625rem solid var(--border-color);
+}
+
+.left-side {
+    &::before {
+        border-left: 0.0625rem solid var(--border-color);
+        right: 0;
+    }
+
+    &::after {
+        border-left: 0.0625rem solid var(--border-color);
+        right: 0;
+    }
+}
+
+.right-side {
+    &::before {
+        border-right: 0.0625rem solid var(--border-color);
+        right: 50%;
+    }
+
+    &::after {
+        border-right: 0.0625rem solid var(--border-color);
+        right: 50%;
+    }
+}
+
+.breaker-linker-button {
+    --width: 1.5625rem;
+    --height: 1.5625rem;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--width);
+    height: var(--height);
+    border: 0.0625rem solid var(--border-color) !important;
+    border-radius: 0.1875rem;
+    background: var(--background-color);
+
+    &.left {
+        @extend .left-side;
+    }
+
+    &.right {
+        @extend .right-side;
+    }
+
+    &::before {
+        @extend .wires;
+        top: -1rem;
+        border-bottom: 0;
+    }
+
+    &::after {
+        @extend .wires;
+        bottom: -1rem;
+        border-top: 0;
+    }
+
+    &:not(.is-linked) {
+        --border-color: #{$primary-gray-200};
+        --background-color: #{$primary-gray-50};
+    }
+
+    &.is-linked {
+        --border-color: #{$primary-indigo-600};
+        --background-color: #{$primary-indigo-100};
+
+        svg {
+            path {
+                fill: $primary-indigo-600;
+            }
+        }
+
+        &::after {
+            border-color: $primary-indigo-500;
+        }
+        &::before {
+            border-color: $primary-indigo-500;
+        }
+    }
+
+    &.is-linked {
+        &:not(&:hover) .breaker-linker-button-ungroup {
+            display: none;
+        }
+
+        &:hover {
+            --background-color: #{$primary-indigo-50};
+
+            .breaker-linker-button-group {
+                display: none;
+            }
+        }
+    }
+
+    &:not(.is-linked) {
+        &:not(&:hover) .breaker-linker-button-group {
+            display: none;
+        }
+
+        &:hover {
+            --border-color: #{$primary-gray-300};
+
+            .breaker-linker-button-ungroup {
+                display: none;
+            }
+        }
+    }
+
+    svg {
+        width: 1.3125rem;
+        height: 1.3125rem;
+    }
+
+    &-loader {
+        max-width: 1.125rem;
+        fill: $primary-gray-400;
+    }
+}

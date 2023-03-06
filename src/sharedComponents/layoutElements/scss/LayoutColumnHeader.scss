@@ -1,0 +1,71 @@
+.layout-column-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+    border-bottom: 0.0625rem solid $primary-gray-200;
+    width: 17.1875rem;
+    height: 2.5rem;
+    background: $primary-gray-50;
+
+    .layout-column-header-action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-top: -0.0625rem;
+    }
+
+    svg {
+        width: 1.25rem;
+
+        &:not(.layout-column-header-action-buttons-filtered) path {
+            fill: $primary-gray-450;
+        }
+
+        &:hover {
+            path {
+                fill: $primary-indigo-600;
+            }
+        }
+    }
+
+    &.disabled {
+        svg {
+            path {
+                fill: $primary-gray-250;
+            }
+        }
+    }
+
+    &-title {
+        &-edit {
+            padding-right: 0.3125rem;
+            overflow: hidden;
+        }
+
+        &-text {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        &-edit-button {
+            padding-right: 0.3125rem;
+
+            svg {
+                margin-left: 0.5rem;
+                width: 0.75rem;
+                height: 0.75rem;
+            }
+        }
+    }
+
+    &:hover {
+        background: $primary-gray-100;
+    }
+
+    &:not(:hover) &-title-edit-button {
+        display: none;
+    }
+}

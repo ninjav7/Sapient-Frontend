@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as Toggleon } from '../../assets/icon/toggleon.svg';
+import { ReactComponent as Telescope } from '../../assets/icon/telescope.svg';
+import { ReactComponent as Circlebolt } from '../../assets/icon/circle-bolt.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -42,7 +43,7 @@ const NavLinks = () => {
         '/settings/equipment',
         '/settings/panels',
         '/settings/active-devices',
-        '/settings/passive-devices',
+        '/settings/smart-meters',
     ];
 
     const handleEnergyClick = () => {
@@ -68,7 +69,8 @@ const NavLinks = () => {
         if (
             location.pathname.includes(configChildRoutes[0]) ||
             location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2])
+            location.pathname.includes(configChildRoutes[2]) ||
+            location.pathname.includes(configChildRoutes[3])
         ) {
             history.push({
                 pathname: `/energy/building/overview/${bldgId}`,
@@ -121,7 +123,8 @@ const NavLinks = () => {
         if (
             location.pathname.includes(configChildRoutes[0]) ||
             location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2])
+            location.pathname.includes(configChildRoutes[2]) ||
+            location.pathname.includes(configChildRoutes[3])
         ) {
             history.push({
                 pathname: `/explore-page/by-equipment/${bldgId}`,
@@ -242,17 +245,17 @@ const NavLinks = () => {
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
                                     <div className={`font-icon-style ${className}`}>
-                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                                        <Circlebolt />
                                     </div>
                                 )}
                                 {item.name === 'Control' && (
                                     <div className={`font-icon-style ${className}`}>
-                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                        <Toggleon />
                                     </div>
                                 )}
                                 {item.name === 'Explore' && (
                                     <div className={`font-icon-style ${className}`}>
-                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                        <Telescope />
                                     </div>
                                 )}
                                 <div className={`navbar-heading ${className}`}>{item.name}</div>

@@ -1,0 +1,23 @@
+.breaker-basic-config {
+    display: grid;
+    grid-template-columns: 0.6fr 2.2fr 2.2fr;
+    gap: 2rem;
+}
+
+.breaker-main-config {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 2rem;
+}
+
+.p-default {
+    padding: 2rem;
+}
+
+.tab-content {
+    padding: 0rem !important;
+}
+
+.child-modal-style {
+    opacity: 0.7 !important;
+}

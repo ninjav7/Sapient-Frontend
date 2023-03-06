@@ -27,6 +27,9 @@
             padding-left: 1rem !important;
         }
     }
+    .highcharts-plot-band {
+        fill: $primary-gray-300;
+    }
 
     .more-details-wrapper {
         display: flex;
@@ -47,6 +50,16 @@
         .button-wrapper button {
             padding: 0.625rem 0.5625rem;
             margin-right: 0.625rem;
+        }
+        .unit-wrapper {
+            margin-top: 0.125rem;
+            .unit-value {
+                margin-right: 0.375rem;
+            }
+            .unit {
+                font-weight: 700;
+                color: $primary-gray-800;
+            }
         }
     }
     .highcharts-axis-labels text {

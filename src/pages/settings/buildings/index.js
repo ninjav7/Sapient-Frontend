@@ -272,7 +272,10 @@ const Buildings = () => {
         await fetchBuildingList(search, sort_by, ordered_by)
             .then((res) => {
                 const responseData = res.data;
-                download('Buildings_List', getBuildingsTableCSVExport(responseData, headerProps));
+                download(
+                    `Buildings_${new Date().toISOString().split('T')[0]}`,
+                    getBuildingsTableCSVExport(responseData, headerProps)
+                );
             })
             .catch((error) => {});
     };
@@ -336,7 +339,7 @@ const Buildings = () => {
                     value: 'building_type',
                     placeholder: 'All Building Types',
                     filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: buildingTypeList.map((filterItem) => ({
+                    filterOptions: buildingTypeList?.map((filterItem) => ({
                         value: filterItem.building_type_id,
                         label: filterItem.building_type,
                     })),

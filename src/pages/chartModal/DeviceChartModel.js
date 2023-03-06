@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, Spinner } from 'reactstrap';
+import { Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import moment from 'moment';
 import 'moment-timezone';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/pro-regular-svg-icons';
+import { ReactComponent as Xmark } from '../../assets/icon/xmark.svg';
 import { BaseUrl, sensorGraphData } from '../../services/Network';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
@@ -177,9 +175,8 @@ const DeviceChartModel = ({
                 </div>
 
                 <div>
-                    <FontAwesomeIcon
-                        icon={faXmark}
-                        size="lg"
+                    <Xmark
+                        className="mouse-pointer"
                         onClick={() => {
                             handleChartClose();
                             handleRefresh();

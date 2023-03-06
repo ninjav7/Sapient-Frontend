@@ -10,9 +10,10 @@ import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
 
 import './Input.scss';
 
-const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...props }) => {
+const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disabled, ...props }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
         'element-end': !!elementEnd,
+        disabled,
         error: !!props.error,
         icon: !!iconUrl,
     });
@@ -21,14 +22,14 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...pr
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm}>{props.label}</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm} className='gray-550'>{props.label}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
             )}
 
             <div className="input-inner-wrapper">
                 {iconUrl && <img className="input-icon" src={iconUrl} />}
-                <FormControl {...props} className={`input-control ${inputClassName}`} />
+                <FormControl {...props} disabled={disabled} className={`input-control ${inputClassName}`} />
                 {elementEnd &&
                     !props.error &&
                     React.cloneElement(elementEnd, {

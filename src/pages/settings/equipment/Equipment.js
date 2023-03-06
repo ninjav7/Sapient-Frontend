@@ -6,24 +6,17 @@ import Typography from '../../../sharedComponents/typography';
 import { UncontrolledTooltip } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../../store/ComponentStore';
-import Form from 'react-bootstrap/Form';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Button from '../../../sharedComponents/button/Button';
 import { getEquipmentTableCSVExport } from '../../../utils/tablesExport';
-
 import 'react-datepicker/dist/react-datepicker.css';
-import Select from '../../../sharedComponents/form/select';
-
 import _ from 'lodash';
-
 import { Badge } from '../../../sharedComponents/badge';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
-import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-
 import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
@@ -32,14 +25,16 @@ import './style.scss';
 import {
     getEqupmentDataRequest,
     deleteEquipmentRequest,
-    addNewEquipment,
     getFiltersForEquipmentRequest,
-    getEndUseDataRequest,
     getLocationDataRequest,
     getMetadataRequest,
 } from '../../../services/equipment';
 import { primaryGray100 } from '../../../assets/scss/_colors.scss';
-import Input from '../../../sharedComponents/form/input/Input';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import Brick from '../../../sharedComponents/brick';
+import AddEquipment from './AddEquipment';
+import { UserStore } from '../../../store/UserStore';
+import { pageListSizes } from '../../../helpers/helpers';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray100} height={35}>
@@ -78,16 +73,9 @@ const SkeletonLoading = () => (
 );
 
 const Equipment = () => {
-    const buildingName = localStorage.getItem('buildingName');
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
-    const [isDelete, setIsDelete] = useState(false);
-    const handleDeleteClose = () => setIsDelete(false);
 
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(1);
@@ -101,6 +89,7 @@ const Equipment = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
     const [DuplicateGeneralEquipmentData, setDuplicateGeneralEquipmentData] = useState([]);
     const [onlineEquipData, setOnlineEquipData] = useState([]);
@@ -137,6 +126,7 @@ const Equipment = () => {
             preparedData.push({
                 value: `${item?.equipment_id}`,
                 label: `${item?.equipment_type} (${item?.end_use_name})`,
+                end_use_id: `${item?.end_use_id}`,
             });
         });
         setEquipmentTypeDataAll(preparedData);
@@ -186,19 +176,6 @@ const Equipment = () => {
         }
         obj[key] = value;
         setCreateEquipmentData(obj);
-    };
-
-    const saveDeviceData = async () => {
-        setIsProcessing(true);
-        await addNewEquipment(bldgId, createEquipmentData)
-            .then((res) => {
-                fetchEquipmentData();
-                handleClose();
-                setIsProcessing(false);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
     };
 
     const renderLocation = useCallback((row, childrenTemplate) => {
@@ -339,6 +316,7 @@ const Equipment = () => {
             .catch((error) => {
                 setIsEquipDataFetched(false);
                 isLoadingRef.current = false;
+                handleChartClose();
             });
     };
 
@@ -554,7 +532,25 @@ const Equipment = () => {
         setIsDeleting(true);
         await deleteEquipmentRequest(bldgId, row.equipments_id)
             .then((res) => {
-                fetchEquipmentData();
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                    fetchEquipmentData();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Equipment.'
+                            : 'Unable to delete Equipment due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
                 setIsDeleting(false);
                 setShowDeleteEquipmentModal(false);
             })
@@ -632,7 +628,10 @@ const Equipment = () => {
         )
             .then((res) => {
                 let response = res.data;
-                download(buildingName, getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData));
+                download(
+                    `${bldgName}_Equipments_${new Date().toISOString().split('T')[0]}`,
+                    getEquipmentTableCSVExport(response.data, headerProps, preparedEndUseData)
+                );
                 setIsEquipDataFetched(false);
             })
             .catch((error) => {
@@ -649,34 +648,37 @@ const Equipment = () => {
     };
 
     return (
-        <div className="equipment-page">
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Equipment</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+        <div>
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Equipment</Typography.Header>
+                        </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.building_equipment_permission?.create ? (
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                    setCreateEquipmentData({
-                                        name: '',
-                                        equipment_type: '',
-                                        end_use: '',
-                                        space_id: '',
-                                    });
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Equipment
-                            </button>
-                        ) : (
-                            <></>
-                        )}
+                            <div className="d-flex">
+                                <Button
+                                    label={'Add Equipment'}
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        handleShow();
+                                        setCreateEquipmentData({
+                                            name: '',
+                                            equipment_type: '',
+                                            end_use: '',
+                                            space_id: '',
+                                        });
+                                    }}
+                                    icon={<PlusSVG />}
+                                />
+                            </div>
+                        ) : null}
                     </div>
                 </Col>
             </Row>
+            <Brick sizeInRem={1.5} />
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
@@ -710,6 +712,7 @@ const Equipment = () => {
                         onChangePage={setPageNo}
                         pageSize={pageSize}
                         currentPage={pageNo}
+                        pageListSizes={pageListSizes}
                         totalCount={(() => {
                             if (search) {
                                 return totalItemsSearched;
@@ -757,91 +760,6 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show} onHide={handleClose} centered className="modal-add-equipment">
-                <Modal.Header>
-                    <Modal.Title>Add Equipment</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Name</Form.Label>
-                            <Input
-                                type="text"
-                                placeholder="Enter Equipment Name"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('name', e.target.value);
-                                }}
-                                value={createEquipmentData?.name}
-                                autoFocus
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Type</Form.Label>
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Equipment Type"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.equipment_type}
-                                options={equipmentTypeDataAll}
-                                onChange={(e) => {
-                                    handleChange('equipment_type', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>End Use Category</Form.Label>
-                            <Select
-                                id="endUseSelect"
-                                placeholder="Selected End Use"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.end_use}
-                                options={endUseDataNow}
-                                onChange={(e) => {
-                                    handleChange('end_use', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Location</Form.Label>
-                            <Select
-                                id="exampleSelect"
-                                placeholder="Select Equipment Location"
-                                name="select"
-                                isSearchable={true}
-                                defaultValue={createEquipmentData?.space_id}
-                                options={locationDataNow}
-                                onChange={(e) => {
-                                    handleChange('space_id', e.value);
-                                }}
-                                className="basic-single"
-                            />
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div className="add-equipment-footer">
-                        <Button
-                            label="Cancel"
-                            size={Button.Sizes.lg}
-                            type={Button.Type.secondaryGrey}
-                            onClick={() => handleClose()}
-                        />
-                        <Button
-                            label={isProcessing ? 'Creating...' : 'Create'}
-                            size={Button.Sizes.lg}
-                            type={Button.Type.primary}
-                            onClick={() => {
-                                saveDeviceData();
-                            }}
-                        />
-                    </div>
-                </Modal.Footer>
-            </Modal>
             <EquipChartModal
                 showEquipmentChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
@@ -850,6 +768,18 @@ const Equipment = () => {
                 selectedTab={selectedModalTab}
                 setSelectedTab={setSelectedModalTab}
                 activePage="equipment"
+            />
+
+            <AddEquipment
+                isAddEquipModalOpen={show}
+                closeModal={handleClose}
+                equipmentTypeDataAll={equipmentTypeDataAll}
+                endUseDataNow={endUseDataNow}
+                locationDataNow={locationDataNow}
+                isProcessing={isProcessing}
+                setIsProcessing={setIsProcessing}
+                fetchEquipmentData={fetchEquipmentData}
+                bldgId={bldgId}
             />
         </div>
     );

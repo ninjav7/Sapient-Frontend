@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { getActiveDeviceData, fetchActiveFilter } from './services';
+import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -65,6 +65,7 @@ const SkeletonLoading = () => (
 
 const ActiveDevices = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -305,11 +306,11 @@ const ActiveDevices = () => {
 
     const handleDownloadCsv = async () => {
         let params = `?building_id=${bldgId}`;
-        await getActiveDeviceData(params)
+        await getSingleActiveDevice(params)
             .then((res) => {
                 const responseData = res?.data?.data;
                 let csvData = getActiveDeviceTableCSVExport(responseData, headerProps);
-                download('Active_Device_List', csvData);
+                download(`${bldgName}_Active_Devices_${new Date().toISOString().split('T')[0]}`, csvData);
             })
             .catch(() => {});
     };

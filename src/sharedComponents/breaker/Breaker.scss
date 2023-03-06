@@ -1,0 +1,171 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.breaker {
+    &-wrapper {
+        @extend .box-shadow-xs;
+        @extend .borders;
+        width: 21.625rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.35s all;
+        overflow: hidden;
+
+        &.not-configured {
+            background: $primary-indigo-25;
+            border-color: $primary-indigo-600;
+        }
+
+        &.partially-configured {
+            background: $warning-25;
+            border-color: $warning-700;
+        }
+
+        &.offline {
+            background: $error-25;
+            border-color: $error-700;
+        }
+
+        &.is-flagged {
+            border: 0.125rem solid $error-700;
+
+            .breaker-content-collector {
+                margin: -0.0625rem 0;
+            }
+
+            .breaker-id-wrapper {
+                background: $error-700;
+
+                .typography-wrapper {
+                    color: $base-white;
+                }
+            }
+        }
+
+        &:hover {
+            @extend .box-shadow-lg;
+        }
+
+        &:hover .breaker-action-buttons {
+            overflow: visible;
+            opacity: 1;
+        }
+
+        //compensation based on counting of elements
+        &.breaker-items-1 {
+            .breaker-content-collector {
+                padding: 0.875rem 0;
+            }
+        }
+        &.breaker-items-2 {
+            .breaker-content-collector {
+                padding: 1.0625rem 0;
+            }
+        }
+    }
+
+    &-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5625rem;
+    }
+
+    &-id {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 2.125rem;
+    }
+
+    &-device-id {
+        display: flex;
+        
+        &-badge {
+            background: $primary-indigo-50 !important;
+            padding: 0.0625rem 0.5rem;
+
+            .typography-wrapper {
+                color: $primary-indigo-700 !important;
+                font-size: 0.625rem !important;
+                white-space: nowrap;
+            }
+        }
+    }
+
+    &-indicator {
+        width: 0.5rem;
+        border-radius: 100%;
+        height: 0.5rem;
+
+        &-wrapper {
+            height: 1.25rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        &-online {
+            background: $success-500;
+        }
+        &-offline {
+            background: $primary-indigo-50;
+            border: 0.0625rem solid $error-700;
+        }
+        &-no-sensors {
+            background: $primary-gray-300;
+        }
+    }
+
+    &-rated-volts-amps {
+        margin-left: 0.0625rem;
+    }
+
+    &-content-collector {
+        padding: 1.25rem 0;
+        gap: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &-device-name {
+        flex: 1;
+        margin: 0 0.5rem 0 0.5625rem;
+
+        .typography-wrapper {
+            max-height: 2.1875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    &-action-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-left: 0.5rem;
+        margin-right: 0.6875rem;
+        gap: 0.5rem;
+        overflow: hidden;
+        opacity: 0;
+        transition: 0.35s all;
+        width: 3.5rem;
+    }
+
+    &-action-btn {
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            path {
+                fill: $primary-gray-800;
+            }
+        }
+    }
+}

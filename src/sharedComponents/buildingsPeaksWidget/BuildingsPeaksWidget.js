@@ -33,7 +33,7 @@ const TabTitle = ({ dateText, value, unit, trendValue, trendType }) => {
 const BuildingsPeaksWidget = ({ tabs, ...props }) => {
     return (
         <div className="buildings-peaks-widget-wrapper" {...props}>
-            <Tabs>
+            <Tabs types={Tabs.Types.large}>
                 {tabs.map(({ tabTitle, tabid, topConsumptionData }) => {
                     const key = tabid || generateID();
                     return (

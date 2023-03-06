@@ -109,7 +109,8 @@ Default.args = {
     onChangePage: (query) => alert('Page: ' + query),
     onPageSize: (query) => alert('Per page ' + query),
     onStatus: (query) => alert('Status changed to: ' + query),
-    totalPages: 90,
+    totalCount: 90,
+    currentPage: 1,
     headers: [
         {
             name: 'Name',
@@ -125,6 +126,11 @@ Default.args = {
         { name: 'Breakers', accessor: 'breakers' },
         { name: 'Socket Count', accessor: 'socketCount', cellProps: { width: 180 } },
     ],
+    //@TODO Likely should be refactored
+    //For demo purposes, here are added two handlers with specific id's
+    isEditable: ({id}) => id !== '63194b735d86669cdae8da67',
+    isDeletable: ({id}) => id !== '63194b735d86669cdae8da67',
+    /****/
     rows: [
         {
             id: '63194b735d86669cdae8da67',

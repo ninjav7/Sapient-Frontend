@@ -32,6 +32,8 @@ const Pagination = (props) => {
         className,
         setPageSize,
         pageListSizes = DEFAULT_LIST_PAGE_SIZES,
+        label,
+        isAlwaysShown,
     } = props;
 
     const paginationRange = usePagination({
@@ -41,8 +43,8 @@ const Pagination = (props) => {
         pageSize,
     });
 
-    if (currentPage === 0 || paginationRange.length < 2) {
-        return null;
+    if (!isAlwaysShown && (currentPage === 0 || paginationRange.length < 2)) {
+       return null;
     }
 
     const onNext = () => {
@@ -58,7 +60,7 @@ const Pagination = (props) => {
         <div className="pagination-wrapper">
             <Select
                 defaultValue={pageListSizes.find(({ value }) => +value === pageSize) || pageListSizes[0]}
-                label="Select"
+                label={label}
                 menuPlacement="auto"
                 onChange={({ value }) => {
                     if (value === -1) {
@@ -125,6 +127,8 @@ Pagination.propTypes = {
             value: stringOrNumberPropTypes.isRequired,
         })
     ),
+    label: PropTypes.string,
+    isAlwaysShown: PropTypes.bool,
 };
 
 export default Pagination;

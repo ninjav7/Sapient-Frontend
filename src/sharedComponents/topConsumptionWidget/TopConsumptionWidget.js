@@ -19,9 +19,10 @@ const TopConsumptionWidget = ({
     className = '',
     handleClick,
     widgetType = 'TopConsumptionWidget',
+    style,
 }) => {
     return (
-        <div className={`${widgetType}-wrapper ${className}`}>
+        <div className={`${widgetType}-wrapper ${className}`} style={style}>
             <div className="d-flex align-items-center justify-content-between mt-1">
                 <div>
                     {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
@@ -39,13 +40,14 @@ const TopConsumptionWidget = ({
                     ))}
                 </div>
 
-                {rows.map(({ link, label, value, unit, badgePercentage, badgeType }, index) => (
-                    <div className={`${widgetType}-table-row`} key={index}>
+                {rows.map(({ link, label, value, unit, badgePercentage, badgeType,id }) => (
+                    <div className={`${widgetType}-table-row`} key={id}>
                         <div>
                             <Button
                                 label={label}
-                                size={Button.Sizes.md}                                type={Button.Type.link}
-                                className="typography-wrapper link mouse-pointer"
+                                size={Button.Sizes.md}                                
+                                type={Button.Type.link}
+                                className="typography-wrapper link mouse-pointer text-left"
                                 onClick={() => {
                                     handleClick(label);
                                 }}
@@ -82,6 +84,7 @@ TopConsumptionWidget.propTypes = {
             link: PropTypes.string,
             label: PropTypes.string,
             value: PropTypes.number,
+            id: PropTypes.string,
             unit: PropTypes.oneOf(Object.values(UNITS)),
             badgePercentage: PropTypes.number,
             badgeType: PropTypes.oneOf(Object.values(TRENDS_BADGE_TYPES)),

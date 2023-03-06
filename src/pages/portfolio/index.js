@@ -22,6 +22,7 @@ import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
 import { updateBuildingStore } from '../../components/SecondaryTopNavBar/utils';
 import { BuildingStore } from '../../store/BuildingStore';
+import Brick from '../../sharedComponents/brick';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -79,20 +80,15 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             setIsEnergyConsumptionChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchPortfolioEndUse(payload)
+            const params = `?off_hours=false`;
+            const payload = apiRequestBody(startDate, endDate, timeZone);
+            await fetchPortfolioEndUse(params, payload)
                 .then((res) => {
-                    let response = res?.data;
-                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                    const response = res?.data?.data;
+                    response.sort((a, b) => b?.energy_consumption?.now - a?.energy_consumption?.now);
                     response.forEach((record) => {
                         record.energy_consumption.now = Math.round(record.energy_consumption.now);
                         record.energy_consumption.old = Math.round(record.energy_consumption.old);
-                        record.after_hours_energy_consumption.now = Math.round(
-                            record.after_hours_energy_consumption.now
-                        );
-                        record.after_hours_energy_consumption.old = Math.round(
-                            record.after_hours_energy_consumption.old
-                        );
                     });
                     setenergyConsumption(response);
                     setIsEnergyConsumptionChartLoading(false);
@@ -115,7 +111,7 @@ const PortfolioOverview = () => {
                     res.data.forEach((record) => {
                         newArray[0].data.push({
                             x: record.x,
-                            y: Math.round(record.y / 1000),
+                            y: (record.y / 1000).toFixed(2),
                         });
                     });
                     setEnergyConsumptionChart(newArray);
@@ -195,10 +191,13 @@ const PortfolioOverview = () => {
     return (
         <>
             <Header title="Portfolio Overview" type="page" />
+
+            <Brick sizeInRem={1.5} />
+
             {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <>
-                    <Row className="mt-4 mb-2">
+                    <Row>
                         <div>
                             <PortfolioKPIs
                                 daysCount={daysCount}
@@ -209,8 +208,10 @@ const PortfolioOverview = () => {
                         </div>
                     </Row>
 
-                    <Row className="mt-3 container-gap">
-                        <Col lg={6}>
+                    <Brick sizeInRem={1.5} />
+
+                    <Row className="container-gap">
+                        <Col xl={6}>
                             <EnergyConsumptionByEndUse
                                 title="Energy Consumption by End Use"
                                 subtitle="Totals in kWh"
@@ -220,7 +221,7 @@ const PortfolioOverview = () => {
                                 className="h-100"
                             />
                         </Col>
-                        <Col lg={6}>
+                        <Col xl={6}>
                             <TotalEnergyConsumption
                                 title="Total Energy Consumption"
                                 subtitle="Hourly Energy Consumption (kWh)"
@@ -229,12 +230,13 @@ const PortfolioOverview = () => {
                                 startEndDayCount={startEndDayCount}
                                 timeZone={timeZone}
                                 pageType="portfolio"
+                                className="h-100"
                             />
                         </Col>
                     </Row>
                 </>
             ) : (
-                <p>You don't have the permission to view this page</p>
+                <div>You don't have the permission to view this page</div>
             )}
         </>
     );

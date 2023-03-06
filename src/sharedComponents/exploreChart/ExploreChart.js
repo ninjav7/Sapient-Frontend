@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import './ExploreChart.scss';
 import Highcharts from 'highcharts/highstock';
+import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import HighchartsReact from 'highcharts-react-official';
 import Typography from '../typography';
@@ -10,14 +12,18 @@ import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
+import EmptyExploreChart from './components/emptyExploreChart/EmptyExploreChart';
+import { HighchartsLowMedHigh } from '../common/charts/modules/lowmedhigh';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
+HighchartsLowMedHigh(Highcharts);
 
 const ExploreChart = (props) => {
     const chartComponentRef = useRef(null);
 
-    const { data, title, subTitle, dateRange, tooltipUnit, tooltipLabel } = props;
+    const { data, series, title, subTitle, dateRange, tooltipUnit, tooltipLabel, isLoadingData, chartProps, withTemp } =
+        props;
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -35,6 +41,18 @@ const ExploreChart = (props) => {
         }
     };
 
+    const chartConfig = _.merge(
+        options({
+            series,
+            data,
+            dateRange,
+            tooltipUnit,
+            tooltipLabel,
+            widgetProps: props,
+        }),
+        chartProps
+    );
+
     return (
         <div className="explore-chart-wrapper">
             <div className="chart-header">
@@ -42,7 +60,7 @@ const ExploreChart = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
-                <div>
+                <div style={{ 'pointer-events': isLoadingData && 'none' }}>
                     <DropDownIcon
                         options={[
                             {
@@ -64,14 +82,23 @@ const ExploreChart = (props) => {
                     />
                 </div>
             </div>
-            <HighchartsReact
-                highcharts={Highcharts}
-                constructorType={'stockChart'}
-                options={options({ data, dateRange, tooltipUnit, tooltipLabel })}
-                ref={chartComponentRef}
-            />
+            {isLoadingData ? (
+                <EmptyExploreChart />
+            ) : (
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    constructorType={'stockChart'}
+                    options={chartConfig}
+                    ref={chartComponentRef}
+                />
+            )}
         </div>
     );
+};
+
+ExploreChart.propTypes = {
+    disableDefaultPlotBands: PropTypes.bool,
+    chartProps: PropTypes.object,
 };
 
 export default ExploreChart;

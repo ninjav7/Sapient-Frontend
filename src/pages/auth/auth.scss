@@ -14,10 +14,27 @@
         background-size: 100% 100%;
     }
 
+
+.name{
+    font-family: Space Grotesk !important;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 2.375rem;
+    letter-spacing: 0em;
+    text-align: left;
+}    
+
 .sub-button{
     width:100%;
     justify-content: center;
-    margin-top: 3rem;
+}
+ .or-text{
+    text-align: center;
+ }
+
+.btn-secondary {
+    background-color:none !important;
+    border-color:none !important
 }
 
 .logoContainer{
@@ -65,6 +82,12 @@ h3{
     font-size: 0.75rem;
 }
 
+.text-mute-error{
+    color: $error-700 !important;
+    font-weight: 500 !important;
+    font-size: 0.75rem;
+}
+
 
 .text-muted{
     color: $primary-gray-550;
@@ -86,4 +109,55 @@ h3{
     font-weight: 600 !important;
     font-size: 1rem;
 }
-    
+
+.rowField{
+    display: flex;
+    flex-direction: row;
+}
+.columnField{
+    display: flex;
+    flex-direction: column;
+}
+
+.errorBlock{
+    width:100% !important;
+    background-color: $error-100;
+    padding:1rem;
+    gap:.25rem;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+  
+}
+
+.errorText{
+    color: $error-900 !important;
+}
+
+.successBlock{
+    width:100% !important;
+    background-color: $success-100;
+    padding:1rem;
+    gap:.25rem;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+  
+}
+
+.successText{
+    color: $success-900 !important;
+}
+
+.btn-block{
+    text-align: center;
+}
+
+.alert-login-style {
+    max-width: 23.4375rem  !important;
+    max-height: 18.75rem !important;
+    height: 18.75rem !important;
+}
+
+.checkError{
+    height: 1.2rem;
+    width: 1.2rem;
+}

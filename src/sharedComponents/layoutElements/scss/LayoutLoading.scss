@@ -1,0 +1,11 @@
+.layout-loading {
+    &-wrapper {
+        height: 2.125rem;
+        overflow: hidden;
+        display: flex;
+        padding: 0.4375rem 0.75rem;
+    }
+
+    flex: 1;
+    border-radius: 2.5rem;
+}

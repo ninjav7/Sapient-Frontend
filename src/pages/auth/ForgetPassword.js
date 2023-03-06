@@ -7,10 +7,10 @@ import Holder from './Holder';
 import Typography from '../../sharedComponents/typography';
 import './auth.scss';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
-import { faCircleCheck } from '@fortawesome/pro-thin-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { forgotPassword } from './service';
+import { UserStore } from '../../store/UserStore';
 
 const ForgetPassword = () => {
     const history = useHistory();
@@ -44,7 +44,6 @@ const ForgetPassword = () => {
                 setShowReset(true);
             })
             .catch((error) => {
-                console.log('error', error);
                 setIsLoading(false);
             });
     };
@@ -73,19 +72,11 @@ const ForgetPassword = () => {
                                 </div>
                                 {showReset ? (
                                     <>
-                                        <Alert color="success" className="alertPop" isOpen={true}>
-                                            <div>
-                                                <Typography.Subheader size={Typography.Sizes.md} className="alertText">
-                                                    <FontAwesomeIcon
-                                                        icon={faCircleCheck}
-                                                        size="lg"
-                                                        className="ml-2 mr-2"
-                                                        style={{ marginRight: '4px', color: 'green' }}
-                                                    />
-                                                    Request Sent
-                                                </Typography.Subheader>
-                                            </div>
-                                        </Alert>
+                                        <div className="successBlock">
+                                            <Typography.Subheader size={Typography.Sizes.md} className="successText">
+                                                <CircleCheckSVG /> &nbsp;&nbsp; Request Sent
+                                            </Typography.Subheader>
+                                        </div>
                                         <Typography.Subheader size={Typography.Sizes.md} className="text-mute mt-4">
                                             If a login is associated with your email, an email will be sent with
                                             instructions on how to reset your password.

@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
-
 import ButtonSC from '../../sharedComponents/button/Button';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { getPlugRulesTableCSVExport } from '../../utils/tablesExport';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -24,7 +22,14 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
+import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
 
+const buttonGroupFilterOptions = [
+    { label: 'All' },
+    { label: 'Active', icon: <ActiveSVG className="bg-grey" /> },
+    { label: 'Inactive', icon: <InactiveSVG className="bg-grey" /> },
+];
 const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
     const history = useHistory();
 
@@ -106,6 +111,7 @@ const PlugRules = () => {
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
     const handleAddRuleShow = () => setShowAddRule(true);
+    const { download } = useCSVDownload();
 
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
@@ -243,7 +249,7 @@ const PlugRules = () => {
 
         let params = '';
 
-        if (activeBuildingId !== 'portfolio') params = `?building_id=${activeBuildingId}`;
+        if (activeBuildingId !== 'portfolio' && activeBuildingId !== null) params = `?building_id=${activeBuildingId}`;
 
         await fetchPlugRules(params, searchParams)
             .then((res) => {
@@ -267,6 +273,10 @@ const PlugRules = () => {
             });
     };
 
+    const handleDownloadCsv = async () => {
+        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps));
+    };
+
     useEffect(() => {
         fetchPlugRuleData();
     }, [activeBuildingId, search]);
@@ -278,6 +288,11 @@ const PlugRules = () => {
             pathname: `/control/plug-rules/${ruleId}`,
         });
     };
+    const handleCreatePlugRule = () => {
+        history.push({
+            pathname: `/control/plug-rules/create-plug-rule`,
+        });
+    };
 
     const formatRows = (data) =>
         data.map((row) => {
@@ -285,7 +300,7 @@ const PlugRules = () => {
 
             const sortedDays = ['mon', 'tue', 'wed', 'thr', 'fri', 'sat', 'sun'];
 
-            newRow.mame = (
+            newRow.name = (
                 <ButtonSC
                     className={'p-0'}
                     type={ButtonSC.Type.link}
@@ -324,19 +339,68 @@ const PlugRules = () => {
             return newRow;
         });
 
-    let newPlugRuleData = [];
+    const renderStatus = (row) => {
+        return (
+            <>
+                {row.is_active ? (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="active-container justify-content-center">
+                        <ActiveSVG style={{ marginTop: '0.125rem' }} />
+                        Active
+                    </Typography.Subheader>
+                ) : (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="inactive-container justify-content-center">
+                        <InactiveSVG style={{ marginTop: '0.125rem' }} />
+                        Inactive
+                    </Typography.Subheader>
+                )}
+            </>
+        );
+    };
 
-    if (selectedTab === 0) {
-        newPlugRuleData = formatRows(plugRuleData);
-    }
+    const headerProps = [
+        { name: 'Name', accessor: 'name' },
+        { name: 'Description', accessor: 'description' },
+        { name: 'Status', accessor: 'status', callbackValue: renderStatus },
+        { name: 'Days', accessor: 'days' },
+        { name: 'Socket Count', accessor: 'sensors_count' },
+    ];
 
-    if (selectedTab === 1) {
-        newPlugRuleData = formatRows(onlinePlugRuleData);
-    }
+    const dataForCSV = () => {
+        let newPlugRuleData = [];
 
-    if (selectedTab === 2) {
-        newPlugRuleData = formatRows(offlinePlugRuleData);
-    }
+        if (selectedTab === 0) {
+            newPlugRuleData = plugRuleData;
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = onlinePlugRuleData;
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = offlinePlugRuleData;
+        }
+        return newPlugRuleData;
+    };
+    const currentRow = () => {
+        let newPlugRuleData = [];
+
+        if (selectedTab === 0) {
+            newPlugRuleData = formatRows(plugRuleData);
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = formatRows(onlinePlugRuleData);
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = formatRows(offlinePlugRuleData);
+        }
+        return newPlugRuleData;
+    };
 
     return (
         <React.Fragment>
@@ -353,64 +417,55 @@ const PlugRules = () => {
                             type="button"
                             className="btn btn-md btn-primary font-weight-bold"
                             onClick={() => {
-                                handleAddRuleShow();
+                                handleCreatePlugRule();
                             }}>
-                            <FontAwesomeIcon icon={faPlus} size="md" className="mr-2" />
+                            <PlusSVG className="mr-2" />
                             Add Rule
                         </button>
                     </div>
                 </div>
             </div>
+            <div className="plug-rules-body">
+                <Row>
+                    <Col lg={12}>
+                        <Brick sizeInRem={2} />
+                        {skeletonLoading ? (
+                            <SkeletonTheme color="#202020" height={35}>
+                                <table cellPadding={5} className="table">
+                                    <tr>
+                                        <th width={130}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-            <Row>
-                <Col lg={12}>
-                    <Brick sizeInRem={2} />
-                    {skeletonLoading ? (
-                        <SkeletonTheme color="#202020" height={35}>
-                            <table cellPadding={5} className="table">
-                                <tr>
-                                    <th width={130}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={190}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={190}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={200}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={200}>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                </tr>
-                            </table>
-                        </SkeletonTheme>
-                    ) : (
-                        <DataTableWidget
-                            id="plugRulesTable1"
-                            onSearch={setSearch}
-                            onStatus={setSelectedTab}
-                            rows={newPlugRuleData}
-                            searchResultRows={newPlugRuleData}
-                            headers={[
-                                { name: 'Name', accessor: 'mame' },
-                                { name: 'Description', accessor: 'description' },
-                                { name: 'Days', accessor: 'days' },
-                                { name: 'Socket Count', accessor: 'sensors_count' },
-                            ]}
-                        />
-                    )}
-                </Col>
-            </Row>
+                                        <th>
+                                            <Skeleton count={5} />
+                                        </th>
+                                    </tr>
+                                </table>
+                            </SkeletonTheme>
+                        ) : (
+                            <DataTableWidget
+                                id="plugRulesTable1"
+                                onSearch={setSearch}
+                                onStatus={setSelectedTab}
+                                buttonGroupFilterOptions={buttonGroupFilterOptions}
+                                rows={currentRow()}
+                                searchResultRows={currentRow()}
+                                onDownload={() => handleDownloadCsv()}
+                                headers={headerProps}
+                            />
+                        )}
+                    </Col>
+                </Row>
+            </div>
 
             {/* Add Rule Model  */}
             <Modal show={showAddRule} onHide={handleAddRuleClose} centered>

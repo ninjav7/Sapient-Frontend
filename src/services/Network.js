@@ -4,6 +4,16 @@ export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
 
+//SuperUser Auth
+export const googleSignIn = '/api/user_role/sso/google/auth';
+export const sessionValidator = '/api/user_role/user/user-session-details';
+export const customerList = '/api/user_role/vendor/customer-list';
+export const offlineDevices = '/api/user_role/vendor/customer-offline-devices';
+export const selectCustomer = '/api/user_role/superuser-select-customer';
+export const getCustomer = '/api/user_role/vendor/create-customer';
+export const updateUsers = '/api/user_role/user/update-user';
+export const checkLinkValidity = '/api/user_role/user/check-token-validity';
+
 // portfolio overview
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -30,7 +40,7 @@ export const getFiltersForBuildings = '/api/config/general/general-buildings-fil
 export const generalBldgDelete = '/api/config/general/delete_building';
 
 //user roles
-export const updateAccount = '/api/user_role/user/update-user';
+export const updateVendor = '/api/user_role/vendor/update-customer';
 export const listUsers = '/api/user_role/user/list_user_by_parentId';
 export const addUser = '/api/user_role/user/add_user';
 export const vendorPermissions = '/api/user_role/user-permission-role/vendor-permissions';
@@ -55,9 +65,8 @@ export const singleUserPermissionDetail = '/api/user_role/user-permission-role/u
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
 
 // end-uses
-export const endUses = '/api/energy/portfolio/end-user';
+export const energyEndUseInfo = '/api/energy/portfolio/end-uses-info';
 export const endUsesChart = '/api/energy/end_use/chart/end-uses';
-export const hvacUsageChart = '/api/energy/chart/hvac';
 export const endUsesUsageChart = '/api/energy/end_use/load_usage';
 export const endUsesEquipmentUsage = '/api/energy/end_use/equipment_type_usage';
 export const equipmentDetails = '/api/config/equipments_details/by_id';
@@ -68,6 +77,7 @@ export const getFiltersForEquipment = '/api/config/configuration-filter';
 export const equipmentType = '/api/config/get_equipment_type';
 export const addEquipmentType = '/api/config/create_equipment_type';
 export const updateEquipmentType = '/api/config/update_equipment_type';
+export const deleteEquipmentType = '/api/config/delete-equipment-type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
 export const updateEquipment = '/api/config/equipments_details/update_equipment';
 export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
@@ -79,7 +89,7 @@ export const deleteEquipment = `/api/config/equipments_details/delete-equipment`
 export const generalActiveDevices = '/api/config/devices/active';
 export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
-//search active and passive device
+//search active and Smart Meter
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 
@@ -101,12 +111,12 @@ export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const updateBreakerTypes = '/api/config/panels/update_breaker_config';
 export const resetBreakers = '/api/config/panels/reset/breakers';
 export const deletePanel = '/api/config/panels/delete';
 export const deleteBreaker = '/api/config/panels/delete/breaker';
 
 // getBuilding
-export const getBuilding = '/api/config/get_buildings';
 export const energyUsage = '/api/energy/energy/usage';
 export const getBuildingTypes = '/api/config/building-types';
 
@@ -170,6 +180,7 @@ export const listSensor = '/api/config/sensor/list_sensor';
 // plug rules
 export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';
 export const plugRuleDetails = '/api/energy/plug_rule/plug-rule-details';
+export const listConditions = '/api/energy/plug_rule/all-conditions';
 export const createPlugRule = '/api/energy/plug_rule/create-plug-rule';
 export const updatePlugRule = '/api/energy/plug_rule/update-plug-rule';
 export const deletePlugRule = '/api/energy/plug_rule/delete-plug-rule';
@@ -178,6 +189,7 @@ export const listLinkSocketRules = '/api/energy/plug_rule/list-link-socket';
 export const getListSensorsForBuildings = '/api/energy/plug_rule/sensor-for-buildings';
 export const getFiltersForSensors = '/api/energy/plug_rule/sensor-for-buildings-filter';
 export const assignSensorsToRule = '/api/energy/plug_rule/assign-sensor-rule';
+export const reassignSensorsToRule = '/api/energy/plug_rule/reassign-socket-rule';
 export const unLinkSocket = '/api/energy/plug_rule/unlink-socket';
 export const graphData = '/api/energy/plug_rule/average-sensor-usage';
 export const getSensorLastUsed = '/api/energy/plug_rule/sensor-last-used';
