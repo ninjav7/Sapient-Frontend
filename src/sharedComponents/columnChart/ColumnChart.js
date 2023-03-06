@@ -101,6 +101,8 @@ ColumnChart.propTypes = {
     chartHeight: PropTypes.number,
     tooltipUnit: PropTypes.string,
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+    tooltipCallBackValue: PropTypes.func,
+    restChartProps: PropTypes.object,
 };
 
 export default ColumnChart;
