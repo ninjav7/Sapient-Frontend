@@ -11,7 +11,7 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import './style.css';
-import { removeFloor } from './services';
+import { removeFloor, removeSpace } from './services';
 
 const DeleteModal = (props) => {
     let cookies = new Cookies();
@@ -35,7 +35,21 @@ const DeleteModal = (props) => {
                 setLoading(false);
             });
     };
-
+    const DeleteSpacesFunc = async () => {
+        setLoading(true);
+        let params = `?space_id=${props?.currentSpaceId}`;
+        await removeSpace(params)
+            .then((res) => {
+                const responseData = res?.data;
+                setLoading(false);
+                props.getFloorsFunc();
+                props.onClickForAllItems(props.selectedData);
+                props.onHide();
+            })
+            .catch(() => {
+                setLoading(false);
+            });
+    };
     return (
         <>
             <Modal {...props} centered dialogClassName="floor-space-container-style">
@@ -75,7 +89,7 @@ const DeleteModal = (props) => {
                             className="btnstyle"
                             disabled={loading}
                             onClick={() => {
-                                DeleteFloorsFunc();
+                                props?.modalType === 'floor' ? DeleteFloorsFunc() : DeleteSpacesFunc();
                             }}
                         />
                     </div>

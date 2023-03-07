@@ -39,7 +39,7 @@ const Layout = () => {
         floor_id: currentFloorId,
         building_id: bldgId,
     });
-
+    const [selectedData, setSelectedData] = useState({});
     const getFloorsFunc = async () => {
         const params = `?building_id=${bldgId}`;
         await fetchFloors(params)
@@ -101,6 +101,7 @@ const Layout = () => {
     const [spaceName, setSpaceName] = useState('');
 
     const onClickForAllItems = async ({ nativeHandler, data }) => {
+        setSelectedData({ nativeHandler, data });
         nativeHandler();
         if (!data.floor_id) {
             return;
@@ -131,15 +132,21 @@ const Layout = () => {
                 currentFloorId={currentFloorId}
                 currentSpaceId={currentSpaceId}
                 spaceName={spaceName}
+                parentSpace={parentSpace}
                 typeId={typeId}
                 getFloorsFunc={getFloorsFunc}
+                onClickForAllItems={onClickForAllItems}
+                selectedData={selectedData}
                 onHide={() => setModalShow(false)}
             />
             <DeleteModal
                 show={showDeleteAlert}
                 modalType={modalType}
                 currentFloorId={currentFloorId}
+                currentSpaceId={currentSpaceId}
                 getFloorsFunc={getFloorsFunc}
+                onClickForAllItems={onClickForAllItems}
+                selectedData={selectedData}
                 onHide={() => handleDeleteAlertClose()}
             />
 
@@ -186,38 +193,39 @@ const Layout = () => {
                                 setCurrentSpaceId(args?._id);
                                 setSpaceName('');
                                 setFloorName('');
-                                setParentSpace('');
+                                setParentSpace(args?._id);
                                 setTypeId('');
                             }
                         }}
                         onColumnNameEdit={(args) => {
-                            if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                setModalShow(true);
-                                setEditFloor(true);
-                                setModalType('floor');
-                                setCurrentFloorId(args?.floor_id);
-                                setFloorName(args?.name);
-                                setSpaceName('');
-                                setCurrentSpaceId('');
-                                setParentSpace('');
-                                setTypeId('');
-                            } else {
-                                setModalShow(true);
-                                setEditFloor(true);
-                                setModalType('spaces');
-                                setCurrentFloorId(args?.parents);
-                                setFloorName('');
-                                setSpaceName(args?.name);
-                                setCurrentSpaceId(args?._id);
-                                setParentSpace(args?.parent_space);
-                                setTypeId(args?.type_id);
-                            }
+                            if (args?.bdId === undefined)
+                                if (args?.floor_id !== undefined && args?.floor_id !== '') {
+                                    setModalShow(true);
+                                    setEditFloor(true);
+                                    setModalType('floor');
+                                    setCurrentFloorId(args?.floor_id);
+                                    setFloorName(args?.name);
+                                    setSpaceName('');
+                                    setCurrentSpaceId('');
+                                    setParentSpace('');
+                                    setTypeId('');
+                                } else {
+                                    setModalShow(true);
+                                    setEditFloor(true);
+                                    setModalType('spaces');
+                                    setCurrentFloorId(args?.parents);
+                                    setFloorName('');
+                                    setSpaceName(args?.name);
+                                    setCurrentSpaceId(args?._id);
+                                    setParentSpace(args?.parent_space);
+                                    setTypeId(args?.type_id);
+                                }
                         }}
                         onItemEdit={(args) => {
                             if (args?.floor_id !== undefined && args?.floor_id !== '') {
                                 setModalShow(true);
                                 setEditFloor(true);
-                                setModalType('spaces');
+                                setModalType('floor');
                                 setCurrentFloorId(args?.parents);
                                 setFloorName(args?.name);
                                 setSpaceName('');

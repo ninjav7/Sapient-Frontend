@@ -7,6 +7,7 @@ import {
     getSpaceTypes,
     createSpace,
     updateSpace,
+    updateFloor,
     deleteSpace,
     deleteFloor,
 } from '../../../services/Network';
@@ -35,10 +36,12 @@ export function addSpace(params, payload) {
     return axiosInstance.post(`${createSpace}${params}`, payload).then((res) => res);
 }
 
+export function updateFloors(params, payload) {
+    return axiosInstance.patch(`${updateFloor}${params}`, payload).then((res) => res);
+}
 export function updateSpaces(params, payload) {
     return axiosInstance.patch(`${updateSpace}${params}`, payload).then((res) => res);
 }
-
 export function removeSpace(params) {
     return axiosInstance.delete(`${deleteSpace}${params}`).then((res) => res);
 }

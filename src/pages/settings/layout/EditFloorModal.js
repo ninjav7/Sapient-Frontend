@@ -12,7 +12,7 @@ import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import Select from '../../../sharedComponents/form/select';
-import { addSpace, addFloors, fetchSpaceTypes, updateSpaces } from './services';
+import { addSpace, addFloors, fetchSpaceTypes, updateSpaces, updateFloors } from './services';
 import './style.css';
 
 const EditFloorModal = (props) => {
@@ -36,12 +36,12 @@ const EditFloorModal = (props) => {
     });
 
     useEffect(() => {
-        if (props.currentFloorId !== '' && props?.currentSpaceId !== '') {
-            setSpaceBody({ ...spaceBody, parents: props.currentFloorId, parent_space: props?.currentSpaceId });
+        if (props.currentFloorId !== '' && props?.parentSpace !== '') {
+            setSpaceBody({ ...spaceBody, parents: props.currentFloorId, parent_space: props?.parentSpace });
         } else if (props.currentFloorId !== '') {
             setSpaceBody({ ...spaceBody, parents: props.currentFloorId });
         }
-    }, [props.currentFloorId, props?.currentSpaceId]);
+    }, [props.currentFloorId, props?.parentSpace]);
 
     useEffect(() => {
         setFloorName(props.floorName);
@@ -100,7 +100,7 @@ const EditFloorModal = (props) => {
         setLoading(true);
 
         const params = `?floor_id=${props?.currentFloorId}`;
-        await updateSpaces(params, floorNameApi)
+        await updateFloors(params, floorNameApi)
             .then((res) => {
                 props.onHide();
                 setLoading(false);
@@ -120,6 +120,7 @@ const EditFloorModal = (props) => {
                 props.onHide();
                 setFloorModal(true);
                 props.getFloorsFunc();
+                props.onClickForAllItems(props.selectedData);
             })
             .catch(() => {
                 setLoading(false);
@@ -127,14 +128,14 @@ const EditFloorModal = (props) => {
     };
     const updateSpacesFunc = async () => {
         setLoading(true);
-
         const params = `?space_id=${props?.currentSpaceId}`;
-        await updateSpaces(params, floorNameApi)
+        await updateSpaces(params, spaceBody)
             .then((res) => {
                 props.onHide();
                 setLoading(false);
                 setFloorModal(true);
                 props.getFloorsFunc();
+                props.onClickForAllItems(props.selectedData);
             })
             .catch(() => {
                 setLoading(false);
@@ -344,10 +345,10 @@ const EditFloorModal = (props) => {
                                 if (!props.editFloor && props?.modalType === 'floor') {
                                     createFloorsFunc();
                                 }
-                                if (!props.editFloor && props?.modalType === 'spaces ') {
+                                if (!props.editFloor && props?.modalType === 'spaces') {
                                     createSpacesAPI();
                                 }
-                                if (props.editFloor && props?.modalType === 'spaces ') {
+                                if (props.editFloor && props?.modalType === 'spaces') {
                                     updateSpacesFunc();
                                 }
                             }}
