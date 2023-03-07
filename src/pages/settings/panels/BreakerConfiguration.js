@@ -56,6 +56,7 @@ const BreakerConfiguration = ({
     isEquipmentListFetching,
     activeTab,
     setActiveTab,
+    isEditingMode,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -903,14 +904,16 @@ const BreakerConfiguration = ({
                                     `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`}
                             </Typography.Header>
                             <div className="d-flex justify-content-start mouse-pointer ">
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    className={`typography-wrapper mr-4 ${
-                                        activeTab === 'edit-breaker' ? 'active-tab-style' : ''
-                                    }`}
-                                    onClick={() => setActiveTab('edit-breaker')}>
-                                    {`Edit Breaker${firstBreakerObj?.breaker_type !== 1 ? `(s)` : ''}`}
-                                </Typography.Subheader>
+                                {isEditingMode && (
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        className={`typography-wrapper mr-4 ${
+                                            activeTab === 'edit-breaker' ? 'active-tab-style' : ''
+                                        }`}
+                                        onClick={() => setActiveTab('edit-breaker')}>
+                                        {`Edit Breaker${firstBreakerObj?.breaker_type !== 1 ? `(s)` : ''}`}
+                                    </Typography.Subheader>
+                                )}
                                 <Typography.Subheader
                                     size={Typography.Sizes.md}
                                     className={`typography-wrapper ${

@@ -93,6 +93,7 @@ const EditPanel = () => {
     const [breakerLinks, setBreakerLinks] = useState([]);
     const [isEquipmentListFetching, setEquipmentFetching] = useState(false);
     const [isLinking, setLinking] = useState(false);
+    const [isEditingMode, setEditingMode] = useState(false);
 
     const [panelObj, setPanelObj] = useState({});
     const [selectedBreakerObj, setSelectedBreakerObj] = useState({});
@@ -1247,6 +1248,10 @@ const EditPanel = () => {
     }, [panelId]);
 
     useEffect(() => {
+        isEditingMode ? setActiveTab('edit-breaker') : setActiveTab('metrics');
+    }, [isEditingMode]);
+
+    useEffect(() => {
         pageDefaultStates();
     }, []);
 
@@ -1406,6 +1411,7 @@ const EditPanel = () => {
                         type,
                     };
                 }}
+                onPanelEditClick={({ isEditingMode }) => setEditingMode(isEditingMode)}
                 breakerPropsAccessor={{
                     id: 'breaker_number',
                     status: 'status',
@@ -1458,6 +1464,7 @@ const EditPanel = () => {
                 isEquipmentListFetching={isEquipmentListFetching}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
+                isEditingMode={isEditingMode}
             />
 
             <UnlinkAllBreakers
