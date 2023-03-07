@@ -1035,7 +1035,7 @@ const BreakerConfiguration = ({
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
-                                                                            ''
+                                                                            'equipment'
                                                                         );
                                                                     }}
                                                                 />
@@ -1059,7 +1059,9 @@ const BreakerConfiguration = ({
                                                                             setSelectedEquipment(e.value);
                                                                         }}
                                                                         className="basic-single"
-                                                                        isDisabled={firstBreakerObj?.type !== ''}
+                                                                        isDisabled={
+                                                                            firstBreakerObj?.type !== 'equipment'
+                                                                        }
                                                                     />
                                                                 )}
                                                             </div>
@@ -1221,7 +1223,7 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.equipment_type}
-                                                                isDisabled={firstBreakerObj?.type !== ''}
+                                                                isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                             />
                                                         </div>
 
@@ -1244,7 +1246,7 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.end_use}
-                                                                isDisabled={firstBreakerObj?.type !== ''}
+                                                                isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                             />
                                                         </div>
                                                     </div>
@@ -1267,7 +1269,7 @@ const BreakerConfiguration = ({
                                                                 handleCreateEquipChange('space_id', e.value);
                                                             }}
                                                             className="basic-single"
-                                                            isDisabled={firstBreakerObj?.type !== ''}
+                                                            isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                         />
                                                     </div>
                                                     <Brick sizeInRem={1.5} />

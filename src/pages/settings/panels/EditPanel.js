@@ -1078,7 +1078,7 @@ const EditPanel = () => {
                 response.forEach((record) => {
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
-                    // if (record?.type === '') record.type = 'equipment';
+                    if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
                     record.status = fetchBreakerStatus(record.config_type, record);
                 });
