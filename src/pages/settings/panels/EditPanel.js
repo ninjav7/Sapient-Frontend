@@ -150,7 +150,8 @@ const EditPanel = () => {
             obj?.breaker_type === 1 &&
             obj?.parent_breaker === '' &&
             obj?.is_linked === false &&
-            obj?.type === 'equipment'
+            obj?.type === 'equipment' &&
+            obj?.rated_amps === 0
         ) {
             return Breaker.Type.notConfigured;
         }
@@ -1076,11 +1077,11 @@ const EditPanel = () => {
 
                 // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                 response.forEach((record) => {
-                    if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
-                    if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                     if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
                     record.status = fetchBreakerStatus(record.config_type, record);
+                    if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
+                    if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                 });
 
                 BreakersStore.update((s) => {
