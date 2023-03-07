@@ -187,7 +187,8 @@ const Panels = () => {
     const renderLinkedBreakers = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.breakers_linked ? `${row?.breakers_linked} / ${row?.breakers}` : '-'}
+                {/* {row?.breakers_linked ? `${row?.breakers_linked} / ${row?.breakers}` : '-'} // Commented as part of PLT-917 */}
+                {row?.breakers_linked ? `${row?.breakers_linked}` : '-'}
             </Typography.Body>
         );
     };

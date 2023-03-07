@@ -24,7 +24,6 @@ const AddEquipment = ({
         name: '',
         equipment_type: '',
         end_use: '',
-        space_id: '',
     };
 
     const defaultErrors = {
