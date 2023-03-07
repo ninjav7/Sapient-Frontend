@@ -56,6 +56,7 @@ const BreakerConfiguration = ({
     isEquipmentListFetching,
     activeTab,
     setActiveTab,
+    isEditingMode,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -316,7 +317,7 @@ const BreakerConfiguration = ({
         let obj = Object.assign({}, firstBreakerObj);
 
         // Type 1
-        if (newBreakerType === '') {
+        if (newBreakerType === 'equipment') {
             obj.rated_amps = parentBreakerObj?.rated_amps;
             obj.voltage = parentBreakerObj?.voltage;
             obj.phase_configuration = parentBreakerObj?.phase_configuration;
@@ -330,7 +331,7 @@ const BreakerConfiguration = ({
                 setSelectedEquipment('');
                 setNewEquipObj({});
             }
-            if (defaultBreakerType === '' && parentBreakerObj?.equipment_link !== 0) {
+            if (defaultBreakerType === 'equipment' && parentBreakerObj?.equipment_link !== 0) {
                 obj.equipment_link = parentBreakerObj?.equipment_link;
                 setSelectedEquipment(parentBreakerObj?.equipment_link[0]);
             }
@@ -646,7 +647,7 @@ const BreakerConfiguration = ({
             promisesList.push(promiseOne);
         }
 
-        if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === '') {
+        if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === 'equipment') {
             let params = '';
             if (update_type === 'forceUpdate') {
                 params = `?force_save=true`;
@@ -903,14 +904,16 @@ const BreakerConfiguration = ({
                                     `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`}
                             </Typography.Header>
                             <div className="d-flex justify-content-start mouse-pointer ">
-                                <Typography.Subheader
-                                    size={Typography.Sizes.md}
-                                    className={`typography-wrapper mr-4 ${
-                                        activeTab === 'edit-breaker' ? 'active-tab-style' : ''
-                                    }`}
-                                    onClick={() => setActiveTab('edit-breaker')}>
-                                    {`Edit Breaker${firstBreakerObj?.breaker_type !== 1 ? `(s)` : ''}`}
-                                </Typography.Subheader>
+                                {isEditingMode && (
+                                    <Typography.Subheader
+                                        size={Typography.Sizes.md}
+                                        className={`typography-wrapper mr-4 ${
+                                            activeTab === 'edit-breaker' ? 'active-tab-style' : ''
+                                        }`}
+                                        onClick={() => setActiveTab('edit-breaker')}>
+                                        {`Edit Breaker${firstBreakerObj?.breaker_type !== 1 ? `(s)` : ''}`}
+                                    </Typography.Subheader>
+                                )}
                                 <Typography.Subheader
                                     size={Typography.Sizes.md}
                                     className={`typography-wrapper ${
@@ -1025,13 +1028,14 @@ const BreakerConfiguration = ({
                                                             <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-1"
-                                                                    checked={firstBreakerObj?.type === ''}
+                                                                    checked={firstBreakerObj?.type === 'equipment'}
                                                                     onClick={(e) => {
-                                                                        if (firstBreakerObj?.type === '') return;
+                                                                        if (firstBreakerObj?.type === 'equipment')
+                                                                            return;
                                                                         handleBreakerTypeChange(
                                                                             'type',
                                                                             parentBreakerObj?.type,
-                                                                            ''
+                                                                            'equipment'
                                                                         );
                                                                     }}
                                                                 />
@@ -1055,7 +1059,9 @@ const BreakerConfiguration = ({
                                                                             setSelectedEquipment(e.value);
                                                                         }}
                                                                         className="basic-single"
-                                                                        isDisabled={firstBreakerObj?.type !== ''}
+                                                                        isDisabled={
+                                                                            firstBreakerObj?.type !== 'equipment'
+                                                                        }
                                                                     />
                                                                 )}
                                                             </div>
@@ -1151,7 +1157,7 @@ const BreakerConfiguration = ({
                                                                 Name
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
-                                                            {firstBreakerObj?.type === '' ? (
+                                                            {firstBreakerObj?.type === 'equipment' ? (
                                                                 <InputTooltip
                                                                     placeholder="Enter Equipment Name"
                                                                     onChange={(e) => {
@@ -1173,7 +1179,7 @@ const BreakerConfiguration = ({
                                                                 Quantity
                                                             </Typography.Body>
                                                             <Brick sizeInRem={0.25} />
-                                                            {firstBreakerObj?.type === '' ? (
+                                                            {firstBreakerObj?.type === 'equipment' ? (
                                                                 <InputTooltip
                                                                     type="number"
                                                                     placeholder="Enter Equipment Quantity"
@@ -1217,7 +1223,7 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.equipment_type}
-                                                                isDisabled={firstBreakerObj?.type !== ''}
+                                                                isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                             />
                                                         </div>
 
@@ -1240,7 +1246,7 @@ const BreakerConfiguration = ({
                                                                 }}
                                                                 className="basic-single"
                                                                 error={equipmentErrors?.end_use}
-                                                                isDisabled={firstBreakerObj?.type !== ''}
+                                                                isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                             />
                                                         </div>
                                                     </div>
@@ -1263,11 +1269,11 @@ const BreakerConfiguration = ({
                                                                 handleCreateEquipChange('space_id', e.value);
                                                             }}
                                                             className="basic-single"
-                                                            isDisabled={firstBreakerObj?.type !== ''}
+                                                            isDisabled={firstBreakerObj?.type !== 'equipment'}
                                                         />
                                                     </div>
                                                     <Brick sizeInRem={1.5} />
-                                                    {firstBreakerObj?.type === '' && (
+                                                    {firstBreakerObj?.type === 'equipment' && (
                                                         <div className="d-flex justify-content-end">
                                                             <Button
                                                                 label={isAdding ? 'Adding...' : 'Add Equipment'}
