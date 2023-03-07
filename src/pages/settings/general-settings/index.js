@@ -165,6 +165,11 @@ const GeneralBuildingSettings = () => {
         const params = `/${bldgId}`;
         let bldgData = {};
         bldgData.info = buildingDetails;
+        if (bldgData.info.square_footage === '') {
+            bldgData.info.square_footage = 0;
+        } else {
+            bldgData.info.square_footage = Number(bldgData.info.square_footage);
+        }
         bldgData.address = buildingAddress;
         bldgData.operating_hours = operationTime.operating_hours;
 
@@ -231,7 +236,7 @@ const GeneralBuildingSettings = () => {
                     name: data.building_name,
                     building_type: data.building_type,
                     building_type_id: data.building_type_id,
-                    square_footage: data.building_size,
+                    square_footage: data.building_size === 0 ? '' : data.building_size,
                     active: data.active,
                     timezone: data.timezone,
                     time_format: data.time_format,
@@ -782,10 +787,10 @@ const GeneralBuildingSettings = () => {
                                     {userPermission?.user_role === 'admin' ||
                                     userPermission?.permissions?.permissions?.account_buildings_permission?.edit ? (
                                         <Inputs
-                                            type="text"
+                                            type="number"
                                             placeholder="Enter Square Footage"
                                             onChange={(e) => {
-                                                handleBldgSettingChanges('square_footage', +e.target.value);
+                                                handleBldgSettingChanges('square_footage', e.target.value);
                                                 localStorage.setItem('generalSquareFootage', e.target.value);
                                             }}
                                             className="w-100"

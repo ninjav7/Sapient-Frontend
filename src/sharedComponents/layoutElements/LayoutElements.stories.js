@@ -95,4 +95,38 @@ Default.args = {
 
     // Put all props that related to building you need
     buildingData: { bdId: 'buildingID' },
+    actionsMap: {
+        '630900e65d44915e0adb5d33': {
+            isEditable: {
+                value: false,
+                includeChildren: true,
+            },
+            //or
+            // isEditable: false,
+
+            // canChangeName: false,
+            //or
+            // canChangeName: {
+            //     value: false,
+            //     includeChildren: true,
+            // },
+
+            // canAddNewSpace: false,
+            //or
+            // canAddNewSpace: {
+            //     value: false,
+            //     includeChildren: true,
+            // },
+
+            //canFilter: false,
+            //or
+            // canFilter: {
+            //     value: false,
+            //     includeChildren: true,
+            // },
+        },
+        '6308ea837e2ef1915c8b94f7': {
+            isEditable: false,
+        },
+    },
 };

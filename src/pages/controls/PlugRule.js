@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
-import { fetchPlugRules } from '../../services/plugRules';
+import { fetchPlugRules, getEstimateSensorSavingsRequst } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
@@ -22,10 +22,10 @@ import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExpor
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
-
 import _ from 'lodash';
 
 import { timePicker15MinutesIntervalOption } from '../../constants/time';
+import { daysOfWeekFull } from '../../constants/days';
 
 import moment from 'moment';
 
@@ -115,7 +115,17 @@ const indexOfDay = {
 const formatAverageData = (data) => {
     const res = [];
     data.forEach((el) => {
-        res.push({ x: moment(el.x), y: el.y });
+        const today = moment();
+        const from_date = today.startOf('week').startOf('isoWeek');
+        if (el.dayOfWeek === 'Sunday') {
+            from_date.day(el.dayOfWeek).add(1, 'weeks');
+        } else {
+            from_date.day(el.dayOfWeek);
+        }
+        const formattedHourFromBackend = el.hour.split(':');
+        const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
+
+        res.push({ x: timeWithHours.unix() * 1000, y: el.consumption });
     });
     return res;
 };
@@ -135,6 +145,7 @@ const PlugRule = () => {
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
+    const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSockets, setIsChangedSockets] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
@@ -153,7 +164,7 @@ const PlugRule = () => {
     const getConditionId = () => uuidv4();
     const initialCurrentData = {
         name: '',
-        building_id: '' || localStorage.getItem('buildingId'),
+        building_id: '',
         description: '',
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
@@ -268,6 +279,9 @@ const PlugRule = () => {
         }
 
         setConditionDisabledDays(disabledDays);
+        if (selectedIds.length) {
+            fetchEstimateSensorSavings();
+        }
     }, [preparedScheduleData]);
 
     const groupedCurrentDataById = (actions) => {
@@ -342,7 +356,7 @@ const PlugRule = () => {
     };
     useEffect(() => {
         calculateOffHoursPlots();
-    }, [preparedScheduleData]);
+    }, [preparedScheduleData, currentData]);
     useEffect(() => {
         generateHours();
         getBuildingData();
@@ -438,8 +452,9 @@ const PlugRule = () => {
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
 
     useEffect(() => {
-        if (selectedIds) {
+        if (selectedIds.length) {
             getGraphData();
+            fetchEstimateSensorSavings();
         }
     }, [selectedIds]);
 
@@ -513,7 +528,7 @@ const PlugRule = () => {
             data: [
                 {
                     action_type: 1,
-                    action_time: '08:00 AM',
+                    action_time: '08:00',
                     action_day: [],
                     condition_id: generateFirstConditionId,
                     condition_group_id: generateConditionGroupId,
@@ -521,7 +536,7 @@ const PlugRule = () => {
                 },
                 {
                     action_type: 0,
-                    action_time: '09:00 AM',
+                    action_time: '09:00',
                     action_day: [],
                     condition_id: generateSecondConditionId,
                     condition_group_id: generateConditionGroupId,
@@ -573,11 +588,13 @@ const PlugRule = () => {
         } else {
             listOfsocketsToReassign = rulesToLink.sensor_id;
         }
-        await reassignSensorsToRuleRequest({
-            rule_id: ruleId,
-            building_id: activeBuildingId,
-            sensor_id: listOfsocketsToReassign,
-        }).then((res) => {});
+
+        listOfsocketsToReassign &&
+            (await reassignSensorsToRuleRequest({
+                rule_id: ruleId,
+                building_id: activeBuildingId,
+                sensor_id: listOfsocketsToReassign,
+            }).then((res) => {}));
     };
 
     const updateSocketUnlink = async () => {
@@ -737,6 +754,20 @@ const PlugRule = () => {
             .catch((error) => {
                 setIsProcessing(false);
             });
+    };
+
+    const fetchEstimateSensorSavings = async () => {
+        const formattedSchedule = currentData?.action?.map((action) => {
+            const { action_day, action_time, action_type, ...rest } = action;
+            const preparedActionDays = action_day.map((day) => {
+                return daysOfWeekFull[day];
+            });
+            return { action_time, action_type, action_days: preparedActionDays };
+        });
+
+        await getEstimateSensorSavingsRequst(formattedSchedule, selectedIds, ruleId).then((res) => {
+            setEstimatedEnergySavings(res.data);
+        });
     };
 
     const addOptions = () => {
@@ -966,7 +997,7 @@ const PlugRule = () => {
 
         setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
         setLinkedRuleData(selectedSensors);
-    }, [allData.length, allSensors.length]);
+    }, [allData.length, allSensors?.length]);
 
     useEffect(() => {
         unLinkedRuleData.length > 0 &&
@@ -977,7 +1008,9 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
-        fetchFiltersForSensors();
+        if (selectedIds.length) {
+            fetchFiltersForSensors();
+        }
 
         fetchUnLinkedSocketRules();
     }, [
@@ -1072,6 +1105,7 @@ const PlugRule = () => {
                     setTotalSocket(response.total_data);
                 }));
         } else {
+            setRulesToUnLink({ rule_id: ruleId, sensor_id: fetchedSelectedIds });
             setRulesToLink([]);
             setSelectedIds([]);
 
@@ -1081,6 +1115,7 @@ const PlugRule = () => {
         setIsChangedSockets(true);
         setCheckedAll(checkedAll);
     };
+
     const currentRowSearched = () => {
         if (selectedRuleFilter === 0) {
             return allSearchData;
@@ -1193,8 +1228,8 @@ const PlugRule = () => {
             }
         } else {
             Promise.allSettled([
-                isChangedSockets && reassignSensorsToRule(),
                 isChangedSockets && updateSocketUnlink(),
+                isChangedSockets && reassignSensorsToRule(),
                 isChangedRuleDetails && updatePlugRuleData(),
             ]).then((value) => {
                 openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
@@ -1237,7 +1272,6 @@ const PlugRule = () => {
             spaceTypeTypeFilterString,
         }).then((filters) => {
             const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
-            console.log('filterOptions345345', filterOptions);
             const filterOptionsFetched = [
                 {
                     label: 'Equipment Type',
@@ -1474,15 +1508,13 @@ const PlugRule = () => {
     };
 
     const getDateRange = () => {
-        const maxDate = new Date();
-        maxDate.setUTCHours(23, 59, 59, 999);
-
-        const minDate = new Date();
-        minDate.setDate(maxDate.getDate() - 7);
-
+        const minDate = moment().startOf('isoweek');
+        const maxDate = moment().endOf('isoweek');
+        maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+        minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         return {
-            maxDate: maxDate.getTime(),
-            minDate: minDate.getTime(),
+            maxDate: maxDate.unix() * 1000,
+            minDate: minDate.unix() * 1000,
         };
     };
     const calculateOffHoursPlots = () => {
@@ -1647,7 +1679,7 @@ const PlugRule = () => {
                                 onChange={() => {
                                     handleSwitchChange();
                                 }}
-                                checked={!currentData.is_active}
+                                checked={currentData.is_active}
                                 onColor={'#2955E7'}
                                 uncheckedIcon={false}
                                 checkedIcon={false}
@@ -1655,7 +1687,7 @@ const PlugRule = () => {
                                 height={20}
                                 width={36}
                             />
-                            <span className="ml-2 plug-rule-switch-font">Not Active</span>
+                            <span className="ml-2 plug-rule-switch-font">Active</span>
                         </div>
                         <div className="cancel-and-save-flex">
                             <button
@@ -1808,7 +1840,20 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: '1,722',
+                                        value: estimatedEnergySavings,
+                                    }}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: '%A, %H:%M',
+                                        },
+                                        xAxis: {
+                                            labels: {
+                                                formatter: function (val) {
+                                                    return moment(val.value).format('dddd');
+                                                },
+                                                step: 2,
+                                            },
+                                        },
                                     }}
                                 />
                             )}

@@ -22,6 +22,11 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
+import Select from '../../sharedComponents/form/select';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+import Input from '../../sharedComponents/form/input/Input';
+import { fetchBuildingsList } from '../../services/buildings';
+
 import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
 
@@ -116,11 +121,14 @@ const PlugRules = () => {
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [nameError, setNameError] = useState(false);
+    const [buildingError, setBuildingError] = useState({ text: '' });
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const [createRuleData, setCreateRuleData] = useState({
-        building_id: '',
-        action: [],
+        building_id: [],
+        name: '',
+        description: '',
     });
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -144,6 +152,12 @@ const PlugRules = () => {
 
     const handleCreatePlugRuleChange = (key, value) => {
         let obj = Object.assign({}, createRuleData);
+        if (key == 'building_id' && value) {
+            setBuildingError({ text: '' });
+        }
+        if (key == 'name' && value) {
+            setNameError(false);
+        }
         obj[key] = value;
         setCreateRuleData(obj);
     };
@@ -155,17 +169,21 @@ const PlugRules = () => {
     };
 
     const savePlugRuleData = async () => {
-        let newRuleData = Object.assign({}, createRuleData);
-        newRuleData.building_id = [localStorage.getItem('buildingId')];
-        setIsProcessing(true);
-        await createPlugRuleRequest(newRuleData)
-            .then((res) => {
-                setIsProcessing(false);
-                setPageRefresh(!pageRefresh);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
+        const isValid = validatePlugRuleForm(currentData);
+        if (isValid) {
+            let newRuleData = Object.assign({}, createRuleData);
+            newRuleData.building_id = [newRuleData.building_id];
+            setIsProcessing(true);
+            await createPlugRuleRequest(newRuleData)
+                .then((res) => {
+                    setIsProcessing(false);
+
+                    redirectToPlugRulePage(res.data.plug_rule_id);
+                })
+                .catch((error) => {
+                    setIsProcessing(false);
+                });
+        }
     };
 
     const updatePlugRuleData = async () => {
@@ -178,6 +196,15 @@ const PlugRules = () => {
             .catch((error) => {
                 setIsProcessing(false);
             });
+    };
+
+    const getBuildingData = async () => {
+        await fetchBuildingsList(false).then((res) => {
+            let data = res.data;
+            const formattedData = formatBuildingListData(data);
+
+            setBuildingListData(formattedData);
+        });
     };
 
     const updateSocketLink = async () => {
@@ -207,7 +234,7 @@ const PlugRules = () => {
     };
 
     // Building List Data Globally
-    const [buildingListData] = useAtom(buildingData);
+    const [buildingListData, setBuildingListData] = useState([]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -225,20 +252,10 @@ const PlugRules = () => {
         });
     };
 
-    const getBuildingData = async () => {
-        try {
-            buildingListData.map((record) => {
-                if (record.building_id === activeBuildingId) {
-                    localStorage.setItem('timeZone', record.timezone);
-                }
-            });
-        } catch (error) {}
-    };
-
     useEffect(() => {
         getBuildingData();
         updateBreadcrumbStore();
-    }, [buildingListData]);
+    }, []);
 
     const fetchPlugRuleData = async () => {
         const searchParams = {
@@ -288,11 +305,41 @@ const PlugRules = () => {
             pathname: `/control/plug-rules/${ruleId}`,
         });
     };
-    const handleCreatePlugRule = () => {
-        history.push({
-            pathname: `/control/plug-rules/create-plug-rule`,
+
+    const formatBuildingListData = (data) => {
+        return data.map((el) => {
+            return { value: el.building_id, label: el.building_name };
         });
     };
+
+    const validatePlugRuleForm = (data) => {
+        let valid = true;
+        if (!createRuleData.name.length) {
+            setNameError(true);
+            valid = false;
+        }
+        if (!createRuleData.building_id.length) {
+            setBuildingError({ text: 'please select building' });
+            valid = false;
+        }
+        return valid;
+    };
+
+    const handleCreatePlugRule = () => {
+        setShowAddRule(true);
+    };
+    const buildingIdProps = {
+        label: 'Choose building',
+        defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
+        onChange: (event) => {
+            handleCreatePlugRuleChange('building_id', event.value);
+        },
+        options: buildingListData,
+    };
+
+    if (buildingError?.text?.length) {
+        buildingIdProps.error = buildingError;
+    }
 
     const formatRows = (data) =>
         data.map((row) => {
@@ -473,32 +520,31 @@ const PlugRules = () => {
                     <Modal.Title>Add Plug Rule</Modal.Title>
                 </div>
                 <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Name"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleCreatePlugRuleChange('name', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
+                    <Input
+                        label="Name"
+                        id="name"
+                        placeholder="Enter Rule Name"
+                        value={currentData.name}
+                        onChange={(e) => {
+                            handleCreatePlugRuleChange('name', e.target.value);
+                        }}
+                        error={nameError}
+                    />
+                    <div className="my-3">{activeBuildingId === 'portfolio' && <Select {...buildingIdProps} />}</div>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Description"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleCreatePlugRuleChange('description', e.target.value);
-                                }}
-                            />
-                        </Form.Group>
-                    </Form>
+                    <Textarea
+                        type="textarea"
+                        label="Description"
+                        name="text"
+                        id="description"
+                        rows="4"
+                        placeholder="Enter Description of Rule"
+                        value={currentData.description}
+                        className="font-weight-bold"
+                        onChange={(e) => {
+                            handleCreatePlugRuleChange('description', e.target.value);
+                        }}
+                    />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="light" onClick={handleAddRuleClose}>
@@ -508,10 +554,9 @@ const PlugRules = () => {
                         variant="primary"
                         onClick={() => {
                             savePlugRuleData();
-                            handleAddRuleClose();
                         }}
                         disabled={isProcessing}>
-                        Save
+                        Create
                     </Button>
                 </Modal.Footer>
             </Modal>

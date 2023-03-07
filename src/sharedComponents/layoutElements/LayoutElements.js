@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { LayoutLevelColumn } from './components/LayoutLevelColumn';
 
 import useStateManager from './useStateManager';
+import { getActionRestrictions } from './helper';
 import { ACCESSORS, ACTIONS } from './constants';
 
 import './scss/LayoutElements.scss';
@@ -30,6 +31,7 @@ const renderStackColumns = (
         onColumnNameEdit,
         onColumnFilter,
         onItemEdit,
+        actionsMap = {},
         isLoadingLastColumn,
     }
 ) =>
@@ -45,6 +47,7 @@ const renderStackColumns = (
             onColumnFilter,
             onItemEdit,
             currentItem,
+            actionsMap,
             isLoading: isLoadingLastColumn && stackEntries.length - 1 === currentIndex,
         };
 
@@ -62,22 +65,26 @@ const renderStackColumns = (
             return defaultProps;
         })();
 
-        return React.cloneElement(component, customizedProps);
+        const currentId = currentItem[ACCESSORS._ID] || currentItem[ACCESSORS.FLOOR_ID];
+        const actionMappedProps = getActionRestrictions(actionsMap[currentId], true);
+
+        return React.cloneElement(component, { ...customizedProps, ...actionMappedProps });
     });
 
 const LayoutElements = (props) => {
     const { state, dispatch } = useStateManager(props);
     const { onClickEachChild, onClickForAllItems, buildingData, className, style } = props;
 
-    const childrenClickHandler = (title, key, callbackState, currentItem) => {
+    const childrenClickHandler = (title, key, callbackState, currentItem, restrictedActions) => {
         dispatch({
             type: ACTIONS.PUSH_INTO_STACK,
             payload: {
                 component: (
                     <LayoutLevelColumn
+                        {...restrictedActions}
                         title={title}
                         childrenCallBackValue={(props) => ({ level: String(props.type_name), ...props })}
-                        onChildrenClick={(space) => {
+                        onChildrenClick={(space, restrictedActions) => {
                             const currentKey = key + 1;
 
                             const nativeHandler = () =>
@@ -89,7 +96,8 @@ const LayoutElements = (props) => {
                                             (item) => item[ACCESSORS.PARENT_SPACE] === space[ACCESSORS.SPACE_ID]
                                         );
                                     },
-                                    space
+                                    space,
+                                    restrictedActions
                                 );
 
                             const handlerArgs = { data: space, nativeHandler };
@@ -198,6 +206,7 @@ LayoutElements.propTypes = {
     //data
     floors: PropTypes.arrayOf(PropTypes.object),
     spaces: PropTypes.arrayOf(PropTypes.object),
+    actionsMap: PropTypes.object,
 };
 
 export default LayoutElements;
