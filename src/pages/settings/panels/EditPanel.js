@@ -150,7 +150,7 @@ const EditPanel = () => {
             obj?.breaker_type === 1 &&
             obj?.parent_breaker === '' &&
             obj?.is_linked === false &&
-            obj?.type === ''
+            obj?.type === 'equipment'
         ) {
             return Breaker.Type.notConfigured;
         }
@@ -217,7 +217,7 @@ const EditPanel = () => {
             }
         }
 
-        if (obj?.type === '') {
+        if (obj?.type === 'equipment') {
             // Below condition is for Single Lvl Breaker
             if (obj?.breaker_type === 1) {
                 if (
@@ -282,7 +282,7 @@ const EditPanel = () => {
         if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
         if (breaker_type === 'not-configured') return Breaker.Status.noSenors;
         if (breaker_type === 'configured') return Breaker.Status.online;
-        if (breaker_obj?.type === '') {
+        if (breaker_obj?.type === 'equipment') {
             if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
             if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
         }
@@ -1078,6 +1078,7 @@ const EditPanel = () => {
                 response.forEach((record) => {
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
+                    // if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
                     record.status = fetchBreakerStatus(record.config_type, record);
                 });
