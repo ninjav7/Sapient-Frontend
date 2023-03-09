@@ -157,7 +157,7 @@ const BuildingOverview = () => {
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
-            xaxisObj.legend = { enabled: false };
+            if (xaxisObj) xaxisObj.legend = { enabled: false };
             setXAxisObj(xaxisObj);
         };
 
