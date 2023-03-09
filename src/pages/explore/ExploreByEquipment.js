@@ -28,6 +28,7 @@ import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import Select from '../../sharedComponents/form/select';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -140,10 +141,25 @@ const ExploreByEquipment = () => {
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
-
+    const metric = [
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current Consumption' },
+    ];
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
+    const handleUnitChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedUnit(obj.unit);
+    };
+    const handleConsumptionChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedConsumptionLabel(obj.Consumption);
+    };
 
     useEffect(() => {
         if (entryPoint !== 'entered') {
@@ -188,7 +204,7 @@ const ExploreByEquipment = () => {
         } else {
             setSelectedEquipmentId('');
         }
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
         if (equipIdNow) {
@@ -1062,16 +1078,18 @@ const ExploreByEquipment = () => {
     const fetchExploreChartData = async () => {
         setChartLoading(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${equipIdNow}&divisible_by=1000`;
+        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipIdNow}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
                 let data = responseData.data;
+
                 let arr = [];
                 arr = allEquipmentList.filter(function (item) {
                     return item.equipment_id === equipIdNow;
                 });
-                let exploreData = [];
                 let sg = '';
                 let legendName = '';
                 sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
@@ -1081,19 +1099,46 @@ const ExploreByEquipment = () => {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
                 let NulledData = [];
-                data.map((ele) => {
-                    if (ele?.consumption === '') {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                    } else {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    NulledData = seriesData;
+                    for (let i = 0; i < data.length; i++) {
+                        let sensorData = [];
+                        data[i].data.map((ele) => {
+                            if (ele.consumption === '') {
+                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                            } else {
+                                sensorData.push({
+                                    x: new Date(ele.time_stamp).getTime(),
+                                    y: ele.consumption,
+                                });
+                            }
+                        });
+                        let recordToInsert = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                        };
+
+                        NulledData.push(recordToInsert);
                     }
-                });
-                let recordToInsert = {
-                    name: legendName,
-                    data: NulledData,
-                    id: arr[0].equipment_id,
-                };
-                setSeriesData([...seriesData, recordToInsert]);
+
+                    setSeriesData(NulledData);
+                } else {
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: legendName,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                    };
+                    setSeriesData([...seriesData, recordToInsert]);
+                }
+
                 setSelectedEquipmentId('');
                 setChartLoading(false);
             })
@@ -1130,10 +1175,13 @@ const ExploreByEquipment = () => {
     }, [removeEquipmentId]);
 
     const dataarr = [];
+    let ct = 0;
 
     const fetchExploreAllChartData = async (id) => {
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=energy&equipment_id=${id}&divisible_by=1000`;
+        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${id}&divisible_by=1000${
+            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
+        }`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
@@ -1143,7 +1191,6 @@ const ExploreByEquipment = () => {
                 arr = allEquipmentList.filter(function (item) {
                     return item.equipment_id === id;
                 });
-                let exploreData = [];
                 let sg = '';
                 let legendName = '';
                 sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
@@ -1153,21 +1200,53 @@ const ExploreByEquipment = () => {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
                 let NulledData = [];
-                data.map((ele) => {
-                    if (ele?.consumption === '') {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
-                    } else {
-                        NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+
+                if (selectedConsumption === 'rmsCurrentMilliAmps') {
+                    ct++;
+                    //NulledData = seriesData;
+                    for (let i = 0; i < data.length; i++) {
+                        let sensorData = [];
+                        data[i].data.map((ele) => {
+                            if (ele.consumption === '') {
+                                sensorData.push({ x: new Date(ele.time_stamp).getTime(), y: null });
+                            } else {
+                                sensorData.push({
+                                    x: new Date(ele.time_stamp).getTime(),
+                                    y: ele.consumption,
+                                });
+                            }
+                        });
+                        let recordToInsert = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                        };
+
+                        dataarr.push(recordToInsert);
                     }
-                });
-                let recordToInsert = {
-                    name: legendName,
-                    data: NulledData,
-                    id: arr[0].equipment_id,
-                };
-                dataarr.push(recordToInsert);
-                if (selectedIds.length === dataarr.length) {
-                    setSeriesData(dataarr);
+
+                    if (selectedIds.length === ct) {
+                        setSeriesData(dataarr);
+                        ct = 0;
+                    }
+                    //setSeriesData(NulledData);
+                } else {
+                    data.map((ele) => {
+                        if (ele?.consumption === '') {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: null });
+                        } else {
+                            NulledData.push({ x: new Date(ele?.time_stamp).getTime(), y: ele?.consumption });
+                        }
+                    });
+                    let recordToInsert = {
+                        name: legendName,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                    };
+                    dataarr.push(recordToInsert);
+                    if (selectedIds.length === dataarr.length) {
+                        setSeriesData(dataarr);
+                    }
                 }
             })
             .catch((error) => {});
@@ -1280,6 +1359,17 @@ const ExploreByEquipment = () => {
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
+                <div className="mr-2">
+                    <Select
+                        defaultValue={selectedConsumption}
+                        options={metric}
+                        onChange={(e) => {
+                            setConsumption(e.value);
+                            handleUnitChange(e.value);
+                            handleConsumptionChange(e.value);
+                        }}
+                    />
+                </div>
                 <Header title="" type="page" />
             </Row>
 
@@ -1292,8 +1382,8 @@ const ExploreByEquipment = () => {
                             <ExploreChart
                                 title={''}
                                 subTitle={''}
-                                tooltipUnit="KWh"
-                                tooltipLabel="Energy Consumption"
+                                tooltipUnit={selectedUnit}
+                                tooltipLabel={selectedConsumptionLabel}
                                 data={seriesData}
                                 dateRange={fetchDateRange(startDate, endDate)}
                             />

@@ -55,6 +55,7 @@ export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, wi
             series: {
                 showInNavigator: true,
                 gapSize: 6,
+                turboThreshold: 0,
             },
         },
         tooltip: {
