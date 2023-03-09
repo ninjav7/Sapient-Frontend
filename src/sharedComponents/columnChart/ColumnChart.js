@@ -4,6 +4,7 @@ import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import cx from 'classnames';
 import PropTypes from 'prop-types';
 
 import Typography from '../typography';
@@ -74,7 +75,10 @@ const ColumnChart = (props) => {
 
             {props.onMoreDetail && (
                 <Button
-                    className="column-chart-more-detail"
+                    className={cx("column-chart-more-detail", {
+                        //@TODO as temporary solution, need to investigate to put button inside chart's container
+                        'no-legends': props?.restChartProps?.legend?.enabled === false
+                    })}
                     label="More Details"
                     size={Button.Sizes.lg}
                     icon={<ArrowRight style={{ height: 11 }} />}
