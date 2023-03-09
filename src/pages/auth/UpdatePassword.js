@@ -498,7 +498,6 @@ const Confirm = (props) => {
                                                         <Input
                                                             placeholder="Enter your password"
                                                             disabled={
-                                                                matchErr === 'error' ||
                                                                 charErr === 'error' ||
                                                                 lowerCaseErr === 'error' ||
                                                                 upperCaseErr === 'error' ||
