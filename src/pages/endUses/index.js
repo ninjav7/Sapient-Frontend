@@ -217,6 +217,7 @@ const EndUsesPage = () => {
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
+            if (xaxisObj) xaxisObj.legend = { enabled: false };
             setXAxisObj(xaxisObj);
         };
 
