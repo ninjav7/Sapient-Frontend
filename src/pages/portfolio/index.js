@@ -15,12 +15,10 @@ import { ComponentStore } from '../../store/ComponentStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
-import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
-import { updateBuildingStore } from '../../components/SecondaryTopNavBar/utils';
 import { BuildingStore } from '../../store/BuildingStore';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
@@ -39,11 +37,6 @@ const PortfolioOverview = () => {
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
-    const [startEndDayCount, setStartEndDayCount] = useState(0);
-
-    const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
-    const [isConsumpHistoryLoading, setIsConsumpHistoryLoading] = useState(false);
-
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
         total_consumption: {
@@ -59,6 +52,7 @@ const PortfolioOverview = () => {
             old: 0,
         },
     });
+
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -219,13 +213,6 @@ const PortfolioOverview = () => {
         updateBreadcrumbStore();
         updateBuildingStore();
     }, []);
-
-    useEffect(() => {
-        const start = moment(startDate);
-        const end = moment(endDate);
-        const days = end.diff(start, 'days');
-        setStartEndDayCount(days + 1);
-    });
 
     return (
         <>
