@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import { useHistory, Link } from 'react-router-dom';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Brick from '../../../sharedComponents/brick';
@@ -41,6 +42,13 @@ import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
 import './breaker-config-styles.scss';
 import ReassignAlert from './ReassignAlert';
+import LineChart from '../../../sharedComponents/lineChart/LineChart';
+import Header from '../../../components/Header';
+import { ReactComponent as ArrowUpRightFromSquare } from '../../../assets/icon/arrowUpRightFromSquare.svg';
+import { fetchDateRange } from '../../../helpers/formattedChartData';
+import { DateRangeStore } from '../../../store/DateRangeStore';
+import { getSensorGraphData } from '../passive-devices/services';
+import { apiRequestBody } from '../../../helpers/helpers';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -62,6 +70,9 @@ const BreakerConfiguration = ({
 
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const defaultErrorObj = {
         rated_amps: null,
@@ -79,6 +90,7 @@ const BreakerConfiguration = ({
     const [thirdBreakerObj, setThirdBreakerObj] = useState({});
 
     const [selectedEquipment, setSelectedEquipment] = useState('');
+    const [sensorsList, setSensorsList] = useState([]);
 
     const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
     const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
@@ -148,6 +160,17 @@ const BreakerConfiguration = ({
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
+
+    const metric = [
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+    ];
+
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
+    const [sensorChartData, setSensorChartData] = useState([]);
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
@@ -232,6 +255,7 @@ const BreakerConfiguration = ({
         setSecondBreakerObj({});
         setThirdBreakerObj({});
         setSelectedEquipment('');
+        setSensorsList([]);
         setFirstSensorList([]);
         setSecondSensorList([]);
         setThirdSensorList([]);
@@ -795,7 +819,6 @@ const BreakerConfiguration = ({
 
         const breakerObj = Object.assign({}, selectedBreakerObj);
         if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
-
         setFirstBreakerObj(breakerObj);
         setParentBreakerObj(breakerObj); // Added to track for any configuration change
 
@@ -806,6 +829,14 @@ const BreakerConfiguration = ({
         // For Breaker Type 1
         if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
             fetchSensorsList(breakerObj?.device_link, 'first');
+            if (breakerObj?.sensor_link !== '') {
+                setSensorsList([
+                    {
+                        id: breakerObj?.sensor_link,
+                        name: breakerObj?.sensor_name,
+                    },
+                ]);
+            }
             return;
         }
 
@@ -814,8 +845,14 @@ const BreakerConfiguration = ({
             let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
             setSecondBreakerObj(obj);
             setSecondBreakerObjOld(obj); // Added to track for any configuration change
-
             if (breakerObj?.device_link === '' && obj?.device_link === '') return;
+
+            let sensors = [];
+
+            if (breakerObj?.sensor_link !== '')
+                sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+            if (obj?.sensor_link !== '') sensors.push({ id: obj?.sensor_link, name: obj?.sensor_name });
+            setSensorsList(sensors);
 
             if (breakerObj?.device_link === obj?.device_link) {
                 fetchSensorsList(breakerObj?.device_link, 'first-second');
@@ -832,6 +869,15 @@ const BreakerConfiguration = ({
             setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
             setThirdBreakerObj(childbreakers[1]);
             setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
+
+            let sensors = [];
+            if (breakerObj?.sensor_link !== '')
+                sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+            if (childbreakers[0]?.sensor_link !== '')
+                sensors.push({ id: childbreakers[0]?.sensor_link, name: childbreakers[0]?.sensor_name });
+            if (childbreakers[1]?.sensor_link !== '')
+                sensors.push({ id: childbreakers[1]?.sensor_link, name: childbreakers[1]?.sensor_name });
+            setSensorsList(sensors);
 
             if (
                 breakerObj?.device_link === '' &&
@@ -876,6 +922,81 @@ const BreakerConfiguration = ({
         setSecondPassiveDevicesList(newList);
         setThirdPassiveDevicesList(newList);
     }, [passiveDevicesList]);
+
+    useEffect(() => {
+        if (sensorsList.length === 0) return;
+
+        const promisesList = [];
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        if (sensorsList.length >= 1) {
+            const params = `?sensor_id=${sensorsList[0]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseOne = getSensorGraphData(params, payload);
+            promisesList.push(promiseOne);
+        }
+
+        if (sensorsList.length >= 2) {
+            const params = `?sensor_id=${sensorsList[1]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseTwo = getSensorGraphData(params, payload);
+            promisesList.push(promiseTwo);
+        }
+
+        if (sensorsList.length === 3) {
+            const params = `?sensor_id=${sensorsList[2]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseThree = getSensorGraphData(params, payload);
+            promisesList.push(promiseThree);
+        }
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const response = res;
+                let sensorData = [];
+                if (sensorsList.length >= 1) {
+                    let sensorObj = {
+                        name: `Sensor ${sensorsList[0]?.name}`,
+                        data: [],
+                    };
+                    response[0].data.forEach((record) => {
+                        let obj = {
+                            x: record?.time_stamp,
+                            y: record?.consumption === '' ? null : record?.consumption,
+                        };
+                        sensorObj.data.push(obj);
+                    });
+                    sensorData.push(sensorObj);
+                }
+                if (sensorsList.length >= 2) {
+                    let sensorObj = {
+                        name: `Sensor ${sensorsList[1]?.name}`,
+                        data: [],
+                    };
+                    response[1].data.forEach((record) => {
+                        let obj = {
+                            x: record?.time_stamp,
+                            y: record?.consumption === '' ? null : record?.consumption,
+                        };
+                        sensorObj.data.push(obj);
+                    });
+                    sensorData.push(sensorObj);
+                }
+                if (sensorsList.length === 3) {
+                    let sensorObj = {
+                        name: `Sensor ${sensorsList[2]?.name}`,
+                        data: [],
+                    };
+                    response[2].data.forEach((record) => {
+                        let obj = {
+                            x: record?.time_stamp,
+                            y: record?.consumption === '' ? null : record?.consumption,
+                        };
+                        sensorObj.data.push(obj);
+                    });
+                    sensorData.push(sensorObj);
+                }
+                setSensorChartData(sensorData);
+            })
+            .catch(() => {});
+    }, [sensorsList]);
 
     return (
         <React.Fragment>
@@ -935,14 +1056,16 @@ const BreakerConfiguration = ({
                             </div>
 
                             <div>
-                                <Button
-                                    label={isProcessing ? 'Saving...' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={onSaveButonClick}
-                                    className="ml-2"
-                                    disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
-                                />
+                                {activeTab !== 'metrics' && (
+                                    <Button
+                                        label={isProcessing ? 'Saving...' : 'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={onSaveButonClick}
+                                        className="ml-2"
+                                        disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1582,7 +1705,26 @@ const BreakerConfiguration = ({
                         )}
 
                         {/* Metrics  */}
-                        {activeTab === 'metrics' && <div>Edit Metric Page</div>}
+                        {activeTab === 'metrics' && (
+                            <div>
+                                <div className="d-flex justify-content-end">
+                                    <Header type="modal" />
+                                </div>
+
+                                <Brick sizeInRem={1.5} />
+
+                                <div>
+                                    <LineChart
+                                        title={''}
+                                        subTitle={''}
+                                        tooltipUnit={selectedUnit}
+                                        tooltipLabel={selectedConsumptionLabel}
+                                        data={sensorChartData}
+                                        dateRange={fetchDateRange(startDate, endDate)}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Modal>
