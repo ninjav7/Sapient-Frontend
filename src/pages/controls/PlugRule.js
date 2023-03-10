@@ -24,7 +24,10 @@ import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 import _ from 'lodash';
 
-import { timePicker15MinutesIntervalOption } from '../../constants/time';
+import {
+    timePicker15MinutesIntervalOption24HourFormat,
+    timePicker15MinutesIntervalOption12HourFormat,
+} from '../../constants/time';
 import { daysOfWeekFull } from '../../constants/days';
 
 import moment from 'moment';
@@ -144,6 +147,7 @@ const PlugRule = () => {
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
+    const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSockets, setIsChangedSockets] = useState(false);
@@ -157,6 +161,10 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [is24Format, setIs24Format] = useState(false);
+    const timepickerOption = is24Format
+        ? timePicker15MinutesIntervalOption24HourFormat
+        : timePicker15MinutesIntervalOption12HourFormat;
 
     const { v4: uuidv4 } = require('uuid');
     const history = useHistory();
@@ -252,11 +260,12 @@ const PlugRule = () => {
             },
         },
     ]);
+    const initialSortingState = { name: '', method: 'ace' };
     const [hoursNew, setHoursNew] = useState([]);
 
     const [selectedIds, setSelectedIds] = useState([]);
     const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
-    const [sortBy, setSortBy] = useState({});
+    const [sortBy, setSortBy] = useState(initialSortingState);
 
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -267,7 +276,9 @@ const PlugRule = () => {
         const workingDaysPerCondition = {};
         const data = preparedScheduleDataCopy?.forEach((curr) => {
             const { title } = curr;
-            workingDaysPerCondition[title] = curr.data[0].action_day;
+            if (!curr.data[0].is_deleted) {
+                workingDaysPerCondition[title] = curr.data[0].action_day;
+            }
         });
 
         const flat = Object.values(workingDaysPerCondition).flat(1);
@@ -283,6 +294,12 @@ const PlugRule = () => {
             fetchEstimateSensorSavings();
         }
     }, [preparedScheduleData]);
+    useEffect(() => {
+        const Is24HoursFormat = buildingListDataNotFormatted.find(
+            (el) => el.building_id == currentData.building_id
+        )?.time_format;
+        setIs24Format(Is24HoursFormat);
+    }, [currentData, buildingListDataNotFormatted]);
 
     const groupedCurrentDataById = (actions) => {
         return (
@@ -305,6 +322,7 @@ const PlugRule = () => {
     const getBuildingData = async () => {
         await fetchBuildingsList(false).then((res) => {
             let data = res.data;
+            setBuildingListDataNotFormatted(data);
             const formattedData = formatBuildingListData(data);
 
             setBuildingListData(formattedData);
@@ -408,8 +426,27 @@ const PlugRule = () => {
             }
         });
     };
+    const initialLineChartData = () => {
+        const res = [];
+        const data = Object.values(daysOfWeekFull);
 
-    const [lineChartData, setLineChartData] = useState([]);
+        data.forEach((el) => {
+            const today = moment();
+            const from_date = today.startOf('week').startOf('isoWeek');
+            if (el === 'Sunday') {
+                from_date.day(el).add(1, 'weeks');
+            } else {
+                from_date.day(el);
+            }
+            const timeWithHours = from_date.set('hour', 0);
+            res.push({ x: timeWithHours.unix() * 1000, y: 0 });
+        });
+        let response = [{ name: `Average Energy demand`, data: res }];
+
+        return response;
+    };
+
+    const [lineChartData, setLineChartData] = useState(initialLineChartData());
 
     const getGraphData = async () => {
         if (selectedIds.length) {
@@ -422,9 +459,6 @@ const PlugRule = () => {
             });
         }
     };
-
-    const [selectedOption, setSelectedOption] = useState([]);
-    const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     useEffect(() => {
         if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
@@ -450,7 +484,6 @@ const PlugRule = () => {
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
-
     useEffect(() => {
         if (selectedIds.length) {
             getGraphData();
@@ -558,12 +591,23 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
-
     const deleteScheduleCondition = (condition_group_id) => {
         let currentObj = [...preparedScheduleData];
         let resArray = [];
         currentObj.forEach((record) => {
-            if (record.title !== condition_group_id) {
+            if (record.title === condition_group_id) {
+                const { data, title } = record;
+                const formattedData = [];
+                data.forEach((el) => {
+                    formattedData.push({ ...el, is_deleted: true });
+                });
+                const formattedRecord = {
+                    title,
+                    data: formattedData,
+                };
+
+                resArray.push(formattedRecord);
+            } else {
                 resArray.push(record);
             }
         });
@@ -896,7 +940,6 @@ const PlugRule = () => {
             (await getUnlinkedSocketRules(
                 pageSize,
                 pageNo,
-                ruleId,
                 activeBuildingId,
                 equpimentTypeFilterString,
                 macTypeFilterString,
@@ -941,7 +984,6 @@ const PlugRule = () => {
         await getUnlinkedSocketRules(
             pageSize,
             pageNo,
-            ruleId,
             activeBuildingId,
             equpimentTypeFilterString,
             macTypeFilterString,
@@ -1008,7 +1050,7 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
-        if (selectedIds.length) {
+        if (activeBuildingId.length) {
             fetchFiltersForSensors();
         }
 
@@ -1074,7 +1116,6 @@ const PlugRule = () => {
                 (await getUnlinkedSocketRules(
                     pageSize,
                     pageNo,
-                    ruleId,
                     activeBuildingId,
                     equpimentTypeFilterString,
                     macTypeFilterString,
@@ -1259,7 +1300,6 @@ const PlugRule = () => {
     }, []);
 
     const [filterOptions, setFilterOptions] = useState([]);
-
     const fetchFiltersForSensors = async () => {
         isLoadingRef.current = true;
         await getFiltersForSensorsRequest({
@@ -1284,7 +1324,6 @@ const PlugRule = () => {
                     })),
                     onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
                     onDelete: () => {
-                        setSelectedOption([]);
                         setEqupimentTypeFilterString('');
                     },
                 },
@@ -1335,7 +1374,6 @@ const PlugRule = () => {
                     })),
                     onClose: (options) => filterHandler(setMacTypeFilterString, options),
                     onDelete: () => {
-                        setSelectedOptionMac([]);
                         setMacTypeFilterString('');
                     },
                 },
@@ -1408,103 +1446,108 @@ const PlugRule = () => {
     const RenderScheduleActionItem = ({ record }) => {
         const firstCondition = record.data[0];
         const secondCondition = record.data[1];
-        return (
-            <>
-                <div className="plug-rule-schedule-row mb-1">
-                    <div className="schedule-left-flex">
-                        <div>
-                            <Select
-                                defaultValue={firstCondition.action_type}
-                                onChange={(event) => {
-                                    handleSchedularConditionChange(
-                                        'action_type',
-                                        event.value,
-                                        firstCondition.condition_id,
-                                        firstCondition.condition_group_id
-                                    );
-                                }}
-                                options={getAvailableActionType(secondCondition.action_type)}
-                            />
+        if (!firstCondition.is_deleted && !secondCondition.is_deleted) {
+            return (
+                <>
+                    <div className="plug-rule-schedule-row mb-1">
+                        <div className="schedule-left-flex">
+                            <div>
+                                <Select
+                                    defaultValue={firstCondition.action_type}
+                                    onChange={(event) => {
+                                        handleSchedularConditionChange(
+                                            'action_type',
+                                            event.value,
+                                            firstCondition.condition_id,
+                                            firstCondition.condition_group_id
+                                        );
+                                    }}
+                                    options={getAvailableActionType(secondCondition.action_type)}
+                                />
+                            </div>
+                            <div>at</div>
+                            <div>
+                                <Select
+                                    defaultValue={firstCondition.action_time}
+                                    onChange={(event) => {
+                                        handleSchedularTimeChange(
+                                            'action_time',
+                                            event.value,
+                                            firstCondition.condition_id,
+                                            firstCondition.condition_group_id
+                                        );
+                                    }}
+                                    isDisabled={firstCondition.action_type == '2'}
+                                    options={firstCondition.action_type == '2' ? [] : timepickerOption}
+                                />
+                            </div>
+                            <div>on</div>
+                            <div className="schedular-weekday-group">
+                                {firstCondition.condition_group_id}
+                                <ConditionGroup
+                                    handleButtonClick={(day) =>
+                                        handleScheduleDayChange(day, firstCondition.condition_group_id)
+                                    }
+                                    disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
+                                    selectedItemsList={firstCondition.action_day}
+                                />
+                            </div>
                         </div>
-                        <div>at</div>
-                        <div>
-                            <Select
-                                defaultValue={firstCondition.action_time}
-                                onChange={(event) => {
-                                    handleSchedularTimeChange(
-                                        'action_time',
-                                        event.value,
-                                        firstCondition.condition_id,
-                                        firstCondition.condition_group_id
-                                    );
-                                }}
-                                isDisabled={firstCondition.action_type == '2'}
-                                options={firstCondition.action_type == '2' ? [] : timePicker15MinutesIntervalOption}
-                            />
+                    </div>
+                    <div className="plug-rule-schedule-row mb-1">
+                        <div className="schedule-left-flex">
+                            <div>
+                                <Select
+                                    defaultValue={secondCondition.action_type}
+                                    onChange={(event) => {
+                                        handleSchedularConditionChange(
+                                            'action_type',
+                                            event.value,
+                                            secondCondition.condition_id,
+                                            secondCondition.condition_group_id
+                                        );
+                                    }}
+                                    options={getAvailableActionType(firstCondition.action_type)}
+                                />
+                            </div>
+                            <div>at</div>
+                            <div>
+                                <Select
+                                    defaultValue={secondCondition.action_time}
+                                    onChange={(event) => {
+                                        handleSchedularTimeChange(
+                                            'action_time',
+                                            event.value,
+                                            secondCondition.condition_id,
+                                            secondCondition.condition_group_id
+                                        );
+                                    }}
+                                    isDisabled={secondCondition.action_type == '2'}
+                                    options={timepickerOption}
+                                />
+                            </div>
                         </div>
-                        <div>on</div>
-                        <div className="schedular-weekday-group">
-                            <ConditionGroup
-                                handleButtonClick={(day) =>
-                                    handleScheduleDayChange(day, firstCondition.condition_group_id)
-                                }
-                                disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
-                                selectedItemsList={firstCondition.action_day}
+                        <div>
+                            <Button
+                                label="Delete Condition"
+                                onClick={() => {
+                                    showOptionToDelete(firstCondition.condition_group_id);
+                                    setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
+                                    setShowDeleteConditionModal(true);
+                                }}
+                                size={Button.Sizes.md}
+                                icon={<DeleteIcon />}
+                                type={Button.Type.secondaryDistructive}
                             />
                         </div>
                     </div>
-                </div>
-                <div className="plug-rule-schedule-row mb-1">
-                    <div className="schedule-left-flex">
-                        <div>
-                            <Select
-                                defaultValue={secondCondition.action_type}
-                                onChange={(event) => {
-                                    handleSchedularConditionChange(
-                                        'action_type',
-                                        event.value,
-                                        secondCondition.condition_id,
-                                        secondCondition.condition_group_id
-                                    );
-                                }}
-                                options={getAvailableActionType(firstCondition.action_type)}
-                            />
-                        </div>
-                        <div>at</div>
-                        <div>
-                            <Select
-                                defaultValue={secondCondition.action_time}
-                                onChange={(event) => {
-                                    handleSchedularTimeChange(
-                                        'action_time',
-                                        event.value,
-                                        secondCondition.condition_id,
-                                        secondCondition.condition_group_id
-                                    );
-                                }}
-                                isDisabled={secondCondition.action_type == '2'}
-                                options={timePicker15MinutesIntervalOption}
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <Button
-                            label="Delete Condition"
-                            onClick={() => {
-                                showOptionToDelete(firstCondition.condition_group_id);
-                                setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
-                                setShowDeleteConditionModal(true);
-                            }}
-                            size={Button.Sizes.md}
-                            icon={<DeleteIcon />}
-                            type={Button.Type.secondaryDistructive}
-                        />
-                    </div>
-                </div>
 
-                <hr className="plug-rule-schedule-breaker" />
-            </>
-        );
+                    <hr className="plug-rule-schedule-breaker" />
+                </>
+            );
+        } else {
+            return null;
+        }
     };
 
     const getDateRange = () => {
@@ -1844,14 +1887,14 @@ const PlugRule = () => {
                                     }}
                                     chartProps={{
                                         tooltip: {
-                                            xDateFormat: '%A, %H:%M',
+                                            xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
                                         },
                                         xAxis: {
                                             labels: {
                                                 formatter: function (val) {
-                                                    return moment(val.value).format('dddd');
+                                                    return moment(val.value).format('ddd');
                                                 },
-                                                step: 2,
+                                                step: 1,
                                             },
                                         },
                                     }}
