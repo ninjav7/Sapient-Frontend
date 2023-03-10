@@ -814,6 +814,53 @@ const BreakerConfiguration = ({
             });
     };
 
+    const fetchSensorsChartData = (sensors_list) => {
+        if (sensors_list.length === 0) return;
+
+        const promisesList = [];
+        const payload = apiRequestBody(startDate, endDate, timeZone);
+
+        if (sensors_list.length >= 1) {
+            const params = `?sensor_id=${sensors_list[0]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseOne = getSensorGraphData(params, payload);
+            promisesList.push(promiseOne);
+        }
+
+        if (sensors_list.length >= 2) {
+            const params = `?sensor_id=${sensors_list[1]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseTwo = getSensorGraphData(params, payload);
+            promisesList.push(promiseTwo);
+        }
+
+        if (sensors_list.length === 3) {
+            const params = `?sensor_id=${sensors_list[2]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const promiseThree = getSensorGraphData(params, payload);
+            promisesList.push(promiseThree);
+        }
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const response = res;
+                const sensorData = [];
+                sensors_list.forEach((record, index) => {
+                    const sensorObj = {
+                        name: `Sensor ${record?.name}`,
+                        data: [],
+                    };
+                    response[index].data.forEach((record) => {
+                        const obj = {
+                            x: record?.time_stamp,
+                            y: record?.consumption === '' ? null : record?.consumption,
+                        };
+                        sensorObj.data.push(obj);
+                    });
+                    sensorData.push(sensorObj);
+                });
+                setSensorChartData(sensorData);
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
@@ -924,79 +971,8 @@ const BreakerConfiguration = ({
     }, [passiveDevicesList]);
 
     useEffect(() => {
-        if (sensorsList.length === 0) return;
-
-        const promisesList = [];
-        const payload = apiRequestBody(startDate, endDate, timeZone);
-
-        if (sensorsList.length >= 1) {
-            const params = `?sensor_id=${sensorsList[0]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
-            const promiseOne = getSensorGraphData(params, payload);
-            promisesList.push(promiseOne);
-        }
-
-        if (sensorsList.length >= 2) {
-            const params = `?sensor_id=${sensorsList[1]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
-            const promiseTwo = getSensorGraphData(params, payload);
-            promisesList.push(promiseTwo);
-        }
-
-        if (sensorsList.length === 3) {
-            const params = `?sensor_id=${sensorsList[2]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
-            const promiseThree = getSensorGraphData(params, payload);
-            promisesList.push(promiseThree);
-        }
-
-        Promise.all(promisesList)
-            .then((res) => {
-                const response = res;
-                let sensorData = [];
-                if (sensorsList.length >= 1) {
-                    let sensorObj = {
-                        name: `Sensor ${sensorsList[0]?.name}`,
-                        data: [],
-                    };
-                    response[0].data.forEach((record) => {
-                        let obj = {
-                            x: record?.time_stamp,
-                            y: record?.consumption === '' ? null : record?.consumption,
-                        };
-                        sensorObj.data.push(obj);
-                    });
-                    sensorData.push(sensorObj);
-                }
-                if (sensorsList.length >= 2) {
-                    let sensorObj = {
-                        name: `Sensor ${sensorsList[1]?.name}`,
-                        data: [],
-                    };
-                    response[1].data.forEach((record) => {
-                        let obj = {
-                            x: record?.time_stamp,
-                            y: record?.consumption === '' ? null : record?.consumption,
-                        };
-                        sensorObj.data.push(obj);
-                    });
-                    sensorData.push(sensorObj);
-                }
-                if (sensorsList.length === 3) {
-                    let sensorObj = {
-                        name: `Sensor ${sensorsList[2]?.name}`,
-                        data: [],
-                    };
-                    response[2].data.forEach((record) => {
-                        let obj = {
-                            x: record?.time_stamp,
-                            y: record?.consumption === '' ? null : record?.consumption,
-                        };
-                        sensorObj.data.push(obj);
-                    });
-                    sensorData.push(sensorObj);
-                }
-                setSensorChartData(sensorData);
-            })
-            .catch(() => {});
-    }, [sensorsList]);
+        fetchSensorsChartData(sensorsList);
+    }, [sensorsList, startDate, endDate]);
 
     return (
         <React.Fragment>
