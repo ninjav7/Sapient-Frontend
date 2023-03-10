@@ -161,16 +161,23 @@ const BreakerConfiguration = ({
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
 
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+    const [metric, setMetric] = useState([
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-        { value: 'rmsCurrentMilliAmps', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
-    ];
+    ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [sensorChartData, setSensorChartData] = useState([]);
+
+    const handleUnitChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedUnit(obj.unit);
+        setSelectedConsumptionLabel(obj.Consumption);
+    };
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
@@ -267,6 +274,8 @@ const BreakerConfiguration = ({
         setExistingEquipId('');
         setCurrentEquipObj({});
         setNewEquipObj({});
+        setSensorChartData([]);
+        setConsumption(metric[0].value);
     };
 
     const handleChange = (key, value) => {
@@ -814,26 +823,26 @@ const BreakerConfiguration = ({
             });
     };
 
-    const fetchSensorsChartData = (sensors_list) => {
+    const fetchSensorsChartData = (sensors_list, selected_consmption) => {
         if (sensors_list.length === 0) return;
 
         const promisesList = [];
         const payload = apiRequestBody(startDate, endDate, timeZone);
 
         if (sensors_list.length >= 1) {
-            const params = `?sensor_id=${sensors_list[0]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseOne = getSensorGraphData(params, payload);
             promisesList.push(promiseOne);
         }
 
         if (sensors_list.length >= 2) {
-            const params = `?sensor_id=${sensors_list[1]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const params = `?sensor_id=${sensors_list[1]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseTwo = getSensorGraphData(params, payload);
             promisesList.push(promiseTwo);
         }
 
         if (sensors_list.length === 3) {
-            const params = `?sensor_id=${sensors_list[2]?.id}&consumption=rmsCurrentMilliAmps&building_id=${bldgId}`;
+            const params = `?sensor_id=${sensors_list[2]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseThree = getSensorGraphData(params, payload);
             promisesList.push(promiseThree);
         }
@@ -971,8 +980,8 @@ const BreakerConfiguration = ({
     }, [passiveDevicesList]);
 
     useEffect(() => {
-        fetchSensorsChartData(sensorsList);
-    }, [sensorsList, startDate, endDate]);
+        fetchSensorsChartData(sensorsList, selectedConsumption);
+    }, [sensorsList, startDate, endDate, selectedConsumption]);
 
     return (
         <React.Fragment>
@@ -1684,6 +1693,16 @@ const BreakerConfiguration = ({
                         {activeTab === 'metrics' && (
                             <div>
                                 <div className="d-flex justify-content-end">
+                                    <div className="mr-2">
+                                        <Select
+                                            defaultValue={selectedConsumption}
+                                            options={metric}
+                                            onChange={(e) => {
+                                                setConsumption(e.value);
+                                                handleUnitChange(e.value);
+                                            }}
+                                        />
+                                    </div>
                                     <Header type="modal" />
                                 </div>
 
