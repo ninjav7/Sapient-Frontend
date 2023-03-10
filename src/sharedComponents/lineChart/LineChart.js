@@ -73,10 +73,14 @@ const LineChart = (props) => {
         plotBandsLegends,
         isLoadingData,
         unitInfo,
-        chartProps
+        chartProps,
     } = props;
 
     const [plotBands, setPlotBands] = useState(plotBandsProp);
+
+    useEffect(() => {
+        setPlotBands(plotBandsProp);
+    }, [plotBandsProp]);
 
     useEffect(() => setPlotBands(plotBandsProp), [plotBandsProp?.length]);
 
