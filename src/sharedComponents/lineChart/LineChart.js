@@ -220,9 +220,6 @@ const LineChart = (props) => {
         chartProps
     );
 
-    console.log('TEST data => ', data);
-    console.log('TEST dateRange => ', dateRange);
-
     return (
         <div className="line-chart-wrapper" ref={wrapperRef}>
             <div className="chart-header">
@@ -240,9 +237,7 @@ const LineChart = (props) => {
                             <Typography.Header size={Typography.Sizes.md} className="unit-value">
                                 {unitInfo.value}
                             </Typography.Header>
-                            <Typography.Subheader size={Typography.Sizes.sm} className="unit">
-                                {unitInfo.unit}
-                            </Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm} className="unit"> {unitInfo.unit}</Typography.Subheader>
                         </div>
                     </div>
                 )}
