@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { useHistory, Link } from 'react-router-dom';
 import { BreakersStore } from '../../../store/BreakersStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Brick from '../../../sharedComponents/brick';
@@ -40,15 +39,14 @@ import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
-import './breaker-config-styles.scss';
 import ReassignAlert from './ReassignAlert';
 import LineChart from '../../../sharedComponents/lineChart/LineChart';
 import Header from '../../../components/Header';
-import { ReactComponent as ArrowUpRightFromSquare } from '../../../assets/icon/arrowUpRightFromSquare.svg';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody } from '../../../helpers/helpers';
+import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -823,11 +821,11 @@ const BreakerConfiguration = ({
             });
     };
 
-    const fetchSensorsChartData = (sensors_list, selected_consmption) => {
+    const fetchSensorsChartData = (sensors_list, selected_consmption, start_date, end_date) => {
         if (sensors_list.length === 0) return;
 
         const promisesList = [];
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        const payload = apiRequestBody(start_date, end_date, timeZone);
 
         if (sensors_list.length >= 1) {
             const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
@@ -873,88 +871,110 @@ const BreakerConfiguration = ({
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
-        const breakerObj = Object.assign({}, selectedBreakerObj);
-        if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
-        setFirstBreakerObj(breakerObj);
-        setParentBreakerObj(breakerObj); // Added to track for any configuration change
+        if (activeTab === 'edit-breaker') {
+            const breakerObj = Object.assign({}, selectedBreakerObj);
+            if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
+            setFirstBreakerObj(breakerObj);
+            setParentBreakerObj(breakerObj); // Added to track for any configuration change
 
-        if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
-        if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
+            if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
+            if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
 
-        // Conditions to check if Sensors List is required to be fetched
-        // For Breaker Type 1
-        if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
-            fetchSensorsList(breakerObj?.device_link, 'first');
-            if (breakerObj?.sensor_link !== '') {
-                setSensorsList([
-                    {
-                        id: breakerObj?.sensor_link,
-                        name: breakerObj?.sensor_name,
-                    },
-                ]);
-            }
-            return;
-        }
-
-        // For Breaker Type 2
-        if (breakerObj?.breaker_type === 2) {
-            let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
-            setSecondBreakerObj(obj);
-            setSecondBreakerObjOld(obj); // Added to track for any configuration change
-            if (breakerObj?.device_link === '' && obj?.device_link === '') return;
-
-            let sensors = [];
-
-            if (breakerObj?.sensor_link !== '')
-                sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
-            if (obj?.sensor_link !== '') sensors.push({ id: obj?.sensor_link, name: obj?.sensor_name });
-            setSensorsList(sensors);
-
-            if (breakerObj?.device_link === obj?.device_link) {
-                fetchSensorsList(breakerObj?.device_link, 'first-second');
-            } else {
+            // Conditions to check if Sensors List is required to be fetched
+            // For Breaker Type 1
+            if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
                 fetchSensorsList(breakerObj?.device_link, 'first');
-                fetchSensorsList(obj?.device_link, 'second');
-            }
-        }
-
-        // For Breaker Type 3
-        if (breakerObj?.breaker_type === 3) {
-            let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
-            setSecondBreakerObj(childbreakers[0]);
-            setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
-            setThirdBreakerObj(childbreakers[1]);
-            setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
-
-            let sensors = [];
-            if (breakerObj?.sensor_link !== '')
-                sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
-            if (childbreakers[0]?.sensor_link !== '')
-                sensors.push({ id: childbreakers[0]?.sensor_link, name: childbreakers[0]?.sensor_name });
-            if (childbreakers[1]?.sensor_link !== '')
-                sensors.push({ id: childbreakers[1]?.sensor_link, name: childbreakers[1]?.sensor_name });
-            setSensorsList(sensors);
-
-            if (
-                breakerObj?.device_link === '' &&
-                childbreakers[0]?.device_link === '' &&
-                childbreakers[1]?.device_link === ''
-            ) {
                 return;
             }
 
-            if (
-                breakerObj?.device_link === childbreakers[0]?.device_link &&
-                breakerObj?.device_link === childbreakers[1]?.device_link
-            ) {
-                fetchSensorsList(breakerObj?.device_link, 'all');
-            } else {
-                if (breakerObj?.device_link !== '') fetchSensorsList(breakerObj?.device_link, 'first');
-                if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
-                if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
+            // For Breaker Type 2
+            if (breakerObj?.breaker_type === 2) {
+                let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(obj);
+                setSecondBreakerObjOld(obj); // Added to track for any configuration change
+                if (breakerObj?.device_link === '' && obj?.device_link === '') return;
+
+                if (breakerObj?.device_link === obj?.device_link) {
+                    fetchSensorsList(breakerObj?.device_link, 'first-second');
+                } else {
+                    fetchSensorsList(breakerObj?.device_link, 'first');
+                    fetchSensorsList(obj?.device_link, 'second');
+                }
+            }
+
+            // For Breaker Type 3
+            if (breakerObj?.breaker_type === 3) {
+                let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(childbreakers[0]);
+                setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
+                setThirdBreakerObj(childbreakers[1]);
+                setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
+
+                if (
+                    breakerObj?.device_link === '' &&
+                    childbreakers[0]?.device_link === '' &&
+                    childbreakers[1]?.device_link === ''
+                ) {
+                    return;
+                }
+
+                if (
+                    breakerObj?.device_link === childbreakers[0]?.device_link &&
+                    breakerObj?.device_link === childbreakers[1]?.device_link
+                ) {
+                    fetchSensorsList(breakerObj?.device_link, 'all');
+                } else {
+                    if (breakerObj?.device_link !== '') fetchSensorsList(breakerObj?.device_link, 'first');
+                    if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
+                    if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
+                }
             }
         }
-    }, [selectedBreakerObj]);
+
+        if (activeTab === 'metrics') {
+            const breakerObj = Object.assign({}, selectedBreakerObj);
+
+            // For Breaker Type 1
+            if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
+                if (breakerObj?.sensor_link !== '') {
+                    setSensorsList([
+                        {
+                            id: breakerObj?.sensor_link,
+                            name: breakerObj?.sensor_name,
+                        },
+                    ]);
+                }
+                return;
+            }
+
+            // For Breaker Type 2
+            if (breakerObj?.breaker_type === 2) {
+                let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
+                if (breakerObj?.device_link === '' && obj?.device_link === '') return;
+
+                let sensors = [];
+
+                if (breakerObj?.sensor_link !== '')
+                    sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+                if (obj?.sensor_link !== '') sensors.push({ id: obj?.sensor_link, name: obj?.sensor_name });
+                setSensorsList(sensors);
+            }
+
+            // For Breaker Type 3
+            if (breakerObj?.breaker_type === 3) {
+                let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
+
+                let sensors = [];
+                if (breakerObj?.sensor_link !== '')
+                    sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+                if (childbreakers[0]?.sensor_link !== '')
+                    sensors.push({ id: childbreakers[0]?.sensor_link, name: childbreakers[0]?.sensor_name });
+                if (childbreakers[1]?.sensor_link !== '')
+                    sensors.push({ id: childbreakers[1]?.sensor_link, name: childbreakers[1]?.sensor_name });
+                setSensorsList(sensors);
+            }
+        }
+    }, [selectedBreakerObj, activeTab]);
 
     useEffect(() => {
         if (activeEquipTab === 'create-equip') fetchMetadata();
@@ -980,7 +1000,7 @@ const BreakerConfiguration = ({
     }, [passiveDevicesList]);
 
     useEffect(() => {
-        fetchSensorsChartData(sensorsList, selectedConsumption);
+        fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
     }, [sensorsList, startDate, endDate, selectedConsumption]);
 
     return (
