@@ -125,13 +125,19 @@ const PlugRules = () => {
     const [buildingError, setBuildingError] = useState({ text: '' });
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const initialBuildingValue = bldgId !== 'portfolio' ? bldgId : '';
     const [createRuleData, setCreateRuleData] = useState({
-        building_id: [],
+        building_id: initialBuildingValue,
         name: '',
         description: '',
     });
+    useEffect(() => {
+        setCreateRuleData((prev) => {
+            return { ...prev, building_id: initialBuildingValue };
+        });
+    }, [bldgId]);
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [currentData, setCurrentData] = useState({});
 
     const [modelRefresh, setModelRefresh] = useState(false);
@@ -169,7 +175,7 @@ const PlugRules = () => {
     };
 
     const savePlugRuleData = async () => {
-        const isValid = validatePlugRuleForm(currentData);
+        const isValid = validatePlugRuleForm();
         if (isValid) {
             let newRuleData = Object.assign({}, createRuleData);
             newRuleData.building_id = [newRuleData.building_id];
@@ -312,7 +318,7 @@ const PlugRules = () => {
         });
     };
 
-    const validatePlugRuleForm = (data) => {
+    const validatePlugRuleForm = () => {
         let valid = true;
         if (!createRuleData.name.length) {
             setNameError(true);
@@ -342,7 +348,7 @@ const PlugRules = () => {
     }
 
     const formatRows = (data) =>
-        data.map((row) => {
+        data?.map((row) => {
             const newRow = { ...row };
 
             const sortedDays = ['mon', 'tue', 'wed', 'thr', 'fri', 'sat', 'sun'];
