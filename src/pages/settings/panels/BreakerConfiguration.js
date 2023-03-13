@@ -46,6 +46,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { apiRequestBody } from '../../../helpers/helpers';
+import { Spinner } from 'reactstrap';
 import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
@@ -170,6 +171,7 @@ const BreakerConfiguration = ({
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [sensorChartData, setSensorChartData] = useState([]);
+    const [isFetchingSensorData, setFetchingSensorData] = useState(false);
 
     const handleUnitChange = (value) => {
         let obj = metric.find((record) => record.value === value);
@@ -274,6 +276,7 @@ const BreakerConfiguration = ({
         setNewEquipObj({});
         setSensorChartData([]);
         setConsumption(metric[0].value);
+        setFetchingSensorData(false);
     };
 
     const handleChange = (key, value) => {
@@ -823,7 +826,7 @@ const BreakerConfiguration = ({
 
     const fetchSensorsChartData = (sensors_list, selected_consmption, start_date, end_date) => {
         if (sensors_list.length === 0) return;
-
+        setFetchingSensorData(true);
         const promisesList = [];
         const payload = apiRequestBody(start_date, end_date, timeZone);
 
@@ -869,8 +872,11 @@ const BreakerConfiguration = ({
                     sensorData.push(sensorObj);
                 });
                 setSensorChartData(sensorData);
+                setFetchingSensorData(false);
             })
-            .catch(() => {});
+            .catch(() => {
+                setFetchingSensorData(false);
+            });
     };
 
     useEffect(() => {
@@ -1738,16 +1744,22 @@ const BreakerConfiguration = ({
 
                                 <Brick sizeInRem={1.5} />
 
-                                <div>
-                                    <LineChart
-                                        title={''}
-                                        subTitle={''}
-                                        tooltipUnit={selectedUnit}
-                                        tooltipLabel={selectedConsumptionLabel}
-                                        data={sensorChartData}
-                                        dateRange={fetchDateRange(startDate, endDate)}
-                                    />
-                                </div>
+                                {isFetchingSensorData ? (
+                                    <div className="sensor-chart-loader">
+                                        <Spinner color="primary" />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <LineChart
+                                            title={''}
+                                            subTitle={''}
+                                            tooltipUnit={selectedUnit}
+                                            tooltipLabel={selectedConsumptionLabel}
+                                            data={sensorChartData}
+                                            dateRange={fetchDateRange(startDate, endDate)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
