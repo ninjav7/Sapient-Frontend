@@ -159,12 +159,12 @@ const BreakerConfiguration = ({
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
 
-    const [metric, setMetric] = useState([
+    const metric = [
         { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
         { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
         { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-    ]);
+    ];
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
@@ -856,8 +856,13 @@ const BreakerConfiguration = ({
                     };
                     response[index].data.forEach((record) => {
                         const obj = {
-                            x: record?.time_stamp,
-                            y: record?.consumption === '' ? null : record?.consumption,
+                            x: new Date(record?.time_stamp).getTime(),
+                            y:
+                                record?.consumption === ''
+                                    ? null
+                                    : selected_consmption === 'power'
+                                    ? record?.consumption / 1000
+                                    : record?.consumption,
                         };
                         sensorObj.data.push(obj);
                     });
