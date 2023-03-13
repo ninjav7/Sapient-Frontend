@@ -39,8 +39,14 @@ import { getMetadataRequest } from '../../../services/equipment';
 import { UserStore } from '../../../store/UserStore';
 import useDebounce from '../../../sharedComponents/hooks/useDebounce';
 import UnlabelEquipAlert from './UnlabelEquipAlert';
-import './breaker-config-styles.scss';
 import ReassignAlert from './ReassignAlert';
+import LineChart from '../../../sharedComponents/lineChart/LineChart';
+import Header from '../../../components/Header';
+import { fetchDateRange } from '../../../helpers/formattedChartData';
+import { DateRangeStore } from '../../../store/DateRangeStore';
+import { getSensorGraphData } from '../passive-devices/services';
+import { apiRequestBody } from '../../../helpers/helpers';
+import './breaker-config-styles.scss';
 
 const BreakerConfiguration = ({
     showBreakerConfigModal,
@@ -62,6 +68,9 @@ const BreakerConfiguration = ({
 
     const breakersList = BreakersStore.useState((s) => s.breakersList);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const defaultErrorObj = {
         rated_amps: null,
@@ -79,6 +88,7 @@ const BreakerConfiguration = ({
     const [thirdBreakerObj, setThirdBreakerObj] = useState({});
 
     const [selectedEquipment, setSelectedEquipment] = useState('');
+    const [sensorsList, setSensorsList] = useState([]);
 
     const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
     const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
@@ -148,6 +158,24 @@ const BreakerConfiguration = ({
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [isAdding, setAdding] = useState(false);
     const [equipmentErrors, setEquipmentErrors] = useState(defaultErrors);
+
+    const metric = [
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+    ];
+
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
+    const [sensorChartData, setSensorChartData] = useState([]);
+
+    const handleUnitChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedUnit(obj.unit);
+        setSelectedConsumptionLabel(obj.Consumption);
+    };
 
     const handleCreateEquipChange = (key, value) => {
         let obj = Object.assign({}, equipmentObj);
@@ -232,6 +260,7 @@ const BreakerConfiguration = ({
         setSecondBreakerObj({});
         setThirdBreakerObj({});
         setSelectedEquipment('');
+        setSensorsList([]);
         setFirstSensorList([]);
         setSecondSensorList([]);
         setThirdSensorList([]);
@@ -243,6 +272,8 @@ const BreakerConfiguration = ({
         setExistingEquipId('');
         setCurrentEquipObj({});
         setNewEquipObj({});
+        setSensorChartData([]);
+        setConsumption(metric[0].value);
     };
 
     const handleChange = (key, value) => {
@@ -790,69 +821,186 @@ const BreakerConfiguration = ({
             });
     };
 
+    const fetchSensorsChartData = (sensors_list, selected_consmption, start_date, end_date) => {
+        if (sensors_list.length === 0) return;
+
+        const promisesList = [];
+        const payload = apiRequestBody(start_date, end_date, timeZone);
+
+        if (sensors_list.length >= 1) {
+            const params = `?sensor_id=${sensors_list[0]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+            const promiseOne = getSensorGraphData(params, payload);
+            promisesList.push(promiseOne);
+        }
+
+        if (sensors_list.length >= 2) {
+            const params = `?sensor_id=${sensors_list[1]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+            const promiseTwo = getSensorGraphData(params, payload);
+            promisesList.push(promiseTwo);
+        }
+
+        if (sensors_list.length === 3) {
+            const params = `?sensor_id=${sensors_list[2]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+            const promiseThree = getSensorGraphData(params, payload);
+            promisesList.push(promiseThree);
+        }
+
+        Promise.all(promisesList)
+            .then((res) => {
+                const response = res;
+                const sensorData = [];
+                sensors_list.forEach((record, index) => {
+                    const sensorObj = {
+                        name: `Sensor ${record?.name}`,
+                        data: [],
+                    };
+                    response[index].data.forEach((record) => {
+                        const obj = {
+                            x: new Date(record?.time_stamp).getTime(),
+                            y:
+                                record?.consumption === ''
+                                    ? null
+                                    : selected_consmption === 'power'
+                                    ? record?.consumption / 1000
+                                    : record?.consumption,
+                        };
+                        sensorObj.data.push(obj);
+                    });
+                    sensorData.push(sensorObj);
+                });
+                setSensorChartData(sensorData);
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
-        const breakerObj = Object.assign({}, selectedBreakerObj);
-        if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
+        if (activeTab === 'edit-breaker') {
+            const breakerObj = Object.assign({}, selectedBreakerObj);
+            if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
+            setFirstBreakerObj(breakerObj);
+            setParentBreakerObj(breakerObj); // Added to track for any configuration change
 
-        setFirstBreakerObj(breakerObj);
-        setParentBreakerObj(breakerObj); // Added to track for any configuration change
+            if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
+            if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
 
-        if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
-        if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
-
-        // Conditions to check if Sensors List is required to be fetched
-        // For Breaker Type 1
-        if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
-            fetchSensorsList(breakerObj?.device_link, 'first');
-            return;
-        }
-
-        // For Breaker Type 2
-        if (breakerObj?.breaker_type === 2) {
-            let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
-            setSecondBreakerObj(obj);
-            setSecondBreakerObjOld(obj); // Added to track for any configuration change
-
-            if (breakerObj?.device_link === '' && obj?.device_link === '') return;
-
-            if (breakerObj?.device_link === obj?.device_link) {
-                fetchSensorsList(breakerObj?.device_link, 'first-second');
-            } else {
+            // Conditions to check if Sensors List is required to be fetched
+            // For Breaker Type 1
+            if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
                 fetchSensorsList(breakerObj?.device_link, 'first');
-                fetchSensorsList(obj?.device_link, 'second');
-            }
-        }
-
-        // For Breaker Type 3
-        if (breakerObj?.breaker_type === 3) {
-            let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
-            setSecondBreakerObj(childbreakers[0]);
-            setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
-            setThirdBreakerObj(childbreakers[1]);
-            setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
-
-            if (
-                breakerObj?.device_link === '' &&
-                childbreakers[0]?.device_link === '' &&
-                childbreakers[1]?.device_link === ''
-            ) {
                 return;
             }
 
-            if (
-                breakerObj?.device_link === childbreakers[0]?.device_link &&
-                breakerObj?.device_link === childbreakers[1]?.device_link
-            ) {
-                fetchSensorsList(breakerObj?.device_link, 'all');
-            } else {
-                if (breakerObj?.device_link !== '') fetchSensorsList(breakerObj?.device_link, 'first');
-                if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
-                if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
+            // For Breaker Type 2
+            if (breakerObj?.breaker_type === 2) {
+                let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(obj);
+                setSecondBreakerObjOld(obj); // Added to track for any configuration change
+                if (breakerObj?.device_link === '' && obj?.device_link === '') return;
+
+                if (breakerObj?.device_link === obj?.device_link) {
+                    fetchSensorsList(breakerObj?.device_link, 'first-second');
+                } else {
+                    fetchSensorsList(breakerObj?.device_link, 'first');
+                    fetchSensorsList(obj?.device_link, 'second');
+                }
+            }
+
+            // For Breaker Type 3
+            if (breakerObj?.breaker_type === 3) {
+                let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(childbreakers[0]);
+                setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
+                setThirdBreakerObj(childbreakers[1]);
+                setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
+
+                if (
+                    breakerObj?.device_link === '' &&
+                    childbreakers[0]?.device_link === '' &&
+                    childbreakers[1]?.device_link === ''
+                ) {
+                    return;
+                }
+
+                if (
+                    breakerObj?.device_link === childbreakers[0]?.device_link &&
+                    breakerObj?.device_link === childbreakers[1]?.device_link
+                ) {
+                    fetchSensorsList(breakerObj?.device_link, 'all');
+                } else {
+                    if (breakerObj?.device_link !== '') fetchSensorsList(breakerObj?.device_link, 'first');
+                    if (childbreakers[0]?.device_link) fetchSensorsList(childbreakers[0]?.device_link, 'second');
+                    if (childbreakers[1]?.device_link !== '') fetchSensorsList(childbreakers[1]?.device_link, 'third');
+                }
             }
         }
-    }, [selectedBreakerObj]);
+
+        if (activeTab === 'metrics') {
+            const breakerObj = Object.assign({}, selectedBreakerObj);
+            if (breakerObj?.rated_amps === undefined && breakerObj?.type !== 'blank') breakerObj.rated_amps = '0';
+            setFirstBreakerObj(breakerObj);
+            setParentBreakerObj(breakerObj); // Added to track for any configuration change
+
+            if (breakerObj?.equipment_link) setSelectedEquipment(breakerObj?.equipment_link[0]);
+            if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
+
+            // Conditions to check if Sensors List is required to be fetched
+            // For Breaker Type 1
+            if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
+                if (breakerObj?.sensor_link !== '') {
+                    setSensorsList([
+                        {
+                            id: breakerObj?.sensor_link,
+                            name: breakerObj?.sensor_name,
+                        },
+                    ]);
+                }
+                return;
+            }
+
+            // For Breaker Type 2
+            if (breakerObj?.breaker_type === 2) {
+                let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(obj);
+                setSecondBreakerObjOld(obj); // Added to track for any configuration change
+                if (breakerObj?.device_link === '' && obj?.device_link === '') return;
+
+                let sensors = [];
+
+                if (breakerObj?.sensor_link !== '')
+                    sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+                if (obj?.sensor_link !== '') sensors.push({ id: obj?.sensor_link, name: obj?.sensor_name });
+                setSensorsList(sensors);
+            }
+
+            // For Breaker Type 3
+            if (breakerObj?.breaker_type === 3) {
+                let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
+                setSecondBreakerObj(childbreakers[0]);
+                setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
+                setThirdBreakerObj(childbreakers[1]);
+                setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
+
+                let sensors = [];
+                if (breakerObj?.sensor_link !== '')
+                    sensors.push({ id: breakerObj?.sensor_link, name: breakerObj?.sensor_name });
+                if (childbreakers[0]?.sensor_link !== '')
+                    sensors.push({ id: childbreakers[0]?.sensor_link, name: childbreakers[0]?.sensor_name });
+                if (childbreakers[1]?.sensor_link !== '')
+                    sensors.push({ id: childbreakers[1]?.sensor_link, name: childbreakers[1]?.sensor_name });
+                setSensorsList(sensors);
+
+                if (
+                    breakerObj?.device_link === '' &&
+                    childbreakers[0]?.device_link === '' &&
+                    childbreakers[1]?.device_link === ''
+                ) {
+                    return;
+                }
+            }
+        }
+    }, [selectedBreakerObj, activeTab]);
 
     useEffect(() => {
         if (activeEquipTab === 'create-equip') fetchMetadata();
@@ -876,6 +1024,10 @@ const BreakerConfiguration = ({
         setSecondPassiveDevicesList(newList);
         setThirdPassiveDevicesList(newList);
     }, [passiveDevicesList]);
+
+    useEffect(() => {
+        fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
+    }, [sensorsList, startDate, endDate, selectedConsumption]);
 
     return (
         <React.Fragment>
@@ -935,14 +1087,16 @@ const BreakerConfiguration = ({
                             </div>
 
                             <div>
-                                <Button
-                                    label={isProcessing ? 'Saving...' : 'Save'}
-                                    size={Button.Sizes.md}
-                                    type={Button.Type.primary}
-                                    onClick={onSaveButonClick}
-                                    className="ml-2"
-                                    disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
-                                />
+                                {activeTab !== 'metrics' && (
+                                    <Button
+                                        label={isProcessing ? 'Saving...' : 'Save'}
+                                        size={Button.Sizes.md}
+                                        type={Button.Type.primary}
+                                        onClick={onSaveButonClick}
+                                        className="ml-2"
+                                        disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1582,7 +1736,36 @@ const BreakerConfiguration = ({
                         )}
 
                         {/* Metrics  */}
-                        {activeTab === 'metrics' && <div>Edit Metric Page</div>}
+                        {activeTab === 'metrics' && (
+                            <div>
+                                <div className="d-flex justify-content-end">
+                                    <div className="mr-2">
+                                        <Select
+                                            defaultValue={selectedConsumption}
+                                            options={metric}
+                                            onChange={(e) => {
+                                                setConsumption(e.value);
+                                                handleUnitChange(e.value);
+                                            }}
+                                        />
+                                    </div>
+                                    <Header type="modal" />
+                                </div>
+
+                                <Brick sizeInRem={1.5} />
+
+                                <div>
+                                    <LineChart
+                                        title={''}
+                                        subTitle={''}
+                                        tooltipUnit={selectedUnit}
+                                        tooltipLabel={selectedConsumptionLabel}
+                                        data={sensorChartData}
+                                        dateRange={fetchDateRange(startDate, endDate)}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Modal>
