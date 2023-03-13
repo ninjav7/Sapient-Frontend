@@ -168,12 +168,6 @@ const PlugRules = () => {
         setCreateRuleData(obj);
     };
 
-    const handleCurrentDataChange = (key, value) => {
-        let obj = Object.assign({}, currentData);
-        obj[key] = value;
-        setCurrentData(obj);
-    };
-
     const savePlugRuleData = async () => {
         const isValid = validatePlugRuleForm();
         if (isValid) {
@@ -194,7 +188,7 @@ const PlugRules = () => {
 
     const updatePlugRuleData = async () => {
         setIsProcessing(true);
-        await updatePlugRuleRequest(currentData)
+        await updatePlugRuleRequest(createRuleData)
             .then((res) => {
                 setIsProcessing(false);
                 setPageRefresh(!pageRefresh);
@@ -336,7 +330,7 @@ const PlugRules = () => {
     };
     const buildingIdProps = {
         label: 'Choose building',
-        defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
+        defaultValue: createRuleData.building_id || localStorage.getItem('buildingId'),
         onChange: (event) => {
             handleCreatePlugRuleChange('building_id', event.value);
         },
@@ -530,7 +524,7 @@ const PlugRules = () => {
                         label="Name"
                         id="name"
                         placeholder="Enter Rule Name"
-                        value={currentData.name}
+                        value={createRuleData.name}
                         onChange={(e) => {
                             handleCreatePlugRuleChange('name', e.target.value);
                         }}
@@ -545,7 +539,7 @@ const PlugRules = () => {
                         id="description"
                         rows="4"
                         placeholder="Enter Description of Rule"
-                        value={currentData.description}
+                        value={createRuleData.description}
                         className="font-weight-bold"
                         onChange={(e) => {
                             handleCreatePlugRuleChange('description', e.target.value);
