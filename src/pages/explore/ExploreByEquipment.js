@@ -1203,7 +1203,6 @@ const ExploreByEquipment = () => {
 
                 if (selectedConsumption === 'rmsCurrentMilliAmps') {
                     ct++;
-                    //NulledData = seriesData;
                     for (let i = 0; i < data.length; i++) {
                         let sensorData = [];
                         data[i].data.map((ele) => {
@@ -1229,7 +1228,6 @@ const ExploreByEquipment = () => {
                         setSeriesData(dataarr);
                         ct = 0;
                     }
-                    //setSeriesData(NulledData);
                 } else {
                     data.map((ele) => {
                         if (ele?.consumption === '') {
