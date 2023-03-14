@@ -1,0 +1,19 @@
+@import '../../../../assets/scss/helpers';
+
+.plot-bands-legends {
+    &-circle {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 100%;
+        margin-right: 0.5rem;
+    }
+    &-item {
+        @extend .reset-styles;
+
+        padding: 0 0.4375rem;
+    }
+    &-wrapper {
+        gap: 0.25rem;
+        margin-right: 1.125rem;
+    }
+}

@@ -28,23 +28,25 @@ const chartsBaseConfig = ({
         text: '',
     },
 
-    legend: isLegendsEnabled ? {
-        align: onMoreDetail ? 'left' : 'center',
-        useHTML: true,
-        labelFormat: renderComponents(
-            <Typography.Subheader
-                size={Typography.Sizes.sm}
-                className="gray-550"
-                style={{ fill: colorPalette.primaryGray550 }}>
-                {'{name}'}
-            </Typography.Subheader>
-        ),
-        itemMarginTop: 22,
-        x: -5,
-        symbolWidth: 10,
-    } : {
-        enabled: false
-    },
+    legend: isLegendsEnabled
+        ? {
+              align: onMoreDetail ? 'left' : 'center',
+              useHTML: true,
+              labelFormat: renderComponents(
+                  <Typography.Subheader
+                      size={Typography.Sizes.sm}
+                      className="gray-550"
+                      style={{ fill: colorPalette.primaryGray550 }}>
+                      {'{name}'}
+                  </Typography.Subheader>
+              ),
+              itemMarginTop: 22,
+              x: -5,
+              symbolWidth: 10,
+          }
+        : {
+              enabled: false,
+          },
 
     tooltip: {
         headerFormat: `<div class="chart-tooltip">${renderComponents(
@@ -123,6 +125,9 @@ const chartsBaseConfig = ({
         column: {
             pointPadding: 0.2,
             borderWidth: 0,
+        },
+        area: {
+            turboThreshold: 0,
         },
     },
     credits: {
