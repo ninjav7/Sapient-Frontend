@@ -845,13 +845,13 @@ const BreakerConfiguration = ({
             promisesList.push(promiseOne);
         }
 
-        if (sensors_list.length >= 2) {
+        if (sensors_list.length >= 2 && selected_consmption !== 'power') {
             const params = `?sensor_id=${sensors_list[1]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseTwo = getSensorGraphData(params, payload);
             promisesList.push(promiseTwo);
         }
 
-        if (sensors_list.length === 3) {
+        if (sensors_list.length === 3 && selected_consmption !== 'power') {
             const params = `?sensor_id=${sensors_list[2]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseThree = getSensorGraphData(params, payload);
             promisesList.push(promiseThree);
@@ -861,25 +861,45 @@ const BreakerConfiguration = ({
             .then((res) => {
                 const response = res;
                 const sensorData = [];
-                sensors_list.forEach((record, index) => {
+
+                if (selected_consmption === 'power') {
+                    let powerConsumpLabel = '';
+
+                    if (firstBreakerObj?.breaker_type === 1)
+                        powerConsumpLabel = `Breaker ${firstBreakerObj?.breaker_number}`;
+                    if (firstBreakerObj?.breaker_type === 2)
+                        powerConsumpLabel = `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}`;
+                    if (firstBreakerObj?.breaker_type === 3)
+                        powerConsumpLabel = `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`;
+
                     const sensorObj = {
-                        name: `Sensor ${record?.name}`,
+                        name: powerConsumpLabel,
                         data: [],
                     };
-                    response[index].data.forEach((record) => {
+                    response[0].data.forEach((record) => {
                         const obj = {
                             x: new Date(record?.time_stamp).getTime(),
-                            y:
-                                record?.consumption === ''
-                                    ? null
-                                    : selected_consmption === 'power'
-                                    ? record?.consumption / 1000
-                                    : record?.consumption,
+                            y: record?.consumption === '' ? null : record?.consumption / 1000,
                         };
                         sensorObj.data.push(obj);
                     });
                     sensorData.push(sensorObj);
-                });
+                } else {
+                    sensors_list.forEach((record, index) => {
+                        const sensorObj = {
+                            name: `Sensor ${record?.name}`,
+                            data: [],
+                        };
+                        response[index].data.forEach((record) => {
+                            const obj = {
+                                x: new Date(record?.time_stamp).getTime(),
+                                y: record?.consumption === '' ? null : record?.consumption,
+                            };
+                            sensorObj.data.push(obj);
+                        });
+                        sensorData.push(sensorObj);
+                    });
+                }
                 setSensorChartData(sensorData);
                 setFetchingSensorData(false);
             })
@@ -1236,7 +1256,8 @@ const BreakerConfiguration = ({
                                                 <div className="p-default">
                                                     <div>
                                                         <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
+                                                            {/* PLT-1034 : Commented as part of In Progress changes and  PROD Deployment */}
+                                                            {/* <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-1"
                                                                     checked={firstBreakerObj?.type === 'equipment'}
@@ -1250,7 +1271,7 @@ const BreakerConfiguration = ({
                                                                         );
                                                                     }}
                                                                 />
-                                                            </div>
+                                                            </div> */}
                                                             <div className="w-100">
                                                                 {isEquipmentListFetching ? (
                                                                     <Skeleton count={1} height={35} />
@@ -1277,8 +1298,9 @@ const BreakerConfiguration = ({
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <Brick sizeInRem={0.65} />
-                                                        <div className="d-flex align-items-center">
+                                                        {/* PLT-1034 : Commented as part of In Progress changes and  PROD Deployment */}
+                                                        {/* <Brick sizeInRem={0.65} /> */}
+                                                        {/* <div className="d-flex align-items-center">
                                                             <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-2"
@@ -1337,7 +1359,7 @@ const BreakerConfiguration = ({
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Blank
                                                             </Typography.Body>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                     <Brick sizeInRem={2} />
                                                     <div className="w-100">
