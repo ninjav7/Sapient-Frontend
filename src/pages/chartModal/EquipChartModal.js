@@ -256,11 +256,11 @@ const EquipChartModal = ({
         }
 
         if (deviceType === 'active-device') {
-            return `/settings/active-devices/single/${equipDeviceId}`;
+            return `/settings/active-devices/single/${bldgId}/${equipDeviceId}`;
         }
 
         if (deviceType === 'passive-device') {
-            return `/settings/smart-meters/single/${equipDeviceId}`;
+            return `/settings/smart-meters/single/${bldgId}/${equipDeviceId}`;
         }
     };
 
@@ -270,11 +270,11 @@ const EquipChartModal = ({
         }
 
         if (deviceType === 'active-device') {
-            history.push({ pathname: `/settings/active-devices/single/${equipDeviceId}` });
+            history.push({ pathname: `/settings/active-devices/single/${bldgId}/${equipDeviceId}` });
         }
 
         if (deviceType === 'passive-device') {
-            history.push({ pathname: `/settings/smart-meters/single/${equipDeviceId}` });
+            history.push({ pathname: `/settings/smart-meters/single/${bldgId}/${equipDeviceId}` });
         }
     };
 

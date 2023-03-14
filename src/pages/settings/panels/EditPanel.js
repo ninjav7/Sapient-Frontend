@@ -134,7 +134,7 @@ const EditPanel = () => {
 
     const onCancelClick = () => {
         history.push({
-            pathname: `/settings/panels`,
+            pathname: `/settings/panels/${bldgId}`,
         });
         BreakersStore.update((s) => {
             s.breakersList = [];
@@ -326,7 +326,7 @@ const EditPanel = () => {
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
                 history.push({
-                    pathname: `/settings/panels`,
+                    pathname: `/settings/panels/${bldgId}`,
                 });
                 UserStore.update((s) => {
                     s.showNotification = true;
@@ -1023,7 +1023,7 @@ const EditPanel = () => {
             .then((res) => {
                 setIsProcessing(false);
                 history.push({
-                    pathname: `/settings/panels`,
+                    pathname: `/settings/panels/${bldgId}`,
                 });
             })
             .catch(() => {
@@ -1202,7 +1202,7 @@ const EditPanel = () => {
             const newList = [
                 {
                     label: 'Panels',
-                    path: '/settings/panels',
+                    path: `/settings/panels/${bldgId}`,
                     active: true,
                 },
             ];
@@ -1252,6 +1252,26 @@ const EditPanel = () => {
     useEffect(() => {
         isEditingMode ? setActiveTab('edit-breaker') : setActiveTab('metrics');
     }, [isEditingMode]);
+
+    useEffect(() => {
+        if (originalPanelObj?.panel_id) {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: `/settings/panels/${bldgId}`,
+                        active: false,
+                    },
+                    {
+                        label: originalPanelObj?.panel_name,
+                        path: '/settings/panels/edit-panel',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        }
+    }, [originalPanelObj]);
 
     useEffect(() => {
         pageDefaultStates();

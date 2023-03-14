@@ -140,7 +140,7 @@ const Panels = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/panels/edit-panel/${el?.panel_type}/${el?.panel_id}`,
+            pathname: `/settings/panels/edit-panel/${bldgId}/${el?.panel_type}/${el?.panel_id}`,
         });
     };
 
@@ -172,7 +172,7 @@ const Panels = () => {
 
     const renderPanelName = (row) => {
         return (
-            <Link to={`/settings/panels/edit-panel/${row?.panel_type}/${row?.panel_id}`}>
+            <Link to={`/settings/panels/edit-panel/${bldgId}/${row?.panel_type}/${row?.panel_id}`}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.panel_name === '' ? '-' : row?.panel_name}
                 </div>

@@ -125,7 +125,7 @@ const Buildings = () => {
         return (
             <Link
                 className="typography-wrapper link"
-                to={`${internalRoute[0]}`}
+                to={`${internalRoute[0].concat(`/${row?.building_id}`)}`}
                 onClick={() => {
                     handleBuildingClick(row);
                 }}>

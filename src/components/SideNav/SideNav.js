@@ -66,16 +66,16 @@ const SideNav = () => {
                 setUserPermissionListRoles('/settings/roles');
             }
             if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
-                setBuildingPermissionDetails('/settings/general');
+                setBuildingPermissionDetails(`/settings/general/${bldgId}`);
             }
             if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-                setBuildingPermissionEquipments('/settings/equipment');
+                setBuildingPermissionEquipments(`/settings/equipment/${bldgId}`);
             }
             if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-                setBuildingPermissionLayouts('/settings/layout');
+                setBuildingPermissionLayouts(`/settings/layout/${bldgId}`);
             }
             if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-                setBuildingPermissionPanels('/settings/panels');
+                setBuildingPermissionPanels(`/settings/panels/${bldgId}`);
             }
 
             if (userPermission?.permissions?.permissions?.account_buildings_permission?.view) {

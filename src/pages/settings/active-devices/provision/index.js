@@ -238,13 +238,13 @@ const Provision = () => {
                 let newList = [
                     {
                         label: 'Active Devices',
-                        path: '/settings/active-devices',
-                        active: true,
+                        path: `/settings/active-devices/${bldgId}`,
+                        active: false,
                     },
                     {
                         label: 'Provisioning',
                         path: '/settings/active-devices/provision',
-                        active: false,
+                        active: true,
                     },
                 ];
                 bs.items = newList;

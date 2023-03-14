@@ -236,7 +236,7 @@ const IndividualPassiveDevice = () => {
     };
 
     const redirectToPassivePage = () => {
-        history.push({ pathname: `/settings/smart-meters` });
+        history.push({ pathname: `/settings/smart-meters/${bldgId}` });
     };
 
     const fetchPassiveDevice = async () => {
@@ -294,7 +294,7 @@ const IndividualPassiveDevice = () => {
             let newList = [
                 {
                     label: 'Smart Meters',
-                    path: '/settings/smart-meters',
+                    path: `/settings/smart-meters/${bldgId}`,
                     active: false,
                 },
             ];
@@ -316,7 +316,7 @@ const IndividualPassiveDevice = () => {
             let newList = [
                 {
                     label: 'Smart Meters',
-                    path: '/settings/smart-meters',
+                    path: `/settings/smart-meters/${bldgId}`,
                     active: false,
                 },
                 {

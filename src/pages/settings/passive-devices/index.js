@@ -228,7 +228,7 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/smart-meters/single/${el.equipments_id}`,
+            pathname: `/settings/smart-meters/single/${bldgId}/${el.equipments_id}`,
         });
     };
 
@@ -271,7 +271,7 @@ const PassiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/smart-meters/single/${row.equipments_id}`,
+                    pathname: `/settings/smart-meters/single/${bldgId}/${row.equipments_id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.identifier === '' ? '-' : row?.identifier}

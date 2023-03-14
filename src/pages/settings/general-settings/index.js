@@ -563,9 +563,7 @@ const GeneralBuildingSettings = () => {
                 let newList = [
                     {
                         label: 'General',
-
-                        path: '/settings/general',
-
+                        path: `/settings/general/${bldgId}`,
                         active: true,
                     },
                 ];

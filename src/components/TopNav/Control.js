@@ -211,7 +211,7 @@ const Control = () => {
                         return current !== '/settings/active-devices';
                     })
                 );
-                setConfigRoutes((el) => [...el, '/settings/general']);
+                setConfigRoutes((el) => [...el, `/settings/general/${bldgId}`]);
             }
 
             if (
@@ -252,7 +252,7 @@ const Control = () => {
         }
         if (userPermission?.user_role === 'admin') {
             setConfigRoutes([]);
-            setConfigRoutes(['/settings/general']);
+            setConfigRoutes([`/settings/general/${bldgId}`]);
         }
     }, [userPermission]);
 

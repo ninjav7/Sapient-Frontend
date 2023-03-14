@@ -99,7 +99,7 @@ const NavLinks = () => {
     };
 
     const handleExploreClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (!bldgObj?.active) {
             history.push({
                 pathname: `/explore-page/by-buildings`,
@@ -107,8 +107,8 @@ const NavLinks = () => {
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
         }
+
         if (
-            configRoutes.includes(location.pathname) ||
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
@@ -120,21 +120,29 @@ const NavLinks = () => {
             return;
         }
 
-        if (
-            location.pathname.includes(configChildRoutes[0]) ||
-            location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2]) ||
-            location.pathname.includes(configChildRoutes[3])
-        ) {
-            history.push({
-                pathname: `/explore-page/by-equipment/${bldgId}`,
-            });
-            return;
-        }
-
-        history.push({
-            pathname: `/explore-page/by-buildings`,
+        configRoutes.forEach((record) => {
+            if (location.pathname.includes(record)) {
+                history.push({
+                    pathname: `/explore-page/by-equipment/${bldgId}`,
+                });
+                return;
+            }
         });
+
+        configChildRoutes.forEach((record) => {
+            if (location.pathname.includes(record)) {
+                history.push({
+                    pathname: `/explore-page/by-equipment/${bldgId}`,
+                });
+                return;
+            }
+        });
+
+        // Validate all possible by Building routes before deleting below commneted code
+        // console.log();
+        // history.push({
+        //     pathname: `/explore-page/by-buildings`,
+        // });
     };
 
     const handleSideNavChange = (componentName) => {

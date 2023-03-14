@@ -330,7 +330,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${row.equipments_id}`,
+                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
@@ -441,7 +441,7 @@ const ActiveDevices = () => {
                             <div className="d-flex">
                                 <Link
                                     to={{
-                                        pathname: `/settings/active-devices/provision`,
+                                        pathname: `/settings/active-devices/provision/${bldgId}`,
                                     }}>
                                     <Button
                                         label={'Add Active Device'}

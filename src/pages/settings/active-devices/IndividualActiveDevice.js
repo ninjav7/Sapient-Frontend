@@ -174,7 +174,7 @@ const IndividualActiveDevice = () => {
             let newList = [
                 {
                     label: 'Active Devices',
-                    path: '/settings/active-devices',
+                    path: `/settings/active-devices/${bldgId}`,
                     active: false,
                 },
             ];
@@ -277,7 +277,7 @@ const IndividualActiveDevice = () => {
     };
 
     const redirectToActivePage = () => {
-        history.push({ pathname: `/settings/active-devices` });
+        history.push({ pathname: `/settings/active-devices/${bldgId}` });
     };
 
     const updateActiveDevice = async () => {
@@ -337,7 +337,7 @@ const IndividualActiveDevice = () => {
             let newList = [
                 {
                     label: 'Active Devices',
-                    path: '/settings/active-devices',
+                    path: `/settings/active-devices/${bldgId}`,
                     active: false,
                 },
                 {
