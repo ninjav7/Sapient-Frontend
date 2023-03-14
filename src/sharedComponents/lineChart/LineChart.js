@@ -46,16 +46,7 @@ const LineChart = (props) => {
         unitInfo,
         chartProps,
     } = props;
-
-
-    const [plotBands, setPlotBands] = useState(plotBandsProp);
-
-    useEffect(() => {
-        setPlotBands(plotBandsProp);
-    }, [plotBandsProp]);
-
-    useEffect(() => setPlotBands(plotBandsProp), [plotBandsProp?.length]);
-
+    
     useEffect(() => {
         const handleResize = () => {
             const width = wrapperRef.current?.offsetWidth;
