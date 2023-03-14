@@ -6,9 +6,11 @@ import colors from '../../../../assets/scss/_colors.scss';
 
 const usePlotBandsLegends = ({ plotBandsProp, plotBandsLegends }) => {
     const [plotBands, setPlotBands] = useState(plotBandsProp);
-
-    useEffect(() => setPlotBands(plotBandsProp), [plotBandsProp?.length]);
-
+    
+    useEffect(() => {
+        setPlotBands(plotBandsProp);
+    }, [plotBandsProp]);
+    
     const renderPlotBandsLegends = useCallback(
         _.uniqBy(
             [...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)],
