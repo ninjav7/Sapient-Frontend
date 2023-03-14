@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { fetchMemberUserList, fetchUserFilters } from './service';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -156,12 +156,6 @@ const Users = () => {
             .catch((error) => {});
     };
 
-    const handleClick = (el) => {
-        history.push({
-            pathname: `/settings/users/user-profile/single/${el?._id}`,
-        });
-    };
-
     useEffect(() => {
         getUsersList();
     }, [userSearchInfo, sortBy, pageNo, pageSize, permissionRoleIds, selectedStatus]);
@@ -184,9 +178,13 @@ const Users = () => {
 
     const renderName = (row) => {
         return (
-            <div className="typography-wrapper link mouse-pointer" onClick={() => handleClick(row)}>
-                {row?.name ? `${row?.name}` : '-'}
-            </div>
+            <Link
+                className="typography-wrapper link"
+                to={{
+                    pathname: `/settings/users/user-profile/single/${row?._id}`,
+                }}>
+                <div className="typography-wrapper link mouse-pointer">{row?.name ? `${row?.name}` : '-'}</div>
+            </Link>
         );
     };
 

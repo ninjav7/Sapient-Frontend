@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
-import { fetchPlugRules } from '../../services/plugRules';
+import { fetchPlugRules, getEstimateSensorSavingsRequst } from '../../services/plugRules';
 import { ReactComponent as DeleteIcon } from '../../sharedComponents/assets/icons/delete-distructive.svg';
 import { ConditionGroup } from '../../sharedComponents/conditionGroup';
 import { useNotification } from '../../sharedComponents/notification/useNotification';
@@ -16,14 +16,19 @@ import { Notification } from '../../sharedComponents/notification/Notification';
 import colors from '../../assets/scss/_colors.scss';
 import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
+import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
+import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
-
 import _ from 'lodash';
 
-import { timePicker15MinutesIntervalOption } from '../../constants/time';
+import {
+    timePicker15MinutesIntervalOption24HourFormat,
+    timePicker15MinutesIntervalOption12HourFormat,
+} from '../../constants/time';
+import { daysOfWeekFull } from '../../constants/days';
 
 import moment from 'moment';
 
@@ -113,7 +118,17 @@ const indexOfDay = {
 const formatAverageData = (data) => {
     const res = [];
     data.forEach((el) => {
-        res.push({ x: moment(el.x), y: el.y });
+        const today = moment();
+        const from_date = today.startOf('week').startOf('isoWeek');
+        if (el.dayOfWeek === 'Sunday') {
+            from_date.day(el.dayOfWeek).add(1, 'weeks');
+        } else {
+            from_date.day(el.dayOfWeek);
+        }
+        const formattedHourFromBackend = el.hour.split(':');
+        const timeWithHours = from_date.set('hour', formattedHourFromBackend[0]);
+
+        res.push({ x: timeWithHours.unix() * 1000, y: el.consumption });
     });
     return res;
 };
@@ -128,13 +143,17 @@ const notificationUpdatedData = {
 const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
+    const { download } = useCSVDownload();
 
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
+    const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
+    const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSockets, setIsChangedSockets] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
+    const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
     const searchTouchedRef = useRef(false);
     const [search, setSearch] = useState('');
     const [openSnackbar] = useNotification();
@@ -142,6 +161,10 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [is24Format, setIs24Format] = useState(false);
+    const timepickerOption = is24Format
+        ? timePicker15MinutesIntervalOption24HourFormat
+        : timePicker15MinutesIntervalOption12HourFormat;
 
     const { v4: uuidv4 } = require('uuid');
     const history = useHistory();
@@ -149,7 +172,7 @@ const PlugRule = () => {
     const getConditionId = () => uuidv4();
     const initialCurrentData = {
         name: '',
-        building_id: '' || ruleId,
+        building_id: '',
         description: '',
     };
     const [currentData, setCurrentData] = useState(initialCurrentData);
@@ -237,11 +260,12 @@ const PlugRule = () => {
             },
         },
     ]);
+    const initialSortingState = { name: '', method: 'ace' };
     const [hoursNew, setHoursNew] = useState([]);
 
     const [selectedIds, setSelectedIds] = useState([]);
     const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
-    const [sortBy, setSortBy] = useState({});
+    const [sortBy, setSortBy] = useState(initialSortingState);
 
     const [allSearchData, setAllSearchData] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -252,7 +276,9 @@ const PlugRule = () => {
         const workingDaysPerCondition = {};
         const data = preparedScheduleDataCopy?.forEach((curr) => {
             const { title } = curr;
-            workingDaysPerCondition[title] = curr.data[0].action_day;
+            if (!curr.data[0].is_deleted) {
+                workingDaysPerCondition[title] = curr.data[0].action_day;
+            }
         });
 
         const flat = Object.values(workingDaysPerCondition).flat(1);
@@ -264,7 +290,16 @@ const PlugRule = () => {
         }
 
         setConditionDisabledDays(disabledDays);
+        if (selectedIds.length) {
+            fetchEstimateSensorSavings();
+        }
     }, [preparedScheduleData]);
+    useEffect(() => {
+        const Is24HoursFormat = buildingListDataNotFormatted.find(
+            (el) => el.building_id == currentData.building_id
+        )?.time_format;
+        setIs24Format(Is24HoursFormat);
+    }, [currentData, buildingListDataNotFormatted]);
 
     const groupedCurrentDataById = (actions) => {
         return (
@@ -287,6 +322,7 @@ const PlugRule = () => {
     const getBuildingData = async () => {
         await fetchBuildingsList(false).then((res) => {
             let data = res.data;
+            setBuildingListDataNotFormatted(data);
             const formattedData = formatBuildingListData(data);
 
             setBuildingListData(formattedData);
@@ -338,7 +374,7 @@ const PlugRule = () => {
     };
     useEffect(() => {
         calculateOffHoursPlots();
-    }, [preparedScheduleData]);
+    }, [preparedScheduleData, currentData]);
     useEffect(() => {
         generateHours();
         getBuildingData();
@@ -350,6 +386,11 @@ const PlugRule = () => {
             fetchPlugRuleDetail();
         }
     }, [ruleId]);
+
+    const filterHandler = (setter, options) => {
+        setter(options.map(({ value }) => value));
+        setPageNo(1);
+    };
 
     useEffect(() => {
         if (!isFetchedPlugRulesData) {
@@ -385,8 +426,27 @@ const PlugRule = () => {
             }
         });
     };
+    const initialLineChartData = () => {
+        const res = [];
+        const data = Object.values(daysOfWeekFull);
 
-    const [lineChartData, setLineChartData] = useState([]);
+        data.forEach((el) => {
+            const today = moment();
+            const from_date = today.startOf('week').startOf('isoWeek');
+            if (el === 'Sunday') {
+                from_date.day(el).add(1, 'weeks');
+            } else {
+                from_date.day(el);
+            }
+            const timeWithHours = from_date.set('hour', 0);
+            res.push({ x: timeWithHours.unix() * 1000, y: 0 });
+        });
+        let response = [{ name: `Average Energy demand`, data: res }];
+
+        return response;
+    };
+
+    const [lineChartData, setLineChartData] = useState(initialLineChartData());
 
     const getGraphData = async () => {
         if (selectedIds.length) {
@@ -399,11 +459,8 @@ const PlugRule = () => {
             });
         }
     };
-
-    const [selectedOption, setSelectedOption] = useState([]);
-    const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     useEffect(() => {
-        if (currentData.building_id.length && currentData.building_id !== 'create-plug-rule') {
+        if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
             fetchLinkedSocketRules();
         }
@@ -420,14 +477,17 @@ const PlugRule = () => {
     const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
 
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+    const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
+    const [tagsFilterString, setTagsFilterString] = useState('');
+    const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
-
     useEffect(() => {
-        if (selectedIds) {
+        if (selectedIds.length) {
             getGraphData();
+            fetchEstimateSensorSavings();
         }
     }, [selectedIds]);
 
@@ -501,7 +561,7 @@ const PlugRule = () => {
             data: [
                 {
                     action_type: 1,
-                    action_time: '08:00 AM',
+                    action_time: '08:00',
                     action_day: [],
                     condition_id: generateFirstConditionId,
                     condition_group_id: generateConditionGroupId,
@@ -509,7 +569,7 @@ const PlugRule = () => {
                 },
                 {
                     action_type: 0,
-                    action_time: '09:00 AM',
+                    action_time: '09:00',
                     action_day: [],
                     condition_id: generateSecondConditionId,
                     condition_group_id: generateConditionGroupId,
@@ -531,12 +591,23 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
-
     const deleteScheduleCondition = (condition_group_id) => {
         let currentObj = [...preparedScheduleData];
         let resArray = [];
         currentObj.forEach((record) => {
-            if (record.title !== condition_group_id) {
+            if (record.title === condition_group_id) {
+                const { data, title } = record;
+                const formattedData = [];
+                data.forEach((el) => {
+                    formattedData.push({ ...el, is_deleted: true });
+                });
+                const formattedRecord = {
+                    title,
+                    data: formattedData,
+                };
+
+                resArray.push(formattedRecord);
+            } else {
                 resArray.push(record);
             }
         });
@@ -561,11 +632,13 @@ const PlugRule = () => {
         } else {
             listOfsocketsToReassign = rulesToLink.sensor_id;
         }
-        await reassignSensorsToRuleRequest({
-            rule_id: ruleId,
-            building_id: activeBuildingId,
-            sensor_id: listOfsocketsToReassign,
-        }).then((res) => {});
+
+        listOfsocketsToReassign &&
+            (await reassignSensorsToRuleRequest({
+                rule_id: ruleId,
+                building_id: activeBuildingId,
+                sensor_id: listOfsocketsToReassign,
+            }).then((res) => {}));
     };
 
     const updateSocketUnlink = async () => {
@@ -580,10 +653,6 @@ const PlugRule = () => {
 
         setIsProcessing(false);
         setPageRefresh(!pageRefresh);
-
-        history.push({
-            pathname: `/control/plug-rules`,
-        });
     };
 
     const handleSchedularConditionChange = (key, value, condition_id, condition_group_id) => {
@@ -637,6 +706,7 @@ const PlugRule = () => {
         });
         handleCurrentDataChange('action', currentObj.action);
     };
+
     const handleReassignSocketsCheckboxClick = (value, socket) => {
         let newSocketsToReassign = [...socketsToReassign];
         if (value) {
@@ -730,6 +800,20 @@ const PlugRule = () => {
             });
     };
 
+    const fetchEstimateSensorSavings = async () => {
+        const formattedSchedule = currentData?.action?.map((action) => {
+            const { action_day, action_time, action_type, ...rest } = action;
+            const preparedActionDays = action_day.map((day) => {
+                return daysOfWeekFull[day];
+            });
+            return { action_time, action_type, action_days: preparedActionDays };
+        });
+
+        await getEstimateSensorSavingsRequst(formattedSchedule, selectedIds, ruleId).then((res) => {
+            setEstimatedEnergySavings(res.data);
+        });
+    };
+
     const addOptions = () => {
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
@@ -755,9 +839,65 @@ const PlugRule = () => {
             addOptions();
         }
     }, [allData]);
-
+    const headerProps = [
+        {
+            name: 'Equipment Type',
+            accessor: 'equipment_type_name',
+            callbackValue: renderEquipType,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Location',
+            accessor: 'equipment_link_location',
+            callbackValue: renderLocation,
+        },
+        {
+            name: 'Space Type',
+            accessor: 'space_type',
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'MAC Address',
+            accessor: 'device_link',
+        },
+        {
+            name: 'Sensors',
+            accessor: 'sensor_count',
+        },
+        {
+            name: 'Assigned Rule',
+            accessor: 'assigned_rule',
+            callbackValue: renderAssignRule,
+        },
+        {
+            name: 'Tags',
+            accessor: 'tags',
+            callbackValue: renderTagCell,
+        },
+        {
+            name: 'Last Data',
+            accessor: 'last_data',
+            callbackValue: renderLastUsedCell,
+        },
+    ];
     const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
 
+    const dataForCSV = () => {
+        let newPlugRuleData = [];
+
+        if (selectedTab === 0) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 1) {
+            newPlugRuleData = allSensors;
+        }
+
+        if (selectedTab === 2) {
+            newPlugRuleData = allSensors;
+        }
+        return newPlugRuleData;
+    };
     const uniqueMacIds = [];
     const [removeMacDuplication, setRemoveMacDuplication] = useState();
 
@@ -800,7 +940,6 @@ const PlugRule = () => {
             (await getUnlinkedSocketRules(
                 pageSize,
                 pageNo,
-                ruleId,
                 activeBuildingId,
                 equpimentTypeFilterString,
                 macTypeFilterString,
@@ -809,6 +948,8 @@ const PlugRule = () => {
                 floorTypeFilterString,
                 spaceTypeFilterString,
                 spaceTypeTypeFilterString,
+                assignedRuleFilterString,
+                tagsFilterString,
                 true,
                 {
                     ...sorting,
@@ -816,22 +957,56 @@ const PlugRule = () => {
             ).then((res) => {
                 isLoadingRef.current = false;
 
-                let response = res.data.data;
-
-                setAllSensors(_.cloneDeep(_.uniqBy(response.data, 'id')));
+                let response = res.data;
+                setAllSensors(response?.data);
 
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                _.uniqBy(response.data, 'id').forEach((record) => {
+                _.uniqBy(response, 'id').forEach((record) => {
                     record.linked_rule = false;
                     unLinkedData.push(record);
                 });
 
                 setUnLinkedRuleData(unLinkedData);
                 setAllUnlinkedRuleAdded((el) => [...el, '1']);
-                setTotalItems(response.total_data);
+                setTotalItems(response?.total_data);
             }));
+    };
+
+    const handleDownloadCsv = async () => {
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        await getUnlinkedSocketRules(
+            pageSize,
+            pageNo,
+            activeBuildingId,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            assignedRuleFilterString,
+            tagsFilterString,
+            false,
+            {
+                ...sorting,
+            }
+        )
+            .then((res) => {
+                let responseData = res?.data;
+                download(
+                    `Sockets${new Date().toISOString().split('T')[0]}`,
+                    getSocketsForPlugRulePageTableCSVExport(responseData.data, headerProps)
+                );
+            })
+            .catch((error) => {});
     };
 
     const fetchLinkedSocketRules = async () => {
@@ -864,7 +1039,7 @@ const PlugRule = () => {
 
         setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
         setLinkedRuleData(selectedSensors);
-    }, [allData.length, allSensors.length]);
+    }, [allData.length, allSensors?.length]);
 
     useEffect(() => {
         unLinkedRuleData.length > 0 &&
@@ -874,6 +1049,9 @@ const PlugRule = () => {
     useEffect(() => {
         if (ruleId === null) {
             return;
+        }
+        if (activeBuildingId.length) {
+            fetchFiltersForSensors();
         }
 
         fetchUnLinkedSocketRules();
@@ -887,6 +1065,8 @@ const PlugRule = () => {
         sensorTypeFilterString,
         floorTypeFilterString,
         spaceTypeFilterString,
+        assignedRuleFilterString,
+        tagsFilterString,
         spaceTypeTypeFilterString,
         sortBy.method,
         sortBy.name,
@@ -936,7 +1116,6 @@ const PlugRule = () => {
                 (await getUnlinkedSocketRules(
                     pageSize,
                     pageNo,
-                    ruleId,
                     activeBuildingId,
                     equpimentTypeFilterString,
                     macTypeFilterString,
@@ -945,6 +1124,8 @@ const PlugRule = () => {
                     floorTypeFilterString,
                     spaceTypeFilterString,
                     spaceTypeTypeFilterString,
+                    assignedRuleFilterString,
+                    tagsFilterString,
                     false,
                     {
                         ...sorting,
@@ -952,7 +1133,7 @@ const PlugRule = () => {
                 ).then((res) => {
                     isLoadingRef.current = false;
 
-                    let response = res.data.data;
+                    let response = res.data;
                     const preparedIdofSockets = [];
                     _.cloneDeep(_.uniqBy(response.data, 'id')).forEach((socket) => {
                         preparedIdofSockets.push(socket.id);
@@ -965,7 +1146,11 @@ const PlugRule = () => {
                     setTotalSocket(response.total_data);
                 }));
         } else {
+            setRulesToUnLink({ rule_id: ruleId, sensor_id: fetchedSelectedIds });
             setRulesToLink([]);
+            setSelectedIds([]);
+
+            setRulesToUnLink((prev) => ({ rule_id: prev.rule_id, sensor_id: fetchedSelectedIds }));
             setTotalSocket(0);
         }
         setIsChangedSockets(true);
@@ -1034,7 +1219,7 @@ const PlugRule = () => {
         const idSocketsToAssign = [];
         const socketsToReassign = [];
         allSensors.forEach((sensor) => {
-            if (rulesToLink.sensor_id.includes(sensor.id)) {
+            if (rulesToLink?.sensor_id?.includes(sensor.id)) {
                 if (sensor.assigned_rule_id && sensor.assigned_rule_id !== ruleId) {
                     socketsToReassign.push(sensor.id);
                     dataUnassign.push(sensor);
@@ -1084,8 +1269,8 @@ const PlugRule = () => {
             }
         } else {
             Promise.allSettled([
-                isChangedSockets && reassignSensorsToRule(),
                 isChangedSockets && updateSocketUnlink(),
+                isChangedSockets && reassignSensorsToRule(),
                 isChangedRuleDetails && updatePlugRuleData(),
             ]).then((value) => {
                 openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
@@ -1115,14 +1300,9 @@ const PlugRule = () => {
     }, []);
 
     const [filterOptions, setFilterOptions] = useState([]);
-
-    const filterHandler = (setter, options) => {
-        setter(options.map(({ value }) => value).join('+'));
-        setPageNo(1);
-    };
     const fetchFiltersForSensors = async () => {
         isLoadingRef.current = true;
-        const filters = await getFiltersForSensorsRequest({
+        await getFiltersForSensorsRequest({
             activeBuildingId,
             macTypeFilterString,
             equpimentTypeFilterString,
@@ -1130,90 +1310,124 @@ const PlugRule = () => {
             floorTypeFilterString,
             spaceTypeFilterString,
             spaceTypeTypeFilterString,
-        });
-
-        filters.data.forEach((filterOptions) => {
-            const filterOptionsFetched = [
-                {
-                    label: 'MAC Address',
-                    value: 'macAddresses',
-                    placeholder: 'All Mac addresses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.mac_address.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                    onDelete: () => {
-                        setSelectedOptionMac([]);
-                        setMacTypeFilterString('');
-                    },
-                },
-                {
-                    label: 'Equipment Type',
-                    value: 'equipmentType',
-                    placeholder: 'All Equipment Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.equipment_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
-                    })),
-                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-                    onDelete: () => {
-                        setSelectedOption([]);
-                        setEqupimentTypeFilterString('');
-                    },
-                },
-                {
-                    label: 'Sensors',
-                    value: 'sensors',
-                    placeholder: 'All Sensors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.sensor_count.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                    onDelete: setSensorTypeFilterString(''),
-                },
-                {
-                    label: 'Floor',
-                    value: 'floor',
-                    placeholder: 'All Floors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_floor.map((filterItem) => ({
-                        value: filterItem.floor_id,
-                        label: filterItem.floor_name,
-                    })),
-                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                    onDelete: () => setFloorTypeFilterString(''),
-                },
-                {
-                    label: 'Space',
-                    value: 'space',
-                    placeholder: 'All Spaces',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                    onDelete: () => setSpaceTypeFilterString(''),
-                },
-                {
-                    label: 'Space Type',
-                    value: 'spaceType',
-                    placeholder: 'All Space Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions.installed_space_type.map((filterItem) => ({
-                        value: filterItem.space_type_id,
-                        label: filterItem.space_type_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                    onDelete: () => setSpaceTypeTypeFilterString(''),
-                },
-            ];
-
+        }).then((filters) => {
+            const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
+            const filterOptionsFetched = !_.isEmpty(filterOptions)
+                ? [
+                      {
+                          label: 'Equipment Type',
+                          value: 'equipmentType',
+                          placeholder: 'All Equipment Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                              value: filterItem.equipment_type_id,
+                              label: filterItem.equipment_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                          onDelete: () => {
+                              setEqupimentTypeFilterString('');
+                          },
+                      },
+                      {
+                          label: 'Floor',
+                          value: 'floor',
+                          placeholder: 'All Floors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                              value: filterItem.floor_id,
+                              label: filterItem.floor_name,
+                          })),
+                          onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+                          onDelete: () => setFloorTypeFilterString(''),
+                      },
+                      {
+                          label: 'Space',
+                          value: 'space',
+                          placeholder: 'All Spaces',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                              value: filterItem.space_id,
+                              label: filterItem.space_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                          onDelete: () => setSpaceTypeFilterString(''),
+                      },
+                      {
+                          label: 'Space Type',
+                          value: 'spaceType',
+                          placeholder: 'All Space Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                              value: filterItem.space_type_id,
+                              label: filterItem.space_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+                          onDelete: () => setSpaceTypeTypeFilterString(''),
+                      },
+                      {
+                          label: 'MAC Address',
+                          value: 'macAddresses',
+                          placeholder: 'All Mac addresses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                          onDelete: () => {
+                              setMacTypeFilterString('');
+                          },
+                      },
+                      {
+                          label: 'Sensors',
+                          value: 'sensor_count',
+                          placeholder: 'All Sensors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                          onDelete: setSensorTypeFilterString(''),
+                      },
+                      {
+                          label: 'Assigned rule',
+                          value: 'assigned_rule',
+                          placeholder: 'All assigned rule',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                              value: filterItem.plug_rule_id,
+                              label: filterItem.plug_rule_name,
+                          })),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
+                          onDelete: setAssignedRuleFilterString(''),
+                      },
+                      {
+                          label: 'Tags',
+                          value: 'tags',
+                          placeholder: 'All tags',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.tags.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setTagsFilterString, options),
+                          onDelete: setTagsFilterString(''),
+                      },
+                      {
+                          label: 'Last used data',
+                          value: 'last_used_data',
+                          placeholder: 'All last used data',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
+                          onDelete: setLastUsedDataFilterString(''),
+                      },
+                  ]
+                : [];
             setFilterOptions(filterOptionsFetched);
         });
 
@@ -1234,115 +1448,118 @@ const PlugRule = () => {
     const RenderScheduleActionItem = ({ record }) => {
         const firstCondition = record.data[0];
         const secondCondition = record.data[1];
-        return (
-            <>
-                <div className="plug-rule-schedule-row mb-1">
-                    <div className="schedule-left-flex">
-                        <div>
-                            <Select
-                                defaultValue={firstCondition.action_type}
-                                onChange={(event) => {
-                                    handleSchedularConditionChange(
-                                        'action_type',
-                                        event.value,
-                                        firstCondition.condition_id,
-                                        firstCondition.condition_group_id
-                                    );
-                                }}
-                                options={getAvailableActionType(secondCondition.action_type)}
-                            />
+        if (!firstCondition.is_deleted && !secondCondition.is_deleted) {
+            return (
+                <>
+                    <div className="plug-rule-schedule-row mb-1">
+                        <div className="schedule-left-flex">
+                            <div>
+                                <Select
+                                    defaultValue={firstCondition.action_type}
+                                    onChange={(event) => {
+                                        handleSchedularConditionChange(
+                                            'action_type',
+                                            event.value,
+                                            firstCondition.condition_id,
+                                            firstCondition.condition_group_id
+                                        );
+                                    }}
+                                    options={getAvailableActionType(secondCondition.action_type)}
+                                />
+                            </div>
+                            <div>at</div>
+                            <div>
+                                <Select
+                                    defaultValue={firstCondition.action_time}
+                                    onChange={(event) => {
+                                        handleSchedularTimeChange(
+                                            'action_time',
+                                            event.value,
+                                            firstCondition.condition_id,
+                                            firstCondition.condition_group_id
+                                        );
+                                    }}
+                                    isDisabled={firstCondition.action_type == '2'}
+                                    options={firstCondition.action_type == '2' ? [] : timepickerOption}
+                                />
+                            </div>
+                            <div>on</div>
+                            <div className="schedular-weekday-group">
+                                {firstCondition.condition_group_id}
+                                <ConditionGroup
+                                    handleButtonClick={(day) =>
+                                        handleScheduleDayChange(day, firstCondition.condition_group_id)
+                                    }
+                                    disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
+                                    selectedItemsList={firstCondition.action_day}
+                                />
+                            </div>
                         </div>
-                        <div>at</div>
-                        <div>
-                            <Select
-                                defaultValue={firstCondition.action_time}
-                                onChange={(event) => {
-                                    handleSchedularTimeChange(
-                                        'action_time',
-                                        event.value,
-                                        firstCondition.condition_id,
-                                        firstCondition.condition_group_id
-                                    );
-                                }}
-                                isDisabled={firstCondition.action_type == '2'}
-                                options={firstCondition.action_type == '2' ? [] : timePicker15MinutesIntervalOption}
-                            />
+                    </div>
+                    <div className="plug-rule-schedule-row mb-1">
+                        <div className="schedule-left-flex">
+                            <div>
+                                <Select
+                                    defaultValue={secondCondition.action_type}
+                                    onChange={(event) => {
+                                        handleSchedularConditionChange(
+                                            'action_type',
+                                            event.value,
+                                            secondCondition.condition_id,
+                                            secondCondition.condition_group_id
+                                        );
+                                    }}
+                                    options={getAvailableActionType(firstCondition.action_type)}
+                                />
+                            </div>
+                            <div>at</div>
+                            <div>
+                                <Select
+                                    defaultValue={secondCondition.action_time}
+                                    onChange={(event) => {
+                                        handleSchedularTimeChange(
+                                            'action_time',
+                                            event.value,
+                                            secondCondition.condition_id,
+                                            secondCondition.condition_group_id
+                                        );
+                                    }}
+                                    isDisabled={secondCondition.action_type == '2'}
+                                    options={timepickerOption}
+                                />
+                            </div>
                         </div>
-                        <div>on</div>
-                        <div className="schedular-weekday-group">
-                            <ConditionGroup
-                                handleButtonClick={(day) =>
-                                    handleScheduleDayChange(day, firstCondition.condition_group_id)
-                                }
-                                disabledItemsList={conditionDisabledDays[firstCondition.condition_group_id]}
-                                selectedItemsList={firstCondition.action_day}
+                        <div>
+                            <Button
+                                label="Delete Condition"
+                                onClick={() => {
+                                    showOptionToDelete(firstCondition.condition_group_id);
+                                    setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
+                                    setShowDeleteConditionModal(true);
+                                }}
+                                size={Button.Sizes.md}
+                                icon={<DeleteIcon />}
+                                type={Button.Type.secondaryDistructive}
                             />
                         </div>
                     </div>
-                </div>
-                <div className="plug-rule-schedule-row mb-1">
-                    <div className="schedule-left-flex">
-                        <div>
-                            <Select
-                                defaultValue={secondCondition.action_type}
-                                onChange={(event) => {
-                                    handleSchedularConditionChange(
-                                        'action_type',
-                                        event.value,
-                                        secondCondition.condition_id,
-                                        secondCondition.condition_group_id
-                                    );
-                                }}
-                                options={getAvailableActionType(firstCondition.action_type)}
-                            />
-                        </div>
-                        <div>at</div>
-                        <div>
-                            <Select
-                                defaultValue={secondCondition.action_time}
-                                onChange={(event) => {
-                                    handleSchedularTimeChange(
-                                        'action_time',
-                                        event.value,
-                                        secondCondition.condition_id,
-                                        secondCondition.condition_group_id
-                                    );
-                                }}
-                                isDisabled={secondCondition.action_type == '2'}
-                                options={timePicker15MinutesIntervalOption}
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <Button
-                            label="Delete Condition"
-                            onClick={() => {
-                                showOptionToDelete(firstCondition.condition_group_id);
-                                setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
-                                setShowDeleteConditionModal(true);
-                            }}
-                            size={Button.Sizes.md}
-                            icon={<DeleteIcon />}
-                            type={Button.Type.secondaryDistructive}
-                        />
-                    </div>
-                </div>
 
-                <hr className="plug-rule-schedule-breaker" />
-            </>
-        );
+                    <hr className="plug-rule-schedule-breaker" />
+                </>
+            );
+        } else {
+            return null;
+        }
     };
 
     const getDateRange = () => {
-        const maxDate = new Date();
-        maxDate.setUTCHours(23, 59, 59, 999);
-
-        const minDate = new Date();
-        minDate.setDate(maxDate.getDate() - 7);
-
+        const minDate = moment().startOf('isoweek');
+        const maxDate = moment().endOf('isoweek');
+        maxDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+        minDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         return {
-            maxDate: maxDate.getTime(),
-            minDate: minDate.getTime(),
+            maxDate: maxDate.unix() * 1000,
+            minDate: minDate.unix() * 1000,
         };
     };
     const calculateOffHoursPlots = () => {
@@ -1507,7 +1724,7 @@ const PlugRule = () => {
                                 onChange={() => {
                                     handleSwitchChange();
                                 }}
-                                checked={!currentData.is_active}
+                                checked={currentData.is_active}
                                 onColor={'#2955E7'}
                                 uncheckedIcon={false}
                                 checkedIcon={false}
@@ -1515,7 +1732,7 @@ const PlugRule = () => {
                                 height={20}
                                 width={36}
                             />
-                            <span className="ml-2 plug-rule-switch-font">Not Active</span>
+                            <span className="ml-2 plug-rule-switch-font">Active</span>
                         </div>
                         <div className="cancel-and-save-flex">
                             <button
@@ -1668,7 +1885,20 @@ const PlugRule = () => {
                                     unitInfo={{
                                         title: 'Estimated Energy Savings',
                                         unit: UNITS.KWH,
-                                        value: '1,722 kwh',
+                                        value: estimatedEnergySavings,
+                                    }}
+                                    chartProps={{
+                                        tooltip: {
+                                            xDateFormat: is24Format ? '%A, %H:%M' : '%A, %I:%M %p',
+                                        },
+                                        xAxis: {
+                                            labels: {
+                                                formatter: function (val) {
+                                                    return moment(val.value).format('ddd');
+                                                },
+                                                step: 1,
+                                            },
+                                        },
                                     }}
                                 />
                             )}
@@ -1705,11 +1935,13 @@ const PlugRule = () => {
                                 setPageNo(1);
                                 setSearch(query);
                             }}
+                            filterOptions={filterOptions}
                             buttonGroupFilterOptions={[
                                 { label: 'All' },
                                 { label: 'Selected' },
                                 { label: 'Unselected' },
                             ]}
+                            onDownload={() => handleDownloadCsv()}
                             onStatus={setSelectedRuleFilter}
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}

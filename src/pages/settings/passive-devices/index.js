@@ -5,7 +5,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
@@ -268,14 +268,15 @@ const PassiveDevices = () => {
 
     const renderIdentifierName = (row) => {
         return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper link mouse-pointer"
-                onClick={() => {
-                    handleClick(row);
+            <Link
+                className="typography-wrapper link"
+                to={{
+                    pathname: `/settings/smart-meters/single/${row.equipments_id}`,
                 }}>
-                {row?.identifier === '' ? '-' : row?.identifier}
-            </div>
+                <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
+                    {row?.identifier === '' ? '-' : row?.identifier}
+                </div>
+            </Link>
         );
     };
 

@@ -15,14 +15,16 @@ import { ComponentStore } from '../../store/ComponentStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
-import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
-import { updateBuildingStore } from '../../components/SecondaryTopNavBar/utils';
 import { BuildingStore } from '../../store/BuildingStore';
 import Brick from '../../sharedComponents/brick';
+import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import colors from '../../assets/scss/_colors.scss';
+import { UNITS } from '../../constants/units';
+import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -34,11 +36,6 @@ const PortfolioOverview = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-
-    const [startEndDayCount, setStartEndDayCount] = useState(0);
-
-    const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
-    const [isConsumpHistoryLoading, setIsConsumpHistoryLoading] = useState(false);
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
@@ -55,15 +52,53 @@ const PortfolioOverview = () => {
             old: 0,
         },
     });
+
     const [isKPIsLoading, setIsKPIsLoading] = useState(false);
+    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+    const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [xAxisObj, setXAxisObj] = useState({
+        xAxis: {
+            tickPositioner: function () {
+                var positions = [],
+                    tick = Math.floor(this.dataMin),
+                    increment = Math.ceil((this.dataMax - this.dataMin) / 4);
+                if (this.dataMax !== null && this.dataMin !== null) {
+                    for (tick; tick - increment <= this.dataMax; tick += increment) {
+                        positions.push(tick);
+                    }
+                }
+                return positions;
+            },
+        },
+    });
+
+    const formatXaxis = ({ value }) => {
+        return moment.utc(value).format(`${dateFormat}`);
+    };
+
+    const toolTipFormatter = ({ value }) => {
+        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+    };
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
+        const getXaxisForDaysSelected = (days_count) => {
+            const xaxisObj = xaxisLabelsCount(days_count);
+            if (xaxisObj) xaxisObj.legend = { enabled: false };
+            setXAxisObj(xaxisObj);
+        };
+
+        const getFormattedChartDates = (days_count) => {
+            const date_format = xaxisLabelsFormat(days_count);
+            setDateFormat(date_format);
+        };
+
+        getXaxisForDaysSelected(daysCount);
+        getFormattedChartDates(daysCount);
+    }, [daysCount]);
+
+    useEffect(() => {
+        if (startDate === null || endDate === null) return;
 
         const portfolioOverallData = async () => {
             setIsKPIsLoading(true);
@@ -99,27 +134,25 @@ const PortfolioOverview = () => {
         };
 
         const energyConsumptionData = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchPortfolioEnergyConsumption(payload)
                 .then((res) => {
-                    let newArray = [
+                    const response = res?.data;
+                    let energyCategories = [];
+                    let energyData = [
                         {
-                            name: 'Energy Value(kWh)',
+                            name: 'Energy',
                             data: [],
                         },
                     ];
-                    res.data.forEach((record) => {
-                        newArray[0].data.push({
-                            x: record.x,
-                            y: (record.y / 1000).toFixed(2),
-                        });
+                    response.forEach((record) => {
+                        energyCategories.push(record?.x);
+                        energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
                     });
-                    setEnergyConsumptionChart(newArray);
-                    setIsConsumpHistoryLoading(false);
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
                 })
-                .catch((error) => {
-                    setIsConsumpHistoryLoading(false);
-                });
+                .catch((error) => {});
         };
 
         const portfolioBuilidingsData = async () => {
@@ -181,13 +214,6 @@ const PortfolioOverview = () => {
         updateBuildingStore();
     }, []);
 
-    useEffect(() => {
-        const start = moment(startDate);
-        const end = moment(endDate);
-        const days = end.diff(start, 'days');
-        setStartEndDayCount(days + 1);
-    });
-
     return (
         <>
             <Header title="Portfolio Overview" type="page" />
@@ -222,15 +248,18 @@ const PortfolioOverview = () => {
                             />
                         </Col>
                         <Col xl={6}>
-                            <TotalEnergyConsumption
+                            <ColumnChart
                                 title="Total Energy Consumption"
-                                subtitle="Hourly Energy Consumption (kWh)"
-                                series={energyConsumptionChart}
-                                isConsumpHistoryLoading={isConsumpHistoryLoading}
-                                startEndDayCount={startEndDayCount}
+                                subTitle="Hourly Energy Consumption (kWh)"
+                                colors={[colors.datavizMain2]}
+                                categories={energyConsumptionsCategories}
+                                tooltipUnit={UNITS.KWH}
+                                series={energyConsumptionsData}
+                                isLegendsEnabled={false}
                                 timeZone={timeZone}
-                                pageType="portfolio"
-                                className="h-100"
+                                xAxisCallBackValue={formatXaxis}
+                                restChartProps={xAxisObj}
+                                tooltipCallBackValue={toolTipFormatter}
                             />
                         </Col>
                     </Row>

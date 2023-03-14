@@ -22,7 +22,19 @@ import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
 import Typography from '../../sharedComponents/typography';
 import Brick from '../../sharedComponents/brick';
 import _ from 'lodash';
+import Select from '../../sharedComponents/form/select';
+import Textarea from '../../sharedComponents/form/textarea/Textarea';
+import Input from '../../sharedComponents/form/input/Input';
+import { fetchBuildingsList } from '../../services/buildings';
 
+import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
+import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
+
+const buttonGroupFilterOptions = [
+    { label: 'All' },
+    { label: 'Active', icon: <ActiveSVG className="bg-grey" /> },
+    { label: 'Inactive', icon: <InactiveSVG className="bg-grey" /> },
+];
 const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
     const history = useHistory();
 
@@ -109,14 +121,23 @@ const PlugRules = () => {
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [nameError, setNameError] = useState(false);
+    const [buildingError, setBuildingError] = useState({ text: '' });
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
-    const [createRuleData, setCreateRuleData] = useState({
-        building_id: '',
-        action: [],
-    });
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const initialBuildingValue = bldgId !== 'portfolio' ? bldgId : '';
+    const [createRuleData, setCreateRuleData] = useState({
+        building_id: initialBuildingValue,
+        name: '',
+        description: '',
+    });
+    useEffect(() => {
+        setCreateRuleData((prev) => {
+            return { ...prev, building_id: initialBuildingValue };
+        });
+    }, [bldgId]);
+
     const [currentData, setCurrentData] = useState({});
 
     const [modelRefresh, setModelRefresh] = useState(false);
@@ -137,33 +158,37 @@ const PlugRules = () => {
 
     const handleCreatePlugRuleChange = (key, value) => {
         let obj = Object.assign({}, createRuleData);
+        if (key == 'building_id' && value) {
+            setBuildingError({ text: '' });
+        }
+        if (key == 'name' && value) {
+            setNameError(false);
+        }
         obj[key] = value;
         setCreateRuleData(obj);
     };
 
-    const handleCurrentDataChange = (key, value) => {
-        let obj = Object.assign({}, currentData);
-        obj[key] = value;
-        setCurrentData(obj);
-    };
-
     const savePlugRuleData = async () => {
-        let newRuleData = Object.assign({}, createRuleData);
-        newRuleData.building_id = [localStorage.getItem('buildingId')];
-        setIsProcessing(true);
-        await createPlugRuleRequest(newRuleData)
-            .then((res) => {
-                setIsProcessing(false);
-                setPageRefresh(!pageRefresh);
-            })
-            .catch((error) => {
-                setIsProcessing(false);
-            });
+        const isValid = validatePlugRuleForm();
+        if (isValid) {
+            let newRuleData = Object.assign({}, createRuleData);
+            newRuleData.building_id = [newRuleData.building_id];
+            setIsProcessing(true);
+            await createPlugRuleRequest(newRuleData)
+                .then((res) => {
+                    setIsProcessing(false);
+
+                    redirectToPlugRulePage(res.data.plug_rule_id);
+                })
+                .catch((error) => {
+                    setIsProcessing(false);
+                });
+        }
     };
 
     const updatePlugRuleData = async () => {
         setIsProcessing(true);
-        await updatePlugRuleRequest(currentData)
+        await updatePlugRuleRequest(createRuleData)
             .then((res) => {
                 setIsProcessing(false);
                 setPageRefresh(!pageRefresh);
@@ -171,6 +196,15 @@ const PlugRules = () => {
             .catch((error) => {
                 setIsProcessing(false);
             });
+    };
+
+    const getBuildingData = async () => {
+        await fetchBuildingsList(false).then((res) => {
+            let data = res.data;
+            const formattedData = formatBuildingListData(data);
+
+            setBuildingListData(formattedData);
+        });
     };
 
     const updateSocketLink = async () => {
@@ -200,7 +234,7 @@ const PlugRules = () => {
     };
 
     // Building List Data Globally
-    const [buildingListData] = useAtom(buildingData);
+    const [buildingListData, setBuildingListData] = useState([]);
 
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
@@ -218,20 +252,10 @@ const PlugRules = () => {
         });
     };
 
-    const getBuildingData = async () => {
-        try {
-            buildingListData.map((record) => {
-                if (record.building_id === activeBuildingId) {
-                    localStorage.setItem('timeZone', record.timezone);
-                }
-            });
-        } catch (error) {}
-    };
-
     useEffect(() => {
         getBuildingData();
         updateBreadcrumbStore();
-    }, [buildingListData]);
+    }, []);
 
     const fetchPlugRuleData = async () => {
         const searchParams = {
@@ -281,14 +305,44 @@ const PlugRules = () => {
             pathname: `/control/plug-rules/${ruleId}`,
         });
     };
-    const handleCreatePlugRule = () => {
-        history.push({
-            pathname: `/control/plug-rules/create-plug-rule`,
+
+    const formatBuildingListData = (data) => {
+        return data.map((el) => {
+            return { value: el.building_id, label: el.building_name };
         });
     };
 
+    const validatePlugRuleForm = () => {
+        let valid = true;
+        if (!createRuleData.name.length) {
+            setNameError(true);
+            valid = false;
+        }
+        if (!createRuleData.building_id.length) {
+            setBuildingError({ text: 'please select building' });
+            valid = false;
+        }
+        return valid;
+    };
+
+    const handleCreatePlugRule = () => {
+        setShowAddRule(true);
+    };
+    const buildingIdProps = {
+        label: 'Choose building',
+        defaultValue: createRuleData.building_id || localStorage.getItem('buildingId'),
+        onChange: (event) => {
+            handleCreatePlugRuleChange('building_id', event.value);
+        },
+        options: buildingListData,
+    };
+
+    if (buildingError?.text?.length) {
+        buildingIdProps.error = buildingError;
+    }
+
     const formatRows = (data) =>
-        data.map((row) => {
+        data?.map((row) => {
             const newRow = { ...row };
 
             const sortedDays = ['mon', 'tue', 'wed', 'thr', 'fri', 'sat', 'sun'];
@@ -332,9 +386,32 @@ const PlugRules = () => {
             return newRow;
         });
 
+    const renderStatus = (row) => {
+        return (
+            <>
+                {row.is_active ? (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="active-container justify-content-center">
+                        <ActiveSVG style={{ marginTop: '0.125rem' }} />
+                        Active
+                    </Typography.Subheader>
+                ) : (
+                    <Typography.Subheader
+                        size={Typography.Sizes.sm}
+                        className="inactive-container justify-content-center">
+                        <InactiveSVG style={{ marginTop: '0.125rem' }} />
+                        Inactive
+                    </Typography.Subheader>
+                )}
+            </>
+        );
+    };
+
     const headerProps = [
         { name: 'Name', accessor: 'name' },
         { name: 'Description', accessor: 'description' },
+        { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
         { name: 'Socket Count', accessor: 'sensors_count' },
     ];
@@ -395,45 +472,47 @@ const PlugRules = () => {
                     </div>
                 </div>
             </div>
+            <div className="plug-rules-body">
+                <Row>
+                    <Col lg={12}>
+                        <Brick sizeInRem={2} />
+                        {skeletonLoading ? (
+                            <SkeletonTheme color="#202020" height={35}>
+                                <table cellPadding={5} className="table">
+                                    <tr>
+                                        <th width={130}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-            <Row>
-                <Col lg={12}>
-                    <Brick sizeInRem={2} />
-                    {skeletonLoading ? (
-                        <SkeletonTheme color="#202020" height={35}>
-                            <table cellPadding={5} className="table">
-                                <tr>
-                                    <th width={130}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={190}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={190}>
-                                        <Skeleton count={5} />
-                                    </th>
+                                        <th width={200}>
+                                            <Skeleton count={5} />
+                                        </th>
 
-                                    <th width={200}>
-                                        <Skeleton count={5} />
-                                    </th>
-
-                                    <th>
-                                        <Skeleton count={5} />
-                                    </th>
-                                </tr>
-                            </table>
-                        </SkeletonTheme>
-                    ) : (
-                        <DataTableWidget
-                            id="plugRulesTable1"
-                            onSearch={setSearch}
-                            onStatus={setSelectedTab}
-                            rows={currentRow()}
-                            searchResultRows={currentRow()}
-                            onDownload={() => handleDownloadCsv()}
-                            headers={headerProps}
-                        />
-                    )}
-                </Col>
-            </Row>
+                                        <th>
+                                            <Skeleton count={5} />
+                                        </th>
+                                    </tr>
+                                </table>
+                            </SkeletonTheme>
+                        ) : (
+                            <DataTableWidget
+                                id="plugRulesTable1"
+                                onSearch={setSearch}
+                                onStatus={setSelectedTab}
+                                buttonGroupFilterOptions={buttonGroupFilterOptions}
+                                rows={currentRow()}
+                                searchResultRows={currentRow()}
+                                onDownload={() => handleDownloadCsv()}
+                                headers={headerProps}
+                            />
+                        )}
+                    </Col>
+                </Row>
+            </div>
 
             {/* Add Rule Model  */}
             <Modal show={showAddRule} onHide={handleAddRuleClose} centered>
@@ -441,32 +520,31 @@ const PlugRules = () => {
                     <Modal.Title>Add Plug Rule</Modal.Title>
                 </div>
                 <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Name"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleCreatePlugRuleChange('name', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
+                    <Input
+                        label="Name"
+                        id="name"
+                        placeholder="Enter Rule Name"
+                        value={createRuleData.name}
+                        onChange={(e) => {
+                            handleCreatePlugRuleChange('name', e.target.value);
+                        }}
+                        error={nameError}
+                    />
+                    <div className="my-3">{activeBuildingId === 'portfolio' && <Select {...buildingIdProps} />}</div>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Description</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Description"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleCreatePlugRuleChange('description', e.target.value);
-                                }}
-                            />
-                        </Form.Group>
-                    </Form>
+                    <Textarea
+                        type="textarea"
+                        label="Description"
+                        name="text"
+                        id="description"
+                        rows="4"
+                        placeholder="Enter Description of Rule"
+                        value={createRuleData.description}
+                        className="font-weight-bold"
+                        onChange={(e) => {
+                            handleCreatePlugRuleChange('description', e.target.value);
+                        }}
+                    />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="light" onClick={handleAddRuleClose}>
@@ -476,10 +554,9 @@ const PlugRules = () => {
                         variant="primary"
                         onClick={() => {
                             savePlugRuleData();
-                            handleAddRuleClose();
                         }}
                         disabled={isProcessing}>
-                        Save
+                        Create
                     </Button>
                 </Modal.Footer>
             </Modal>

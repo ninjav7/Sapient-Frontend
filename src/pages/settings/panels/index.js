@@ -13,7 +13,7 @@ import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { pageListSizes } from '../../../helpers/helpers';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { getPanelsTableCSVExport } from '../../../utils/tablesExport';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import CreatePanel from './CreatePanel';
@@ -172,12 +172,11 @@ const Panels = () => {
 
     const renderPanelName = (row) => {
         return (
-            <div
-                size={Typography.Sizes.md}
-                className="typography-wrapper link mouse-pointer"
-                onClick={() => handleClick(row)}>
-                {row?.panel_name === '' ? '-' : row?.panel_name}
-            </div>
+            <Link to={`/settings/panels/edit-panel/${row?.panel_type}/${row?.panel_id}`}>
+                <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
+                    {row?.panel_name === '' ? '-' : row?.panel_name}
+                </div>
+            </Link>
         );
     };
 
@@ -188,7 +187,8 @@ const Panels = () => {
     const renderLinkedBreakers = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
-                {row?.breakers_linked ? `${row?.breakers_linked} / ${row?.breakers}` : '-'}
+                {/* {row?.breakers_linked ? `${row?.breakers_linked} / ${row?.breakers}` : '-'} // Commented as part of PLT-917 */}
+                {row?.breakers_linked ? `${row?.breakers_linked}` : '-'}
             </Typography.Body>
         );
     };
@@ -468,7 +468,12 @@ const Panels = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
-                        onEditRow={(record, id, row) => handleClick(row)}
+                        onEditRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleClick(row)
+                                : null
+                        }
                         onDeleteRow={(record, id, row) => handlePanelDelete(row)}
                         isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {

@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
-import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import { apiRequestBody } from '../../helpers/helpers';
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
@@ -20,24 +20,26 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
-import TotalEnergyConsumption from '../../sharedComponents/totalEnergyConsumption';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
 import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
 import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-import './style.css';
 import EquipChartModal from '../chartModal/EquipChartModal';
+import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import colors from '../../assets/scss/_colors.scss';
+import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
+import './style.css';
 
 const BuildingOverview = () => {
-    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
-    const [buildingListData] = useAtom(buildingData);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-    const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [overallBldgData, setOverallBldgData] = useState({
         total_building: 0,
@@ -56,17 +58,32 @@ const BuildingOverview = () => {
         },
     });
 
+    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+
+    const [xAxisObj, setXAxisObj] = useState({
+        xAxis: {
+            tickPositioner: function () {
+                var positions = [],
+                    tick = Math.floor(this.dataMin),
+                    increment = Math.ceil((this.dataMax - this.dataMin) / 4);
+                if (this.dataMax !== null && this.dataMin !== null) {
+                    for (tick; tick - increment <= this.dataMax; tick += increment) {
+                        positions.push(tick);
+                    }
+                }
+                return positions;
+            },
+        },
+    });
+
     const [isPlugOnly, setIsPlugOnly] = useState(false);
-    const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
-    const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
+    const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
     const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
     const [hourlyAvgConsumpData, setHourlyAvgConsumpData] = useState([]);
-
     const heatMapChartHeight = 125;
-
     const [energyConsumption, setEnergyConsumption] = useState([]);
-
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
     //EquipChartModel
@@ -76,19 +93,21 @@ const BuildingOverview = () => {
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
 
+    const formatXaxis = ({ value }) => {
+        return moment.utc(value).format(`${dateFormat}`);
+    };
+
+    const toolTipFormatter = ({ value }) => {
+        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
+    };
+
     const fetchTrendBadgeType = (now, old) => {
-        if (now > old) {
-            return TRENDS_BADGE_TYPES.UPWARD_TREND;
-        }
-        if (now < old) {
-            return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
-        }
+        if (now > old) return TRENDS_BADGE_TYPES.UPWARD_TREND;
+        if (now < old) return TRENDS_BADGE_TYPES.DOWNWARD_TREND;
     };
 
     const getAverageValue = (value, min, max) => {
-        if (min == undefined || max === undefined) {
-            return 0;
-        }
+        if (min == undefined || max === undefined) return 0;
         let percentage = Math.round(((value - min) / (max - min)) * 100);
         return isNaN(percentage) ? 0 : Math.round(percentage);
     };
@@ -110,12 +129,7 @@ const BuildingOverview = () => {
     };
 
     const builidingEquipmentsData = async () => {
-        let time_zone = 'US/Eastern';
-        if (bldgId && buildingListData.length !== 0) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            time_zone = bldgObj?.timezone;
-        }
-        const payload = apiRequestBody(startDate, endDate, time_zone);
+        const payload = apiRequestBody(startDate, endDate, timeZone);
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
                 let response = res.data[0].top_contributors;
@@ -140,43 +154,27 @@ const BuildingOverview = () => {
             .catch((error) => {});
     };
 
-    const pageDefaultState = () => {
-        BreadcrumbStore.update((bs) => {
-            let newList = [
-                {
-                    label: 'Building Overview',
-                    path: '/energy/building/overview',
-                    active: true,
-                },
-            ];
-            bs.items = newList;
-        });
-        ComponentStore.update((s) => {
-            s.parent = 'buildings';
-        });
-    };
+    useEffect(() => {
+        const getXaxisForDaysSelected = (days_count) => {
+            const xaxisObj = xaxisLabelsCount(days_count);
+            if (xaxisObj) xaxisObj.legend = { enabled: false };
+            setXAxisObj(xaxisObj);
+        };
+
+        const getFormattedChartDates = (days_count) => {
+            const date_format = xaxisLabelsFormat(days_count);
+            setDateFormat(date_format);
+        };
+
+        getXaxisForDaysSelected(daysCount);
+        getFormattedChartDates(daysCount);
+    }, [daysCount]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
 
-        let time_zone = 'US/Eastern';
-
-        if (bldgId) {
-            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-
-            if (bldgObj?.building_id) {
-                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
-        }
-
         const buildingOverallData = async () => {
-            let payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchOverallBldgData(bldgId, payload)
                 .then((res) => {
                     setOverallBldgData(res.data);
@@ -186,7 +184,7 @@ const BuildingOverview = () => {
 
         const buildingEndUserData = async () => {
             const params = `?building_id=${bldgId}&off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
@@ -198,7 +196,7 @@ const BuildingOverview = () => {
 
         const buildingHourlyData = async () => {
             setIsAvgConsumptionDataLoading(true);
-            let payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -307,29 +305,25 @@ const BuildingOverview = () => {
         };
 
         const buildingConsumptionChart = async () => {
-            setIsEnergyConsumptionDataLoading(true);
-            let payload = apiRequestBody(startDate, endDate, time_zone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEnergyConsumption(bldgId, payload)
                 .then((res) => {
-                    let response = res?.data;
-                    let newArray = [
+                    const response = res?.data;
+                    let energyCategories = [];
+                    let energyData = [
                         {
                             name: 'Energy',
                             data: [],
                         },
                     ];
                     response.forEach((record) => {
-                        newArray[0].data.push({
-                            x: record?.x,
-                            y: (record?.y / 1000).toFixed(2),
-                        });
+                        energyCategories.push(record?.x);
+                        energyData[0].data.push(parseFloat((record?.y / 1000).toFixed(2)));
                     });
-                    setBuildingConsumptionChartData(newArray);
-                    setIsEnergyConsumptionDataLoading(false);
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
                 })
-                .catch((error) => {
-                    setIsEnergyConsumptionDataLoading(false);
-                });
+                .catch((error) => {});
         };
 
         buildingOverallData();
@@ -340,22 +334,37 @@ const BuildingOverview = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building Overview',
+                        path: '/energy/building/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
 
-    useEffect(() => {
-        pageDefaultState();
-    }, []);
-
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
 
             <div className="mt-4 mb-4">
-                <BuildingKPIs daysCount={startEndDayCount} overalldata={overallBldgData} />
+                <BuildingKPIs daysCount={daysCount} overalldata={overallBldgData} />
             </div>
 
             <div className="bldg-page-grid-style">
@@ -374,24 +383,26 @@ const BuildingOverview = () => {
 
                     {isPlugOnly ? (
                         <>
-                            <TotalEnergyConsumption
+                            <ColumnChart
                                 title="Total Energy Consumption"
-                                subtitle="Hourly Energy Consumption (kWh)"
-                                series={buildingConsumptionChartData}
-                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
-                                startEndDayCount={startEndDayCount}
+                                subTitle="Hourly Energy Consumption (kWh)"
+                                onMoreDetail={() => handleRouteChange('/energy/end-uses/plug')}
+                                colors={[colors.datavizMain2]}
+                                categories={energyConsumptionsCategories}
+                                tooltipUnit={UNITS.KWH}
+                                series={energyConsumptionsData}
+                                isLegendsEnabled={false}
                                 timeZone={timeZone}
-                                pageType="building"
-                                className="mt-4"
-                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                                showRouteBtn={true}
+                                xAxisCallBackValue={formatXaxis}
+                                restChartProps={xAxisObj}
+                                tooltipCallBackValue={toolTipFormatter}
                             />
 
                             <HourlyAvgConsumption
                                 title="Hourly Average Consumption"
                                 subtitle="Average by Hour (kWh)"
                                 isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                                startEndDayCount={startEndDayCount}
+                                startEndDayCount={daysCount}
                                 series={hourlyAvgConsumpData}
                                 height={heatMapChartHeight}
                                 timeZone={timeZone}
@@ -407,7 +418,7 @@ const BuildingOverview = () => {
                                 title="Hourly Average Consumption"
                                 subtitle="Average by Hour (kWh)"
                                 isAvgConsumptionDataLoading={isAvgConsumptionDataLoading}
-                                startEndDayCount={startEndDayCount}
+                                startEndDayCount={daysCount}
                                 series={hourlyAvgConsumpData}
                                 height={heatMapChartHeight}
                                 timeZone={timeZone}
@@ -416,18 +427,23 @@ const BuildingOverview = () => {
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
                             />
-                            <TotalEnergyConsumption
-                                title="Total Energy Consumption"
-                                subtitle="Hourly Energy Consumption (kWh)"
-                                series={buildingConsumptionChartData}
-                                isConsumpHistoryLoading={isEnergyConsumptionDataLoading}
-                                startEndDayCount={startEndDayCount}
-                                timeZone={timeZone}
-                                pageType="building"
-                                className="mt-4"
-                                handleRouteChange={() => handleRouteChange('/energy/end-uses')}
-                                showRouteBtn={true}
-                            />
+
+                            <div className="mt-4">
+                                <ColumnChart
+                                    title="Total Energy Consumption"
+                                    subTitle="Hourly Energy Consumption (kWh)"
+                                    onMoreDetail={() => handleRouteChange('/energy/end-uses')}
+                                    colors={[colors.datavizMain2]}
+                                    categories={energyConsumptionsCategories}
+                                    tooltipUnit={UNITS.KWH}
+                                    series={energyConsumptionsData}
+                                    isLegendsEnabled={false}
+                                    timeZone={timeZone}
+                                    xAxisCallBackValue={formatXaxis}
+                                    restChartProps={xAxisObj}
+                                    tooltipCallBackValue={toolTipFormatter}
+                                />
+                            </div>
                         </>
                     )}
                 </div>

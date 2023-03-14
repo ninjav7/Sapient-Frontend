@@ -111,6 +111,7 @@ export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const updateBreakerTypes = '/api/config/panels/update_breaker_config';
 export const resetBreakers = '/api/config/panels/reset/breakers';
 export const deletePanel = '/api/config/panels/delete';
 export const deleteBreaker = '/api/config/panels/delete/breaker';
@@ -142,11 +143,12 @@ export const addToSystem = '/api/config/kasa/add_to_system';
 export const getLayouts = '/api/config/get_layout/';
 export const getFloors = '/api/config/layout/get-floors';
 export const createFloors = '/api/config/layout/create-floor';
+export const updateFloor = '/api/config/layout/update-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
-export const updateSpace = '/api/config/layout/update-floor';
-export const deleteSpace = '/api/config/layout/delete-space';
+export const updateSpace = '/api/config/layout/update-space';
+export const deleteSpace = '/api/config/layout/delete-space/';
 export const deleteFloor = '/api/config/layout/delete-floor';
 
 // getLocation
@@ -186,6 +188,7 @@ export const deletePlugRule = '/api/energy/plug_rule/delete-plug-rule';
 
 export const listLinkSocketRules = '/api/energy/plug_rule/list-link-socket';
 export const getListSensorsForBuildings = '/api/energy/plug_rule/sensor-for-buildings';
+export const getEstimateSensorSavings = '/api/energy/plug_rule/estimate-sensor-savings';
 export const getFiltersForSensors = '/api/energy/plug_rule/sensor-for-buildings-filter';
 export const assignSensorsToRule = '/api/energy/plug_rule/assign-sensor-rule';
 export const reassignSensorsToRule = '/api/energy/plug_rule/reassign-socket-rule';

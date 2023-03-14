@@ -4,6 +4,7 @@ import {
     listPlugRules,
     listConditions,
     updatePlugRule,
+    getEstimateSensorSavings,
     createPlugRule,
     deletePlugRule,
     plugRuleDetails,
@@ -42,9 +43,18 @@ export function updatePlugRuleRequest(currentData) {
     });
 }
 
+export function getEstimateSensorSavingsRequst(schedule, selectedIds, plugRuleId) {
+    const sensors = selectedIds.join('%2B');
+    let params = `?plug_rule_id=${plugRuleId}&timezone=US%2FEastern&sensor_id=${sensors}`;
+
+    return axiosInstance.post(`${getEstimateSensorSavings}${params}`, schedule).then((res) => {
+        return res.data;
+    });
+}
+
 export function createPlugRuleRequest(currentData) {
     return axiosInstance.post(`${createPlugRule}`, currentData).then((res) => {
-        return res;
+        return res.data;
     });
 }
 
@@ -63,14 +73,13 @@ export function getGraphDataRequest(selectedIds, plugRuleId) {
             params: {
                 //@TODO Hardcoded because it doesn't have default values on backend side, but we don't need them right now.
                 tz_info: 'US/Eastern',
-                num_of_days: 7,
+                num_of_days: 14,
                 sensors: selectedIds.join('+'),
             },
         })
         .then((res) => {
-            console.log('RESSS', res);
             return res;
-        })
+        });
 }
 
 export function getListSensorsForBuildingsRequest(page_size, pageNo, ruleId, activeBuildingId, getParams) {
@@ -96,12 +105,24 @@ export function getFiltersForSensorsRequest(args) {
             params: _.pickBy(
                 {
                     building_id: args.activeBuildingId,
-                    mac_address: args.macTypeFilterString,
-                    equipment_types: args.equpimentTypeFilterString,
-                    sensor_number: args.sensorTypeFilterString,
-                    floor_id: args.floorTypeFilterString,
-                    space_id: args.spaceTypeFilterString,
-                    space_type_id: args.spaceTypeTypeFilterString,
+                    mac_address: args.macTypeFilterString
+                        ? encodeURI(args.macTypeFilterString?.join('+'))
+                        : args.macTypeFilterString,
+                    equipment_types: args.equpimentTypeFilterString
+                        ? encodeURI(args.equpimentTypeFilterString?.join('+'))
+                        : args.equpimentTypeFilterString,
+                    sensor_number: args.sensorTypeFilterString
+                        ? encodeURI(args.sensorTypeFilterString?.join('+'))
+                        : args.sensorTypeFilterString,
+                    floor_id: args.sensorTypeFilterString
+                        ? encodeURI(args.sensorTypeFilterString?.join('+'))
+                        : args.sensorTypeFilterString,
+                    space_id: args.spaceTypeFilterString
+                        ? encodeURI(args.spaceTypeFilterString?.join('+'))
+                        : args.spaceTypeFilterString,
+                    space_type_id: args.spaceTypeTypeFilterString
+                        ? encodeURI(args.spaceTypeTypeFilterString?.join('+'))
+                        : args.spaceTypeTypeFilterString,
                 },
                 _.identity
             ),
@@ -114,7 +135,6 @@ export function getFiltersForSensorsRequest(args) {
 export function getUnlinkedSocketRules(
     pageSize,
     pageNo,
-    ruleId,
     activeBuildingId,
     equpimentTypeFilterString,
     macTypeFilterString,
@@ -123,18 +143,16 @@ export function getUnlinkedSocketRules(
     floorTypeFilterString,
     spaceTypeFilterString,
     spaceTypeTypeFilterString,
+    assignedRuleFilterString,
+    tagsFilterString,
     withPagination,
     getParams
 ) {
     let params = '';
     if (withPagination) {
-        params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${ruleId}&building_id=${activeBuildingId}&equipment_types=${encodeURIComponent(
-            equpimentTypeFilterString
-        )}&location=${locationTypeFilterString}&sensor_number=${encodeURIComponent(sensorTypeFilterString)}`;
+        params = `?building_id=${activeBuildingId}&page_size=${pageSize}&page_no=${pageNo}`;
     } else {
-        params = `?rule_id=${ruleId}&building_id=${activeBuildingId}&equipment_types=${encodeURIComponent(
-            equpimentTypeFilterString
-        )}&location=${locationTypeFilterString}&sensor_number=${encodeURIComponent(sensorTypeFilterString)}`;
+        params = `?building_id=${activeBuildingId}`;
     }
 
     if (pageSize === 0) {
@@ -145,17 +163,36 @@ export function getUnlinkedSocketRules(
         .get(`${getListSensorsForBuildings}${params}`, {
             params: _.pickBy(
                 {
-                    floor_id: floorTypeFilterString,
-                    space_id: spaceTypeFilterString,
-                    space_type_id: spaceTypeTypeFilterString,
-                    mac_address: macTypeFilterString,
+                    floor_id: floorTypeFilterString
+                        ? encodeURI(floorTypeFilterString?.join('+'))
+                        : floorTypeFilterString,
+                    space_id: spaceTypeFilterString
+                        ? encodeURI(spaceTypeFilterString?.join('+'))
+                        : spaceTypeFilterString,
+                    space_type_id: spaceTypeTypeFilterString
+                        ? encodeURI(spaceTypeTypeFilterString?.join('+'))
+                        : spaceTypeTypeFilterString,
+                    assigned_rule: assignedRuleFilterString
+                        ? encodeURI(assignedRuleFilterString?.join('+'))
+                        : assignedRuleFilterString,
+                    mac_address: macTypeFilterString ? encodeURI(macTypeFilterString?.join('+')) : macTypeFilterString,
+                    location: locationTypeFilterString
+                        ? encodeURI(locationTypeFilterString?.join('+'))
+                        : locationTypeFilterString,
+                    tags: tagsFilterString ? encodeURI(tagsFilterString?.join('+')) : tagsFilterString,
+                    equipment_types: equpimentTypeFilterString
+                        ? encodeURI(equpimentTypeFilterString?.join('+'))
+                        : equpimentTypeFilterString,
+                    sensor_number: sensorTypeFilterString
+                        ? encodeURI(sensorTypeFilterString?.join('+'))
+                        : sensorTypeFilterString,
                     ...getParams,
                 },
                 _.identity
             ),
         })
         .then((res) => {
-            return res;
+            return res.data;
         });
 }
 

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
-import { Row } from 'reactstrap';
 import Header from '../../components/Header';
-import HvacUsesCard from './HvacUsesCard';
-import BarChartWidget from '../../sharedComponents/barChartWidget';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { fetchEndUsesType, fetchEndUsesEquipmentUsage, fetchEndUsesUsageChart } from '../endUses/services';
 import { percentageHandler } from '../../utils/helper';
@@ -12,12 +10,16 @@ import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import Skeleton from 'react-loading-skeleton';
-import { apiRequestBody, formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
-import './style.css';
+import { apiRequestBody, formatConsumptionValue } from '../../helpers/helpers';
 import { UNITS } from '../../constants/units';
 import EndUsesKPIs from '../../sharedComponents/endUsesKPIs/EndUsesKPIs';
 import { fetchTrendType } from './utils';
+import { buildingData } from '../../store/globalState';
+import { KPI_UNITS } from '../../sharedComponents/KPIs';
+import colors from '../../assets/scss/_colors.scss';
+import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
+import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
+import './style.css';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -27,71 +29,37 @@ const EndUseType = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const [buildingListData] = useAtom(buildingData);
+    const [isPlugOnly, setIsPlugOnly] = useState(false);
 
-    const [equipTypeChartOptions, setEquipTypeChartOptions] = useState({
-        chart: {
-            height: 380,
-            type: 'bar',
-            toolbar: {
-                show: true,
+    const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+    const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
+    const [energyConsumptionsData, setEnergyConsumptionsData] = useState([]);
+    const [xAxisObj, setXAxisObj] = useState({
+        xAxis: {
+            tickPositioner: function () {
+                var positions = [],
+                    tick = Math.floor(this.dataMin),
+                    increment = Math.ceil((this.dataMax - this.dataMin) / 4);
+                if (this.dataMax !== null && this.dataMin !== null) {
+                    for (tick; tick - increment <= this.dataMax; tick += increment) {
+                        positions.push(tick);
+                    }
+                }
+                return positions;
             },
-            zoom: {
-                enabled: false,
-            },
-        },
-        plotOptions: {
-            bar: {
-                horizontal: true,
-                dataLabels: {
-                    position: 'top',
-                },
-            },
-        },
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        dataLabels: {
-            enabled: false,
-            offsetX: -6,
-            style: {
-                fontSize: '12px',
-                colors: ['#fff'],
-            },
-        },
-        colors: ['#6d669b'],
-        stroke: {
-            show: true,
-            width: 1,
-            colors: ['#fff'],
-        },
-
-        xaxis: {
-            categories: ['EquipType 1', 'EquipType 2', 'EquipType 3', 'EquipType 4', 'EquipType 5'],
-            axisBorder: {
-                color: '#d6ddea',
-            },
-            axisTicks: {
-                color: '#d6ddea',
-            },
-        },
-        yaxis: {
-            labels: {
-                offsetX: -10,
-            },
-        },
-        legend: {
-            offsetY: -10,
-        },
-        states: {
-            hover: {
-                filter: 'none',
-            },
-        },
-        grid: {
-            borderColor: '#f1f3fa',
         },
     });
+
+    const formatXaxis = ({ value }) => {
+        return moment(value).tz(timeZone).format(`${dateFormat}`);
+    };
+
+    const toolTipFormatter = ({ value }) => {
+        return daysCount >= 182
+            ? moment(value).tz(timeZone).format(`MMM 'YY`)
+            : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+    };
 
     const [energyChartOptions, setEnergyChartOptions] = useState({
         chart: {
@@ -223,6 +191,22 @@ const EndUseType = () => {
     };
 
     useEffect(() => {
+        const getXaxisForDaysSelected = (days_count) => {
+            const xaxisObj = xaxisLabelsCount(days_count);
+            if (xaxisObj) xaxisObj.legend = { enabled: false };
+            setXAxisObj(xaxisObj);
+        };
+
+        const getFormattedChartDates = (days_count) => {
+            const date_format = xaxisLabelsFormat(days_count);
+            setDateFormat(date_format);
+        };
+
+        getXaxisForDaysSelected(daysCount);
+        getFormattedChartDates(daysCount);
+    }, [daysCount]);
+
+    useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
@@ -237,6 +221,7 @@ const EndUseType = () => {
                         active: true,
                     },
                 ];
+                if (isPlugOnly) newList.shift();
                 bs.items = newList;
             });
             ComponentStore.update((s) => {
@@ -284,11 +269,18 @@ const EndUseType = () => {
             });
         };
         updateBreadcrumbStore();
-    }, [endUseName]);
+    }, [endUseName, isPlugOnly]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         if (endUseType === 'hvac') {
@@ -313,14 +305,9 @@ const EndUseType = () => {
     }, [endUseType]);
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
+        if (startDate === null || endDate === null) return;
 
-        let endUseTypeRequest = fetchEndUseType(endUseType);
+        const endUseTypeRequest = fetchEndUseType(endUseType);
 
         const endUsesDataFetch = async () => {
             setIsEndUsesDataFetched(true);
@@ -417,40 +404,31 @@ const EndUseType = () => {
 
         const plugUsageDataFetch = async () => {
             setIsPlugLoadChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, timeZone);
             await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
                 .then((res) => {
-                    let data = res.data;
+                    const response = res?.data;
+                    let energyCategories = [];
                     let energyData = [
                         {
-                            name: 'CONSUMPTION',
+                            name: 'Energy',
                             data: [],
                         },
                     ];
-                    data.map((record) => {
-                        let obj = {
-                            x: record.date,
-                            y: parseFloat((record.energy_consumption / 1000).toFixed(2)),
-                        };
-                        energyData[0].data.push(obj);
+                    response.forEach((record) => {
+                        energyCategories.push(record?.date);
+                        energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
                     });
-                    setEnergyChartData(energyData);
-                    setIsPlugLoadChartLoading(false);
+                    setEnergyConsumptionsCategories(energyCategories);
+                    setEnergyConsumptionsData(energyData);
                 })
-                .catch((error) => {
-                    setIsPlugLoadChartLoading(false);
-                });
+                .catch((error) => {});
         };
 
         endUsesDataFetch();
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch();
     }, [startDate, endDate, endUseType, bldgId]);
-
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount, timeZone);
-        setEnergyChartOptions({ ...energyChartOptions, xaxis: xaxisObj });
-    }, [daysCount]);
 
     const fetchEnduseTitle = (type) => {
         if (type === 'hvac') {
@@ -483,12 +461,18 @@ const EndUseType = () => {
             </div>
 
             <div className="mt-4">
-                <BarChartWidget
+                <ColumnChart
                     title={fetchEnduseTitle(endUseType)}
                     subtitle={'Energy Usage By Hour (kWh)'}
-                    series={energyChartData}
-                    startEndDayCount={daysCount}
+                    colors={[colors.datavizMain2]}
+                    categories={energyConsumptionsCategories}
+                    tooltipUnit={KPI_UNITS.KWH}
+                    series={energyConsumptionsData}
+                    isLegendsEnabled={false}
                     timeZone={timeZone}
+                    xAxisCallBackValue={formatXaxis}
+                    restChartProps={xAxisObj}
+                    tooltipCallBackValue={toolTipFormatter}
                 />
             </div>
 
