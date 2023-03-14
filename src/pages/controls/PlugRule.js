@@ -1312,120 +1312,122 @@ const PlugRule = () => {
             spaceTypeTypeFilterString,
         }).then((filters) => {
             const filterOptions = filters.data?.length ? filters.data[0] : filters.data;
-            const filterOptionsFetched = [
-                {
-                    label: 'Equipment Type',
-                    value: 'equipmentType',
-                    placeholder: 'All Equipment Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
-                        value: filterItem.equipment_type_id,
-                        label: filterItem.equipment_type_name,
-                    })),
-                    onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
-                    onDelete: () => {
-                        setEqupimentTypeFilterString('');
-                    },
-                },
-                {
-                    label: 'Floor',
-                    value: 'floor',
-                    placeholder: 'All Floors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
-                        value: filterItem.floor_id,
-                        label: filterItem.floor_name,
-                    })),
-                    onClose: (options) => filterHandler(setFloorTypeFilterString, options),
-                    onDelete: () => setFloorTypeFilterString(''),
-                },
-                {
-                    label: 'Space',
-                    value: 'space',
-                    placeholder: 'All Spaces',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.installed_space.map((filterItem) => ({
-                        value: filterItem.space_id,
-                        label: filterItem.space_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
-                    onDelete: () => setSpaceTypeFilterString(''),
-                },
-                {
-                    label: 'Space Type',
-                    value: 'spaceType',
-                    placeholder: 'All Space Types',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
-                        value: filterItem.space_type_id,
-                        label: filterItem.space_type_name,
-                    })),
-                    onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
-                    onDelete: () => setSpaceTypeTypeFilterString(''),
-                },
-                {
-                    label: 'MAC Address',
-                    value: 'macAddresses',
-                    placeholder: 'All Mac addresses',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.mac_address.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setMacTypeFilterString, options),
-                    onDelete: () => {
-                        setMacTypeFilterString('');
-                    },
-                },
-                {
-                    label: 'Sensors',
-                    value: 'sensor_count',
-                    placeholder: 'All Sensors',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                    onDelete: setSensorTypeFilterString(''),
-                },
-                {
-                    label: 'Assigned rule',
-                    value: 'assigned_rule',
-                    placeholder: 'All assigned rule',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
-                        value: filterItem.plug_rule_id,
-                        label: filterItem.plug_rule_name,
-                    })),
-                    onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
-                    onDelete: setAssignedRuleFilterString(''),
-                },
-                {
-                    label: 'Tags',
-                    value: 'tags',
-                    placeholder: 'All tags',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.tags.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setTagsFilterString, options),
-                    onDelete: setTagsFilterString(''),
-                },
-                {
-                    label: 'Last used data',
-                    value: 'last_used_data',
-                    placeholder: 'All last used data',
-                    filterType: FILTER_TYPES.MULTISELECT,
-                    filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
-                        value: filterItem,
-                        label: filterItem,
-                    })),
-                    onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
-                    onDelete: setLastUsedDataFilterString(''),
-                },
-            ];
+            const filterOptionsFetched = !_.isEmpty(filterOptions)
+                ? [
+                      {
+                          label: 'Equipment Type',
+                          value: 'equipmentType',
+                          placeholder: 'All Equipment Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.equipment_type.map((filterItem) => ({
+                              value: filterItem.equipment_type_id,
+                              label: filterItem.equipment_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setEqupimentTypeFilterString, options),
+                          onDelete: () => {
+                              setEqupimentTypeFilterString('');
+                          },
+                      },
+                      {
+                          label: 'Floor',
+                          value: 'floor',
+                          placeholder: 'All Floors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_floor.map((filterItem) => ({
+                              value: filterItem.floor_id,
+                              label: filterItem.floor_name,
+                          })),
+                          onClose: (options) => filterHandler(setFloorTypeFilterString, options),
+                          onDelete: () => setFloorTypeFilterString(''),
+                      },
+                      {
+                          label: 'Space',
+                          value: 'space',
+                          placeholder: 'All Spaces',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space.map((filterItem) => ({
+                              value: filterItem.space_id,
+                              label: filterItem.space_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeFilterString, options),
+                          onDelete: () => setSpaceTypeFilterString(''),
+                      },
+                      {
+                          label: 'Space Type',
+                          value: 'spaceType',
+                          placeholder: 'All Space Types',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.installed_space_type.map((filterItem) => ({
+                              value: filterItem.space_type_id,
+                              label: filterItem.space_type_name,
+                          })),
+                          onClose: (options) => filterHandler(setSpaceTypeTypeFilterString, options),
+                          onDelete: () => setSpaceTypeTypeFilterString(''),
+                      },
+                      {
+                          label: 'MAC Address',
+                          value: 'macAddresses',
+                          placeholder: 'All Mac addresses',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.mac_address.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setMacTypeFilterString, options),
+                          onDelete: () => {
+                              setMacTypeFilterString('');
+                          },
+                      },
+                      {
+                          label: 'Sensors',
+                          value: 'sensor_count',
+                          placeholder: 'All Sensors',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.sensor_count.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setSensorTypeFilterString, options),
+                          onDelete: setSensorTypeFilterString(''),
+                      },
+                      {
+                          label: 'Assigned rule',
+                          value: 'assigned_rule',
+                          placeholder: 'All assigned rule',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.assigned_rule.map((filterItem) => ({
+                              value: filterItem.plug_rule_id,
+                              label: filterItem.plug_rule_name,
+                          })),
+                          onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
+                          onDelete: setAssignedRuleFilterString(''),
+                      },
+                      {
+                          label: 'Tags',
+                          value: 'tags',
+                          placeholder: 'All tags',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.tags.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setTagsFilterString, options),
+                          onDelete: setTagsFilterString(''),
+                      },
+                      {
+                          label: 'Last used data',
+                          value: 'last_used_data',
+                          placeholder: 'All last used data',
+                          filterType: FILTER_TYPES.MULTISELECT,
+                          filterOptions: filterOptions?.last_used_data.map((filterItem) => ({
+                              value: filterItem,
+                              label: filterItem,
+                          })),
+                          onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
+                          onDelete: setLastUsedDataFilterString(''),
+                      },
+                  ]
+                : [];
             setFilterOptions(filterOptionsFetched);
         });
 

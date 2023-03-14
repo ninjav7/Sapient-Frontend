@@ -21,3 +21,10 @@
 .child-modal-style {
     opacity: 0.7 !important;
 }
+
+.sensor-chart-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
