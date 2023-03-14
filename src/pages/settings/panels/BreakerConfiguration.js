@@ -107,6 +107,8 @@ const BreakerConfiguration = ({
     const [secondSensorList, setSecondSensorList] = useState([]);
     const [thirdSensorList, setThirdSensorList] = useState([]);
 
+    const [selectedDevicesList, setSelectedDevicesList] = useState([]);
+
     // Unlink Alert Modal
     const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
     const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
@@ -277,6 +279,7 @@ const BreakerConfiguration = ({
         setSensorChartData([]);
         setConsumption(metric[0].value);
         setFetchingSensorData(false);
+        setSelectedDevicesList([]);
     };
 
     const handleChange = (key, value) => {
@@ -609,8 +612,9 @@ const BreakerConfiguration = ({
 
         let equipLink;
 
+        // Purpose for parentBreakerObj?.type !== 'equipment => When No change done with Equipment
         // Equip TO No-Equip attached
-        if (currentEquipObj?.id && !newEquipObj?.id) equipLink = [];
+        if (currentEquipObj?.id && !newEquipObj?.id && parentBreakerObj?.type !== 'equipment') equipLink = [];
 
         // No-Equip TO Equip attached
         if (!currentEquipObj?.id && newEquipObj?.id) equipLink = [newEquipObj?.id];
@@ -813,6 +817,11 @@ const BreakerConfiguration = ({
                     newArray.push(obj);
                 });
 
+                if (device_search && device_search !== 'default-list' && selectedDevicesList.length !== 0) {
+                    const newList = selectedDevicesList.concat(newArray);
+                    newArray = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+                }
+
                 if (type === 'first') setFirstPassiveDevicesList(newArray);
                 if (type === 'second') setSecondPassiveDevicesList(newArray);
                 if (type === 'third') setThirdPassiveDevicesList(newArray);
@@ -1014,6 +1023,64 @@ const BreakerConfiguration = ({
         setSecondPassiveDevicesList(newList);
         setThirdPassiveDevicesList(newList);
     }, [passiveDevicesList]);
+
+    useEffect(() => {
+        if (!selectedBreakerObj?.id) return;
+
+        const deviceList = [];
+        const breakerObj = Object.assign({}, selectedBreakerObj);
+
+        if (breakerObj?.device_link !== '') {
+            deviceList.push({
+                label: breakerObj?.device_name,
+                value: breakerObj?.device_link,
+                isDisabled: false,
+            });
+        }
+
+        // For Breaker Type 2
+        if (breakerObj?.breaker_type === 2) {
+            let breakerObjTwo = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
+            if (breakerObjTwo?.device_link !== '') {
+                deviceList.push({
+                    label: breakerObjTwo?.device_name,
+                    value: breakerObjTwo?.device_link,
+                    isDisabled: false,
+                });
+            }
+        }
+
+        // For Breaker Type 3
+        if (breakerObj?.breaker_type === 3) {
+            let childbreakers = breakersList.filter((el) => el?.parent_breaker === breakerObj?.id);
+            if (childbreakers[0]?.device_name !== '') {
+                deviceList.push({
+                    label: childbreakers[0]?.device_name,
+                    value: childbreakers[0]?.device_link,
+                    isDisabled: false,
+                });
+            }
+            if (childbreakers[1]?.device_name !== '') {
+                deviceList.push({
+                    label: childbreakers[1]?.device_name,
+                    value: childbreakers[1]?.device_link,
+                    isDisabled: false,
+                });
+            }
+        }
+
+        const filteredList = [...new Set(deviceList.map(JSON.stringify))].map(JSON.parse);
+        setSelectedDevicesList(filteredList);
+    }, [selectedBreakerObj]);
+
+    useEffect(() => {
+        if (selectedDevicesList.length === 0) return;
+        const newList = selectedDevicesList.concat(passiveDevicesList);
+        const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+        setFirstPassiveDevicesList(filteredList);
+        setSecondPassiveDevicesList(filteredList);
+        setThirdPassiveDevicesList(filteredList);
+    }, [selectedDevicesList]);
 
     useEffect(() => {
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
