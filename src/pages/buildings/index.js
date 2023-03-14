@@ -6,7 +6,7 @@ import { apiRequestBody } from '../../helpers/helpers';
 import { useAtom } from 'jotai';
 import moment from 'moment';
 import 'moment-timezone';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import {
     fetchOverallBldgData,
     fetchBuildingEquipments,
@@ -32,8 +32,8 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import './style.css';
 
 const BuildingOverview = () => {
+    const { bldgId } = useParams();
     const [buildingListData] = useAtom(buildingData);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const history = useHistory();
 
@@ -129,7 +129,12 @@ const BuildingOverview = () => {
     };
 
     const builidingEquipmentsData = async () => {
-        const payload = apiRequestBody(startDate, endDate, timeZone);
+        let time_zone = 'US/Eastern';
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            time_zone = bldgObj?.timezone;
+        }
+        const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
                 let response = res.data[0].top_contributors;
@@ -173,8 +178,24 @@ const BuildingOverview = () => {
     useEffect(() => {
         if (startDate === null || endDate === null) return;
 
+        let time_zone = 'US/Eastern';
+
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+
         const buildingOverallData = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchOverallBldgData(bldgId, payload)
                 .then((res) => {
                     setOverallBldgData(res.data);
@@ -184,7 +205,7 @@ const BuildingOverview = () => {
 
         const buildingEndUserData = async () => {
             const params = `?building_id=${bldgId}&off_hours=false`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEndUseByBuilding(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
@@ -196,7 +217,7 @@ const BuildingOverview = () => {
 
         const buildingHourlyData = async () => {
             setIsAvgConsumptionDataLoading(true);
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     let response = res?.data;
@@ -305,7 +326,7 @@ const BuildingOverview = () => {
         };
 
         const buildingConsumptionChart = async () => {
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEnergyConsumption(bldgId, payload)
                 .then((res) => {
                     const response = res?.data;

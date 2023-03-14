@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import Header from '../../components/Header';
 import { fetchEndUsesChart, fetchEndUses } from '../endUses/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -7,30 +8,28 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { apiRequestBody } from '../../helpers/helpers';
-import './style.css';
 import { TopEndUsesWidget } from '../../sharedComponents/topEndUsesWidget';
 import { UNITS } from '../../constants/units';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { formatConsumptionValue } from '../../sharedComponents/helpers/helper';
 import { fetchTrendType } from './utils';
 import EndUsesTypeWidget from './endUsesTypeWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
 import Brick from '../../sharedComponents/brick';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import { useParams } from 'react-router-dom';
+import { buildingData } from '../../store/globalState';
+import './style.css';
 
 const EndUsesPage = () => {
     const history = useHistory();
 
     const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-
-    const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
-    const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
@@ -84,17 +83,27 @@ const EndUsesPage = () => {
     }, []);
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
+        if (startDate === null || endDate === null) return;
+
+        let time_zone = 'US/Eastern';
+
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
         }
 
         const endUsesDataFetch = async () => {
-            setIsEndUsesDataFetched(true);
             const params = `?building_id=${bldgId}`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEndUses(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
@@ -166,17 +175,13 @@ const EndUsesPage = () => {
                     setEndUsesData(data);
 
                     setTopEndUsesData(endUsesList);
-                    setIsEndUsesDataFetched(false);
                 })
-                .catch((error) => {
-                    setIsEndUsesDataFetched(false);
-                });
+                .catch((error) => {});
         };
 
         const endUsesChartDataFetch = async () => {
-            setIsEndUsesChartLoading(true);
             setStackedColumnChartData([]);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchEndUsesChart(bldgId, payload)
                 .then((res) => {
                     let responseData = res?.data;
@@ -204,11 +209,8 @@ const EndUsesPage = () => {
                     setEndUseCategories(endUseColors);
                     setStackedColumnChartCategories(formattedTimestamp);
                     setStackedColumnChartData(formattedData);
-                    setIsEndUsesChartLoading(false);
                 })
-                .catch((error) => {
-                    setIsEndUsesChartLoading(false);
-                });
+                .catch((error) => {});
         };
 
         endUsesDataFetch();

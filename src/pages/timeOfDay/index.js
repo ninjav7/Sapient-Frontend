@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 import Header from '../../components/Header';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -9,35 +11,16 @@ import { BuildingStore } from '../../store/BuildingStore';
 import HeatMapWidget from '../../sharedComponents/heatMapWidget';
 import { apiRequestBody } from '../../helpers/helpers';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
-import './style.css';
 import Brick from '../../sharedComponents/brick';
-import { useParams } from 'react-router-dom';
+import { buildingData } from '../../store/globalState';
+import './style.css';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-
-    // temperory soln
-    const getTimeData = (value) => {
-        if (value === 1) {
-            return '12AM';
-        }
-        if (value === 13) {
-            return '12PM';
-        }
-        if (value >= 2 && value <= 12) {
-            let num = value - 1;
-            let time = `${num}AM`;
-            return time;
-        }
-        if (value >= 14) {
-            let num = value - 13;
-            let time = `${num}PM`;
-            return time;
-        }
-    };
 
     const [lineChartData, setLineChartData] = useState([]);
 
@@ -47,21 +30,16 @@ const TimeOfDay = () => {
     });
 
     const [heatMapChartData, setHeatMapChartData] = useState([]);
-    const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
     const weekdaysChartHeight = '400px';
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
-    const [isEndUsageChartLoading, setIsEndUsageChartLoading] = useState(false);
-
     const metric = [{ value: 'energy', label: 'Energy', unit: 'kWh', Consumption: 'Energy' }];
 
     const getAverageValue = (value, min, max) => {
-        if (min == undefined || max === undefined) {
-            return 0;
-        }
-        let percentage = Math.round(((value - min) / (max - min)) * 100);
+        if (min == undefined || max === undefined) return 0;
+        const percentage = Math.round(((value - min) / (max - min)) * 100);
         return Math.round(percentage);
     };
 
@@ -88,17 +66,27 @@ const TimeOfDay = () => {
     }, []);
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
+        if (startDate === null || endDate === null) return;
+
+        let time_zone = 'US/Eastern';
+
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
         }
 
         const endUsesByOfHour = async () => {
-            setIsEndUsageChartLoading(true);
             const params = `?building_id=${bldgId}&off_hours=true`;
-            const payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchBuildingAfterHours(params, payload)
                 .then((res) => {
                     const response = res?.data?.data;
@@ -120,15 +108,12 @@ const TimeOfDay = () => {
                         newDonutData.push(fixedConsumption);
                     });
                     setDonutChartData(newDonutData);
-                    setIsEndUsageChartLoading(false);
                 })
-                .catch((error) => {
-                    setIsEndUsageChartLoading(false);
-                });
+                .catch((error) => {});
         };
 
         const dailyUsageByHour = async () => {
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchBuilidingHourly(bldgId, payload)
                 .then((res) => {
                     const response = res?.data;
@@ -196,8 +181,7 @@ const TimeOfDay = () => {
         };
 
         const averageUsageByHourFetch = async () => {
-            setIsAvgHourlyChartLoading(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
+            const payload = apiRequestBody(startDate, endDate, time_zone);
             await fetchAvgDailyUsageByHour(bldgId, payload)
                 .then((res) => {
                     let response = res.data;
@@ -707,11 +691,8 @@ const TimeOfDay = () => {
                     });
 
                     setHeatMapChartData(heatMapData.reverse());
-                    setIsAvgHourlyChartLoading(false);
                 })
-                .catch((error) => {
-                    setIsAvgHourlyChartLoading(false);
-                });
+                .catch((error) => {});
         };
 
         endUsesByOfHour();
