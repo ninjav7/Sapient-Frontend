@@ -8,11 +8,13 @@
         padding: 1rem 1rem 0.3125rem 1rem;
         position: relative;
     }
+
     &-download-button {
         padding: 0 !important;
         height: 2.25rem;
         width: 2.25rem;
         justify-content: center;
+
         &.button svg path {
             fill: $primary-gray-800;
         }
@@ -23,7 +25,7 @@
         bottom: 1rem;
         right: 0.5rem;
 
-        //@TODO It's probably temporary 
+        //@TODO It's probably temporary
         &.no-legends {
             position: static;
             margin-left: auto;
@@ -38,10 +40,8 @@
     @extend .box-shadow-lg;
     padding: 0.4375rem 0.8125rem;
     background: $base-white;
-
     border-radius: 0.25rem;
     overflow: hidden;
-
     border: 0.0625rem solid $primary-gray-450;
 
     td + td {
@@ -51,6 +51,7 @@
 
 .highcharts-legend-item {
     margin-top: -0.25rem;
+
     .highcharts-point {
         width: 0.5rem;
         height: 0.5rem;

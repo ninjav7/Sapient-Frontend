@@ -2,14 +2,14 @@ import React from 'react';
 import { splat } from 'highcharts';
 import _ from 'lodash';
 
-import Typography from '../../../typography';
+import { tooltipLowMedHighTemplate } from './tooltipLowMedHighTemplate';
 
-import { renderComponents } from '../../../columnChart/helper';
+import { UNITS } from '../../../../constants/units';
 import { LOW_MED_HIGH } from './contants';
 import './lowmedhigh.scss';
 
 export const HighchartsLowMedHigh = (H) => {
-    const unitTemp = `°F`;
+    const unitTemp = UNITS.F;
 
     H.wrap(H.Tooltip.prototype, 'defaultFormatter', function (proceed, tooltip) {
         const { items, lowhighmed } = splat(this.points).reduce(
@@ -38,46 +38,9 @@ export const HighchartsLowMedHigh = (H) => {
 
         if (lowHighMedItem) {
             const { options } = lowHighMedItem.point;
-            const tempInfo = renderComponents(
-                <div className="tooltip-low-med-high">
-                    <div className="d-flex align-items-center justify-content-center">
-                        <Typography.Body size={Typography.Sizes.xxs} className="gray-450">
-                            Avg
-                        </Typography.Body>
-                        <div style={{ width: '0.25rem' }}></div>
-                        <Typography.Subheader size={Typography.Sizes.md} className="gray-900">
-                            {options.median}
-                        </Typography.Subheader>
-                        <Typography.Body size={Typography.Sizes.xxs} className="gray-550">
-                            {unitTemp}
-                        </Typography.Body>
-                    </div>
+            const lomMedHighHtml = tooltipLowMedHighTemplate({ ...options, unitTemp });
 
-                    <div className="d-flex">
-                        <div className="d-flex align-items-center justify-content-center">
-                            <div className="tooltip-low-med-high-min-temp" />
-                            <div style={{ width: '0.25rem' }}></div>
-                            <Typography.Body size={Typography.Sizes.xxs}>{options.low}</Typography.Body>
-                            <Typography.Body size={Typography.Sizes.xxs} className="gray-550">
-                                {unitTemp}
-                            </Typography.Body>
-                        </div>
-
-                        <div style={{ width: '0.328125rem' }}></div>
-
-                        <div className="d-flex  align-items-center ">
-                            <div className="tooltip-low-med-high-max-temp" />
-                            <div style={{ width: '0.25rem' }}></div>
-                            <Typography.Body size={Typography.Sizes.xxs}>{options.high}</Typography.Body>
-                            <Typography.Body size={Typography.Sizes.xxs} className="gray-550">
-                                {unitTemp}
-                            </Typography.Body>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            s.push(`<tr><td colspan='2'>${tempInfo}</td></tr>`);
+            s.push(lomMedHighHtml);
         }
 
         // footer
@@ -98,10 +61,10 @@ export const HighchartsLowMedHigh = (H) => {
             // Change point shape to a line with three crossing lines for low/median/high
             // Stroke width is hardcoded to 1 for simplicity
             drawPoints: function () {
-                var series = this;
+                const series = this;
 
                 this.points.forEach(function (point) {
-                    var graphic = point.graphic,
+                    let graphic = point.graphic,
                         verb = graphic ? 'animate' : 'attr',
                         shapeArgs = point.shapeArgs,
                         width = shapeArgs.width,

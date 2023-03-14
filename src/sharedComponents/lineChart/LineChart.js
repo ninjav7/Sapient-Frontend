@@ -11,9 +11,9 @@ import { ReactComponent as ArrowSVG } from '../../assets/icon/arrow.svg';
 import { ReactComponent as BurgerSVG } from '../../assets/icon/burger.svg';
 import DropDownIcon from '../dropDowns/dropDownButton/DropDownIcon';
 import EmptyLineChart from './components/emptyLineChart/EmptyLineChart';
-import { options, PLOT_BANDS_TYPE } from './constants';
+import { options } from './constants';
 import { DOWNLOAD_TYPES } from '../constants';
-import colors from '../../assets/scss/_colors.scss';
+import { PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
 
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
@@ -21,40 +21,11 @@ import { generateID, stringOrNumberPropTypes } from '../helpers/helper';
 import { UNITS } from '../../constants/units';
 
 import Brick from '../brick';
+import { UpperLegendComponent } from '../common/charts/components/UpperLegendComponent/UpperLegendComponent';
+import { usePlotBandsLegends } from '../common/charts/hooks/usePlotBandsLegends';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
-
-const LegendComponent = ({ onClick, label, styles, disabled }) => {
-    const [isDisabled, setIsDisabled] = useState(!!disabled);
-
-    const handlerClick = () => {
-        const state = !isDisabled;
-
-        setIsDisabled((state) => {
-            return !state;
-        });
-
-        onClick && onClick(state);
-    };
-
-    return (
-        <>
-            <button
-                className="reset-styles d-flex align-items-center plot-bands-legends-item"
-                role="btn"
-                style={{
-                    opacity: isDisabled ? 0.4 : 1,
-                }}
-                onClick={handlerClick}>
-                <div className="plot-bands-legends-circle" style={styles} />
-                <Typography.Subheader size={Typography.Sizes.sm} className="gray-550">
-                    {label}
-                </Typography.Subheader>
-            </button>
-        </>
-    );
-};
 
 const LineChart = (props) => {
     const chartComponentRef = useRef(null);
@@ -75,15 +46,7 @@ const LineChart = (props) => {
         unitInfo,
         chartProps,
     } = props;
-
-    const [plotBands, setPlotBands] = useState(plotBandsProp);
-
-    useEffect(() => {
-        setPlotBands(plotBandsProp);
-    }, [plotBandsProp]);
-
-    useEffect(() => setPlotBands(plotBandsProp), [plotBandsProp?.length]);
-
+    
     useEffect(() => {
         const handleResize = () => {
             const width = wrapperRef.current?.offsetWidth;
@@ -126,87 +89,8 @@ const LineChart = (props) => {
         chartComponentRef.current.chart.exportChart({ type: 'image/svg+xml' });
     };
 
-    const renderPlotBandsLegends = useCallback(
-        _.uniqBy(
-            [...(plotBandsLegends || []), ...(plotBandsProp || []).filter((plot) => plot.type in PLOT_BANDS_TYPE)],
-            (obj) => obj.type
-        ).map((plotLegend) => {
-            let styles;
+    const { plotBands, renderPlotBandsLegends } = usePlotBandsLegends({ plotBandsProp, plotBandsLegends });
 
-            let label, color, onClick;
-
-            switch (plotLegend.type) {
-                case PLOT_BANDS_TYPE.off_hours:
-                    {
-                        label = 'Plug Rule Off-Hours';
-                        color = 'rgb(16 24 40 / 25%)';
-                        onClick = (disabled) => {
-                            setPlotBands((oldState) =>
-                                disabled
-                                    ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.off_hours)
-                                    : [
-                                          ...oldState,
-                                          ...plotBandsProp.filter((data) => data.type === PLOT_BANDS_TYPE.off_hours),
-                                      ]
-                            );
-                        };
-                        styles = {
-                            background: color,
-                        };
-                    }
-                    break;
-                case PLOT_BANDS_TYPE.after_hours:
-                    {
-                        label = 'After-Hours';
-                        color = {
-                            background: 'rgba(180, 35, 24, 0.1)',
-                            borderColor: colors.error700,
-                        };
-                        onClick = (disabled) => {
-                            setPlotBands((oldState) =>
-                                disabled
-                                    ? oldState.filter((data) => data.type !== PLOT_BANDS_TYPE.after_hours)
-                                    : [
-                                          ...oldState,
-                                          ...plotBandsProp.filter((data) => data.type === PLOT_BANDS_TYPE.after_hours),
-                                      ]
-                            );
-                        };
-                        styles = {
-                            background: color.background,
-                            border: `0.0625rem solid ${color.borderColor}`,
-                        };
-                    }
-                    break;
-                default: {
-                    label = plotLegend.label;
-                    color = plotLegend.color;
-                    onClick = plotLegend.onClick;
-
-                    styles =
-                        typeof color === 'string'
-                            ? {
-                                  background: color,
-                              }
-                            : {
-                                  background: color.background,
-                                  border: `0.0625rem solid ${color.borderColor}`,
-                              };
-                }
-            }
-
-            return (
-                <LegendComponent
-                    key={generateID()}
-                    onClick={onClick}
-                    label={label}
-                    styles={styles}
-                    type={plotLegend.type}
-                />
-            );
-        }),
-        []
-    );
     const chartConfig = _.merge(
         options({
             data,
@@ -228,7 +112,11 @@ const LineChart = (props) => {
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
                 {!!renderPlotBandsLegends?.length && (
-                    <div className="ml-auto d-flex plot-bands-legends-wrapper">{renderPlotBandsLegends}</div>
+                    <div className="ml-auto d-flex plot-bands-legends-wrapper">
+                        {renderPlotBandsLegends.map((legendProps) => {
+                            return <UpperLegendComponent {...legendProps} key={generateID()} />;
+                        })}
+                    </div>
                 )}
                 {unitInfo && (
                     <div className="d-flex flex-column mr-4">
@@ -237,7 +125,9 @@ const LineChart = (props) => {
                             <Typography.Header size={Typography.Sizes.md} className="unit-value">
                                 {unitInfo.value}
                             </Typography.Header>
-                            <Typography.Subheader size={Typography.Sizes.sm} className="unit"> {unitInfo.unit}</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm} className="unit">
+                                {unitInfo.unit}
+                            </Typography.Subheader>
                         </div>
                     </div>
                 )}
