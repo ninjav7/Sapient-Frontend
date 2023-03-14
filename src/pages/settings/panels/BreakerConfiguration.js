@@ -845,13 +845,13 @@ const BreakerConfiguration = ({
             promisesList.push(promiseOne);
         }
 
-        if (sensors_list.length >= 2) {
+        if (sensors_list.length >= 2 && selected_consmption !== 'power') {
             const params = `?sensor_id=${sensors_list[1]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseTwo = getSensorGraphData(params, payload);
             promisesList.push(promiseTwo);
         }
 
-        if (sensors_list.length === 3) {
+        if (sensors_list.length === 3 && selected_consmption !== 'power') {
             const params = `?sensor_id=${sensors_list[2]?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
             const promiseThree = getSensorGraphData(params, payload);
             promisesList.push(promiseThree);
@@ -861,25 +861,45 @@ const BreakerConfiguration = ({
             .then((res) => {
                 const response = res;
                 const sensorData = [];
-                sensors_list.forEach((record, index) => {
+
+                if (selected_consmption === 'power') {
+                    let powerConsumpLabel = '';
+
+                    if (firstBreakerObj?.breaker_type === 1)
+                        powerConsumpLabel = `Breaker ${firstBreakerObj?.breaker_number}`;
+                    if (firstBreakerObj?.breaker_type === 2)
+                        powerConsumpLabel = `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}`;
+                    if (firstBreakerObj?.breaker_type === 3)
+                        powerConsumpLabel = `Breakers ${firstBreakerObj?.breaker_number}, ${secondBreakerObj?.breaker_number}, ${thirdBreakerObj?.breaker_number}`;
+
                     const sensorObj = {
-                        name: `Sensor ${record?.name}`,
+                        name: powerConsumpLabel,
                         data: [],
                     };
-                    response[index].data.forEach((record) => {
+                    response[0].data.forEach((record) => {
                         const obj = {
                             x: new Date(record?.time_stamp).getTime(),
-                            y:
-                                record?.consumption === ''
-                                    ? null
-                                    : selected_consmption === 'power'
-                                    ? record?.consumption / 1000
-                                    : record?.consumption,
+                            y: record?.consumption === '' ? null : record?.consumption / 1000,
                         };
                         sensorObj.data.push(obj);
                     });
                     sensorData.push(sensorObj);
-                });
+                } else {
+                    sensors_list.forEach((record, index) => {
+                        const sensorObj = {
+                            name: `Sensor ${record?.name}`,
+                            data: [],
+                        };
+                        response[index].data.forEach((record) => {
+                            const obj = {
+                                x: new Date(record?.time_stamp).getTime(),
+                                y: record?.consumption === '' ? null : record?.consumption,
+                            };
+                            sensorObj.data.push(obj);
+                        });
+                        sensorData.push(sensorObj);
+                    });
+                }
                 setSensorChartData(sensorData);
                 setFetchingSensorData(false);
             })

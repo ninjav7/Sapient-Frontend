@@ -93,20 +93,4 @@
     .highcharts-legend .highcharts-area-series rect {
         display: none;
     }
-
-    .plot-bands-legends {
-        &-circle {
-            width: 0.5rem;
-            height: 0.5rem;
-            border-radius: 100%;
-            margin-right: 0.5rem;
-        }
-        &-item {
-            padding: 0 0.4375rem;
-        }
-        &-wrapper {
-            gap: 0.25rem;
-            margin-right: 1.125rem;
-        }
-    }
 }

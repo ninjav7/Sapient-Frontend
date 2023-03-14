@@ -4,11 +4,7 @@ import { DATAVIZ_COLORS } from '../../constants/colors';
 import { renderComponents } from '../columnChart/helper';
 import Typography from '../../sharedComponents/typography';
 import colors from '../../assets/scss/_colors.scss';
-
-export const PLOT_BANDS_TYPE = Object.freeze({
-    off_hours: 'off_hours',
-    after_hours: 'after_hours'
-});
+import { PLOT_BANDS_TYPE } from '../common/charts/modules/contants';
 
 const preparedData = (data) => {
     return data.map((el, index) => {
@@ -43,7 +39,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
                         from,
                         to,
                         color: 'rgb(16 24 40 / 25%)',
-                    }
+                    };
                 }
                 case PLOT_BANDS_TYPE.after_hours: {
                     return [
@@ -73,7 +69,7 @@ export const options = ({ data, dateRange, Highcharts, tooltipUnit, tooltipLabel
                     ];
                 }
             }
-            
+
             if (Array.isArray(background)) {
                 return [
                     {
