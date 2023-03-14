@@ -1256,7 +1256,8 @@ const BreakerConfiguration = ({
                                                 <div className="p-default">
                                                     <div>
                                                         <div className="d-flex align-items-center">
-                                                            <div className="mr-2">
+                                                            {/* PLT-1034 : Commented as part of In Progress changes and  PROD Deployment */}
+                                                            {/* <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-1"
                                                                     checked={firstBreakerObj?.type === 'equipment'}
@@ -1270,7 +1271,7 @@ const BreakerConfiguration = ({
                                                                         );
                                                                     }}
                                                                 />
-                                                            </div>
+                                                            </div> */}
                                                             <div className="w-100">
                                                                 {isEquipmentListFetching ? (
                                                                     <Skeleton count={1} height={35} />
@@ -1297,8 +1298,9 @@ const BreakerConfiguration = ({
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <Brick sizeInRem={0.65} />
-                                                        <div className="d-flex align-items-center">
+                                                        {/* PLT-1034 : Commented as part of In Progress changes and  PROD Deployment */}
+                                                        {/* <Brick sizeInRem={0.65} /> */}
+                                                        {/* <div className="d-flex align-items-center">
                                                             <div className="mr-2">
                                                                 <Radio
                                                                     name="radio-2"
@@ -1357,7 +1359,7 @@ const BreakerConfiguration = ({
                                                             <Typography.Body size={Typography.Sizes.md}>
                                                                 Blank
                                                             </Typography.Body>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                     <Brick sizeInRem={2} />
                                                     <div className="w-100">
