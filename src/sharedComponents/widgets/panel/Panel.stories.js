@@ -79,11 +79,14 @@ Default.args = {
         console.log(breakerProps, breakerData, children);
         const equipmentName = breakerData?.equipment_links[0]?.name;
         const status = Breaker.Status.online;
+        
+        const isLoading = nodes[4].id === breakerProps._id;
 
         //here you can modify props for breakers
         return {
             ...breakerProps,
             equipmentName,
+            isLoading,
             items: breakerProps.items.map((breakerProp) => ({ ...breakerProp, status })),
         };
     },
