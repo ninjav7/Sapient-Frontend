@@ -64,6 +64,7 @@ const BreakerConfiguration = ({
     activeTab,
     setActiveTab,
     isEditingMode,
+    setBreakerUpdateId,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -593,6 +594,8 @@ const BreakerConfiguration = ({
         if (alertObj.rated_amps) return;
 
         setIsProcessing(true);
+        setBreakerUpdateId(firstBreakerObj?.id);
+        closeModalWithoutSave();
 
         let breakerTypeObj = {};
 
@@ -716,14 +719,12 @@ const BreakerConfiguration = ({
                     (response.length === 1 && response[0]?.status === 200) ||
                     (response.length === 2 && response[0]?.status === 200 && response[1]?.status === 200)
                 ) {
-                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker configuration updated successfully.';
                         s.notificationType = 'success';
                     });
                     setIsProcessing(false);
-                    window.scrollTo(0, 0);
                     setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
@@ -732,10 +733,12 @@ const BreakerConfiguration = ({
                         s.notificationType = 'error';
                     });
                     setIsProcessing(false);
+                    setBreakerUpdateId('');
                 }
             })
             .catch(() => {
                 setIsProcessing(false);
+                setBreakerUpdateId('');
             });
     };
 
