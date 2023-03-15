@@ -90,6 +90,7 @@ const BreakerConfiguration = ({
 
     const [selectedEquipment, setSelectedEquipment] = useState('');
     const [sensorsList, setSensorsList] = useState([]);
+    const [breakersId, setBreakersId] = useState([]);
 
     const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
     const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
@@ -508,25 +509,38 @@ const BreakerConfiguration = ({
         }
     };
 
-    const unLinkCurrentBreaker = async () => {
+    const unLinkCurrentBreaker = async (breakers_ids) => {
         setIsResetting(true);
 
-        const breakersList = [];
         const params = `?building_id=${bldgId}`;
-
-        if (firstBreakerObj?.id) breakersList.push(firstBreakerObj?.id);
-        if (secondBreakerObj?.id) breakersList.push(secondBreakerObj?.id);
-        if (thirdBreakerObj?.id) breakersList.push(thirdBreakerObj?.id);
-
-        const payload = { breaker_id: breakersList };
+        const payload = { breaker_id: breakers_ids };
 
         await resetAllBreakers(params, payload)
             .then((res) => {
                 setIsResetting(false);
+                const response = res?.data;
                 window.scrollTo(0, 0);
                 handleUnlinkAlertClose();
                 closeModalWithoutSave();
-                setBreakerAPITrigerred(true);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker has been reset successfully.';
+                        s.notificationType = 'success';
+                    });
+                    setBreakerAPITrigerred(true);
+                } else {
+                    setIsResetting(false);
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to reset Breaker.'
+                            : 'Unable to reset Breaker due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsResetting(false);
@@ -927,11 +941,14 @@ const BreakerConfiguration = ({
                 return;
             }
 
+            if (breakerObj?.breaker_type === 1) setBreakersId([breakerObj?.id]);
+
             // For Breaker Type 2
             if (breakerObj?.breaker_type === 2) {
                 let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
                 setSecondBreakerObj(obj);
                 setSecondBreakerObjOld(obj); // Added to track for any configuration change
+                setBreakersId([breakerObj?.id, obj?.id]);
                 if (breakerObj?.device_link === '' && obj?.device_link === '') return;
 
                 if (breakerObj?.device_link === obj?.device_link) {
@@ -949,7 +966,7 @@ const BreakerConfiguration = ({
                 setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
                 setThirdBreakerObj(childbreakers[1]);
                 setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
-
+                setBreakersId([breakerObj?.id, childbreakers[0]?.id, childbreakers[1]?.id]);
                 if (
                     breakerObj?.device_link === '' &&
                     childbreakers[0]?.device_link === '' &&
@@ -1766,11 +1783,6 @@ const BreakerConfiguration = ({
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
                                                     onClick={() => {
-                                                        if (
-                                                            parentBreakerObj?.type === 'blank' ||
-                                                            parentBreakerObj?.type === 'unwired'
-                                                        )
-                                                            return;
                                                         closeModalWithoutSave();
                                                         handleUnlinkAlertShow();
                                                     }}
@@ -1859,6 +1871,7 @@ const BreakerConfiguration = ({
                 handleEditBreakerShow={openBreakerConfigModal}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkCurrentBreaker={unLinkCurrentBreaker}
+                breakersId={breakersId}
             />
 
             <DeleteBreaker

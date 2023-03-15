@@ -300,21 +300,29 @@ const EditPanel = () => {
         await resetAllBreakers(params, payload)
             .then((res) => {
                 setIsResetting(false);
+                const response = res?.data;
                 handleUnlinkAlertClose();
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been reset successfully';
-                    s.notificationType = 'success';
-                });
-                setBreakerAPITrigerred(true);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been reset successfully';
+                        s.notificationType = 'success';
+                    });
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to reset Panel.'
+                            : 'Unable to reset Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsResetting(false);
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to reset Panel';
-                    s.notificationType = 'error';
-                });
             });
     };
 
@@ -1472,7 +1480,6 @@ const EditPanel = () => {
             <UnlinkAllBreakers
                 isResetting={isResetting}
                 showUnlinkAlert={showUnlinkAlert}
-                handleUnlinkAlertShow={handleUnlinkAlertShow}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkAllBreakers={unLinkAllBreakers}
             />
