@@ -11,6 +11,7 @@ import { BREAKER_CALLBACKS, BREAKER_ITEMS_PROP_MAP, BREAKER_STATUSES, BREAKER_TY
 
 import { ReactComponent as ChartSVG } from '../assets/icons/chart-mixed.svg';
 import { ReactComponent as PenSVG } from '../assets/icons/pen.svg';
+import { ReactComponent as LoadingSVG } from '../assets/icons/loading.svg';
 
 import './Breaker.scss';
 
@@ -29,8 +30,9 @@ const Breaker = (props) => {
         className,
         styleWrapper,
         isMain,
+        isLoading,
     } = props;
-    
+
     const onEdit = props[BREAKER_CALLBACKS.ON_EDIT];
     const onShowChart = props[BREAKER_CALLBACKS.ON_SHOW_CHART_DATA];
 
@@ -58,9 +60,11 @@ const Breaker = (props) => {
                 'is-flagged': isFlagged,
                 [type]: !!type,
                 'is-main': !!isMain,
+                'is-loading': isLoading,
                 className,
             })}
-            style={styleWrapper}>
+            style={styleWrapper}
+        >
             {items && (
                 <div className="breaker-content-collector breaker-id-wrapper">
                     {items.map(({ id }) => (
@@ -122,23 +126,29 @@ const Breaker = (props) => {
             )}
 
             <div className="breaker-action-buttons">
-                {onShowChart && (
-                    <Button
-                        className="breaker-action-btn"
-                        onClick={(event) => callBackMemoized(BREAKER_CALLBACKS.ON_SHOW_CHART_DATA, event)}
-                        type={Button.Type.secondaryGrey}
-                        label=""
-                        icon={<ChartSVG width={16} />}
-                    />
-                )}
-                {onEdit && (
-                    <Button
-                        className="breaker-action-btn"
-                        onClick={(event) => callBackMemoized(BREAKER_CALLBACKS.ON_EDIT, event)}
-                        type={Button.Type.secondaryGrey}
-                        label=""
-                        icon={<PenSVG width={15} />}
-                    />
+                {isLoading ? (
+                    <LoadingSVG class="breaker-is-loading" />
+                ) : (
+                    <>
+                        {onShowChart && (
+                            <Button
+                                className="breaker-action-btn"
+                                onClick={(event) => callBackMemoized(BREAKER_CALLBACKS.ON_SHOW_CHART_DATA, event)}
+                                type={Button.Type.secondaryGrey}
+                                label=""
+                                icon={<ChartSVG width={16} />}
+                            />
+                        )}
+                        {onEdit && (
+                            <Button
+                                className="breaker-action-btn"
+                                onClick={(event) => callBackMemoized(BREAKER_CALLBACKS.ON_EDIT, event)}
+                                type={Button.Type.secondaryGrey}
+                                label=""
+                                icon={<PenSVG width={15} />}
+                            />
+                        )}
+                    </>
                 )}
             </div>
         </div>
@@ -147,7 +157,7 @@ const Breaker = (props) => {
 
 Breaker.Status = BREAKER_STATUSES;
 Breaker.Type = BREAKER_TYPES;
-Breaker.ItemsPropMap = BREAKER_ITEMS_PROP_MAP
+Breaker.ItemsPropMap = BREAKER_ITEMS_PROP_MAP;
 
 Breaker.propTypes = {
     items: PropTypes.arrayOf(
@@ -167,6 +177,7 @@ Breaker.propTypes = {
     type: PropTypes.oneOf(Object.values(Breaker.Type)),
     styleWrapper: PropTypes.object,
     isMain: PropTypes.bool,
+    isLoading: PropTypes.bool,
 };
 
 export default Breaker;
