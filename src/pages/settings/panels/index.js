@@ -497,11 +497,16 @@ const Panels = () => {
                         pageListSizes={pageListSizes}
                         onEditRow={
                             userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
                                 ? (record, id, row) => handleClick(row)
                                 : null
                         }
-                        onDeleteRow={(record, id, row) => handlePanelDelete(row)}
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                ? (record, id, row) => handlePanelDelete(row)
+                                : null
+                        }
                         isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {
                             if (selectedFilter === 0) {

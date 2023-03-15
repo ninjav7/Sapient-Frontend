@@ -1280,6 +1280,8 @@ const EditPanel = () => {
         pageDefaultStates();
     }, []);
 
+    console.log('SSR userPermission => ', userPermission);
+
     return (
         <React.Fragment>
             <div className="d-flex justify-content-between">
@@ -1357,7 +1359,7 @@ const EditPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    disabled={
+                                    isDisabled={
                                         !(
                                             userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.building_panels_permission?.edit
@@ -1383,7 +1385,7 @@ const EditPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    disabled={
+                                    isDisabled={
                                         !(
                                             userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.building_panels_permission?.edit
@@ -1406,7 +1408,10 @@ const EditPanel = () => {
                     defaultValue: 1,
                 }}
                 numberOfBreakers={breakerCountObj}
-                isEditable={true}
+                isEditable={
+                    userPermission?.user_role === 'admin' ||
+                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                }
                 states={panelStates}
                 mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
                 dangerZoneProps={{
