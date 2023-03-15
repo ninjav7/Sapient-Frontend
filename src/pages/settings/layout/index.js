@@ -17,6 +17,7 @@ import { fetchFloors, fetchSpaces, addSpace, removeFloor } from './services';
 const Layout = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [editFloor, setEditFloor] = useState(false);
@@ -85,8 +86,6 @@ const Layout = () => {
             })
             .catch(() => {});
     };
-
-    const [userPermission] = useAtom(userPermissionData);
 
     const [deletingFloor, setDeletingFloorModal] = useAtom(deleteFloor);
     const handleDeleteClose = () => {
@@ -164,86 +163,101 @@ const Layout = () => {
                         spaces={spaces}
                         floors={floorData}
                         buildingData={building}
-                        onColumnAdd={(args) => {
-                            if (args?.bdId !== undefined && args?.bdId !== '') {
-                                setModalShow(true);
-                                setEditFloor(false);
-                                setModalType('floor');
-                                setCurrentFloorId('');
-                                setSpaceName('');
-                                setFloorName('');
-                                setCurrentSpaceId('');
-                                setParentSpace('');
-                                setTypeId('');
-                            } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                setModalShow(true);
-                                setEditFloor(false);
-                                setModalType('spaces');
-                                setCurrentFloorId(args?.floor_id);
-                                setSpaceName('');
-                                setFloorName('');
-                                setCurrentSpaceId('');
-                                setParentSpace('');
-                                setTypeId('');
-                            } else {
-                                setModalShow(true);
-                                setEditFloor(false);
-                                setModalType('spaces');
-                                setCurrentFloorId(args?.parents);
-                                setCurrentSpaceId(args?._id);
-                                setSpaceName('');
-                                setFloorName('');
-                                setParentSpace(args?._id);
-                                setTypeId('');
-                            }
-                        }}
-                        onColumnNameEdit={(args) => {
-                            if (args?.bdId === undefined)
-                                if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                    setModalShow(true);
-                                    setEditFloor(true);
-                                    setModalType('floor');
-                                    setCurrentFloorId(args?.floor_id);
-                                    setFloorName(args?.name);
-                                    setSpaceName('');
-                                    setCurrentSpaceId('');
-                                    setParentSpace('');
-                                    setTypeId('');
-                                } else {
-                                    setModalShow(true);
-                                    setEditFloor(true);
-                                    setModalType('spaces');
-                                    setCurrentFloorId(args?.parents);
-                                    setFloorName('');
-                                    setSpaceName(args?.name);
-                                    setCurrentSpaceId(args?._id);
-                                    setParentSpace(args?.parent_space);
-                                    setTypeId(args?.type_id);
-                                }
-                        }}
-                        onItemEdit={(args) => {
-                            if (args?.floor_id !== undefined && args?.floor_id !== '') {
-                                setModalShow(true);
-                                setEditFloor(true);
-                                setModalType('floor');
-                                setCurrentFloorId(args?.parents);
-                                setFloorName(args?.name);
-                                setSpaceName('');
-                                setCurrentSpaceId('');
-                                setParentSpace('');
-                                setTypeId('');
-                            } else {
-                                setModalShow(true);
-                                setEditFloor(true);
-                                setModalType('spaces');
-                                setFloorName('');
-                                setCurrentFloorId(args?.parents);
-                                setSpaceName(args?.name);
-                                setCurrentSpaceId(args?._id);
-                                setParentSpace(args?.parent_space);
-                                setTypeId(args?.type_id);
-                            }
-                        }}
+                        onColumnAdd={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (args) => {
+                                      if (args?.bdId !== undefined && args?.bdId !== '') {
+                                          setModalShow(true);
+                                          setEditFloor(false);
+                                          setModalType('floor');
+                                          setCurrentFloorId('');
+                                          setSpaceName('');
+                                          setFloorName('');
+                                          setCurrentSpaceId('');
+                                          setParentSpace('');
+                                          setTypeId('');
+                                      } else if (args?.floor_id !== undefined && args?.floor_id !== '') {
+                                          setModalShow(true);
+                                          setEditFloor(false);
+                                          setModalType('spaces');
+                                          setCurrentFloorId(args?.floor_id);
+                                          setSpaceName('');
+                                          setFloorName('');
+                                          setCurrentSpaceId('');
+                                          setParentSpace('');
+                                          setTypeId('');
+                                      } else {
+                                          setModalShow(true);
+                                          setEditFloor(false);
+                                          setModalType('spaces');
+                                          setCurrentFloorId(args?.parents);
+                                          setCurrentSpaceId(args?._id);
+                                          setSpaceName('');
+                                          setFloorName('');
+                                          setParentSpace(args?._id);
+                                          setTypeId('');
+                                      }
+                                  }
+                                : null
+                        }
+                        onColumnNameEdit={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (args) => {
+                                      if (args?.bdId === undefined)
+                                          if (args?.floor_id !== undefined && args?.floor_id !== '') {
+                                              setModalShow(true);
+                                              setEditFloor(true);
+                                              setModalType('floor');
+                                              setCurrentFloorId(args?.floor_id);
+                                              setFloorName(args?.name);
+                                              setSpaceName('');
+                                              setCurrentSpaceId('');
+                                              setParentSpace('');
+                                              setTypeId('');
+                                          } else {
+                                              setModalShow(true);
+                                              setEditFloor(true);
+                                              setModalType('spaces');
+                                              setCurrentFloorId(args?.parents);
+                                              setFloorName('');
+                                              setSpaceName(args?.name);
+                                              setCurrentSpaceId(args?._id);
+                                              setParentSpace(args?.parent_space);
+                                              setTypeId(args?.type_id);
+                                          }
+                                  }
+                                : null
+                        }
+                        onItemEdit={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (args) => {
+                                      if (args?.floor_id !== undefined && args?.floor_id !== '') {
+                                          setModalShow(true);
+                                          setEditFloor(true);
+                                          setModalType('floor');
+                                          setCurrentFloorId(args?.parents);
+                                          setFloorName(args?.name);
+                                          setSpaceName('');
+                                          setCurrentSpaceId('');
+                                          setParentSpace('');
+                                          setTypeId('');
+                                      } else {
+                                          setModalShow(true);
+                                          setEditFloor(true);
+                                          setModalType('spaces');
+                                          setFloorName('');
+                                          setCurrentFloorId(args?.parents);
+                                          setSpaceName(args?.name);
+                                          setCurrentSpaceId(args?._id);
+                                          setParentSpace(args?.parent_space);
+                                          setTypeId(args?.type_id);
+                                      }
+                                  }
+                                : null
+                        }
                         onClickEachChild={[onClickForAllItems]}
                     />
                 </Col>

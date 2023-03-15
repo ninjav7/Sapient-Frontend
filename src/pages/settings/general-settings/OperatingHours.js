@@ -62,13 +62,7 @@ const OperatingHours = (props) => {
                                 placeholder="Time"
                             />
                         ) : (
-                            <Inputs
-                                type="text"
-                                placeholder="Time"
-                                className="w-100"
-                                valuealue={props.startTime}
-                                disabled
-                            />
+                            <Inputs type="text" placeholder="Time" className="w-100" value={props.startTime} disabled />
                         )}
                     </div>
 
@@ -86,13 +80,7 @@ const OperatingHours = (props) => {
                                 placeholder="Time"
                             />
                         ) : (
-                            <Inputs
-                                type="text"
-                                placeholder="Time"
-                                className="w-100"
-                                valuealue={props.endTime}
-                                disabled
-                            />
+                            <Inputs type="text" placeholder="Time" className="w-100" value={props.endTime} disabled />
                         )}
                     </div>
                 </div>
