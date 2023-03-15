@@ -300,21 +300,29 @@ const EditPanel = () => {
         await resetAllBreakers(params, payload)
             .then((res) => {
                 setIsResetting(false);
+                const response = res?.data;
                 handleUnlinkAlertClose();
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been reset successfully';
-                    s.notificationType = 'success';
-                });
-                setBreakerAPITrigerred(true);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been reset successfully';
+                        s.notificationType = 'success';
+                    });
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to reset Panel.'
+                            : 'Unable to reset Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsResetting(false);
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to reset Panel';
-                    s.notificationType = 'error';
-                });
             });
     };
 
@@ -323,16 +331,31 @@ const EditPanel = () => {
         const params = `?panel_id=${panelId}`;
         await deleteCurrentPanel(params)
             .then((res) => {
+                const response = res?.data;
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
-                history.push({
-                    pathname: `/settings/panels`,
-                });
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been deleted successfully';
-                    s.notificationType = 'success';
-                });
+                if (response?.success) {
+                    history.push({
+                        pathname: `/settings/panels`,
+                    });
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Panel.'
+                            : 'Unable to delete Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsDeleting(false);
@@ -1472,7 +1495,6 @@ const EditPanel = () => {
             <UnlinkAllBreakers
                 isResetting={isResetting}
                 showUnlinkAlert={showUnlinkAlert}
-                handleUnlinkAlertShow={handleUnlinkAlertShow}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkAllBreakers={unLinkAllBreakers}
             />

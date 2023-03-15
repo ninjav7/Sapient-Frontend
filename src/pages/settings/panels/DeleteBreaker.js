@@ -10,6 +10,7 @@ const DeleteBreaker = ({
     handleEditBreakerShow,
     isDeleting,
     deleteCurrentBreaker,
+    breakersId,
 }) => {
     return (
         <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
@@ -38,7 +39,9 @@ const DeleteBreaker = ({
                     size={Button.Sizes.lg}
                     type={Button.Type.primaryDistructive}
                     disabled={isDeleting}
-                    onClick={deleteCurrentBreaker}
+                    onClick={() => {
+                        deleteCurrentBreaker(breakersId);
+                    }}
                 />
             </Modal.Footer>
         </Modal>
