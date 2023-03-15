@@ -5,7 +5,7 @@
     &-wrapper {
         @extend .box-shadow-xs;
         @extend .borders;
-        width: 21.625rem;
+        width: 21.875rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -48,9 +48,12 @@
             @extend .box-shadow-lg;
         }
 
-        &:hover .breaker-action-buttons {
-            overflow: visible;
-            opacity: 1;
+        &:hover,
+        &.is-loading {
+            .breaker-action-buttons {
+                overflow: visible;
+                opacity: 1;
+            }
         }
 
         //compensation based on counting of elements
@@ -62,6 +65,20 @@
         &.breaker-items-2 {
             .breaker-content-collector {
                 padding: 1.0625rem 0;
+            }
+        }
+    }
+
+    &-is-loading {
+        width: 1rem;
+        height: 1rem;
+        margin: auto;
+
+        .spinner-svg {
+            fill: $primary-gray-550;
+
+            &-background {
+                fill: $primary-gray-550;
             }
         }
     }
@@ -81,7 +98,7 @@
 
     &-device-id {
         display: flex;
-        
+
         &-badge {
             background: $primary-indigo-50 !important;
             padding: 0.0625rem 0.5rem;
