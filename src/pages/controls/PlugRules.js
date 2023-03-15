@@ -26,6 +26,7 @@ import Select from '../../sharedComponents/form/select';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Input from '../../sharedComponents/form/input/Input';
 import { fetchBuildingsList } from '../../services/buildings';
+import { getBuildingName } from '../../helpers/helpers';
 
 import { ReactComponent as InactiveSVG } from '../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../assets/icon/circle-check.svg';
@@ -291,7 +292,7 @@ const PlugRules = () => {
     };
 
     const handleDownloadCsv = async () => {
-        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps));
+        download('Plug_Rules', getPlugRulesTableCSVExport(dataForCSV(), headerProps, buildingListData));
     };
 
     useEffect(() => {
@@ -359,6 +360,8 @@ const PlugRules = () => {
             newRow.description = (
                 <Typography.Body size={Typography.Sizes.md}>{newRow.description || '-'}</Typography.Body>
             );
+            const buildingName = getBuildingName(buildingListData, newRow.buildings[0]?.building_id);
+            newRow.buildings = <Typography.Body size={Typography.Sizes.md}>{buildingName || ''}</Typography.Body>;
 
             newRow.days = (
                 <Typography.Body size={Typography.Sizes.md}>
@@ -411,6 +414,7 @@ const PlugRules = () => {
     const headerProps = [
         { name: 'Name', accessor: 'name' },
         { name: 'Description', accessor: 'description' },
+        { name: 'Building', accessor: 'buildings' },
         { name: 'Status', accessor: 'status', callbackValue: renderStatus },
         { name: 'Days', accessor: 'days' },
         { name: 'Socket Count', accessor: 'sensors_count' },
