@@ -100,6 +100,7 @@ const EditPanel = () => {
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [breakerUpdateId, setBreakerUpdateId] = useState('');
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -1115,6 +1116,7 @@ const EditPanel = () => {
                 if (setIsLoading) setIsLoading(false);
 
                 setBreakerAPITrigerred(false);
+                setBreakerUpdateId('');
             })
             .catch(() => {
                 setBreakerAPITrigerred(false);
@@ -1122,6 +1124,7 @@ const EditPanel = () => {
                     s.breakersList = [];
                 });
                 if (setIsLoading) setIsLoading(false);
+                setBreakerUpdateId('');
                 setLinking(false);
             });
     };
@@ -1280,8 +1283,6 @@ const EditPanel = () => {
         pageDefaultStates();
     }, []);
 
-    console.log('SSR userPermission => ', userPermission);
-
     return (
         <React.Fragment>
             <div className="d-flex justify-content-between">
@@ -1430,15 +1431,17 @@ const EditPanel = () => {
                     setActiveTab('metrics');
                     if (breakerObj) openBreakerConfigModal();
                 }}
-                callBackBreakerProps={({ breakerProps, breakerData, children }) => {
+                callBackBreakerProps={({ breakerProps, breakerData }) => {
                     const type = breakerData?.config_type;
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = breakerData?.status;
+                    const isLoading = breakerData?.id === breakerUpdateId;
                     return {
                         ...breakerProps,
                         equipmentName,
                         items: breakerProps.items.map((breakerProp) => ({ ...breakerProp, status })),
                         type,
+                        isLoading,
                     };
                 }}
                 onPanelEditClick={({ isEditingMode }) => setEditingMode(isEditingMode)}
@@ -1457,7 +1460,13 @@ const EditPanel = () => {
                     isLinked: 'is_linked',
                 }}
                 onBreakerLinkedClick={(props, setIsLoading) => {
-                    if (props?.source && props?.target) handleBreakerLinkClicked(props, setIsLoading, isLinking);
+                    if (
+                        props?.source &&
+                        props?.target &&
+                        props?.source !== breakerUpdateId &&
+                        props?.target !== breakerUpdateId
+                    )
+                        handleBreakerLinkClicked(props, setIsLoading, isLinking);
                 }}
                 nodes={breakersList}
                 edges={breakerLinks}
@@ -1495,6 +1504,7 @@ const EditPanel = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 isEditingMode={isEditingMode}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <UnlinkAllBreakers
