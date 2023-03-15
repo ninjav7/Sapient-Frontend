@@ -63,11 +63,13 @@ export const Default = (props) => {
                 {...props}
                 equipmentName={undefined}
                 // You can leave "type" as undefined
-                
             />
             <br />
             <h6>Offline Breaker</h6>
             <Breaker {...props} equipmentName={undefined} type={Breaker.Type.offline} />
+            <br />
+            <h6>Loading Breaker</h6>
+            <Breaker {...props} isLoading />
         </>
     );
 };
@@ -78,10 +80,10 @@ Default.args = {
             id: '1',
             status: Breaker.Status.online,
             sensorId: '4-2',
-            deviceId: '00-B0-D0-63-C2-26'
+            deviceId: '00-B0-D0-63-C2-26',
         },
     ],
- 
+
     ratedAmps: '40 A',
     ratedVolts: '120 V',
     onEdit: (props) => alert('OnEdit'),
