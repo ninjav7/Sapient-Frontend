@@ -509,11 +509,11 @@ const BreakerConfiguration = ({
         }
     };
 
-    const unLinkCurrentBreaker = async (breakers_ids) => {
+    const unLinkCurrentBreaker = async (breakers_list) => {
         setIsResetting(true);
 
         const params = `?building_id=${bldgId}`;
-        const payload = { breaker_id: breakers_ids };
+        const payload = { breaker_id: breakers_list };
 
         await resetAllBreakers(params, payload)
             .then((res) => {
@@ -547,16 +547,16 @@ const BreakerConfiguration = ({
             });
     };
 
-    const deleteCurrentBreaker = async () => {
+    const deleteCurrentBreaker = async (breakers_list) => {
         setIsDeleting(true);
-        const params = `?breaker_id=${firstBreakerObj?.id}`;
+        const params = `?breaker_id=${breakers_list[0]}`;
         await getBreakerDeleted(params)
             .then((res) => {
                 setIsDeleting(false);
-                const response = res;
+                const response = res?.data;
                 handleDeleteAlertClose();
 
-                if (response?.status === 200) {
+                if (response?.success) {
                     closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -1880,6 +1880,7 @@ const BreakerConfiguration = ({
                 handleDeleteAlertClose={handleDeleteAlertClose}
                 handleEditBreakerShow={openBreakerConfigModal}
                 deleteCurrentBreaker={deleteCurrentBreaker}
+                breakersId={breakersId}
             />
 
             <UnlabelEquipAlert

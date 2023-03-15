@@ -331,16 +331,31 @@ const EditPanel = () => {
         const params = `?panel_id=${panelId}`;
         await deleteCurrentPanel(params)
             .then((res) => {
+                const response = res?.data;
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
-                history.push({
-                    pathname: `/settings/panels`,
-                });
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been deleted successfully';
-                    s.notificationType = 'success';
-                });
+                if (response?.success) {
+                    history.push({
+                        pathname: `/settings/panels`,
+                    });
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Panel.'
+                            : 'Unable to delete Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsDeleting(false);
