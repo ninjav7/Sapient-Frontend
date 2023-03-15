@@ -1,5 +1,5 @@
 import { percentageHandler } from '../utils/helper';
-import { formatConsumptionValue } from '../helpers/helpers';
+import { formatConsumptionValue, getBuildingName } from '../helpers/helpers';
 
 export const getTableHeadersList = (record) => {
     let arr = [];
@@ -245,7 +245,7 @@ export const getCompareBuildingTableCSVExport = (tableData, columns, topEnergyDe
     return csv;
 };
 
-export const getPlugRulesTableCSVExport = (tableData, columns) => {
+export const getPlugRulesTableCSVExport = (tableData, columns, buildingList) => {
     let dataToExport = [];
 
     tableData.forEach((tableRow, index) => {
@@ -267,6 +267,10 @@ export const getPlugRulesTableCSVExport = (tableData, columns) => {
                     ];
 
                     arr.push(days.join(' '));
+                    break;
+                case 'buildings':
+                    const buildingName = getBuildingName(buildingList, tableRow.buildings[0]?.building_id);
+                    arr.push(buildingName);
                     break;
                 default:
                     arr.push(tableRow[columns[i].accessor]);

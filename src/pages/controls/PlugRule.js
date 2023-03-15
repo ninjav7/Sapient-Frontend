@@ -367,7 +367,7 @@ const PlugRule = () => {
             plugRules &&
                 plugRules.forEach((plugRule) => {
                     if (plugRule.name == currentData.name) {
-                        setActiveBuildingId(plugRule.buildings[0].building_id);
+                        setActiveBuildingId(plugRule.buildings[0]?.building_id);
                     }
                 });
         });
@@ -408,7 +408,7 @@ const PlugRule = () => {
                 setSkeletonLoading(false);
             }
             let response = Object.assign({}, res.data.data[0]);
-            response.building_id = response.building[0].building_id;
+            response.building_id = response?.building[0]?.building_id;
             setActiveBuildingId(response.building_id);
             setCurrentData(response);
             const scheduleData = groupedCurrentDataById(response.action);
@@ -433,13 +433,15 @@ const PlugRule = () => {
         data.forEach((el) => {
             const today = moment();
             const from_date = today.startOf('week').startOf('isoWeek');
+            let timeWithHours = '';
             if (el === 'Sunday') {
                 from_date.day(el).add(1, 'weeks');
+                timeWithHours = from_date.set({ hour: 23, minute: 59 });
             } else {
                 from_date.day(el);
+                timeWithHours = from_date.set('hour', 0);
             }
-            const timeWithHours = from_date.set('hour', 0);
-            res.push({ x: timeWithHours.unix() * 1000, y: 0 });
+            res.push({ x: timeWithHours, y: 0 });
         });
         let response = [{ name: `Average Energy demand`, data: res }];
 
@@ -1050,7 +1052,7 @@ const PlugRule = () => {
         if (ruleId === null) {
             return;
         }
-        if (activeBuildingId.length) {
+        if (activeBuildingId?.length) {
             fetchFiltersForSensors();
         }
 
@@ -1485,7 +1487,6 @@ const PlugRule = () => {
                             </div>
                             <div>on</div>
                             <div className="schedular-weekday-group">
-                                {firstCondition.condition_group_id}
                                 <ConditionGroup
                                     handleButtonClick={(day) =>
                                         handleScheduleDayChange(day, firstCondition.condition_group_id)
@@ -1565,29 +1566,36 @@ const PlugRule = () => {
     const calculateOffHoursPlots = () => {
         let weekWithSchedule = [];
         const copyOfPreparedScheduleData = [...preparedScheduleData];
-        copyOfPreparedScheduleData.map((groupId) => {
-            groupId.data.forEach((el) => {
-                switch (el.action_type) {
-                    case 0:
-                        el.action_day.forEach((day) => {
-                            weekWithSchedule[indexOfDay[day]] = {
-                                ...weekWithSchedule[indexOfDay[day]],
-                                turnOff: el.action_time,
-                            };
-                        });
+        copyOfPreparedScheduleData
+            .filter(
+                (el) =>
+                    !el.data.find((groupId) => {
+                        return groupId.is_deleted;
+                    })
+            )
+            .map((groupId) => {
+                groupId.data.forEach((el) => {
+                    switch (el.action_type) {
+                        case 0:
+                            el.action_day.forEach((day) => {
+                                weekWithSchedule[indexOfDay[day]] = {
+                                    ...weekWithSchedule[indexOfDay[day]],
+                                    turnOff: el.action_time,
+                                };
+                            });
 
-                        break;
-                    case 1:
-                        el.action_day.forEach((day) => {
-                            weekWithSchedule[indexOfDay[day]] = {
-                                ...weekWithSchedule[indexOfDay[day]],
-                                turnOn: el.action_time,
-                            };
-                        });
-                        break;
-                }
+                            break;
+                        case 1:
+                            el.action_day.forEach((day) => {
+                                weekWithSchedule[indexOfDay[day]] = {
+                                    ...weekWithSchedule[indexOfDay[day]],
+                                    turnOn: el.action_time,
+                                };
+                            });
+                            break;
+                    }
+                });
             });
-        });
 
         let result = [];
         for (let i = 0; i < weekWithSchedule.length; i++) {
