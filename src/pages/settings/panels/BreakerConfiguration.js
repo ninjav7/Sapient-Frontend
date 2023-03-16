@@ -301,12 +301,14 @@ const BreakerConfiguration = ({
         if (breakerLvl === 'first') {
             let obj = Object.assign({}, firstBreakerObj);
             if (key === 'device_link') {
+                obj.sensor_link = '';
                 if (obj?.breaker_type === 1) {
                     fetchSensorsList(value, 'first');
                 }
                 if (obj?.breaker_type === 2) {
                     let obj = Object.assign({}, secondBreakerObj);
                     obj['device_link'] = value;
+                    obj.sensor_link = '';
                     setSecondBreakerObj(obj);
                     fetchSensorsList(value, 'first-second');
                 }
@@ -314,7 +316,9 @@ const BreakerConfiguration = ({
                     let objTwo = Object.assign({}, secondBreakerObj);
                     let objThree = Object.assign({}, thirdBreakerObj);
                     objTwo['device_link'] = value;
+                    objTwo.sensor_link = '';
                     objThree['device_link'] = value;
+                    objThree.sensor_link = '';
                     setSecondBreakerObj(objTwo);
                     setThirdBreakerObj(objThree);
                     fetchSensorsList(value, 'all');
@@ -326,14 +330,20 @@ const BreakerConfiguration = ({
         if (breakerLvl === 'second') {
             let obj = Object.assign({}, secondBreakerObj);
             obj[key] = value;
+            if (key === 'device_link') {
+                obj['sensor_link'] = '';
+                fetchSensorsList(value, 'second');
+            }
             setSecondBreakerObj(obj);
-            if (key === 'device_link') fetchSensorsList(value, 'second');
         }
         if (breakerLvl === 'third') {
             let obj = Object.assign({}, thirdBreakerObj);
             obj[key] = value;
+            if (key === 'device_link') {
+                obj['sensor_link'] = '';
+                fetchSensorsList(value, 'third');
+            }
             setThirdBreakerObj(obj);
-            if (key === 'device_link') fetchSensorsList(value, 'third');
         }
     };
 
@@ -1125,6 +1135,10 @@ const BreakerConfiguration = ({
     useEffect(() => {
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
     }, [sensorsList, startDate, endDate, selectedConsumption]);
+
+    console.log('SSR firstBreakerObj => ', firstBreakerObj);
+    console.log('SSR secondBreakerObj => ', secondBreakerObj);
+    console.log('SSR thirdBreakerObj => ', thirdBreakerObj);
 
     return (
         <React.Fragment>
