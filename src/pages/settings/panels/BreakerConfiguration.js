@@ -92,7 +92,6 @@ const BreakerConfiguration = ({
     const [selectedEquipment, setSelectedEquipment] = useState('');
     const [sensorsList, setSensorsList] = useState([]);
     const [breakersId, setBreakersId] = useState([]);
-    const [isEdited, setEdited] = useState(false);
 
     const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
     const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
@@ -926,18 +925,6 @@ const BreakerConfiguration = ({
             });
     };
 
-    const validateBreakerConfiguration = () => {
-        const breakerOne = comparePanelData(firstBreakerObj, parentBreakerObj);
-        const breakerTwo = comparePanelData(secondBreakerObj, secondBreakerObjOld);
-        const breakerThree = comparePanelData(thirdBreakerObj, thirdBreakerObjOld);
-        const status = breakerOne && breakerTwo && breakerThree ? true : false;
-        setEdited(status);
-    };
-
-    useEffect(() => {
-        validateBreakerConfiguration();
-    }, [isProcessing, firstBreakerObj, secondBreakerObj, thirdBreakerObj]);
-
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
 
@@ -1204,7 +1191,12 @@ const BreakerConfiguration = ({
                                         type={Button.Type.primary}
                                         onClick={onSaveButonClick}
                                         className="ml-2"
-                                        disabled={isEdited || isProcessing}
+                                        disabled={
+                                            (comparePanelData(firstBreakerObj, parentBreakerObj) &&
+                                                comparePanelData(secondBreakerObj, secondBreakerObjOld) &&
+                                                comparePanelData(thirdBreakerObj, thirdBreakerObjOld)) ||
+                                            isProcessing
+                                        }
                                     />
                                 )}
                             </div>
