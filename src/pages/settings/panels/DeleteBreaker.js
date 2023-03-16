@@ -11,6 +11,7 @@ const DeleteBreaker = ({
     isDeleting,
     deleteCurrentBreaker,
     breakersId,
+    setBreakerUpdateId,
 }) => {
     return (
         <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
@@ -40,6 +41,7 @@ const DeleteBreaker = ({
                     type={Button.Type.primaryDistructive}
                     disabled={isDeleting}
                     onClick={() => {
+                        if (breakersId.length !== 0) setBreakerUpdateId(breakersId[0]);
                         deleteCurrentBreaker(breakersId);
                     }}
                 />
