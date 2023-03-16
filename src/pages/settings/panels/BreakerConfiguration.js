@@ -532,9 +532,8 @@ const BreakerConfiguration = ({
                 setIsResetting(false);
                 const response = res?.data;
                 window.scrollTo(0, 0);
-                handleUnlinkAlertClose();
-                closeModalWithoutSave();
                 if (response?.success) {
+                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker has been reset successfully.';
@@ -552,10 +551,12 @@ const BreakerConfiguration = ({
                             : 'Unable to reset Breaker due to Internal Server Error.';
                         s.notificationType = 'error';
                     });
+                    setBreakerUpdateId('');
                 }
             })
             .catch(() => {
                 setIsResetting(false);
+                setBreakerUpdateId('');
             });
     };
 
@@ -566,8 +567,8 @@ const BreakerConfiguration = ({
             .then((res) => {
                 setIsDeleting(false);
                 const response = res?.data;
+                if (breakersId.length !== 0) setBreakerUpdateId(breakersId[0]);
                 handleDeleteAlertClose();
-
                 if (response?.success) {
                     closeModalWithoutSave();
                     UserStore.update((s) => {
@@ -587,10 +588,12 @@ const BreakerConfiguration = ({
                             : 'Unable to delete Breaker due to Internal Server Error.';
                         s.notificationType = 'error';
                     });
+                    setBreakerUpdateId('');
                 }
             })
             .catch(() => {
                 setIsDeleting(false);
+                setBreakerUpdateId('');
             });
     };
 
@@ -949,9 +952,9 @@ const BreakerConfiguration = ({
             if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
 
             // For Breaker Type 1
-            // Conditions to check if Sensors List is required to be fetched
             if (breakerObj?.breaker_type === 1) setBreakersId([breakerObj?.id]);
 
+            // Conditions to check if Sensors List is required to be fetched
             if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
                 fetchSensorsList(breakerObj?.device_link, 'first');
                 return;
@@ -1891,6 +1894,7 @@ const BreakerConfiguration = ({
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkCurrentBreaker={unLinkCurrentBreaker}
                 breakersId={breakersId}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <DeleteBreaker
@@ -1900,6 +1904,7 @@ const BreakerConfiguration = ({
                 handleEditBreakerShow={openBreakerConfigModal}
                 deleteCurrentBreaker={deleteCurrentBreaker}
                 breakersId={breakersId}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <UnlabelEquipAlert

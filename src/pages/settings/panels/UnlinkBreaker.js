@@ -11,6 +11,7 @@ const UnlinkBreaker = ({
     isResetting,
     unLinkCurrentBreaker,
     breakersId,
+    setBreakerUpdateId,
 }) => {
     return (
         <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
@@ -41,6 +42,8 @@ const UnlinkBreaker = ({
                     type={Button.Type.primaryDistructive}
                     disabled={isResetting}
                     onClick={() => {
+                        if (breakersId.length !== 0) setBreakerUpdateId(breakersId[0]);
+                        handleUnlinkAlertClose();
                         unLinkCurrentBreaker(breakersId);
                     }}
                 />
