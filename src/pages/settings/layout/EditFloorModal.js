@@ -295,9 +295,6 @@ const EditFloorModal = (props) => {
                                     }}
                                     isSearchable={true}
                                 />
-                                <Typography.Body size={Typography.Sizes.md}>
-                                    Only Floors can be at the building root
-                                </Typography.Body>
                             </div>
                             <div
                                 style={{ marginTop: '20px' }}
