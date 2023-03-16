@@ -360,7 +360,8 @@ const PlugRules = () => {
             newRow.description = (
                 <Typography.Body size={Typography.Sizes.md}>{newRow.description || '-'}</Typography.Body>
             );
-            const buildingName = getBuildingName(buildingListData, newRow.buildings[0]?.building_id);
+            const preparedBuildingInfo = newRow.buildings ? newRow.buildings[0]?.building_id : '';
+            const buildingName = getBuildingName(buildingListData, preparedBuildingInfo);
             newRow.buildings = <Typography.Body size={Typography.Sizes.md}>{buildingName || ''}</Typography.Body>;
 
             newRow.days = (
