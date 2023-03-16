@@ -1136,10 +1136,6 @@ const BreakerConfiguration = ({
         fetchSensorsChartData(sensorsList, selectedConsumption, startDate, endDate);
     }, [sensorsList, startDate, endDate, selectedConsumption]);
 
-    console.log('SSR firstBreakerObj => ', firstBreakerObj);
-    console.log('SSR secondBreakerObj => ', secondBreakerObj);
-    console.log('SSR thirdBreakerObj => ', thirdBreakerObj);
-
     return (
         <React.Fragment>
             <Modal

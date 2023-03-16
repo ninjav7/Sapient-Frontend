@@ -1432,7 +1432,7 @@ const EditPanel = () => {
                     if (breakerObj) openBreakerConfigModal();
                 }}
                 callBackBreakerProps={({ breakerProps, breakerData }) => {
-                    const type = breakerData?.config_type;
+                    const type = fetchBreakerType(breakerData);
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = breakerData?.status;
                     const isLoading = breakerData?.id === breakerUpdateId;
