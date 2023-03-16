@@ -1404,10 +1404,6 @@ const EditPanel = () => {
             <Panel
                 typeOptions={panelTypeList}
                 typeProps={breakerType}
-                startingBreaker={{
-                    onChange: null,
-                    defaultValue: 1,
-                }}
                 numberOfBreakers={breakerCountObj}
                 isEditable={
                     userPermission?.user_role === 'admin' ||
