@@ -183,6 +183,9 @@ const EditFloorModal = (props) => {
                                     value={'Floor'}
                                     disabled={true}
                                 />
+                                <Typography.Body size={Typography.Sizes.md}>
+                                    Only Floors can be at the building root
+                                </Typography.Body>
                             </div>
                             <div
                                 style={{ marginTop: '20px' }}
@@ -230,6 +233,9 @@ const EditFloorModal = (props) => {
                                     value={'Floor'}
                                     disabled={true}
                                 />
+                                <Typography.Body size={Typography.Sizes.md}>
+                                    Only Floors can be at the building root
+                                </Typography.Body>
                             </div>
                         </>
                     ) : props.modalType === 'spaces' && !props.editFloor ? (
