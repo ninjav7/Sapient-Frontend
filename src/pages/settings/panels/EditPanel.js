@@ -152,7 +152,7 @@ const EditPanel = () => {
             obj?.parent_breaker === '' &&
             obj?.is_linked === false &&
             obj?.type === 'equipment' &&
-            (obj?.rated_amps === 0 || 'undefined')
+            (obj?.rated_amps === 0 || typeof obj?.rated_amps === 'undefined')
         ) {
             return Breaker.Type.notConfigured;
         }
@@ -511,6 +511,11 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj?.id,
+                    rated_amps: sourceBreakerObj.rated_amps
+                        ? sourceBreakerObj.rated_amps
+                        : targetBreakerObj.rated_amps
+                        ? targetBreakerObj.rated_amps
+                        : 0,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -522,6 +527,11 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps
+                        ? sourceBreakerObj.rated_amps
+                        : targetBreakerObj.rated_amps
+                        ? targetBreakerObj.rated_amps
+                        : 0,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -533,6 +543,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: thirdBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -574,8 +585,15 @@ const EditPanel = () => {
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
+            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
+
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
+                rated_amps: sourceBreakerObj.rated_amps
+                    ? sourceBreakerObj.rated_amps
+                    : targetBreakerObj.rated_amps
+                    ? targetBreakerObj.rated_amps
+                    : 0,
                 voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                 phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                 breaker_type: 2,
@@ -587,6 +605,11 @@ const EditPanel = () => {
 
             let breakerObjTwo = {
                 breaker_id: targetBreakerObj.id,
+                rated_amps: sourceBreakerObj.rated_amps
+                    ? sourceBreakerObj.rated_amps
+                    : targetBreakerObj.rated_amps
+                    ? targetBreakerObj.rated_amps
+                    : 0,
                 voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                 phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                 breaker_type: 2,
@@ -653,6 +676,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj?.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -664,6 +688,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -675,6 +700,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -723,6 +749,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: targetBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -734,6 +761,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: targetBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -745,6 +773,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: thirdBreakerObj.id,
+                    rated_amps: targetBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
                     breaker_type: 3,
@@ -776,6 +805,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -786,6 +816,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -796,6 +827,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: thirdBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -821,6 +853,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -831,6 +864,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -841,6 +875,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -868,6 +903,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -878,6 +914,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                     breaker_type: 2,
@@ -888,6 +925,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: thirdBreakerObj.id,
+                    rated_amps: sourceBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                     breaker_type: 2,
@@ -913,6 +951,7 @@ const EditPanel = () => {
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                     breaker_type: 2,
@@ -923,6 +962,7 @@ const EditPanel = () => {
 
                 let breakerObjTwo = {
                     breaker_id: sourceBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
                     breaker_type: 2,
@@ -933,6 +973,7 @@ const EditPanel = () => {
 
                 let breakerObjThree = {
                     breaker_id: targetBreakerObj.id,
+                    rated_amps: parentBreakerObj.rated_amps,
                     voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                     phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                     breaker_type: 1,
@@ -949,8 +990,15 @@ const EditPanel = () => {
             setIsLoading(true);
             setLinking(true);
 
+            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
+
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
+                rated_amps: sourceBreakerObj.rated_amps
+                    ? sourceBreakerObj.rated_amps
+                    : targetBreakerObj.rated_amps
+                    ? targetBreakerObj.rated_amps
+                    : 0,
                 voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                 phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                 breaker_type: 1,
@@ -960,6 +1008,11 @@ const EditPanel = () => {
             };
             let breakerObjTwo = {
                 breaker_id: targetBreakerObj.id,
+                rated_amps: sourceBreakerObj.rated_amps
+                    ? sourceBreakerObj.rated_amps
+                    : targetBreakerObj.rated_amps
+                    ? targetBreakerObj.rated_amps
+                    : 0,
                 voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
                 phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
                 breaker_type: 1,
@@ -1404,10 +1457,6 @@ const EditPanel = () => {
             <Panel
                 typeOptions={panelTypeList}
                 typeProps={breakerType}
-                startingBreaker={{
-                    onChange: null,
-                    defaultValue: 1,
-                }}
                 numberOfBreakers={breakerCountObj}
                 isEditable={
                     userPermission?.user_role === 'admin' ||

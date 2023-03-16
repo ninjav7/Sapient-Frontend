@@ -524,25 +524,14 @@ const EquipChartModal = ({
                                                 <Skeleton count={1} />
                                             ) : (
                                                 <div className="ytd-flex">
-                                                    {equipData?.device_type === 'active' ? (
-                                                        <span className="mr-1 ytd-value">
-                                                            {ytdData?.ytd_peak?.power
-                                                                ? formatConsumptionValue(
-                                                                      ytdData?.ytd_peak?.power / 1000,
-                                                                      1
-                                                                  )
-                                                                : 0}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="mr-1 ytd-value">
-                                                            {ytdData?.ytd_peak?.power
-                                                                ? formatConsumptionValue(
-                                                                      ytdData?.ytd_peak?.power / 1000000,
-                                                                      1
-                                                                  )
-                                                                : 0}
-                                                        </span>
-                                                    )}
+                                                    <span className="mr-1 ytd-value">
+                                                        {ytdData?.ytd_peak?.power
+                                                            ? formatConsumptionValue(
+                                                                  ytdData?.ytd_peak?.power / 1000000,
+                                                                  2
+                                                              )
+                                                            : 0}
+                                                    </span>
 
                                                     {ytdData?.ytd_peak?.time_stamp ? (
                                                         <span className="ytd-unit">
