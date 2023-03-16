@@ -531,7 +531,6 @@ const BreakerConfiguration = ({
             .then((res) => {
                 setIsResetting(false);
                 const response = res?.data;
-                window.scrollTo(0, 0);
                 if (response?.success) {
                     closeModalWithoutSave();
                     UserStore.update((s) => {
