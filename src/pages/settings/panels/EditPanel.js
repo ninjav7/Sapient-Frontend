@@ -152,7 +152,7 @@ const EditPanel = () => {
             obj?.parent_breaker === '' &&
             obj?.is_linked === false &&
             obj?.type === 'equipment' &&
-            (obj?.rated_amps === 0 || 'undefined')
+            (obj?.rated_amps === 0 || typeof obj?.rated_amps === 'undefined')
         ) {
             return Breaker.Type.notConfigured;
         }
