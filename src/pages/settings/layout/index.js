@@ -238,7 +238,7 @@ const Layout = () => {
                                           setModalShow(true);
                                           setEditFloor(true);
                                           setModalType('floor');
-                                          setCurrentFloorId(args?.parents);
+                                          setCurrentFloorId(args?.floor_id);
                                           setFloorName(args?.name);
                                           setSpaceName('');
                                           setCurrentSpaceId('');
