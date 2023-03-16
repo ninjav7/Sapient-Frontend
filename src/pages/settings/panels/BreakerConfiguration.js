@@ -282,6 +282,7 @@ const BreakerConfiguration = ({
         setConsumption(metric[0].value);
         setFetchingSensorData(false);
         setSelectedDevicesList([]);
+        setBreakersId([]);
     };
 
     const handleChange = (key, value) => {
@@ -949,12 +950,12 @@ const BreakerConfiguration = ({
 
             // For Breaker Type 1
             // Conditions to check if Sensors List is required to be fetched
+            if (breakerObj?.breaker_type === 1) setBreakersId([breakerObj?.id]);
+
             if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
                 fetchSensorsList(breakerObj?.device_link, 'first');
                 return;
             }
-
-            if (breakerObj?.breaker_type === 1) setBreakersId([breakerObj?.id]);
 
             // For Breaker Type 2
             if (breakerObj?.breaker_type === 2) {
@@ -1801,7 +1802,7 @@ const BreakerConfiguration = ({
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
                                                     onClick={() => {
-                                                        closeModalWithoutSave();
+                                                        closeBreakerConfigModal();
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
@@ -1819,7 +1820,7 @@ const BreakerConfiguration = ({
                                                             firstBreakerObj?.breaker_type === 1 &&
                                                             breakersList.length === firstBreakerObj?.breaker_number
                                                         ) {
-                                                            closeModalWithoutSave();
+                                                            closeBreakerConfigModal();
                                                             handleDeleteAlertShow();
                                                         }
                                                     }}
