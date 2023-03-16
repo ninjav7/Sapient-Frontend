@@ -233,3 +233,16 @@ export const pageListSizes = [
 export const compareObjData = (obj1, obj2) => {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
+
+export const getBuildingName = (buildingListData, id) => {
+    let buildingName = '';
+    if (buildingListData?.length) {
+        buildingListData.forEach((building) => {
+            if (building.value == id) {
+                buildingName = building.label;
+            }
+        });
+    }
+
+    return buildingName;
+};

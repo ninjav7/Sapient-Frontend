@@ -21,6 +21,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { UserStore } from '../../../store/UserStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -160,13 +161,39 @@ const Panels = () => {
         const params = `?panel_id=${panelId}`;
         await deleteCurrentPanel(params)
             .then((res) => {
+                const response = res?.data;
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
                 fetchPanelsDataWithFilter();
-                window.scrollTo(0, 0);
+                if (response?.success) {
+                    history.push({
+                        pathname: `/settings/panels`,
+                    });
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Panel.'
+                            : 'Unable to delete Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsDeleting(false);
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to delete Panel';
+                    s.notificationType = 'error';
+                });
             });
     };
 
@@ -470,11 +497,16 @@ const Panels = () => {
                         pageListSizes={pageListSizes}
                         onEditRow={
                             userPermission?.user_role === 'admin' ||
-                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
                                 ? (record, id, row) => handleClick(row)
                                 : null
                         }
-                        onDeleteRow={(record, id, row) => handlePanelDelete(row)}
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                                ? (record, id, row) => handlePanelDelete(row)
+                                : null
+                        }
                         isDeletable={(row) => handleAbleToDeleteRow()}
                         totalCount={(() => {
                             if (selectedFilter === 0) {

@@ -64,6 +64,7 @@ const BreakerConfiguration = ({
     activeTab,
     setActiveTab,
     isEditingMode,
+    setBreakerUpdateId,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -90,6 +91,7 @@ const BreakerConfiguration = ({
 
     const [selectedEquipment, setSelectedEquipment] = useState('');
     const [sensorsList, setSensorsList] = useState([]);
+    const [breakersId, setBreakersId] = useState([]);
 
     const [firstDeviceSearch, setFirstDeviceSearch] = useState('');
     const [secondDeviceSearch, setSecondDeviceSearch] = useState('');
@@ -280,6 +282,7 @@ const BreakerConfiguration = ({
         setConsumption(metric[0].value);
         setFetchingSensorData(false);
         setSelectedDevicesList([]);
+        setBreakersId([]);
     };
 
     const handleChange = (key, value) => {
@@ -299,12 +302,14 @@ const BreakerConfiguration = ({
         if (breakerLvl === 'first') {
             let obj = Object.assign({}, firstBreakerObj);
             if (key === 'device_link') {
+                obj.sensor_link = '';
                 if (obj?.breaker_type === 1) {
                     fetchSensorsList(value, 'first');
                 }
                 if (obj?.breaker_type === 2) {
                     let obj = Object.assign({}, secondBreakerObj);
                     obj['device_link'] = value;
+                    obj.sensor_link = '';
                     setSecondBreakerObj(obj);
                     fetchSensorsList(value, 'first-second');
                 }
@@ -312,7 +317,9 @@ const BreakerConfiguration = ({
                     let objTwo = Object.assign({}, secondBreakerObj);
                     let objThree = Object.assign({}, thirdBreakerObj);
                     objTwo['device_link'] = value;
+                    objTwo.sensor_link = '';
                     objThree['device_link'] = value;
+                    objThree.sensor_link = '';
                     setSecondBreakerObj(objTwo);
                     setThirdBreakerObj(objThree);
                     fetchSensorsList(value, 'all');
@@ -324,14 +331,20 @@ const BreakerConfiguration = ({
         if (breakerLvl === 'second') {
             let obj = Object.assign({}, secondBreakerObj);
             obj[key] = value;
+            if (key === 'device_link') {
+                obj['sensor_link'] = '';
+                fetchSensorsList(value, 'second');
+            }
             setSecondBreakerObj(obj);
-            if (key === 'device_link') fetchSensorsList(value, 'second');
         }
         if (breakerLvl === 'third') {
             let obj = Object.assign({}, thirdBreakerObj);
             obj[key] = value;
+            if (key === 'device_link') {
+                obj['sensor_link'] = '';
+                fetchSensorsList(value, 'third');
+            }
             setThirdBreakerObj(obj);
-            if (key === 'device_link') fetchSensorsList(value, 'third');
         }
     };
 
@@ -508,41 +521,55 @@ const BreakerConfiguration = ({
         }
     };
 
-    const unLinkCurrentBreaker = async () => {
+    const unLinkCurrentBreaker = async (breakers_list) => {
         setIsResetting(true);
 
-        const breakersList = [];
         const params = `?building_id=${bldgId}`;
-
-        if (firstBreakerObj?.id) breakersList.push(firstBreakerObj?.id);
-        if (secondBreakerObj?.id) breakersList.push(secondBreakerObj?.id);
-        if (thirdBreakerObj?.id) breakersList.push(thirdBreakerObj?.id);
-
-        const payload = { breaker_id: breakersList };
+        const payload = { breaker_id: breakers_list };
 
         await resetAllBreakers(params, payload)
             .then((res) => {
                 setIsResetting(false);
+                const response = res?.data;
                 window.scrollTo(0, 0);
-                handleUnlinkAlertClose();
-                closeModalWithoutSave();
-                setBreakerAPITrigerred(true);
+                if (response?.success) {
+                    closeModalWithoutSave();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Breaker has been reset successfully.';
+                        s.notificationType = 'success';
+                    });
+                    setBreakerAPITrigerred(true);
+                } else {
+                    setIsResetting(false);
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to reset Breaker.'
+                            : 'Unable to reset Breaker due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                    setBreakerUpdateId('');
+                }
             })
             .catch(() => {
                 setIsResetting(false);
+                setBreakerUpdateId('');
             });
     };
 
-    const deleteCurrentBreaker = async () => {
+    const deleteCurrentBreaker = async (breakers_list) => {
         setIsDeleting(true);
-        const params = `?breaker_id=${firstBreakerObj?.id}`;
+        const params = `?breaker_id=${breakers_list[0]}`;
         await getBreakerDeleted(params)
             .then((res) => {
                 setIsDeleting(false);
-                const response = res;
+                const response = res?.data;
+                if (breakersId.length !== 0) setBreakerUpdateId(breakersId[0]);
                 handleDeleteAlertClose();
-
-                if (response?.status === 200) {
+                if (response?.success) {
                     closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
@@ -561,10 +588,12 @@ const BreakerConfiguration = ({
                             : 'Unable to delete Breaker due to Internal Server Error.';
                         s.notificationType = 'error';
                     });
+                    setBreakerUpdateId('');
                 }
             })
             .catch(() => {
                 setIsDeleting(false);
+                setBreakerUpdateId('');
             });
     };
 
@@ -579,6 +608,8 @@ const BreakerConfiguration = ({
         if (alertObj.rated_amps) return;
 
         setIsProcessing(true);
+        setBreakerUpdateId(firstBreakerObj?.id);
+        closeModalWithoutSave();
 
         let breakerTypeObj = {};
 
@@ -702,14 +733,12 @@ const BreakerConfiguration = ({
                     (response.length === 1 && response[0]?.status === 200) ||
                     (response.length === 2 && response[0]?.status === 200 && response[1]?.status === 200)
                 ) {
-                    closeModalWithoutSave();
                     UserStore.update((s) => {
                         s.showNotification = true;
                         s.notificationMessage = 'Breaker configuration updated successfully.';
                         s.notificationType = 'success';
                     });
                     setIsProcessing(false);
-                    window.scrollTo(0, 0);
                     setBreakerAPITrigerred(true);
                 } else {
                     UserStore.update((s) => {
@@ -718,10 +747,12 @@ const BreakerConfiguration = ({
                         s.notificationType = 'error';
                     });
                     setIsProcessing(false);
+                    setBreakerUpdateId('');
                 }
             })
             .catch(() => {
                 setIsProcessing(false);
+                setBreakerUpdateId('');
             });
     };
 
@@ -921,6 +952,8 @@ const BreakerConfiguration = ({
             if (breakerObj?.equipment_links.length !== 0) setCurrentEquipObj(breakerObj?.equipment_links[0]);
 
             // For Breaker Type 1
+            if (breakerObj?.breaker_type === 1) setBreakersId([breakerObj?.id]);
+
             // Conditions to check if Sensors List is required to be fetched
             if (breakerObj?.breaker_type === 1 && breakerObj?.device_link !== '') {
                 fetchSensorsList(breakerObj?.device_link, 'first');
@@ -932,6 +965,7 @@ const BreakerConfiguration = ({
                 let obj = breakersList.find((el) => el?.parent_breaker === breakerObj?.id);
                 setSecondBreakerObj(obj);
                 setSecondBreakerObjOld(obj); // Added to track for any configuration change
+                setBreakersId([breakerObj?.id, obj?.id]);
                 if (breakerObj?.device_link === '' && obj?.device_link === '') return;
 
                 if (breakerObj?.device_link === obj?.device_link) {
@@ -949,7 +983,7 @@ const BreakerConfiguration = ({
                 setSecondBreakerObjOld(childbreakers[0]); // Added to track for any configuration change
                 setThirdBreakerObj(childbreakers[1]);
                 setThirdBreakerObjOld(childbreakers[1]); // Added to track for any configuration change
-
+                setBreakersId([breakerObj?.id, childbreakers[0]?.id, childbreakers[1]?.id]);
                 if (
                     breakerObj?.device_link === '' &&
                     childbreakers[0]?.device_link === '' &&
@@ -1171,7 +1205,12 @@ const BreakerConfiguration = ({
                                         type={Button.Type.primary}
                                         onClick={onSaveButonClick}
                                         className="ml-2"
-                                        disabled={comparePanelData(firstBreakerObj, parentBreakerObj) || isProcessing}
+                                        disabled={
+                                            (comparePanelData(firstBreakerObj, parentBreakerObj) &&
+                                                comparePanelData(secondBreakerObj, secondBreakerObjOld) &&
+                                                comparePanelData(thirdBreakerObj, thirdBreakerObjOld)) ||
+                                            isProcessing
+                                        }
                                     />
                                 )}
                             </div>
@@ -1766,12 +1805,7 @@ const BreakerConfiguration = ({
                                                     size={Button.Sizes.md}
                                                     type={Button.Type.secondaryDistructive}
                                                     onClick={() => {
-                                                        if (
-                                                            parentBreakerObj?.type === 'blank' ||
-                                                            parentBreakerObj?.type === 'unwired'
-                                                        )
-                                                            return;
-                                                        closeModalWithoutSave();
+                                                        closeBreakerConfigModal();
                                                         handleUnlinkAlertShow();
                                                     }}
                                                     icon={<UnlinkOldSVG />}
@@ -1789,7 +1823,7 @@ const BreakerConfiguration = ({
                                                             firstBreakerObj?.breaker_type === 1 &&
                                                             breakersList.length === firstBreakerObj?.breaker_number
                                                         ) {
-                                                            closeModalWithoutSave();
+                                                            closeBreakerConfigModal();
                                                             handleDeleteAlertShow();
                                                         }
                                                     }}
@@ -1859,6 +1893,8 @@ const BreakerConfiguration = ({
                 handleEditBreakerShow={openBreakerConfigModal}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkCurrentBreaker={unLinkCurrentBreaker}
+                breakersId={breakersId}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <DeleteBreaker
@@ -1867,6 +1903,8 @@ const BreakerConfiguration = ({
                 handleDeleteAlertClose={handleDeleteAlertClose}
                 handleEditBreakerShow={openBreakerConfigModal}
                 deleteCurrentBreaker={deleteCurrentBreaker}
+                breakersId={breakersId}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <UnlabelEquipAlert

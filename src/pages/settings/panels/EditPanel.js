@@ -100,6 +100,7 @@ const EditPanel = () => {
     const [originalPanelObj, setOriginalPanelObj] = useState({});
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [breakerUpdateId, setBreakerUpdateId] = useState('');
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -151,7 +152,7 @@ const EditPanel = () => {
             obj?.parent_breaker === '' &&
             obj?.is_linked === false &&
             obj?.type === 'equipment' &&
-            obj?.rated_amps === 0
+            (obj?.rated_amps === 0 || 'undefined')
         ) {
             return Breaker.Type.notConfigured;
         }
@@ -300,21 +301,29 @@ const EditPanel = () => {
         await resetAllBreakers(params, payload)
             .then((res) => {
                 setIsResetting(false);
+                const response = res?.data;
                 handleUnlinkAlertClose();
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been reset successfully';
-                    s.notificationType = 'success';
-                });
-                setBreakerAPITrigerred(true);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been reset successfully';
+                        s.notificationType = 'success';
+                    });
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to reset Panel.'
+                            : 'Unable to reset Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsResetting(false);
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Unable to reset Panel';
-                    s.notificationType = 'error';
-                });
             });
     };
 
@@ -323,16 +332,31 @@ const EditPanel = () => {
         const params = `?panel_id=${panelId}`;
         await deleteCurrentPanel(params)
             .then((res) => {
+                const response = res?.data;
                 setIsDeleting(false);
                 handleDeletePanelAlertClose();
-                history.push({
-                    pathname: `/settings/panels/${bldgId}`,
-                });
-                UserStore.update((s) => {
-                    s.showNotification = true;
-                    s.notificationMessage = 'Panel has been deleted successfully';
-                    s.notificationType = 'success';
-                });
+                if (response?.success) {
+                    history.push({
+                        pathname: `/settings/panels`,
+                    });
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Panel has been deleted successfully.';
+                        s.notificationType = 'success';
+                    });
+                    window.scrollTo(0, 0);
+                    setBreakerAPITrigerred(true);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Panel.'
+                            : 'Unable to delete Panel due to Internal Server Error.';
+                        s.notificationType = 'error';
+                    });
+                }
             })
             .catch(() => {
                 setIsDeleting(false);
@@ -1092,6 +1116,7 @@ const EditPanel = () => {
                 if (setIsLoading) setIsLoading(false);
 
                 setBreakerAPITrigerred(false);
+                setBreakerUpdateId('');
             })
             .catch(() => {
                 setBreakerAPITrigerred(false);
@@ -1099,6 +1124,7 @@ const EditPanel = () => {
                     s.breakersList = [];
                 });
                 if (setIsLoading) setIsLoading(false);
+                setBreakerUpdateId('');
                 setLinking(false);
             });
     };
@@ -1354,7 +1380,7 @@ const EditPanel = () => {
                                         handleChange('parent_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    disabled={
+                                    isDisabled={
                                         !(
                                             userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.building_panels_permission?.edit
@@ -1380,7 +1406,7 @@ const EditPanel = () => {
                                         handleChange('location_id', e.value);
                                     }}
                                     isSearchable={true}
-                                    disabled={
+                                    isDisabled={
                                         !(
                                             userPermission?.user_role === 'admin' ||
                                             userPermission?.permissions?.permissions?.building_panels_permission?.edit
@@ -1403,7 +1429,10 @@ const EditPanel = () => {
                     defaultValue: 1,
                 }}
                 numberOfBreakers={breakerCountObj}
-                isEditable={true}
+                isEditable={
+                    userPermission?.user_role === 'admin' ||
+                    userPermission?.permissions?.permissions?.building_panels_permission?.edit
+                }
                 states={panelStates}
                 mainBreaker={panelType === 'disconnect' ? null : mainBreakerConfig}
                 dangerZoneProps={{
@@ -1422,15 +1451,17 @@ const EditPanel = () => {
                     setActiveTab('metrics');
                     if (breakerObj) openBreakerConfigModal();
                 }}
-                callBackBreakerProps={({ breakerProps, breakerData, children }) => {
-                    const type = breakerData?.config_type;
+                callBackBreakerProps={({ breakerProps, breakerData }) => {
+                    const type = fetchBreakerType(breakerData);
                     const equipmentName = breakerData?.equipment_links[0]?.name;
                     const status = breakerData?.status;
+                    const isLoading = breakerData?.id === breakerUpdateId;
                     return {
                         ...breakerProps,
                         equipmentName,
                         items: breakerProps.items.map((breakerProp) => ({ ...breakerProp, status })),
                         type,
+                        isLoading,
                     };
                 }}
                 onPanelEditClick={({ isEditingMode }) => setEditingMode(isEditingMode)}
@@ -1449,7 +1480,13 @@ const EditPanel = () => {
                     isLinked: 'is_linked',
                 }}
                 onBreakerLinkedClick={(props, setIsLoading) => {
-                    if (props?.source && props?.target) handleBreakerLinkClicked(props, setIsLoading, isLinking);
+                    if (
+                        props?.source &&
+                        props?.target &&
+                        props?.source !== breakerUpdateId &&
+                        props?.target !== breakerUpdateId
+                    )
+                        handleBreakerLinkClicked(props, setIsLoading, isLinking);
                 }}
                 nodes={breakersList}
                 edges={breakerLinks}
@@ -1487,12 +1524,12 @@ const EditPanel = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 isEditingMode={isEditingMode}
+                setBreakerUpdateId={setBreakerUpdateId}
             />
 
             <UnlinkAllBreakers
                 isResetting={isResetting}
                 showUnlinkAlert={showUnlinkAlert}
-                handleUnlinkAlertShow={handleUnlinkAlertShow}
                 handleUnlinkAlertClose={handleUnlinkAlertClose}
                 unLinkAllBreakers={unLinkAllBreakers}
             />

@@ -112,10 +112,10 @@ const LayoutLevelColumn = (props) => {
         );
     };
 
-    const columnAddHandler = useCallback(() => onColumnAdd(currentItem), []);
-    const columnEditHandler = useCallback(() => onColumnEdit(currentItem), []);
-    const columnNameEditHandler = useCallback(() => onColumnNameEdit(currentItem), []);
-    const columnFilterHandler = useCallback(() => onColumnFilter(currentItem), []);
+    const columnAddHandler = useCallback(() => onColumnAdd(currentItem), [currentItem]);
+    const columnEditHandler = useCallback(() => onColumnEdit(currentItem), [currentItem]);
+    const columnNameEditHandler = useCallback(() => onColumnNameEdit(currentItem), [currentItem]);
+    const columnFilterHandler = useCallback(() => onColumnFilter(currentItem), [currentItem]);
 
     return (
         <div className="layout-level-column">
