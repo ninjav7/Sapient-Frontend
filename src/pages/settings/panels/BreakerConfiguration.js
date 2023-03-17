@@ -1313,7 +1313,8 @@ const BreakerConfiguration = ({
                                             activeKey={activeEquipTab}
                                             onSelect={(e) => {
                                                 setActiveEquipTab(e);
-                                            }}>
+                                            }}
+                                            className="dropdown-visibility">
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
                                                     <div>
