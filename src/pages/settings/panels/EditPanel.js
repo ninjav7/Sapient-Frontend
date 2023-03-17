@@ -280,18 +280,11 @@ const EditPanel = () => {
         }
     };
 
-    const fetchBreakerStatus = (breaker_type, breaker_obj) => {
+    const fetchBreakerStatus = (breaker_obj) => {
         if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
-        if (breaker_type === 'not-configured') return Breaker.Status.noSenors;
-        if (breaker_type === 'configured') return Breaker.Status.online;
-        if (breaker_obj?.type === 'equipment') {
-            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
-            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
-        }
-        if (breaker_obj?.type === 'unlabeled') {
-            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
-            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
-        }
+        if (breaker_obj.status === null) return Breaker.Status.noSensors;
+        if (breaker_obj.status) return Breaker.Status.online;
+        if (!breaker_obj.status) return Breaker.Status.offline;
     };
 
     const unLinkAllBreakers = async () => {
@@ -1156,7 +1149,7 @@ const EditPanel = () => {
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
-                    record.status = fetchBreakerStatus(record.config_type, record);
+                    record.status = fetchBreakerStatus(record);
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                 });
