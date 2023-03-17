@@ -282,7 +282,7 @@ const EditPanel = () => {
 
     const fetchBreakerStatus = (breaker_obj) => {
         if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
-        if (breaker_obj.status === null) return Breaker.Status.noSenors;
+        if (breaker_obj.status === null) return Breaker.Status.noSensors;
         if (breaker_obj.status) return Breaker.Status.online;
         if (!breaker_obj.status) return Breaker.Status.offline;
     };
