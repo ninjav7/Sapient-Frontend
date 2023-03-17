@@ -298,10 +298,32 @@ const BreakerConfiguration = ({
         }
     };
 
+    const addSelectedDeviceToList = (selectedList, deviceList) => {
+        const newList = selectedList.concat(deviceList);
+        const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+        return filteredList;
+    };
+
+    const updateDevicesList = (value) => {
+        const selectedDeviceOne = passiveDevicesListOne.find((record) => record?.value === value);
+        const selectedDeviceTwo = passiveDevicesListTwo.find((record) => record?.value === value);
+        const selectedDeviceThree = passiveDevicesListTwo.find((record) => record?.value === value);
+
+        const filteredListOne = addSelectedDeviceToList([selectedDeviceOne], passiveDevicesListOne);
+        setFirstPassiveDevicesList(filteredListOne);
+
+        const filteredListTwo = addSelectedDeviceToList([selectedDeviceTwo], passiveDevicesListTwo);
+        setSecondPassiveDevicesList(filteredListTwo);
+
+        const filteredListThree = addSelectedDeviceToList([selectedDeviceThree], passiveDevicesListThree);
+        setThirdPassiveDevicesList(filteredListThree);
+    };
+
     const handleBreakerConfigChange = (key, value, breakerLvl) => {
         if (breakerLvl === 'first') {
             let obj = Object.assign({}, firstBreakerObj);
             if (key === 'device_link') {
+                updateDevicesList(value);
                 obj.sensor_link = '';
                 if (obj?.breaker_type === 1) {
                     fetchSensorsList(value, 'first');
@@ -332,6 +354,7 @@ const BreakerConfiguration = ({
             let obj = Object.assign({}, secondBreakerObj);
             obj[key] = value;
             if (key === 'device_link') {
+                updateDevicesList(value);
                 obj['sensor_link'] = '';
                 fetchSensorsList(value, 'second');
             }
@@ -341,6 +364,7 @@ const BreakerConfiguration = ({
             let obj = Object.assign({}, thirdBreakerObj);
             obj[key] = value;
             if (key === 'device_link') {
+                updateDevicesList(value);
                 obj['sensor_link'] = '';
                 fetchSensorsList(value, 'third');
             }
@@ -531,7 +555,6 @@ const BreakerConfiguration = ({
             .then((res) => {
                 setIsResetting(false);
                 const response = res?.data;
-                window.scrollTo(0, 0);
                 if (response?.success) {
                     closeModalWithoutSave();
                     UserStore.update((s) => {
@@ -1290,7 +1313,8 @@ const BreakerConfiguration = ({
                                             activeKey={activeEquipTab}
                                             onSelect={(e) => {
                                                 setActiveEquipTab(e);
-                                            }}>
+                                            }}
+                                            className="dropdown-visibility">
                                             <Tabs.Item eventKey="equip" title="Equipment">
                                                 <div className="p-default">
                                                     <div>
