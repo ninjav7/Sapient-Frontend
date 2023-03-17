@@ -68,6 +68,83 @@ const EndUseType = () => {
         return end_uses_type === 'hvac' ? 'HVAC' : end_uses_type.charAt(0).toUpperCase() + end_uses_type.slice(1);
     };
 
+    const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
+            .then((res) => {
+                const response = res?.data;
+                let energyCategories = [];
+                let energyData = [
+                    {
+                        name: 'Energy',
+                        data: [],
+                    },
+                ];
+                response.forEach((record) => {
+                    energyCategories.push(record?.date);
+                    energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
+                });
+                setEnergyConsumptionsCategories(energyCategories);
+                setEnergyConsumptionsData(energyData);
+            })
+            .catch((error) => {});
+    };
+
+    const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
+            .then((res) => {
+                let response = res?.data?.data;
+                let requestEndUseType = fetchEndUseType(endUseType);
+                let data = response.find((element) => element.device === requestEndUseType);
+                let obj = {
+                    items: [
+                        {
+                            title: 'Total Consumption',
+                            value: formatConsumptionValue(Math.round(data?.energy_consumption?.now / 1000), 0),
+                            unit: UNITS.KWH,
+                            trends: [
+                                {
+                                    trendValue: percentageHandler(
+                                        data?.energy_consumption?.now,
+                                        data?.energy_consumption?.old
+                                    ),
+                                    trendType: fetchTrendType(
+                                        data?.energy_consumption?.now,
+                                        data?.energy_consumption?.old
+                                    ),
+                                    text: 'since last period',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'After-Hours Consumption',
+                            value: formatConsumptionValue(
+                                Math.round(data?.after_hours_energy_consumption?.now / 1000),
+                                0
+                            ),
+                            unit: UNITS.KWH,
+                            trends: [
+                                {
+                                    trendValue: percentageHandler(
+                                        data?.after_hours_energy_consumption?.now,
+                                        data?.after_hours_energy_consumption?.old
+                                    ),
+                                    trendType: fetchTrendType(
+                                        data?.after_hours_energy_consumption?.now,
+                                        data?.after_hours_energy_consumption?.old
+                                    ),
+                                    text: 'since last period',
+                                },
+                            ],
+                        },
+                    ],
+                };
+                setEndUsesData(obj);
+            })
+            .catch((error) => {});
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -145,61 +222,6 @@ const EndUseType = () => {
 
         const endUseTypeRequest = fetchEndUseType(endUseType);
 
-        const endUsesDataFetch = async () => {
-            const payload = apiRequestBody(startDate, endDate, time_zone);
-            await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
-                .then((res) => {
-                    let response = res?.data?.data;
-                    let requestEndUseType = fetchEndUseType(endUseType);
-                    let data = response.find((element) => element.device === requestEndUseType);
-                    let obj = {
-                        items: [
-                            {
-                                title: 'Total Consumption',
-                                value: formatConsumptionValue(Math.round(data?.energy_consumption?.now / 1000), 0),
-                                unit: UNITS.KWH,
-                                trends: [
-                                    {
-                                        trendValue: percentageHandler(
-                                            data?.energy_consumption?.now,
-                                            data?.energy_consumption?.old
-                                        ),
-                                        trendType: fetchTrendType(
-                                            data?.energy_consumption?.now,
-                                            data?.energy_consumption?.old
-                                        ),
-                                        text: 'since last period',
-                                    },
-                                ],
-                            },
-                            {
-                                title: 'After-Hours Consumption',
-                                value: formatConsumptionValue(
-                                    Math.round(data?.after_hours_energy_consumption?.now / 1000),
-                                    0
-                                ),
-                                unit: UNITS.KWH,
-                                trends: [
-                                    {
-                                        trendValue: percentageHandler(
-                                            data?.after_hours_energy_consumption?.now,
-                                            data?.after_hours_energy_consumption?.old
-                                        ),
-                                        trendType: fetchTrendType(
-                                            data?.after_hours_energy_consumption?.now,
-                                            data?.after_hours_energy_consumption?.old
-                                        ),
-                                        text: 'since last period',
-                                    },
-                                ],
-                            },
-                        ],
-                    };
-                    setEndUsesData(obj);
-                })
-                .catch((error) => {});
-        };
-
         // Planned for Future Enable of this integration
         // const equipmentUsageDataFetch = async () => {
         //     setIsEquipTypeChartLoading(true);
@@ -234,49 +256,15 @@ const EndUseType = () => {
         //         });
         // };
 
-        const plugUsageDataFetch = async () => {
-            const payload = apiRequestBody(startDate, endDate, time_zone);
-            await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
-                .then((res) => {
-                    const response = res?.data;
-                    let energyCategories = [];
-                    let energyData = [
-                        {
-                            name: 'Energy',
-                            data: [],
-                        },
-                    ];
-                    response.forEach((record) => {
-                        energyCategories.push(record?.date);
-                        energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
-                    });
-                    setEnergyConsumptionsCategories(energyCategories);
-                    setEnergyConsumptionsData(energyData);
-                })
-                .catch((error) => {});
-        };
-
-        endUsesDataFetch();
+        endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
-        plugUsageDataFetch();
+        plugUsageDataFetch(endUseTypeRequest, time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
 
     const fetchEnduseTitle = (type) => {
-        if (type === 'hvac') {
-            return 'HVAC Consumption';
-        }
-        if (type === 'lighting') {
-            return 'Lighting Consumption';
-        }
-        if (type === 'plug') {
-            return 'Plug Load Consumption';
-        }
-        if (type === 'process') {
-            return 'Process Consumption';
-        }
-        if (type === 'other') {
-            return 'Other End Uses Consumption';
-        }
+        return type === 'hvac'
+            ? 'HVAC Consumption'
+            : (endUseType.charAt(0).toUpperCase() + endUseType.slice(1)).concat(' Consumption');
     };
 
     return (
@@ -294,7 +282,7 @@ const EndUseType = () => {
             <div className="mt-4">
                 <ColumnChart
                     title={fetchEnduseTitle(endUseType)}
-                    subtitle={'Energy Usage By Hour (kWh)'}
+                    subTitle={'Energy Usage By Hour (kWh)'}
                     colors={[colors.datavizMain2]}
                     categories={energyConsumptionsCategories}
                     tooltipUnit={KPI_UNITS.KWH}

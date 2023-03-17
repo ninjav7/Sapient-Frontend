@@ -63,24 +63,128 @@ const EndUsesPage = () => {
         });
     };
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'End Uses',
-                        path: '/energy/end-uses',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
+    const endUsesDataFetch = async (time_zone) => {
+        const params = `?building_id=${bldgId}`;
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUses(params, payload)
+            .then((res) => {
+                const response = res?.data?.data;
+                response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
+                let endUsesList = [];
+                response.forEach((record, index) => {
+                    let obj = {
+                        title: record?.device,
+                        viewHandler: () => {
+                            redirectToEndUse(record?.device);
+                        },
+                        items: [
+                            {
+                                title: 'Total Consumption',
+                                value: formatConsumptionValue(Math.round(record?.energy_consumption?.now / 1000), 0),
+                                unit: UNITS.KWH,
+                                trends: [
+                                    {
+                                        trendValue: percentageHandler(
+                                            record?.energy_consumption?.now,
+                                            record?.energy_consumption?.old
+                                        ),
+                                        trendType: fetchTrendType(
+                                            record?.energy_consumption?.now,
+                                            record?.energy_consumption?.old
+                                        ),
+                                        text: 'since last period',
+                                    },
+                                ],
+                            },
+                            {
+                                title: 'After-Hours Consumption',
+                                value: formatConsumptionValue(
+                                    Math.round(record?.after_hours_energy_consumption?.now / 1000),
+                                    0
+                                ),
+                                unit: UNITS.KWH,
+                                trends: [
+                                    {
+                                        trendValue: percentageHandler(
+                                            record?.after_hours_energy_consumption?.now,
+                                            record?.after_hours_energy_consumption?.old
+                                        ),
+                                        trendType: fetchTrendType(
+                                            record?.after_hours_energy_consumption?.now,
+                                            record?.after_hours_energy_consumption?.old
+                                        ),
+                                        text: 'since last period',
+                                    },
+                                ],
+                            },
+                        ],
+                    };
+                    endUsesList.push(obj);
+                });
+
+                let data = [];
+                response.forEach((record) => {
+                    record.energy_consumption.now = formatConsumptionValue(
+                        Math.round(record?.energy_consumption?.now / 1000),
+                        0
+                    );
+                    record.color = COLOR_SCHEME_BY_DEVICE[record?.device];
+                    data.push(record);
+                });
+                setEndUsesData(data);
+
+                setTopEndUsesData(endUsesList);
+            })
+            .catch((error) => {});
+    };
+
+    const endUsesChartDataFetch = async (time_zone) => {
+        setStackedColumnChartData([]);
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUsesChart(bldgId, payload)
+            .then((res) => {
+                let responseData = res?.data;
+
+                const formattedTimestamp = [];
+                const endUseColors = [];
+
+                const formattedData = responseData.map((record, index) => {
+                    let obj = {
+                        name: record?.name,
+                        data: [],
+                    };
+                    endUseColors.push(COLOR_SCHEME_BY_DEVICE[record?.name]);
+                    record.data.forEach((el) => {
+                        if (index === 0) formattedTimestamp.push(el?.time_stamp);
+                        obj.data.push(
+                            isNaN(el?.consumption) ? el?.consumption : parseFloat((el?.consumption / 1000).toFixed(2))
+                        );
+                    });
+                    return obj;
+                });
+
+                setEndUseCategories(endUseColors);
+                setStackedColumnChartCategories(formattedTimestamp);
+                setStackedColumnChartData(formattedData);
+            })
+            .catch((error) => {});
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'End Uses',
+                    path: '/energy/end-uses',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'buildings';
+        });
+    };
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
@@ -101,120 +205,8 @@ const EndUsesPage = () => {
             }
         }
 
-        const endUsesDataFetch = async () => {
-            const params = `?building_id=${bldgId}`;
-            const payload = apiRequestBody(startDate, endDate, time_zone);
-            await fetchEndUses(params, payload)
-                .then((res) => {
-                    const response = res?.data?.data;
-                    response.sort((a, b) => b.energy_consumption.now - a.energy_consumption.now);
-                    let endUsesList = [];
-                    response.forEach((record, index) => {
-                        let obj = {
-                            title: record?.device,
-                            viewHandler: () => {
-                                redirectToEndUse(record?.device);
-                            },
-                            items: [
-                                {
-                                    title: 'Total Consumption',
-                                    value: formatConsumptionValue(
-                                        Math.round(record?.energy_consumption?.now / 1000),
-                                        0
-                                    ),
-                                    unit: UNITS.KWH,
-                                    trends: [
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.old
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.energy_consumption?.now,
-                                                record?.energy_consumption?.old
-                                            ),
-                                            text: 'since last period',
-                                        },
-                                    ],
-                                },
-                                {
-                                    title: 'After-Hours Consumption',
-                                    value: formatConsumptionValue(
-                                        Math.round(record?.after_hours_energy_consumption?.now / 1000),
-                                        0
-                                    ),
-                                    unit: UNITS.KWH,
-                                    trends: [
-                                        {
-                                            trendValue: percentageHandler(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.old
-                                            ),
-                                            trendType: fetchTrendType(
-                                                record?.after_hours_energy_consumption?.now,
-                                                record?.after_hours_energy_consumption?.old
-                                            ),
-                                            text: 'since last period',
-                                        },
-                                    ],
-                                },
-                            ],
-                        };
-                        endUsesList.push(obj);
-                    });
-
-                    let data = [];
-                    response.forEach((record) => {
-                        record.energy_consumption.now = formatConsumptionValue(
-                            Math.round(record?.energy_consumption?.now / 1000),
-                            0
-                        );
-                        record.color = COLOR_SCHEME_BY_DEVICE[record?.device];
-                        data.push(record);
-                    });
-                    setEndUsesData(data);
-
-                    setTopEndUsesData(endUsesList);
-                })
-                .catch((error) => {});
-        };
-
-        const endUsesChartDataFetch = async () => {
-            setStackedColumnChartData([]);
-            const payload = apiRequestBody(startDate, endDate, time_zone);
-            await fetchEndUsesChart(bldgId, payload)
-                .then((res) => {
-                    let responseData = res?.data;
-
-                    const formattedTimestamp = [];
-                    const endUseColors = [];
-
-                    const formattedData = responseData.map((record, index) => {
-                        let obj = {
-                            name: record?.name,
-                            data: [],
-                        };
-                        endUseColors.push(COLOR_SCHEME_BY_DEVICE[record?.name]);
-                        record.data.forEach((el) => {
-                            if (index === 0) formattedTimestamp.push(el?.time_stamp);
-                            obj.data.push(
-                                isNaN(el?.consumption)
-                                    ? el?.consumption
-                                    : parseFloat((el?.consumption / 1000).toFixed(2))
-                            );
-                        });
-                        return obj;
-                    });
-
-                    setEndUseCategories(endUseColors);
-                    setStackedColumnChartCategories(formattedTimestamp);
-                    setStackedColumnChartData(formattedData);
-                })
-                .catch((error) => {});
-        };
-
-        endUsesDataFetch();
-        endUsesChartDataFetch();
+        endUsesDataFetch(time_zone);
+        endUsesChartDataFetch(time_zone);
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -232,6 +224,10 @@ const EndUsesPage = () => {
         getXaxisForDaysSelected(daysCount);
         getFormattedChartDates(daysCount);
     }, [daysCount]);
+
+    useEffect(() => {
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
