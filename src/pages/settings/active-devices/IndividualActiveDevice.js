@@ -10,7 +10,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { apiRequestBody } from '../../../helpers/helpers';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
@@ -56,7 +56,8 @@ const IndividualActiveDevice = () => {
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
     const [locationError, setLocationError] = useState(null);
@@ -349,6 +350,19 @@ const IndividualActiveDevice = () => {
             bs.items = newList;
         });
     }, [activeData]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         updateBreadcrumbStore();

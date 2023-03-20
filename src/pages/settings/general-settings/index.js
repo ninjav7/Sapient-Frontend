@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, CardBody, CardHeader } from 'reactstrap';
 import axios from 'axios';
-import moment from 'moment';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../../store/globalState';
+import { useParams } from 'react-router-dom';
 import { BaseUrl, generalBldgDelete } from '../../../services/Network';
 import { BuildingStore, BuildingListStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -30,7 +30,7 @@ const GeneralBuildingSettings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
@@ -556,6 +556,19 @@ const GeneralBuildingSettings = () => {
 
         fetchBuildingData();
     }, [render]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

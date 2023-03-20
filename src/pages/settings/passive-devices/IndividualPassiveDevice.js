@@ -6,7 +6,7 @@ import moment from 'moment';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
@@ -45,6 +45,8 @@ const IndividualPassiveDevice = () => {
     let history = useHistory();
 
     const { deviceId } = useParams();
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [sensorId, setSensorId] = useState('');
 
     // Chart states
@@ -75,7 +77,6 @@ const IndividualPassiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
     const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [sensorObj, setSensorObj] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
@@ -329,6 +330,19 @@ const IndividualPassiveDevice = () => {
         });
         if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         updateBreadcrumbStore();

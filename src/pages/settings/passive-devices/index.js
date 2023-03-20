@@ -5,8 +5,8 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
-import { useHistory, Link } from 'react-router-dom';
-import { userPermissionData } from '../../../store/globalState';
+import { useHistory, Link, useParams } from 'react-router-dom';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { Button } from '../../../sharedComponents/button';
@@ -59,8 +59,9 @@ const SkeletonLoading = () => (
 
 const PassiveDevices = () => {
     const history = useHistory();
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+    const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -128,6 +129,19 @@ const PassiveDevices = () => {
                 setIsDataFetching(false);
             });
     };
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         fetchPassiveDeviceData();

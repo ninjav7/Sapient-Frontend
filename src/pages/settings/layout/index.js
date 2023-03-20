@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 import '../style.css';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -8,7 +9,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import EditFloorModal from './EditFloorModal';
 import DeleteModal from './DeleteModal';
-import { deleteFloor, getFloorsData } from '../../../store/globalState';
+import { buildingData, deleteFloor, getFloorsData } from '../../../store/globalState';
 import { userPermissionData } from '../../../store/globalState';
 import LayoutElements from '../../../sharedComponents/layoutElements/LayoutElements';
 import Brick from '../../../sharedComponents/brick';
@@ -19,7 +20,9 @@ const Layout = () => {
     let userdata = cookies.get('user');
     const [userPermission] = useAtom(userPermissionData);
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
+
     const [editFloor, setEditFloor] = useState(false);
     // Saving API data
     const [isLoadingLastColumn, setIsLoadingLastColumn] = useState(false);
@@ -77,6 +80,19 @@ const Layout = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     const createSpacesAPI = async () => {
         let params = `?building_id=${bldgId}`;

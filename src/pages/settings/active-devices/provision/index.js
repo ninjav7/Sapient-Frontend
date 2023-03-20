@@ -8,6 +8,8 @@ import {
     getInsertKasaDevices,
     insertToSystem,
 } from './services';
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -29,6 +31,7 @@ import colorPalette from '../../../../assets/scss/_colors.scss';
 import LinkModal from './LinkModal';
 import UnLinkModal from './UnLinkModal';
 import FindDevicesModal from './FindDevicesModal';
+import { buildingData } from '../../../../store/globalState';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -118,7 +121,8 @@ const Provision = () => {
     const [isAddProcessing, setIsAddProcessing] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [auth, setAuth] = useState('');
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [error, setError] = useState(false);
     const [message, setMessage] = useState('');
     const [kasaDevices, setKasaDevices] = useState([]);
@@ -333,6 +337,19 @@ const Provision = () => {
     useEffect(() => {
         getKasaAccount();
     }, [auth]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     //Linked Accounts
     const currentRow = () => {

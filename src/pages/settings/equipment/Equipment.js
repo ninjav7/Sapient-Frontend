@@ -17,8 +17,9 @@ import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constant
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
-import { allEquipmentDataGlobal, equipmentDataGlobal } from '../../../store/globalState';
+import { allEquipmentDataGlobal, buildingData, equipmentDataGlobal } from '../../../store/globalState';
 import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
 import { userPermissionData } from '../../../store/globalState';
 import EquipChartModal from '../../chartModal/EquipChartModal';
 import './style.scss';
@@ -88,7 +89,8 @@ const Equipment = () => {
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(true);
 
     const [selectedTab, setSelectedTab] = useState(0);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
     const [DuplicateGeneralEquipmentData, setDuplicateGeneralEquipmentData] = useState([]);
@@ -364,6 +366,19 @@ const Equipment = () => {
             })
             .catch((error) => {});
     };
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

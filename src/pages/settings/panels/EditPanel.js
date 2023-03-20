@@ -35,7 +35,7 @@ import {
     validateDevicesForBreaker,
 } from './utils';
 import { comparePanelData } from './utils';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -56,7 +56,8 @@ const EditPanel = () => {
     const { panelId } = useParams();
 
     const [userPermission] = useAtom(userPermissionData);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
     // Edit Breaker Modal
@@ -1324,6 +1325,19 @@ const EditPanel = () => {
     useEffect(() => {
         isEditingMode ? setActiveTab('edit-breaker') : setActiveTab('metrics');
     }, [isEditingMode]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id) {
+                BuildingStore.update((s) => {
+                    s.BldgId = bldgObj?.building_id;
+                    s.BldgName = bldgObj?.building_name;
+                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
+                });
+            }
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         if (originalPanelObj?.panel_id) {
