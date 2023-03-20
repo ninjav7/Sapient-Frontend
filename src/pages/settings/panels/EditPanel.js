@@ -580,8 +580,6 @@ const EditPanel = () => {
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
-
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 rated_amps: sourceBreakerObj.rated_amps
@@ -984,8 +982,6 @@ const EditPanel = () => {
 
             setIsLoading(true);
             setLinking(true);
-
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
 
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
