@@ -57,7 +57,6 @@ const NavLinks = () => {
         }
 
         if (
-            configRoutes.includes(location.pathname) ||
             location.pathname.includes('/explore-page/by-equipment') ||
             location.pathname.includes('/control/plug-rules')
         ) {
@@ -67,20 +66,28 @@ const NavLinks = () => {
             return;
         }
 
-        if (
-            location.pathname.includes(configChildRoutes[0]) ||
-            location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2]) ||
-            location.pathname.includes(configChildRoutes[3])
-        ) {
-            history.push({
-                pathname: `/energy/building/overview/${bldgId}`,
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/energy/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
             });
-            return;
-        }
 
-        routeToPortfolioPage();
-        updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/energy/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            routeToPortfolioPage();
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+        }
     };
 
     const handleControlClick = () => {
