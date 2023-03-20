@@ -48,7 +48,7 @@ const NavLinks = () => {
     ];
 
     const handleEnergyClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgObj?.active) {
             routeToPortfolioPage();
@@ -91,7 +91,7 @@ const NavLinks = () => {
     };
 
     const handleControlClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (bldgObj) {
             if (!bldgObj?.active) {
                 routeToPortfolioPage();
@@ -128,29 +128,29 @@ const NavLinks = () => {
             return;
         }
 
-        configRoutes.forEach((record) => {
-            if (location.pathname.includes(record)) {
-                history.push({
-                    pathname: `/explore-page/by-equipment/${bldgId}`,
-                });
-                return;
-            }
-        });
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                    });
+                    return;
+                }
+            });
 
-        configChildRoutes.forEach((record) => {
-            if (location.pathname.includes(record)) {
-                history.push({
-                    pathname: `/explore-page/by-equipment/${bldgId}`,
-                });
-                return;
-            }
-        });
-
-        // Validate all possible by Building routes before deleting below commneted code
-        // console.log();
-        // history.push({
-        //     pathname: `/explore-page/by-buildings`,
-        // });
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            history.push({
+                pathname: `/explore-page/by-buildings`,
+            });
+        }
     };
 
     const handleSideNavChange = (componentName) => {
