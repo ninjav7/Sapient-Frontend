@@ -95,11 +95,6 @@ const SecondaryTopNavBar = () => {
     const handleBuildingChange = (record, path) => {
         updateBuildingStore(record?.value, record?.label, record?.timezone);
 
-        if (portfolioRoutes.includes(path)) {
-            redirectToEndpoint(`/energy/building/overview/${record?.value}`);
-            return;
-        }
-
         if (path === '/explore-page/by-buildings') {
             redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
             return;
@@ -110,32 +105,40 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
+        if (portfolioRoutes.includes(path)) {
+            redirectToEndpoint(`/energy/building/overview/${record?.value}`);
+            return;
+        }
+
         if (accountRoutes.includes(path)) {
             redirectToEndpoint(`/settings/general/${record?.value}`);
             return;
         }
 
-        if (location.pathname.includes('/energy')) {
-            let pathName = path.substr(0, path.lastIndexOf('/'));
+        if (path.includes('/energy')) {
+            const pathName = path.substr(0, path.lastIndexOf('/'));
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
         }
 
-        configChildRoutes.forEach((route) => {
-            if (path.includes(route)) {
-                if (path.includes('edit-panel')) redirectToEndpoint(`/settings/panels/${record?.value}`);
-                if (path.includes('active-devices')) redirectToEndpoint(`/settings/active-devices/${record?.value}`);
-                if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
-                return;
-            }
-        });
+        if (path.includes('/settings')) {
+            configChildRoutes.forEach((route) => {
+                if (path.includes(route)) {
+                    if (path.includes('edit-panel')) redirectToEndpoint(`/settings/panels/${record?.value}`);
+                    if (path.includes('active-devices'))
+                        redirectToEndpoint(`/settings/active-devices/${record?.value}`);
+                    if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
+                    return;
+                }
+            });
 
-        configRoutes.forEach((route) => {
-            if (path.includes(route)) {
-                redirectToEndpoint(`${route}/${record?.value}`);
-                return;
-            }
-        });
+            configRoutes.forEach((route) => {
+                if (path.includes(route)) {
+                    redirectToEndpoint(`${route}/${record?.value}`);
+                    return;
+                }
+            });
+        }
     };
 
     const handleBldgSwitcherChange = (bldg_id) => {
@@ -158,11 +161,8 @@ const SecondaryTopNavBar = () => {
     };
 
     useEffect(() => {
-        let bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
-
-        if (bldgObj) {
-            setSelectedBuilding(bldgObj);
-        }
+        const bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
+        if (bldgObj?.value) setSelectedBuilding(bldgObj);
     }, [buildingsList]);
 
     useEffect(() => {
@@ -170,7 +170,7 @@ const SecondaryTopNavBar = () => {
             let bldgList = [...buildingsList];
             let allBuildingsList = [];
             buildingListData.forEach((record) => {
-                let obj = {
+                const obj = {
                     label: record?.building_name,
                     value: record?.building_id,
                     timezone: record?.timezone,

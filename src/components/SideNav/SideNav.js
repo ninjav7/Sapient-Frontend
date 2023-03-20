@@ -32,7 +32,7 @@ const SideNav = () => {
             s.parent = route.parent;
         });
 
-        if (route.parent === 'buildings') {
+        if (route.parent === 'buildings' || route.parent === 'building-settings') {
             let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
 
             if (pathName.includes('/energy/end-uses') && buildingListData.length !== 0) {
@@ -66,16 +66,16 @@ const SideNav = () => {
                 setUserPermissionListRoles('/settings/roles');
             }
             if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
-                setBuildingPermissionDetails(`/settings/general/${bldgId}`);
+                setBuildingPermissionDetails('/settings/general');
             }
             if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-                setBuildingPermissionEquipments(`/settings/equipment/${bldgId}`);
+                setBuildingPermissionEquipments('/settings/equipment');
             }
             if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-                setBuildingPermissionLayouts(`/settings/layout/${bldgId}`);
+                setBuildingPermissionLayouts('/settings/layout');
             }
             if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-                setBuildingPermissionPanels(`/settings/panels/${bldgId}`);
+                setBuildingPermissionPanels('/settings/panels');
             }
 
             if (userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
