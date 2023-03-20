@@ -24,6 +24,7 @@ import { apiRequestBody } from '../../helpers/helpers';
 import { primaryGray1000 } from '../../assets/scss/_colors.scss';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import Brick from '../../sharedComponents/brick';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color={primaryGray1000} height={35}>
@@ -83,14 +84,7 @@ const CompareBuildings = () => {
             ComponentStore.update((s) => {
                 s.parent = 'portfolio';
             });
-
-            localStorage.setItem('building_Id', 'portfolio');
-            localStorage.setItem('buildingName', 'Portfolio');
-
-            BuildingStore.update((s) => {
-                s.Building_Id = 'portfolio';
-                s.Building_Name = 'Portfolio';
-            });
+            updateBuildingStore('portfolio', 'Portfolio', '');
         };
         updateBreadcrumbStore();
     }, []);
@@ -141,14 +135,7 @@ const CompareBuildings = () => {
                     size={Typography.Sizes.md}
                     className="mouse-pointer"
                     onClick={() => {
-                        localStorage.setItem('building_Id', row.building_id);
-                        localStorage.setItem('buildingName', row.building_name);
-                        localStorage.setItem('buildingTimeZone', row.timezone);
-                        BuildingStore.update((s) => {
-                            s.BldgId = row.building_id;
-                            s.BldgTimeZone = row.timezone;
-                            s.BldgName = row.building_name;
-                        });
+                        updateBuildingStore(row.building_id, row.building_name, row.timezone);
                         history.push({
                             pathname: `/energy/building/overview/${row.building_id}`,
                         });

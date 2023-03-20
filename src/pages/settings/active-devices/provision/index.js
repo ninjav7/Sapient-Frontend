@@ -32,6 +32,7 @@ import LinkModal from './LinkModal';
 import UnLinkModal from './UnLinkModal';
 import FindDevicesModal from './FindDevicesModal';
 import { buildingData } from '../../../../store/globalState';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -341,13 +342,8 @@ const Provision = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id) {
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
         }
     }, [buildingListData, bldgId]);
 

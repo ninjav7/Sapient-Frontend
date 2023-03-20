@@ -8,7 +8,8 @@ import { ReactComponent as Circlebolt } from '../../assets/icon/circle-bolt.svg'
 import { useAtom } from 'jotai';
 import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
-import { configChildRoutes, updateBuildingStore } from '../SecondaryTopNavBar/utils';
+import { configChildRoutes } from '../SecondaryTopNavBar/utils';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const NavLinks = () => {
     const location = useLocation();

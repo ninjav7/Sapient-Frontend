@@ -20,6 +20,7 @@ import { fetchBuildingList, getFiltersForBuildingsRequest } from './services';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getBuildingsTableCSVExport } from '../../../utils/tablesExport';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -111,14 +112,7 @@ const Buildings = () => {
     };
 
     const handleBuildingClick = (record) => {
-        localStorage.setItem('buildingId', record.building_id);
-        localStorage.setItem('buildingName', record.building_name);
-        localStorage.setItem('buildingTimeZone', record.timezone);
-        BuildingStore.update((s) => {
-            s.BldgId = record.building_id;
-            s.BldgName = record.building_name;
-            s.BldgTimeZone = record.timezone;
-        });
+        updateBuildingStore(record?.building_id, record?.building_name, record?.timezone);
     };
 
     const renderBldgName = (row) => {

@@ -28,6 +28,7 @@ import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
 import { getExploreByBuildingTableCSVExport } from '../../utils/tablesExport';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getAverageValue } from '../../helpers/AveragePercent';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -150,13 +151,7 @@ const ExploreByBuildings = () => {
                 s.parent = 'explore';
             });
 
-            localStorage.setItem('buildingId', 'portfolio');
-            localStorage.setItem('buildingName', 'Portfolio');
-
-            BuildingStore.update((s) => {
-                s.BldgId = 'portfolio';
-                s.BldgName = 'Portfolio';
-            });
+            updateBuildingStore('portfolio', 'Portfolio', '');
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
@@ -686,15 +681,7 @@ const ExploreByBuildings = () => {
     };
 
     const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone) => {
-        localStorage.setItem('buildingId', bldId);
-        localStorage.setItem('buildingName', bldName);
-        localStorage.setItem('buildingTimeZone', bldTimeZone === '' ? 'US/Eastern' : bldTimeZone);
-
-        BuildingStore.update((s) => {
-            s.BldgId = bldId;
-            s.BldgName = bldName;
-            s.BldgTimeZone = bldTimeZone === '' ? 'US/Eastern' : bldTimeZone;
-        });
+        updateBuildingStore(bldId, bldName, bldTimeZone);
 
         history.push({
             pathname: `/explore-page/by-equipment/${bldId}`,

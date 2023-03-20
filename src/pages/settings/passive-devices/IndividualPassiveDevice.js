@@ -34,6 +34,7 @@ import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 import '../active-devices/styles.scss';
 import '../../../sharedComponents/breaker/Breaker.scss';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -334,13 +335,8 @@ const IndividualPassiveDevice = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id) {
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
         }
     }, [buildingListData, bldgId]);
 

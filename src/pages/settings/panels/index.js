@@ -22,6 +22,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { UserStore } from '../../../store/UserStore';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -454,13 +455,8 @@ const Panels = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id) {
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
         }
     }, [buildingListData, bldgId]);
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 
-import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes, updateBuildingStore } from './utils';
+import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes } from './utils';
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -12,6 +12,7 @@ import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/ico
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
 
 import './style.scss';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SecondaryTopNavBar = () => {
     const location = useLocation();

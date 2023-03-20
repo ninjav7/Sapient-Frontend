@@ -14,6 +14,7 @@ import LineChart from '../../sharedComponents/lineChart/LineChart';
 import Brick from '../../sharedComponents/brick';
 import { buildingData } from '../../store/globalState';
 import './style.css';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
@@ -75,12 +76,7 @@ const TimeOfDay = () => {
 
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
             }
         }
 

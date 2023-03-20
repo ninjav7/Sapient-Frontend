@@ -48,6 +48,7 @@ import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import './styles.scss';
 import UngroupAlert from './UngroupAlert';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -1329,13 +1330,8 @@ const EditPanel = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id) {
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
         }
     }, [buildingListData, bldgId]);
 

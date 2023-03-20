@@ -20,6 +20,7 @@ import colors from '../../assets/scss/_colors.scss';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import './style.css';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -211,12 +212,7 @@ const EndUseType = () => {
 
             if (bldgObj?.building_id) {
                 if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
-
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
             }
         }
 

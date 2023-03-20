@@ -35,6 +35,7 @@ import './styles.scss';
 import '../passive-devices/styles.scss';
 import { UserStore } from '../../../store/UserStore';
 import '../../../sharedComponents/breaker/Breaker.scss';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const IndividualActiveDevice = () => {
     const history = useHistory();
@@ -354,13 +355,8 @@ const IndividualActiveDevice = () => {
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
-            if (bldgObj?.building_id) {
-                BuildingStore.update((s) => {
-                    s.BldgId = bldgObj?.building_id;
-                    s.BldgName = bldgObj?.building_name;
-                    s.BldgTimeZone = bldgObj?.timezone ? bldgObj?.timezone : 'US/Eastern';
-                });
-            }
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
         }
     }, [buildingListData, bldgId]);
 

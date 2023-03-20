@@ -1,5 +1,3 @@
-import { BuildingStore } from '../../store/BuildingStore';
-
 export const configRoutes = [
     '/settings/general',
     '/settings/layout',
@@ -29,15 +27,3 @@ export const accountRoutes = [
 export const accountChildRoutes = ['/users/user-profile/single'];
 
 export const buildingRoutes = ['/energy/building/overview', '/energy/end-uses', '/energy/time-of-day'];
-
-export const updateBuildingStore = (bldgId, bldgName, bldgTimeZone) => {
-    localStorage.setItem('buildingId', bldgId);
-    localStorage.setItem('buildingName', bldgName);
-    localStorage.setItem('buildingTimeZone', bldgTimeZone === '' ? 'US/Eastern' : bldgTimeZone);
-
-    BuildingStore.update((s) => {
-        s.BldgId = bldgId;
-        s.BldgName = bldgName;
-        s.BldgTimeZone = bldgTimeZone === '' ? 'US/Eastern' : bldgTimeZone;
-    });
-};
