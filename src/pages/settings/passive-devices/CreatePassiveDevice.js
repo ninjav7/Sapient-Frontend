@@ -128,7 +128,7 @@ const CreatePassiveDevice = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
 
     const redirectUserToPassivePage = (deviceId) => {
         history.push({
-            pathname: `/settings/smart-meters/single/${deviceId}`,
+            pathname: `/settings/smart-meters/single/${bldgId}/${deviceId}`,
         });
     };
 

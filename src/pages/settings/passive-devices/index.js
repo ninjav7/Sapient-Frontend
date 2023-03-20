@@ -5,8 +5,8 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
-import { useHistory, Link } from 'react-router-dom';
-import { userPermissionData } from '../../../store/globalState';
+import { useHistory, Link, useParams } from 'react-router-dom';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { Button } from '../../../sharedComponents/button';
@@ -26,6 +26,7 @@ import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getPassiveDeviceTableCSVExport } from '../../../utils/tablesExport';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -59,8 +60,9 @@ const SkeletonLoading = () => (
 
 const PassiveDevices = () => {
     const history = useHistory();
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+    const [buildingListData] = useAtom(buildingData);
     const [userPermission] = useAtom(userPermissionData);
 
     const { download } = useCSVDownload();
@@ -128,6 +130,14 @@ const PassiveDevices = () => {
                 setIsDataFetching(false);
             });
     };
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         fetchPassiveDeviceData();
@@ -228,7 +238,7 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/smart-meters/single/${el.equipments_id}`,
+            pathname: `/settings/smart-meters/single/${bldgId}/${el.equipments_id}`,
         });
     };
 
@@ -271,7 +281,7 @@ const PassiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/smart-meters/single/${row.equipments_id}`,
+                    pathname: `/settings/smart-meters/single/${bldgId}/${row.equipments_id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.identifier === '' ? '-' : row?.identifier}

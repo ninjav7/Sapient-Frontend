@@ -25,6 +25,7 @@ import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -202,16 +203,12 @@ const PortfolioOverview = () => {
             });
         };
 
-        const updateBuildingStore = () => {
-            BuildingStore.update((s) => {
-                s.BldgId = 'portfolio';
-                s.BldgName = 'Portfolio';
-                s.BldgTimeZone = '';
-            });
+        const updateBuildingData = () => {
+            updateBuildingStore('portfolio', 'Portfolio', '');
         };
 
         updateBreadcrumbStore();
-        updateBuildingStore();
+        updateBuildingData();
     }, []);
 
     return (

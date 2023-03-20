@@ -35,7 +35,7 @@ import {
     validateDevicesForBreaker,
 } from './utils';
 import { comparePanelData } from './utils';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -48,6 +48,7 @@ import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import './styles.scss';
 import UngroupAlert from './UngroupAlert';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -56,7 +57,8 @@ const EditPanel = () => {
     const { panelId } = useParams();
 
     const [userPermission] = useAtom(userPermissionData);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
     // Edit Breaker Modal
@@ -135,7 +137,7 @@ const EditPanel = () => {
 
     const onCancelClick = () => {
         history.push({
-            pathname: `/settings/panels`,
+            pathname: `/settings/panels/${bldgId}`,
         });
         BreakersStore.update((s) => {
             s.breakersList = [];
@@ -578,8 +580,6 @@ const EditPanel = () => {
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
 
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
-
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 rated_amps: sourceBreakerObj.rated_amps
@@ -983,8 +983,6 @@ const EditPanel = () => {
             setIsLoading(true);
             setLinking(true);
 
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
-
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 rated_amps: sourceBreakerObj.rated_amps
@@ -1093,7 +1091,7 @@ const EditPanel = () => {
             .then((res) => {
                 setIsProcessing(false);
                 history.push({
-                    pathname: `/settings/panels`,
+                    pathname: `/settings/panels/${bldgId}`,
                 });
             })
             .catch(() => {
@@ -1274,7 +1272,7 @@ const EditPanel = () => {
             const newList = [
                 {
                     label: 'Panels',
-                    path: '/settings/panels',
+                    path: `/settings/panels/${bldgId}`,
                     active: true,
                 },
             ];
@@ -1324,6 +1322,34 @@ const EditPanel = () => {
     useEffect(() => {
         isEditingMode ? setActiveTab('edit-breaker') : setActiveTab('metrics');
     }, [isEditingMode]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
+
+    useEffect(() => {
+        if (originalPanelObj?.panel_id) {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: `/settings/panels/${bldgId}`,
+                        active: false,
+                    },
+                    {
+                        label: originalPanelObj?.panel_name,
+                        path: '/settings/panels/edit-panel',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        }
+    }, [originalPanelObj]);
 
     useEffect(() => {
         pageDefaultStates();

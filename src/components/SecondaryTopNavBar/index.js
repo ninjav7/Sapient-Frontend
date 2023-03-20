@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 
-import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes, updateBuildingStore } from './utils';
+import { accountRoutes, configRoutes, portfolioRoutes, configChildRoutes } from './utils';
 import { buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -12,6 +12,7 @@ import { ReactComponent as BuildingSVG } from '../../sharedComponents/assets/ico
 import { ReactComponent as PortfolioSVG } from '../../sharedComponents/assets/icons/portfolio-icon.svg';
 
 import './style.scss';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SecondaryTopNavBar = () => {
     const location = useLocation();
@@ -71,29 +72,28 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (accountRoutes.includes(path) || configRoutes.includes(path)) {
+        if (accountRoutes.includes(path)) {
             redirectToEndpoint(`/settings/account`);
             return;
         }
 
-        if (
-            path.includes(configChildRoutes[0]) ||
-            path.includes(configChildRoutes[1]) ||
-            path.includes(configChildRoutes[2]) ||
-            path.includes(configChildRoutes[3])
-        ) {
-            redirectToEndpoint(`/settings/account`);
-            return;
-        }
+        configRoutes.forEach((record) => {
+            if (path.includes(record)) {
+                redirectToEndpoint(`/settings/account`);
+                return;
+            }
+        });
+
+        configChildRoutes.forEach((record) => {
+            if (path.includes(record)) {
+                redirectToEndpoint(`/settings/account`);
+                return;
+            }
+        });
     };
 
     const handleBuildingChange = (record, path) => {
         updateBuildingStore(record?.value, record?.label, record?.timezone);
-
-        if (portfolioRoutes.includes(path)) {
-            redirectToEndpoint(`/energy/building/overview/${record?.value}`);
-            return;
-        }
 
         if (path === '/explore-page/by-buildings') {
             redirectToEndpoint(`/explore-page/by-equipment/${record?.value}`);
@@ -105,39 +105,45 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        if (accountRoutes.includes(path)) {
-            redirectToEndpoint(`/settings/general`);
+        if (portfolioRoutes.includes(path)) {
+            redirectToEndpoint(`/energy/building/overview/${record?.value}`);
             return;
         }
 
-        if (location.pathname.includes('/energy')) {
-            let pathName = path.substr(0, path.lastIndexOf('/'));
+        if (accountRoutes.includes(path)) {
+            redirectToEndpoint(`/settings/general/${record?.value}`);
+            return;
+        }
+
+        if (path.includes('/energy')) {
+            const pathName = path.substr(0, path.lastIndexOf('/'));
             redirectToEndpoint(`${pathName}/${record?.value}`);
             return;
         }
 
-        if (
-            path.includes(configChildRoutes[0]) ||
-            path.includes(configChildRoutes[1]) ||
-            path.includes(configChildRoutes[2]) ||
-            path.includes(configChildRoutes[3])
-        ) {
-            if (path.includes('edit-panel')) {
-                redirectToEndpoint(`/settings/panels`);
-            }
-            if (path.includes('active-devices')) {
-                redirectToEndpoint(`/settings/active-devices`);
-            }
-            if (path.includes('smart-meters')) {
-                redirectToEndpoint(`/settings/smart-meters`);
-            }
-            return;
+        if (path.includes('/settings')) {
+            configChildRoutes.forEach((route) => {
+                if (path.includes(route)) {
+                    if (path.includes('edit-panel')) redirectToEndpoint(`/settings/panels/${record?.value}`);
+                    if (path.includes('active-devices'))
+                        redirectToEndpoint(`/settings/active-devices/${record?.value}`);
+                    if (path.includes('smart-meters')) redirectToEndpoint(`/settings/smart-meters/${record?.value}`);
+                    return;
+                }
+            });
+
+            configRoutes.forEach((route) => {
+                if (path.includes(route)) {
+                    redirectToEndpoint(`${route}/${record?.value}`);
+                    return;
+                }
+            });
         }
     };
 
     const handleBldgSwitcherChange = (bldg_id) => {
         if (bldg_id === 'portfolio') {
-            let obj = {
+            const obj = {
                 value: 'portfolio',
                 label: 'Portfolio',
                 timezone: '',
@@ -148,18 +154,15 @@ const SecondaryTopNavBar = () => {
             return;
         }
 
-        let allBuildings = buildingsList[2].options;
-        let bldgObj = allBuildings.find((record) => record?.value === bldg_id);
+        const allBuildings = buildingsList[2].options;
+        const bldgObj = allBuildings.find((record) => record?.value === bldg_id);
         setSelectedBuilding(bldgObj);
         handleBuildingChange(bldgObj, location.pathname);
     };
 
     useEffect(() => {
-        let bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
-
-        if (bldgObj) {
-            setSelectedBuilding(bldgObj);
-        }
+        const bldgObj = buildingsList[2].options.find((record) => record?.value === selectedBuilding.value);
+        if (bldgObj?.value) setSelectedBuilding(bldgObj);
     }, [buildingsList]);
 
     useEffect(() => {
@@ -167,7 +170,7 @@ const SecondaryTopNavBar = () => {
             let bldgList = [...buildingsList];
             let allBuildingsList = [];
             buildingListData.forEach((record) => {
-                let obj = {
+                const obj = {
                     label: record?.building_name,
                     value: record?.building_id,
                     timezone: record?.timezone,

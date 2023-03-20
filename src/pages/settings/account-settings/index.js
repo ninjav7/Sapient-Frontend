@@ -14,6 +14,7 @@ import Button from '../../../sharedComponents/button/Button';
 import Inputs from '../../../sharedComponents/form/input/Input';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Brick from '../../../sharedComponents/brick';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const AccountSettings = () => {
     const cookies = new Cookies();
@@ -62,16 +63,12 @@ const AccountSettings = () => {
             });
         };
 
-        const updateBuildingStore = () => {
-            BuildingStore.update((s) => {
-                s.BldgId = 'portfolio';
-                s.BldgName = 'Portfolio';
-                s.BldgTimeZone = '';
-            });
+        const updateBuilding = () => {
+            updateBuildingStore('portfolio', 'Portfolio', '');
         };
 
         updateBreadcrumbStore();
-        updateBuildingStore();
+        updateBuilding();
     }, []);
 
     useEffect(() => {

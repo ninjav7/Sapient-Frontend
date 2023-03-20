@@ -32,7 +32,7 @@ const SideNav = () => {
             s.parent = route.parent;
         });
 
-        if (route.parent === 'buildings') {
+        if (route.parent === 'buildings' || route.parent === 'building-settings') {
             let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
 
             if (pathName.includes('/energy/end-uses') && buildingListData.length !== 0) {

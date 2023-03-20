@@ -20,11 +20,12 @@ import colors from '../../assets/scss/_colors.scss';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import './style.css';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
+    const { bldgId } = useParams();
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -61,133 +62,88 @@ const EndUseType = () => {
             : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
     };
 
-    const [energyChartOptions, setEnergyChartOptions] = useState({
-        chart: {
-            type: 'bar',
-            height: 350,
-            toolbar: {
-                show: true,
-            },
-            zoom: {
-                enabled: false,
-            },
-        },
-        stroke: {
-            width: 0.2,
-            show: true,
-            curve: 'straight',
-        },
-        dataLabels: {
-            enabled: true,
-            enabledOnSeries: [1],
-        },
-        animations: {
-            enabled: false,
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                            .tz(timeZone)
-                            .format(`MMM D 'YY @ hh:mm A`)}</div>
-                    </div>`;
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
-                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
-                    return `${weekText} - ${dateText}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 1,
-                    dashArray: 0,
-                },
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (val) {
-                    let print = val.toFixed(0);
-                    return `${print}`;
-                },
-            },
-            style: {
-                colors: ['#1D2939'],
-                fontSize: '12px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-    });
-
-    const [energyChartData, setEnergyChartData] = useState([]);
     const [endUseName, setEndUseName] = useState('');
-
-    const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
-    const [isPlugLoadChartLoading, setIsPlugLoadChartLoading] = useState(false);
-    const [isEquipTypeChartLoading, setIsEquipTypeChartLoading] = useState(false);
-
     const [endUsesData, setEndUsesData] = useState({});
 
-    const [hvacUsageData, setHvacUsageData] = useState([]);
-
     const fetchEndUseType = (end_uses_type) => {
-        if (end_uses_type === 'hvac') {
-            return 'HVAC';
-        }
+        return end_uses_type === 'hvac' ? 'HVAC' : end_uses_type.charAt(0).toUpperCase() + end_uses_type.slice(1);
+    };
 
-        if (end_uses_type === 'lighting') {
-            return 'Lighting';
-        }
+    const plugUsageDataFetch = async (endUseTypeRequest, time_zone) => {
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
+            .then((res) => {
+                const response = res?.data;
+                let energyCategories = [];
+                let energyData = [
+                    {
+                        name: 'Energy',
+                        data: [],
+                    },
+                ];
+                response.forEach((record) => {
+                    energyCategories.push(record?.date);
+                    energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
+                });
+                setEnergyConsumptionsCategories(energyCategories);
+                setEnergyConsumptionsData(energyData);
+            })
+            .catch((error) => {});
+    };
 
-        if (end_uses_type === 'plug') {
-            return 'Plug';
-        }
-
-        if (end_uses_type === 'process') {
-            return 'Process';
-        }
-
-        if (end_uses_type === 'other') {
-            return 'Other';
-        }
+    const endUsesDataFetch = async (endUseTypeRequest, time_zone) => {
+        const payload = apiRequestBody(startDate, endDate, time_zone);
+        await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
+            .then((res) => {
+                let response = res?.data?.data;
+                let requestEndUseType = fetchEndUseType(endUseType);
+                let data = response.find((element) => element.device === requestEndUseType);
+                let obj = {
+                    items: [
+                        {
+                            title: 'Total Consumption',
+                            value: formatConsumptionValue(Math.round(data?.energy_consumption?.now / 1000), 0),
+                            unit: UNITS.KWH,
+                            trends: [
+                                {
+                                    trendValue: percentageHandler(
+                                        data?.energy_consumption?.now,
+                                        data?.energy_consumption?.old
+                                    ),
+                                    trendType: fetchTrendType(
+                                        data?.energy_consumption?.now,
+                                        data?.energy_consumption?.old
+                                    ),
+                                    text: 'since last period',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'After-Hours Consumption',
+                            value: formatConsumptionValue(
+                                Math.round(data?.after_hours_energy_consumption?.now / 1000),
+                                0
+                            ),
+                            unit: UNITS.KWH,
+                            trends: [
+                                {
+                                    trendValue: percentageHandler(
+                                        data?.after_hours_energy_consumption?.now,
+                                        data?.after_hours_energy_consumption?.old
+                                    ),
+                                    trendType: fetchTrendType(
+                                        data?.after_hours_energy_consumption?.now,
+                                        data?.after_hours_energy_consumption?.old
+                                    ),
+                                    text: 'since last period',
+                                },
+                            ],
+                        },
+                    ],
+                };
+                setEndUsesData(obj);
+            })
+            .catch((error) => {});
     };
 
     useEffect(() => {
@@ -227,46 +183,6 @@ const EndUseType = () => {
             ComponentStore.update((s) => {
                 s.parent = 'buildings';
             });
-            setEnergyChartOptions({
-                ...energyChartOptions,
-                tooltip: {
-                    //@TODO NEED?
-                    // enabled: false,
-                    shared: false,
-                    intersect: false,
-                    style: {
-                        fontSize: '12px',
-                        fontFamily: 'Inter, Arial, sans-serif',
-                        fontWeight: 600,
-                        cssClass: 'apexcharts-xaxis-label',
-                    },
-                    y: {
-                        formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                            return value + ' K';
-                        },
-                    },
-                    marker: {
-                        show: false,
-                    },
-                    custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                        const { labels } = w.globals;
-                        const { seriesX } = w.globals;
-                        const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
-                        //const timestamp = labels[dataPointIndex];
-
-                        return `<div class="line-chart-widget-tooltip">
-                            <h6 class="line-chart-widget-tooltip-title">${endUseName} Consumption</h6>
-                            <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
-                                series[seriesIndex][dataPointIndex],
-                                0
-                            )} kWh</div>
-                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
-                                .tz(timeZone)
-                                .format(`MMM D 'YY @ hh:mm A`)}</div>
-                        </div>`;
-                    },
-                },
-            });
         };
         updateBreadcrumbStore();
     }, [endUseName, isPlugOnly]);
@@ -283,90 +199,24 @@ const EndUseType = () => {
     }, [buildingListData, bldgId]);
 
     useEffect(() => {
-        if (endUseType === 'hvac') {
-            setEndUseName('HVAC');
-        }
-
-        if (endUseType === 'lighting') {
-            setEndUseName('Lighting');
-        }
-
-        if (endUseType === 'plug') {
-            setEndUseName('Plug');
-        }
-
-        if (endUseType === 'process') {
-            setEndUseName('Process');
-        }
-
-        if (endUseType === 'other') {
-            setEndUseName('Other');
-        }
+        setEndUseName(endUseType === 'hvac' ? 'HVAC' : endUseType.charAt(0).toUpperCase() + endUseType.slice(1));
     }, [endUseType]);
 
     useEffect(() => {
         if (startDate === null || endDate === null) return;
 
-        const endUseTypeRequest = fetchEndUseType(endUseType);
+        let time_zone = 'US/Eastern';
 
-        const endUsesDataFetch = async () => {
-            setIsEndUsesDataFetched(true);
-            let payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchEndUsesType(bldgId, endUseTypeRequest, payload)
-                .then((res) => {
-                    let response = res?.data?.data;
-                    let requestEndUseType = fetchEndUseType(endUseType);
-                    let data = response.find((element) => element.device === requestEndUseType);
-                    let obj = {
-                        items: [
-                            {
-                                title: 'Total Consumption',
-                                value: formatConsumptionValue(Math.round(data?.energy_consumption?.now / 1000), 0),
-                                unit: UNITS.KWH,
-                                trends: [
-                                    {
-                                        trendValue: percentageHandler(
-                                            data?.energy_consumption?.now,
-                                            data?.energy_consumption?.old
-                                        ),
-                                        trendType: fetchTrendType(
-                                            data?.energy_consumption?.now,
-                                            data?.energy_consumption?.old
-                                        ),
-                                        text: 'since last period',
-                                    },
-                                ],
-                            },
-                            {
-                                title: 'After-Hours Consumption',
-                                value: formatConsumptionValue(
-                                    Math.round(data?.after_hours_energy_consumption?.now / 1000),
-                                    0
-                                ),
-                                unit: UNITS.KWH,
-                                trends: [
-                                    {
-                                        trendValue: percentageHandler(
-                                            data?.after_hours_energy_consumption?.now,
-                                            data?.after_hours_energy_consumption?.old
-                                        ),
-                                        trendType: fetchTrendType(
-                                            data?.after_hours_energy_consumption?.now,
-                                            data?.after_hours_energy_consumption?.old
-                                        ),
-                                        text: 'since last period',
-                                    },
-                                ],
-                            },
-                        ],
-                    };
-                    setEndUsesData(obj);
-                    setIsEndUsesDataFetched(false);
-                })
-                .catch((error) => {
-                    setIsEndUsesDataFetched(false);
-                });
-        };
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+
+            if (bldgObj?.building_id) {
+                if (bldgObj?.timezone) time_zone = bldgObj?.timezone;
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+            }
+        }
+
+        const endUseTypeRequest = fetchEndUseType(endUseType);
 
         // Planned for Future Enable of this integration
         // const equipmentUsageDataFetch = async () => {
@@ -402,50 +252,15 @@ const EndUseType = () => {
         //         });
         // };
 
-        const plugUsageDataFetch = async () => {
-            setIsPlugLoadChartLoading(true);
-            const payload = apiRequestBody(startDate, endDate, timeZone);
-            await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
-                .then((res) => {
-                    const response = res?.data;
-                    let energyCategories = [];
-                    let energyData = [
-                        {
-                            name: 'Energy',
-                            data: [],
-                        },
-                    ];
-                    response.forEach((record) => {
-                        energyCategories.push(record?.date);
-                        energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
-                    });
-                    setEnergyConsumptionsCategories(energyCategories);
-                    setEnergyConsumptionsData(energyData);
-                })
-                .catch((error) => {});
-        };
-
-        endUsesDataFetch();
+        endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
-        plugUsageDataFetch();
+        plugUsageDataFetch(endUseTypeRequest, time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
 
     const fetchEnduseTitle = (type) => {
-        if (type === 'hvac') {
-            return 'HVAC Consumption';
-        }
-        if (type === 'lighting') {
-            return 'Lighting Consumption';
-        }
-        if (type === 'plug') {
-            return 'Plug Load Consumption';
-        }
-        if (type === 'process') {
-            return 'Process Consumption';
-        }
-        if (type === 'other') {
-            return 'Other End Uses Consumption';
-        }
+        return type === 'hvac'
+            ? 'HVAC Consumption'
+            : (endUseType.charAt(0).toUpperCase() + endUseType.slice(1)).concat(' Consumption');
     };
 
     return (
@@ -463,7 +278,7 @@ const EndUseType = () => {
             <div className="mt-4">
                 <ColumnChart
                     title={fetchEnduseTitle(endUseType)}
-                    subtitle={'Energy Usage By Hour (kWh)'}
+                    subTitle={'Energy Usage By Hour (kWh)'}
                     colors={[colors.datavizMain2]}
                     categories={energyConsumptionsCategories}
                     tooltipUnit={KPI_UNITS.KWH}
