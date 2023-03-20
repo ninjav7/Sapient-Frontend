@@ -14,7 +14,7 @@ import 'moment-timezone';
 import moment from 'moment';
 import Header from '../../components/Header';
 import { getExploreByEquipmentTableCSVExport } from '../../utils/tablesExport';
-import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
+import { buildingData, selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { apiRequestBody } from '../../helpers/helpers';
 import { DataTableWidget } from '../../sharedComponents/dataTableWidget';
@@ -29,6 +29,7 @@ import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -68,7 +69,7 @@ const SkeletonLoading = () => (
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
-
+    const [buildingListData] = useAtom(buildingData);
     const [chartLoading, setChartLoading] = useState(false);
 
     const [equpimentIdSelection] = useAtom(selectedEquipment);
@@ -162,6 +163,11 @@ const ExploreByEquipment = () => {
     };
 
     useEffect(() => {
+        if (bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
         if (entryPoint !== 'entered') {
             setFiltersValues({
                 selectedFilters: [],
