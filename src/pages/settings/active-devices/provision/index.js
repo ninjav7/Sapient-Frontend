@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Alert, Input, Spinner } from 'reactstrap';
+import { Row, Col, Alert, Spinner } from 'reactstrap';
 import {
     fetchKasaDevices,
     fetchKasaAccounts,
@@ -10,6 +10,8 @@ import {
 } from './services';
 import { useAtom } from 'jotai';
 import { useParams } from 'react-router-dom';
+import { buildingData } from '../../../../store/globalState';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -31,8 +33,6 @@ import colorPalette from '../../../../assets/scss/_colors.scss';
 import LinkModal from './LinkModal';
 import UnLinkModal from './UnLinkModal';
 import FindDevicesModal from './FindDevicesModal';
-import { buildingData } from '../../../../store/globalState';
-import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -97,7 +97,7 @@ const DevicesSkeletonLoading = () => (
 const Provision = () => {
     //New Integrations
     const [totalItems, setTotalItems] = useState(0);
-
+    const [deviceTotalItems, setDeviceTotalItems] = useState(0);
     // Modal states
     const [showlink, setShowLink] = useState(false);
     const [checkFind, setCheckFind] = useState(true);
@@ -127,6 +127,15 @@ const Provision = () => {
     const [error, setError] = useState(false);
     const [message, setMessage] = useState('');
     const [kasaDevices, setKasaDevices] = useState([]);
+    const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState({});
+    const [pageNo, setPageNo] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
+    const [devicesearch, setDeviceSearch] = useState('');
+    const [deviceSortBy, setDeviceSortBy] = useState({});
+    const [devicePageNo, setDevicePageNo] = useState(1);
+    const [devicePageSize, setDevicePageSize] = useState(20);
+    const [selectedAccount, setSelectedAccount] = useState({});
 
     const handleUnlink = async (checkedEmail) => {
         let authData = {
@@ -164,11 +173,14 @@ const Provision = () => {
                 kasa_account_ids: checkedEmailFind,
                 find_new: true,
             };
-            getKasaDevices(arr, true);
+            setSelectedAccount(arr);
+
             setShowFind(false);
         }
     };
-
+    useEffect(() => {
+        if (Object.entries(selectedAccount).length !== 0) getKasaDevices(selectedAccount, true);
+    }, [selectedAccount, devicePageNo, devicePageSize, devicesearch, deviceSortBy]);
     const handleAuthorize = async (email, password) => {
         let authData = {
             username: email,
@@ -263,11 +275,18 @@ const Provision = () => {
 
     const getKasaAccount = async () => {
         setIsProcessing(true);
-        let params = `?building_id=${bldgId}`;
-        await fetchKasaAccounts(params)
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name === undefined ? 'email' : sortBy.name,
+                sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
+            };
+
+        await fetchKasaAccounts(pageNo, pageSize, bldgId, search, {
+            ...sorting,
+        })
             .then((res) => {
                 let kDevices = [];
-
+                setTotalItems(res?.data?.data?.length);
                 let Hs = 0;
                 let kp = 0;
                 let Hs1 = 0;
@@ -315,8 +334,21 @@ const Provision = () => {
         setIsAddProcessing(true);
         let ready = [];
         let progress = [];
-        let params = `?building_id=${bldgId}`;
-        await fetchKasaDevices(params, details)
+        const sorting = deviceSortBy.method &&
+            deviceSortBy.name && {
+                order_by: deviceSortBy.name === undefined ? 'device_mac' : deviceSortBy.name,
+                sort_by: deviceSortBy.method === undefined ? 'ace' : deviceSortBy.method,
+            };
+        await fetchKasaDevices(
+            devicePageNo,
+            devicePageSize,
+            bldgId,
+            devicesearch,
+            {
+                ...sorting,
+            },
+            details
+        )
             .then((res) => {
                 res.data.data.forEach((ele) => {
                     if (ele.action === 1) {
@@ -337,7 +369,7 @@ const Provision = () => {
 
     useEffect(() => {
         getKasaAccount();
-    }, [auth]);
+    }, [auth, search, sortBy, pageNo, pageSize]);
 
     useEffect(() => {
         if (bldgId && buildingListData.length !== 0) {
@@ -455,6 +487,7 @@ const Provision = () => {
             name: 'Email',
             accessor: 'email',
             callbackValue: renderEmail,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Timezone',
@@ -465,26 +498,31 @@ const Provision = () => {
             name: 'HS110s',
             accessor: 'HS110s',
             callbackValue: renderHS110s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'KP115s',
             accessor: 'KP115s',
             callbackValue: renderKP115s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'HS300s',
             accessor: 'HS300s',
             callbackValue: renderHS300s,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Sockets',
             accessor: 'Socket',
             callbackValue: renderSocket,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Remaining Capacity',
             accessor: 'Remaining_Capacity',
             callbackValue: renderRemainingCapacity,
+            onSort: (method, name) => setSortBy({ method, name }),
         },
     ];
 
@@ -514,6 +552,20 @@ const Provision = () => {
             name: 'Kasa Account',
             accessor: 'kasa_account',
             callbackValue: renderKasaAccount,
+        },
+    ];
+    const pageListSizes = [
+        {
+            label: '5 Rows',
+            value: '5',
+        },
+        {
+            label: '10 Rows',
+            value: '10',
+        },
+        {
+            label: '15 Rows',
+            value: '15',
         },
     ];
 
@@ -566,12 +618,20 @@ const Provision = () => {
                             isLoading={isProcessing}
                             isLoadingComponent={<SkeletonLoading />}
                             id="linked_account"
-                            onSearch={(query) => {}}
+                            onSearch={(query) => {
+                                setPageNo(1);
+                                setSearch(query);
+                            }}
                             buttonGroupFilterOptions={[]}
                             rows={currentRow()}
                             searchResultRows={currentRow()}
                             disableColumnDragging={true}
                             headers={headerProps1}
+                            currentPage={pageNo}
+                            onChangePage={setPageNo}
+                            pageSize={pageSize}
+                            onPageSize={setPageSize}
+                            pageListSizes={pageListSizes}
                             totalCount={(() => {
                                 return totalItems;
                             })()}
@@ -623,7 +683,10 @@ const Provision = () => {
                         isLoading={isAddProcessing}
                         isLoadingComponent={<DevicesSkeletonLoading />}
                         id="devices_linked"
-                        onSearch={(query) => {}}
+                        onSearch={(query) => {
+                            setDevicePageNo(1);
+                            setDeviceSearch(query);
+                        }}
                         onStatus={setSelectedStatus}
                         buttonGroupFilterOptions={[
                             { label: `Available (${progressData.length})` },
@@ -634,8 +697,12 @@ const Provision = () => {
                         disableColumnDragging={true}
                         searchResultRows={currentRowDevices()}
                         headers={headerProps2}
+                        currentPage={devicePageNo}
+                        onChangePage={setDevicePageNo}
+                        pageSize={devicePageSize}
+                        onPageSize={setDevicePageSize}
                         totalCount={(() => {
-                            return totalItems;
+                            return deviceTotalItems;
                         })()}
                     />
                 </Col>
