@@ -3,6 +3,7 @@ import ReactSelect from 'react-select';
 import _ from 'lodash';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 import Brick from '../../brick';
 import Typography from '../../typography';
@@ -40,6 +41,7 @@ const Select = ({
     error,
     info,
     label,
+    required,
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
@@ -116,6 +118,11 @@ const Select = ({
                 <>
                     <Typography.Body size={Typography.Sizes.sm} className="gray-550">
                         {label}
+                        {required && (
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        )}
                     </Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>

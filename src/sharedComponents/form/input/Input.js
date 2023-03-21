@@ -2,6 +2,7 @@ import React from 'react';
 import FormControl from 'react-bootstrap/FormControl';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import colorPalette from '../../../assets/scss/_colors.scss';
 
 import Typography from '../../typography';
 import Brick from '../../brick';
@@ -10,7 +11,7 @@ import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
 
 import './Input.scss';
 
-const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disabled, ...props }) => {
+const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disabled, required, ...props }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
         'element-end': !!elementEnd,
         disabled,
@@ -22,7 +23,14 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disab
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm} className='gray-550'>{props.label}</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                        {props.label}
+                        {required && (
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        )}
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
             )}
