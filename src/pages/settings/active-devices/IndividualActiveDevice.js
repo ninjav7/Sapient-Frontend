@@ -10,7 +10,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import DeviceChartModel from '../../../pages/chartModal/DeviceChartModel';
 import { apiRequestBody } from '../../../helpers/helpers';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
 import Brick from '../../../sharedComponents/brick';
@@ -35,6 +35,7 @@ import './styles.scss';
 import '../passive-devices/styles.scss';
 import { UserStore } from '../../../store/UserStore';
 import '../../../sharedComponents/breaker/Breaker.scss';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const IndividualActiveDevice = () => {
     const history = useHistory();
@@ -56,7 +57,8 @@ const IndividualActiveDevice = () => {
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
     const [locationError, setLocationError] = useState(null);
@@ -174,7 +176,7 @@ const IndividualActiveDevice = () => {
             let newList = [
                 {
                     label: 'Active Devices',
-                    path: '/settings/active-devices',
+                    path: `/settings/active-devices/${bldgId}`,
                     active: false,
                 },
             ];
@@ -277,7 +279,7 @@ const IndividualActiveDevice = () => {
     };
 
     const redirectToActivePage = () => {
-        history.push({ pathname: `/settings/active-devices` });
+        history.push({ pathname: `/settings/active-devices/${bldgId}` });
     };
 
     const updateActiveDevice = async () => {
@@ -337,7 +339,7 @@ const IndividualActiveDevice = () => {
             let newList = [
                 {
                     label: 'Active Devices',
-                    path: '/settings/active-devices',
+                    path: `/settings/active-devices/${bldgId}`,
                     active: false,
                 },
                 {
@@ -349,6 +351,14 @@ const IndividualActiveDevice = () => {
             bs.items = newList;
         });
     }, [activeData]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         updateBreadcrumbStore();

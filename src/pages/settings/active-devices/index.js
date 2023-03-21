@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getActiveDeviceData, fetchActiveFilter, getSingleActiveDevice } from './services';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -10,7 +10,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import { useAtom } from 'jotai';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Brick from '../../../sharedComponents/brick';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
@@ -24,6 +24,7 @@ import { Button } from '../../../sharedComponents/button';
 import { Badge } from '../../../sharedComponents/badge';
 import { pageListSizes } from '../../../helpers/helpers';
 import { getActiveDeviceTableCSVExport } from '../../../utils/tablesExport';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -64,7 +65,8 @@ const SkeletonLoading = () => (
 );
 
 const ActiveDevices = () => {
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
     const [userPermission] = useAtom(userPermissionData);
 
@@ -300,6 +302,14 @@ const ActiveDevices = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
+
     const currentRow = () => {
         return activeDeviceData;
     };
@@ -330,7 +340,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${row.equipments_id}`,
+                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>
@@ -441,7 +451,7 @@ const ActiveDevices = () => {
                             <div className="d-flex">
                                 <Link
                                     to={{
-                                        pathname: `/settings/active-devices/provision`,
+                                        pathname: `/settings/active-devices/provision/${bldgId}`,
                                     }}>
                                     <Button
                                         label={'Add Active Device'}

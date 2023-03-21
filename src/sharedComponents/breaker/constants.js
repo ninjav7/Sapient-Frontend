@@ -1,7 +1,7 @@
 const BREAKER_STATUSES = Object.freeze({
     online: 'online',
     offline: 'offline',
-    noSenors: 'no-sensors',
+    noSensors: 'no-sensors',
 });
 
 const BREAKER_TYPES = Object.freeze({

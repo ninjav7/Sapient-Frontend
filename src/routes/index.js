@@ -226,7 +226,7 @@ const settingsRoutes = {
     visibility: false,
     children: [
         {
-            path: '/settings/general',
+            path: '/settings/general/:bldgId',
             name: 'General',
             component: General,
             route: PrivateRoute,
@@ -234,7 +234,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/layout',
+            path: '/settings/layout/:bldgId',
             name: 'Layout',
             component: Layout,
             route: PrivateRoute,
@@ -242,7 +242,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/equipment',
+            path: '/settings/equipment/:bldgId',
             name: 'Equipment',
             component: Equipment,
             route: PrivateRoute,
@@ -258,7 +258,7 @@ const settingsRoutes = {
         //     parent: 'building-settings',
         // },
         {
-            path: '/settings/panels/edit-panel/:panelType/:panelId',
+            path: '/settings/panels/edit-panel/:bldgId/:panelType/:panelId',
             name: 'Edit Panel',
             component: EditPanel,
             route: PrivateRoute,
@@ -266,7 +266,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/panels',
+            path: '/settings/panels/:bldgId',
             name: 'Panels',
             component: Panels,
             route: PrivateRoute,
@@ -274,7 +274,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/single/:deviceId',
+            path: '/settings/active-devices/single/:bldgId/:deviceId',
             name: 'Single Active Devices',
             component: IndividualActiveDevice,
             route: PrivateRoute,
@@ -282,7 +282,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/provision',
+            path: '/settings/active-devices/provision/:bldgId',
             name: 'Provision Devices',
             component: Provision,
             route: PrivateRoute,
@@ -290,7 +290,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices',
+            path: '/settings/active-devices/:bldgId',
             name: 'Active Devices',
             component: ActiveDevices,
             route: PrivateRoute,
@@ -298,15 +298,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/provision',
-            name: 'Provision Devices',
-            component: Provision,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'building-settings',
-        },
-        {
-            path: '/settings/smart-meters/single/:deviceId',
+            path: '/settings/smart-meters/single/:bldgId/:deviceId',
             name: 'Single Smart Meter',
             component: IndividualPassiveDevice,
             route: PrivateRoute,
@@ -314,7 +306,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/smart-meters',
+            path: '/settings/smart-meters/:bldgId',
             name: 'Smart Meters',
             component: PassiveDevices,
             route: PrivateRoute,

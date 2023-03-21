@@ -6,7 +6,7 @@ import moment from 'moment';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
@@ -34,6 +34,7 @@ import Select from '../../../sharedComponents/form/select';
 import { UserStore } from '../../../store/UserStore';
 import '../active-devices/styles.scss';
 import '../../../sharedComponents/breaker/Breaker.scss';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -45,6 +46,8 @@ const IndividualPassiveDevice = () => {
     let history = useHistory();
 
     const { deviceId } = useParams();
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [sensorId, setSensorId] = useState('');
 
     // Chart states
@@ -75,7 +78,6 @@ const IndividualPassiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
     const [selectedPassiveDevice, setSelectedPassiveDevice] = useState({});
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [sensorObj, setSensorObj] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
@@ -236,7 +238,7 @@ const IndividualPassiveDevice = () => {
     };
 
     const redirectToPassivePage = () => {
-        history.push({ pathname: `/settings/smart-meters` });
+        history.push({ pathname: `/settings/smart-meters/${bldgId}` });
     };
 
     const fetchPassiveDevice = async () => {
@@ -294,7 +296,7 @@ const IndividualPassiveDevice = () => {
             let newList = [
                 {
                     label: 'Smart Meters',
-                    path: '/settings/smart-meters',
+                    path: `/settings/smart-meters/${bldgId}`,
                     active: false,
                 },
             ];
@@ -316,7 +318,7 @@ const IndividualPassiveDevice = () => {
             let newList = [
                 {
                     label: 'Smart Meters',
-                    path: '/settings/smart-meters',
+                    path: `/settings/smart-meters/${bldgId}`,
                     active: false,
                 },
                 {
@@ -329,6 +331,14 @@ const IndividualPassiveDevice = () => {
         });
         if (passiveData) setSelectedPassiveDevice(passiveData);
     }, [passiveData]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
 
     useEffect(() => {
         updateBreadcrumbStore();

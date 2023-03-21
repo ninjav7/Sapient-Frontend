@@ -16,6 +16,7 @@ import Select from '../../sharedComponents/form/select';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import Typography from '../../sharedComponents/typography';
+import { Button } from '../../sharedComponents/button';
 
 const DeviceChartModel = ({
     showChart,
@@ -175,8 +176,10 @@ const DeviceChartModel = ({
                 </div>
 
                 <div>
-                    <Xmark
-                        className="mouse-pointer"
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.md}
+                        type={Button.Type.secondaryGrey}
                         onClick={() => {
                             handleChartClose();
                             handleRefresh();

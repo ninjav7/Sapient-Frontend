@@ -45,18 +45,24 @@ const Control = () => {
     };
 
     const handleSideNavChange = () => {
-        if (accountRoutes.includes(location.pathname)) {
-            ComponentStore.update((s) => {
-                s.parent = 'account';
-            });
-            return;
-        }
-        if (configRoutes.includes(location.pathname)) {
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-            return;
-        }
+        const currentPath = location.pathname;
+        accountRoutes.forEach((record) => {
+            if (currentPath.includes(record)) {
+                ComponentStore.update((s) => {
+                    s.parent = 'account';
+                });
+                return;
+            }
+        });
+
+        configRoutes.forEach((record) => {
+            if (currentPath.includes(record)) {
+                ComponentStore.update((s) => {
+                    s.parent = 'building-settings';
+                });
+                return;
+            }
+        });
     };
 
     const handleRouteChange = () => {
@@ -64,11 +70,11 @@ const Control = () => {
         let pathName = '';
 
         if (currentPath.includes('/control/plug-rules')) {
-            bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = configRoutes[0]);
+            bldgId === 'portfolio' ? (pathName = accountRoutes[0]) : (pathName = `${configRoutes[0]}/${bldgId}`);
         } else {
             routesForAccountSettings.includes(currentPath) || currentPath.includes(accountChildRoutes[0])
                 ? (pathName = accountRoutes[0])
-                : (pathName = configRoutes[0]);
+                : (pathName = `${configRoutes[0]}/${bldgId}`);
         }
 
         history.push({

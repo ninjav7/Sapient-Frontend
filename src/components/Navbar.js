@@ -7,8 +7,11 @@ import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings } from 'react-feather';
 import '../pages/portfolio/style.scss';
 import './style.css';
+import { BuildingStore } from '../store/BuildingStore';
 
 const Navbar = (props) => {
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     return (
         <React.Fragment>
             <div className="topnav shadow energy-topnav-custom">
@@ -29,7 +32,7 @@ const Navbar = (props) => {
                     <AppMenu mode={'vertical'} />
 
                     <div className="nav-right-icon-style">
-                        <Link to="/settings/general">
+                        <Link to={`/settings/general/${bldgId}`}>
                             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
                                 <Settings className="icon-sm" />
                             </button>

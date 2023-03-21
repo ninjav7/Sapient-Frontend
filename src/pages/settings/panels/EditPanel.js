@@ -35,7 +35,7 @@ import {
     validateDevicesForBreaker,
 } from './utils';
 import { comparePanelData } from './utils';
-import { userPermissionData } from '../../../store/globalState';
+import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
@@ -48,6 +48,7 @@ import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import './styles.scss';
 import UngroupAlert from './UngroupAlert';
+import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -56,7 +57,8 @@ const EditPanel = () => {
     const { panelId } = useParams();
 
     const [userPermission] = useAtom(userPermissionData);
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [isBreakerApiTrigerred, setBreakerAPITrigerred] = useState(false);
 
     // Edit Breaker Modal
@@ -101,6 +103,8 @@ const EditPanel = () => {
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [breakerUpdateId, setBreakerUpdateId] = useState('');
+    const [startingBreaker, setStartingBreaker] = useState(1);
+    const [maxBreakerCount, setMaxBreakerCount] = useState(1);
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -135,7 +139,7 @@ const EditPanel = () => {
 
     const onCancelClick = () => {
         history.push({
-            pathname: `/settings/panels`,
+            pathname: `/settings/panels/${bldgId}`,
         });
         BreakersStore.update((s) => {
             s.breakersList = [];
@@ -280,18 +284,11 @@ const EditPanel = () => {
         }
     };
 
-    const fetchBreakerStatus = (breaker_type, breaker_obj) => {
+    const fetchBreakerStatus = (breaker_obj) => {
         if (breaker_obj?.type === 'blank' || breaker_obj?.type === 'unwired') return null;
-        if (breaker_type === 'not-configured') return Breaker.Status.noSenors;
-        if (breaker_type === 'configured') return Breaker.Status.online;
-        if (breaker_obj?.type === 'equipment') {
-            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
-            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
-        }
-        if (breaker_obj?.type === 'unlabeled') {
-            if (breaker_obj?.sensor_link === '') return Breaker.Status.noSenors;
-            if (breaker_obj?.sensor_link !== '') return Breaker.Status.online;
-        }
+        if (breaker_obj.status === null) return Breaker.Status.noSensors;
+        if (breaker_obj.status) return Breaker.Status.online;
+        if (!breaker_obj.status) return Breaker.Status.offline;
     };
 
     const unLinkAllBreakers = async () => {
@@ -584,8 +581,6 @@ const EditPanel = () => {
             setLinking(true);
 
             const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
-
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
 
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
@@ -990,8 +985,6 @@ const EditPanel = () => {
             setIsLoading(true);
             setLinking(true);
 
-            if (sourceBreakerObj.rated_amps) console.log('SSR its true');
-
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 rated_amps: sourceBreakerObj.rated_amps
@@ -1096,11 +1089,12 @@ const EditPanel = () => {
             parent_panel: panelObj?.parent_id,
             space_id: panelObj?.location_id,
         };
+        if (panelObj?.starting_breaker) panel_obj.starting_breaker = panelObj?.starting_breaker;
         await updatePanelDetails(params, panel_obj)
             .then((res) => {
                 setIsProcessing(false);
                 history.push({
-                    pathname: `/settings/panels`,
+                    pathname: `/settings/panels/${bldgId}`,
                 });
             })
             .catch(() => {
@@ -1131,6 +1125,8 @@ const EditPanel = () => {
                     });
                 }
 
+                if (response?.starting_breaker) setStartingBreaker(response?.starting_breaker);
+
                 setBreakerCountObj({ ...breakerCountObj, defaultValue: response?.breakers });
                 setBreakerType({ ...breakerType, defaultValue: response?.panel_type });
 
@@ -1151,12 +1147,14 @@ const EditPanel = () => {
         await getBreakersList(params)
             .then((res) => {
                 let response = res?.data?.data;
+                if (response.length === 0) setStartingBreaker(0);
+                if (response) setMaxBreakerCount(response.length);
 
-                // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
-                    record.status = fetchBreakerStatus(record.config_type, record);
+                    record.status = fetchBreakerStatus(record);
+                    // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                 });
@@ -1281,7 +1279,7 @@ const EditPanel = () => {
             const newList = [
                 {
                     label: 'Panels',
-                    path: '/settings/panels',
+                    path: `/settings/panels/${bldgId}`,
                     active: true,
                 },
             ];
@@ -1331,6 +1329,34 @@ const EditPanel = () => {
     useEffect(() => {
         isEditingMode ? setActiveTab('edit-breaker') : setActiveTab('metrics');
     }, [isEditingMode]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
+
+    useEffect(() => {
+        if (originalPanelObj?.panel_id) {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: `/settings/panels/${bldgId}`,
+                        active: false,
+                    },
+                    {
+                        label: originalPanelObj?.panel_name,
+                        path: '/settings/panels/edit-panel',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        }
+    }, [originalPanelObj]);
 
     useEffect(() => {
         pageDefaultStates();
@@ -1458,6 +1484,20 @@ const EditPanel = () => {
                 typeOptions={panelTypeList}
                 typeProps={breakerType}
                 numberOfBreakers={breakerCountObj}
+                startingBreaker={{
+                    onChange: () => {
+                        let count = startingBreaker;
+                        count = count + 1;
+                        if (count <= maxBreakerCount) {
+                            setStartingBreaker(count);
+                            handleChange('starting_breaker', count);
+                        }
+                    },
+                    defaultValue: startingBreaker,
+                    type: 'number',
+                    min: 1,
+                    max: maxBreakerCount,
+                }}
                 isEditable={
                     userPermission?.user_role === 'admin' ||
                     userPermission?.permissions?.permissions?.building_panels_permission?.edit

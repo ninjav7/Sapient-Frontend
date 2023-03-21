@@ -8,7 +8,8 @@ import { ReactComponent as Circlebolt } from '../../assets/icon/circle-bolt.svg'
 import { useAtom } from 'jotai';
 import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
-import { configChildRoutes, updateBuildingStore } from '../SecondaryTopNavBar/utils';
+import { configChildRoutes } from '../SecondaryTopNavBar/utils';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -47,7 +48,7 @@ const NavLinks = () => {
     ];
 
     const handleEnergyClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
 
         if (!bldgObj?.active) {
             routeToPortfolioPage();
@@ -56,7 +57,6 @@ const NavLinks = () => {
         }
 
         if (
-            configRoutes.includes(location.pathname) ||
             location.pathname.includes('/explore-page/by-equipment') ||
             location.pathname.includes('/control/plug-rules')
         ) {
@@ -66,24 +66,32 @@ const NavLinks = () => {
             return;
         }
 
-        if (
-            location.pathname.includes(configChildRoutes[0]) ||
-            location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2]) ||
-            location.pathname.includes(configChildRoutes[3])
-        ) {
-            history.push({
-                pathname: `/energy/building/overview/${bldgId}`,
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/energy/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
             });
-            return;
-        }
 
-        routeToPortfolioPage();
-        updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/energy/building/overview/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            routeToPortfolioPage();
+            updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
+        }
     };
 
     const handleControlClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (bldgObj) {
             if (!bldgObj?.active) {
                 routeToPortfolioPage();
@@ -99,7 +107,7 @@ const NavLinks = () => {
     };
 
     const handleExploreClick = () => {
-        let bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
+        const bldgObj = buildingListData.find((bldg) => bldg.building_id === bldgId);
         if (!bldgObj?.active) {
             history.push({
                 pathname: `/explore-page/by-buildings`,
@@ -107,8 +115,8 @@ const NavLinks = () => {
             updateBuildingStore('portfolio', 'Portfolio', ''); // (BldgId, BldgName, BldgTimeZone)
             return;
         }
+
         if (
-            configRoutes.includes(location.pathname) ||
             location.pathname.includes('/energy/building/overview') ||
             location.pathname.includes('/energy/end-uses') ||
             location.pathname.includes('/energy/time-of-day') ||
@@ -120,21 +128,29 @@ const NavLinks = () => {
             return;
         }
 
-        if (
-            location.pathname.includes(configChildRoutes[0]) ||
-            location.pathname.includes(configChildRoutes[1]) ||
-            location.pathname.includes(configChildRoutes[2]) ||
-            location.pathname.includes(configChildRoutes[3])
-        ) {
-            history.push({
-                pathname: `/explore-page/by-equipment/${bldgId}`,
+        if (location.pathname.includes('/settings')) {
+            configRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                    });
+                    return;
+                }
             });
-            return;
-        }
 
-        history.push({
-            pathname: `/explore-page/by-buildings`,
-        });
+            configChildRoutes.forEach((record) => {
+                if (location.pathname.includes(record)) {
+                    history.push({
+                        pathname: `/explore-page/by-equipment/${bldgId}`,
+                    });
+                    return;
+                }
+            });
+        } else {
+            history.push({
+                pathname: `/explore-page/by-buildings`,
+            });
+        }
     };
 
     const handleSideNavChange = (componentName) => {
