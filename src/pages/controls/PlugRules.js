@@ -463,7 +463,6 @@ const PlugRules = () => {
         }
         return newPlugRuleData;
     };
-    console.log('nameError243', nameError);
 
     return (
         <React.Fragment>
