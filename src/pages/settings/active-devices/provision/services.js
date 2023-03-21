@@ -8,11 +8,21 @@ import {
     addToSystem,
 } from '../../../../services/Network';
 
-export function fetchKasaDevices(params, payload) {
+export function fetchKasaDevices(devicePageNo, devicePageSize, bldgId, devicesearch, getParams, payload) {
+    const searchData = encodeURIComponent(devicesearch);
+    let params = `?building_id=${bldgId}&device_search=${searchData}&page_size=${devicePageSize}&page_no=${devicePageNo}`;
+    if (getParams.order_by && getParams.sort_by) {
+        params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
+    }
     return axiosInstance.post(`${get_kasa_devices}${params}`, payload).then((res) => res);
 }
 
-export function fetchKasaAccounts(params) {
+export function fetchKasaAccounts(pageNo, pageSize, bldgId, search, getParams) {
+    const searchData = encodeURIComponent(search);
+    let params = `?building_id=${bldgId}&account_search=${searchData}&page_size=${pageSize}&page_no=${pageNo}`;
+    if (getParams.order_by && getParams.sort_by) {
+        params += `&ordered_by=${getParams.order_by}&sort_by=${getParams.sort_by}`;
+    }
     return axiosInstance.get(`${get_kasa_account}${params}`).then((res) => res);
 }
 
