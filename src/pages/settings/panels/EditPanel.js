@@ -104,7 +104,6 @@ const EditPanel = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [breakerUpdateId, setBreakerUpdateId] = useState('');
     const [startingBreaker, setStartingBreaker] = useState(1);
-    const [maxBreakerCount, setMaxBreakerCount] = useState(1);
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -1147,8 +1146,6 @@ const EditPanel = () => {
         await getBreakersList(params)
             .then((res) => {
                 let response = res?.data?.data;
-                if (response.length === 0) setStartingBreaker(0);
-                if (response) setMaxBreakerCount(response.length);
 
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
@@ -1488,15 +1485,12 @@ const EditPanel = () => {
                     onChange: () => {
                         let count = startingBreaker;
                         count = count + 1;
-                        if (count <= maxBreakerCount) {
-                            setStartingBreaker(count);
-                            handleChange('starting_breaker', count);
-                        }
+                        setStartingBreaker(count);
+                        handleChange('starting_breaker', count);
                     },
                     defaultValue: startingBreaker,
                     type: 'number',
                     min: 1,
-                    max: maxBreakerCount,
                 }}
                 isEditable={
                     userPermission?.user_role === 'admin' ||
