@@ -8,6 +8,10 @@ import {
     getInsertKasaDevices,
     insertToSystem,
 } from './services';
+import { useAtom } from 'jotai';
+import { useParams } from 'react-router-dom';
+import { buildingData } from '../../../../store/globalState';
+import { updateBuildingStore } from '../../../../helpers/updateBuildingStore';
 import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -118,7 +122,8 @@ const Provision = () => {
     const [isAddProcessing, setIsAddProcessing] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState(0);
     const [auth, setAuth] = useState('');
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const { bldgId } = useParams();
+    const [buildingListData] = useAtom(buildingData);
     const [error, setError] = useState(false);
     const [message, setMessage] = useState('');
     const [kasaDevices, setKasaDevices] = useState([]);
@@ -250,13 +255,13 @@ const Provision = () => {
                 let newList = [
                     {
                         label: 'Active Devices',
-                        path: '/settings/active-devices',
-                        active: true,
+                        path: `/settings/active-devices/${bldgId}`,
+                        active: false,
                     },
                     {
                         label: 'Provisioning',
                         path: '/settings/active-devices/provision',
-                        active: false,
+                        active: true,
                     },
                 ];
                 bs.items = newList;
@@ -365,6 +370,14 @@ const Provision = () => {
     useEffect(() => {
         getKasaAccount();
     }, [auth, search, sortBy, pageNo, pageSize]);
+
+    useEffect(() => {
+        if (bldgId && buildingListData.length !== 0) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            if (bldgObj?.building_id)
+                updateBuildingStore(bldgObj?.building_id, bldgObj?.building_name, bldgObj?.timezone);
+        }
+    }, [buildingListData, bldgId]);
 
     //Linked Accounts
     const currentRow = () => {
