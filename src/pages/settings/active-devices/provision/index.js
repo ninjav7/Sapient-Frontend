@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Alert, Input, Spinner } from 'reactstrap';
+import { Row, Col, Alert, Spinner } from 'reactstrap';
 import {
     fetchKasaDevices,
     fetchKasaAccounts,
@@ -272,8 +272,8 @@ const Provision = () => {
         setIsProcessing(true);
         const sorting = sortBy.method &&
             sortBy.name && {
-                order_by: sortBy.method === undefined ? 'ace' : sortBy.method,
-                sort_by: sortBy.name === undefined ? 'email' : sortBy.name,
+                order_by: sortBy.name === undefined ? 'email' : sortBy.name,
+                sort_by: sortBy.method === undefined ? 'ace' : sortBy.method,
             };
 
         await fetchKasaAccounts(pageNo, pageSize, bldgId, search, {
