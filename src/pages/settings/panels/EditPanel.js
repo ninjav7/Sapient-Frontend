@@ -103,6 +103,8 @@ const EditPanel = () => {
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [breakerUpdateId, setBreakerUpdateId] = useState('');
+    const [startingBreaker, setStartingBreaker] = useState(1);
+    const [maxBreakerCount, setMaxBreakerCount] = useState(1);
     const [mainBreakerConfig, setMainBreakerConfig] = useState({
         items: [
             {
@@ -1087,6 +1089,7 @@ const EditPanel = () => {
             parent_panel: panelObj?.parent_id,
             space_id: panelObj?.location_id,
         };
+        if (panelObj?.starting_breaker) panel_obj.starting_breaker = panelObj?.starting_breaker;
         await updatePanelDetails(params, panel_obj)
             .then((res) => {
                 setIsProcessing(false);
@@ -1122,6 +1125,8 @@ const EditPanel = () => {
                     });
                 }
 
+                if (response?.starting_breaker) setStartingBreaker(response?.starting_breaker);
+
                 setBreakerCountObj({ ...breakerCountObj, defaultValue: response?.breakers });
                 setBreakerType({ ...breakerType, defaultValue: response?.panel_type });
 
@@ -1142,12 +1147,14 @@ const EditPanel = () => {
         await getBreakersList(params)
             .then((res) => {
                 let response = res?.data?.data;
+                if (response.length === 0) setStartingBreaker(0);
+                if (response) setMaxBreakerCount(response.length);
 
-                // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
                     record.config_type = fetchBreakerType(record);
                     record.status = fetchBreakerStatus(record);
+                    // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;
                     if (record?.voltage === 0 || !record?.voltage) record.voltage = undefined;
                 });
@@ -1477,6 +1484,20 @@ const EditPanel = () => {
                 typeOptions={panelTypeList}
                 typeProps={breakerType}
                 numberOfBreakers={breakerCountObj}
+                startingBreaker={{
+                    onChange: () => {
+                        let count = startingBreaker;
+                        count = count + 1;
+                        if (count <= maxBreakerCount) {
+                            setStartingBreaker(count);
+                            handleChange('starting_breaker', count);
+                        }
+                    },
+                    defaultValue: startingBreaker,
+                    type: 'number',
+                    min: 1,
+                    max: maxBreakerCount,
+                }}
                 isEditable={
                     userPermission?.user_role === 'admin' ||
                     userPermission?.permissions?.permissions?.building_panels_permission?.edit
