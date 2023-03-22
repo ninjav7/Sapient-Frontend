@@ -65,6 +65,7 @@ const Layout = () => {
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
+            window.scrollTo(0, 0);
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
