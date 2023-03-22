@@ -408,7 +408,7 @@ const EquipChartModal = ({
             <Modal
                 show={showEquipmentChart}
                 onHide={handleChartClose}
-                dialogClassName="modal-container-style"
+                size="xl"
                 centered
                 backdrop="static"
                 keyboard={false}>
