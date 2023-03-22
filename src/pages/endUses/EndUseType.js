@@ -21,6 +21,8 @@ import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { getWeatherData } from '../../services/weather';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -32,6 +34,7 @@ const EndUseType = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
+    const [weatherData, setWeatherData] = useState(null);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -146,6 +149,52 @@ const EndUseType = () => {
             .catch((error) => {});
     };
 
+    const fetchWeatherData = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await getWeatherData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    const highTemp = {
+                        type: LOW_MED_HIGH_TYPES.HIGH,
+                        data: [],
+                        color: colors.datavizRed500,
+                    };
+                    const avgTemp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.primaryGray450,
+                    };
+                    const lowTemp = {
+                        type: LOW_MED_HIGH_TYPES.LOW,
+                        data: [],
+                        color: colors.datavizBlue400,
+                    };
+                    response.data.forEach((record) => {
+                        if (record?.temp || record?.temp === 0) avgTemp.data.push(record?.temp);
+                        if (record?.max_temp) highTemp.data.push(record?.max_temp);
+                        if (record?.min_temp) lowTemp.data.push(record?.min_temp);
+                    });
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
+                    if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    console.log('SSRai tempData => ', tempData);
+                    if (tempData.length !== 0) setWeatherData(tempData);
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch(() => {
+                setWeatherData(null);
+            });
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -255,6 +304,7 @@ const EndUseType = () => {
         endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch(endUseTypeRequest, time_zone);
+        fetchWeatherData(time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
 
     const fetchEnduseTitle = (type) => {
@@ -288,6 +338,8 @@ const EndUseType = () => {
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
+                    temperatureSeries={weatherData}
+                    plotBands={null}
                 />
             </div>
 
