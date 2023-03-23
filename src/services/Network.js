@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://sapient-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-dev-stage.azurewebsites.net';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
@@ -109,6 +109,8 @@ export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
+export const groupBreakers = '/api/config/panels/group_breakers';
+export const ungroupBreakers = '/api/config/panels/ungroup_breakers';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
 export const updateBreakerTypes = '/api/config/panels/update_breaker_config';

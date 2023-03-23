@@ -5,7 +5,9 @@ import { useAtom } from 'jotai';
 
 import {
     deleteCurrentPanel,
+    getBreakersGrouped,
     getBreakersList,
+    getBreakersUngrouped,
     getEquipmentsList,
     getLocationData,
     getPanelsList,
@@ -382,6 +384,32 @@ const EditPanel = () => {
         const params = `?building_id=${bldgId}`;
         const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
         await updateBreakersLink(params, payload)
+            .then((res) => {
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
+            })
+            .catch(() => {
+                setIsLoading(false);
+                setLinking(false);
+            });
+    };
+
+    const updateBreakerGrouping = async (bldg_id, payload, setIsLoading) => {
+        const params = `?building_id=${bldg_id}`;
+        await getBreakersGrouped(params, payload)
+            .then((res) => {
+                fetchBreakersData(panelId, bldgId, setIsLoading);
+                fetchEquipmentData(bldgId);
+            })
+            .catch(() => {
+                setIsLoading(false);
+                setLinking(false);
+            });
+    };
+
+    const updateBreakerUngrouping = async (bldg_id, payload, setIsLoading) => {
+        const params = `?building_id=${bldg_id}`;
+        await getBreakersUngrouped(params, payload)
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
                 fetchEquipmentData(bldgId);
@@ -1017,12 +1045,77 @@ const EditPanel = () => {
         }
     };
 
-    const handleBreakerLinkClicked = (breakerLinkObj, setIsLoading, is_linking) => {
+    const handleBreakerGrouping = (breakerLinkObj, setIsLoading, is_linking) => {
         if (is_linking) return;
 
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
 
+        if (panelObj?.voltage !== 600) {
+            // For all Panel voltage other than 600
+            if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type !== 'equipment') {
+                // When both Breaker Types are same
+                if (sourceBreakerObj?.type === targetBreakerObj?.type) {
+                    // Breaker Lvl 3:1, 1:3, 3:3
+                    if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
+                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked.`;
+                        setAlertMessage(alertMsg);
+                        handleUngroupAlertOpen();
+                        return;
+                    }
+                    if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
+                        // Breaker Lvl 2:2
+                        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
+                            const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked.`;
+                            setAlertMessage(alertMsg);
+                            handleUngroupAlertOpen();
+                            return;
+                        }
+                        if (panelObj?.voltage === '120/240') {
+                            const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked. Since Panel Voltage 120/240`;
+                            setAlertMessage(alertMsg);
+                            handleUngroupAlertOpen();
+                            return;
+                        }
+                        // Breaker Lvl 1:2
+                        if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 2) {
+                            console.log('Call breakers grouping API with source and target ID to form Triple Breaker');
+                        }
+                        // Breaker Lvl 2:1
+                        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 1) {
+                            console.log('Call breakers grouping API with source and target ID to form Triple Breaker');
+                        }
+                    }
+                    // Breaker Lvl 1:1
+                    if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+                        console.log('Call breakers grouping API with source and target ID to form Double Breaker');
+                    }
+                }
+                // When both Breaker Types are different
+                if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
+                    const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
+                    const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
+                    setAdditionalMessage(true);
+                    setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
+                    handleUngroupAlertOpen();
+                    return;
+                }
+            }
+            // When one of the Breaker i.e. (source or target) is of type Equipment
+            else {
+                if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type === 'equipment') {
+                }
+                if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type !== 'equipment') {
+                }
+                if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type === 'equipment') {
+                }
+            }
+        }
+        // For Panel Voltage 600 - where we only form triple grouping
+        else {
+        }
+
+        return;
         // linked - linked => user is trying to unlink 2 breakers
         if (sourceBreakerObj?.is_linked && targetBreakerObj?.is_linked) {
             if (
@@ -1549,7 +1642,7 @@ const EditPanel = () => {
                         props?.source !== breakerUpdateId &&
                         props?.target !== breakerUpdateId
                     )
-                        handleBreakerLinkClicked(props, setIsLoading, isLinking);
+                        handleBreakerGrouping(props, setIsLoading, isLinking);
                 }}
                 nodes={breakersList}
                 edges={breakerLinks}

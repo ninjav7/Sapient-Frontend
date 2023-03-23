@@ -17,6 +17,8 @@ import {
     listSensor,
     updateBreakers,
     createEquipment,
+    groupBreakers,
+    ungroupBreakers,
 } from '../../../services/Network';
 
 export function getPanelsData(
@@ -120,4 +122,12 @@ export function updateBreakerDetails(params, payload) {
 
 export function createEquipmentData(params, payload) {
     return axiosInstance.post(`${createEquipment}${params}`, payload).then((res) => res);
+}
+
+export function getBreakersGrouped(params, payload) {
+    return axiosInstance.post(`${groupBreakers}${params}`, payload).then((res) => res);
+}
+
+export function getBreakersUngrouped(params, payload) {
+    return axiosInstance.post(`${ungroupBreakers}${params}`, payload).then((res) => res);
 }
