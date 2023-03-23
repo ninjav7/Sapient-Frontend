@@ -21,14 +21,21 @@ const Textarea = ({ iconUrl, elementEnd, inputClassName = '', className = '', ..
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm}>{props.label}</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550 font-weight-medium">
+                        {props.label}
+                    </Typography.Body>
                     <Brick sizeInRem={0.25} />
                 </>
             )}
 
             <div className="input-inner-wrapper">
                 {iconUrl && <img className="input-icon" src={iconUrl} />}
-                <FormControl {...props} className={`textarea-control ${inputClassName}`} as="textarea" rows={fieldRows} />
+                <FormControl
+                    {...props}
+                    className={`textarea-control ${inputClassName}`}
+                    as="textarea"
+                    rows={fieldRows}
+                />
                 {elementEnd &&
                     !props.error &&
                     React.cloneElement(elementEnd, {
