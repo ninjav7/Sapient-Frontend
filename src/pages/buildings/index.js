@@ -341,14 +341,13 @@ const BuildingOverview = () => {
                         color: colors.datavizBlue400,
                     };
                     response.data.forEach((record) => {
-                        if (record?.temp || record?.temp === 0) avgTemp.data.push(record?.temp);
-                        if (record?.max_temp) highTemp.data.push(record?.max_temp);
-                        if (record?.min_temp) lowTemp.data.push(record?.min_temp);
+                        avgTemp.data.push(record?.temp);
+                        highTemp.data.push(record?.max_temp);
+                        lowTemp.data.push(record?.min_temp);
                     });
                     if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
                     if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
-                    console.log('SSRai tempData => ', tempData);
                     if (tempData.length !== 0) setWeatherData(tempData);
                 } else {
                     setWeatherData(null);
@@ -422,6 +421,9 @@ const BuildingOverview = () => {
             if (bldgObj?.building_id) setIsPlugOnly(bldgObj?.plug_only);
         }
     }, [buildingListData, bldgId]);
+
+    console.log('SSR energyConsumptionsData => ', energyConsumptionsData);
+    console.log('SSR weatherData => ', weatherData);
 
     return (
         <React.Fragment>
