@@ -84,35 +84,32 @@ const LayoutLevelColumn = (props) => {
                 const { isEditable } = getActionRestrictions(actionsMap[id]);
 
                 return (
-                    <>
-                        <small>{id} </small>
-                        <LayoutLocationSelectionMenuList
-                            title={name}
-                            key={generateID()}
-                            level={level}
-                            isActive={isActive}
-                            notEditable={onColumnEditIncludeChildren}
-                            onEdit={
-                                !onColumnEditIncludeChildren && isEditable && onItemEdit
-                                    ? (event) => onItemEdit({ event, name, ...props })
-                                    : null
-                            }
-                            isArrowShown={hasChildren || childProps.hasChildren}
-                            onClick={(event) => {
-                                setSelectedItem(id);
-                                onChildrenClick(
-                                    { event, name, ...props },
-                                    {
-                                        onColumnAddIncludeChildren,
-                                        onColumnEditIncludeChildren,
-                                        onColumnNameEditIncludeChildren,
-                                        onColumnFilterIncludeChildren,
-                                        onItemEditIncludeChildren,
-                                    }
-                                );
-                            }}
-                        />
-                    </>
+                    <LayoutLocationSelectionMenuList
+                        title={name}
+                        key={generateID()}
+                        level={level}
+                        isActive={isActive}
+                        notEditable={onColumnEditIncludeChildren}
+                        onEdit={
+                            !onColumnEditIncludeChildren && isEditable && onItemEdit
+                                ? (event) => onItemEdit({ event, name, ...props })
+                                : null
+                        }
+                        isArrowShown={hasChildren || childProps.hasChildren}
+                        onClick={(event) => {
+                            setSelectedItem(id);
+                            onChildrenClick(
+                                { event, name, ...props },
+                                {
+                                    onColumnAddIncludeChildren,
+                                    onColumnEditIncludeChildren,
+                                    onColumnNameEditIncludeChildren,
+                                    onColumnFilterIncludeChildren,
+                                    onItemEditIncludeChildren,
+                                }
+                            );
+                        }}
+                    />
                 );
             })
         ) : (

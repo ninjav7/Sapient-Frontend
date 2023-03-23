@@ -117,13 +117,6 @@ const LayoutElements = (props) => {
                             stackMap.current[currentKey] = space[ACCESSORS.SPACE_ID];
                             countOfStack.current = currentKey;
 
-                            // Deleting next columns go after selected
-                            Object.entries(stackMap.current)
-                                .slice(currentKey)
-                                .forEach(([key]) => {
-                                    // delete stackMap.current[key];
-                                });
-
                             const nativeHandler = () =>
                                 childrenClickHandler(
                                     space[ACCESSORS.NAME],
@@ -256,23 +249,9 @@ const LayoutElements = (props) => {
     console.log(stackMap.current, 'stackmap');
 
     return (
-        <>
-            <button
-                onClick={() => {
-                    countOfStack.current = 3;
-                    stackMap.current = stackMap.current = {
-                        1: '641aa4560d9c5d41746a66e7',
-                        2: '641acd5cbcd12865f2445805',
-                        3: '641ad8382d969e2c2a4ce14c',
-                    };
-                    putInStack(4);
-                }}>
-                Make order
-            </button>
-            <div className={cx('layout-elements-wrapper d-flex', className)} style={style}>
-                {renderStackColumns(state, props, stackMap)}
-            </div>
-        </>
+        <div className={cx('layout-elements-wrapper d-flex', className)} style={style}>
+            {renderStackColumns(state, props, stackMap)}
+        </div>
     );
 };
 
@@ -308,7 +287,3 @@ LayoutElements.propTypes = {
 };
 
 export default LayoutElements;
-
-//1 dont render if there is no children for previous column
-// 2 delete afterwards ids when you click on lower lever that it has.
-// 3 restrictions
