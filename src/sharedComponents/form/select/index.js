@@ -41,7 +41,6 @@ const Select = ({
     error,
     info,
     label,
-    required,
     ...props
 }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
@@ -116,10 +115,10 @@ const Select = ({
         <div className={cx(`react-select-wrapper`, className, { 'is-error': !!error })} ref={containerRef}>
             {label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550 font-weight-medium">
                         {label}
-                        {required && (
-                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                        {props?.required && (
+                            <span style={{ color: colorPalette.error700 }} className="font-weight-bold ml-1">
                                 *
                             </span>
                         )}

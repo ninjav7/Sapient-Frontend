@@ -11,7 +11,7 @@ import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
 
 import './Input.scss';
 
-const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disabled, required, ...props }) => {
+const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disabled, ...props }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
         'element-end': !!elementEnd,
         disabled,
@@ -23,10 +23,10 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disab
         <div className={inputWrapperClassNames}>
             {props.label && (
                 <>
-                    <Typography.Body size={Typography.Sizes.sm} className="gray-550">
+                    <Typography.Body size={Typography.Sizes.sm} className="gray-550 font-weight-medium">
                         {props.label}
-                        {required && (
-                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                        {props?.required && (
+                            <span style={{ color: colorPalette.error700 }} className="font-weight-bold ml-1">
                                 *
                             </span>
                         )}
