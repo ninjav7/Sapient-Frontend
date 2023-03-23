@@ -61,6 +61,7 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', disab
 Input.propTypes = {
     iconUrl: PropTypes.string,
     elementEnd: PropTypes.node,
+    required: PropTypes.bool,
     error: PropTypes.string,
     label: PropTypes.string,
 };

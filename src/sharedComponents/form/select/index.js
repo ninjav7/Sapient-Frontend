@@ -208,6 +208,7 @@ Select.propTypes = {
             hasValue: PropTypes.bool,
         })
     ).isRequired,
+    required: PropTypes.bool,
     customOption: PropTypes.node,
     type: PropTypes.oneOf(Object.values(DROPDOWN_INPUT_TYPES)),
     icon: PropTypes.node,
