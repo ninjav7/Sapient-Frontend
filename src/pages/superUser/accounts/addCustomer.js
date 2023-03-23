@@ -7,6 +7,8 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { createCustomer } from './services';
 import { UserStore } from '../../../store/UserStore';
+import { useNotification } from '../../../sharedComponents/notification/useNotification';
+import { Notification } from '../../../sharedComponents/notification/Notification';
 
 const CreateCustomer = ({
     isAddCustomerOpen,
@@ -18,6 +20,11 @@ const CreateCustomer = ({
 }) => {
     const defaultCustomerObj = {
         name: '',
+    };
+    const [openSnackbar] = useNotification();
+    const mockData = {
+        title: 'Account Created',
+        description: 'It will appear in the list shortly',
     };
 
     const [customerData, setCustomerData] = useState(defaultCustomerObj);
@@ -37,17 +44,14 @@ const CreateCustomer = ({
             .then((res) => {
                 let response = res.data;
                 if (response.success === false) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message;
-                        s.notificationType = 'error';
+                    openSnackbar({
+                        ...mockData,
+                        title: 'Error',
+                        description: response?.message,
+                        type: Notification.Types.error,
                     });
                 } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message;
-                        s.notificationType = 'success';
-                    });
+                    openSnackbar({ ...mockData, type: Notification.Types.success });
                     closeAddCustomerModal();
                     getCustomerList();
                     getOfflineDevices();
