@@ -115,14 +115,23 @@ const PlugRules = () => {
 
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
-    const handleAddRuleClose = () => setShowAddRule(false);
+    const handleAddRuleClose = () => {
+        setShowAddRule(false);
+        setNameError('');
+        setBuildingError({ text: '' });
+        setCreateRuleData({
+            building_id: initialBuildingValue,
+            name: '',
+            description: '',
+        });
+    };
     const handleAddRuleShow = () => setShowAddRule(true);
     const { download } = useCSVDownload();
 
     const activeBuildingId = localStorage.getItem('buildingId');
     const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [nameError, setNameError] = useState(false);
+    const [nameError, setNameError] = useState('');
     const [buildingError, setBuildingError] = useState({ text: '' });
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -163,7 +172,7 @@ const PlugRules = () => {
             setBuildingError({ text: '' });
         }
         if (key == 'name' && value) {
-            setNameError(false);
+            setNameError('');
         }
         obj[key] = value;
         setCreateRuleData(obj);
@@ -316,11 +325,11 @@ const PlugRules = () => {
     const validatePlugRuleForm = () => {
         let valid = true;
         if (!createRuleData.name.length) {
-            setNameError(true);
+            setNameError('Name is required.');
             valid = false;
         }
         if (!createRuleData.building_id.length) {
-            setBuildingError({ text: 'please select building' });
+            setBuildingError({ text: 'Please choose Building.' });
             valid = false;
         }
         return valid;
@@ -330,7 +339,8 @@ const PlugRules = () => {
         setShowAddRule(true);
     };
     const buildingIdProps = {
-        label: 'Choose building',
+        label: 'Choose Building',
+        required: true,
         defaultValue: createRuleData.building_id || localStorage.getItem('buildingId'),
         onChange: (event) => {
             handleCreatePlugRuleChange('building_id', event.value);
@@ -527,6 +537,7 @@ const PlugRules = () => {
                 <Modal.Body>
                     <Input
                         label="Name"
+                        required
                         id="name"
                         placeholder="Enter Rule Name"
                         value={createRuleData.name}

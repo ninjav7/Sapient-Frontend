@@ -31,6 +31,8 @@ export const Default = (props) => {
             <Brick />
             <Input label="Label text" />
             <Brick />
+            <Input label="is required text" required={true} />
+            <Brick />
             <InputTooltip disabled tooltipText="Help text" label="Input with Label text and Tooltip" />
             <Brick />
             <InputTooltip disabled tooltipText="Help text" label="Input with Tooltip and with Error" error="Error message" />
