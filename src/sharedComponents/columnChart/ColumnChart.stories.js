@@ -91,6 +91,14 @@ const config = {
             to: 6,
         },
     ],
+    upperLegendsProps: {
+        weather: {
+            onClick: alert,
+        },
+        plotBands: {
+            onClick: alert,
+        },
+    },
 };
 
 export const Default = (args) => <ColumnChart {...args} temperatureSeries={null} plotBands={null} />;
