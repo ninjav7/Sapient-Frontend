@@ -91,6 +91,7 @@ const BuildingOverview = () => {
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
 
     const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -341,9 +342,9 @@ const BuildingOverview = () => {
                         color: colors.datavizBlue400,
                     };
                     response.data.forEach((record) => {
-                        avgTemp.data.push(record?.temp);
-                        highTemp.data.push(record?.max_temp);
-                        lowTemp.data.push(record?.min_temp);
+                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
+                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
+                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
                     });
                     if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
                     if (highTemp?.data.length !== 0) tempData.push(highTemp);
@@ -422,9 +423,6 @@ const BuildingOverview = () => {
         }
     }, [buildingListData, bldgId]);
 
-    console.log('SSR energyConsumptionsData => ', energyConsumptionsData);
-    console.log('SSR weatherData => ', weatherData);
-
     return (
         <React.Fragment>
             <Header title="Building Overview" type="page" />
@@ -464,6 +462,14 @@ const BuildingOverview = () => {
                                 tooltipCallBackValue={toolTipFormatter}
                                 temperatureSeries={weatherData}
                                 plotBands={null}
+                                upperLegendsProps={{
+                                    weather: {
+                                        onClick: ({ withTemp }) => {
+                                            setWeatherChartVisibility(withTemp);
+                                        },
+                                    },
+                                }}
+                                withTemp={isWeatherChartVisible}
                             />
 
                             <HourlyAvgConsumption
@@ -512,6 +518,14 @@ const BuildingOverview = () => {
                                     tooltipCallBackValue={toolTipFormatter}
                                     temperatureSeries={weatherData}
                                     plotBands={null}
+                                    upperLegendsProps={{
+                                        weather: {
+                                            onClick: ({ withTemp }) => {
+                                                setWeatherChartVisibility(withTemp);
+                                            },
+                                        },
+                                    }}
+                                    withTemp={isWeatherChartVisible}
                                 />
                             </div>
                         </>
