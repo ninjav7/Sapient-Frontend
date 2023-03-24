@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
@@ -43,6 +43,10 @@ const ColumnChart = (props) => {
     const filterWeather = useCallback(() => {
         setWithTemp((old) => !old);
     }, []);
+
+    useEffect(() => {
+        setWithTemp(withTempProp);
+    }, [withTempProp]);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -92,7 +96,7 @@ const ColumnChart = (props) => {
                                         filterWeather(event);
 
                                         const onClick = _.get(upperLegendsProps, 'weather.onClick');
-                                        onClick && onClick({ event, props });
+                                        onClick && onClick({ event, props, withTemp: !withTemp });
                                     }}
                                 />
                             ))}
@@ -179,7 +183,7 @@ ColumnChart.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     tooltipCallBackValue: PropTypes.func,
     restChartProps: PropTypes.object,
-    withTempProp: PropTypes.bool,
+    withTemp: PropTypes.bool,
     upperLegendsProps: PropTypes.shape({
         weather: PropTypes.object,
         plotBands: PropTypes.object,
