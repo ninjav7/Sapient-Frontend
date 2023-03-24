@@ -34,7 +34,9 @@ const EndUseType = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
+
     const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -339,6 +341,14 @@ const EndUseType = () => {
                     tooltipCallBackValue={toolTipFormatter}
                     temperatureSeries={weatherData}
                     plotBands={null}
+                    upperLegendsProps={{
+                        weather: {
+                            onClick: ({ withTemp }) => {
+                                setWeatherChartVisibility(withTemp);
+                            },
+                        },
+                    }}
+                    withTemp={isWeatherChartVisible}
                 />
             </div>
 
