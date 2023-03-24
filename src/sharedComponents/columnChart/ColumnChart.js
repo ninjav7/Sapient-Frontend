@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import HighchartsExporting from 'highcharts/modules/exporting';
 import HighchartsData from 'highcharts/modules/export-data';
 import highchartsAccessibility from 'highcharts/modules/accessibility';
 import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
+import _ from 'lodash';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -31,7 +32,7 @@ highchartsAccessibility(Highcharts);
 highchartsAddLowMedHighToTooltip(Highcharts);
 
 const ColumnChart = (props) => {
-    const { plotBandsLegends, plotBands: plotBandsProp, withTemp: withTempProp = true } = props;
+    const { plotBandsLegends, plotBands: plotBandsProp, withTemp: withTempProp = true, upperLegendsProps = {} } = props;
 
     const chartComponentRef = useRef(null);
     const [withTemp, setWithTemp] = useState(withTempProp);
@@ -42,6 +43,10 @@ const ColumnChart = (props) => {
     const filterWeather = useCallback(() => {
         setWithTemp((old) => !old);
     }, []);
+
+    useEffect(() => {
+        setWithTemp(withTempProp);
+    }, [withTempProp]);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -65,14 +70,35 @@ const ColumnChart = (props) => {
                     <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
                     <Typography.Body size={Typography.Sizes.xs}>{props.subTitle}</Typography.Body>
                 </div>
-                {!!renderPlotBandsLegends?.length && (
+                {(!!renderPlotBandsLegends?.length || !!props.temperatureSeries) && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">
                         {renderPlotBandsLegends.map((legendProps) => {
-                            return <UpperLegendComponent {...legendProps} />;
+                            const props = { ...legendProps, ...upperLegendsProps.plotBands };
+
+                            return (
+                                <UpperLegendComponent
+                                    {...props}
+                                    onClick={(event) => {
+                                        legendProps?.onClick && legendProps.onClick(event);
+                                        const onClick = _.get(upperLegendsProps, 'plotBands.onClick');
+                                        onClick && onClick({ event, props });
+                                    }}
+                                />
+                            );
                         })}
                         {props.temperatureSeries &&
                             renderWeatherLegends.map((legendProps) => (
-                                <UpperLegendComponent {...legendProps} disabled={!withTemp} onClick={filterWeather} />
+                                <UpperLegendComponent
+                                    {...legendProps}
+                                    disabled={!withTemp}
+                                    {...upperLegendsProps.weather}
+                                    onClick={(event) => {
+                                        filterWeather(event);
+
+                                        const onClick = _.get(upperLegendsProps, 'weather.onClick');
+                                        onClick && onClick({ event, props, withTemp: !withTemp });
+                                    }}
+                                />
                             ))}
                     </div>
                 )}
@@ -157,7 +183,11 @@ ColumnChart.propTypes = {
     categories: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
     tooltipCallBackValue: PropTypes.func,
     restChartProps: PropTypes.object,
-    withTempProp: PropTypes.bool,
+    withTemp: PropTypes.bool,
+    upperLegendsProps: PropTypes.shape({
+        weather: PropTypes.object,
+        plotBands: PropTypes.object,
+    }),
 };
 
 export default ColumnChart;

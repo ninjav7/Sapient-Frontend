@@ -91,10 +91,20 @@ const config = {
             to: 6,
         },
     ],
+    upperLegendsProps: {
+        weather: {
+            onClick: ({ event, props, withTemp }) => {
+                alert(withTemp);
+            },
+        },
+        plotBands: {
+            onClick: alert,
+        },
+    },
 };
 
 export const Default = (args) => <ColumnChart {...args} temperatureSeries={null} plotBands={null} />;
 Default.args = config;
 
-export const WithTemp = (args) => <ColumnChart {...args} />;
+export const WithTemp = (args) => <ColumnChart {...args} withTemp={false} />;
 WithTemp.args = config;
