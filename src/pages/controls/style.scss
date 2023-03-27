@@ -27,6 +27,10 @@
             font-weight: normal;
         }
     }
+    .sockets-modal-body{
+        max-height: 40rem;
+        overflow-y: scroll;
+    }
 }
 
 .spacing {
