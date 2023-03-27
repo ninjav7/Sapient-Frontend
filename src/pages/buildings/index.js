@@ -394,8 +394,14 @@ const BuildingOverview = () => {
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
-        fetchWeatherData(time_zone);
     }, [startDate, endDate, bldgId]);
+
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -467,6 +473,7 @@ const BuildingOverview = () => {
                                         onClick: ({ withTemp }) => {
                                             setWeatherChartVisibility(withTemp);
                                         },
+                                        isAlwaysShown: true,
                                     },
                                 }}
                                 withTemp={isWeatherChartVisible}
@@ -523,6 +530,7 @@ const BuildingOverview = () => {
                                             onClick: ({ withTemp }) => {
                                                 setWeatherChartVisibility(withTemp);
                                             },
+                                            isAlwaysShown: true,
                                         },
                                     }}
                                     withTemp={isWeatherChartVisible}

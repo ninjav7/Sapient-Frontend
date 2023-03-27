@@ -305,8 +305,14 @@ const EndUseType = () => {
         endUsesDataFetch(endUseTypeRequest, time_zone);
         // equipmentUsageDataFetch(); // Planned for Future Enable of this integration
         plugUsageDataFetch(endUseTypeRequest, time_zone);
-        fetchWeatherData(time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
+
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible]);
 
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'
@@ -346,6 +352,7 @@ const EndUseType = () => {
                             onClick: ({ withTemp }) => {
                                 setWeatherChartVisibility(withTemp);
                             },
+                            isAlwaysShown: true,
                         },
                     }}
                     withTemp={isWeatherChartVisible}
