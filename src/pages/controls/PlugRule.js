@@ -1057,6 +1057,7 @@ const PlugRule = () => {
         }
 
         fetchUnLinkedSocketRules();
+        fetchLinkedSocketRules();
     }, [
         ruleId,
         currentData.name,
@@ -1148,11 +1149,13 @@ const PlugRule = () => {
                     setTotalSocket(response.total_data);
                 }));
         } else {
-            setRulesToUnLink({ rule_id: ruleId, sensor_id: fetchedSelectedIds });
+            const idOfSelectedSockets = [];
+            allSensors.filter((socket) => {
+                idOfSelectedSockets.push(socket.id);
+            });
+            setRulesToUnLink({ rule_id: ruleId, sensor_id: idOfSelectedSockets });
             setRulesToLink([]);
             setSelectedIds([]);
-
-            setRulesToUnLink((prev) => ({ rule_id: prev.rule_id, sensor_id: fetchedSelectedIds }));
             setTotalSocket(0);
         }
         setIsChangedSockets(true);
@@ -1552,6 +1555,67 @@ const PlugRule = () => {
             return null;
         }
     };
+    const getFirstLastOffPeriodDayAndTime = (week) => {
+        let isLastOffAction = false;
+        let firstOnDay, firstOnTime;
+        let isSetFirstDay = false;
+        let lastOffTime = '';
+        let lastOffDay = 0;
+        week?.length &&
+            week.forEach((dayOfWeek, index) => {
+                if (dayOfWeek.turnOn && !isSetFirstDay) {
+                    isSetFirstDay = true;
+                    firstOnDay = index;
+                    firstOnTime = dayOfWeek.turnOn;
+                }
+                const copyTurnOffTime = dayOfWeek.turnOff;
+                const copyTurnOnTime = dayOfWeek.turnOn;
+                const convertedCurrentOffTime = copyTurnOffTime.replace(':', ',');
+                const convertedNextOnTime = copyTurnOnTime.replace(':', ',');
+
+                if (convertedCurrentOffTime > convertedNextOnTime) {
+                    isLastOffAction = true;
+                    lastOffDay = index;
+                    lastOffTime = copyTurnOffTime;
+                } else {
+                    isLastOffAction = false;
+                }
+            });
+        return { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime };
+    };
+    const getSoonestOnDateWithTime = (currentOff, week) => {
+        let onDay = 0;
+        let onTime = 0;
+        let isSearchedDay = false;
+        week.forEach((dayOfWeek, index) => {
+            if (currentOff < index && dayOfWeek.turnOn && !isSearchedDay) {
+                onDay = index;
+                onTime = dayOfWeek.turnOn;
+                isSearchedDay = true;
+            }
+        });
+        return { isSearchedDay, onDay, onTime };
+    };
+
+    const getOffPeriodsForOffTimeLater = (week) => {
+        const res = [];
+        week?.length &&
+            week.forEach((dayOfWeek, index) => {
+                if (dayOfWeek.turnOn < dayOfWeek.turnOff) {
+                    const { isSearchedDay, onDay, onTime } = getSoonestOnDateWithTime(index, week);
+                    if (isSearchedDay) {
+                        res.push({
+                            day: index,
+                            currentOffDay: index,
+                            nextOnDay: onDay,
+                            currentOffTime: dayOfWeek.turnOff,
+                            nextOnTime: onTime,
+                        });
+                    }
+                }
+            });
+        return res;
+    };
 
     const getDateRange = () => {
         const minDate = moment().startOf('isoweek');
@@ -1606,7 +1670,7 @@ const PlugRule = () => {
             let nextOnDay;
             if (i === weekWithSchedule.length - 1) {
                 nextOn = weekWithSchedule[0]?.turnOn;
-                nextOnDay = 0;
+                nextOnDay = weekWithSchedule.length - 1;
             } else {
                 for (let j = i; j < weekWithSchedule.length; j++) {
                     if (weekWithSchedule[j]?.turnOn) {
@@ -1616,7 +1680,9 @@ const PlugRule = () => {
                             break;
                         } else {
                             nextOnDay = j + 1;
-                            nextOn = weekWithSchedule[j + 1]?.turnOn;
+                            if (weekWithSchedule[j + 1]) {
+                                nextOn = weekWithSchedule[j + 1]?.turnOn;
+                            }
                             break;
                         }
                     }
@@ -1628,22 +1694,52 @@ const PlugRule = () => {
             if (!nextOn) {
                 if (i === weekWithSchedule.length - 1) {
                     nextOn = weekWithSchedule[0]?.turnOn;
-                    nextOnDay = 0;
+                    nextOnDay = i;
                 } else {
                     nextOn = weekWithSchedule[i + 1]?.turnOn;
                     nextOnDay = i + 1;
                 }
             }
             if (currentOff && nextOn) {
-                result.push({
-                    day: i,
-                    currentOffDay,
-                    nextOnDay,
-                    currentOffTime: currentOff,
-                    nextOnTime: nextOn,
-                });
+                if (currentOffDay < nextOnDay) {
+                    result.push({
+                        day: i,
+                        currentOffDay,
+                        nextOnDay,
+                        currentOffTime: currentOff,
+                        nextOnTime: nextOn,
+                    });
+                } else if (currentOffDay === nextOnDay && nextOn > currentOff) {
+                    result.push({
+                        day: i,
+                        currentOffDay,
+                        nextOnDay,
+                        currentOffTime: currentOff,
+                        nextOnTime: nextOn,
+                    });
+                }
             }
         }
+        const { isLastOffAction, lastOffDay, lastOffTime, firstOnDay, firstOnTime } =
+            getFirstLastOffPeriodDayAndTime(weekWithSchedule);
+        if (isLastOffAction) {
+            result.push({
+                day: lastOffDay,
+                currentOffDay: lastOffDay,
+                nextOnDay: 6,
+                currentOffTime: lastOffTime,
+                nextOnTime: '23:59',
+            });
+            result.push({
+                day: 0,
+                currentOffDay: 0,
+                nextOnDay: firstOnDay,
+                currentOffTime: '00:00',
+                nextOnTime: firstOnTime,
+            });
+        }
+        const theSameDayOffLater = getOffPeriodsForOffTimeLater(weekWithSchedule);
+        result.push(...theSameDayOffLater);
         getOffperiodsWithRealDate(result, getDateRange());
     };
 
@@ -1658,13 +1754,13 @@ const PlugRule = () => {
         return dateArray;
     }
     const checkIfDayInOffRange = (day, result) => {
-        let offDay = {};
+        let offDayArray = [];
         result.forEach((el) => {
             if (el.day == day) {
-                offDay = el;
+                offDayArray.push(el);
             }
         });
-        return offDay;
+        return offDayArray;
     };
 
     const getOffperiodsWithRealDate = (result, dateRange) => {
@@ -1674,24 +1770,26 @@ const PlugRule = () => {
         const offPeriods = [];
         rangeDates.forEach((day) => {
             const currentWeekDay = moment(day).weekday();
-            const weekDayOffSchedule = checkIfDayInOffRange(currentWeekDay, result);
-            if (!_.isEmpty(weekDayOffSchedule)) {
-                let timeDiff;
+            const weekDayOffScheduleArray = checkIfDayInOffRange(currentWeekDay, result);
+            weekDayOffScheduleArray.forEach((weekDayOffSchedule) => {
+                if (!_.isEmpty(weekDayOffSchedule)) {
+                    let timeDiff;
 
-                if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
-                    timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
-                } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
-                    timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
+                    if (weekDayOffSchedule?.nextOnDay >= weekDayOffSchedule?.currentOffDay) {
+                        timeDiff = weekDayOffSchedule?.nextOnDay - weekDayOffSchedule?.currentOffDay;
+                    } else if (weekDayOffSchedule?.nextOnDay < weekDayOffSchedule?.currentOffDay) {
+                        timeDiff = 6 - weekDayOffSchedule?.currentOffDay + weekDayOffSchedule?.nextOnDay + 1;
+                    }
+                    const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
+                    const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
+                    const to = moment(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
+                    offPeriods.push({
+                        type: LineChart.PLOT_BANDS_TYPE.off_hours,
+                        from: from * 1000,
+                        to: to * 1000,
+                    });
                 }
-                const nextTurnOnDay = moment(day, 'YYYY-MM-DD').add(timeDiff, 'days').format('YYYY-MM-DD');
-                const from = moment(day + ' ' + weekDayOffSchedule?.currentOffTime).unix();
-                const to = moment(nextTurnOnDay + ' ' + weekDayOffSchedule?.nextOnTime).unix();
-                offPeriods.push({
-                    type: LineChart.PLOT_BANDS_TYPE.off_hours,
-                    from: from * 1000,
-                    to: to * 1000,
-                });
-            }
+            });
         });
         setOffHoursPlots(offPeriods);
     };
@@ -2128,81 +2226,85 @@ const PlugRule = () => {
                     </Typography.Subheader>
                 </Modal.Header>
                 <Modal.Body>
-                    <DataTableWidget
-                        isLoading={isLoadingRef.current}
-                        isLoadingComponent={<SkeletonLoading />}
-                        id="sockets-plug-rules-modal"
-                        rows={dataToUnassign}
-                        buttonGroupFilterOptions={[]}
-                        headers={[
-                            {
-                                name: 'Equipment Type',
-                                accessor: 'equipment_type_name',
-                                callbackValue: renderEquipType,
-                            },
-                            {
-                                name: 'Location',
-                                accessor: 'equipment_link_location',
-                                callbackValue: renderLocation,
-                            },
-                            {
-                                name: 'Space Type',
-                                accessor: 'space_type',
-                            },
+                    <div className="sockets-modal-body">
+                        <DataTableWidget
+                            isLoading={isLoadingRef.current}
+                            isLoadingComponent={<SkeletonLoading />}
+                            id="sockets-plug-rules-modal"
+                            rows={dataToUnassign}
+                            buttonGroupFilterOptions={[]}
+                            headers={[
+                                {
+                                    name: 'Equipment Type',
+                                    accessor: 'equipment_type_name',
+                                    callbackValue: renderEquipType,
+                                },
+                                {
+                                    name: 'Location',
+                                    accessor: 'equipment_link_location',
+                                    callbackValue: renderLocation,
+                                },
+                                {
+                                    name: 'Space Type',
+                                    accessor: 'space_type',
+                                },
 
-                            {
-                                name: 'MAC Address',
-                                accessor: 'device_link',
-                            },
-                            {
-                                name: 'Sensors',
-                                accessor: 'sensor_count',
-                            },
-                            {
-                                name: 'Assigned Rule',
-                                accessor: 'assigned_rule',
-                                callbackValue: renderAssignRule,
-                            },
-                            {
-                                name: 'Tags',
-                                accessor: 'tags',
-                                callbackValue: renderTagCell,
-                            },
-                            {
-                                name: 'Last Data',
-                                accessor: 'last_data',
-                                callbackValue: renderLastUsedCell,
-                            },
-                        ]}
-                        onCheckboxRow={() => {}}
-                        customCheckAll={() => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="vehicle1"
-                                name="vehicle1"
-                                checked={checkedAllReassignSockets}
-                                onChange={() => {
-                                    setCheckedAllReassignSockets(!checkedAllReassignSockets);
-                                }}
-                            />
-                        )}
-                        customCheckboxForCell={(record) => (
-                            <Checkbox
-                                label=""
-                                type="checkbox"
-                                id="socket_rule"
-                                name="socket_rule"
-                                checked={socketsToReassign.includes(record?.id) || checkedAllReassignSockets}
-                                value={
-                                    socketsToReassign.includes(record?.id) || checkedAllReassignSockets ? true : false
-                                }
-                                onChange={(e) => {
-                                    handleReassignSocketsCheckboxClick(e.target.value, record);
-                                }}
-                            />
-                        )}
-                    />
+                                {
+                                    name: 'MAC Address',
+                                    accessor: 'device_link',
+                                },
+                                {
+                                    name: 'Sensors',
+                                    accessor: 'sensor_count',
+                                },
+                                {
+                                    name: 'Assigned Rule',
+                                    accessor: 'assigned_rule',
+                                    callbackValue: renderAssignRule,
+                                },
+                                {
+                                    name: 'Tags',
+                                    accessor: 'tags',
+                                    callbackValue: renderTagCell,
+                                },
+                                {
+                                    name: 'Last Data',
+                                    accessor: 'last_data',
+                                    callbackValue: renderLastUsedCell,
+                                },
+                            ]}
+                            onCheckboxRow={() => {}}
+                            customCheckAll={() => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="vehicle1"
+                                    name="vehicle1"
+                                    checked={checkedAllReassignSockets}
+                                    onChange={() => {
+                                        setCheckedAllReassignSockets(!checkedAllReassignSockets);
+                                    }}
+                                />
+                            )}
+                            customCheckboxForCell={(record) => (
+                                <Checkbox
+                                    label=""
+                                    type="checkbox"
+                                    id="socket_rule"
+                                    name="socket_rule"
+                                    checked={socketsToReassign.includes(record?.id) || checkedAllReassignSockets}
+                                    value={
+                                        socketsToReassign.includes(record?.id) || checkedAllReassignSockets
+                                            ? true
+                                            : false
+                                    }
+                                    onChange={(e) => {
+                                        handleReassignSocketsCheckboxClick(e.target.value, record);
+                                    }}
+                                />
+                            )}
+                        />
+                    </div>
                 </Modal.Body>
 
                 <Modal.Footer>
