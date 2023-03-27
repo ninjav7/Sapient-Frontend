@@ -1052,15 +1052,53 @@ const EditPanel = () => {
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
 
         // For Panel Voltage 600 - where we only can form triple breaker grouping
-        if (panelObj?.voltage === 600) {
+        if (panelObj?.voltage === '600') {
             // When source and target Breaker lvl is 1:1 => Will be grouped
             if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+                const breakerCountToAdd = panelType === 'distribution' ? 2 : 1;
+                const thirdBreakerObj = breakersList.find(
+                    (el) => el?.breaker_number === targetBreakerObj?.breaker_number + breakerCountToAdd
+                );
+
+                // When 3rd breaker not found OR when third breaker is already grouped
+                if (!thirdBreakerObj?.id || thirdBreakerObj?.breaker_type !== 1) {
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`;
+                    setAlertMessage(alertMsg);
+                    handleUngroupAlertOpen();
+                    return;
+                }
+
+                // When 3rd breaker found for grouping and isGroupable
+                setIsLoading(true);
+                setLinking(true);
+                updateBreakerGrouping(
+                    bldgId,
+                    [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                    setIsLoading
+                );
                 return;
             }
 
             // When source and target Breaker lvl is 3:3 => Will be ungrouped
             if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
-                return;
+                // When source breaker is Parent breaker
+                if (sourceBreakerObj?.parent_breaker === '') {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
+                    return;
+                }
+
+                // When source breaker is not Parent Breaker
+                if (sourceBreakerObj?.parent_breaker !== '') {
+                    const parentBreakerObj = breakersList.find((el) => el?.id === sourceBreakerObj?.parent_breaker);
+                    if (parentBreakerObj?.id) {
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerUngrouping(bldgId, [parentBreakerObj?.id], setIsLoading);
+                        return;
+                    }
+                }
             }
 
             // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
