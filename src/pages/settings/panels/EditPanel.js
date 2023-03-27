@@ -1053,7 +1053,20 @@ const EditPanel = () => {
 
         // For Panel Voltage 600 - where we only can form triple breaker grouping
         if (panelObj?.voltage === 600) {
-            console.log('SSR here, there will be Logic for Panel Voltage 600');
+            // When source and target Breaker lvl is 1:1 => Will be grouped
+            if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+                return;
+            }
+
+            // When source and target Breaker lvl is 3:3 => Will be ungrouped
+            if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
+                return;
+            }
+
+            // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
+            const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped.`;
+            setAlertMessage(alertMsg);
+            handleUngroupAlertOpen();
             return;
         }
 
