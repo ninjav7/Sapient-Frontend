@@ -3,6 +3,8 @@ import Typography from '../../../typography';
 
 import { renderComponents } from '../../../columnChart/helper';
 
+import './lowmedhigh.scss';
+
 const tooltipLowMedHighTemplate = ({ median, low, high, unitTemp }) => {
     const tempInfo = renderComponents(
         <div className="tooltip-low-med-high">
