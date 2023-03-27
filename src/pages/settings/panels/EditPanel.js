@@ -421,7 +421,7 @@ const EditPanel = () => {
     };
 
     const linkBreakers = (sourceBreakerObj, targetBreakerObj, setIsLoading) => {
-        // Different Breaker Types cannot be linked -- restricted till all the conditions are shared
+        // Different Breaker Types cannot be grouped -- restricted till all the conditions are shared
         if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
             const source =
                 sourceBreakerObj?.type !== ''
@@ -439,7 +439,7 @@ const EditPanel = () => {
 
         if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
             setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
             );
             handleUngroupAlertOpen();
             return;
@@ -448,7 +448,7 @@ const EditPanel = () => {
         // --- breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3 ---
         if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
             setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
             );
             handleUngroupAlertOpen();
             return;
@@ -461,7 +461,7 @@ const EditPanel = () => {
                 // Setup Triple Breaker
                 if (targetBreakerObj?.breaker_number + breakerCountToAdd > breakersList.length) {
                     setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
                     );
                     handleUngroupAlertOpen();
                     return;
@@ -473,7 +473,7 @@ const EditPanel = () => {
 
                 if (sourceBreakerObj?.breaker_type === 3) {
                     setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
                     );
                     handleUngroupAlertOpen();
                     return;
@@ -481,7 +481,7 @@ const EditPanel = () => {
 
                 if (targetBreakerObj?.breaker_type === 3) {
                     setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
                     );
                     handleUngroupAlertOpen();
                     return;
@@ -489,7 +489,7 @@ const EditPanel = () => {
 
                 if (thirdBreakerObj?.breaker_type === 3) {
                     setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
                     );
                     handleUngroupAlertOpen();
                     return;
@@ -502,7 +502,7 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -524,7 +524,7 @@ const EditPanel = () => {
                     if (configuredEquip.length === 1) {
                         equipmentID = configuredEquip[0];
                     } else {
-                        setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                        setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                         handleUngroupAlertOpen();
                         return;
                     }
@@ -586,7 +586,7 @@ const EditPanel = () => {
             ]);
 
             if (!isLinkable) {
-                setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                 handleUngroupAlertOpen();
                 return;
             }
@@ -599,7 +599,7 @@ const EditPanel = () => {
             const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
             if (isEquipDiff) {
-                setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                 handleUngroupAlertOpen();
                 return;
             }
@@ -646,7 +646,7 @@ const EditPanel = () => {
         // breakerLink= 2:2
         if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
             setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
             );
             handleUngroupAlertOpen();
             return;
@@ -656,7 +656,7 @@ const EditPanel = () => {
         if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
             if (panelObj?.voltage === '120/240') {
                 setAlertMessage(
-                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked!`
+                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
                 );
                 handleUngroupAlertOpen();
                 return;
@@ -673,7 +673,7 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -686,7 +686,7 @@ const EditPanel = () => {
                 const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -746,7 +746,7 @@ const EditPanel = () => {
                 ]);
 
                 if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -759,7 +759,7 @@ const EditPanel = () => {
                 const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
 
                 if (isEquipDiff) {
-                    setAlertMessage(`Breaker cannot be linked due to different Device/Equipment configuration.`);
+                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -1051,18 +1051,52 @@ const EditPanel = () => {
         const sourceBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.source);
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
 
-        // For Panel Voltage 600 - where we only can form triple grouping
+        // For Panel Voltage 600 - where we only can form triple breaker grouping
         if (panelObj?.voltage === 600) {
             console.log('SSR here, there will be Logic for Panel Voltage 600');
+            return;
         }
 
-        // For all Panel Voltage other than 600
-        if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type !== 'equipment') {
-            // When both Breaker Types are same
-            if (sourceBreakerObj?.type === targetBreakerObj?.type) {
-                // Breaker Lvl 3:1, 1:3, 3:3
-                if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
-                    // When ungrouping 1st breaker out of triple breaker
+        // When both Breaker Types are same
+        if (sourceBreakerObj?.type === targetBreakerObj?.type) {
+            // Breaker Lvl 3:1, 1:3, 3:3
+            if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
+                // When ungrouping 1st breaker out of triple breaker
+                if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
+                    return;
+                }
+
+                // When ungrouping 3rd breaker out of triple breaker
+                if (sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerUngrouping(bldgId, [targetBreakerObj?.id], setIsLoading);
+                    return;
+                }
+
+                // When both breaker are not grouped & one breaker is already triple breaker
+                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped.`;
+                setAlertMessage(alertMsg);
+                handleUngroupAlertOpen();
+                return;
+            }
+
+            // Breaker Lvl 1:1
+            if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+                setIsLoading(true);
+                setLinking(true);
+                updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                return;
+            }
+
+            // Breaker Lvl 2:2, 1:2, 2:1
+            if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
+                // Breaker Lvl 2:2
+                if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
+                    // When both Breaker are grouped together
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
@@ -1070,76 +1104,43 @@ const EditPanel = () => {
                         return;
                     }
 
-                    // When ungrouping 3rd breaker out of triple breaker
-                    if (sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker) {
-                        setIsLoading(true);
-                        setLinking(true);
-                        updateBreakerUngrouping(bldgId, [targetBreakerObj?.id], setIsLoading);
-                        return;
-                    }
-
-                    // When both breaker are not grouped & one breaker is already triple breaker
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked.`;
+                    // When both Breakers are grouped seperately
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
                 }
 
-                // Breaker Lvl 1:1
-                if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
+                // Panel voltage 120/240 cannot form Triple Grouping
+                if (panelObj?.voltage === '120/240') {
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since Panel Voltage 120/240`;
+                    setAlertMessage(alertMsg);
+                    handleUngroupAlertOpen();
+                    return;
+                }
+
+                // Breaker Lvl 1:2
+                if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 2) {
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
                     return;
                 }
 
-                // Breaker Lvl 2
-                if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
-                    // Breaker Lvl 2:2
-                    if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
-                        // When both Breaker are grouped together
-                        if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
-                            setIsLoading(true);
-                            setLinking(true);
-                            updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
-                            return;
-                        }
-
-                        // When both Breakers are grouped seperately
-                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked.`;
-                        setAlertMessage(alertMsg);
-                        handleUngroupAlertOpen();
-                        return;
-                    }
-
-                    // Panel voltage 120/240 cannot form Triple Grouping
-                    if (panelObj?.voltage === '120/240') {
-                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be linked. Since Panel Voltage 120/240`;
-                        setAlertMessage(alertMsg);
-                        handleUngroupAlertOpen();
-                        return;
-                    }
-
-                    // Breaker Lvl 1:2
-                    if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 2) {
-                        setIsLoading(true);
-                        setLinking(true);
-                        updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
-                        return;
-                    }
-
-                    // Breaker Lvl 2:1
-                    if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 1) {
-                        setIsLoading(true);
-                        setLinking(true);
-                        updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
-                        return;
-                    }
+                // Breaker Lvl 2:1
+                if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 1) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                    return;
                 }
             }
+        }
 
-            // When both Breaker Types are different
-            if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
+        // When both Breaker Types are different
+        if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
+            // When breaker type is different and not equipment (default state)
+            if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type !== 'equipment') {
                 const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
                 const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
                 setAdditionalMessage(true);
@@ -1147,16 +1148,42 @@ const EditPanel = () => {
                 handleUngroupAlertOpen();
                 return;
             }
-        }
 
-        // When one of the Breaker i.e. (source or target) is of type Equipment
-        else {
-            console.log('SSR yeh execute hoga.');
-            if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type === 'equipment') {
-            }
-            if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type !== 'equipment') {
-            }
-            if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type === 'equipment') {
+            // When one of the Breaker i.e. (source or target) is of type Equipment
+            if (sourceBreakerObj?.type === 'equipment' || targetBreakerObj?.type === 'equipment') {
+                // When source breaker is not configured then it can be grouped
+                if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type !== 'equipment') {
+                    if (sourceBreakerObj?.config_type === Breaker.Type.notConfigured) {
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                        return;
+                    } else {
+                        const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
+                        const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
+                        setAdditionalMessage(true);
+                        setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
+                        handleUngroupAlertOpen();
+                        return;
+                    }
+                }
+
+                // When target breaker is not configured then it can be grouped
+                if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type === 'equipment') {
+                    if (targetBreakerObj?.config_type === Breaker.Type.notConfigured) {
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                        return;
+                    } else {
+                        const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
+                        const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
+                        setAdditionalMessage(true);
+                        setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
+                        handleUngroupAlertOpen();
+                        return;
+                    }
+                }
             }
         }
     };
