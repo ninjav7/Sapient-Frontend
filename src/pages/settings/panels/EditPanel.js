@@ -1052,10 +1052,11 @@ const EditPanel = () => {
         const targetBreakerObj = breakersList.find((el) => el?.id === breakerLinkObj?.target);
 
         // For Panel Voltage 600 - where we only can form triple grouping
-        if (panelObj?.voltage !== 600) {
+        if (panelObj?.voltage === 600) {
+            console.log('SSR here, there will be Logic for Panel Voltage 600');
         }
 
-        // For all Panel voltage other than 600
+        // For all Panel Voltage other than 600
         if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type !== 'equipment') {
             // When both Breaker Types are same
             if (sourceBreakerObj?.type === targetBreakerObj?.type) {
