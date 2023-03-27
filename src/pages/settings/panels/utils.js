@@ -1,3 +1,5 @@
+import { Breaker } from '../../../sharedComponents/breaker';
+
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
     if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {
@@ -129,4 +131,89 @@ export const getBreakerType = (breaker_lvl) => {
     if (breaker_lvl === 1) return 'single';
     if (breaker_lvl === 2) return 'double';
     if (breaker_lvl === 3) return 'triple';
+};
+
+export const validateBreakerTypeForGrouping = (breakersList, groupType) => {
+    if (groupType === 'triple') {
+        const [breakerOne, breakerTwo, breakerThree] = breakersList;
+
+        // When all breakers type are same
+        if (breakerOne?.type === breakerTwo?.type && breakerOne?.type === breakerThree?.type) {
+            if (breakerOne?.type !== 'equipment') return true;
+            if (
+                breakerOne?.type === 'equipment' &&
+                breakerOne?.breaker_state === Breaker.Type.notConfigured &&
+                breakerTwo?.breaker_state === Breaker.Type.notConfigured &&
+                breakerThree?.breaker_state === Breaker.Type.notConfigured
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        // If all breaker type are not same
+        else {
+            const newList = [breakerOne?.type, breakerTwo?.type, breakerThree?.type];
+            const fetchBreakerTypes = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+
+            // With multiple types get included, one type must be equipment
+            if (fetchBreakerTypes.length === 2 && fetchBreakerTypes.includes('equipment')) {
+                // Check for equipment type breaker with partially & confgiured state
+                // Check 1
+                if (breakerOne?.type === 'equipment' && breakerOne?.breaker_state !== Breaker.Type.notConfigured) {
+                    return false;
+                }
+                // Check 2
+                if (breakerTwo?.type === 'equipment' && breakerTwo?.breaker_state !== Breaker.Type.notConfigured) {
+                    return false;
+                }
+                // Check 3
+                if (breakerThree?.type === 'equipment' && breakerThree?.breaker_state !== Breaker.Type.notConfigured) {
+                    return false;
+                }
+                // Equipment type with not-confgiured state
+                return true;
+            } else {
+                // When with multiple breaker type involved, equipment does not exist
+                return false;
+            }
+        }
+    }
+
+    if (groupType === 'double') {
+        const [breakerOne, breakerTwo] = breakersList;
+
+        // When all breakers type are same
+        if (breakerOne?.type === breakerTwo?.type) {
+            if (breakerOne?.type !== 'equipment') return true;
+            if (
+                breakerOne?.type === 'equipment' &&
+                breakerOne?.breaker_state === Breaker.Type.notConfigured &&
+                breakerTwo?.breaker_state === Breaker.Type.notConfigured
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        // If all breaker type are not same
+        else {
+            if (breakerOne?.type === 'equipment' || breakerTwo?.type === 'equipment') {
+                // Check for equipment type breaker with partially & confgiured state
+                // Check 1
+                if (breakerOne?.type === 'equipment' && breakerOne?.breaker_state !== Breaker.Type.notConfigured) {
+                    return false;
+                }
+                // Check 2
+                if (breakerTwo?.type === 'equipment' && breakerTwo?.breaker_state !== Breaker.Type.notConfigured) {
+                    return false;
+                }
+                // When with multiple breaker type as equipment, with not-configured state
+                return true;
+            } else {
+                // When both breaker types are different and not any one is of type equipment
+                return false;
+            }
+        }
+    }
 };
