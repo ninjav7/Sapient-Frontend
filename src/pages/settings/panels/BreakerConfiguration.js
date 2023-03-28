@@ -65,6 +65,7 @@ const BreakerConfiguration = ({
     setActiveTab,
     isEditingMode,
     setBreakerUpdateId,
+    panelDevicesList,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -1096,11 +1097,12 @@ const BreakerConfiguration = ({
     }, [debouncedThirdSearch]);
 
     useEffect(() => {
-        const newList = passiveDevicesList;
-        setFirstPassiveDevicesList(newList);
-        setSecondPassiveDevicesList(newList);
-        setThirdPassiveDevicesList(newList);
-    }, [passiveDevicesList]);
+        const newList = panelDevicesList.concat(passiveDevicesList);
+        const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+        setFirstPassiveDevicesList(filteredList);
+        setSecondPassiveDevicesList(filteredList);
+        setThirdPassiveDevicesList(filteredList);
+    }, [passiveDevicesList, panelDevicesList]);
 
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
@@ -1153,7 +1155,7 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         if (selectedDevicesList.length === 0) return;
-        const newList = selectedDevicesList.concat(passiveDevicesList);
+        const newList = selectedDevicesList.concat(panelDevicesList, passiveDevicesList);
         const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
         setFirstPassiveDevicesList(filteredList);
         setSecondPassiveDevicesList(filteredList);
