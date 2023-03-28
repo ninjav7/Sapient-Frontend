@@ -25,7 +25,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 import _ from 'lodash';
-
+import colorPalette from '../../assets/scss/_colors.scss';
 import {
     timePicker15MinutesIntervalOption24HourFormat,
     timePicker15MinutesIntervalOption12HourFormat,
@@ -1841,7 +1841,7 @@ const PlugRule = () => {
                                         handleSwitchChange();
                                     }}
                                     checked={currentData.is_active}
-                                    onColor={'#2955E7'}
+                                    onColor={colorPalette.datavizBlue600}
                                     uncheckedIcon={false}
                                     checkedIcon={false}
                                     className="react-switch"
