@@ -788,7 +788,9 @@ const PlugRule = () => {
         const formattedSchedule = [];
         preparedScheduleData.forEach((currentCondition) => {
             currentCondition.data.forEach((currentRow) => {
-                formattedSchedule.push(currentRow);
+                if (currentRow.action_day.length) {
+                    formattedSchedule.push(currentRow);
+                }
             });
         });
         currentDataCopy.action = formattedSchedule;
