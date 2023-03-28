@@ -58,13 +58,11 @@ const EndUseType = () => {
     });
 
     const formatXaxis = ({ value }) => {
-        return moment(value).tz(timeZone).format(`${dateFormat}`);
+        return moment.utc(value).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182
-            ? moment(value).tz(timeZone).format(`MMM 'YY`)
-            : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
     };
 
     const [endUseName, setEndUseName] = useState('');
@@ -78,7 +76,7 @@ const EndUseType = () => {
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
-                const response = res?.data;
+                const response = res?.data?.data;
                 let energyCategories = [];
                 let energyData = [
                     {
@@ -87,8 +85,8 @@ const EndUseType = () => {
                     },
                 ];
                 response.forEach((record) => {
-                    energyCategories.push(record?.date);
-                    energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
+                    energyCategories.push(record?.time_stamp);
+                    energyData[0].data.push(parseFloat((record?.consumption / 1000).toFixed(2)));
                 });
                 setEnergyConsumptionsCategories(energyCategories);
                 setEnergyConsumptionsData(energyData);
@@ -312,7 +310,7 @@ const EndUseType = () => {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             fetchWeatherData(bldgObj?.timezone);
         }
-    }, [isWeatherChartVisible]);
+    }, [isWeatherChartVisible, startDate, endDate]);
 
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'

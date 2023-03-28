@@ -461,6 +461,14 @@ export const getPanelsTableCSVExport = (tableData, columns) => {
                     arr.push(locationName);
                     break;
 
+                case 'passive_devices':
+                    const tags = tableRow['connected_devices'];
+                    const devicesName = [];
+                    tags.forEach((record) => devicesName.push(record?.device_identifier));
+                    const convertedTags = devicesName.join('; ');
+                    arr.push(convertedTags);
+                    break;
+
                 case 'parent':
                     const parentPanel = tableRow['parent'];
                     const parentPanelName = parentPanel ? parentPanel : '-';

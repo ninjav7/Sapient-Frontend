@@ -65,6 +65,7 @@ const BreakerConfiguration = ({
     setActiveTab,
     isEditingMode,
     setBreakerUpdateId,
+    panelDevicesList,
 }) => {
     const [activeEquipTab, setActiveEquipTab] = useState('equip');
 
@@ -780,10 +781,11 @@ const BreakerConfiguration = ({
     };
 
     const onSaveButonClick = () => {
-        if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
-            validateUnlabledChange();
-            return;
-        }
+        // PLT-1120: Commented as part of ticket requirement
+        // if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
+        //     validateUnlabledChange();
+        //     return;
+        // }
         if (currentEquipObj?.id && newEquipObj?.id && currentEquipObj?.id !== newEquipObj?.id) {
             closeBreakerConfigModal();
             openReassignAlert();
@@ -1095,11 +1097,12 @@ const BreakerConfiguration = ({
     }, [debouncedThirdSearch]);
 
     useEffect(() => {
-        const newList = passiveDevicesList;
-        setFirstPassiveDevicesList(newList);
-        setSecondPassiveDevicesList(newList);
-        setThirdPassiveDevicesList(newList);
-    }, [passiveDevicesList]);
+        const newList = panelDevicesList.concat(passiveDevicesList);
+        const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
+        setFirstPassiveDevicesList(filteredList);
+        setSecondPassiveDevicesList(filteredList);
+        setThirdPassiveDevicesList(filteredList);
+    }, [passiveDevicesList, panelDevicesList]);
 
     useEffect(() => {
         if (!selectedBreakerObj?.id) return;
@@ -1152,7 +1155,7 @@ const BreakerConfiguration = ({
 
     useEffect(() => {
         if (selectedDevicesList.length === 0) return;
-        const newList = selectedDevicesList.concat(passiveDevicesList);
+        const newList = selectedDevicesList.concat(panelDevicesList, passiveDevicesList);
         const filteredList = [...new Set(newList.map(JSON.stringify))].map(JSON.parse);
         setFirstPassiveDevicesList(filteredList);
         setSecondPassiveDevicesList(filteredList);

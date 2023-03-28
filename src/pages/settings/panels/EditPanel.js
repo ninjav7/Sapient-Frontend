@@ -102,6 +102,7 @@ const EditPanel = () => {
     const [panelObj, setPanelObj] = useState({});
     const [selectedBreakerObj, setSelectedBreakerObj] = useState({});
     const [originalPanelObj, setOriginalPanelObj] = useState({});
+    const [panelDevicesList, setPanelDevicesList] = useState([]);
     const [isPanelFetched, setPanelFetching] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [breakerUpdateId, setBreakerUpdateId] = useState('');
@@ -1280,6 +1281,18 @@ const EditPanel = () => {
                 setPanelObj(response);
                 setOriginalPanelObj(response);
 
+                if (response?.connected_devices.length !== 0) {
+                    let devicesList = [];
+                    response.connected_devices.forEach((record) => {
+                        devicesList.push({
+                            label: record?.device_identifier,
+                            value: record?.device_id,
+                            isDisabled: false,
+                        });
+                    });
+                    setPanelDevicesList(devicesList);
+                }
+
                 if (response) {
                     setMainBreakerConfig({
                         items: [
@@ -1758,6 +1771,7 @@ const EditPanel = () => {
                 setActiveTab={setActiveTab}
                 isEditingMode={isEditingMode}
                 setBreakerUpdateId={setBreakerUpdateId}
+                panelDevicesList={panelDevicesList}
             />
 
             <UnlinkAllBreakers

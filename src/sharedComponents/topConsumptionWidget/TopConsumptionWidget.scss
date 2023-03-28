@@ -2,7 +2,7 @@
 
 .TopConsumptionWidget {
     &-wrapper {
-        padding: 1rem;
+        padding: 0.9375rem;
         display: inline-block;
         border: 0.0625rem solid $primary-gray-200;
         box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
@@ -48,3 +48,37 @@
     }
 }
 
+.top-consumption {
+    &-widget-table-content {
+        tr:first-child {
+            td {
+                padding-bottom: 0.8125rem;
+            }
+        }
+        td {
+            padding-bottom: 1.1875rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        tr:last-child {
+            td {
+                padding-bottom: 0.3125rem;
+            }
+        }
+        td:first-child {
+            padding-left: 0;
+        }
+        td:last-child {
+            text-align: right;
+            padding-right: 0;
+        }
+        td:nth-child(2) {
+            text-align: right;
+        }
+    }
+    &-item-value {
+        margin-right: 0.125rem;
+    }
+    
+}
