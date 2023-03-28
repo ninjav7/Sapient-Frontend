@@ -431,17 +431,18 @@ const PlugRule = () => {
         const data = Object.values(daysOfWeekFull);
 
         data.forEach((el) => {
-            const today = moment();
-            const from_date = today.startOf('week').startOf('isoWeek');
-            let timeWithHours = '';
-            if (el === 'Sunday') {
-                from_date.day(el).add(1, 'weeks');
-                timeWithHours = from_date.set({ hour: 23, minute: 59 });
-            } else {
-                from_date.day(el);
-                timeWithHours = from_date.set('hour', 0);
+            for (let i = 0; i <= 23; i++) {
+                const today = moment();
+                const from_date = today.startOf('week').startOf('isoWeek');
+                let timeWithHours = '';
+                if (el === 'Sunday') {
+                    from_date.day(el).add(1, 'weeks');
+                } else {
+                    from_date.day(el);
+                }
+                timeWithHours = from_date.set({ hour: i, minute: 0 });
+                res.push({ x: timeWithHours, y: 0 });
             }
-            res.push({ x: timeWithHours, y: 0 });
         });
         let response = [{ name: `Average Energy demand`, data: res }];
 
