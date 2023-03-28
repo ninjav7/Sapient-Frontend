@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'reactstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Row, Col, UncontrolledTooltip } from 'reactstrap';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -23,6 +23,7 @@ import '../style.css';
 import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constants';
 import { UserStore } from '../../../store/UserStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { Badge } from '../../../sharedComponents/badge';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -213,6 +214,42 @@ const Panels = () => {
         return <Typography.Body size={Typography.Sizes.md}>{row?.location ? row?.location : '-'} </Typography.Body>;
     };
 
+    const renderPassiveDevices = useCallback((row) => {
+        const slicedArr = row?.connected_devices.slice(1);
+        return (
+            <div className="tags-row-content">
+                <Badge
+                    text={
+                        <>
+                            <span className="gray-950">
+                                {row?.connected_devices[0] ? row.connected_devices[0]?.device_identifier : 'none'}
+                            </span>
+                        </>
+                    }
+                />
+                {slicedArr?.length > 0 ? (
+                    <>
+                        <Badge
+                            text={
+                                <span className="gray-950" id={`tags-badge-${row.panel_id}`}>
+                                    +{slicedArr.length}
+                                </span>
+                            }
+                        />
+                        <UncontrolledTooltip
+                            placement="top"
+                            target={`tags-badge-${row.panel_id}`}
+                            className="tags-tooltip">
+                            {slicedArr.map((el) => {
+                                return <Badge text={<span className="gray-950">{el?.device_identifier}</span>} />;
+                            })}
+                        </UncontrolledTooltip>
+                    </>
+                ) : null}
+            </div>
+        );
+    });
+
     const renderLinkedBreakers = (row) => {
         return (
             <Typography.Body size={Typography.Sizes.md}>
@@ -249,6 +286,12 @@ const Panels = () => {
             name: 'Location',
             accessor: 'location',
             callbackValue: renderPanelLocation,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
+        {
+            name: 'Passive Device ID',
+            accessor: 'passive_devices',
+            callbackValue: renderPassiveDevices,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
