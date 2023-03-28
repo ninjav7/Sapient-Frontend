@@ -780,10 +780,11 @@ const BreakerConfiguration = ({
     };
 
     const onSaveButonClick = () => {
-        if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
-            validateUnlabledChange();
-            return;
-        }
+        // PLT-1120: Commented as part of ticket requirement
+        // if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
+        //     validateUnlabledChange();
+        //     return;
+        // }
         if (currentEquipObj?.id && newEquipObj?.id && currentEquipObj?.id !== newEquipObj?.id) {
             closeBreakerConfigModal();
             openReassignAlert();
