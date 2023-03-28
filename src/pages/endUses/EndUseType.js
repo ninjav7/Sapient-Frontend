@@ -310,7 +310,7 @@ const EndUseType = () => {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             fetchWeatherData(bldgObj?.timezone);
         }
-    }, [isWeatherChartVisible]);
+    }, [isWeatherChartVisible, startDate, endDate]);
 
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'
