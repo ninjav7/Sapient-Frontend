@@ -158,7 +158,13 @@ export function getUnlinkedSocketRules(
     if (pageSize === 0) {
         return;
     }
-
+    // const initialTags = tagsFilterString.map((el)=>{
+    //     return(
+    //         encodeURIComponent(el)
+    //     )
+    // })
+    const tags = tagsFilterString ? encodeURI(tagsFilterString?.join('+')) : tagsFilterString;
+    console.log("tags65433256",tags);
     return axiosInstance
         .get(`${getListSensorsForBuildings}${params}`, {
             params: _.pickBy(
@@ -179,7 +185,7 @@ export function getUnlinkedSocketRules(
                     location: locationTypeFilterString
                         ? encodeURI(locationTypeFilterString?.join('+'))
                         : locationTypeFilterString,
-                    tags: tagsFilterString ? encodeURI(tagsFilterString?.join('+')) : tagsFilterString,
+                    tags: tags,
                     equipment_types: equpimentTypeFilterString
                         ? encodeURI(equpimentTypeFilterString?.join('+'))
                         : equpimentTypeFilterString,

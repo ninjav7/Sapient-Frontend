@@ -929,6 +929,7 @@ const PlugRule = () => {
     useEffect(() => {
         removeMacDuplicates();
     }, [macOptions]);
+    console.log('tagsFilterString342', tagsFilterString);
 
     const fetchUnLinkedSocketRules = async () => {
         const sorting = sortBy.method &&
@@ -1394,7 +1395,7 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setSensorTypeFilterString, options),
-                          onDelete: setSensorTypeFilterString(''),
+                          onDelete: () => setSensorTypeFilterString(''),
                       },
                       {
                           label: 'Assigned rule',
@@ -1406,7 +1407,7 @@ const PlugRule = () => {
                               label: filterItem.plug_rule_name,
                           })),
                           onClose: (options) => filterHandler(setAssignedRuleFilterString, options),
-                          onDelete: setAssignedRuleFilterString(''),
+                          onDelete: () => setAssignedRuleFilterString(''),
                       },
                       {
                           label: 'Tags',
@@ -1418,7 +1419,7 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setTagsFilterString, options),
-                          onDelete: setTagsFilterString(''),
+                          onDelete: () => setTagsFilterString(''),
                       },
                       {
                           label: 'Last used data',
@@ -1430,7 +1431,7 @@ const PlugRule = () => {
                               label: filterItem,
                           })),
                           onClose: (options) => filterHandler(setLastUsedDataFilterString, options),
-                          onDelete: setLastUsedDataFilterString(''),
+                          onDelete: () => setLastUsedDataFilterString(''),
                       },
                   ]
                 : [];
