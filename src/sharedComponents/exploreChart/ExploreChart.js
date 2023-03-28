@@ -66,11 +66,11 @@ const ExploreChart = (props) => {
         setWithTemp((old) => !old);
     }, []);
 
-    const showUpperLegends = series.some((serie) => serie.type === LOW_MED_HIGH);
+    const showUpperLegends = series?.some((serie) => serie.type === LOW_MED_HIGH);
 
     const chartConfig = _.merge(
         options({
-            series: withTemp ? series : series.filter(({ type }) => type !== LOW_MED_HIGH),
+            series: withTemp ? series : series?.filter(({ type }) => type !== LOW_MED_HIGH),
             data,
             dateRange,
             tooltipUnit,

@@ -32,7 +32,17 @@ highchartsAccessibility(Highcharts);
 highchartsAddLowMedHighToTooltip(Highcharts);
 
 const ColumnChart = (props) => {
-    const { plotBandsLegends, plotBands: plotBandsProp, withTemp: withTempProp = true, upperLegendsProps = {} } = props;
+    const {
+        title,
+        subTitle,
+        plotBandsLegends,
+        plotBands: plotBandsProp,
+        withTemp: withTempProp = true,
+        upperLegendsProps = {},
+        temperatureSeries,
+        onMoreDetail,
+        style,
+    } = props;
 
     const chartComponentRef = useRef(null);
     const [withTemp, setWithTemp] = useState(withTempProp);
@@ -61,16 +71,21 @@ const ColumnChart = (props) => {
         }
     };
 
-    const chartConfig = options({ ...props, temperatureSeries: withTemp ? props.temperatureSeries : [], plotBands });
+    const chartConfig = options({ ...props, temperatureSeries: withTemp ? temperatureSeries : [], plotBands });
+
+    const { weather } = upperLegendsProps;
+    const weatherIsAlwaysShown = weather?.isAlwaysShown;
+
+    const showUpperLegends = !!renderPlotBandsLegends?.length || !!temperatureSeries || weatherIsAlwaysShown;
 
     return (
-        <div className="column-chart-wrapper" style={props.style}>
+        <div className="column-chart-wrapper" style={style}>
             <div className="d-flex align-items-center justify-content-between">
                 <div>
-                    <Typography.Subheader size={Typography.Sizes.md}>{props.title}</Typography.Subheader>
-                    <Typography.Body size={Typography.Sizes.xs}>{props.subTitle}</Typography.Body>
+                    <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
+                    <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
-                {(!!renderPlotBandsLegends?.length || !!props.temperatureSeries) && (
+                {showUpperLegends && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">
                         {renderPlotBandsLegends.map((legendProps) => {
                             const props = { ...legendProps, ...upperLegendsProps.plotBands };
@@ -86,7 +101,7 @@ const ColumnChart = (props) => {
                                 />
                             );
                         })}
-                        {props.temperatureSeries &&
+                        {(temperatureSeries || weatherIsAlwaysShown) &&
                             renderWeatherLegends.map((legendProps) => (
                                 <UpperLegendComponent
                                     {...legendProps}
@@ -126,7 +141,7 @@ const ColumnChart = (props) => {
             <Brick sizeInRem={1.5} />
             <HighchartsReact highcharts={Highcharts} options={chartConfig} ref={chartComponentRef} />
 
-            {props.onMoreDetail && (
+            {onMoreDetail && (
                 <Button
                     className={cx('column-chart-more-detail', {
                         //@TODO as temporary solution, need to investigate to put button inside chart's container
@@ -137,7 +152,7 @@ const ColumnChart = (props) => {
                     icon={<ArrowRight style={{ height: 11 }} />}
                     type={Button.Type.tertiary}
                     iconAlignment={Button.IconAlignment.right}
-                    onClick={props.onMoreDetail}
+                    onClick={onMoreDetail}
                 />
             )}
         </div>
@@ -147,6 +162,7 @@ const ColumnChart = (props) => {
 ColumnChart.propTypes = {
     title: PropTypes.string.isRequired,
     subTitle: PropTypes.string.isRequired,
+    tooltipValuesKey: PropTypes.string,
     colors: PropTypes.arrayOf(PropTypes.string).isRequired,
     series: PropTypes.arrayOf(
         PropTypes.shape({

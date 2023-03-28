@@ -21,6 +21,8 @@ import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { getWeatherData } from '../../services/weather';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -32,6 +34,9 @@ const EndUseType = () => {
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
+
+    const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
     const [energyConsumptionsCategories, setEnergyConsumptionsCategories] = useState([]);
@@ -53,13 +58,11 @@ const EndUseType = () => {
     });
 
     const formatXaxis = ({ value }) => {
-        return moment(value).tz(timeZone).format(`${dateFormat}`);
+        return moment.utc(value).format(`${dateFormat}`);
     };
 
     const toolTipFormatter = ({ value }) => {
-        return daysCount >= 182
-            ? moment(value).tz(timeZone).format(`MMM 'YY`)
-            : moment(value).tz(timeZone).format(`MMM D 'YY @ hh:mm A`);
+        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
     };
 
     const [endUseName, setEndUseName] = useState('');
@@ -73,7 +76,7 @@ const EndUseType = () => {
         const payload = apiRequestBody(startDate, endDate, time_zone);
         await fetchEndUsesUsageChart(bldgId, endUseTypeRequest, payload)
             .then((res) => {
-                const response = res?.data;
+                const response = res?.data?.data;
                 let energyCategories = [];
                 let energyData = [
                     {
@@ -82,8 +85,8 @@ const EndUseType = () => {
                     },
                 ];
                 response.forEach((record) => {
-                    energyCategories.push(record?.date);
-                    energyData[0].data.push(parseFloat((record?.energy_consumption / 1000).toFixed(2)));
+                    energyCategories.push(record?.time_stamp);
+                    energyData[0].data.push(parseFloat((record?.consumption / 1000).toFixed(2)));
                 });
                 setEnergyConsumptionsCategories(energyCategories);
                 setEnergyConsumptionsData(energyData);
@@ -144,6 +147,51 @@ const EndUseType = () => {
                 setEndUsesData(obj);
             })
             .catch((error) => {});
+    };
+
+    const fetchWeatherData = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await getWeatherData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    const highTemp = {
+                        type: LOW_MED_HIGH_TYPES.HIGH,
+                        data: [],
+                        color: colors.datavizRed500,
+                    };
+                    const avgTemp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.primaryGray450,
+                    };
+                    const lowTemp = {
+                        type: LOW_MED_HIGH_TYPES.LOW,
+                        data: [],
+                        color: colors.datavizBlue400,
+                    };
+                    response.data.forEach((record) => {
+                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
+                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
+                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
+                    });
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
+                    if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (tempData.length !== 0) setWeatherData(tempData);
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch(() => {
+                setWeatherData(null);
+            });
     };
 
     useEffect(() => {
@@ -257,6 +305,13 @@ const EndUseType = () => {
         plugUsageDataFetch(endUseTypeRequest, time_zone);
     }, [startDate, endDate, endUseType, bldgId]);
 
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible, startDate, endDate]);
+
     const fetchEnduseTitle = (type) => {
         return type === 'hvac'
             ? 'HVAC Consumption'
@@ -288,6 +343,17 @@ const EndUseType = () => {
                     xAxisCallBackValue={formatXaxis}
                     restChartProps={xAxisObj}
                     tooltipCallBackValue={toolTipFormatter}
+                    temperatureSeries={weatherData}
+                    plotBands={null}
+                    upperLegendsProps={{
+                        weather: {
+                            onClick: ({ withTemp }) => {
+                                setWeatherChartVisibility(withTemp);
+                            },
+                            isAlwaysShown: true,
+                        },
+                    }}
+                    withTemp={isWeatherChartVisible}
                 />
             </div>
 

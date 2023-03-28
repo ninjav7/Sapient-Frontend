@@ -31,6 +31,8 @@ import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
+import { getWeatherData } from '../../services/weather';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -87,6 +89,9 @@ const BuildingOverview = () => {
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
+
+    const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -309,6 +314,51 @@ const BuildingOverview = () => {
             .catch((error) => {});
     };
 
+    const fetchWeatherData = async (time_zone) => {
+        const payload = {
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+            bldg_id: bldgId,
+        };
+        await getWeatherData(payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    const highTemp = {
+                        type: LOW_MED_HIGH_TYPES.HIGH,
+                        data: [],
+                        color: colors.datavizRed500,
+                    };
+                    const avgTemp = {
+                        type: LOW_MED_HIGH_TYPES.MED,
+                        data: [],
+                        color: colors.primaryGray450,
+                    };
+                    const lowTemp = {
+                        type: LOW_MED_HIGH_TYPES.LOW,
+                        data: [],
+                        color: colors.datavizBlue400,
+                    };
+                    response.data.forEach((record) => {
+                        if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
+                        if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
+                        if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
+                    });
+                    if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
+                    if (highTemp?.data.length !== 0) tempData.push(highTemp);
+                    if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
+                    if (tempData.length !== 0) setWeatherData(tempData);
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch(() => {
+                setWeatherData(null);
+            });
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -345,6 +395,13 @@ const BuildingOverview = () => {
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
     }, [startDate, endDate, bldgId]);
+
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
+            fetchWeatherData(bldgObj?.timezone);
+        }
+    }, [isWeatherChartVisible, startDate, endDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -409,6 +466,17 @@ const BuildingOverview = () => {
                                 xAxisCallBackValue={formatXaxis}
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
+                                temperatureSeries={weatherData}
+                                plotBands={null}
+                                upperLegendsProps={{
+                                    weather: {
+                                        onClick: ({ withTemp }) => {
+                                            setWeatherChartVisibility(withTemp);
+                                        },
+                                        isAlwaysShown: true,
+                                    },
+                                }}
+                                withTemp={isWeatherChartVisible}
                             />
 
                             <HourlyAvgConsumption
@@ -455,6 +523,17 @@ const BuildingOverview = () => {
                                     xAxisCallBackValue={formatXaxis}
                                     restChartProps={xAxisObj}
                                     tooltipCallBackValue={toolTipFormatter}
+                                    temperatureSeries={weatherData}
+                                    plotBands={null}
+                                    upperLegendsProps={{
+                                        weather: {
+                                            onClick: ({ withTemp }) => {
+                                                setWeatherChartVisibility(withTemp);
+                                            },
+                                            isAlwaysShown: true,
+                                        },
+                                    }}
+                                    withTemp={isWeatherChartVisible}
                                 />
                             </div>
                         </>
