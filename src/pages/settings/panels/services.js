@@ -128,6 +128,6 @@ export function getBreakersGrouped(params, payload) {
     return axiosInstance.post(`${groupBreakers}${params}`, payload).then((res) => res);
 }
 
-export function getBreakersUngrouped(params, payload) {
-    return axiosInstance.post(`${ungroupBreakers}${params}`, payload).then((res) => res);
+export function getBreakersUngrouped(params) {
+    return axiosInstance.patch(`${ungroupBreakers}${params}`).then((res) => res);
 }
