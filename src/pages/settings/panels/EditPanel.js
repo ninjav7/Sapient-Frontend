@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
-
 import {
     deleteCurrentPanel,
     getBreakersGrouped,
@@ -13,30 +12,17 @@ import {
     getPanelsList,
     getPassiveDeviceList,
     resetAllBreakers,
-    updateBreakersLink,
     updatePanelDetails,
 } from './services';
-
-import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { BreakersStore } from '../../../store/BreakersStore';
-
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-
 import Brick from '../../../sharedComponents/brick';
 import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
-import {
-    compareSensorsCount,
-    getEquipmentForBreaker,
-    getPhaseConfigValue,
-    getVoltageConfigValue,
-    validateBreakerTypeForGrouping,
-    validateConfiguredEquip,
-    validateDevicesForBreaker,
-} from './utils';
+import { compareSensorsCount, getVoltageConfigValue } from './utils';
 import { comparePanelData } from './utils';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
@@ -49,9 +35,9 @@ import UnlinkAllBreakers from './UnlinkAllBreakers';
 import { UserStore } from '../../../store/UserStore';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
-import './styles.scss';
 import UngroupAlert from './UngroupAlert';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import './styles.scss';
 
 const EditPanel = () => {
     const history = useHistory();
@@ -368,40 +354,20 @@ const EditPanel = () => {
             });
     };
 
-    const linkMultipleBreakersAPI = async (breakerObjOne, breakerObjTwo, setIsLoading) => {
-        const params = `?building_id=${bldgId}`;
-        const payload = [breakerObjOne, breakerObjTwo];
-        await updateBreakersLink(params, payload)
-            .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
-            })
-            .catch(() => {
-                setIsLoading(false);
-                setLinking(false);
-            });
-    };
-
-    const linkTripleBreakersAPI = async (breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading) => {
-        const params = `?building_id=${bldgId}`;
-        const payload = [breakerObjOne, breakerObjTwo, breakerObjThree];
-        await updateBreakersLink(params, payload)
-            .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
-            })
-            .catch(() => {
-                setIsLoading(false);
-                setLinking(false);
-            });
-    };
-
     const updateBreakerGrouping = async (bldg_id, payload, setIsLoading) => {
         const params = `?building_id=${bldg_id}`;
         await getBreakersGrouped(params, payload)
             .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
+                const response = res?.data;
+                if (response?.success) {
+                    fetchBreakersData(panelId, bldgId, setIsLoading);
+                    fetchEquipmentData(bldgId);
+                } else {
+                    setIsLoading(false);
+                    setLinking(false);
+                    setAlertMessage(response?.message);
+                    handleUngroupAlertOpen();
+                }
             })
             .catch(() => {
                 setIsLoading(false);
@@ -413,638 +379,21 @@ const EditPanel = () => {
         const params = `?building_id=${bldg_id}&breaker_id=${ungroupBreakerId}`;
         await getBreakersUngrouped(params)
             .then((res) => {
-                fetchBreakersData(panelId, bldgId, setIsLoading);
-                fetchEquipmentData(bldgId);
+                const response = res?.data;
+                if (response?.success) {
+                    fetchBreakersData(panelId, bldgId, setIsLoading);
+                    fetchEquipmentData(bldgId);
+                } else {
+                    setIsLoading(false);
+                    setLinking(false);
+                    setAlertMessage(response?.message);
+                    handleUngroupAlertOpen();
+                }
             })
             .catch(() => {
                 setIsLoading(false);
                 setLinking(false);
             });
-    };
-
-    const linkBreakers = (sourceBreakerObj, targetBreakerObj, setIsLoading) => {
-        // Different Breaker Types cannot be grouped -- restricted till all the conditions are shared
-        if (sourceBreakerObj?.type !== targetBreakerObj?.type) {
-            const source =
-                sourceBreakerObj?.type !== ''
-                    ? sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1)
-                    : 'Equipment';
-            const target =
-                targetBreakerObj?.type !== ''
-                    ? targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1)
-                    : 'Equipment';
-            setAdditionalMessage(true);
-            setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
-            handleUngroupAlertOpen();
-            return;
-        }
-
-        if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
-            setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-            );
-            handleUngroupAlertOpen();
-            return;
-        }
-
-        // --- breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3 ---
-        if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
-            setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-            );
-            handleUngroupAlertOpen();
-            return;
-        }
-
-        // --- breakerLink= 1:1 ---
-        if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
-            if (panelObj?.voltage === '600') {
-                const breakerCountToAdd = panelType === 'distribution' ? 2 : 1;
-                // Setup Triple Breaker
-                if (targetBreakerObj?.breaker_number + breakerCountToAdd > breakersList.length) {
-                    setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-                    );
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                let thirdBreakerObj = breakersList.find(
-                    (record) => record?.breaker_number === targetBreakerObj?.breaker_number + breakerCountToAdd
-                );
-
-                if (sourceBreakerObj?.breaker_type === 3) {
-                    setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-                    );
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                if (targetBreakerObj?.breaker_type === 3) {
-                    setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-                    );
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                if (thirdBreakerObj?.breaker_type === 3) {
-                    setAlertMessage(
-                        `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-                    );
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                const { isLinkable, uniqueList } = validateDevicesForBreaker([
-                    sourceBreakerObj?.device_link,
-                    targetBreakerObj?.device_link,
-                    thirdBreakerObj?.device_link,
-                ]);
-
-                if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                let deviceID = '';
-
-                if (uniqueList.length === 1) deviceID = uniqueList[0];
-                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
-
-                let breakerOneEquip = sourceBreakerObj?.equipment_link[0] ? sourceBreakerObj?.equipment_link[0] : '';
-                let breakerTwoEquip = targetBreakerObj?.equipment_link[0] ? targetBreakerObj?.equipment_link[0] : '';
-                let breakerThreeEquip = thirdBreakerObj?.equipment_link[0] ? thirdBreakerObj?.equipment_link[0] : '';
-
-                let equipmentID = '';
-                let equipmentList = [breakerOneEquip, breakerTwoEquip, breakerThreeEquip];
-
-                if (!(breakerOneEquip === '' && breakerTwoEquip === '' && breakerThreeEquip === '')) {
-                    let configuredEquip = equipmentList.filter((el) => el !== '');
-                    if (configuredEquip.length === 1) {
-                        equipmentID = configuredEquip[0];
-                    } else {
-                        setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                        handleUngroupAlertOpen();
-                        return;
-                    }
-                }
-
-                setIsLoading(true);
-                setLinking(true);
-
-                let breakerObjOne = {
-                    breaker_id: sourceBreakerObj?.id,
-                    rated_amps: sourceBreakerObj.rated_amps
-                        ? sourceBreakerObj.rated_amps
-                        : targetBreakerObj.rated_amps
-                        ? targetBreakerObj.rated_amps
-                        : 0,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: '',
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps
-                        ? sourceBreakerObj.rated_amps
-                        : targetBreakerObj.rated_amps
-                        ? targetBreakerObj.rated_amps
-                        : 0,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: sourceBreakerObj?.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjThree = {
-                    breaker_id: thirdBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: sourceBreakerObj.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-                return;
-            }
-
-            const { isLinkable, uniqueList } = validateDevicesForBreaker([
-                sourceBreakerObj?.device_link,
-                targetBreakerObj?.device_link,
-            ]);
-
-            if (!isLinkable) {
-                setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                handleUngroupAlertOpen();
-                return;
-            }
-
-            let deviceID = '';
-
-            if (uniqueList.length === 1) deviceID = uniqueList[0];
-            if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
-
-            const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
-
-            if (isEquipDiff) {
-                setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                handleUngroupAlertOpen();
-                return;
-            }
-
-            setIsLoading(true);
-            setLinking(true);
-
-            const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
-
-            let breakerObjOne = {
-                breaker_id: sourceBreakerObj.id,
-                rated_amps: sourceBreakerObj.rated_amps
-                    ? sourceBreakerObj.rated_amps
-                    : targetBreakerObj.rated_amps
-                    ? targetBreakerObj.rated_amps
-                    : 0,
-                voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                breaker_type: 2,
-                parent_breaker: '',
-                is_linked: true,
-                equipment_id: equipmentID,
-                device_id: deviceID,
-            };
-
-            let breakerObjTwo = {
-                breaker_id: targetBreakerObj.id,
-                rated_amps: sourceBreakerObj.rated_amps
-                    ? sourceBreakerObj.rated_amps
-                    : targetBreakerObj.rated_amps
-                    ? targetBreakerObj.rated_amps
-                    : 0,
-                voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                breaker_type: 2,
-                parent_breaker: sourceBreakerObj.id,
-                is_linked: true,
-                equipment_id: equipmentID,
-                device_id: deviceID,
-            };
-            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo, setIsLoading);
-        }
-
-        // breakerLink= 2:2
-        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
-            setAlertMessage(
-                `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-            );
-            handleUngroupAlertOpen();
-            return;
-        }
-
-        // breakerLink= 1:2 && breakerLink= 2:1
-        if (sourceBreakerObj?.breaker_type === 2 || targetBreakerObj?.breaker_type === 2) {
-            if (panelObj?.voltage === '120/240') {
-                setAlertMessage(
-                    `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`
-                );
-                handleUngroupAlertOpen();
-                return;
-            }
-
-            // breakerLink= 2:1
-            if (sourceBreakerObj?.breaker_type === 2) {
-                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
-
-                const { isLinkable, uniqueList } = validateDevicesForBreaker([
-                    parentBreakerObj?.device_link,
-                    sourceBreakerObj?.device_link,
-                    targetBreakerObj?.device_link,
-                ]);
-
-                if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                let deviceID = '';
-
-                if (uniqueList.length === 1) deviceID = uniqueList[0];
-                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
-
-                const isEquipDiff = validateConfiguredEquip(parentBreakerObj, targetBreakerObj);
-
-                if (isEquipDiff) {
-                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                setIsLoading(true);
-                setLinking(true);
-
-                const equipmentID = getEquipmentForBreaker([parentBreakerObj, targetBreakerObj]);
-
-                let breakerObjOne = {
-                    breaker_id: parentBreakerObj?.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: '',
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: parentBreakerObj?.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjThree = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: parentBreakerObj?.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-                return;
-            }
-
-            // breakerLink= 1:2
-            if (targetBreakerObj?.breaker_type === 2) {
-                let thirdBreakerObj = breakersList.find((record) => record?.parent_breaker === targetBreakerObj?.id);
-
-                const { isLinkable, uniqueList } = validateDevicesForBreaker([
-                    sourceBreakerObj?.device_link,
-                    targetBreakerObj?.device_link,
-                    thirdBreakerObj?.device_link,
-                ]);
-
-                if (!isLinkable) {
-                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                let deviceID = '';
-
-                if (uniqueList.length === 1) deviceID = uniqueList[0];
-                if (uniqueList.length === 2) deviceID = uniqueList.find((el) => el !== '');
-
-                const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
-
-                if (isEquipDiff) {
-                    setAlertMessage(`Breaker cannot be grouped due to different Device/Equipment configuration.`);
-                    handleUngroupAlertOpen();
-                    return;
-                }
-
-                setIsLoading(true);
-                setLinking(true);
-
-                const equipmentID = getEquipmentForBreaker([sourceBreakerObj, targetBreakerObj]);
-
-                let breakerObjOne = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: targetBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: '',
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: targetBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: sourceBreakerObj.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-
-                let breakerObjThree = {
-                    breaker_id: thirdBreakerObj.id,
-                    rated_amps: targetBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'triple'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'triple'),
-                    breaker_type: 3,
-                    parent_breaker: sourceBreakerObj.id,
-                    is_linked: true,
-                    equipment_id: equipmentID,
-                    device_id: deviceID,
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-                return;
-            }
-        }
-    };
-
-    const unlinkBreakers = (sourceBreakerObj, targetBreakerObj, setIsLoading) => {
-        if (panelObj?.voltage === '600') {
-            // Parent Breaker in Triple Linking
-            if (sourceBreakerObj?.parent_breaker === '') {
-                let linkedBreakerObjs = breakersList.filter(
-                    (record) => record?.parent_breaker === sourceBreakerObj?.id
-                );
-                let thirdBreakerObj = linkedBreakerObjs[1];
-
-                let equipmentId =
-                    sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
-
-                setIsLoading(true);
-                setLinking(true);
-
-                let breakerObjOne = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: equipmentId,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-
-                let breakerObjThree = {
-                    breaker_id: thirdBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-                return;
-            }
-            // Child Breaker in Triple Linking
-            if (sourceBreakerObj?.parent_breaker !== '') {
-                if (sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker) {
-                    return;
-                }
-                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
-
-                let equipmentId =
-                    parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
-
-                setIsLoading(true);
-                setLinking(true);
-
-                let breakerObjOne = {
-                    breaker_id: parentBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: equipmentId,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-
-                let breakerObjThree = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-            }
-            return;
-        }
-        if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
-            // Parent Breaker in Triple Linking
-            if (sourceBreakerObj?.parent_breaker === '') {
-                let linkedBreakerObjs = breakersList.filter(
-                    (record) => record?.parent_breaker === sourceBreakerObj?.id
-                );
-                let thirdBreakerObj = linkedBreakerObjs[1];
-
-                let equipmentId =
-                    sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
-
-                setIsLoading(true);
-                setLinking(true);
-
-                let breakerObjOne = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                    breaker_type: 2,
-                    parent_breaker: '',
-                    is_linked: true,
-                    equipment_id: equipmentId,
-                };
-
-                let breakerObjThree = {
-                    breaker_id: thirdBreakerObj.id,
-                    rated_amps: sourceBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                    breaker_type: 2,
-                    parent_breaker: targetBreakerObj.id,
-                    is_linked: true,
-                    equipment_id: equipmentId,
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-                return;
-            }
-            // Child Breaker in Triple Linking
-            if (sourceBreakerObj?.parent_breaker !== '') {
-                if (sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker) {
-                    return;
-                }
-                let parentBreakerObj = breakersList.find((record) => record?.id === sourceBreakerObj?.parent_breaker);
-
-                let equipmentId =
-                    parentBreakerObj?.equipment_link.length === 0 ? '' : parentBreakerObj?.equipment_link[0];
-
-                setIsLoading(true);
-                setLinking(true);
-
-                let breakerObjOne = {
-                    breaker_id: parentBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                    breaker_type: 2,
-                    parent_breaker: '',
-                    is_linked: true,
-                    equipment_id: equipmentId,
-                };
-
-                let breakerObjTwo = {
-                    breaker_id: sourceBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'double'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'double'),
-                    breaker_type: 2,
-                    parent_breaker: parentBreakerObj.id,
-                    is_linked: true,
-                    equipment_id: equipmentId,
-                };
-
-                let breakerObjThree = {
-                    breaker_id: targetBreakerObj.id,
-                    rated_amps: parentBreakerObj.rated_amps,
-                    voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                    phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                    equipment_id: '',
-                };
-                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree, setIsLoading);
-            }
-        }
-        if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 2) {
-            let equipmentId = sourceBreakerObj?.equipment_link.length === 0 ? '' : sourceBreakerObj?.equipment_link[0];
-
-            setIsLoading(true);
-            setLinking(true);
-
-            let breakerObjOne = {
-                breaker_id: sourceBreakerObj.id,
-                rated_amps: sourceBreakerObj.rated_amps
-                    ? sourceBreakerObj.rated_amps
-                    : targetBreakerObj.rated_amps
-                    ? targetBreakerObj.rated_amps
-                    : 0,
-                voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                breaker_type: 1,
-                parent_breaker: '',
-                is_linked: false,
-                equipment_id: equipmentId,
-            };
-            let breakerObjTwo = {
-                breaker_id: targetBreakerObj.id,
-                rated_amps: sourceBreakerObj.rated_amps
-                    ? sourceBreakerObj.rated_amps
-                    : targetBreakerObj.rated_amps
-                    ? targetBreakerObj.rated_amps
-                    : 0,
-                voltage: getVoltageConfigValue(panelObj?.voltage, 'single'),
-                phase_configuration: getPhaseConfigValue(panelObj?.voltage, 'single'),
-                breaker_type: 1,
-                parent_breaker: '',
-                is_linked: false,
-                equipment_id: '',
-            };
-            linkMultipleBreakersAPI(breakerObjOne, breakerObjTwo, setIsLoading);
-            return;
-        }
     };
 
     const handleBreakerGrouping = (breakerLinkObj, setIsLoading, is_linking) => {
@@ -1055,7 +404,7 @@ const EditPanel = () => {
 
         // For Panel Voltage 600 - where we only can form triple breaker grouping
         if (panelObj?.voltage === '600') {
-            // When source and target Breaker lvl is 1:1 => Will be grouped
+            // Breaker lvl is 1:1 => Will be grouped
             if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
                 const breakerCountToAdd = panelType === 'distribution' ? 2 : 1;
                 const thirdBreakerObj = breakersList.find(
@@ -1080,7 +429,7 @@ const EditPanel = () => {
                 return;
             }
 
-            // When source and target Breaker lvl is 3:3 => Will be ungrouped
+            // Breaker lvl is 3:3 => Will be ungrouped
             if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
                 // When both breakers are grouped seperately, so they cannot be grouped
                 if (
