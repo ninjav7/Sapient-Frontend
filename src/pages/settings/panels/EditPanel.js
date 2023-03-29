@@ -33,6 +33,7 @@ import {
     getEquipmentForBreaker,
     getPhaseConfigValue,
     getVoltageConfigValue,
+    validateBreakerTypeForGrouping,
     validateConfiguredEquip,
     validateDevicesForBreaker,
 } from './utils';
@@ -408,9 +409,9 @@ const EditPanel = () => {
             });
     };
 
-    const updateBreakerUngrouping = async (bldg_id, payload, setIsLoading) => {
-        const params = `?building_id=${bldg_id}`;
-        await getBreakersUngrouped(params, payload)
+    const updateBreakerUngrouping = async (bldg_id, ungroupBreakerId, setIsLoading) => {
+        const params = `?building_id=${bldg_id}&breaker_id=${ungroupBreakerId}`;
+        await getBreakersUngrouped(params)
             .then((res) => {
                 fetchBreakersData(panelId, bldgId, setIsLoading);
                 fetchEquipmentData(bldgId);
@@ -1063,13 +1064,12 @@ const EditPanel = () => {
 
                 // When 3rd breaker not found OR when third breaker is already grouped
                 if (!thirdBreakerObj?.id || thirdBreakerObj?.breaker_type !== 1) {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped!`;
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped together to form triple breaker grouping.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
                 }
 
-                // When 3rd breaker found for grouping and isGroupable
                 setIsLoading(true);
                 setLinking(true);
                 updateBreakerGrouping(
@@ -1082,21 +1082,33 @@ const EditPanel = () => {
 
             // When source and target Breaker lvl is 3:3 => Will be ungrouped
             if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
-                // When source breaker is Parent breaker
-                if (sourceBreakerObj?.parent_breaker === '') {
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
+                // When both breakers are grouped seperately, so they cannot be grouped
+                if (
+                    sourceBreakerObj?.id !== targetBreakerObj?.parent_breaker &&
+                    sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker
+                ) {
+                    // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the Breakers are grouped seperately.`;
+                    setAlertMessage(alertMsg);
+                    handleUngroupAlertOpen();
                     return;
                 }
 
-                // When source breaker is not Parent Breaker
+                // When source breaker is parent breaker - can be ungrouped
+                if (sourceBreakerObj?.parent_breaker === '') {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
+                    return;
+                }
+
+                // When source breaker is not Parent Breaker - can be ungrouped
                 if (sourceBreakerObj?.parent_breaker !== '') {
                     const parentBreakerObj = breakersList.find((el) => el?.id === sourceBreakerObj?.parent_breaker);
                     if (parentBreakerObj?.id) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, [parentBreakerObj?.id], setIsLoading);
+                        updateBreakerUngrouping(bldgId, parentBreakerObj?.id, setIsLoading);
                         return;
                     }
                 }
@@ -1117,7 +1129,7 @@ const EditPanel = () => {
                 if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                     setIsLoading(true);
                     setLinking(true);
-                    updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
+                    updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
                     return;
                 }
 
@@ -1125,7 +1137,7 @@ const EditPanel = () => {
                 if (sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker) {
                     setIsLoading(true);
                     setLinking(true);
-                    updateBreakerUngrouping(bldgId, [targetBreakerObj?.id], setIsLoading);
+                    updateBreakerUngrouping(bldgId, targetBreakerObj?.id, setIsLoading);
                     return;
                 }
 
@@ -1152,7 +1164,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, [sourceBreakerObj?.id], setIsLoading);
+                        updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
                         return;
                     }
 
