@@ -3,6 +3,8 @@ import Modal from 'react-bootstrap/Modal';
 import Input from '../../sharedComponents/form/input/Input';
 import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
+import { useAtom } from 'jotai';
+import classNames from 'classnames';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -18,12 +20,12 @@ import { fetchBuildingsList } from '../../services/buildings';
 import { UNITS } from '../../constants/units';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { getSocketsForPlugRulePageTableCSVExport } from '../../utils/tablesExport';
-
+import { userPermissionData } from '../../store/globalState';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useHistory, useParams } from 'react-router-dom';
 import Select from '../../sharedComponents/form/select';
 import _ from 'lodash';
-
+import colorPalette from '../../assets/scss/_colors.scss';
 import {
     timePicker15MinutesIntervalOption24HourFormat,
     timePicker15MinutesIntervalOption12HourFormat,
@@ -161,6 +163,9 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [userPermission] = useAtom(userPermissionData);
+    const isViewer = userPermission?.user_role === 'member';
+
     const [is24Format, setIs24Format] = useState(false);
     const timepickerOption = is24Format
         ? timePicker15MinutesIntervalOption24HourFormat
@@ -788,7 +793,9 @@ const PlugRule = () => {
         const formattedSchedule = [];
         preparedScheduleData.forEach((currentCondition) => {
             currentCondition.data.forEach((currentRow) => {
-                formattedSchedule.push(currentRow);
+                if (currentRow.action_day.length) {
+                    formattedSchedule.push(currentRow);
+                }
             });
         });
         currentDataCopy.action = formattedSchedule;
@@ -1461,6 +1468,7 @@ const PlugRule = () => {
                         <div className="schedule-left-flex">
                             <div>
                                 <Select
+                                    isDisabled={isViewer}
                                     defaultValue={firstCondition.action_type}
                                     onChange={(event) => {
                                         handleSchedularConditionChange(
@@ -1485,12 +1493,12 @@ const PlugRule = () => {
                                             firstCondition.condition_group_id
                                         );
                                     }}
-                                    isDisabled={firstCondition.action_type == '2'}
+                                    isDisabled={firstCondition.action_type == '2' || isViewer}
                                     options={firstCondition.action_type == '2' ? [] : timepickerOption}
                                 />
                             </div>
                             <div>on</div>
-                            <div className="schedular-weekday-group">
+                            <div className={classNames('schedular-weekday-group', { isDisabled: isViewer })}>
                                 <ConditionGroup
                                     handleButtonClick={(day) =>
                                         handleScheduleDayChange(day, firstCondition.condition_group_id)
@@ -1505,6 +1513,7 @@ const PlugRule = () => {
                         <div className="schedule-left-flex">
                             <div>
                                 <Select
+                                    isDisabled={isViewer}
                                     defaultValue={secondCondition.action_type}
                                     onChange={(event) => {
                                         handleSchedularConditionChange(
@@ -1529,24 +1538,26 @@ const PlugRule = () => {
                                             secondCondition.condition_group_id
                                         );
                                     }}
-                                    isDisabled={secondCondition.action_type == '2'}
+                                    isDisabled={secondCondition.action_type == '2' || isViewer}
                                     options={timepickerOption}
                                 />
                             </div>
                         </div>
-                        <div>
-                            <Button
-                                label="Delete Condition"
-                                onClick={() => {
-                                    showOptionToDelete(firstCondition.condition_group_id);
-                                    setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
-                                    setShowDeleteConditionModal(true);
-                                }}
-                                size={Button.Sizes.md}
-                                icon={<DeleteIcon />}
-                                type={Button.Type.secondaryDistructive}
-                            />
-                        </div>
+                        {!isViewer && (
+                            <div>
+                                <Button
+                                    label="Delete Condition"
+                                    onClick={() => {
+                                        showOptionToDelete(firstCondition.condition_group_id);
+                                        setCurrentScheduleIdToDelete(firstCondition.condition_group_id);
+                                        setShowDeleteConditionModal(true);
+                                    }}
+                                    size={Button.Sizes.md}
+                                    icon={<DeleteIcon />}
+                                    type={Button.Type.secondaryDistructive}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <hr className="plug-rule-schedule-breaker" />
@@ -1826,21 +1837,24 @@ const PlugRule = () => {
                         </div>
                     </div>
                     <div className="plug-rule-right-flex">
-                        <div className="plug-rule-switch-header">
-                            <Switch
-                                onChange={() => {
-                                    handleSwitchChange();
-                                }}
-                                checked={currentData.is_active}
-                                onColor={'#2955E7'}
-                                uncheckedIcon={false}
-                                checkedIcon={false}
-                                className="react-switch"
-                                height={20}
-                                width={36}
-                            />
-                            <span className="ml-2 plug-rule-switch-font">Active</span>
-                        </div>
+                        {!isViewer && (
+                            <div className="plug-rule-switch-header">
+                                <Switch
+                                    onChange={() => {
+                                        handleSwitchChange();
+                                    }}
+                                    checked={currentData.is_active}
+                                    onColor={colorPalette.datavizBlue600}
+                                    uncheckedIcon={false}
+                                    checkedIcon={false}
+                                    className="react-switch"
+                                    height={20}
+                                    width={36}
+                                />
+                                <span className="ml-2 plug-rule-switch-font">Active</span>
+                            </div>
+                        )}
+
                         <div className="cancel-and-save-flex">
                             <button
                                 type="button"
@@ -1853,15 +1867,17 @@ const PlugRule = () => {
                                 }}>
                                 Cancel
                             </button>
-                            <Button
-                                disabled={isDisabledSaveButton}
-                                size={Button.Sizes.md}
-                                label="Save"
-                                type={Button.Type.primary}
-                                onClick={() => {
-                                    handleSaveClicked();
-                                }}
-                            />
+                            {!isViewer && (
+                                <Button
+                                    disabled={isDisabledSaveButton}
+                                    size={Button.Sizes.md}
+                                    label="Save"
+                                    type={Button.Type.primary}
+                                    onClick={() => {
+                                        handleSaveClicked();
+                                    }}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1893,6 +1909,7 @@ const PlugRule = () => {
                                         <Input
                                             label="Name"
                                             id="name"
+                                            disabled={isViewer}
                                             placeholder="Enter Rule Name"
                                             value={currentData.name}
                                             onChange={(e) => {
@@ -1922,6 +1939,7 @@ const PlugRule = () => {
                                             name="text"
                                             id="description"
                                             rows="4"
+                                            disabled={isViewer}
                                             placeholder="Enter Description of Rule"
                                             value={currentData.description}
                                             className="font-weight-bold"
@@ -1948,15 +1966,16 @@ const PlugRule = () => {
                                         preparedScheduleData.map((record, index) => {
                                             return <RenderScheduleActionItem record={record} key={index} />;
                                         })}
-
-                                    <button
-                                        type="button"
-                                        className="btn btn-default add-condition"
-                                        onClick={() => {
-                                            createScheduleCondition();
-                                        }}>
-                                        Add Condition
-                                    </button>
+                                    {!isViewer && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-default add-condition"
+                                            onClick={() => {
+                                                createScheduleCondition();
+                                            }}>
+                                            Add Condition
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -2011,23 +2030,25 @@ const PlugRule = () => {
                             )}
                         </div>
                     </div>
-                    <div className="plug-rule-danger-zone-container">
-                        <div className="plug-rule-danger-zone-header p-3">
-                            <div>
-                                <h5 className="plug-rule-chart-title mb-1">Danger zone</h5>
+                    {!isViewer && (
+                        <div className="plug-rule-danger-zone-container">
+                            <div className="plug-rule-danger-zone-header p-3">
+                                <div>
+                                    <h5 className="plug-rule-chart-title mb-1">Danger zone</h5>
+                                </div>
+                            </div>
+
+                            <div className="total-eng-consumtn card-body">
+                                <Button
+                                    onClick={() => setShowDeleteModal(true)}
+                                    label="Delete rule"
+                                    size={Button.Sizes.lg}
+                                    icon={<DeleteIcon />}
+                                    type={Button.Type.primaryDistructive}
+                                />
                             </div>
                         </div>
-
-                        <div className="total-eng-consumtn card-body">
-                            <Button
-                                onClick={() => setShowDeleteModal(true)}
-                                label="Delete rule"
-                                size={Button.Sizes.lg}
-                                icon={<DeleteIcon />}
-                                type={Button.Type.primaryDistructive}
-                            />
-                        </div>
-                    </div>
+                    )}
                 </>
             )}
 
