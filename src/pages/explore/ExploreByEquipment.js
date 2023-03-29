@@ -95,6 +95,7 @@ const ExploreByEquipment = () => {
     const [filterOptions, setFilterOptions] = useState([]);
     const [checkedAll, setCheckedAll] = useState(false);
     const [equipIdNow, setEquipIdNow] = useState('');
+    const [device_type, setDevice_type] = useState('');
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
@@ -353,10 +354,12 @@ const ExploreByEquipment = () => {
             });
             setSeriesData(arr1);
             setEquipIdNow('');
+            setDevice_type('');
         }
 
         if (value === 'false') {
             setEquipIdNow(equip?.equipment_id);
+            setDevice_type(equip?.device_type);
         }
 
         const isAdding = value === 'false';
@@ -1084,7 +1087,9 @@ const ExploreByEquipment = () => {
     const fetchExploreChartData = async () => {
         setChartLoading(true);
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${equipIdNow}&divisible_by=1000${
+        let params = `?building_id=${bldgId}&consumption=${
+            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
+        }&equipment_id=${equipIdNow}&divisible_by=1000${
             selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
         }`;
         await fetchExploreEquipmentChart(payload, params)
@@ -1185,9 +1190,9 @@ const ExploreByEquipment = () => {
 
     const fetchExploreAllChartData = async (id) => {
         let payload = apiRequestBody(startDate, endDate, timeZone);
-        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&equipment_id=${id}&divisible_by=1000${
-            selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''
-        }`;
+        let params = `?building_id=${bldgId}&consumption=${
+            selectedConsumption === 'rmsCurrentMilliAmps' && device_type === 'active' ? 'mAh' : selectedConsumption
+        }&equipment_id=${id}&divisible_by=1000${selectedConsumption === 'rmsCurrentMilliAmps' ? '&detailed=true' : ''}`;
         await fetchExploreEquipmentChart(payload, params)
             .then((res) => {
                 let responseData = res.data;
