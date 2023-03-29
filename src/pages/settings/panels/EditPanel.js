@@ -529,7 +529,7 @@ const EditPanel = () => {
         if (sourceBreakerObj?.type === targetBreakerObj?.type) {
             // When Breaker is of type unlabeld
             if (sourceBreakerObj?.type === 'unlabeled') {
-                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the breaker have different equipments configured.`;
+                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the breaker have different equipment configured.`;
                 setAlertMessage(alertMsg);
                 handleUngroupAlertOpen();
                 setAdditionalMessage(true);
@@ -645,10 +645,43 @@ const EditPanel = () => {
                 const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
                 const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
                 setAdditionalMessage(true);
-                setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker`);
+                setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker.`);
                 handleUngroupAlertOpen();
                 return;
             }
+
+            // When any of breaker is of type 'unlabeled'
+            if (
+                (sourceBreakerObj?.type === 'unlabeled' && targetBreakerObj?.type !== 'equipment') ||
+                (targetBreakerObj?.type === 'unlabeled' && sourceBreakerObj?.type !== 'equipment')
+            ) {
+                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker is of type Unlabeled.`;
+                setAlertMessage(alertMsg);
+                handleUngroupAlertOpen();
+                setAdditionalMessage(true);
+                return;
+            } else {
+                if (
+                    (sourceBreakerObj?.type === 'equipment' &&
+                        sourceBreakerObj?.config_type === Breaker.Type.notConfigured) ||
+                    (targetBreakerObj?.type === 'equipment' &&
+                        targetBreakerObj?.config_type === Breaker.Type.notConfigured)
+                ) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                    return;
+                } else {
+                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped.`;
+                    setAlertMessage(alertMsg);
+                    handleUngroupAlertOpen();
+                    setAdditionalMessage(true);
+                    return;
+                }
+            }
+
+            // ABove 2 conditions is working but seems like we need to do with multiple conditions based on breaker level 1,2 3 to conver all scenarios as used below.
+            // Below if conditions needs to be updated
 
             // -----------------------------------------------------------------------------------------------------------
 
