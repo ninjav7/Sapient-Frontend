@@ -7,10 +7,10 @@ import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import { ReactComponent as PlusSVG } from '../../assets/icon/plus.svg';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
 import axios from 'axios';
 import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 import { BaseUrl, assignSensorsToRule } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -142,6 +142,8 @@ const PlugRules = () => {
         name: '',
         description: '',
     });
+    const [userPermission] = useAtom(userPermissionData);
+    const isViewer = userPermission?.user_role === 'member';
     useEffect(() => {
         setCreateRuleData((prev) => {
             return { ...prev, building_id: initialBuildingValue };
@@ -473,19 +475,21 @@ const PlugRules = () => {
                     </div>
                     <div className="plug-heading">Plug Rules</div>
                 </div>
-                <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                    <div>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-primary font-weight-bold"
-                            onClick={() => {
-                                handleCreatePlugRule();
-                            }}>
-                            <PlusSVG className="mr-2" />
-                            Add Rule
-                        </button>
+                {!isViewer && (
+                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
+                        <div>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={() => {
+                                    handleCreatePlugRule();
+                                }}>
+                                <PlusSVG className="mr-2" />
+                                Add Rule
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
             <div className="plug-rules-body">
                 <Row>
