@@ -38,9 +38,11 @@ Default.args = {
 export const WithTemp = (args) => {
     const [weatherData, setWeatherData] = useState(null);
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+
     useEffect(() => {
         console.log(weatherData);
     }, [weatherData]);
+
     return (
         <ExploreChart
             {...args}
@@ -117,7 +119,7 @@ export const WithTemp = (args) => {
                             y: 10000,
                         },
                         {
-                            x: 1665255600000,
+                            x: 1664564400000,
                             y: 20000,
                         },
                     ],
@@ -129,7 +131,7 @@ export const WithTemp = (args) => {
                 weather: {
                     onClick: ({ event, props, withTemp }) => {
                         setWeatherData({
-                            pointStart: 1672554600000,
+                            pointStart: 1664564400000,
                             pointInterval: 57600000,
                             data: [
                                 [4.4, 9.2, 13.3],
