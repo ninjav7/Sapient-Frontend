@@ -3,6 +3,24 @@ import { hexToRgb } from '../../utils/helper';
 import { DATAVIZ_COLORS } from '../../constants/colors';
 import { renderComponents } from '../columnChart/helper';
 import Typography from '../../sharedComponents/typography';
+
+import colors from '../../assets/scss/_colors.scss';
+
+import { LOW_MED_HIGH } from '../common/charts/modules/contants';
+
+// refer doc https://api.highcharts.com/highcharts/series.line
+const tempSeries = (temperatureSeries) =>
+    temperatureSeries && {
+        name: 'Temp',
+        type: LOW_MED_HIGH,
+        pointStart: new Date('2022-10-1').getTime(),
+        pointInterval: 16 * 3600 * 1000,
+        color: colors.primaryGray450,
+        yAxis: 1,
+        showInLegend: false,
+        ...(temperatureSeries || {}),
+    };
+
 export const preparedData = (data) => {
     const result = data.map((el, index) => {
         return {
@@ -17,7 +35,7 @@ export const preparedData = (data) => {
     return result;
 };
 
-export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, widgetProps }) => {
+export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, temperatureSeries, widgetProps }) => {
     return {
         chart: {
             type: 'line',
@@ -124,6 +142,11 @@ export const options = ({ data, series, dateRange, tooltipUnit, tooltipLabel, wi
         time: {
             useUTC: true,
         },
-        series: series || preparedData(data),
+        series: (() => {
+            const tempSeriesData = tempSeries(temperatureSeries);
+            const series = [...(series || preparedData(data))];
+
+            return tempSeriesData ? [...series, tempSeriesData] : series;
+        })(),
     };
 };
