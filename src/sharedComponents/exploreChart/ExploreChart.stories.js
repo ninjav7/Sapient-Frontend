@@ -159,7 +159,6 @@ WithTemp.args = {
     subTitle: 'Chart subtitle',
     isLoadingData: true,
     disableDefaultPlotBands: true,
-
     // Not necessary, merely for demo purposes
     tooltipValuesKey: '{point.y:.1f}',
     data,
