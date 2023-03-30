@@ -118,31 +118,8 @@ export const WithTemp = (args) => {
                     lineWidth: 2,
                     showInLegend: true,
                 },
-
-                {
-                    name: 'Temp',
-                    type: LOW_MED_HIGH,
-                    pointStart: new Date('2022-10-1').getTime(),
-                    pointInterval: 16 * 3600 * 1000,
-                    data: [
-                        [10, 31, 90],
-                        [33, 42, 45],
-                        [28, 30, 38],
-                        [21, 61, 95],
-                        [30, 38, 42],
-                        [50, 60, 70],
-                        null,
-                        null,
-                        [75, 77, 80],
-                        [23, 54, 75],
-                        [34, 61, 70],
-                        [69, 75, 80],
-                    ],
-                    color: colors.primaryGray450,
-                    yAxis: 1,
-                    showInLegend: false,
-                },
             ]}
+            withTemp={true}
         />
     );
 };
@@ -152,6 +129,38 @@ WithTemp.args = {
     subTitle: 'Chart subtitle',
     isLoadingData: true,
     disableDefaultPlotBands: true,
+    upperLegendsProps: {
+        weather: {
+            onClick: ({ event, props, withTemp }) => {
+                alert(withTemp);
+            },
+
+            // Will be shown even we don't have data for "temperatureSeries"
+            // In case we didn't fetch the data so far, and we want fetch it once user clicked in the legend.
+            // It has been made porposly to avoid additional not required API call execution.
+            isAlwaysShown: true,
+        },
+    },
+    temperatureSeries: {
+        pointStart: new Date('2022-10-1').getTime(),
+        pointInterval: 16 * 3600 * 1000,
+        data: [
+            [10, 31, 90],
+            [33, 42, 45],
+            [28, 30, 38],
+            [21, 61, 95],
+            [30, 38, 42],
+            [50, 60, 70],
+            null,
+            null,
+            [75, 77, 80],
+            [23, 54, 75],
+            [34, 61, 70],
+            [69, 75, 80],
+        ],
+    },
+    // Not necessary, merely for demo purposes
+    tooltipValuesKey: '{point.y:.1f}',
     data,
     dateRange,
 };

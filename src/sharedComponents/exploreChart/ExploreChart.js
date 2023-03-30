@@ -17,6 +17,8 @@ import { HighchartsLowMedHigh } from '../common/charts/modules/lowmedhigh';
 import { LOW_MED_HIGH } from '../common/charts/modules/contants';
 import { UpperLegendComponent } from '../common/charts/components/UpperLegendComponent/UpperLegendComponent';
 import { useWeatherLegends } from '../common/charts/hooks/useWeatherLegends';
+import { LOW_MED_HIGH_TYPES } from '../common/charts/modules/contants';
+import { generateID } from '../helpers/helper';
 
 HighchartsExporting(Highcharts);
 HighchartsData(Highcharts);
@@ -36,6 +38,8 @@ const ExploreChart = (props) => {
         isLoadingData,
         chartProps,
         withTemp: withTempProp,
+        upperLegendsProps = {},
+        temperatureSeries,
     } = props;
 
     const [withTemp, setWithTemp] = useState(withTempProp);
@@ -45,6 +49,10 @@ const ExploreChart = (props) => {
     useEffect(() => {
         setWithTemp(withTempProp);
     }, [withTempProp]);
+
+    const filterWeather = useCallback(() => {
+        setWithTemp((old) => !old);
+    }, []);
 
     const handleDropDownOptionClicked = (name) => {
         switch (name) {
@@ -62,15 +70,10 @@ const ExploreChart = (props) => {
         }
     };
 
-    const filterWeather = useCallback(() => {
-        setWithTemp((old) => !old);
-    }, []);
-
-    const showUpperLegends = series?.some((serie) => serie.type === LOW_MED_HIGH);
-
     const chartConfig = _.merge(
         options({
-            series: withTemp ? series : series?.filter(({ type }) => type !== LOW_MED_HIGH),
+            series,
+            temperatureSeries: withTemp && temperatureSeries,
             data,
             dateRange,
             tooltipUnit,
@@ -79,6 +82,12 @@ const ExploreChart = (props) => {
         }),
         chartProps
     );
+
+    const { weather } = upperLegendsProps;
+    const weatherIsAlwaysShown = weather?.isAlwaysShown;
+
+    const showUpperLegends =
+        series?.some((serie) => serie.type === LOW_MED_HIGH) || !!temperatureSeries || weatherIsAlwaysShown;
 
     return (
         <div className="explore-chart-wrapper">
@@ -89,9 +98,25 @@ const ExploreChart = (props) => {
                 </div>
                 {showUpperLegends && (
                     <div className="ml-auto d-flex plot-bands-legends-wrapper">
-                        {renderWeatherLegends.map((legendProps) => (
-                            <UpperLegendComponent {...legendProps} disabled={!withTemp} onClick={filterWeather} />
-                        ))}
+                        {renderWeatherLegends.map((legendProps) => {
+                            const props = { ...legendProps, disabled: !withTemp, ...upperLegendsProps.plotBands };
+
+                            return (
+                                <UpperLegendComponent
+                                    {...props}
+                                    disabled={!withTemp}
+                                    onClick={(event) => {
+                                        filterWeather(event);
+
+                                        legendProps?.onClick && legendProps.onClick(event);
+
+                                        const onClick = _.get(upperLegendsProps, 'weather.onClick');
+                                        onClick && onClick({ event, props, withTemp: !withTemp });
+                                    }}
+                                    key={generateID()}
+                                />
+                            );
+                        })}
                     </div>
                 )}
                 <div style={{ 'pointer-events': isLoadingData && 'none' }}>
@@ -133,6 +158,18 @@ const ExploreChart = (props) => {
 ExploreChart.propTypes = {
     disableDefaultPlotBands: PropTypes.bool,
     chartProps: PropTypes.object,
+    upperLegendsProps: PropTypes.shape({
+        weather: PropTypes.object,
+        plotBands: PropTypes.object,
+    }),
+    temperatureSeries: PropTypes.arrayOf(
+        PropTypes.shape({
+            type: PropTypes.oneOf(Object.values(LOW_MED_HIGH_TYPES)),
+            data: PropTypes.arrayOf(PropTypes.number.isRequired),
+            color: PropTypes.string.isRequired,
+        })
+    ),
+    withTemp: PropTypes.bool,
 };
 
 export default ExploreChart;
