@@ -929,7 +929,6 @@ const PlugRule = () => {
     useEffect(() => {
         removeMacDuplicates();
     }, [macOptions]);
-    console.log('tagsFilterString342', tagsFilterString);
 
     const fetchUnLinkedSocketRules = async () => {
         const sorting = sortBy.method &&
