@@ -455,11 +455,11 @@ const EditPanel = () => {
                 if (fetchBreakerTypes.length === 2 && fetchBreakerTypes.includes('equipment')) {
                     if (
                         (sourceBreakerObj?.type === 'equipment' &&
-                            sourceBreakerObj?.config_type !== Breaker.Type.notConfigured) ||
+                            sourceBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                         (targetBreakerObj?.type === 'equipment' &&
-                            targetBreakerObj?.config_type !== Breaker.Type.notConfigured) ||
+                            targetBreakerObj?.breaker_state !== Breaker.Type.notConfigured) ||
                         (thirdBreakerObj?.type === 'equipment' &&
-                            thirdBreakerObj?.config_type !== Breaker.Type.notConfigured)
+                            thirdBreakerObj?.breaker_state !== Breaker.Type.notConfigured)
                     ) {
                         const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number}, Breaker ${targetBreakerObj?.breaker_number} & Breaker ${thirdBreakerObj?.breaker_number} cannot be grouped. Since multiple breaker types cannot be grouped.`;
                         setAlertMessage(alertMsg);
@@ -691,7 +691,7 @@ const EditPanel = () => {
                 // When source breaker is of type equipment and in not configured state
                 if (
                     sourceBreakerObj?.type === 'equipment' &&
-                    sourceBreakerObj?.config_type === Breaker.Type.notConfigured
+                    sourceBreakerObj?.breaker_state === Breaker.Type.notConfigured
                 ) {
                     setIsLoading(true);
                     setLinking(true);
@@ -702,7 +702,7 @@ const EditPanel = () => {
                 // When target breaker is of type equipment and in not configured state
                 if (
                     targetBreakerObj?.type === 'equipment' &&
-                    targetBreakerObj?.config_type === Breaker.Type.notConfigured
+                    targetBreakerObj?.breaker_state === Breaker.Type.notConfigured
                 ) {
                     setIsLoading(true);
                     setLinking(true);
@@ -751,7 +751,7 @@ const EditPanel = () => {
 
                     if (
                         sourceBreakerObj?.type === 'equipment' &&
-                        sourceBreakerObj?.config_type === Breaker.Type.notConfigured
+                        sourceBreakerObj?.breaker_state === Breaker.Type.notConfigured
                     ) {
                         setIsLoading(true);
                         setLinking(true);
@@ -776,7 +776,7 @@ const EditPanel = () => {
 
                     if (
                         targetBreakerObj?.type === 'equipment' &&
-                        targetBreakerObj?.config_type === Breaker.Type.notConfigured
+                        targetBreakerObj?.breaker_state === Breaker.Type.notConfigured
                     ) {
                         setIsLoading(true);
                         setLinking(true);
@@ -890,7 +890,7 @@ const EditPanel = () => {
 
                 response.forEach((record) => {
                     if (record?.type === '') record.type = 'equipment';
-                    record.config_type = fetchBreakerType(record);
+                    record.breaker_state = fetchBreakerType(record);
                     record.status = fetchBreakerStatus(record);
                     // Apms set as undefined to restricts Amps reading to be displayed if its 0A
                     if (record?.rated_amps === 0 || !record?.rated_amps) record.rated_amps = undefined;

@@ -1,5 +1,3 @@
-import { Breaker } from '../../../sharedComponents/breaker';
-
 export const validateConfiguredEquip = (sourceBreakerObj, targetBreakerObj) => {
     let diff = false;
     if (sourceBreakerObj?.equipment_link[0] && targetBreakerObj?.equipment_link[0]) {
