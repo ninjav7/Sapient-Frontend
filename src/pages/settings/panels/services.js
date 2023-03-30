@@ -124,8 +124,8 @@ export function createEquipmentData(params, payload) {
     return axiosInstance.post(`${createEquipment}${params}`, payload).then((res) => res);
 }
 
-export function getBreakersGrouped(params, payload) {
-    return axiosInstance.post(`${groupBreakers}${params}`, payload).then((res) => res);
+export function getBreakersGrouped(payload) {
+    return axiosInstance.post(`${groupBreakers}`, payload).then((res) => res);
 }
 
 export function getBreakersUngrouped(params) {

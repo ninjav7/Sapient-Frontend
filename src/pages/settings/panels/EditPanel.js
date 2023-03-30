@@ -354,9 +354,8 @@ const EditPanel = () => {
             });
     };
 
-    const updateBreakerGrouping = async (bldg_id, payload, setIsLoading) => {
-        const params = `?building_id=${bldg_id}`;
-        await getBreakersGrouped(params, payload)
+    const updateBreakerGrouping = async (payload, setIsLoading) => {
+        await getBreakersGrouped(payload)
             .then((res) => {
                 const response = res?.data;
                 if (response?.success) {
@@ -375,8 +374,8 @@ const EditPanel = () => {
             });
     };
 
-    const updateBreakerUngrouping = async (bldg_id, ungroupBreakerId, setIsLoading) => {
-        const params = `?building_id=${bldg_id}&breaker_id=${ungroupBreakerId}`;
+    const updateBreakerUngrouping = async (ungroupBreakerId, setIsLoading) => {
+        const params = `?breaker_id=${ungroupBreakerId}`;
         await getBreakersUngrouped(params)
             .then((res) => {
                 const response = res?.data;
@@ -440,7 +439,6 @@ const EditPanel = () => {
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(
-                        bldgId,
                         [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
                         setIsLoading
                     );
@@ -471,7 +469,6 @@ const EditPanel = () => {
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(
-                        bldgId,
                         [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
                         setIsLoading
                     );
@@ -502,7 +499,7 @@ const EditPanel = () => {
                 if (sourceBreakerObj?.parent_breaker === '') {
                     setIsLoading(true);
                     setLinking(true);
-                    updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
+                    updateBreakerUngrouping(sourceBreakerObj?.id, setIsLoading);
                     return;
                 }
 
@@ -512,7 +509,7 @@ const EditPanel = () => {
                     if (parentBreakerObj?.id) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, parentBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(parentBreakerObj?.id, setIsLoading);
                         return;
                     }
                 }
@@ -540,7 +537,7 @@ const EditPanel = () => {
             if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
                 setIsLoading(true);
                 setLinking(true);
-                updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                updateBreakerGrouping([sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
                 return;
             }
 
@@ -563,7 +560,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(sourceBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -571,7 +568,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, targetBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(targetBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -591,7 +588,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, targetBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(targetBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -616,7 +613,6 @@ const EditPanel = () => {
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(
-                        bldgId,
                         [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
                         setIsLoading
                     );
@@ -629,7 +625,6 @@ const EditPanel = () => {
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(
-                        bldgId,
                         [parentBreakerObj?.id, sourceBreakerObj?.id, targetBreakerObj?.id],
                         setIsLoading
                     );
@@ -658,7 +653,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, sourceBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(sourceBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -666,7 +661,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.parent_breaker === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, targetBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(targetBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -695,7 +690,7 @@ const EditPanel = () => {
                 ) {
                     setIsLoading(true);
                     setLinking(true);
-                    updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                    updateBreakerGrouping([sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
                     return;
                 }
 
@@ -706,7 +701,7 @@ const EditPanel = () => {
                 ) {
                     setIsLoading(true);
                     setLinking(true);
-                    updateBreakerGrouping(bldgId, [sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                    updateBreakerGrouping([sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
                     return;
                 }
 
@@ -726,7 +721,7 @@ const EditPanel = () => {
                     if (sourceBreakerObj?.id === targetBreakerObj?.parent_breaker) {
                         setIsLoading(true);
                         setLinking(true);
-                        updateBreakerUngrouping(bldgId, targetBreakerObj?.id, setIsLoading);
+                        updateBreakerUngrouping(targetBreakerObj?.id, setIsLoading);
                         return;
                     }
 
@@ -756,7 +751,6 @@ const EditPanel = () => {
                         setIsLoading(true);
                         setLinking(true);
                         updateBreakerGrouping(
-                            bldgId,
                             [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
                             setIsLoading
                         );
@@ -781,7 +775,6 @@ const EditPanel = () => {
                         setIsLoading(true);
                         setLinking(true);
                         updateBreakerGrouping(
-                            bldgId,
                             [parentBreakerObj?.id, sourceBreakerObj?.id, targetBreakerObj?.id],
                             setIsLoading
                         );
