@@ -425,6 +425,14 @@ const BreakerConfiguration = ({
                 obj.voltage = getVoltageConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
                 obj.phase_configuration = getPhaseConfigValue(panelObj?.voltage, getBreakerType(obj?.breaker_type));
             }
+
+            if (defaultBreakerType === 'equipment') {
+                obj.equipment_link = [];
+                setNewEquipObj({
+                    id: 'unlabeled',
+                    name: 'Unlabeled',
+                });
+            }
         }
 
         // Type 3 & Type 4
@@ -708,9 +716,24 @@ const BreakerConfiguration = ({
             breakerObjThree.device_link = thirdBreakerObj?.device_link;
         }
 
-        breakersList.push(breakerObjOne);
-        if (breakerObjTwo?.breaker_id) breakersList.push(breakerObjTwo);
-        if (breakerObjThree?.breaker_id) breakersList.push(breakerObjThree);
+        if (breakerObjOne?.breaker_id && breakerObjOne?.equipment_link[0] === 'unlabeled') {
+            update_type = 'forceUpdate';
+            delete breakerObjOne.equipment_link;
+        }
+
+        if (breakerObjTwo?.breaker_id && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
+            update_type = 'forceUpdate';
+            delete breakerObjTwo.equipment_link;
+        }
+
+        if (breakerObjThree?.breaker_id && breakerObjThree?.equipment_link[0] === 'unlabeled') {
+            update_type = 'forceUpdate';
+            delete breakerObjThree.equipment_link;
+        }
+
+        if (Object.keys(breakersList).length > 1) breakersList.push(breakerObjOne);
+        if (breakerObjTwo?.breaker_id && Object.keys(breakerObjTwo).length > 1) breakersList.push(breakerObjTwo);
+        if (breakerObjThree?.breaker_id && Object.keys(breakerObjThree).length > 1) breakersList.push(breakerObjThree);
 
         let breakerTypeUpdateList = [];
 
@@ -735,7 +758,7 @@ const BreakerConfiguration = ({
 
         const promisesList = [];
 
-        if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired')) {
+        if (!(breakerTypeObj?.type === 'blank' || breakerTypeObj?.type === 'unwired') && breakersList.length !== 0) {
             const promiseOne = updateBreakerDetails(params, breakersList);
             promisesList.push(promiseOne);
         }
@@ -781,11 +804,6 @@ const BreakerConfiguration = ({
     };
 
     const onSaveButonClick = () => {
-        // PLT-1120: Commented as part of ticket requirement
-        // if (parentBreakerObj?.type !== 'unlabeled' && firstBreakerObj?.type === 'unlabeled') {
-        //     validateUnlabledChange();
-        //     return;
-        // }
         if (currentEquipObj?.id && newEquipObj?.id && currentEquipObj?.id !== newEquipObj?.id) {
             closeBreakerConfigModal();
             openReassignAlert();
