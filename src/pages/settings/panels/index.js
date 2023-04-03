@@ -24,6 +24,7 @@ import { FILTER_TYPES } from '../../../sharedComponents/dataTableWidget/constant
 import { UserStore } from '../../../store/UserStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { Badge } from '../../../sharedComponents/badge';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -204,6 +205,10 @@ const Panels = () => {
             });
     };
 
+    const renderPanelFlags = (row) => {
+        return <>{row?.flag_count && <StatusBadge text={`${row?.flag_count}`} type={StatusBadge.Type.warning} />}</>;
+    };
+
     const renderPanelName = (row) => {
         return (
             <Link to={`/settings/panels/edit-panel/${bldgId}/${row?.panel_type}/${row?.panel_id}`}>
@@ -280,6 +285,12 @@ const Panels = () => {
     };
 
     const headerProps = [
+        {
+            name: 'Flags',
+            accessor: 'panel_flags',
+            callbackValue: renderPanelFlags,
+            onSort: (method, name) => setSortBy({ method, name }),
+        },
         {
             name: 'Name',
             accessor: 'panel_name',
