@@ -85,8 +85,8 @@ const Buildings = () => {
     const fetchGeneralBuildingData = async () => {
         setIsDataFetching(true);
 
-        const ordered_by = sortBy.name === undefined ? 'building_name' : sortBy.name;
-        const sort_by = sortBy.method === undefined ? 'ace' : sortBy.method;
+        const ordered_by = sortBy.name === undefined || sortBy.method === null ? 'building_name' : sortBy.name;
+        const sort_by = sortBy.method === undefined || sortBy.method === null ? 'ace' : sortBy.method;
 
         await fetchBuildingList(search, sort_by, ordered_by, sqftAPIFlag)
             .then((res) => {
