@@ -105,6 +105,7 @@ const ExploreByEquipment = () => {
     const [checkedAll, setCheckedAll] = useState(false);
     const [equipIdNow, setEquipIdNow] = useState('');
     const [device_type, setDevice_type] = useState('');
+    const topCon = useRef('');
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
@@ -112,7 +113,7 @@ const ExploreByEquipment = () => {
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
+    const [isExploreFilterLoading, setIsExploreFilterLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
@@ -216,6 +217,8 @@ const ExploreByEquipment = () => {
     ];
 
     useEffect(() => {
+        top = '';
+        topCon.current = '';
         if (selectedIds?.length >= 1) {
             let arr = [];
             for (let i = 0; i < selectedIds?.length; i++) {
@@ -270,6 +273,7 @@ const ExploreByEquipment = () => {
                         setWeatherSeries([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    topCon.current = responseData.data[0].consumption.now;
                     top = responseData.data[0].consumption.now;
                 }
                 setExploreTableData(responseData.data);
@@ -318,6 +322,10 @@ const ExploreByEquipment = () => {
         return allEquipmentList.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
     };
 
+    const fetchAveragePercentage = (con) => {
+        return getAverageValue(con / 1000, bottomConsumption, topCon.current / 1000);
+    };
+
     const renderConsumption = (row) => {
         return (
             <>
@@ -325,7 +333,7 @@ const ExploreByEquipment = () => {
                     {Math.round(row.consumption.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottomConsumption, top / 1000)} />
+                <TinyBarChart percent={fetchAveragePercentage(row.consumption.now)} />
             </>
         );
     };
@@ -434,7 +442,7 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         (async () => {
-            setIsExploreDataLoading(true);
+            setIsExploreFilterLoading(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
 
             if (filters?.data?.data !== null) {
@@ -477,7 +485,7 @@ const ExploreByEquipment = () => {
                 set_maxPerValue(0);
             }
 
-            setIsExploreDataLoading(false);
+            setIsExploreFilterLoading(false);
         })();
     }, [startDate, endDate, bldgId]);
 
@@ -1131,10 +1139,10 @@ const ExploreByEquipment = () => {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
                 let NulledData = [];
-                let WeatherData = [];
+                let WeatherDataarr = [];
                 if (selectedConsumption === 'rmsCurrentMilliAmps') {
                     NulledData = seriesData;
-                    WeatherData = weatherSeries;
+                    WeatherDataarr = weatherSeries;
                     for (let i = 0; i < data.length; i++) {
                         let sensorData = [];
                         data[i].data.map((ele) => {
@@ -1160,11 +1168,11 @@ const ExploreByEquipment = () => {
                             lineWidth: 2,
                             showInLegend: true,
                         };
-                        WeatherData.push(rcdToIns);
+                        WeatherDataarr.push(rcdToIns);
                         NulledData.push(recordToInsert);
                     }
                     setSeriesData(NulledData);
-                    setWeatherSeries(WeatherData);
+                    setWeatherSeries(WeatherDataarr);
                 } else {
                     data.map((ele) => {
                         if (ele?.consumption === '') {
@@ -1445,432 +1453,33 @@ const ExploreByEquipment = () => {
     }, [isWeatherChartVisible]);
 
     const handleWeatherChart = async () => {
-        // let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
-        //     new Date(startDate).toISOString()
-        // )}&date_to=${encodeURIComponent(new Date(endDate).toISOString())}`;
-        // await fetchWeatherData(params)
-        //     .then((res) => {
-        //         console.log('Weather ', res);
-        //         let responseData = res.data;
-
-        let response = [
-            {
-                datetime: '2023-01-01T00:00:00+00:00',
-                clouds: 40,
-                dewpt: 5.1,
-                max_temp: 13.3,
-                min_temp: 4.4,
-                rh: 77.8,
-                solar_rad: 101,
-                t_solar_rad: 2423.3,
-                temp: 9.2,
-            },
-            {
-                datetime: '2023-01-02T00:00:00+00:00',
-                clouds: 73,
-                dewpt: 5.5,
-                max_temp: 13.3,
-                min_temp: 3.9,
-                rh: 82.2,
-                solar_rad: 90.3,
-                t_solar_rad: 2167.6,
-                temp: 8.4,
-            },
-            {
-                datetime: '2023-01-03T00:00:00+00:00',
-                clouds: 100,
-                dewpt: 9.7,
-                max_temp: 16.1,
-                min_temp: 8.9,
-                rh: 84.8,
-                solar_rad: 12.6,
-                t_solar_rad: 301.4,
-                temp: 12.3,
-            },
-            {
-                datetime: '2023-01-04T00:00:00+00:00',
-                clouds: 100,
-                dewpt: 12.3,
-                max_temp: 18.3,
-                min_temp: 11.7,
-                rh: 84.8,
-                solar_rad: 23.6,
-                t_solar_rad: 566.4,
-                temp: 14.9,
-            },
-            {
-                datetime: '2023-01-05T00:00:00+00:00',
-                clouds: 77,
-                dewpt: 9.4,
-                max_temp: 16.7,
-                min_temp: 8.3,
-                rh: 80,
-                solar_rad: 42.2,
-                t_solar_rad: 1013.1,
-                temp: 13.3,
-            },
-            {
-                datetime: '2023-01-06T00:00:00+00:00',
-                clouds: 57,
-                dewpt: 2.5,
-                max_temp: 9.4,
-                min_temp: 5,
-                rh: 70.7,
-                solar_rad: 75,
-                t_solar_rad: 1800.2,
-                temp: 7.8,
-            },
-            {
-                datetime: '2023-01-07T00:00:00+00:00',
-                clouds: 41,
-                dewpt: -1.7,
-                max_temp: 7.8,
-                min_temp: 3.9,
-                rh: 57.3,
-                solar_rad: 85.8,
-                t_solar_rad: 2058.3,
-                temp: 6.1,
-            },
-            {
-                datetime: '2023-01-08T00:00:00+00:00',
-                clouds: 54,
-                dewpt: -2,
-                max_temp: 6.1,
-                min_temp: 0.6,
-                rh: 65.2,
-                solar_rad: 51.3,
-                t_solar_rad: 1231.1,
-                temp: 4,
-            },
-            {
-                datetime: '2023-01-09T00:00:00+00:00',
-                clouds: 50,
-                dewpt: -0.7,
-                max_temp: 6.7,
-                min_temp: 3.3,
-                rh: 71,
-                solar_rad: 91.9,
-                t_solar_rad: 2205.9,
-                temp: 4.5,
-            },
-            {
-                datetime: '2023-01-10T00:00:00+00:00',
-                clouds: 63,
-                dewpt: -3.3,
-                max_temp: 6.7,
-                min_temp: 0.6,
-                rh: 60.8,
-                solar_rad: 36.7,
-                t_solar_rad: 881.9,
-                temp: 3.7,
-            },
-            {
-                datetime: '2023-01-11T00:00:00+00:00',
-                clouds: 64,
-                dewpt: -1.6,
-                max_temp: 7.2,
-                min_temp: -1.1,
-                rh: 70.4,
-                solar_rad: 35.6,
-                t_solar_rad: 855.1,
-                temp: 3.5,
-            },
-            {
-                datetime: '2023-01-12T00:00:00+00:00',
-                clouds: 100,
-                dewpt: 5.4,
-                max_temp: 15,
-                min_temp: 3,
-                rh: 79.2,
-                solar_rad: 24.1,
-                t_solar_rad: 578.1,
-                temp: 8.9,
-            },
-            {
-                datetime: '2023-01-13T00:00:00+00:00',
-                clouds: 89,
-                dewpt: 4.2,
-                max_temp: 14.4,
-                min_temp: 2.8,
-                rh: 70,
-                solar_rad: 35,
-                t_solar_rad: 840.7,
-                temp: 9.5,
-            },
-            {
-                datetime: '2023-01-14T00:00:00+00:00',
-                clouds: 82,
-                dewpt: -6.5,
-                max_temp: 2.5,
-                min_temp: -1.1,
-                rh: 58.7,
-                solar_rad: 44.1,
-                t_solar_rad: 1058.9,
-                temp: 0.6,
-            },
-            {
-                datetime: '2023-01-15T00:00:00+00:00',
-                clouds: 26,
-                dewpt: -7.4,
-                max_temp: 6.1,
-                min_temp: -2.2,
-                rh: 52.9,
-                solar_rad: 114.3,
-                t_solar_rad: 2742.3,
-                temp: 1.4,
-            },
-            {
-                datetime: '2023-01-16T00:00:00+00:00',
-                clouds: 15,
-                dewpt: -10.5,
-                max_temp: 10,
-                min_temp: -1.7,
-                rh: 36.3,
-                solar_rad: 115.4,
-                t_solar_rad: 2769.2,
-                temp: 3.8,
-            },
-            {
-                datetime: '2023-01-17T00:00:00+00:00',
-                clouds: 71,
-                dewpt: -2.9,
-                max_temp: 7.8,
-                min_temp: 1.7,
-                rh: 57.5,
-                solar_rad: 41.6,
-                t_solar_rad: 997.6,
-                temp: 5.2,
-            },
-            {
-                datetime: '2023-01-18T00:00:00+00:00',
-                clouds: 66,
-                dewpt: 3.5,
-                max_temp: 12.2,
-                min_temp: 5.6,
-                rh: 72.7,
-                solar_rad: 103.3,
-                t_solar_rad: 2479.8,
-                temp: 8.7,
-            },
-            {
-                datetime: '2023-01-19T00:00:00+00:00',
-                clouds: 100,
-                dewpt: 3.9,
-                max_temp: 7.2,
-                min_temp: 2.8,
-                rh: 87.6,
-                solar_rad: 22.6,
-                t_solar_rad: 541.8,
-                temp: 5.8,
-            },
-            {
-                datetime: '2023-01-20T00:00:00+00:00',
-                clouds: 48,
-                dewpt: 0.8,
-                max_temp: 8.9,
-                min_temp: 3.9,
-                rh: 66,
-                solar_rad: 105.1,
-                t_solar_rad: 2523.5,
-                temp: 7.1,
-            },
-            {
-                datetime: '2023-01-21T00:00:00+00:00',
-                clouds: 85,
-                dewpt: -3,
-                max_temp: 5.6,
-                min_temp: 3.3,
-                rh: 58.5,
-                solar_rad: 31.6,
-                t_solar_rad: 757.3,
-                temp: 4.5,
-            },
-            {
-                datetime: '2023-01-22T00:00:00+00:00',
-                clouds: 97,
-                dewpt: -0.8,
-                max_temp: 6.1,
-                min_temp: 1.1,
-                rh: 74.2,
-                solar_rad: 33.5,
-                t_solar_rad: 803.8,
-                temp: 3.5,
-            },
-            {
-                datetime: '2023-01-23T00:00:00+00:00',
-                clouds: 92,
-                dewpt: 1.2,
-                max_temp: 5.6,
-                min_temp: 3.3,
-                rh: 80.8,
-                solar_rad: 36.7,
-                t_solar_rad: 880.7,
-                temp: 4.4,
-            },
-            {
-                datetime: '2023-01-24T00:00:00+00:00',
-                clouds: 41,
-                dewpt: -3.3,
-                max_temp: 8.9,
-                min_temp: 1.1,
-                rh: 57.6,
-                solar_rad: 112.2,
-                t_solar_rad: 2693.1,
-                temp: 4.6,
-            },
-            {
-                datetime: '2023-01-25T00:00:00+00:00',
-                clouds: 100,
-                dewpt: 1.8,
-                max_temp: 14.4,
-                min_temp: -1.1,
-                rh: 79.6,
-                solar_rad: 29.5,
-                t_solar_rad: 708.9,
-                temp: 5,
-            },
-            {
-                datetime: '2023-01-26T00:00:00+00:00',
-                clouds: 42,
-                dewpt: 1.2,
-                max_temp: 14.4,
-                min_temp: 2.2,
-                rh: 63.6,
-                solar_rad: 103.5,
-                t_solar_rad: 2484.5,
-                temp: 8,
-            },
-            {
-                datetime: '2023-01-27T00:00:00+00:00',
-                clouds: 22,
-                dewpt: -5.4,
-                max_temp: 8.9,
-                min_temp: 0.6,
-                rh: 53.7,
-                solar_rad: 106.8,
-                t_solar_rad: 2562.8,
-                temp: 3.3,
-            },
-            {
-                datetime: '2023-01-28T00:00:00+00:00',
-                clouds: 44,
-                dewpt: -2.9,
-                max_temp: 11.1,
-                min_temp: 0,
-                rh: 53.5,
-                solar_rad: 101.4,
-                t_solar_rad: 2433.5,
-                temp: 6.1,
-            },
-            {
-                datetime: '2023-01-29T00:00:00+00:00',
-                clouds: 88,
-                dewpt: 0.9,
-                max_temp: 11.1,
-                min_temp: 1.1,
-                rh: 69.8,
-                solar_rad: 33.1,
-                t_solar_rad: 793.5,
-                temp: 6.4,
-            },
-            {
-                datetime: '2023-01-30T00:00:00+00:00',
-                clouds: 63,
-                dewpt: 3.5,
-                max_temp: 12.2,
-                min_temp: 2.8,
-                rh: 79,
-                solar_rad: 125.9,
-                t_solar_rad: 3021.9,
-                temp: 7.1,
-            },
-            {
-                datetime: '2023-01-31T00:00:00+00:00',
-                clouds: 93,
-                dewpt: 0.3,
-                max_temp: 12.8,
-                min_temp: 1.7,
-                rh: 79.1,
-                solar_rad: 36.1,
-                t_solar_rad: 866.1,
-                temp: 3.6,
-            },
-            {
-                datetime: '2023-02-01T00:00:00+00:00',
-                clouds: 69,
-                dewpt: -7.2,
-                max_temp: 3.9,
-                min_temp: -0.6,
-                rh: 56.2,
-                solar_rad: 85.6,
-                t_solar_rad: 2053.8,
-                temp: 1.3,
-            },
-            {
-                datetime: '2023-02-02T00:00:00+00:00',
-                clouds: 83,
-                dewpt: -9.4,
-                max_temp: 5,
-                min_temp: -2.2,
-                rh: 46,
-                solar_rad: 100.9,
-                t_solar_rad: 2420.8,
-                temp: 1.1,
-            },
-        ];
-        // let arr = weatherSeries;
-        // let datapoints = [];
-        // const response = res?.data;
-        // if (response?.success) {
-        const tempData = [];
-        const highTemp = {
-            type: LOW_MED_HIGH_TYPES.HIGH,
-            data: [],
-            color: colors.datavizRed500,
-        };
-        const avgTemp = {
-            type: LOW_MED_HIGH_TYPES.MED,
-            data: [],
-            color: colors.primaryGray450,
-        };
-        const lowTemp = {
-            type: LOW_MED_HIGH_TYPES.LOW,
-            data: [],
-            color: colors.datavizBlue400,
-        };
-        response.forEach((record) => {
-            tempData.push([record?.min_temp, record?.temp, record?.max_temp]);
-            // if (record.hasOwnProperty('temp')) avgTemp.data.push(record?.temp);
-            // if (record.hasOwnProperty('max_temp')) highTemp.data.push(record?.max_temp);
-            // if (record.hasOwnProperty('min_temp')) lowTemp.data.push(record?.min_temp);
-        });
-        // if (avgTemp?.data.length !== 0) tempData.push(avgTemp);
-        // if (highTemp?.data.length !== 0) tempData.push(highTemp);
-        // if (lowTemp?.data.length !== 0) tempData.push(lowTemp);
-        if (tempData.length !== 0) {
-            let obj = {};
-
-            obj['pointStart'] = new Date(startDate).getTime();
-            obj['pointInterval'] = 16 * 3600 * 1000;
-            obj['data'] = tempData;
-
-            setWeatherData(obj);
-        }
-        console.log(tempData);
-        // } else {
-        //     setWeatherData(null);
-        // }
-        // })
-        // .catch((error) => {
-        //     setWeatherData(null);
-        // });
+        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
+            new Date(startDate).toISOString()
+        )}&date_to=${encodeURIComponent(new Date(endDate).toISOString())}`;
+        await fetchWeatherData(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    response.forEach((record) => {
+                        tempData.push([record?.min_temp, record?.temp, record?.max_temp]);
+                    });
+                    if (tempData.length !== 0) {
+                        let obj = {};
+                        obj['pointStart'] = new Date(startDate).getTime();
+                        obj['pointInterval'] = 16 * 3600 * 1000;
+                        obj['data'] = tempData;
+                        setWeatherData(obj);
+                    }
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch((error) => {
+                setWeatherData(null);
+            });
     };
-    useEffect(() => {
-        console.log(weatherData);
-    }, [weatherData]);
-    const args = {
-        temperatureSeries: weatherData,
-    };
+
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1890,28 +1499,25 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-data-table-style p-2 mb-2">
-                    {/* {isExploreChartDataLoading ? (
-                        <></>
-                    ) : (
-                        <> */}
-
                     <ExploreChart
                         title={''}
                         subTitle={''}
-                        {...args}
-                        isLoadingData={isExploreChartDataLoading}
+                        isLoadingData={false}
+                        disableDefaultPlotBands={true}
+                        tooltipValuesKey={'{point.y:.1f}'}
                         tooltipUnit={selectedUnit}
                         tooltipLabel={selectedConsumptionLabel}
                         data={seriesData}
+                        dateRange={fetchDateRange(startDate, endDate)}
+                        temperatureSeries={weatherData}
                         series={weatherSeries}
                         withTemp={isWeatherChartVisible}
-                        dateRange={fetchDateRange(startDate, endDate)}
                         upperLegendsProps={{
                             weather: {
-                                onClick: ({ withTemp }) => {
+                                onClick: ({ event, props, withTemp }) => {
                                     setWeatherChartVisibility(withTemp);
                                 },
-                                isAlwaysShown: true,
+                                isAlwaysShown: false,
                             },
                         }}
                         chartProps={{
@@ -1947,8 +1553,6 @@ const ExploreByEquipment = () => {
                             ],
                         }}
                     />
-                    {/* </>
-                    )} */}
                 </div>
             </Row>
 
