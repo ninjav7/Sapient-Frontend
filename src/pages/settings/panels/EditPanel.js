@@ -483,7 +483,7 @@ const EditPanel = () => {
                     );
                     return;
                 } else {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number}, Breaker ${targetBreakerObj?.breaker_number} & Breaker ${thirdBreakerObj?.breaker_number} cannot be grouped. Since multiple breaker types cannot be grouped.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because they are different breaker types.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
@@ -660,7 +660,7 @@ const EditPanel = () => {
                 return;
             }
 
-            // Breaker Lvl 3:1, 1:3, 3:3
+            // Breaker Lvl 3:1, 1:3, 3:3, 2:3, 3:2
             if (sourceBreakerObj?.breaker_type === 3 || targetBreakerObj?.breaker_type === 3) {
                 // Breaker Type 3-3
                 if (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 3) {
@@ -681,19 +681,19 @@ const EditPanel = () => {
                     }
 
                     // When both breaker are not grouped & one breaker is already triple breaker
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since they have not formed grouping together.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they are both already in another group.`;
+                    setAlertMessage(alertMsg);
+                    setAdditionalMessage(true);
+                    handleUngroupAlertOpen();
+                    return;
+                } else {
+                    // Breaker Type 3:1, 1:3, 2:3, 3:2
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because breaker ${sourceBreakerObj?.breaker_number} or ${targetBreakerObj?.breaker_number} is already grouped in the maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
                     setAdditionalMessage(true);
                     handleUngroupAlertOpen();
                     return;
                 }
-
-                // Breaker Type 1-3 & 3-1
-                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker is already formed triple grouped`;
-                setAlertMessage(alertMsg);
-                setAdditionalMessage(true);
-                handleUngroupAlertOpen();
-                return;
             }
 
             // Breaker Lvl 1:1
@@ -741,7 +741,7 @@ const EditPanel = () => {
                     }
 
                     // When both Breakers are grouped seperately
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since breakers are grouped seperately.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because the resulting group would exceed a maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
@@ -749,7 +749,7 @@ const EditPanel = () => {
 
                 // Panel voltage 120/240 cannot form Triple Grouping
                 if (panelObj?.voltage === '120/240') {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since Panel Voltage 120/240`;
+                    const alertMsg = `120/240 V panels have maximum group size of 2 breakers - grouping more than 2 breakers would exceed that size.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
