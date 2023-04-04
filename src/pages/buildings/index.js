@@ -401,7 +401,7 @@ const BuildingOverview = () => {
             const bldgObj = buildingListData.find((el) => el?.building_id === bldgId);
             fetchWeatherData(bldgObj?.timezone);
         }
-    }, [isWeatherChartVisible]);
+    }, [isWeatherChartVisible, startDate, endDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
