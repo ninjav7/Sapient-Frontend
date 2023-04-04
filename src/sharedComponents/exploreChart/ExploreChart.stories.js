@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import ExploreChart from './ExploreChart';
 import { mockedData, mockedData2, mockedData3 } from './mock';
 import colors from '../../assets/scss/_colors.scss';
@@ -9,8 +9,8 @@ export default {
     component: ExploreChart,
 };
 const dateRange = {
-    minDate: new Date('2023-01-1').getTime(),
-    maxDate: new Date('2023-02-1').getTime(),
+    minDate: new Date('2022-09-1').getTime(),
+    maxDate: new Date('2022-11-1').getTime(),
 };
 
 const data = [
@@ -36,13 +36,6 @@ Default.args = {
 };
 
 export const WithTemp = (args) => {
-    const [weatherData, setWeatherData] = useState(null);
-    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
-
-    useEffect(() => {
-        console.log(weatherData);
-    }, [weatherData]);
-
     return (
         <ExploreChart
             {...args}
@@ -79,7 +72,6 @@ export const WithTemp = (args) => {
                     },
                 ],
             }}
-            temperatureSeries={weatherData}
             series={[
                 {
                     type: 'line',
@@ -119,63 +111,38 @@ export const WithTemp = (args) => {
                             y: 10000,
                         },
                         {
-                            x: 1664564400000,
+                            x: 1665255600000,
                             y: 20000,
                         },
                     ],
                     lineWidth: 2,
                     showInLegend: true,
                 },
-            ]}
-            upperLegendsProps={{
-                weather: {
-                    onClick: ({ event, props, withTemp }) => {
-                        setWeatherData({
-                            pointStart: 1664564400000,
-                            pointInterval: 57600000,
-                            data: [
-                                [4.4, 9.2, 13.3],
-                                [3.9, 8.4, 13.3],
-                                [8.9, 12.3, 16.1],
-                                [11.7, 14.9, 18.3],
-                                [8.3, 13.3, 16.7],
-                                [5, 7.8, 9.4],
-                                [3.9, 6.1, 7.8],
-                                [0.6, 4, 6.1],
-                                [3.3, 4.5, 6.7],
-                                [0.6, 3.7, 6.7],
-                                [-1.1, 3.5, 7.2],
-                                [3, 8.9, 15],
-                                [2.8, 9.5, 14.4],
-                                [-1.1, 0.6, 2.5],
-                                [-2.2, 1.4, 6.1],
-                                [-1.7, 3.8, 10],
-                                [1.7, 5.2, 7.8],
-                                [5.6, 8.7, 12.2],
-                                [2.8, 5.8, 7.2],
-                                [3.9, 7.1, 8.9],
-                                [3.3, 4.5, 5.6],
-                                [1.1, 3.5, 6.1],
-                                [3.3, 4.4, 5.6],
-                                [1.1, 4.6, 8.9],
-                                [-1.1, 5, 14.4],
-                                [2.2, 8, 14.4],
-                                [0.6, 3.3, 8.9],
-                                [0, 6.1, 11.1],
-                                [1.1, 6.4, 11.1],
-                                [2.8, 7.1, 12.2],
-                                [1.7, 3.6, 12.8],
-                                [-0.6, 1.3, 3.9],
-                                [-2.2, 1.1, 5],
-                            ],
-                        });
-                        setWeatherChartVisibility(withTemp);
-                    },
 
-                    isAlwaysShown: true,
+                {
+                    name: 'Temp',
+                    type: LOW_MED_HIGH,
+                    pointStart: new Date('2022-10-1').getTime(),
+                    pointInterval: 16 * 3600 * 1000,
+                    data: [
+                        [10, 31, 90],
+                        [33, 42, 45],
+                        [28, 30, 38],
+                        [21, 61, 95],
+                        [30, 38, 42],
+                        [50, 60, 70],
+                        null,
+                        null,
+                        [75, 77, 80],
+                        [23, 54, 75],
+                        [34, 61, 70],
+                        [69, 75, 80],
+                    ],
+                    color: colors.primaryGray450,
+                    yAxis: 1,
+                    showInLegend: false,
                 },
-            }}
-            withTemp={isWeatherChartVisible}
+            ]}
         />
     );
 };
@@ -185,8 +152,6 @@ WithTemp.args = {
     subTitle: 'Chart subtitle',
     isLoadingData: true,
     disableDefaultPlotBands: true,
-    // Not necessary, merely for demo purposes
-    tooltipValuesKey: '{point.y:.1f}',
     data,
     dateRange,
 };

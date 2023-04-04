@@ -26,31 +26,27 @@ export const HighchartsLowMedHigh = (H) => {
             { items: [], lowhighmed: [] }
         );
 
-        try {
-            let s;
+        let s;
 
-            // Build the header
-            s = [tooltip.tooltipFooterHeaderFormatter(items[0])];
+        // Build the header
+        s = [tooltip.tooltipFooterHeaderFormatter(items[0])];
 
-            // build the values
-            s = s.concat(tooltip.bodyFormatter(items));
+        // build the values
+        s = s.concat(tooltip.bodyFormatter(items));
 
-            const lowHighMedItem = _.first(lowhighmed);
+        const lowHighMedItem = _.first(lowhighmed);
 
-            if (lowHighMedItem) {
-                const { options } = lowHighMedItem.point;
-                const lomMedHighHtml = tooltipLowMedHighTemplate({ ...options, unitTemp });
+        if (lowHighMedItem) {
+            const { options } = lowHighMedItem.point;
+            const lomMedHighHtml = tooltipLowMedHighTemplate({ ...options, unitTemp });
 
-                s.push(lomMedHighHtml);
-            }
-
-            // footer
-            s.push(tooltip.tooltipFooterHeaderFormatter(items[0], true));
-
-            return s;
-        } catch (error) {
-            // internal error inside the library
+            s.push(lomMedHighHtml);
         }
+
+        // footer
+        s.push(tooltip.tooltipFooterHeaderFormatter(items[0], true));
+
+        return s;
     });
 
     // Define custom series type for displaying low/med/high values using boxplot as a base
