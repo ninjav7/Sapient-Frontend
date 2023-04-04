@@ -6,6 +6,7 @@ import {
     getExploreEquipmentList,
     getExploreEquipmentChart,
     getExploreFilter,
+    getWeather,
 } from '../../services/Network';
 
 //Explore By Building
@@ -150,6 +151,12 @@ export function fetchExploreFilter(
         };
     }
     return axiosInstance.post(`${getExploreFilter}${params}`, payload).then((res) => {
+        return res;
+    });
+}
+
+export function fetchWeatherData(params) {
+    return axiosInstance.get(`${getWeather}${params}`).then((res) => {
         return res;
     });
 }

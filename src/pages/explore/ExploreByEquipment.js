@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Row, Col } from 'reactstrap';
-import { fetchExploreEquipmentList, fetchExploreEquipmentChart, fetchExploreFilter } from '../explore/services';
+import {
+    fetchExploreEquipmentList,
+    fetchExploreEquipmentChart,
+    fetchExploreFilter,
+    fetchWeatherData,
+} from '../explore/services';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -25,11 +30,15 @@ import { TrendsBadge } from '../../sharedComponents/trendsBadge';
 import Typography from '../../sharedComponents/typography';
 import { FILTER_TYPES } from '../../sharedComponents/dataTableWidget/constants';
 import ExploreChart from '../../sharedComponents/exploreChart/ExploreChart';
+import Button from '../../sharedComponents/button/Button';
 import { fetchDateRange } from '../../helpers/formattedChartData';
 import { getAverageValue } from '../../helpers/AveragePercent';
 import useCSVDownload from '../../sharedComponents/hooks/useCSVDownload';
 import Select from '../../sharedComponents/form/select';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import { LOW_MED_HIGH } from '../../sharedComponents/common/charts/modules/contants';
+import colors from '../../assets/scss/_colors.scss';
+import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -96,6 +105,7 @@ const ExploreByEquipment = () => {
     const [checkedAll, setCheckedAll] = useState(false);
     const [equipIdNow, setEquipIdNow] = useState('');
     const [device_type, setDevice_type] = useState('');
+    const topCon = useRef('');
 
     const bldgName = BuildingStore.useState((s) => s.BldgName);
 
@@ -103,7 +113,7 @@ const ExploreByEquipment = () => {
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
+    const [isExploreFilterLoading, setIsExploreFilterLoading] = useState(false);
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [seriesData, setSeriesData] = useState([]);
     let entryPoint = '';
@@ -136,13 +146,15 @@ const ExploreByEquipment = () => {
     const [currentButtonId, setCurrentButtonId] = useState(0);
     const [isopened, setIsOpened] = useState(false);
     const [filtersValues, setFiltersValues] = useState({});
-
+    const [weatherSeries, setWeatherSeries] = useState([]);
     const [exploreTableData, setExploreTableData] = useState([]);
+    const [tempState, setTempState] = useState(false);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [selectedModalTab, setSelectedModalTab] = useState(0);
     const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
+    const [weatherStat, setWeatherStat] = useState({});
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy Consumption' },
         { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power Consumption' },
@@ -151,6 +163,9 @@ const ExploreByEquipment = () => {
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [weatherData, setWeatherData] = useState(null);
+    const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+
     useEffect(() => {
         entryPoint = 'entered';
     }, []);
@@ -174,6 +189,7 @@ const ExploreByEquipment = () => {
                 selectedFilters: [],
             });
             setSeriesData([]);
+            setWeatherSeries([]);
             setConAPIFlag('');
             setPerAPIFlag('');
             setSelectedIds([]);
@@ -201,12 +217,15 @@ const ExploreByEquipment = () => {
     ];
 
     useEffect(() => {
+        top = '';
+        topCon.current = '';
         if (selectedIds?.length >= 1) {
             let arr = [];
             for (let i = 0; i < selectedIds?.length; i++) {
                 arr.push(selectedIds[i]);
             }
             setSeriesData([]);
+            setWeatherSeries([]);
             setSelectedAllEquipmentId(arr);
         } else {
             setSelectedEquipmentId('');
@@ -251,8 +270,10 @@ const ExploreByEquipment = () => {
                     if (entryPoint === 'entered') {
                         totalEquipmentId.length = 0;
                         setSeriesData([]);
+                        setWeatherSeries([]);
                     }
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    topCon.current = responseData.data[0].consumption.now;
                     top = responseData.data[0].consumption.now;
                 }
                 setExploreTableData(responseData.data);
@@ -301,6 +322,10 @@ const ExploreByEquipment = () => {
         return allEquipmentList.filter(({ id }) => !selectedIds.find((eqId) => eqId === id));
     };
 
+    const fetchAveragePercentage = (con) => {
+        return getAverageValue(con / 1000, bottomConsumption, topCon.current / 1000);
+    };
+
     const renderConsumption = (row) => {
         return (
             <>
@@ -308,7 +333,7 @@ const ExploreByEquipment = () => {
                     {Math.round(row.consumption.now / 1000)} kWh
                 </Typography.Body>
                 <Brick sizeInRem={0.375} />
-                <TinyBarChart percent={getAverageValue(row.consumption.now / 1000, bottomConsumption, top / 1000)} />
+                <TinyBarChart percent={fetchAveragePercentage(row.consumption.now)} />
             </>
         );
     };
@@ -353,6 +378,10 @@ const ExploreByEquipment = () => {
                 return item.id !== equip?.equipment_id;
             });
             setSeriesData(arr1);
+            let arr2 = weatherSeries.filter(function (item) {
+                return item.id !== equip?.equipment_id;
+            });
+            setWeatherSeries(arr2);
             setEquipIdNow('');
             setDevice_type('');
         }
@@ -413,7 +442,7 @@ const ExploreByEquipment = () => {
 
     useEffect(() => {
         (async () => {
-            setIsExploreDataLoading(true);
+            setIsExploreFilterLoading(true);
             const filters = await fetchExploreFilter(bldgId, startDate, endDate, timeZone, [], [], [], [], 0, 0, '');
 
             if (filters?.data?.data !== null) {
@@ -456,7 +485,7 @@ const ExploreByEquipment = () => {
                 set_maxPerValue(0);
             }
 
-            setIsExploreDataLoading(false);
+            setIsExploreFilterLoading(false);
         })();
     }, [startDate, endDate, bldgId]);
 
@@ -1110,8 +1139,10 @@ const ExploreByEquipment = () => {
                     legendName = arr[0].equipment_name + ' - ' + sg;
                 }
                 let NulledData = [];
+                let WeatherDataarr = [];
                 if (selectedConsumption === 'rmsCurrentMilliAmps') {
                     NulledData = seriesData;
+                    WeatherDataarr = weatherSeries;
                     for (let i = 0; i < data.length; i++) {
                         let sensorData = [];
                         data[i].data.map((ele) => {
@@ -1129,11 +1160,19 @@ const ExploreByEquipment = () => {
                             data: sensorData,
                             id: arr[0].equipment_id,
                         };
-
+                        let rcdToIns = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                            type: 'line',
+                            lineWidth: 2,
+                            showInLegend: true,
+                        };
+                        WeatherDataarr.push(rcdToIns);
                         NulledData.push(recordToInsert);
                     }
-
                     setSeriesData(NulledData);
+                    setWeatherSeries(WeatherDataarr);
                 } else {
                     data.map((ele) => {
                         if (ele?.consumption === '') {
@@ -1147,7 +1186,17 @@ const ExploreByEquipment = () => {
                         data: NulledData,
                         id: arr[0].equipment_id,
                     };
+                    let rcdToIns = {
+                        name: `${legendName}`,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                        type: 'line',
+                        lineWidth: 2,
+                        showInLegend: true,
+                    };
+
                     setSeriesData([...seriesData, recordToInsert]);
+                    setWeatherSeries([...weatherSeries, rcdToIns]);
                 }
 
                 setSelectedEquipmentId('');
@@ -1155,7 +1204,12 @@ const ExploreByEquipment = () => {
             })
             .catch((error) => {});
     };
-
+    useEffect(() => {
+        if (weatherSeries.length > 0) {
+            let check = weatherSeries.filter((serie) => serie.type === LOW_MED_HIGH);
+            if (check.length === 0) weatherSeries.push(weatherStat);
+        }
+    }, [weatherSeries]);
     useEffect(() => {
         if (selectedEquipmentId === '') {
             return;
@@ -1182,10 +1236,16 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
+        let arr2 = [];
+        arr2 = weatherSeries.filter(function (item) {
+            return item.id !== removeEquipmentId;
+        });
         setSeriesData(arr1);
+        setWeatherSeries(arr2);
     }, [removeEquipmentId]);
 
     const dataarr = [];
+    const weatherdataarr = [];
     let ct = 0;
 
     const fetchExploreAllChartData = async (id) => {
@@ -1231,12 +1291,21 @@ const ExploreByEquipment = () => {
                             data: sensorData,
                             id: arr[0].equipment_id,
                         };
-
+                        let rcdToIns = {
+                            name: `${legendName} - Sensor ${data[i].sensor_name}`,
+                            data: sensorData,
+                            id: arr[0].equipment_id,
+                            type: 'line',
+                            lineWidth: 2,
+                            showInLegend: true,
+                        };
                         dataarr.push(recordToInsert);
+                        weatherdataarr.push(rcdToIns);
                     }
 
                     if (selectedIds.length === ct) {
                         setSeriesData(dataarr);
+                        setWeatherSeries(weatherdataarr);
                         ct = 0;
                     }
                 } else {
@@ -1251,10 +1320,21 @@ const ExploreByEquipment = () => {
                         name: legendName,
                         data: NulledData,
                         id: arr[0].equipment_id,
+                        type: 'line',
+                    };
+                    let rcdToIns = {
+                        name: `${legendName}`,
+                        data: NulledData,
+                        id: arr[0].equipment_id,
+                        type: 'line',
+                        lineWidth: 2,
+                        showInLegend: true,
                     };
                     dataarr.push(recordToInsert);
+                    weatherdataarr.push(rcdToIns);
                     if (selectedIds.length === dataarr.length) {
                         setSeriesData(dataarr);
+                        setWeatherSeries(weatherdataarr);
                     }
                 }
             })
@@ -1282,6 +1362,7 @@ const ExploreByEquipment = () => {
         }
         if (allEquipmentData.length === exploreTableData.length) {
             setSeriesData(allEquipmentData);
+            setWeatherSeries(allEquipmentData);
         }
     }, [allEquipmentData]);
 
@@ -1365,6 +1446,40 @@ const ExploreByEquipment = () => {
         window.scrollTo(0, 0);
     }, [pageNo, pageSize]);
 
+    useEffect(() => {
+        if (isWeatherChartVisible && bldgId) {
+            handleWeatherChart();
+        }
+    }, [isWeatherChartVisible]);
+
+    const handleWeatherChart = async () => {
+        let params = `?building_id=${bldgId}&consumption=${selectedConsumption}&timezone=${timeZone}&date_from=${encodeURIComponent(
+            new Date(startDate).toISOString()
+        )}&date_to=${encodeURIComponent(new Date(endDate).toISOString())}`;
+        await fetchWeatherData(params)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    const tempData = [];
+                    response.forEach((record) => {
+                        tempData.push([record?.min_temp, record?.temp, record?.max_temp]);
+                    });
+                    if (tempData.length !== 0) {
+                        let obj = {};
+                        obj['pointStart'] = new Date(startDate).getTime();
+                        obj['pointInterval'] = 16 * 3600 * 1000;
+                        obj['data'] = tempData;
+                        setWeatherData(obj);
+                    }
+                } else {
+                    setWeatherData(null);
+                }
+            })
+            .catch((error) => {
+                setWeatherData(null);
+            });
+    };
+
     return (
         <>
             <Row className="ml-2 mr-2 explore-filters-style">
@@ -1384,20 +1499,60 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-data-table-style p-2 mb-2">
-                    {isExploreChartDataLoading ? (
-                        <></>
-                    ) : (
-                        <>
-                            <ExploreChart
-                                title={''}
-                                subTitle={''}
-                                tooltipUnit={selectedUnit}
-                                tooltipLabel={selectedConsumptionLabel}
-                                data={seriesData}
-                                dateRange={fetchDateRange(startDate, endDate)}
-                            />
-                        </>
-                    )}
+                    <ExploreChart
+                        title={''}
+                        subTitle={''}
+                        isLoadingData={false}
+                        disableDefaultPlotBands={true}
+                        tooltipValuesKey={'{point.y:.1f}'}
+                        tooltipUnit={selectedUnit}
+                        tooltipLabel={selectedConsumptionLabel}
+                        data={seriesData}
+                        dateRange={fetchDateRange(startDate, endDate)}
+                        temperatureSeries={weatherData}
+                        series={weatherSeries}
+                        withTemp={isWeatherChartVisible}
+                        upperLegendsProps={{
+                            weather: {
+                                onClick: ({ event, props, withTemp }) => {
+                                    setWeatherChartVisibility(withTemp);
+                                },
+                                isAlwaysShown: false,
+                            },
+                        }}
+                        chartProps={{
+                            navigator: {
+                                outlineWidth: 0,
+                            },
+                            plotOptions: {
+                                series: {
+                                    states: {
+                                        inactive: {
+                                            opacity: 1,
+                                        },
+                                    },
+                                },
+                            },
+                            xAxis: {
+                                gridLineWidth: 0,
+                            },
+                            yAxis: [
+                                {
+                                    gridLineWidth: 1,
+                                    lineWidth: 1,
+                                    opposite: false,
+                                    lineColor: null,
+                                },
+                                {
+                                    opposite: true,
+                                    title: false,
+                                    max: 120,
+                                    postFix: '23',
+                                    gridLineWidth: 0,
+                                },
+                            ],
+                        }}
+                    />
                 </div>
             </Row>
 
