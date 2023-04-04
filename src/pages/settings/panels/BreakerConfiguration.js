@@ -717,17 +717,14 @@ const BreakerConfiguration = ({
         }
 
         if (breakerObjOne?.equipment_link && breakerObjOne?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
             delete breakerObjOne.equipment_link;
         }
 
         if (breakerObjTwo?.equipment_link && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
             delete breakerObjTwo.equipment_link;
         }
 
         if (breakerObjThree?.equipment_link && breakerObjThree?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
             delete breakerObjThree.equipment_link;
         }
 
@@ -765,9 +762,10 @@ const BreakerConfiguration = ({
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === 'equipment') {
             let params = '';
-            if (update_type === 'forceUpdate') {
+            if (update_type === 'forceSave') {
                 params = `?force_save=true`;
-                if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
+                if (parentBreakerObj?.equipment_link.length !== 0 && newEquipObj.id === 'unlabeled')
+                    breakerTypeObj.equipment_id = parentBreakerObj?.equipment_link[0];
             }
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj, params);
             promisesList.push(promiseTwo);
