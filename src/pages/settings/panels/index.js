@@ -60,6 +60,10 @@ const SkeletonLoading = () => (
             <th>
                 <Skeleton count={10} />
             </th>
+
+            <th>
+                <Skeleton count={10} />
+            </th>
         </tr>
     </SkeletonTheme>
 );

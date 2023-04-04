@@ -716,22 +716,22 @@ const BreakerConfiguration = ({
             breakerObjThree.device_link = thirdBreakerObj?.device_link;
         }
 
-        if (breakerObjOne?.breaker_id && breakerObjOne?.equipment_link[0] === 'unlabeled') {
+        if (breakerObjOne?.equipment_link && breakerObjOne?.equipment_link[0] === 'unlabeled') {
             update_type = 'forceUpdate';
             delete breakerObjOne.equipment_link;
         }
 
-        if (breakerObjTwo?.breaker_id && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
+        if (breakerObjTwo?.equipment_link && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
             update_type = 'forceUpdate';
             delete breakerObjTwo.equipment_link;
         }
 
-        if (breakerObjThree?.breaker_id && breakerObjThree?.equipment_link[0] === 'unlabeled') {
+        if (breakerObjThree?.equipment_link && breakerObjThree?.equipment_link[0] === 'unlabeled') {
             update_type = 'forceUpdate';
             delete breakerObjThree.equipment_link;
         }
 
-        if (Object.keys(breakersList).length > 1) breakersList.push(breakerObjOne);
+        if (breakerObjOne?.breaker_id && Object.keys(breakerObjOne).length > 1) breakersList.push(breakerObjOne);
         if (breakerObjTwo?.breaker_id && Object.keys(breakerObjTwo).length > 1) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id && Object.keys(breakerObjThree).length > 1) breakersList.push(breakerObjThree);
 
