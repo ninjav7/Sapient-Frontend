@@ -412,7 +412,7 @@ const EditPanel = () => {
 
                 // When 3rd breaker not found
                 if (!thirdBreakerObj?.id) {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped. Since third breaker not found for grouping.`;
+                    const alertMsg = `600 V panel requires groups of 1 or 3 breakers - Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because there is not a third breaker available.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
@@ -420,7 +420,7 @@ const EditPanel = () => {
 
                 // When 3rd breaker is already grouped
                 if (thirdBreakerObj?.breaker_type !== 1) {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped. Since Breaker ${thirdBreakerObj?.breaker_number} is already grouped.`;
+                    const alertMsg = `600 V panel requires groups of 1 or 3 breakers - Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because ${thirdBreakerObj?.breaker_number} is already grouped.`;
                     setAlertMessage(alertMsg);
                     setAdditionalMessage(true);
                     handleUngroupAlertOpen();
@@ -433,7 +433,7 @@ const EditPanel = () => {
                     targetBreakerObj?.type === 'unlabeled' ||
                     thirdBreakerObj?.type === 'unlabeled'
                 ) {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number}, Breaker ${targetBreakerObj?.breaker_number} & Breaker ${thirdBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker atleast is of type Unlabeled.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because at least one has has a type of unlabeled.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     setAdditionalMessage(true);
@@ -468,7 +468,7 @@ const EditPanel = () => {
                         (thirdBreakerObj?.type === 'equipment' &&
                             thirdBreakerObj?.breaker_state !== Breaker.Type.notConfigured)
                     ) {
-                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number}, Breaker ${targetBreakerObj?.breaker_number} & Breaker ${thirdBreakerObj?.breaker_number} cannot be grouped. Since multiple breaker types cannot be grouped.`;
+                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because they are different breaker types. `;
                         setAlertMessage(alertMsg);
                         handleUngroupAlertOpen();
                         return;
@@ -498,7 +498,7 @@ const EditPanel = () => {
                     sourceBreakerObj?.parent_breaker !== targetBreakerObj?.parent_breaker
                 ) {
                     // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the Breakers are grouped seperately.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they are both already in another group.`;
                     setAlertMessage(alertMsg);
                     setAdditionalMessage(true);
                     handleUngroupAlertOpen();
@@ -527,7 +527,7 @@ const EditPanel = () => {
 
             // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
             if (sourceBreakerObj?.breaker_type !== targetBreakerObj?.breaker_type) {
-                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker is already grouped.`;
+                const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because Breaker ${sourceBreakerObj?.breaker_number} or Breaker ${targetBreakerObj?.breaker_number} is already grouped.`;
                 setAlertMessage(alertMsg);
                 setAdditionalMessage(true);
                 handleUngroupAlertOpen();
@@ -539,7 +539,7 @@ const EditPanel = () => {
         if (sourceBreakerObj?.type === targetBreakerObj?.type) {
             // When Breaker is of type unlabeld
             if (sourceBreakerObj?.type === 'unlabeled') {
-                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the breaker are Unlabeled type and have different equipment configured.`;
+                const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different unlabeled equipment.`;
                 setAlertMessage(alertMsg);
                 handleUngroupAlertOpen();
                 setAdditionalMessage(true);
@@ -561,7 +561,7 @@ const EditPanel = () => {
                     (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 3) ||
                     (sourceBreakerObj?.breaker_type === 3 && targetBreakerObj?.breaker_type === 1)
                 ) {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker has already formed triple grouping.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because Breaker ${sourceBreakerObj?.breaker_number} or ${targetBreakerObj?.breaker_number} is already grouped in the maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
                     setAdditionalMessage(true);
                     handleUngroupAlertOpen();
@@ -587,7 +587,7 @@ const EditPanel = () => {
                     }
 
                     // When both the breaker are grouped seperately
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the breakers has formed triple grouping.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because the resulting group would exceed a maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
                     setAdditionalMessage(true);
                     handleUngroupAlertOpen();
@@ -608,7 +608,7 @@ const EditPanel = () => {
                     }
 
                     // When both Breakers are grouped seperately
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since both the Breaker are grouped seperately.`;
+                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because the resulting group would exceed a maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
@@ -616,7 +616,7 @@ const EditPanel = () => {
 
                 // Panel voltage - 120/240 => cannot form triple grouping
                 if (panelObj?.voltage === '120/240') {
-                    const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since Panel Voltage is of 120/240.`;
+                    const alertMsg = `120/240 V panels have maximum group size of 2 breakers - grouping more than 2 breakers would exceed that size.`;
                     setAlertMessage(alertMsg);
                     handleUngroupAlertOpen();
                     return;
@@ -654,8 +654,8 @@ const EditPanel = () => {
             if (sourceBreakerObj?.type !== 'equipment' && targetBreakerObj?.type !== 'equipment') {
                 const source = sourceBreakerObj?.type.charAt(0).toUpperCase() + sourceBreakerObj?.type.slice(1);
                 const target = targetBreakerObj?.type.charAt(0).toUpperCase() + targetBreakerObj?.type.slice(1);
+                setAlertMessage(`Only an unconfigured breaker may be grouped with Blank or Unwired breakers.`);
                 setAdditionalMessage(true);
-                setAlertMessage(`An ${source} breaker cannot be combined with a ${target} Breaker.`);
                 handleUngroupAlertOpen();
                 return;
             }
@@ -771,7 +771,7 @@ const EditPanel = () => {
                         );
                         return;
                     } else {
-                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker is not in Un-configured state.`;
+                        const alertMsg = `Only an unconfigured breaker may be grouped with Equipment Attached breakers.`;
                         setAlertMessage(alertMsg);
                         setAdditionalMessage(true);
                         handleUngroupAlertOpen();
@@ -795,7 +795,7 @@ const EditPanel = () => {
                         );
                         return;
                     } else {
-                        const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped. Since one of the breaker is not in Un-configured state.`;
+                        const alertMsg = `Only an unconfigured breaker may be grouped with Equipment Attached breakers.`;
                         setAlertMessage(alertMsg);
                         setAdditionalMessage(true);
                         handleUngroupAlertOpen();
