@@ -716,22 +716,19 @@ const BreakerConfiguration = ({
             breakerObjThree.device_link = thirdBreakerObj?.device_link;
         }
 
-        if (breakerObjOne?.breaker_id && breakerObjOne?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
+        if (breakerObjOne?.equipment_link && breakerObjOne?.equipment_link[0] === 'unlabeled') {
             delete breakerObjOne.equipment_link;
         }
 
-        if (breakerObjTwo?.breaker_id && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
+        if (breakerObjTwo?.equipment_link && breakerObjTwo?.equipment_link[0] === 'unlabeled') {
             delete breakerObjTwo.equipment_link;
         }
 
-        if (breakerObjThree?.breaker_id && breakerObjThree?.equipment_link[0] === 'unlabeled') {
-            update_type = 'forceUpdate';
+        if (breakerObjThree?.equipment_link && breakerObjThree?.equipment_link[0] === 'unlabeled') {
             delete breakerObjThree.equipment_link;
         }
 
-        if (Object.keys(breakersList).length > 1) breakersList.push(breakerObjOne);
+        if (breakerObjOne?.breaker_id && Object.keys(breakerObjOne).length > 1) breakersList.push(breakerObjOne);
         if (breakerObjTwo?.breaker_id && Object.keys(breakerObjTwo).length > 1) breakersList.push(breakerObjTwo);
         if (breakerObjThree?.breaker_id && Object.keys(breakerObjThree).length > 1) breakersList.push(breakerObjThree);
 
@@ -765,9 +762,10 @@ const BreakerConfiguration = ({
 
         if (breakerTypeObj?.notes || breakerTypeObj?.type || breakerTypeObj?.type === 'equipment') {
             let params = '';
-            if (update_type === 'forceUpdate') {
+            if (update_type === 'forceSave') {
                 params = `?force_save=true`;
-                if (existingEquipId !== '') breakerTypeObj.equipment_id = existingEquipId;
+                if (parentBreakerObj?.equipment_link.length !== 0 && newEquipObj.id === 'unlabeled')
+                    breakerTypeObj.equipment_id = parentBreakerObj?.equipment_link[0];
             }
             const promiseTwo = updateBreakersTypeLink(breakerTypeObj, params);
             promisesList.push(promiseTwo);
