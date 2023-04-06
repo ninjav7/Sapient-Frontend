@@ -12,10 +12,11 @@ export const STATUS_TYPES = Object.freeze({
 });
 
 const StatusBadge = ({ text = '', type = STATUS_TYPES.success, icon, ...props }) => {
-
     return (
         <div className={cx('status-badge-wrapper', props.className, type)}>
-            <Typography.Body size={Typography.Sizes.sm}>{icon ? icon : text}</Typography.Body>
+            <Typography.Body size={Typography.Sizes.sm} className={`${props.textStyle}`}>
+                {icon ? icon : text}
+            </Typography.Body>
         </div>
     );
 };
