@@ -22,7 +22,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import Brick from '../../../sharedComponents/brick';
 import Panel from '../../../sharedComponents/widgets/panel/Panel';
 import { Breaker } from '../../../sharedComponents/breaker';
-import { compareSensorsCount, getVoltageConfigValue } from './utils';
+import { compareSensorsCount, getVoltageConfigValue, validateBreakerConfiguration } from './utils';
 import { comparePanelData } from './utils';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
@@ -548,10 +548,19 @@ const EditPanel = () => {
 
             // Breaker Lvl 1:1
             if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 1) {
-                setIsLoading(true);
-                setLinking(true);
-                updateBreakerGrouping([sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
-                return;
+                const { isGroupable, alertText } = validateBreakerConfiguration(sourceBreakerObj, targetBreakerObj);
+
+                if (isGroupable) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerGrouping([sourceBreakerObj?.id, targetBreakerObj?.id], setIsLoading);
+                    return;
+                } else {
+                    setAlertMessage(alertText);
+                    handleUngroupAlertOpen();
+                    setAdditionalMessage(true);
+                    return;
+                }
             }
 
             // Breaker Lvl 1:3, 3:1, 3:3
@@ -624,26 +633,44 @@ const EditPanel = () => {
 
                 // Breaker Lvl 1:2
                 if (sourceBreakerObj?.breaker_type === 1 && targetBreakerObj?.breaker_type === 2) {
-                    const thirdBreakerObj = breakersList.find((el) => el?.parent_breaker === targetBreakerObj?.id);
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerGrouping(
-                        [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                        setIsLoading
-                    );
-                    return;
+                    const { isGroupable, alertText } = validateBreakerConfiguration(sourceBreakerObj, targetBreakerObj);
+
+                    if (isGroupable) {
+                        const thirdBreakerObj = breakersList.find((el) => el?.parent_breaker === targetBreakerObj?.id);
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(
+                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                            setIsLoading
+                        );
+                        return;
+                    } else {
+                        setAlertMessage(alertText);
+                        handleUngroupAlertOpen();
+                        setAdditionalMessage(true);
+                        return;
+                    }
                 }
 
                 // Breaker Lvl 2:1
                 if (sourceBreakerObj?.breaker_type === 2 && targetBreakerObj?.breaker_type === 1) {
-                    const parentBreakerObj = breakersList.find((el) => el?.id === sourceBreakerObj?.parent_breaker);
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerGrouping(
-                        [parentBreakerObj?.id, sourceBreakerObj?.id, targetBreakerObj?.id],
-                        setIsLoading
-                    );
-                    return;
+                    const { isGroupable, alertText } = validateBreakerConfiguration(sourceBreakerObj, targetBreakerObj);
+
+                    if (isGroupable) {
+                        const parentBreakerObj = breakersList.find((el) => el?.id === sourceBreakerObj?.parent_breaker);
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(
+                            [parentBreakerObj?.id, sourceBreakerObj?.id, targetBreakerObj?.id],
+                            setIsLoading
+                        );
+                        return;
+                    } else {
+                        setAlertMessage(alertText);
+                        handleUngroupAlertOpen();
+                        setAdditionalMessage(true);
+                        return;
+                    }
                 }
             }
         }

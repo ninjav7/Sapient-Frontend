@@ -130,3 +130,31 @@ export const getBreakerType = (breaker_lvl) => {
     if (breaker_lvl === 2) return 'double';
     if (breaker_lvl === 3) return 'triple';
 };
+
+export const validateBreakerConfiguration = (sourceBreakerObj, targetBreakerObj) => {
+    let isGroupable = true;
+    let alertText = '';
+    if (sourceBreakerObj?.type === 'equipment' && targetBreakerObj?.type === 'equipment') {
+        const { isLinkable } = validateDevicesForBreaker([
+            sourceBreakerObj?.device_link,
+            targetBreakerObj?.device_link,
+        ]);
+
+        const isEquipDiff = validateConfiguredEquip(sourceBreakerObj, targetBreakerObj);
+
+        if (!isLinkable) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different device attached.`;
+        }
+        if (isEquipDiff) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different equipment attached.`;
+        }
+
+        if (isEquipDiff && !isLinkable) {
+            isGroupable = false;
+            alertText = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different device and equipment attached.`;
+        }
+    }
+    return { isGroupable, alertText };
+};
