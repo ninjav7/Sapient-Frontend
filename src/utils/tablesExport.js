@@ -442,6 +442,12 @@ export const getPanelsTableCSVExport = (tableData, columns) => {
 
         for (let i = 0; i <= columns.length - 1; i++) {
             switch (columns[i].accessor) {
+                case 'panel_flags':
+                    const flagCount = tableRow['flag_count'];
+                    const flagData = flagCount && flagCount > 0 ? flagCount : null;
+                    arr.push(flagData);
+                    break;
+
                 case 'breakers_linked':
                     const linked_breakers = tableRow['breakers_linked'];
                     const total_breakers = tableRow['breakers'];
