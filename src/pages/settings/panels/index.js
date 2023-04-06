@@ -25,6 +25,7 @@ import { UserStore } from '../../../store/UserStore';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
 import { Badge } from '../../../sharedComponents/badge';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
+import './styles.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -210,7 +211,18 @@ const Panels = () => {
     };
 
     const renderPanelFlags = (row) => {
-        return <>{row?.flag_count && <StatusBadge text={`${row?.flag_count}`} type={StatusBadge.Type.warning} />}</>;
+        return (
+            <>
+                {row?.flag_count && row?.flag_count !== 0 ? (
+                    <StatusBadge
+                        text={`${row?.flag_count}`}
+                        type={StatusBadge.Type.warning}
+                        className="flag-container"
+                        textStyle="flag-text"
+                    />
+                ) : null}
+            </>
+        );
     };
 
     const renderPanelName = (row) => {
