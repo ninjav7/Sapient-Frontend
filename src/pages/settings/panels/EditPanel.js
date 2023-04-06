@@ -496,11 +496,42 @@ const EditPanel = () => {
                     }
                 }
 
-                // When breaker is of type blank & unwired
+                // When breakers are of type blank & unwired
                 if (
                     sourceBreakerObj?.type === targetBreakerObj?.type &&
-                    sourceBreakerObj?.type === thirdBreakerObj?.type
+                    sourceBreakerObj?.type === thirdBreakerObj?.type &&
+                    (sourceBreakerObj?.type === 'blank' || sourceBreakerObj?.type === 'unwired')
                 ) {
+                    setIsLoading(true);
+                    setLinking(true);
+                    updateBreakerGrouping(
+                        [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                        setIsLoading
+                    );
+                    return;
+                }
+
+                // When all breakers are of type equipment -- equipment type breaker grouping need to be fixed
+                if (
+                    sourceBreakerObj?.type === targetBreakerObj?.type &&
+                    sourceBreakerObj?.type === thirdBreakerObj?.type &&
+                    sourceBreakerObj?.type === 'equipment'
+                ) {
+                    if (
+                        (sourceBreakerObj?.type === 'equipment' &&
+                            sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                        (targetBreakerObj?.type === 'equipment' &&
+                            targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                        (thirdBreakerObj?.type === 'equipment' &&
+                            thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                    ) {
+                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only unconfigured breaker can be grouped together.`;
+                        setAlertMessage(alertMsg);
+                        handleUngroupAlertOpen();
+                        return;
+                    }
+
+                    // Below grouping with exeucte when Breaker of type equipment is in 'not-configured' state
                     setIsLoading(true);
                     setLinking(true);
                     updateBreakerGrouping(
@@ -804,7 +835,7 @@ const EditPanel = () => {
                 }
 
                 // When both condition fails
-                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped.`;
+                const alertMsg = `Breaker ${sourceBreakerObj?.breaker_number} & Breaker ${targetBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped.`;
                 setAlertMessage(alertMsg);
                 setAdditionalMessage(true);
                 handleUngroupAlertOpen();
