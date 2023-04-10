@@ -427,147 +427,171 @@ const EditPanel = () => {
                     return;
                 }
 
-                // When all breakers are of type blank & unwired
-                if (
-                    sourceBreakerObj?.type === targetBreakerObj?.type &&
-                    sourceBreakerObj?.type === thirdBreakerObj?.type &&
-                    (sourceBreakerObj?.type === 'blank' || sourceBreakerObj?.type === 'unwired')
-                ) {
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerGrouping(
-                        [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                        setIsLoading
-                    );
-                    return;
-                }
+                // Get grouping breaker type list
+                const breakersType = [sourceBreakerObj?.type, targetBreakerObj?.type, thirdBreakerObj?.type];
 
-                // When all breakers are of type equipment, not-configured state handled
-                if (
-                    sourceBreakerObj?.type === targetBreakerObj?.type &&
-                    sourceBreakerObj?.type === thirdBreakerObj?.type &&
-                    sourceBreakerObj?.type === 'equipment'
-                ) {
-                    const breakersState = [
-                        sourceBreakerObj?.breaker_custom_state,
-                        targetBreakerObj?.breaker_custom_state,
-                        thirdBreakerObj?.breaker_custom_state,
+                // For Unlabeled Type
+                const isUnlabeledTypeExist = breakersType.some((el) => el === 'unlabeled');
+                if (isUnlabeledTypeExist) {
+                    // Condition to handle when breaker is of unlabeled type
+                    const typeListForUnlabeled = [
+                        sourceBreakerObj?.type,
+                        targetBreakerObj?.type,
+                        thirdBreakerObj?.type,
                     ];
+                    const unlabeledList = typeListForUnlabeled.filter((el) => el === 'unlabeled');
 
-                    // When all 3 breakers are of not-configured state
-                    const isAllBreakersNotConfigured = breakersState.every((el) => el === Breaker.Type.notConfigured);
-                    if (isAllBreakersNotConfigured) {
-                        setIsLoading(true);
-                        setLinking(true);
-                        updateBreakerGrouping(
-                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                            setIsLoading
-                        );
-                        return;
-                    }
-
-                    // When 2 breakers are of not-configured state
-                    const fetchNotConfiguredBreakers = breakersState.filter((el) => el === Breaker.Type.notConfigured);
-                    if (fetchNotConfiguredBreakers.length === 2) {
-                        setIsLoading(true);
-                        setLinking(true);
-                        updateBreakerGrouping(
-                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                            setIsLoading
-                        );
-                        return;
-                    }
-
-                    // When there is only one breaker in not-configured or when breaker are in partially-configured or configured state
-                    if (fetchNotConfiguredBreakers.length !== 2) {
-                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because multiple breakers must be in unconfigured state for grouping together.`;
-                        setAlertMessage(alertMsg);
-                        handleUngroupAlertOpen();
-                        return;
-                    }
-                }
-
-                // Condition to handle when breaker is of unlabeled type
-                const typeListForUnlabeled = [sourceBreakerObj?.type, targetBreakerObj?.type, thirdBreakerObj?.type];
-                const unlabeledList = typeListForUnlabeled.filter((el) => el === 'unlabeled');
-
-                // When multiple unlabeled breaker type found
-                if (unlabeledList.length > 1) {
-                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because multiple breakers are of unlabeled type.`;
-                    setAlertMessage(alertMsg);
-                    handleUngroupAlertOpen();
-                    setAdditionalMessage(true);
-                    return;
-                }
-
-                // When only 1 breaker is of unlabeled type
-                if (unlabeledList.length === 1) {
-                    if (typeListForUnlabeled.includes('unwired') || typeListForUnlabeled.includes('blank')) {
-                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped with Unlabeled breaker.`;
+                    // When multiple unlabeled breaker type found
+                    if (unlabeledList.length > 1) {
+                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because multiple breakers are of unlabeled type.`;
                         setAlertMessage(alertMsg);
                         handleUngroupAlertOpen();
                         setAdditionalMessage(true);
                         return;
                     }
 
+                    // When only 1 breaker is of unlabeled type
+                    if (unlabeledList.length === 1) {
+                        if (typeListForUnlabeled.includes('unwired') || typeListForUnlabeled.includes('blank')) {
+                            const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped with Unlabeled breaker.`;
+                            setAlertMessage(alertMsg);
+                            handleUngroupAlertOpen();
+                            setAdditionalMessage(true);
+                            return;
+                        }
+
+                        if (
+                            (sourceBreakerObj?.type === 'equipment' &&
+                                sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                            (targetBreakerObj?.type === 'equipment' &&
+                                targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                            (thirdBreakerObj?.type === 'equipment' &&
+                                thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                        ) {
+                            const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped with Unlabeled breaker. `;
+                            setAlertMessage(alertMsg);
+                            setAdditionalMessage(true);
+                            handleUngroupAlertOpen();
+                            return;
+                        }
+
+                        // Below grouping will execute when both equipment type breaker are in 'not-configured' state
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(
+                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                            setIsLoading
+                        );
+                        return;
+                    }
+                }
+
+                // For Unwired or Blank Type
+                const isUnwiredTypeExist = breakersType.some((el) => el === 'unwired');
+                const isBlankTypeExist = breakersType.some((el) => el === 'blank');
+                if (isUnwiredTypeExist || isBlankTypeExist) {
+                    // When all breakers are of type unwired or blank
                     if (
-                        (sourceBreakerObj?.type === 'equipment' &&
-                            sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
-                        (targetBreakerObj?.type === 'equipment' &&
-                            targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
-                        (thirdBreakerObj?.type === 'equipment' &&
-                            thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                        sourceBreakerObj?.type === targetBreakerObj?.type &&
+                        sourceBreakerObj?.type === thirdBreakerObj?.type &&
+                        (sourceBreakerObj?.type === 'unwired' || sourceBreakerObj?.type === 'blank')
                     ) {
-                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only an unconfigured breaker may be grouped with Unlabeled breaker. `;
-                        setAlertMessage(alertMsg);
-                        handleUngroupAlertOpen();
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(
+                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                            setIsLoading
+                        );
                         return;
                     }
 
-                    // Below grouping will execute when both equipment type breaker are in 'not-configured' state
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerGrouping(
-                        [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                        setIsLoading
-                    );
-                    return;
-                }
+                    const uniqueBreakerTypes = [...new Set(breakersType.map(JSON.stringify))].map(JSON.parse);
+                    if (uniqueBreakerTypes.length === 2 && uniqueBreakerTypes.includes('equipment')) {
+                        if (
+                            (sourceBreakerObj?.type === 'equipment' &&
+                                sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                            (targetBreakerObj?.type === 'equipment' &&
+                                targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
+                            (thirdBreakerObj?.type === 'equipment' &&
+                                thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
+                        ) {
+                            const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only unconfigured breaker can be grouped together.`;
+                            setAlertMessage(alertMsg);
+                            handleUngroupAlertOpen();
+                            return;
+                        }
 
-                // When all breakers are not of same type
-                const typeList = [sourceBreakerObj?.type, targetBreakerObj?.type, thirdBreakerObj?.type];
-                const fetchBreakerTypes = [...new Set(typeList.map(JSON.stringify))].map(JSON.parse);
-
-                // With multiple types get included, one type must be equipment
-                if (fetchBreakerTypes.length === 2 && fetchBreakerTypes.includes('equipment')) {
-                    if (
-                        (sourceBreakerObj?.type === 'equipment' &&
-                            sourceBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
-                        (targetBreakerObj?.type === 'equipment' &&
-                            targetBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured) ||
-                        (thirdBreakerObj?.type === 'equipment' &&
-                            thirdBreakerObj?.breaker_custom_state !== Breaker.Type.notConfigured)
-                    ) {
-                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because they are different breaker types. `;
+                        // Below grouping with exeucte when Breaker of type equipment is in 'not-configured' state
+                        setIsLoading(true);
+                        setLinking(true);
+                        updateBreakerGrouping(
+                            [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                            setIsLoading
+                        );
+                        return;
+                    } else {
+                        const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because they are different breaker types.`;
                         setAlertMessage(alertMsg);
+                        setAdditionalMessage(true);
                         handleUngroupAlertOpen();
                         return;
                     }
-
-                    // Below grouping with exeucte when Breaker of type equipment is in 'not-configured' state
-                    setIsLoading(true);
-                    setLinking(true);
-                    updateBreakerGrouping(
-                        [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
-                        setIsLoading
-                    );
-                    return;
-                } else {
-                    const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because they are different breaker types.`;
-                    setAlertMessage(alertMsg);
-                    handleUngroupAlertOpen();
-                    return;
                 }
+
+                // For Equipment Type
+                const isEquipmentTypeExist = breakersType.some((el) => el === 'equipment');
+                if (isEquipmentTypeExist) {
+                    // When all breakers are of type equipment, not-configured state handled
+                    if (
+                        sourceBreakerObj?.type === targetBreakerObj?.type &&
+                        sourceBreakerObj?.type === thirdBreakerObj?.type &&
+                        sourceBreakerObj?.type === 'equipment'
+                    ) {
+                        const breakersState = [
+                            sourceBreakerObj?.breaker_custom_state,
+                            targetBreakerObj?.breaker_custom_state,
+                            thirdBreakerObj?.breaker_custom_state,
+                        ];
+
+                        // When all 3 breakers are of not-configured state
+                        const isAllBreakersNotConfigured = breakersState.every(
+                            (el) => el === Breaker.Type.notConfigured
+                        );
+                        if (isAllBreakersNotConfigured) {
+                            setIsLoading(true);
+                            setLinking(true);
+                            updateBreakerGrouping(
+                                [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                                setIsLoading
+                            );
+                            return;
+                        }
+
+                        // When 2 breakers are of not-configured state
+                        const fetchNotConfiguredBreakers = breakersState.filter(
+                            (el) => el === Breaker.Type.notConfigured
+                        );
+                        if (fetchNotConfiguredBreakers.length === 2) {
+                            setIsLoading(true);
+                            setLinking(true);
+                            updateBreakerGrouping(
+                                [sourceBreakerObj?.id, targetBreakerObj?.id, thirdBreakerObj?.id],
+                                setIsLoading
+                            );
+                            return;
+                        }
+
+                        // When there is only one breaker in not-configured or when breaker are in partially-configured or configured state
+                        if (fetchNotConfiguredBreakers.length !== 2) {
+                            const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because multiple breakers must be in unconfigured state for grouping together.`;
+                            setAlertMessage(alertMsg);
+                            handleUngroupAlertOpen();
+                            return;
+                        }
+                    }
+                }
+
+                // get from notepad ++ , if further code is required
             }
 
             // Breaker lvl is 3:3 => Will be ungrouped => We will not be validating anything to send as alert to the user
