@@ -604,10 +604,10 @@ const EditPanel = () => {
                 }
             }
 
-            // Evaluate this condition after 1:1 validation in 600
+            // Breaker lvl is 1:3 & 3:! => Will show up alert
             // When one of the breaker is already grouped then it cannot form triple breaker grouping with 600 voltage config
             if (sourceBreakerObj?.breaker_type !== targetBreakerObj?.breaker_type) {
-                const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because Breaker ${sourceBreakerObj?.breaker_number} or Breaker ${targetBreakerObj?.breaker_number} is already grouped.`;
+                const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because Breaker ${sourceBreakerObj?.breaker_number} or ${targetBreakerObj?.breaker_number} is already grouped.`;
                 setAlertMessage(alertMsg);
                 setAdditionalMessage(true);
                 handleUngroupAlertOpen();
