@@ -1,3 +1,5 @@
+@import '../../../assets/scss/colors';
+
 .breaker-basic-config {
     display: grid;
     grid-template-columns: 0.6fr 2.2fr 2.2fr;
@@ -35,4 +37,19 @@
 
 .modal {
     overflow: visible !important;
+}
+
+.flag-count-container {
+    background: $error-50 !important;
+    border-color: $error-50 !important;
+    width: 1.4375rem !important;
+    height: 1.25rem !important;
+    justify-content: center !important;
+}
+
+.flag-count-text {
+    color: $error-700 !important;
+    font-weight: 500 !important;
+    font-size: 0.625rem !important;
+    line-height: 1rem !important;
 }
