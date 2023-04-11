@@ -517,6 +517,7 @@ const EditPanel = () => {
                         ) {
                             const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because only unconfigured breaker can be grouped together.`;
                             setAlertMessage(alertMsg);
+                            setAdditionalMessage(true);
                             handleUngroupAlertOpen();
                             return;
                         }
@@ -585,6 +586,7 @@ const EditPanel = () => {
                         if (fetchNotConfiguredBreakers.length !== 2) {
                             const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number}, ${targetBreakerObj?.breaker_number} & ${thirdBreakerObj?.breaker_number} cannot be grouped because multiple breakers must be in unconfigured state for grouping together.`;
                             setAlertMessage(alertMsg);
+                            setAdditionalMessage(true);
                             handleUngroupAlertOpen();
                             return;
                         }
@@ -645,8 +647,8 @@ const EditPanel = () => {
             if (sourceBreakerObj?.type === 'unlabeled') {
                 const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because they have different unlabeled equipment.`;
                 setAlertMessage(alertMsg);
-                handleUngroupAlertOpen();
                 setAdditionalMessage(true);
+                handleUngroupAlertOpen();
                 return;
             }
 
@@ -661,8 +663,8 @@ const EditPanel = () => {
                     return;
                 } else {
                     setAlertMessage(alertText);
-                    handleUngroupAlertOpen();
                     setAdditionalMessage(true);
+                    handleUngroupAlertOpen();
                     return;
                 }
             }
@@ -723,6 +725,7 @@ const EditPanel = () => {
                     // When both Breakers are grouped seperately
                     const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because the resulting group would exceed a maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
+                    setAdditionalMessage(true);
                     handleUngroupAlertOpen();
                     return;
                 }
@@ -771,8 +774,8 @@ const EditPanel = () => {
                         return;
                     } else {
                         setAlertMessage(alertText);
-                        handleUngroupAlertOpen();
                         setAdditionalMessage(true);
+                        handleUngroupAlertOpen();
                         return;
                     }
                 }
@@ -874,6 +877,7 @@ const EditPanel = () => {
                     // When both Breakers are grouped seperately
                     const alertMsg = `Breakers ${sourceBreakerObj?.breaker_number} & ${targetBreakerObj?.breaker_number} cannot be grouped because the resulting group would exceed a maximum group size of 3 breakers.`;
                     setAlertMessage(alertMsg);
+                    setAdditionalMessage(true);
                     handleUngroupAlertOpen();
                     return;
                 }
