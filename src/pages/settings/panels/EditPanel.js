@@ -37,6 +37,7 @@ import { DangerZone } from '../../../sharedComponents/dangerZone';
 import DeletePanel from './DeletePanel';
 import UngroupAlert from './UngroupAlert';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import './styles.scss';
 
 const EditPanel = () => {
@@ -1248,8 +1249,16 @@ const EditPanel = () => {
     return (
         <React.Fragment>
             <div className="d-flex justify-content-between">
-                <div>
-                    <Typography.Header size={Typography.Sizes.lg}>Edit Panel</Typography.Header>
+                <div className="d-flex align-items-center ">
+                    <Typography.Header size={Typography.Sizes.lg}>{originalPanelObj?.panel_name}</Typography.Header>
+                    {originalPanelObj?.flag_count && originalPanelObj?.flag_count !== 0 ? (
+                        <StatusBadge
+                            text={`${originalPanelObj?.flag_count}`}
+                            type={StatusBadge.Type.warning}
+                            className="flag-container ml-2"
+                            textStyle="flag-text"
+                        />
+                    ) : null}
                 </div>
                 {isPanelFetched ? (
                     <Skeleton count={1} height={35} width={135} />
