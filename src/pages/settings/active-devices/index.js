@@ -116,7 +116,12 @@ const ActiveDevices = () => {
                 hardwareSelected
             )
                 .then((res) => {
-                    let response = res.data;
+                    let response = res?.data;
+                    if (response.data && response.data.length !== 0) {
+                        response.data.forEach((record) => {
+                            record.bldg_id = bldgId;
+                        });
+                    }
                     setActiveDeviceData(response.data);
                     setTotalItems(response?.total_data);
                     setIsDeviceProcessing(false);
@@ -340,7 +345,7 @@ const ActiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/active-devices/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/active-devices/single/${row.bldg_id}/${row.equipments_id}`,
                 }}>
                 <a>{row.identifier}</a>
             </Link>

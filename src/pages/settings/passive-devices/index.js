@@ -122,6 +122,11 @@ const PassiveDevices = () => {
         )
             .then((res) => {
                 const responseData = res?.data;
+                if (responseData.data && responseData.data.length !== 0) {
+                    responseData.data.forEach((record) => {
+                        record.bldg_id = bldgId;
+                    });
+                }
                 setPassiveDeviceData(responseData?.data);
                 setTotalItems(responseData?.total_data);
                 setIsDataFetching(false);
@@ -238,7 +243,7 @@ const PassiveDevices = () => {
 
     const handleClick = (el) => {
         history.push({
-            pathname: `/settings/smart-meters/single/${bldgId}/${el.equipments_id}`,
+            pathname: `/settings/smart-meters/single/${el.bldg_id}/${el.equipments_id}`,
         });
     };
 
@@ -281,7 +286,7 @@ const PassiveDevices = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/smart-meters/single/${bldgId}/${row.equipments_id}`,
+                    pathname: `/settings/smart-meters/single/${row.bldg_id}/${row.equipments_id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.identifier === '' ? '-' : row?.identifier}
