@@ -9,17 +9,9 @@ import { Button } from '../../../sharedComponents/button';
 import { ampsRating, hydraData } from './utils';
 import './style.css';
 
-const EditSensorPanelModel = ({
-    showEditSensorPanel,
-    closeEditSensorPanelModel,
-    currentSensorObj,
-    setCurrentSensorObj,
-    sensors,
-    setSensors,
-}) => {
+const EditSensorModal = ({ showModal, closeModal, currentSensorObj, setCurrentSensorObj, sensors, setSensors }) => {
     const [sensorObj, setSensorObj] = useState(null);
     const [errorObj, setErrorObj] = useState(null);
-    const [customVal, setCustomVal] = useState(false);
     const [isProcessing, setProcessing] = useState(false);
 
     const handleChange = (key, value) => {
@@ -27,7 +19,7 @@ const EditSensorPanelModel = ({
         let errorObj = Object.assign({}, errorObj);
 
         if (key === 'amp_multiplier') errorObj = null;
-        if (key === 'rated_amps' && !customVal) {
+        if (key === 'rated_amps' && !sensorObj?.isCustomVal) {
             const selected = hydraData.find((el) => el?.ct_size === value);
             if (selected?.amp_multiplier) obj.amp_multiplier = selected?.amp_multiplier;
         }
@@ -52,47 +44,34 @@ const EditSensorPanelModel = ({
             if (index !== -1) {
                 newArray[index].rated_amps = sensorObj?.rated_amps;
                 newArray[index].amp_multiplier = parseFloat(sensorObj?.amp_multiplier);
-                newArray[index].isCustomVal = customVal;
+                newArray[index].isCustomVal = sensorObj?.isCustomVal;
             }
             setSensors(newArray);
             setProcessing(false);
         }
-        closeEditSensorPanelModel();
+        closeModal();
         setCurrentSensorObj(null);
         setErrorObj(null);
-        setCustomVal(false);
     };
 
-    useEffect(() => {
-        if (!customVal && sensorObj) {
-            let obj = Object.assign({}, sensorObj);
-            const selectedAmps = hydraData.find((el) => el?.ct_size === obj?.rated_amps);
-            if (selectedAmps?.amp_multiplier) obj.amp_multiplier = selectedAmps?.amp_multiplier;
+    const handleCustomValueChange = (sensor_obj) => {
+        if (sensor_obj) {
+            let obj = Object.assign({}, sensor_obj);
+            if (obj?.isCustomVal) {
+                const selectedAmps = hydraData.find((el) => el?.ct_size === obj?.rated_amps);
+                if (selectedAmps?.amp_multiplier) obj.amp_multiplier = selectedAmps?.amp_multiplier;
+            }
+            obj.isCustomVal = !obj?.isCustomVal;
             setSensorObj(obj);
         }
-    }, [customVal]);
+    };
 
     useEffect(() => {
         if (currentSensorObj) setSensorObj(currentSensorObj);
     }, [currentSensorObj]);
 
-    useEffect(() => {
-        if (sensorObj?.id) {
-            if (sensorObj?.isCustomVal === true) setCustomVal(true);
-        }
-    }, [sensorObj]);
-
-    console.log('SSR customVal => ', customVal);
-    console.log('SSR sensorObj => ', sensorObj);
-
     return (
-        <Modal
-            show={showEditSensorPanel}
-            onHide={closeEditSensorPanelModel}
-            backdrop="static"
-            size={'md'}
-            keyboard={false}
-            centered>
+        <Modal show={showModal} onHide={closeModal} backdrop="static" size={'md'} keyboard={false} centered>
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>Edit Sensor Modal</Typography.Header>
 
@@ -123,27 +102,27 @@ const EditSensorPanelModel = ({
                     <div>
                         <div className="d-flex justify-content-between align-items-center">
                             <Typography.Body size={Typography.Sizes.md}>
-                                {customVal ? 'Set Custom Multiplier' : 'Selected Multiplier'}
+                                {sensorObj?.isCustomVal ? 'Set Custom Multiplier' : 'Selected Multiplier'}
                             </Typography.Body>
-                            <div className="mouse-pointer" onClick={() => setCustomVal(!customVal)}>
+                            <div className="mouse-pointer" onClick={() => handleCustomValueChange(sensorObj)}>
                                 <Typography.Body
                                     size={Typography.Sizes.xs}
                                     className="input-error-label text-primary font-bold">
-                                    {customVal ? 'Set Default Value' : 'Set Custom Value'}
+                                    {sensorObj?.isCustomVal ? 'Set Default Value' : 'Set Custom Value'}
                                 </Typography.Body>
                             </div>
                         </div>
                         <Brick sizeInRem={0.25} />
                         <InputTooltip
                             type="number"
-                            placeholder={customVal ? 'Enter Multiplier Value' : 'Selected Multiplier'}
+                            placeholder={sensorObj?.isCustomVal ? 'Enter Multiplier Value' : 'Selected Multiplier'}
                             onChange={(e) => {
                                 if (e.target.value < 0) return;
                                 handleChange('amp_multiplier', e.target.value);
                             }}
                             labelSize={Typography.Sizes.md}
                             value={sensorObj?.amp_multiplier}
-                            disabled={!customVal}
+                            disabled={!sensorObj?.isCustomVal}
                             error={errorObj?.amp_multiplier}
                         />
                     </div>
@@ -158,10 +137,9 @@ const EditSensorPanelModel = ({
                         type={Button.Type.secondaryGrey}
                         className="w-100"
                         onClick={() => {
-                            closeEditSensorPanelModel();
+                            closeModal();
                             setCurrentSensorObj(null);
                             setErrorObj(null);
-                            setCustomVal(false);
                         }}
                     />
 
@@ -181,4 +159,4 @@ const EditSensorPanelModel = ({
     );
 };
 
-export default EditSensorPanelModel;
+export default EditSensorModal;

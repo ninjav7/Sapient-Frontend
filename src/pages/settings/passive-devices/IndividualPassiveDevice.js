@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
-import EditSensorPanelModel from './EditSensorPanelModel';
+import EditSensorModal from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
@@ -638,9 +638,9 @@ const IndividualPassiveDevice = () => {
                 breakerId={breakerId}
             />
 
-            <EditSensorPanelModel
-                showEditSensorPanel={showEditSensorPanel}
-                closeEditSensorPanelModel={closeEditSensorPanelModel}
+            <EditSensorModal
+                showModal={showEditSensorPanel}
+                closeModal={closeEditSensorPanelModel}
                 sensors={sensors}
                 setSensors={setSensors}
                 currentSensorObj={currentSensorObj}

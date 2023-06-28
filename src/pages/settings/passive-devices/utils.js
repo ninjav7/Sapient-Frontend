@@ -15,10 +15,6 @@ export const hydraData = [
         ct_size: 600,
         amp_multiplier: 53.56,
     },
-    {
-        ct_size: 1000,
-        amp_multiplier: 159.61,
-    },
 ];
 
 export const ampsRating = [
@@ -37,9 +33,5 @@ export const ampsRating = [
     {
         label: `600A`,
         value: 600,
-    },
-    {
-        label: `1000A`,
-        value: 1000,
     },
 ];
