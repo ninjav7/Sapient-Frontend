@@ -1,231 +1,127 @@
-import React, { useState, useEffect } from 'react';
-import Form from 'react-bootstrap/Form';
-import axios from 'axios';
-import { BaseUrl, generalPanels, getBreakers } from '../../../services/Network';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { Button, Input } from 'reactstrap';
-import { Cookies } from 'react-cookie';
-import Skeleton from 'react-loading-skeleton';
+import Brick from '../../../sharedComponents/brick';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import Typography from '../../../sharedComponents/typography';
+import colorPalette from '../../../assets/scss/_colors.scss';
+import Select from '../../../sharedComponents/form/select';
+import { Button } from '../../../sharedComponents/button';
 import './style.css';
+import { ampsRating, hydraData } from './utils';
 
 const EditSensorPanelModel = ({
     showEditSensorPanel,
     closeEditSensorPanelModel,
     currentSensorObj,
     setCurrentSensorObj,
-    editSenorModelRefresh,
-    setEditSenorModelRefresh,
-    bldgId,
 }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
+    const [sensorObj, setSensorObj] = useState(null);
 
-    const [panelData, setPanelData] = useState([]);
-    const [breakersData, setBreakersData] = useState([]);
-
-    const [isPanelDataFetched, setPanelDataFetched] = useState(true);
-    const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
-
-    // const saveToSensorArray = () => {
-    //     let currentArray = sensors;
-    //     currentArray[currentIndex] = currentRecord;
-    //     setSensors(currentArray);
-    // };
-
-    const handleSensorChange = (key, value) => {
-        let obj = Object.assign({}, currentSensorObj);
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, sensorObj);
         obj[key] = value;
-        setCurrentSensorObj(obj);
-    };
-
-    const fetchBreakersList = async (panelId) => {
-        if (panelId === '') {
-            return;
+        if (key === 'rated_amps') {
+            let selected = hydraData.find((el) => el?.ct_size === value);
+            if (selected?.multiplier) {
+                obj.amp_multiplier = selected?.multiplier;
+            }
         }
-        if (panelId === 'Select Panel') {
-            return;
-        }
-        try {
-            setBreakerDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?panel_id=${panelId}`;
-            await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                let response = res.data.data;
-                response.sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                });
-                setBreakersData(response);
-            });
-            setBreakerDataFetched(false);
-        } catch (error) {
-            setBreakerDataFetched(false);
-        }
+        setSensorObj(obj);
     };
 
     useEffect(() => {
-        const fetchPanelsData = async () => {
-            if (!editSenorModelRefresh) {
-                return;
-            }
-            try {
-                setPanelDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => {
-                        return a.panel_name.localeCompare(b.panel_name);
-                    });
-                    setPanelData(response);
-                });
-                setPanelDataFetched(false);
-            } catch (error) {
-                setPanelDataFetched(false);
-            }
-        };
-
-        const fetchBreakersData = async () => {
-            if (!editSenorModelRefresh) {
-                return;
-            }
-            try {
-                setBreakerDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let panelId = currentSensorObj.panel_id ? currentSensorObj.panel_id : '';
-                let params = `?panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
-                    response.sort((a, b) => {
-                        return a.name.localeCompare(b.name);
-                    });
-                    setBreakersData(response);
-                });
-                setBreakerDataFetched(false);
-            } catch (error) {
-                setBreakerDataFetched(false);
-            }
-        };
-
-        fetchPanelsData();
-        fetchBreakersData();
-    }, [editSenorModelRefresh]);
+        if (currentSensorObj) setSensorObj(currentSensorObj);
+    }, [currentSensorObj]);
 
     return (
-        <>
-            <Modal show={showEditSensorPanel} onHide={closeEditSensorPanelModel} size={'md'} centered>
-                <Modal.Header className="m-3 p-2 mb-0">
-                    <Modal.Title>Select Breaker</Modal.Title>
-                </Modal.Header>
-                <Form className="m-4 mt-0">
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                        <Form.Label>Panel</Form.Label>
-                        {isPanelDataFetched ? (
-                            <Skeleton count={1} height={40} className="mb-2" />
-                        ) : (
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                defaultValue={currentSensorObj.panel_id}
-                                onChange={(e) => {
-                                    handleSensorChange('panel_name', e.target.value);
-                                    fetchBreakersList(e.target.value);
-                                }}>
-                                <option selected>Select Panel</option>
-                                {panelData.map((record) => {
-                                    return (
-                                        // <div>
-                                        <option value={record.panel_id}>{record.panel_name}</option>
-                                        // </div>
-                                    );
-                                })}
+        <Modal
+            show={showEditSensorPanel}
+            onHide={closeEditSensorPanelModel}
+            backdrop="static"
+            size={'md'}
+            keyboard={false}
+            centered>
+            <div className="p-4">
+                <Typography.Header size={Typography.Sizes.lg}>Edit Sensor Modal</Typography.Header>
 
-                                {/* <div className="filter-bld-style">
-                                    <div className="portfolio-txt-style">{record.building_name}</div>
-                                    {location.pathname !== '/energy/portfolio/overview' &&
-                                        record.building_id === bldStoreId && (
-                                            <div>
-                                                <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                                            </div>
-                                        )}
-                                </div> */}
-                            </Input>
-                        )}
-                    </Form.Group>
+                <Brick sizeInRem={2} />
 
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                        <Form.Label>Breaker</Form.Label>
-                        {isBreakerDataFetched ? (
-                            <Skeleton count={1} height={35} />
-                        ) : (
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                defaultValue={currentSensorObj.breaker_id}
-                                onChange={(e) => {
-                                    handleSensorChange('breaker_name', e.target.value);
-                                }}>
-                                <option selected>Select Breaker</option>
-                                {breakersData.map((record) => {
-                                    return (
-                                        <option value={record.id} className="checkmark">
-                                            {record.name}
-                                        </option>
-                                    );
-                                })}
-                            </Input>
-                            // <select className="selectpicker show-tick">
-                            //     <option>Mustard</option>
-                            //     <option>Ketchup</option>
-                            //     <option>Relish</option>
-                            // </select>
-                        )}
-                    </Form.Group>
+                <div className="w-100 mr-2">
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Select Amps Rating
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <Select
+                        placeholder="Select Panel Types"
+                        options={ampsRating}
+                        currentValue={ampsRating.filter((option) => option.value === sensorObj?.rated_amps)}
+                        onChange={(e) => {
+                            handleChange('rated_amps', e.value);
+                        }}
+                        isSearchable={true}
+                        // error={errorObj?.panel_type}
+                    />
+                </div>
 
-                    {/* {equipmentId === '' && (
-                        <Form.Group className="mb-3 mt-2">
-                            <Button variant="light" className="select-breaker-style">
-                                Select Next Available Breaker
-                            </Button>
-                        </Form.Group>
-                    )} */}
-                </Form>
-                <Modal.Footer>
+                <Brick sizeInRem={1.5} />
+
+                <div className="w-100">
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>
+                            Select Multiplier
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            type="number"
+                            placeholder="Enter Breakers"
+                            onChange={(e) => {
+                                if (e.target.value < 0) return;
+                                handleChange('amp_multiplier', e.target.value);
+                            }}
+                            labelSize={Typography.Sizes.md}
+                            value={sensorObj?.amp_multiplier}
+                            disabled={true}
+                            // error={errorObj?.breaker_count}
+                        />
+                    </div>
+                </div>
+
+                <Brick sizeInRem={2.5} />
+
+                <div className="d-flex justify-content-between w-100">
                     <Button
-                        variant="light"
-                        onClick={() => {
-                            setEditSenorModelRefresh(false);
-                            closeEditSensorPanelModel();
-                        }}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        className="w-100"
                         onClick={() => {
                             closeEditSensorPanelModel();
-                            setEditSenorModelRefresh(false);
+                            setCurrentSensorObj(null);
+                        }}
+                    />
+
+                    <Button
+                        label={'Save'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primary}
+                        className="w-100"
+                        // disabled={isProcessing}
+                        onClick={() => {
+                            closeEditSensorPanelModel();
                             // saveToSensorArray();
-                        }}>
-                        Save
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
+                        }}
+                    />
+                </div>
+
+                <Brick sizeInRem={1} />
+            </div>
+        </Modal>
     );
 };
 
