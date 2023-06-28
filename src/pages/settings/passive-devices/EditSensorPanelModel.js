@@ -6,32 +6,84 @@ import Typography from '../../../sharedComponents/typography';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Select from '../../../sharedComponents/form/select';
 import { Button } from '../../../sharedComponents/button';
-import './style.css';
 import { ampsRating, hydraData } from './utils';
+import './style.css';
 
 const EditSensorPanelModel = ({
     showEditSensorPanel,
     closeEditSensorPanelModel,
     currentSensorObj,
     setCurrentSensorObj,
+    sensors,
+    setSensors,
 }) => {
     const [sensorObj, setSensorObj] = useState(null);
+    const [errorObj, setErrorObj] = useState(null);
+    const [customVal, setCustomVal] = useState(false);
+    const [isProcessing, setProcessing] = useState(false);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, sensorObj);
-        obj[key] = value;
-        if (key === 'rated_amps') {
-            let selected = hydraData.find((el) => el?.ct_size === value);
-            if (selected?.multiplier) {
-                obj.amp_multiplier = selected?.multiplier;
-            }
+        let errorObj = Object.assign({}, errorObj);
+
+        if (key === 'amp_multiplier') errorObj = null;
+        if (key === 'rated_amps' && !customVal) {
+            const selected = hydraData.find((el) => el?.ct_size === value);
+            if (selected?.amp_multiplier) obj.amp_multiplier = selected?.amp_multiplier;
         }
+
+        obj[key] = value;
         setSensorObj(obj);
+        setErrorObj(errorObj);
     };
+
+    const saveSensorData = () => {
+        let alertObj = Object.assign({}, errorObj);
+
+        if (!sensorObj?.amp_multiplier || sensorObj?.amp_multiplier === '')
+            alertObj.amp_multiplier = 'Please enter multiplier value. It cannot be empty.';
+
+        setErrorObj(alertObj);
+
+        if (!alertObj?.amp_multiplier) {
+            setProcessing(true);
+            const newArray = [...sensors];
+            let index = sensors.findIndex((obj) => obj.id === sensorObj?.id);
+            if (index !== -1) {
+                newArray[index].rated_amps = sensorObj?.rated_amps;
+                newArray[index].amp_multiplier = parseFloat(sensorObj?.amp_multiplier);
+                newArray[index].isCustomVal = customVal;
+            }
+            setSensors(newArray);
+            setProcessing(false);
+        }
+        closeEditSensorPanelModel();
+        setCurrentSensorObj(null);
+        setErrorObj(null);
+        setCustomVal(false);
+    };
+
+    useEffect(() => {
+        if (!customVal && sensorObj) {
+            let obj = Object.assign({}, sensorObj);
+            const selectedAmps = hydraData.find((el) => el?.ct_size === obj?.rated_amps);
+            if (selectedAmps?.amp_multiplier) obj.amp_multiplier = selectedAmps?.amp_multiplier;
+            setSensorObj(obj);
+        }
+    }, [customVal]);
 
     useEffect(() => {
         if (currentSensorObj) setSensorObj(currentSensorObj);
     }, [currentSensorObj]);
+
+    useEffect(() => {
+        if (sensorObj?.id) {
+            if (sensorObj?.isCustomVal === true) setCustomVal(true);
+        }
+    }, [sensorObj]);
+
+    console.log('SSR customVal => ', customVal);
+    console.log('SSR sensorObj => ', sensorObj);
 
     return (
         <Modal
@@ -55,14 +107,13 @@ const EditSensorPanelModel = ({
                     </Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
-                        placeholder="Select Panel Types"
+                        placeholder="Select Amps Rating"
                         options={ampsRating}
                         currentValue={ampsRating.filter((option) => option.value === sensorObj?.rated_amps)}
                         onChange={(e) => {
                             handleChange('rated_amps', e.value);
                         }}
                         isSearchable={true}
-                        // error={errorObj?.panel_type}
                     />
                 </div>
 
@@ -70,24 +121,30 @@ const EditSensorPanelModel = ({
 
                 <div className="w-100">
                     <div>
-                        <Typography.Body size={Typography.Sizes.md}>
-                            Select Multiplier
-                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                                *
-                            </span>
-                        </Typography.Body>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <Typography.Body size={Typography.Sizes.md}>
+                                {customVal ? 'Set Custom Multiplier' : 'Selected Multiplier'}
+                            </Typography.Body>
+                            <div className="mouse-pointer" onClick={() => setCustomVal(!customVal)}>
+                                <Typography.Body
+                                    size={Typography.Sizes.xs}
+                                    className="input-error-label text-primary font-bold">
+                                    {customVal ? 'Set Default Value' : 'Set Custom Value'}
+                                </Typography.Body>
+                            </div>
+                        </div>
                         <Brick sizeInRem={0.25} />
                         <InputTooltip
                             type="number"
-                            placeholder="Enter Breakers"
+                            placeholder={customVal ? 'Enter Multiplier Value' : 'Selected Multiplier'}
                             onChange={(e) => {
                                 if (e.target.value < 0) return;
                                 handleChange('amp_multiplier', e.target.value);
                             }}
                             labelSize={Typography.Sizes.md}
                             value={sensorObj?.amp_multiplier}
-                            disabled={true}
-                            // error={errorObj?.breaker_count}
+                            disabled={!customVal}
+                            error={errorObj?.amp_multiplier}
                         />
                     </div>
                 </div>
@@ -103,19 +160,18 @@ const EditSensorPanelModel = ({
                         onClick={() => {
                             closeEditSensorPanelModel();
                             setCurrentSensorObj(null);
+                            setErrorObj(null);
+                            setCustomVal(false);
                         }}
                     />
 
                     <Button
-                        label={'Save'}
+                        label={isProcessing ? 'Saving ...' : 'Save'}
                         size={Button.Sizes.lg}
                         type={Button.Type.primary}
                         className="w-100"
-                        // disabled={isProcessing}
-                        onClick={() => {
-                            closeEditSensorPanelModel();
-                            // saveToSensorArray();
-                        }}
+                        disabled={isProcessing}
+                        onClick={saveSensorData}
                     />
                 </div>
 

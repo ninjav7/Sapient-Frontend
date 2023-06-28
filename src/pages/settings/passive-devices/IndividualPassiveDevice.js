@@ -261,13 +261,9 @@ const IndividualPassiveDevice = () => {
                 const response = res?.data;
                 if (response && response.length !== 0) {
                     response.forEach((record) => {
-                        if (record?.index === 2 || record?.index === 4) {
-                            record.rated_amps = 100;
-                            record.amp_multiplier = 53.56;
-                            return;
-                        }
                         record.rated_amps = 80;
                         record.amp_multiplier = 7.17;
+                        record.isCustomVal = false;
                     });
                 }
                 setSensors(response);
@@ -645,6 +641,8 @@ const IndividualPassiveDevice = () => {
             <EditSensorPanelModel
                 showEditSensorPanel={showEditSensorPanel}
                 closeEditSensorPanelModel={closeEditSensorPanelModel}
+                sensors={sensors}
+                setSensors={setSensors}
                 currentSensorObj={currentSensorObj}
                 setCurrentSensorObj={setCurrentSensorObj}
             />
