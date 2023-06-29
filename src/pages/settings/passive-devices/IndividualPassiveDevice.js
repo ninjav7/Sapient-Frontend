@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
-import EditSensorPanelModel from './EditSensorPanelModel';
+import EditSensorModal from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
@@ -80,7 +80,7 @@ const IndividualPassiveDevice = () => {
 
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [sensorObj, setSensorObj] = useState({});
-    const [currentSensorObj, setCurrentSensorObj] = useState({});
+    const [currentSensorObj, setCurrentSensorObj] = useState(null);
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
     const [breakerId, setBreakerId] = useState('');
     const [sensors, setSensors] = useState([]);
@@ -258,7 +258,14 @@ const IndividualPassiveDevice = () => {
         let params = `?device_id=${deviceId}`;
         await getPassiveDeviceSensors(params)
             .then((res) => {
-                const response = res.data;
+                const response = res?.data;
+                if (response && response.length !== 0) {
+                    response.forEach((record) => {
+                        record.rated_amps = 80;
+                        record.amp_multiplier = 7.17;
+                        record.isCustomVal = false;
+                    });
+                }
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
@@ -547,6 +554,11 @@ const IndividualPassiveDevice = () => {
                                                 )}
                                             </div>
                                             <div className="d-flex align-items-center">
+                                                <Typography.Body
+                                                    size={Typography.Sizes.xxl}
+                                                    className="gray-500 mouse-pointer mr-3">
+                                                    {`${record?.rated_amps}A`}
+                                                </Typography.Body>
                                                 <Button
                                                     className="breaker-action-btn"
                                                     onClick={() => handleChartShow(record?.id)}
@@ -554,17 +566,21 @@ const IndividualPassiveDevice = () => {
                                                     label=""
                                                     icon={<ChartSVG width={16} />}
                                                 />
-                                                {/* Planned to enable commented code in Future [Panel-Breaker Edit code] */}
-                                                {/* <button
-                                                            type="button"
-                                                            className="btn btn-default passive-edit-style"
-                                                            onClick={() => {
-                                                                setEditSenorModelRefresh(true);
-                                                                setCurrentSensorObj(record);
-                                                                openEditSensorPanelModel();
-                                                            }}>
-                                                            Edit
-                                                        </button> */}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions
+                                                    ?.advanced_passive_device_permission?.edit ? (
+                                                    <Button
+                                                        className="breaker-action-btn ml-2"
+                                                        onClick={() => {
+                                                            setEditSenorModelRefresh(true);
+                                                            setCurrentSensorObj(record);
+                                                            openEditSensorPanelModel();
+                                                        }}
+                                                        type={Button.Type.secondaryGrey}
+                                                        label=""
+                                                        icon={<PenSVG width={15} />}
+                                                    />
+                                                ) : null}
                                             </div>
                                         </div>
                                     </>
@@ -622,14 +638,13 @@ const IndividualPassiveDevice = () => {
                 breakerId={breakerId}
             />
 
-            <EditSensorPanelModel
-                showEditSensorPanel={showEditSensorPanel}
-                closeEditSensorPanelModel={closeEditSensorPanelModel}
+            <EditSensorModal
+                showModal={showEditSensorPanel}
+                closeModal={closeEditSensorPanelModel}
+                sensors={sensors}
+                setSensors={setSensors}
                 currentSensorObj={currentSensorObj}
                 setCurrentSensorObj={setCurrentSensorObj}
-                editSenorModelRefresh={editSenorModelRefresh}
-                setEditSenorModelRefresh={setEditSenorModelRefresh}
-                bldgId={bldgId}
             />
 
             <EditPassiveDevice
