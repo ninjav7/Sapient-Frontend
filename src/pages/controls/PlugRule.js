@@ -5,6 +5,7 @@ import Textarea from '../../sharedComponents/form/textarea/Textarea';
 import Switch from 'react-switch';
 import { useAtom } from 'jotai';
 import classNames from 'classnames';
+import { BuildingStore } from '../../store/BuildingStore';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -146,7 +147,7 @@ const PlugRule = () => {
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
     const { download } = useCSVDownload();
-
+    const bldgTimeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [isCreateRuleMode, setIsCreateRuleMode] = useState(false);
     const [buildingListData, setBuildingListData] = useState([]);
     const [buildingListDataNotFormatted, setBuildingListDataNotFormatted] = useState([]);
@@ -1832,7 +1833,7 @@ const PlugRule = () => {
                             <span className="plug-rule-device-name">{currentData.name}</span>
                             <span className="plug-rule-device-timezone">
                                 {' '}
-                                TimeZone- {localStorage.getItem('timeZone')}
+                                TimeZone- {bldgTimeZone}
                             </span>
                         </div>
                     </div>
