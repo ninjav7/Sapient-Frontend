@@ -1580,10 +1580,10 @@ const PlugRule = () => {
                     firstOnDay = index;
                     firstOnTime = dayOfWeek.turnOn;
                 }
-                const copyTurnOffTime = dayOfWeek.turnOff;
-                const copyTurnOnTime = dayOfWeek.turnOn;
-                const convertedCurrentOffTime = copyTurnOffTime.replace(':', ',');
-                const convertedNextOnTime = copyTurnOnTime.replace(':', ',');
+                const copyTurnOffTime = dayOfWeek?.turnOff;
+                const copyTurnOnTime = dayOfWeek?.turnOn;
+                const convertedCurrentOffTime = copyTurnOffTime && copyTurnOffTime.replace(':', ',');
+                const convertedNextOnTime = copyTurnOnTime && copyTurnOnTime.replace(':', ',');
 
                 if (convertedCurrentOffTime > convertedNextOnTime) {
                     isLastOffAction = true;
