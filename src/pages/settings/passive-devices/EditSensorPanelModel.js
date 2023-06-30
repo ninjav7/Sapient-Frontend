@@ -61,7 +61,7 @@ const EditSensorModal = ({
         }
         setErrorObj(alertObj);
 
-        if (alertObj.rated_amps && alertObj.amp_multiplier) return;
+        if (alertObj.rated_amps || alertObj.amp_multiplier) return;
 
         setProcessing(true);
 
