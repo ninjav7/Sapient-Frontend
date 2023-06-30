@@ -261,9 +261,10 @@ const IndividualPassiveDevice = () => {
                 const response = res?.data;
                 if (response && response.length !== 0) {
                     response.forEach((record) => {
-                        record.rated_amps = 80;
-                        record.amp_multiplier = 7.17;
-                        record.isCustomVal = false;
+                        if (!record?.rated_amps) record.rated_amps = 80;
+                        if (!record?.rated_amps) record.amp_multiplier = 7.17;
+                        if (!record?.rated_amps) record.isCustomVal = false;
+                        if (!record?.breaker_rated_amps) record.breaker_rated_amps = 100;
                     });
                 }
                 setSensors(response);
@@ -542,6 +543,8 @@ const IndividualPassiveDevice = () => {
                                                     }`}>
                                                     {record?.equipment_id === '' && record?.breaker_id === ''
                                                         ? 'Not Attached'
+                                                        : record?.breaker_rated_amps && record?.breaker_rated_amps !== 0
+                                                        ? `${record?.breaker_link}, ${record?.breaker_rated_amps}A.`
                                                         : record?.breaker_link}
                                                 </Typography.Subheader>
                                                 {record?.equipment_id !== '' && record?.breaker_id !== '' && (
