@@ -636,10 +636,9 @@ const IndividualPassiveDevice = () => {
             <EditSensorModal
                 showModal={showEditSensorPanel}
                 closeModal={closeEditSensorPanelModel}
-                sensors={sensors}
-                setSensors={setSensors}
                 currentSensorObj={currentSensorObj}
                 setCurrentSensorObj={setCurrentSensorObj}
+                fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
             />
 
             <EditPassiveDevice

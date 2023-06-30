@@ -6,11 +6,17 @@ import Typography from '../../../sharedComponents/typography';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import Select from '../../../sharedComponents/form/select';
 import { Button } from '../../../sharedComponents/button';
-import { getSensorsCts } from './services';
+import { getSensorsCts, updateSensorData } from './services';
+import { UserStore } from '../../../store/UserStore';
 import './style.css';
 
-const EditSensorModal = ({ showModal, closeModal, currentSensorObj, setCurrentSensorObj, sensors, setSensors }) => {
-    const [sensorObj, setSensorObj] = useState(null);
+const EditSensorModal = ({
+    showModal,
+    closeModal,
+    currentSensorObj,
+    setCurrentSensorObj,
+    fetchPassiveDeviceSensorData,
+}) => {
     const [errorObj, setErrorObj] = useState(null);
     const [isProcessing, setProcessing] = useState(false);
 
@@ -35,34 +41,64 @@ const EditSensorModal = ({ showModal, closeModal, currentSensorObj, setCurrentSe
         setErrorObj(errorObj);
     };
 
-    const saveSensorData = () => {
-        let alertObj = Object.assign({}, errorObj);
-
-        if (!sensorObj?.amp_multiplier || sensorObj?.amp_multiplier === '')
-            alertObj.amp_multiplier = 'Please enter multiplier value. It cannot be empty.';
-
-        setErrorObj(alertObj);
-
-        if (!alertObj?.amp_multiplier) {
-            setProcessing(true);
-            const newArray = [...sensors];
-            let index = sensors.findIndex((obj) => obj.id === sensorObj?.id);
-            if (index !== -1) {
-                newArray[index].rated_amps = sensorObj?.rated_amps;
-                newArray[index].amp_multiplier = parseFloat(sensorObj?.amp_multiplier);
-                newArray[index].isCustomVal = sensorObj?.isCustomVal;
-            }
-            setSensors(newArray);
-            setProcessing(false);
-        }
-        closeModal();
-        setCurrentSensorObj(null);
-        setErrorObj(null);
-    };
-
     const handleCustomValueChange = (ct_sensors) => {
         const customObj = ct_sensors.find((el) => el?.model === 'Custom');
         handleChange('_id', customObj?._id);
+    };
+
+    const saveSensorData = async (sensor_id, ct_obj) => {
+        if (!sensor_id || !ct_obj?._id) return;
+
+        const alertObj = Object.assign({}, errorObj);
+        if (ct_obj?.model === 'Custom') {
+            if (ct_obj?.rated_amps === undefined || ct_obj?.rated_amps === '') {
+                alertObj.rated_amps = 'Please enter amp rating value. It cannot be empty.';
+            }
+
+            if (ct_obj?.amp_multiplier === undefined || ct_obj?.amp_multiplier === '') {
+                alertObj.amp_multiplier = 'Please enter multiplier value. It cannot be empty.';
+            }
+        }
+        setErrorObj(alertObj);
+
+        if (alertObj.rated_amps && alertObj.amp_multiplier) return;
+
+        setProcessing(true);
+
+        const params = `?sensor_id=${sensor_id}`;
+        const payload = {};
+
+        payload.sensor_model_id = ct_obj?._id;
+
+        if (ct_obj?.model === 'Custom') {
+            payload.rated_amps = parseFloat(ct_obj?.rated_amps);
+            payload.amp_multiplier = parseFloat(ct_obj?.amp_multiplier);
+        }
+
+        await updateSensorData(params, payload)
+            .then((res) => {
+                if (res?.status === 200) {
+                    fetchPassiveDeviceSensorData();
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Sensor Modal updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'Unable to update Sensor Modal due to internal server error.';
+                        s.notificationType = 'error';
+                    });
+                }
+                setProcessing(false);
+                closeModal();
+                setCurrentSensorObj(null);
+                setErrorObj(null);
+                setCTSensorObj(null);
+                setCTSensorsList([]);
+            })
+            .catch(() => {});
     };
 
     const fetchCTSList = async () => {
@@ -86,15 +122,13 @@ const EditSensorModal = ({ showModal, closeModal, currentSensorObj, setCurrentSe
     }, [showModal]);
 
     useEffect(() => {
-        if (currentSensorObj?.id) setSensorObj(currentSensorObj);
-    }, [currentSensorObj]);
-
-    useEffect(() => {
         if (currentSensorObj?.sensor_model_id && ctSensorsList.length !== 0) {
             const obj = ctSensorsList.find((el) => el?.value === currentSensorObj?.sensor_model_id);
             setCTSensorObj(obj);
         }
     }, [ctSensorsList, currentSensorObj]);
+
+    console.log('SSR ctSensorObj => ', ctSensorObj);
 
     return (
         <Modal show={showModal} onHide={closeModal} backdrop="static" size={'md'} keyboard={false} centered>
@@ -210,7 +244,7 @@ const EditSensorModal = ({ showModal, closeModal, currentSensorObj, setCurrentSe
                         type={Button.Type.primary}
                         className="w-100"
                         disabled={isProcessing}
-                        onClick={saveSensorData}
+                        onClick={() => saveSensorData(currentSensorObj?.id, ctSensorObj)}
                     />
                 </div>
 
