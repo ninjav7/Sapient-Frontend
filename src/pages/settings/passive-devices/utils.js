@@ -1,37 +1,35 @@
 export const hydraData = [
     {
-        ct_size: 80,
+        value: '1',
+        label: '80A Sensor Modal',
+        rated_amps: 80,
         amp_multiplier: 7.17,
+        is_custom: false,
     },
     {
-        ct_size: 100,
+        value: '2',
+        label: '100A Sensor Modal',
+        rated_amps: 100,
         amp_multiplier: 9.45,
+        is_custom: false,
     },
     {
-        ct_size: 200,
+        value: '3',
+        label: '200A Sensor Modal',
+        rated_amps: 200,
         amp_multiplier: 17.93,
+        is_custom: false,
     },
     {
-        ct_size: 600,
+        value: '4',
+        label: '600A Sensor Modal',
+        rated_amps: 600,
         amp_multiplier: 53.56,
-    },
-];
-
-export const ampsRating = [
-    {
-        label: `80A`,
-        value: 80,
+        is_custom: false,
     },
     {
-        label: `100A`,
-        value: 100,
-    },
-    {
-        label: `200A`,
-        value: 200,
-    },
-    {
-        label: `600A`,
-        value: 600,
+        value: '5',
+        label: 'Custom',
+        is_custom: true,
     },
 ];

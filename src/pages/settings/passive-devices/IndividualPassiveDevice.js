@@ -259,13 +259,6 @@ const IndividualPassiveDevice = () => {
         await getPassiveDeviceSensors(params)
             .then((res) => {
                 const response = res?.data;
-                if (response && response.length !== 0) {
-                    response.forEach((record) => {
-                        record.rated_amps = 80;
-                        record.amp_multiplier = 7.17;
-                        record.isCustomVal = false;
-                    });
-                }
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
@@ -533,17 +526,28 @@ const IndividualPassiveDevice = () => {
                                                     className="sensor-index mr-4">
                                                     {index + 1}
                                                 </Typography.Subheader>
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    className={`mr-4 ${
-                                                        record?.equipment_id === '' && record?.breaker_id === ''
-                                                            ? 'sensor-index'
-                                                            : ''
-                                                    }`}>
-                                                    {record?.equipment_id === '' && record?.breaker_id === ''
-                                                        ? 'Not Attached'
-                                                        : record?.breaker_link}
-                                                </Typography.Subheader>
+
+                                                {record?.equipment_id === '' && record?.breaker_id === '' ? (
+                                                    <Typography.Subheader
+                                                        size={Typography.Sizes.md}
+                                                        className="mr-4 sensor-index">
+                                                        Not Attached
+                                                    </Typography.Subheader>
+                                                ) : record?.breaker_rated_amps && record?.breaker_rated_amps !== 0 ? (
+                                                    <div className="d-flex mr-4">
+                                                        <Typography.Subheader size={Typography.Sizes.md}>
+                                                            {`${record?.breaker_link}, `}
+                                                        </Typography.Subheader>
+                                                        <div className="font-normal ml-1">{`${record?.breaker_rated_amps}A`}</div>
+                                                    </div>
+                                                ) : (
+                                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                                        {record?.equipment_id === ''
+                                                            ? `${record?.breaker_link}`
+                                                            : `${record?.breaker_link}, `}
+                                                    </Typography.Subheader>
+                                                )}
+
                                                 {record?.equipment_id !== '' && record?.breaker_id !== '' && (
                                                     <Typography.Subheader
                                                         size={Typography.Sizes.md}
@@ -641,10 +645,9 @@ const IndividualPassiveDevice = () => {
             <EditSensorModal
                 showModal={showEditSensorPanel}
                 closeModal={closeEditSensorPanelModel}
-                sensors={sensors}
-                setSensors={setSensors}
                 currentSensorObj={currentSensorObj}
                 setCurrentSensorObj={setCurrentSensorObj}
+                fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
             />
 
             <EditPassiveDevice
