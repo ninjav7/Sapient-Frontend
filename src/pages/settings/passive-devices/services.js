@@ -10,6 +10,7 @@ import {
     sensorGraphData,
     updateActivePassiveDevice,
     listSensor,
+    listCts,
 } from '../../../services/Network';
 
 export function savePassiveDeviceData(params, payload) {
@@ -90,4 +91,8 @@ export function updatePassiveDevice(params, payload) {
 
 export function getPassiveDeviceSensors(params) {
     return axiosInstance.get(`${listSensor}${params}`).then((res) => res);
+}
+
+export function getSensorsCts() {
+    return axiosInstance.get(`${listCts}`).then((res) => res);
 }

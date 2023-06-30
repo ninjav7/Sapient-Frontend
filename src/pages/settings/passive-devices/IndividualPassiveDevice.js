@@ -259,14 +259,6 @@ const IndividualPassiveDevice = () => {
         await getPassiveDeviceSensors(params)
             .then((res) => {
                 const response = res?.data;
-                if (response && response.length !== 0) {
-                    response.forEach((record) => {
-                        if (!record?.rated_amps) record.rated_amps = 80;
-                        if (!record?.rated_amps) record.amp_multiplier = 7.17;
-                        if (!record?.rated_amps) record.isCustomVal = false;
-                        if (!record?.breaker_rated_amps) record.breaker_rated_amps = 100;
-                    });
-                }
                 setSensors(response);
                 setIsFetchingSensorData(false);
             })
