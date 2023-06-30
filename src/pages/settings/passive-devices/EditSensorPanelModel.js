@@ -123,12 +123,22 @@ const EditSensorModal = ({
 
     useEffect(() => {
         if (currentSensorObj?.sensor_model_id && ctSensorsList.length !== 0) {
-            const obj = ctSensorsList.find((el) => el?.value === currentSensorObj?.sensor_model_id);
-            setCTSensorObj(obj);
+            if (currentSensorObj?.is_custom_model) {
+                const obj = ctSensorsList.find((el) => el?.value === currentSensorObj?.sensor_model_id);
+                if (obj?.model === 'Custom') {
+                    obj.rated_amps = currentSensorObj?.rated_amps;
+                    obj.amp_multiplier = currentSensorObj?.amp_multiplier;
+                }
+                setCTSensorObj(obj);
+            } else {
+                const obj = ctSensorsList.find((el) => el?.value === currentSensorObj?.sensor_model_id);
+                setCTSensorObj(obj);
+            }
         }
     }, [ctSensorsList, currentSensorObj]);
 
     console.log('SSR ctSensorObj => ', ctSensorObj);
+    console.log('SSR currentSensorObj => ', currentSensorObj);
 
     return (
         <Modal show={showModal} onHide={closeModal} backdrop="static" size={'md'} keyboard={false} centered>
