@@ -137,9 +137,6 @@ const EditSensorModal = ({
         }
     }, [ctSensorsList, currentSensorObj]);
 
-    console.log('SSR ctSensorObj => ', ctSensorObj);
-    console.log('SSR currentSensorObj => ', currentSensorObj);
-
     return (
         <Modal show={showModal} onHide={closeModal} backdrop="static" size={'md'} keyboard={false} centered>
             <div className="p-4">
