@@ -35,6 +35,7 @@ import { UserStore } from '../../../store/UserStore';
 import '../active-devices/styles.scss';
 import '../../../sharedComponents/breaker/Breaker.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import Sensors from './Sensors';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -508,89 +509,14 @@ const IndividualPassiveDevice = () => {
                             <Skeleton count={8} height={40} />
                         </div>
                     ) : (
-                        <>
-                            {filtered.map((record, index) => {
-                                return (
-                                    <>
-                                        <Brick sizeInRem={0.75} />
-
-                                        <div
-                                            className={`d-flex justify-content-between sensor-container ${
-                                                record?.equipment_id === '' && record?.breaker_id === ''
-                                                    ? 'sensor-unattach'
-                                                    : ''
-                                            }`}>
-                                            <div className="d-flex align-items-center mouse-pointer">
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    className="sensor-index mr-4">
-                                                    {index + 1}
-                                                </Typography.Subheader>
-
-                                                {record?.equipment_id === '' && record?.breaker_id === '' ? (
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="mr-4 sensor-index">
-                                                        Not Attached
-                                                    </Typography.Subheader>
-                                                ) : record?.breaker_rated_amps && record?.breaker_rated_amps !== 0 ? (
-                                                    <div className="d-flex mr-4">
-                                                        <Typography.Subheader size={Typography.Sizes.md}>
-                                                            {`${record?.breaker_link}, `}
-                                                        </Typography.Subheader>
-                                                        <div className="font-normal ml-1">{`${record?.breaker_rated_amps}A`}</div>
-                                                    </div>
-                                                ) : (
-                                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                                        {record?.equipment_id === ''
-                                                            ? `${record?.breaker_link}`
-                                                            : `${record?.breaker_link}, `}
-                                                    </Typography.Subheader>
-                                                )}
-
-                                                {record?.equipment_id !== '' && record?.breaker_id !== '' && (
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="sensor-equip typography-wrapper link"
-                                                        style={{ fontWeight: '500' }}>
-                                                        {record?.equipment}
-                                                    </Typography.Subheader>
-                                                )}
-                                            </div>
-                                            <div className="d-flex align-items-center">
-                                                <Typography.Body
-                                                    size={Typography.Sizes.xxl}
-                                                    className="gray-500 mouse-pointer mr-3">
-                                                    {`${record?.rated_amps}A`}
-                                                </Typography.Body>
-                                                <Button
-                                                    className="breaker-action-btn"
-                                                    onClick={() => handleChartShow(record?.id)}
-                                                    type={Button.Type.secondaryGrey}
-                                                    label=""
-                                                    icon={<ChartSVG width={16} />}
-                                                />
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions
-                                                    ?.advanced_passive_device_permission?.edit ? (
-                                                    <Button
-                                                        className="breaker-action-btn ml-2"
-                                                        onClick={() => {
-                                                            setEditSenorModelRefresh(true);
-                                                            setCurrentSensorObj(record);
-                                                            openEditSensorPanelModel();
-                                                        }}
-                                                        type={Button.Type.secondaryGrey}
-                                                        label=""
-                                                        icon={<PenSVG width={15} />}
-                                                    />
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                    </>
-                                );
-                            })}
-                        </>
+                        <Sensors
+                            data={filtered}
+                            userPermission={userPermission}
+                            handleChartShow={handleChartShow}
+                            setEditSenorModelRefresh={setEditSenorModelRefresh}
+                            setCurrentSensorObj={setCurrentSensorObj}
+                            openEditSensorPanelModel={openEditSensorPanelModel}
+                        />
                     )}
                 </Col>
             </Row>
