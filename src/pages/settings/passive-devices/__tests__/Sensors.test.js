@@ -42,15 +42,21 @@ const userPermission = {
     },
 };
 
-test('renders correct sensor data', () => {
-    render(<Sensors data={mockData} userPermission={userPermission} />);
+describe('Test Smart Meter Sensors Component', () => {
+    test('renders with correct sensor data', () => {
+        render(<Sensors data={mockData} userPermission={userPermission} />);
 
-    // Assert the presence and correctness of rendered elements based on the mock data
-    const indexElement = screen.getByTestId('1-1');
-    expect(indexElement).toBeInTheDocument();
+        // Assert the presence and correctness of rendered elements based on the mock data
+        const indexElement = screen.getByTestId('1-1');
+        expect(indexElement).toBeInTheDocument();
+    });
 
-    // Find the div element with data-testid="breaker-amps"
-    const breakerAmpsElement = screen.getByTestId('breaker-amps');
-    const breakerAmpsValue = breakerAmpsElement.textContent; // Get the value of the element
-    expect(breakerAmpsValue).toBe('30A'); // checks on the value
+    test('renders sensor with amps configured for with breaker', () => {
+        render(<Sensors data={mockData} userPermission={userPermission} />);
+
+        // Find the div element with data-testid="breaker-amps"
+        const breakerAmpsElement = screen.getByTestId('breaker-amps');
+        const breakerAmpsValue = breakerAmpsElement.textContent; // Get the value of the element
+        expect(breakerAmpsValue).toBe('30A'); // checks on the value
+    });
 });
