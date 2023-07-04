@@ -8,7 +8,7 @@ import { isUserAuthenticated, isSuperUserAuthenticated } from '../helpers/authUt
 
 // settings
 import General from '../pages/settings/general-settings';
-import UtilityBills from '../pages/settings/utilityBills';
+import UtilityMeters from '../pages/settings/utility-meters';
 import Layout from '../pages/settings/layout';
 import Equipment from '../pages/settings/equipment/Equipment';
 import EquipmentTypes from '../pages/settings/equipment-type';
@@ -24,7 +24,6 @@ import AccountSettings from '../pages/settings/account-settings';
 import Buildings from '../pages/settings/buildings';
 import Users from '../pages/settings/users';
 import UserProfile from '../pages/settings/users/UserProfile';
-import Roles from '../pages/settings/roles';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 
@@ -249,14 +248,6 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        // {
-        //     path: '/settings/utility-bills',
-        //     name: 'Utility Bills',
-        //     component: UtilityBills,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels/edit-panel/:bldgId/:panelType/:panelId',
             name: 'Edit Panel',
@@ -313,15 +304,14 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        // PLT-492: Hide Role Page
-        // {
-        //     path: '/settings/gateways',
-        //     name: 'Gateways',
-        //     component: Gateways,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'building-settings',
-        // },
+        {
+            path: '/settings/utility-meters/:bldgId',
+            name: 'Utility Meters',
+            component: UtilityMeters,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
+        },
         {
             path: '/settings/account',
             name: 'General',
@@ -372,15 +362,6 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-
-        // {
-        //     path: '/settings/roles',
-        //     name: 'Roles',
-        //     component: Roles,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
         {
             path: '/settings/equipment-types',
             name: 'Equipment Types',
