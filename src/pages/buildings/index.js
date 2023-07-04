@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -20,6 +21,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
+import Brick from '../../sharedComponents/brick';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
 import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
@@ -33,6 +35,8 @@ import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import { equipTypeEnergyData, spaceTypeEnergyData } from './energy-consumption/mock';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -492,6 +496,23 @@ const BuildingOverview = () => {
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
                             />
+
+                            <Row className="container-gap">
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Space Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={spaceTypeEnergyData}
+                                    />
+                                </Col>
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Equipment Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={equipTypeEnergyData}
+                                    />
+                                </Col>
+                            </Row>
                         </>
                     ) : (
                         <>
@@ -536,6 +557,23 @@ const BuildingOverview = () => {
                                     withTemp={isWeatherChartVisible}
                                 />
                             </div>
+
+                            <Row className="container-gap mt-4">
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Space Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={spaceTypeEnergyData}
+                                    />
+                                </Col>
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Equipment Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={equipTypeEnergyData}
+                                    />
+                                </Col>
+                            </Row>
                         </>
                     )}
                 </div>
@@ -548,6 +586,8 @@ const BuildingOverview = () => {
                     handleClick={handleClick}
                     widgetType="TopEnergyConsumersWidget"
                 />
+
+                {/* <Brick sizeInRem={1.5} /> */}
             </div>
 
             <div>

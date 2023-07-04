@@ -13,7 +13,7 @@ const EnergyConsumptionChart = (props) => {
     const { title = '', subTitle = '', style = {}, rows = [] } = props;
 
     return (
-        <div className="energy-usage-chart-wrapper" style={style}>
+        <div className="energy-usage-chart-wrapper h-100" style={style}>
             <div className="d-flex align-items-center justify-content-between">
                 <div>
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
@@ -21,7 +21,7 @@ const EnergyConsumptionChart = (props) => {
                 </div>
             </div>
             <Brick sizeInRem={1.5} />
-            <div className="energy-usage-chart-wrapper mb-2">
+            <div className="mb-2">
                 <div className="EnergyConsumptionWidget-table d-block">
                     <table className="w-100 EnergyConsumptionWidget-widget-table-content align-items-baseline mb-2">
                         {rows.map(({ id, name, value, unit, consumption, percentage, badgePercentage, badgeType }) => (
