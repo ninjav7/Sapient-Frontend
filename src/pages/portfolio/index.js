@@ -26,6 +26,8 @@ import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import { equipTypeEnergyData, spaceTypeEnergyData } from './data';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -257,6 +259,25 @@ const PortfolioOverview = () => {
                                 xAxisCallBackValue={formatXaxis}
                                 restChartProps={xAxisObj}
                                 tooltipCallBackValue={toolTipFormatter}
+                            />
+                        </Col>
+                    </Row>
+
+                    <Brick sizeInRem={1.5} />
+
+                    <Row className="container-gap">
+                        <Col xl={6}>
+                            <EnergyConsumptionChart
+                                title="Energy Consumption by Space Type"
+                                subTitle="Office-Hours and After-Hours Energy Used"
+                                rows={spaceTypeEnergyData}
+                            />
+                        </Col>
+                        <Col xl={6}>
+                            <EnergyConsumptionChart
+                                title="Energy Consumption by Equipment Type"
+                                subTitle="Office-Hours and After-Hours Energy Used"
+                                rows={equipTypeEnergyData}
                             />
                         </Col>
                     </Row>

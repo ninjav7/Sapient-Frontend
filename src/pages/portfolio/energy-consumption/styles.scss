@@ -1,0 +1,63 @@
+@import '../../../assets/scss/colors';
+@import '../../../sharedComponents/assets/scss/helpers';
+
+.energy-usage-chart {
+    &-wrapper {
+        @extend .borders-base;
+        overflow: hidden;
+        padding: 1rem 1rem 0.3125rem 1rem;
+        position: relative;
+    }
+    &-value {
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        text-align: left;
+        color: $primary-gray-600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+}
+
+.EnergyConsumptionWidget {
+    &-wrapper {
+        padding: 0.9375rem;
+        display: inline-block;
+        border: 0.0625rem solid $primary-gray-200;
+        box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+        border-radius: 0.5rem;
+    }
+
+    &-widget-table-content {
+        tr:first-child {
+            td {
+                padding-bottom: 0.8125rem;
+            }
+        }
+        td {
+            padding-bottom: 1.1875rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        tr:last-child {
+            td {
+                padding-bottom: 0.3125rem;
+            }
+        }
+        td:first-child {
+            padding-left: 0;
+        }
+        td:last-child {
+            text-align: right;
+            padding-right: 0;
+        }
+        td:nth-child(2) {
+            text-align: right;
+        }
+    }
+    &-item-value {
+        margin-right: 0.125rem;
+    }
+}
