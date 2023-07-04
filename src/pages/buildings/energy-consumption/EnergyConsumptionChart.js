@@ -13,7 +13,7 @@ const EnergyConsumptionChart = (props) => {
     const { title = '', subTitle = '', style = {}, rows = [] } = props;
 
     return (
-        <div className="energy-usage-chart-wrapper h-100" style={style}>
+        <div className="energy-usage-chart-wrapper" style={style}>
             <div className="d-flex align-items-center justify-content-between">
                 <div>
                     <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>

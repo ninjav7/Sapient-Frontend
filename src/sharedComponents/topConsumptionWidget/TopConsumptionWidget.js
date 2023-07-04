@@ -22,6 +22,7 @@ const TopConsumptionWidget = ({
     widgetType = 'TopConsumptionWidget',
     exploreBtn,
     style,
+    tableStyle,
 }) => {
     return (
         <div className={`${widgetType}-wrapper ${className}`} style={style}>
@@ -44,7 +45,7 @@ const TopConsumptionWidget = ({
             <Brick sizeInRem={0.6875} />
 
             <div className={`${widgetType}-table d-block`}>
-                <table className="w-100 top-consumption-widget-table-content">
+                <table className="top-consumption-widget-table-content" style={tableStyle}>
                     <tr>
                         {heads.map((head, index) => (
                             <td className={`${widgetType}-table-head-cell`} key={index}>

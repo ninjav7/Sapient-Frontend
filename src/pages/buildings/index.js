@@ -557,37 +557,37 @@ const BuildingOverview = () => {
                                     withTemp={isWeatherChartVisible}
                                 />
                             </div>
-
-                            <Row className="container-gap mt-4">
-                                <Col xl={6}>
-                                    <EnergyConsumptionChart
-                                        title="Energy Consumption by Space Type"
-                                        subTitle="Office-Hours and After-Hours Energy Used"
-                                        rows={spaceTypeEnergyData}
-                                    />
-                                </Col>
-                                <Col xl={6}>
-                                    <EnergyConsumptionChart
-                                        title="Energy Consumption by Equipment Type"
-                                        subTitle="Office-Hours and After-Hours Energy Used"
-                                        rows={equipTypeEnergyData}
-                                    />
-                                </Col>
-                            </Row>
                         </>
                     )}
                 </div>
 
-                <TopConsumptionWidget
-                    title="Top Energy Consumers"
-                    heads={['Equipment', 'Energy', 'Change']}
-                    rows={topEnergyConsumptionData}
-                    className={'fit-container-style'}
-                    handleClick={handleClick}
-                    widgetType="TopEnergyConsumersWidget"
-                />
-
-                {/* <Brick sizeInRem={1.5} /> */}
+                <div className="w-100">
+                    <div>
+                        <TopConsumptionWidget
+                            title="Top Energy Consumers"
+                            heads={['Equipment', 'Energy', 'Change']}
+                            rows={topEnergyConsumptionData}
+                            className={'fit-container-style w-100'}
+                            handleClick={handleClick}
+                            widgetType="TopEnergyConsumersWidget"
+                            tableStyle={{ width: '75%' }}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Space Type"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            rows={spaceTypeEnergyData}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Equipment Type"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            rows={equipTypeEnergyData}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div>
