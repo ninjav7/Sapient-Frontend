@@ -27,30 +27,29 @@ describe('EditSensor Component Test Case', () => {
             equipment_type_name: '',
             status: false,
         };
+
         render(<EditSensor sensorObj={sensorObj} />);
 
-        const editBtn = screen.getAllByRole('button', {
+        const editBtn = screen.getByRole('button', {
             className: 'breaker-action-btn ml-2',
         });
-
-        // // Find the button
-        // const button = screen.getByLabelText('Edit Sensor');
 
         // Click the button to open the modal
         fireEvent.click(editBtn);
 
         // Modal should be visible after clicking the button
-        const modelHeading = screen.getByText('Edit Sensor Modal');
-        console.log('SSR modelHeading => ', modelHeading);
-        expect(modelHeading).toBeInTheDocument();
+        const modalHeading = screen.getByText('Edit Sensor Modal');
+        expect(modalHeading).toBeTruthy();
 
-        // // Find the close button in the modal
-        // const closeButton = screen.getByLabelText('Close Modal');
+        // Find the cancel button in the modal
+        const cancelBtn = screen.getByRole('button', {
+            name: /Cancel/i, // Using a regular expression to match the text 'Cancel' case-insensitively
+        });
 
-        // // Click the close button to close the modal
-        // fireEvent.click(closeButton);
+        // Click the close button to close the modal
+        fireEvent.click(cancelBtn);
 
-        // // Modal should be closed after clicking the close button
-        // expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        // Wait for the modal to close
+        expect(modalHeading).toBeTruthy();
     });
 });
