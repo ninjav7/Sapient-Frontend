@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
-import EditSensorModal from './EditSensorPanelModel';
+import EditSensorModal from './EditSensorModal';
 import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
@@ -64,11 +64,6 @@ const IndividualPassiveDevice = () => {
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
-
-    // Edit Sensor Panel model state
-    const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
-    const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
-    const openEditSensorPanelModel = () => setShowEditSensorPanel(true);
 
     // Edit Device Modal states
     const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
@@ -256,7 +251,7 @@ const IndividualPassiveDevice = () => {
 
     const fetchPassiveDeviceSensorData = async () => {
         setIsFetchingSensorData(true);
-        let params = `?device_id=${deviceId}`;
+        const params = `?device_id=${deviceId}`;
         await getPassiveDeviceSensors(params)
             .then((res) => {
                 const response = res?.data;
@@ -513,9 +508,7 @@ const IndividualPassiveDevice = () => {
                             data={filtered}
                             userPermission={userPermission}
                             handleChartShow={handleChartShow}
-                            setEditSenorModelRefresh={setEditSenorModelRefresh}
-                            setCurrentSensorObj={setCurrentSensorObj}
-                            openEditSensorPanelModel={openEditSensorPanelModel}
+                            fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
                         />
                     )}
                 </Col>
@@ -566,14 +559,6 @@ const IndividualPassiveDevice = () => {
                 sensorObj={sensorObj}
                 bldgId={bldgId}
                 breakerId={breakerId}
-            />
-
-            <EditSensorModal
-                showModal={showEditSensorPanel}
-                closeModal={closeEditSensorPanelModel}
-                currentSensorObj={currentSensorObj}
-                setCurrentSensorObj={setCurrentSensorObj}
-                fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
             />
 
             <EditPassiveDevice

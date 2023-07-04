@@ -1,21 +1,14 @@
 import React from 'react';
 import Brick from '../../../sharedComponents/brick';
-import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 import '../../../sharedComponents/breaker/Breaker.scss';
 import Typography from '../../../sharedComponents/typography';
 import { Button } from '../../../sharedComponents/button';
+import EditSensor from './EditSensor';
 import './styles.scss';
 
 const Sensors = (props) => {
-    const {
-        data,
-        userPermission,
-        handleChartShow,
-        setEditSenorModelRefresh,
-        setCurrentSensorObj,
-        openEditSensorPanelModel,
-    } = props;
+    const { data, userPermission, handleChartShow, fetchPassiveDeviceSensorData } = props;
 
     return (
         <>
@@ -76,16 +69,10 @@ const Sensors = (props) => {
                                 />
                                 {userPermission?.user_role === 'admin' ||
                                 userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
-                                    <Button
-                                        className="breaker-action-btn ml-2"
-                                        onClick={() => {
-                                            setEditSenorModelRefresh(true);
-                                            setCurrentSensorObj(record);
-                                            openEditSensorPanelModel();
-                                        }}
-                                        type={Button.Type.secondaryGrey}
-                                        label=""
-                                        icon={<PenSVG width={15} />}
+                                    <EditSensor
+                                        sensorObj={record}
+                                        fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
+                                        {...props}
                                     />
                                 ) : null}
                             </div>
