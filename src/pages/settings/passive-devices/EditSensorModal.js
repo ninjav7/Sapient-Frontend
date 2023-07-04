@@ -144,7 +144,6 @@ const EditSensorModal = (props) => {
                     <Select
                         placeholder="Select Sensor Model"
                         options={ctSensorsList}
-                        defaultValue={ctSensorsList.find((option) => option?.value === ctSensorObj?._id)}
                         currentValue={ctSensorsList.find((option) => option?.value === ctSensorObj?._id)}
                         onChange={(e) => handleChange('_id', e.value)}
                         isSearchable={true}
