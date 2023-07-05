@@ -188,7 +188,7 @@ Select.Multi = MultiSelect;
 
 Select.propTypes = {
     selectClassName: PropTypes.string,
-    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]).isRequired,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]),
 
     // The difference between default and current values, is currentValue allows to change current value dynamically
     currentValue: PropTypes.object,
