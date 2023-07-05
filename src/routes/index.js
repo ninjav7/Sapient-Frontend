@@ -305,7 +305,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/utility-meters/:bldgId',
+            path: '/settings/utility-meters',
             name: 'Utility Meters',
             component: UtilityMeters,
             route: PrivateRoute,

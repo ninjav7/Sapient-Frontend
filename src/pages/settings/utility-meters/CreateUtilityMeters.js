@@ -1,129 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { getLocationData, savePassiveDeviceData } from './services';
 import { BuildingStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
 import { useHistory } from 'react-router-dom';
-import { isInputLetterOrNumber } from '../../../helpers/helpers';
 import colorPalette from '../../../assets/scss/_colors.scss';
+import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
+import { convertToAlphaNumeric } from './utils';
 import { UserStore } from '../../../store/UserStore';
 
-const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchPassiveDeviceData }) => {
+const CreateUtilityMeters = (props) => {
+    const { utilityMetersData, setUtilityMetersData } = props;
+
     const history = useHistory();
 
-    const defaultDeviceObj = {
-        device_type: 'passive',
-        mac_address: '',
-        model: '',
-        space_id: '',
+    const defaultObj = {
+        status: true,
+        device_id: '',
+        model: 'sapient-pulse',
+        model_name: 'Sapient Pulse (CLSM-1001)',
+        modbus: '',
     };
 
-    const defaultErrors = {
-        mac_address: null,
+    const defaultError = {
+        device_id: null,
         model: null,
+        modbus: null,
     };
 
-    const passiveDeviceModel = [
+    const utilityMeterModel = [
         {
-            value: 'hydra',
-            label: 'Hydra',
-        },
-        {
-            value: 'trident',
-            label: 'Trident',
+            value: 'sapient-pulse',
+            label: 'Sapient Pulse (CLSM-1001)',
         },
     ];
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
-    const [deviceData, setDeviceData] = useState(defaultDeviceObj);
-    const [deviceErrors, setDeviceErrors] = useState(defaultErrors);
-    const [locationData, setLocationData] = useState([]);
+    const [modal, setModal] = useState(false);
+    const handleModalOpen = () => setModal(true);
+    const handleModalClose = () => setModal(false);
+
+    const [utilityData, setUtilityData] = useState(defaultObj);
+    const [utilityError, setUtilityError] = useState(defaultError);
 
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handleChange = (key, value) => {
-        if (key === 'mac_address' && value.length > 16) return;
-        let obj = Object.assign({}, deviceData);
-        obj[key] = value;
-        setDeviceData(obj);
+        let obj = Object.assign({}, utilityData);
+
+        if (key === 'device_id') {
+            let formattedValue = convertToAlphaNumeric(value);
+            if (formattedValue.length > 12) return;
+            formattedValue = formattedValue.replace(/..\B/g, '$&:');
+            obj[key] = formattedValue;
+        } else {
+            obj[key] = value;
+        }
+
+        if (key === 'model') {
+            let selectedObj = utilityMeterModel.find((el) => el?.value === value);
+            obj.model_name = selectedObj?.label;
+        }
+        setUtilityData(obj);
     };
 
-    const saveDeviceDetails = async () => {
-        let alertObj = Object.assign({}, deviceErrors);
+    const saveUtilityMeter = async () => {
+        let alertObj = Object.assign({}, utilityError);
 
-        if (
-            !isInputLetterOrNumber(deviceData?.mac_address) ||
-            deviceData?.mac_address === '' ||
-            deviceData?.mac_address.length !== 16
-        )
-            alertObj.mac_address = 'Please enter only Letters and Numbers. 16 digit serial number.';
-        if (deviceData?.model.length === 0) alertObj.model = { text: 'Please select Model Type.' };
+        let formattedDeviceId = convertToAlphaNumeric(utilityData?.device_id);
+        if (formattedDeviceId.length < 12) {
+            alertObj.device_id = 'Please enter 12 digit Device ID.';
+        }
+        if (utilityData?.model.length === 0) alertObj.model = { text: 'Please select Model.' };
+        if (utilityData?.modbus.length === 0) alertObj.modbus = 'Please enter Modbus. It cannot be empty.';
 
-        setDeviceErrors(alertObj);
+        setUtilityError(alertObj);
 
-        if (!alertObj.mac_address && !alertObj.model) {
+        if (!alertObj.device_id && !alertObj.model && !alertObj.modbus) {
+            utilityData.id = String(Date.now());
             setIsProcessing(true);
-            const params = `?building_id=${bldgId}`;
-            await savePassiveDeviceData(params, deviceData)
-                .then((res) => {
-                    const response = res?.data;
-                    if (response?.success) {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = response?.message;
-                            s.notificationType = 'success';
-                        });
-                        closeAddDeviceModal();
-                        setDeviceData(defaultDeviceObj);
-                        setDeviceErrors(defaultErrors);
-                        if (response?.data?.device_id) redirectUserToPassivePage(response?.data?.device_id);
-                    } else {
-                        if (!response?.success && response?.message.includes('identifier already exists')) {
-                            alertObj.mac_address = 'Identifier with given name already exists.';
-                            setDeviceErrors(alertObj);
-                        } else {
-                            UserStore.update((s) => {
-                                s.showNotification = true;
-                                s.notificationMessage = response?.message
-                                    ? response?.message
-                                    : res
-                                    ? 'Unable to create Smart Meter.'
-                                    : 'Unable to create Smart Meter due to Internal Server Error!.';
-                                s.notificationType = 'error';
-                            });
-                        }
-                    }
-                    setIsProcessing(false);
-                })
-                .catch((e) => {
-                    setDeviceErrors(defaultErrors);
-                    setIsProcessing(false);
-                });
-        }
-    };
-
-    const fetchLocationData = async () => {
-        const response = await getLocationData(`/${bldgId}`);
-        if (response?.data.length === 0) {
-            setLocationData([]);
-            return;
-        }
-        let data = [];
-        response.data.sort((a, b) => {
-            return a.location_name.localeCompare(b.location_name);
-        });
-        response.data.forEach((record) => {
-            data.push({
-                label: record?.location_name,
-                value: record?.location_id,
+            setUtilityMetersData([...utilityMetersData, utilityData]);
+            UserStore.update((s) => {
+                s.showNotification = true;
+                s.notificationMessage = 'Utility Meter created Successfully!';
+                s.notificationType = 'success';
             });
-        });
-        setLocationData(data);
+            setIsProcessing(false);
+            handleModalClose();
+            setUtilityData(defaultObj);
+            setUtilityError(defaultError);
+        }
     };
 
     const redirectUserToPassivePage = (deviceId) => {
@@ -131,10 +101,6 @@ const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
             pathname: `/settings/smart-meters/single/${bldgId}/${deviceId}`,
         });
     };
-
-    useEffect(() => {
-        if (isAddDeviceModalOpen) fetchLocationData();
-    }, [isAddDeviceModalOpen]);
 
     return (
         <>
@@ -144,37 +110,14 @@ const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                     size={Button.Sizes.md}
                     type={Button.Type.primary}
                     icon={<PlusSVG />}
+                    onClick={handleModalOpen}
                 />
             </div>
-            <Modal show={isAddDeviceModalOpen} onHide={closeAddDeviceModal} backdrop="static" keyboard={false} centered>
+            <Modal show={modal} onHide={handleModalClose} backdrop="static" keyboard={false} centered>
                 <div className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>Add Smart Meter</Typography.Header>
+                    <Typography.Header size={Typography.Sizes.lg}>Add Utility Meter</Typography.Header>
 
                     <Brick sizeInRem={2} />
-
-                    <Typography.Body size={Typography.Sizes.md}>
-                        Enter Identifier
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter Identifier"
-                        onChange={(e) => {
-                            handleChange('mac_address', e.target.value.trim().toUpperCase());
-                            setDeviceErrors({ ...deviceErrors, mac_address: null });
-                        }}
-                        error={deviceErrors?.mac_address}
-                        labelSize={Typography.Sizes.md}
-                        value={deviceData?.mac_address}
-                    />
-                    <Brick sizeInRem={0.25} />
-                    {!deviceErrors.mac_address && (
-                        <Typography.Body size={Typography.Sizes.sm}>16 digit serial number</Typography.Body>
-                    )}
-
-                    <Brick sizeInRem={1.25} />
 
                     <div>
                         <Typography.Body size={Typography.Sizes.md}>
@@ -186,30 +129,64 @@ const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                         <Brick sizeInRem={0.25} />
                         <Select
                             placeholder="Select Model"
-                            options={passiveDeviceModel}
-                            defaultValue={passiveDeviceModel.filter((option) => option.value === deviceData?.model)}
+                            options={utilityMeterModel}
+                            defaultValue={utilityMeterModel.filter((option) => option.value === utilityData?.model)}
                             onChange={(e) => {
                                 handleChange('model', e.value);
-                                setDeviceErrors({ ...deviceErrors, model: null });
+                                setUtilityError({ ...utilityError, model: null });
                             }}
-                            error={deviceErrors?.model}
-                            isSearchable={true}
+                            error={utilityError?.model}
+                            isSearchable={false}
                         />
                     </div>
 
                     <Brick sizeInRem={1.5} />
 
                     <div>
-                        <Typography.Body size={Typography.Sizes.md}>Location</Typography.Body>
+                        <Typography.Body size={Typography.Sizes.md}>
+                            Device ID
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Body>
                         <Brick sizeInRem={0.25} />
-                        <Select
-                            placeholder="Select Location"
-                            options={locationData}
-                            defaultValue={locationData.filter((option) => option.value === deviceData?.space_id)}
+                        <InputTooltip
+                            placeholder="Enter Device ID"
                             onChange={(e) => {
-                                handleChange('space_id', e.value);
+                                handleChange('device_id', e.target.value.trim().toUpperCase());
+                                setUtilityError({ ...utilityError, device_id: null });
                             }}
-                            isSearchable={true}
+                            error={utilityError?.device_id}
+                            labelSize={Typography.Sizes.md}
+                            value={utilityData?.device_id}
+                        />
+                        <Brick sizeInRem={0.25} />
+                        {!utilityError.mac_address && (
+                            <Typography.Body size={Typography.Sizes.sm}>12 digit serial number</Typography.Body>
+                        )}
+                    </div>
+
+                    <Brick sizeInRem={1.25} />
+
+                    <div>
+                        <Typography.Body size={Typography.Sizes.md}>
+                            Modbus Address
+                            <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                *
+                            </span>
+                        </Typography.Body>
+                        <Brick sizeInRem={0.25} />
+                        <InputTooltip
+                            placeholder="Enter Modbus Address"
+                            type="number"
+                            onChange={(e) => {
+                                if (e.target.value < 0) return;
+                                handleChange('modbus', e.target.value);
+                                setUtilityError({ ...utilityError, modbus: null });
+                            }}
+                            error={utilityError?.modbus}
+                            labelSize={Typography.Sizes.md}
+                            value={utilityData?.modbus}
                         />
                     </div>
 
@@ -222,9 +199,9 @@ const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                             type={Button.Type.secondaryGrey}
                             className="w-100"
                             onClick={() => {
-                                setDeviceData(defaultDeviceObj);
-                                setDeviceErrors(defaultErrors);
-                                closeAddDeviceModal();
+                                setUtilityData(defaultObj);
+                                setUtilityError(defaultError);
+                                handleModalClose();
                             }}
                         />
 
@@ -234,7 +211,7 @@ const CreateUtilityMeters = ({ isAddDeviceModalOpen, closeAddDeviceModal, fetchP
                             type={Button.Type.primary}
                             className="w-100"
                             disabled={isProcessing}
-                            onClick={saveDeviceDetails}
+                            onClick={saveUtilityMeter}
                         />
                     </div>
 

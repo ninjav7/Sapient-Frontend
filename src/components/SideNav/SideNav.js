@@ -33,6 +33,13 @@ const SideNav = () => {
         });
 
         if (route.parent === 'buildings' || route.parent === 'building-settings') {
+            if (route?.path.includes('utility-meters')) {
+                history.push({
+                    pathname: `${route?.path}?bldg_id=${bldgId}`,
+                });
+                return;
+            }
+
             let pathName = route.path.substr(0, route.path.lastIndexOf('/'));
 
             if (pathName.includes('/energy/end-uses') && buildingListData.length !== 0) {
