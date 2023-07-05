@@ -125,7 +125,7 @@ Button.IconAlignment = BUTTON_ICON_ALIGNMENT;
 Button.propTypes = {
     label: PropTypes.oneOfType([PropTypes.node, PropTypes.string]),
     type: PropTypes.oneOf(Object.values(BUTTON_TYPES)).isRequired,
-    size: PropTypes.oneOf(Object.values(SIZES)),
+    size: PropTypes.oneOf(Object.values(SIZES)).isRequired,
     icon: PropTypes.node,
     iconAlignment: PropTypes.oneOf(Object.values(BUTTON_ICON_ALIGNMENT)),
     typeButton: PropTypes.string,
