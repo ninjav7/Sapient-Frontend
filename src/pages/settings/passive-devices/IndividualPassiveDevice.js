@@ -8,7 +8,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { buildingData, userPermissionData } from '../../../store/globalState';
 import Skeleton from 'react-loading-skeleton';
-import EditSensorModal from './EditSensorPanelModel';
+import EditSensorModal from './EditSensorModal';
 import AddSensorPanelModel from './AddSensorPanelModel';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
@@ -35,6 +35,7 @@ import { UserStore } from '../../../store/UserStore';
 import '../active-devices/styles.scss';
 import '../../../sharedComponents/breaker/Breaker.scss';
 import { updateBuildingStore } from '../../../helpers/updateBuildingStore';
+import Sensors from './Sensors';
 
 const IndividualPassiveDevice = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -63,11 +64,6 @@ const IndividualPassiveDevice = () => {
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
     const showDeleteAlert = () => setShowDelete(true);
-
-    // Edit Sensor Panel model state
-    const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
-    const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
-    const openEditSensorPanelModel = () => setShowEditSensorPanel(true);
 
     // Edit Device Modal states
     const [isEditDeviceModalOpen, setEditDeviceDeviceModal] = useState(false);
@@ -255,7 +251,7 @@ const IndividualPassiveDevice = () => {
 
     const fetchPassiveDeviceSensorData = async () => {
         setIsFetchingSensorData(true);
-        let params = `?device_id=${deviceId}`;
+        const params = `?device_id=${deviceId}`;
         await getPassiveDeviceSensors(params)
             .then((res) => {
                 const response = res?.data;
@@ -508,89 +504,12 @@ const IndividualPassiveDevice = () => {
                             <Skeleton count={8} height={40} />
                         </div>
                     ) : (
-                        <>
-                            {filtered.map((record, index) => {
-                                return (
-                                    <>
-                                        <Brick sizeInRem={0.75} />
-
-                                        <div
-                                            className={`d-flex justify-content-between sensor-container ${
-                                                record?.equipment_id === '' && record?.breaker_id === ''
-                                                    ? 'sensor-unattach'
-                                                    : ''
-                                            }`}>
-                                            <div className="d-flex align-items-center mouse-pointer">
-                                                <Typography.Subheader
-                                                    size={Typography.Sizes.md}
-                                                    className="sensor-index mr-4">
-                                                    {index + 1}
-                                                </Typography.Subheader>
-
-                                                {record?.equipment_id === '' && record?.breaker_id === '' ? (
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="mr-4 sensor-index">
-                                                        Not Attached
-                                                    </Typography.Subheader>
-                                                ) : record?.breaker_rated_amps && record?.breaker_rated_amps !== 0 ? (
-                                                    <div className="d-flex mr-4">
-                                                        <Typography.Subheader size={Typography.Sizes.md}>
-                                                            {`${record?.breaker_link}, `}
-                                                        </Typography.Subheader>
-                                                        <div className="font-normal ml-1">{`${record?.breaker_rated_amps}A`}</div>
-                                                    </div>
-                                                ) : (
-                                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                                        {record?.equipment_id === ''
-                                                            ? `${record?.breaker_link}`
-                                                            : `${record?.breaker_link}, `}
-                                                    </Typography.Subheader>
-                                                )}
-
-                                                {record?.equipment_id !== '' && record?.breaker_id !== '' && (
-                                                    <Typography.Subheader
-                                                        size={Typography.Sizes.md}
-                                                        className="sensor-equip typography-wrapper link"
-                                                        style={{ fontWeight: '500' }}>
-                                                        {record?.equipment}
-                                                    </Typography.Subheader>
-                                                )}
-                                            </div>
-                                            <div className="d-flex align-items-center">
-                                                <Typography.Body
-                                                    size={Typography.Sizes.xxl}
-                                                    className="gray-500 mouse-pointer mr-3">
-                                                    {`${record?.rated_amps}A`}
-                                                </Typography.Body>
-                                                <Button
-                                                    className="breaker-action-btn"
-                                                    onClick={() => handleChartShow(record?.id)}
-                                                    type={Button.Type.secondaryGrey}
-                                                    label=""
-                                                    icon={<ChartSVG width={16} />}
-                                                />
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions
-                                                    ?.advanced_passive_device_permission?.edit ? (
-                                                    <Button
-                                                        className="breaker-action-btn ml-2"
-                                                        onClick={() => {
-                                                            setEditSenorModelRefresh(true);
-                                                            setCurrentSensorObj(record);
-                                                            openEditSensorPanelModel();
-                                                        }}
-                                                        type={Button.Type.secondaryGrey}
-                                                        label=""
-                                                        icon={<PenSVG width={15} />}
-                                                    />
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                    </>
-                                );
-                            })}
-                        </>
+                        <Sensors
+                            data={filtered}
+                            userPermission={userPermission}
+                            handleChartShow={handleChartShow}
+                            fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
+                        />
                     )}
                 </Col>
             </Row>
@@ -640,14 +559,6 @@ const IndividualPassiveDevice = () => {
                 sensorObj={sensorObj}
                 bldgId={bldgId}
                 breakerId={breakerId}
-            />
-
-            <EditSensorModal
-                showModal={showEditSensorPanel}
-                closeModal={closeEditSensorPanelModel}
-                currentSensorObj={currentSensorObj}
-                setCurrentSensorObj={setCurrentSensorObj}
-                fetchPassiveDeviceSensorData={fetchPassiveDeviceSensorData}
             />
 
             <EditPassiveDevice
