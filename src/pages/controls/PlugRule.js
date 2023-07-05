@@ -2071,6 +2071,7 @@ const PlugRule = () => {
                                 { label: 'Unselected' },
                             ]}
                             onDownload={() => handleDownloadCsv()}
+                            status={selectedRuleFilter}
                             onStatus={setSelectedRuleFilter}
                             rows={currentRow()}
                             searchResultRows={currentRowSearched()}
