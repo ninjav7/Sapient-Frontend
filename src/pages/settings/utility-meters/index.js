@@ -13,7 +13,8 @@ import { userPermissionData } from '../../../store/globalState';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { UtilityMetersStore } from '../../../store/UtilityMetersStore';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -39,7 +40,7 @@ const SkeletonLoading = () => (
 
 const UtilityMeters = () => {
     const [userPermission] = useAtom(userPermissionData);
-
+    const { bldgId } = useParams();
     const [pageNo, setPageNo] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [deviceStatus, setDeviceStatus] = useState(0);
@@ -48,26 +49,8 @@ const UtilityMeters = () => {
     const [sortBy, setSortBy] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
 
-    const [utilityMetersData, setUtilityMetersData] = useState([
-        {
-            id: '1',
-            status: true,
-            device_id: '00:B0:D0:63:C2:26',
-            modbus: '1',
-            model: 'sapient-pulse',
-            model_name: 'Sapient Pulse (CLSM-1001)',
-        },
-        {
-            id: '2',
-            status: false,
-            device_id: '00:B0:D0:63:C2:26',
-            modbus: '2',
-            model: 'sapient-pulse',
-            model_name: 'Sapient Pulse (CLSM-1001)',
-        },
-    ]);
-
-    const [utilityMetersDataList, setUtilityMetersDataList] = useState([]);
+    const [renderList, setRenderList] = useState([]);
+    const utilityMetersDataList = UtilityMetersStore.useState((s) => s.utilityMetersList);
 
     const renderDeviceStatus = (row) => {
         return (
@@ -84,7 +67,7 @@ const UtilityMeters = () => {
             <Link
                 className="typography-wrapper link"
                 to={{
-                    pathname: `/settings/utility-meters/single/62df7f3cb9acc8a9a0415118/${row?.id}`,
+                    pathname: `/settings/utility-meters/single/${bldgId}/${row?.id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
                     {row?.device_id}
@@ -129,24 +112,30 @@ const UtilityMeters = () => {
     ];
 
     const currentRow = () => {
-        return utilityMetersDataList;
+        return renderList;
+    };
+
+    const updateUtilityMetersList = (value) => {
+        UtilityMetersStore.update((s) => {
+            s.utilityMetersList = value;
+        });
     };
 
     useEffect(() => {
-        if (utilityMetersData.length === 0) return;
+        if (utilityMetersDataList.length === 0) return;
 
-        if (deviceStatus === 0) setUtilityMetersDataList([...utilityMetersData]);
+        if (deviceStatus === 0) setRenderList([...utilityMetersDataList]);
         if (deviceStatus === 1) {
             let newArray = [];
-            utilityMetersData.forEach((el) => (el?.status ? newArray.push(el) : null));
-            setUtilityMetersDataList(newArray);
+            utilityMetersDataList.forEach((el) => (el?.status ? newArray.push(el) : null));
+            setRenderList(newArray);
         }
         if (deviceStatus === 2) {
             let newArray = [];
-            utilityMetersData.forEach((el) => (el?.status ? null : newArray.push(el)));
-            setUtilityMetersDataList(newArray);
+            utilityMetersDataList.forEach((el) => (el?.status ? null : newArray.push(el)));
+            setRenderList(newArray);
         }
-    }, [deviceStatus, utilityMetersData]);
+    }, [deviceStatus, utilityMetersDataList]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -178,8 +167,8 @@ const UtilityMeters = () => {
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
                             <CreateUtilityMeters
-                                utilityMetersData={utilityMetersData}
-                                setUtilityMetersData={setUtilityMetersData}
+                                utilityMetersDataList={utilityMetersDataList}
+                                updateUtilityMetersList={updateUtilityMetersList}
                             />
                         ) : null}
                     </div>

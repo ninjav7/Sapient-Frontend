@@ -13,7 +13,7 @@ import { convertToAlphaNumeric } from './utils';
 import { UserStore } from '../../../store/UserStore';
 
 const CreateUtilityMeters = (props) => {
-    const { utilityMetersData, setUtilityMetersData } = props;
+    const { utilityMetersDataList, updateUtilityMetersList } = props;
 
     const history = useHistory();
 
@@ -68,6 +68,12 @@ const CreateUtilityMeters = (props) => {
         setUtilityData(obj);
     };
 
+    const redirectUserToUtilityMeterPage = (deviceId) => {
+        history.push({
+            pathname: `/settings/utility-meters/single/${bldgId}/${deviceId}`,
+        });
+    };
+
     const saveUtilityMeter = async () => {
         let alertObj = Object.assign({}, utilityError);
 
@@ -83,7 +89,7 @@ const CreateUtilityMeters = (props) => {
         if (!alertObj.device_id && !alertObj.model && !alertObj.modbus) {
             utilityData.id = String(Date.now());
             setIsProcessing(true);
-            setUtilityMetersData([...utilityMetersData, utilityData]);
+            updateUtilityMetersList([...utilityMetersDataList, utilityData]);
             UserStore.update((s) => {
                 s.showNotification = true;
                 s.notificationMessage = 'Utility Meter created Successfully!';
@@ -93,13 +99,8 @@ const CreateUtilityMeters = (props) => {
             handleModalClose();
             setUtilityData(defaultObj);
             setUtilityError(defaultError);
+            redirectUserToUtilityMeterPage(utilityData?.id);
         }
-    };
-
-    const redirectUserToPassivePage = (deviceId) => {
-        history.push({
-            pathname: `/settings/smart-meters/single/${bldgId}/${deviceId}`,
-        });
     };
 
     return (
