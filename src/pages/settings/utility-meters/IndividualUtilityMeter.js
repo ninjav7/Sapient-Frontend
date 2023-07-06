@@ -10,11 +10,13 @@ import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
+import { ReactComponent as DeleteSVG } from '../../../assets/icon/delete.svg';
 import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import Brick from '../../../sharedComponents/brick';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
 import { Badge } from '../../../sharedComponents/badge';
+import { DangerZone } from '../../../sharedComponents/dangerZone';
 
 const Sensors = (props) => {
     const { data, userPermission, handleChartShow, fetchPassiveDeviceSensorData } = props;
@@ -79,8 +81,6 @@ const Sensors = (props) => {
 
 const DeviceHeader = (props) => {
     const { utilityMeterObj, userPermission, redirectToMainPage } = props;
-
-    console.log('SSR utilityMeterObj => ', utilityMeterObj);
 
     return (
         <div className="passive-header-wrapper d-flex justify-content-between">
@@ -281,6 +281,17 @@ const IndividualUtilityMeter = () => {
 
                 <Col lg={8}>
                     <DeviceSensors utilityMeterObj={utilityMeterObj} />
+                </Col>
+            </Row>
+
+            <Row style={{ padding: '2rem' }}>
+                <Col lg={12}>
+                    <DangerZone
+                        title="Danger Zone"
+                        labelButton="Delete Utility Meter"
+                        iconButton={<DeleteSVG />}
+                        onClickButton={() => {}}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

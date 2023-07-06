@@ -12,18 +12,18 @@ export const UtilityMetersStore = new Store({
             sensors: [
                 {
                     id: '1',
-                    sensor_name: 'Test',
-                    sensor_badge: 'Test Badge',
+                    sensor_name: 'TECO - Itron K2C - 54632136854',
+                    sensor_badge: '1.2 Pulse Weight',
                 },
                 {
                     id: '2',
-                    sensor_name: '',
-                    sensor_badge: '',
+                    sensor_name: 'TECO - Itron K2C - 54632136855',
+                    sensor_badge: '1.2 Pulse Weight',
                 },
                 {
                     id: '3',
-                    sensor_name: '',
-                    sensor_badge: '',
+                    sensor_name: 'TECO - Itron K2C - 54632136856',
+                    sensor_badge: '1.2 Pulse Weight',
                 },
                 {
                     id: '4',

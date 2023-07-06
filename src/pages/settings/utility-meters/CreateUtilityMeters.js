@@ -165,7 +165,7 @@ const CreateUtilityMeters = (props) => {
                         />
                         <Brick sizeInRem={0.25} />
                         {!utilityError.mac_address && (
-                            <Typography.Body size={Typography.Sizes.sm}>12 digit serial number</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.sm}>Enter MAC address of A8810.</Typography.Body>
                         )}
                     </div>
 
