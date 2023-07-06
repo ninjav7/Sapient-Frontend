@@ -11,6 +11,7 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { convertToAlphaNumeric } from './utils';
 import { UserStore } from '../../../store/UserStore';
+import { sampleSensors } from './mock';
 
 const CreateUtilityMeters = (props) => {
     const { utilityMetersDataList, updateUtilityMetersList } = props;
@@ -88,6 +89,7 @@ const CreateUtilityMeters = (props) => {
 
         if (!alertObj.device_id && !alertObj.model && !alertObj.modbus) {
             utilityData.id = String(Date.now());
+            utilityData.sensors = sampleSensors;
             setIsProcessing(true);
             updateUtilityMetersList([...utilityMetersDataList, utilityData]);
             UserStore.update((s) => {

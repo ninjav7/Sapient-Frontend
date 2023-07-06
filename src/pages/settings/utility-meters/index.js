@@ -48,9 +48,10 @@ const UtilityMeters = () => {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
-
     const [renderList, setRenderList] = useState([]);
     const utilityMetersDataList = UtilityMetersStore.useState((s) => s.utilityMetersList);
+
+    console.log('SSR utilityMetersDataList => ', utilityMetersDataList);
 
     const renderDeviceStatus = (row) => {
         return (
