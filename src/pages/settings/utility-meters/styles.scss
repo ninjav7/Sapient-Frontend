@@ -14,3 +14,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
 }
+
+.utility-meter-badge {
+    color: $primary-indigo-600 !important;
+    background: $primary-indigo-100 !important;
+    border: 0.0625rem solid $primary-indigo-50 !important;
+}

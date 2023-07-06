@@ -12,8 +12,8 @@ export const UtilityMetersStore = new Store({
             sensors: [
                 {
                     id: '1',
-                    sensor_name: '',
-                    sensor_badge: '',
+                    sensor_name: 'Test',
+                    sensor_badge: 'Test Badge',
                 },
                 {
                     id: '2',

@@ -8,27 +8,95 @@ import { UtilityMetersStore } from '../../../store/UtilityMetersStore';
 import { userPermissionData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
+import { ReactComponent as ChartSVG } from '../../../assets/icon/chart.svg';
 import { ReactComponent as SearchSVG } from '../../../assets/icon/search.svg';
+import { ReactComponent as PenSVG } from '../../../assets/icon/panels/pen.svg';
 import Brick from '../../../sharedComponents/brick';
+import colorPalette from '../../../assets/scss/_colors.scss';
 import './styles.scss';
-import Sensors from '../passive-devices/Sensors';
+import { Badge } from '../../../sharedComponents/badge';
+
+const Sensors = (props) => {
+    const { data, userPermission, handleChartShow, fetchPassiveDeviceSensorData } = props;
+
+    return (
+        <>
+            {data.map((record, index) => {
+                return (
+                    <div key={index}>
+                        <Brick sizeInRem={0.75} />
+
+                        <div
+                            className={`d-flex justify-content-between sensor-container ${
+                                record?.sensor_name === '' ? 'sensor-unattach' : ''
+                            }`}>
+                            <div className="d-flex align-items-center mouse-pointer">
+                                <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
+                                    {record?.id}
+                                </Typography.Subheader>
+
+                                {record?.sensor_name === '' ? (
+                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
+                                        Not Attached
+                                    </Typography.Subheader>
+                                ) : (
+                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                        {record?.sensor_name}
+                                    </Typography.Subheader>
+                                )}
+
+                                {record?.sensor_badge !== '' && (
+                                    <Badge
+                                        text={record?.sensor_badge}
+                                        className="utility-meter-badge font-weight-bold"
+                                        typographyClassName="utility-meter-badge"
+                                    />
+                                )}
+                            </div>
+                            <div className="d-flex align-items-center">
+                                <Button
+                                    className="breaker-action-btn"
+                                    onClick={() => handleChartShow(record?.id)}
+                                    type={Button.Type.secondaryGrey}
+                                    label=""
+                                    icon={<ChartSVG width={16} />}
+                                />
+                                <Button
+                                    className="breaker-action-btn ml-2"
+                                    // onClick={openModal}
+                                    type={Button.Type.secondaryGrey}
+                                    label=""
+                                    icon={<PenSVG width={15} />}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </>
+    );
+};
 
 const DeviceHeader = (props) => {
     const { utilityMeterObj, userPermission, redirectToMainPage } = props;
 
+    console.log('SSR utilityMeterObj => ', utilityMeterObj);
+
     return (
         <div className="passive-header-wrapper d-flex justify-content-between">
             <div className="d-flex flex-column justify-content-between">
-                <Typography.Subheader size={Typography.Sizes.sm} className="font-weight-bold">
-                    Utility Meter
+                <Typography.Subheader size={Typography.Sizes.md} style={{ color: colorPalette.primaryGray500 }}>
+                    Utility Metering Device
                 </Typography.Subheader>
                 <div className="d-flex align-items-center">
                     <Typography.Header size={Typography.Sizes.md} className="mr-2">
                         {utilityMeterObj?.device_id}
                     </Typography.Header>
-                    <Typography.Subheader size={Typography.Sizes.md} className="d-flex align-items-center mt-1">
-                        {`8 Sensors`}
-                    </Typography.Subheader>
+                    {utilityMeterObj?.sensors && (
+                        <Typography.Subheader size={Typography.Sizes.md} className="d-flex align-items-center mt-1">
+                            {`${utilityMeterObj?.sensors.length} Pulse Counters`}
+                        </Typography.Subheader>
+                    )}
                 </div>
                 <Typography.Subheader
                     size={Typography.Sizes.md}
@@ -121,11 +189,15 @@ const DeviceDetails = (props) => {
 };
 
 const DeviceSensors = (props) => {
-    const { userPermission } = props;
+    const { utilityMeterObj, userPermission } = props;
 
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md}>{`Sensors (8)`}</Typography.Subheader>
+            {utilityMeterObj?.sensors && (
+                <Typography.Subheader size={Typography.Sizes.md}>
+                    {`Sensors (${utilityMeterObj?.sensors.length})`}
+                </Typography.Subheader>
+            )}
             <Brick sizeInRem={0.5} />
             <div className="active-sensor-header">
                 <div className="search-container mr-2">
@@ -144,7 +216,7 @@ const DeviceSensors = (props) => {
             <Brick sizeInRem={0.25} />
 
             <Sensors
-                data={[]}
+                data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []}
                 userPermission={userPermission}
                 handleChartShow={() => {}}
                 fetchPassiveDeviceSensorData={() => {}}
@@ -208,7 +280,7 @@ const IndividualUtilityMeter = () => {
                 </Col>
 
                 <Col lg={8}>
-                    <DeviceSensors />
+                    <DeviceSensors utilityMeterObj={utilityMeterObj} />
                 </Col>
             </Row>
         </React.Fragment>
