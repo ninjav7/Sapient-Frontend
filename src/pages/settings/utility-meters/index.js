@@ -51,8 +51,6 @@ const UtilityMeters = () => {
     const [renderList, setRenderList] = useState([]);
     const utilityMetersDataList = UtilityMetersStore.useState((s) => s.utilityMetersList);
 
-    console.log('SSR utilityMetersDataList => ', utilityMetersDataList);
-
     const renderDeviceStatus = (row) => {
         return (
             <StatusBadge
@@ -168,6 +166,7 @@ const UtilityMeters = () => {
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
                             <CreateUtilityMeters
+                                bldgId={bldgId}
                                 utilityMetersDataList={utilityMetersDataList}
                                 updateUtilityMetersList={updateUtilityMetersList}
                             />

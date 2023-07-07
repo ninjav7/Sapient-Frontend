@@ -12,16 +12,17 @@ import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { convertToAlphaNumeric } from './utils';
 import { UserStore } from '../../../store/UserStore';
 import { sampleSensors } from './mock';
+import { createUtilityMeterServices } from './services';
 
 const CreateUtilityMeters = (props) => {
-    const { utilityMetersDataList, updateUtilityMetersList } = props;
+    const { bldgId, utilityMetersDataList, updateUtilityMetersList } = props;
 
     const history = useHistory();
 
     const defaultObj = {
         status: true,
         device_id: '',
-        model: 'sapient-pulse',
+        model: 'pulse counter',
         model_name: 'Sapient Pulse (CLSM-1001)',
         modbus: '',
     };
@@ -34,12 +35,10 @@ const CreateUtilityMeters = (props) => {
 
     const utilityMeterModel = [
         {
-            value: 'sapient-pulse',
+            value: 'pulse counter',
             label: 'Sapient Pulse (CLSM-1001)',
         },
     ];
-
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [modal, setModal] = useState(false);
     const handleModalOpen = () => setModal(true);
@@ -88,20 +87,47 @@ const CreateUtilityMeters = (props) => {
         setUtilityError(alertObj);
 
         if (!alertObj.device_id && !alertObj.model && !alertObj.modbus) {
-            utilityData.id = String(Date.now());
-            utilityData.sensors = sampleSensors;
             setIsProcessing(true);
-            updateUtilityMetersList([...utilityMetersDataList, utilityData]);
-            UserStore.update((s) => {
-                s.showNotification = true;
-                s.notificationMessage = 'Utility Meter created Successfully!';
-                s.notificationType = 'success';
-            });
-            setIsProcessing(false);
-            handleModalClose();
-            setUtilityData(defaultObj);
-            setUtilityError(defaultError);
-            redirectUserToUtilityMeterPage(utilityData?.id);
+            const reqObj = {
+                building_id: bldgId,
+                device_type: utilityData?.model,
+                model: utilityData?.model_name,
+                deviceIdentifier: utilityData?.device_id,
+                modbus_address: utilityData?.modbus,
+            };
+            console.log('SSR reqObj => ', reqObj);
+            await createUtilityMeterServices(reqObj)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                        // redirectUserToUtilityMeterPage(utilityData?.id);
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to create Utility Meter.'
+                                : 'Unable to create Utility Meter due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    setUtilityData(defaultObj);
+                    setUtilityError(defaultError);
+                    handleModalClose();
+                    setIsProcessing(false);
+                })
+                .catch((e) => {
+                    setIsProcessing(false);
+                    handleModalClose();
+                    setUtilityData(defaultObj);
+                    setUtilityError(defaultError);
+                });
         }
     };
 

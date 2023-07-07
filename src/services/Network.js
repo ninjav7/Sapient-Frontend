@@ -94,6 +94,10 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 
+// utility-meters
+export const createUtilityMeter = '/api/v2/devices/utility/create';
+export const getUtilityMeters = '/api/v2/devices/utility/get';
+
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
