@@ -597,11 +597,11 @@ const BuildingOverview = () => {
                         />
                     </div>
                     <div className="mt-4">
-                        {/* <EnergyConsumptionChart
+                        <EnergyConsumptionChart
                             title="Energy Consumption by Equipment Type"
                             subTitle="Office-Hours and After-Hours Energy Used"
                             rows={equipTypeEnergyData}
-                        /> */}
+                        />
                     </div>
                 </div>
             </div>
