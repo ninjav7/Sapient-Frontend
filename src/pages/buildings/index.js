@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -13,6 +14,7 @@ import {
     fetchBuilidingHourly,
     fetchEnergyConsumption,
     fetchEndUseByBuilding,
+    getEnergyConsumptionByType,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -20,6 +22,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
+import Brick from '../../sharedComponents/brick';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
 import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
@@ -33,6 +36,8 @@ import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import { equipTypeEnergyData, spaceTypeEnergyData } from './energy-consumption/mock';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -359,6 +364,20 @@ const BuildingOverview = () => {
             });
     };
 
+    const fetchEnergyConsumptionByType = async (time_zone) => {
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+        };
+        await getEnergyConsumptionByType(payload)
+            .then((res) => {
+                console.log('SSR res => ', res);
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -394,6 +413,7 @@ const BuildingOverview = () => {
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
+        fetchEnergyConsumptionByType(time_zone);
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -492,6 +512,23 @@ const BuildingOverview = () => {
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
                             />
+
+                            <Row className="container-gap">
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Space Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={spaceTypeEnergyData}
+                                    />
+                                </Col>
+                                <Col xl={6}>
+                                    <EnergyConsumptionChart
+                                        title="Energy Consumption by Equipment Type"
+                                        subTitle="Office-Hours and After-Hours Energy Used"
+                                        rows={equipTypeEnergyData}
+                                    />
+                                </Col>
+                            </Row>
                         </>
                     ) : (
                         <>
@@ -540,14 +577,33 @@ const BuildingOverview = () => {
                     )}
                 </div>
 
-                <TopConsumptionWidget
-                    title="Top Energy Consumers"
-                    heads={['Equipment', 'Energy', 'Change']}
-                    rows={topEnergyConsumptionData}
-                    className={'fit-container-style'}
-                    handleClick={handleClick}
-                    widgetType="TopEnergyConsumersWidget"
-                />
+                <div className="w-100">
+                    <div>
+                        <TopConsumptionWidget
+                            title="Top Energy Consumers"
+                            heads={['Equipment', 'Energy', 'Change']}
+                            rows={topEnergyConsumptionData}
+                            className={'fit-container-style w-100'}
+                            handleClick={handleClick}
+                            widgetType="TopEnergyConsumersWidget"
+                            tableStyle={{ width: '75%' }}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Space Type"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            rows={spaceTypeEnergyData}
+                        />
+                    </div>
+                    <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Equipment Type"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            rows={equipTypeEnergyData}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div>
