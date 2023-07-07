@@ -14,6 +14,7 @@ import {
     fetchBuilidingHourly,
     fetchEnergyConsumption,
     fetchEndUseByBuilding,
+    getEnergyConsumptionByType,
 } from '../buildings/services';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -363,6 +364,20 @@ const BuildingOverview = () => {
             });
     };
 
+    const fetchEnergyConsumptionByType = async (time_zone) => {
+        const payload = {
+            bldg_id: bldgId,
+            date_from: encodeURIComponent(new Date(startDate).toISOString()),
+            date_to: encodeURIComponent(new Date(endDate).toISOString()),
+            tz_info: time_zone,
+        };
+        await getEnergyConsumptionByType(payload)
+            .then((res) => {
+                console.log('SSR res => ', res);
+            })
+            .catch(() => {});
+    };
+
     useEffect(() => {
         const getXaxisForDaysSelected = (days_count) => {
             const xaxisObj = xaxisLabelsCount(days_count);
@@ -398,6 +413,7 @@ const BuildingOverview = () => {
         builidingEquipmentsData(time_zone);
         buildingHourlyData(time_zone);
         buildingConsumptionChart(time_zone);
+        fetchEnergyConsumptionByType(time_zone);
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
