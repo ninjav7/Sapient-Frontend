@@ -573,14 +573,6 @@ const BuildingOverview = () => {
                                     withTemp={isWeatherChartVisible}
                                 />
                             </div>
-
-                            <div className="mt-4">
-                                <EnergyConsumptionChart
-                                    title="Energy Consumption by Space Type"
-                                    subTitle="Office-Hours and After-Hours Energy Used"
-                                    rows={spaceTypeEnergyData}
-                                />
-                            </div>
                         </>
                     )}
                 </div>

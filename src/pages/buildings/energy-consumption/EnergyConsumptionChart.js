@@ -28,10 +28,14 @@ const EnergyConsumptionChart = (props) => {
                     <Typography.Body size={Typography.Sizes.xs}>{subTitle}</Typography.Body>
                 </div>
             </div>
-            <Brick sizeInRem={1.5} />
+
+            <Brick sizeInRem={0.75} />
+            <div className="horizontal-line"></div>
+            <Brick sizeInRem={0.75} />
+
             <div className="mb-2 energy-usage-chart-scroll-container">
                 <div className="EnergyConsumptionWidget-table d-block">
-                    <table className="w-100 EnergyConsumptionWidget-widget-table-content align-items-baseline mb-2">
+                    <table className="w-100 EnergyConsumptionWidget-widget-table-content align-items-baseline">
                         <tbody>
                             {rows.map(
                                 ({
@@ -47,12 +51,12 @@ const EnergyConsumptionChart = (props) => {
                                     offHour,
                                 }) => (
                                     <tr key={id}>
-                                        <td width={200}>
+                                        <td width="25%">
                                             <Typography.Subheader size={Typography.Sizes.md}>
                                                 {name}
                                             </Typography.Subheader>
                                         </td>
-                                        <td width={250}>
+                                        <td width="40%">
                                             <Progress multi className="custom-progress-bar">
                                                 <Progress
                                                     bar
@@ -68,15 +72,15 @@ const EnergyConsumptionChart = (props) => {
                                                 />
                                             </Progress>
                                         </td>
-                                        <td>
-                                            <div className="energy-usage-chart-value ml-4">{`${formatConsumptionValue(
+                                        <td width="20%">
+                                            <div className="energy-usage-chart-value">{`${formatConsumptionValue(
                                                 consumption
                                             )} ${unit}`}</div>
                                         </td>
-                                        <td>
+                                        <td width="10%">
                                             <div className="energy-usage-chart-value">{`${percentage}%`}</div>
                                         </td>
-                                        <td width={50}>
+                                        <td width="5%">
                                             <TrendsBadge type={badgeType} value={badgePercentage} />
                                         </td>
                                     </tr>
