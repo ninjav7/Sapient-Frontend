@@ -10,6 +10,8 @@ export const spaceTypeEnergyData = [
         percentage: 42,
         badgePercentage: 3,
         badgeType: TRENDS_BADGE_TYPES.DOWNWARD_TREND,
+        onHour: 100,
+        offHour: 50,
     },
     {
         id: '2',
@@ -20,6 +22,8 @@ export const spaceTypeEnergyData = [
         percentage: 28,
         badgePercentage: 1,
         badgeType: TRENDS_BADGE_TYPES.DOWNWARD_TREND,
+        onHour: 90,
+        offHour: 40,
     },
     {
         id: '3',
@@ -30,6 +34,8 @@ export const spaceTypeEnergyData = [
         percentage: 12,
         badgePercentage: 3,
         badgeType: TRENDS_BADGE_TYPES.DOWNWARD_TREND,
+        onHour: 80,
+        offHour: 30,
     },
     {
         id: '4',
@@ -40,6 +46,8 @@ export const spaceTypeEnergyData = [
         percentage: 8,
         badgePercentage: 3,
         badgeType: TRENDS_BADGE_TYPES.UPWARD_TREND,
+        onHour: 60,
+        offHour: 20,
     },
     {
         id: '5',
@@ -50,6 +58,8 @@ export const spaceTypeEnergyData = [
         percentage: 5,
         badgePercentage: 1,
         badgeType: TRENDS_BADGE_TYPES.DOWNWARD_TREND,
+        onHour: 50,
+        offHour: 10,
     },
     {
         id: '6',
@@ -60,6 +70,8 @@ export const spaceTypeEnergyData = [
         percentage: 2,
         badgePercentage: 3,
         badgeType: TRENDS_BADGE_TYPES.UPWARD_TREND,
+        onHour: 30,
+        offHour: 5,
     },
 ];
 

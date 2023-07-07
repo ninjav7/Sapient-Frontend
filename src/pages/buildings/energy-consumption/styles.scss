@@ -20,6 +20,31 @@
     }
 }
 
+.energy-usage-chart-scroll-container {
+    max-height: 18.75rem;
+    overflow-y: auto;
+    border: 0.0625rem solid #ccc;
+    border-radius: 0.25rem;
+    padding: 0.625rem;
+}
+
+.energy-usage-chart-scroll-container:hover {
+    overflow-y: auto !important;
+}
+
+.energy-usage-chart-scroll-container::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.energy-usage-chart-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #e9dddd;
+    border-radius: 0.25rem;
+}
+
+.energy-usage-chart-scroll-container::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+}
+
 .EnergyConsumptionWidget {
     &-wrapper {
         padding: 0.9375rem;
@@ -60,4 +85,17 @@
     &-item-value {
         margin-right: 0.125rem;
     }
+}
+
+.custom-on-hour {
+    background-color: $sapient-specific-hvac;
+}
+
+.custom-off-hour {
+    background-color: $dataviz-red-300;
+}
+
+.custom-progress-bar {
+    height: 0.8rem;
+    border-radius: 0.2rem;
 }

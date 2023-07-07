@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
-import './styles.scss';
-import { Button } from '../../../sharedComponents/button';
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
 import { formatConsumptionValue } from '../../../helpers/helpers';
-import { TinyBarChart } from '../../../sharedComponents/tinyBarChart';
+import { Progress } from 'reactstrap';
+import './styles.scss';
 
 const EnergyConsumptionChart = (props) => {
     const { title = '', subTitle = '', style = {}, rows = [] } = props;
+
+    const [totalVal, setTotalVal] = useState(0);
+
+    useEffect(() => {
+        if (rows.length !== 0) {
+            rows.sort((a, b) => b?.onHour - a?.onHour);
+            setTotalVal(rows[0]?.onHour + rows[0]?.offHour);
+        }
+    }, [rows]);
 
     return (
         <div className="energy-usage-chart-wrapper" style={style}>
@@ -21,30 +29,60 @@ const EnergyConsumptionChart = (props) => {
                 </div>
             </div>
             <Brick sizeInRem={1.5} />
-            <div className="mb-2">
+            <div className="mb-2 energy-usage-chart-scroll-container">
                 <div className="EnergyConsumptionWidget-table d-block">
                     <table className="w-100 EnergyConsumptionWidget-widget-table-content align-items-baseline mb-2">
-                        {rows.map(({ id, name, value, unit, consumption, percentage, badgePercentage, badgeType }) => (
-                            <tr key={id}>
-                                <td width={140}>
-                                    <Typography.Subheader size={Typography.Sizes.md}>{name}</Typography.Subheader>
-                                </td>
-                                <td width={160}>
-                                    <TinyBarChart percent={value} />
-                                </td>
-                                <td>
-                                    <div className="energy-usage-chart-value ml-4">{`${formatConsumptionValue(
-                                        consumption
-                                    )} ${unit}`}</div>
-                                </td>
-                                <td>
-                                    <div className="energy-usage-chart-value">{`${percentage}%`}</div>
-                                </td>
-                                <td width={40}>
-                                    <TrendsBadge type={badgeType} value={badgePercentage} />
-                                </td>
-                            </tr>
-                        ))}
+                        <tbody>
+                            {rows.map(
+                                ({
+                                    id,
+                                    name,
+                                    value,
+                                    unit,
+                                    consumption,
+                                    percentage,
+                                    badgePercentage,
+                                    badgeType,
+                                    onHour,
+                                    offHour,
+                                }) => (
+                                    <tr key={id}>
+                                        <td width={200}>
+                                            <Typography.Subheader size={Typography.Sizes.md}>
+                                                {name}
+                                            </Typography.Subheader>
+                                        </td>
+                                        <td width={250}>
+                                            <Progress multi className="custom-progress-bar">
+                                                <Progress
+                                                    bar
+                                                    value={onHour}
+                                                    max={totalVal}
+                                                    barClassName="custom-on-hour"
+                                                />
+                                                <Progress
+                                                    bar
+                                                    value={offHour}
+                                                    max={totalVal}
+                                                    barClassName="custom-off-hour"
+                                                />
+                                            </Progress>
+                                        </td>
+                                        <td>
+                                            <div className="energy-usage-chart-value ml-4">{`${formatConsumptionValue(
+                                                consumption
+                                            )} ${unit}`}</div>
+                                        </td>
+                                        <td>
+                                            <div className="energy-usage-chart-value">{`${percentage}%`}</div>
+                                        </td>
+                                        <td width={50}>
+                                            <TrendsBadge type={badgeType} value={badgePercentage} />
+                                        </td>
+                                    </tr>
+                                )
+                            )}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -55,6 +93,8 @@ const EnergyConsumptionChart = (props) => {
 EnergyConsumptionChart.propTypes = {
     title: PropTypes.string.isRequired,
     subTitle: PropTypes.string.isRequired,
+    style: PropTypes.object,
+    rows: PropTypes.array,
 };
 
 export default EnergyConsumptionChart;
