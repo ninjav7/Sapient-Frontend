@@ -123,24 +123,24 @@ const Sensors = (props) => {
 
                         <div
                             className={`d-flex justify-content-between sensor-container ${
-                                record?.sensor_name === '' ? 'sensor-unattach' : ''
+                                record?.device_id ? '' : 'sensor-unattach'
                             }`}>
                             <div className="d-flex align-items-center mouse-pointer">
                                 <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
-                                    {record?.id}
+                                    {record?.sensor_name}
                                 </Typography.Subheader>
 
-                                {record?.sensor_name === '' ? (
+                                {record?.device_id ? (
+                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                        {record?.device_id}
+                                    </Typography.Subheader>
+                                ) : (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
                                         Not Attached
                                     </Typography.Subheader>
-                                ) : (
-                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                        {record?.sensor_name}
-                                    </Typography.Subheader>
                                 )}
 
-                                {record?.sensor_badge !== '' && (
+                                {record?.sensor_badge !== '' && record?.device_id && (
                                     <Badge
                                         text={record?.sensor_badge}
                                         className="utility-meter-badge font-weight-bold"
