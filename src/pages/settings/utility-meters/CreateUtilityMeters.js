@@ -11,11 +11,10 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { convertToAlphaNumeric } from './utils';
 import { UserStore } from '../../../store/UserStore';
-import { sampleSensors } from './mock';
 import { createUtilityMeterServices } from './services';
 
 const CreateUtilityMeters = (props) => {
-    const { bldgId, utilityMetersDataList, updateUtilityMetersList } = props;
+    const { bldgId } = props;
 
     const history = useHistory();
 

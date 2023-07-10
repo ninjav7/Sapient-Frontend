@@ -17,9 +17,10 @@ import Brick from '../../../sharedComponents/brick';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { Badge } from '../../../sharedComponents/badge';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
-import { deleteUtilityMeterData, getSingleUtilityMeter } from './services';
-import { convertToMac } from './utils';
+import { deleteUtilityMeterData, getSingleUtilityMeter, updateUtilityMeterServices } from './services';
+import { convertToAlphaNumeric, convertToMac } from './utils';
 import './styles.scss';
+import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 
 const DeleteUtility = (props) => {
     const { utilityMeterObj, redirectToMainPage } = props;
@@ -224,8 +225,187 @@ const DeviceHeader = (props) => {
     );
 };
 
+const EditUtilityMeter = (props) => {
+    const { editUtilityModal, handleModalClose, utilityMeterObj, fetchUtilityMeter, bldgId } = props;
+
+    const defaultError = {
+        mac_address: null,
+        modbus_address: null,
+    };
+
+    const [meterObj, setMeterObj] = useState({});
+    const [isUpdating, setUpdating] = useState(false);
+    const [utilityError, setUtilityError] = useState(defaultError);
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, meterObj);
+
+        if (key === 'mac_address') {
+            let formattedValue = convertToAlphaNumeric(value);
+            if (formattedValue.length > 12) return;
+            formattedValue = formattedValue.replace(/..\B/g, '$&:');
+            obj[key] = formattedValue;
+        } else {
+            obj[key] = value;
+        }
+
+        setMeterObj(obj);
+    };
+
+    const updateUtilityMeter = async (device_id, bldg_id) => {
+        let alertObj = Object.assign({}, utilityError);
+
+        let formattedDeviceId = convertToAlphaNumeric(meterObj?.mac_address);
+        if (formattedDeviceId.length < 12) {
+            alertObj.mac_address = 'Please enter 12 digit Device ID.';
+        }
+        if (meterObj?.modbus_address.length === 0) {
+            alertObj.modbus_address = 'Please enter Modbus. It cannot be empty.';
+        }
+
+        setUtilityError(alertObj);
+
+        if (!alertObj.mac_address && !alertObj.modbus_address) {
+            setUpdating(true);
+
+            const params = `?device_id=${device_id}`;
+
+            const reqObj = {
+                deviceIdentifier: meterObj?.mac_address,
+                modbus_address: meterObj?.modbus_address,
+            };
+
+            await updateUtilityMeterServices(params, reqObj)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                        fetchUtilityMeter(bldg_id, device_id);
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update Utility Meter.'
+                                : 'Unable to update Utility Meter due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    handleModalClose();
+                })
+                .catch((e) => {
+                    handleModalClose();
+                });
+        }
+    };
+
+    useEffect(() => {
+        if (editUtilityModal && utilityMeterObj?.id) {
+            let obj = Object.assign({}, utilityMeterObj);
+            obj.mac_address = convertToMac(obj.mac_address);
+            setMeterObj(obj);
+        }
+    }, [editUtilityModal]);
+
+    return (
+        <Modal show={editUtilityModal} onHide={handleModalClose} backdrop="static" keyboard={false} centered>
+            <div className="p-4">
+                <Typography.Header size={Typography.Sizes.lg}>Edit Utility Meter</Typography.Header>
+
+                <Brick sizeInRem={2} />
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Device ID
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter Device ID"
+                        onChange={(e) => {
+                            handleChange('mac_address', e.target.value.trim().toUpperCase());
+                            setUtilityError({ ...utilityError, device_id: null });
+                        }}
+                        error={utilityError?.mac_address}
+                        labelSize={Typography.Sizes.md}
+                        value={meterObj?.mac_address}
+                    />
+                    <Brick sizeInRem={0.25} />
+                    {!utilityError.mac_address && (
+                        <Typography.Body size={Typography.Sizes.sm}>Enter MAC address of A8810.</Typography.Body>
+                    )}
+                </div>
+
+                <Brick sizeInRem={1.25} />
+
+                <div>
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Modbus Address
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter Modbus Address"
+                        type="number"
+                        onChange={(e) => {
+                            if (e.target.value < 0) return;
+                            handleChange('modbus_address', e.target.value);
+                            setUtilityError({ ...utilityError, modbus: null });
+                        }}
+                        error={utilityError?.modbus_address}
+                        labelSize={Typography.Sizes.md}
+                        value={meterObj?.modbus_address}
+                    />
+                </div>
+
+                <Brick sizeInRem={2.5} />
+
+                <div className="d-flex justify-content-between w-100">
+                    <Button
+                        label="Cancel"
+                        size={Button.Sizes.lg}
+                        type={Button.Type.secondaryGrey}
+                        className="w-100"
+                        onClick={() => {
+                            setUtilityError(defaultError);
+                            handleModalClose();
+                            setMeterObj({});
+                        }}
+                    />
+
+                    <Button
+                        label={isUpdating ? 'Updating...' : 'Update'}
+                        size={Button.Sizes.lg}
+                        type={Button.Type.primary}
+                        className="w-100"
+                        disabled={isUpdating}
+                        onClick={() => {
+                            updateUtilityMeter(utilityMeterObj?.id, bldgId);
+                        }}
+                    />
+                </div>
+
+                <Brick sizeInRem={1} />
+            </div>
+        </Modal>
+    );
+};
+
 const DeviceDetails = (props) => {
-    const { utilityMeterObj } = props;
+    const { utilityMeterObj, userPermission } = props;
+
+    const [editUtilityModal, setEditUtilityModal] = useState(false);
+    const handleModalOpen = () => setEditUtilityModal(true);
+    const handleModalClose = () => setEditUtilityModal(false);
 
     return (
         <>
@@ -241,7 +421,7 @@ const DeviceDetails = (props) => {
                     </div>
                 </div>
                 <hr />
-                <div className="device-detail-body">
+                <div className="device-detail-body d-flex justify-content-between">
                     <div>
                         <div>
                             <Typography.Subheader size={Typography.Sizes.sm}>Gateway</Typography.Subheader>
@@ -273,8 +453,24 @@ const DeviceDetails = (props) => {
                             </Typography.Subheader>
                         </div>
                     </div>
+
+                    {userPermission?.user_role === 'admin' ||
+                    userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
+                        <div
+                            className="d-flex justify-content-between align-items-start mouse-pointer"
+                            onClick={handleModalOpen}>
+                            <PenSVG className="mr-2" style={{ marginTop: '0.1rem' }} />
+                            <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
+                        </div>
+                    ) : null}
                 </div>
             </div>
+            <EditUtilityMeter
+                editUtilityModal={editUtilityModal}
+                handleModalClose={handleModalClose}
+                utilityMeterObj={utilityMeterObj}
+                {...props}
+            />
         </>
     );
 };
@@ -327,6 +523,7 @@ const IndividualUtilityMeter = () => {
     };
 
     const fetchUtilityMeter = async (bldg_id, device_id) => {
+        setUtilityMeterObj({});
         await getSingleUtilityMeter(bldg_id, device_id)
             .then((res) => {
                 const response = res?.data;
@@ -386,7 +583,12 @@ const IndividualUtilityMeter = () => {
 
             <Row className="passive-container">
                 <Col lg={4}>
-                    <DeviceDetails utilityMeterObj={utilityMeterObj} />
+                    <DeviceDetails
+                        utilityMeterObj={utilityMeterObj}
+                        userPermission={userPermission}
+                        fetchUtilityMeter={fetchUtilityMeter}
+                        bldgId={bldgId}
+                    />
                 </Col>
 
                 <Col lg={8}>

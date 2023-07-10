@@ -14,7 +14,6 @@ import { userPermissionData } from '../../../store/globalState';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
-import { UtilityMetersStore } from '../../../store/UtilityMetersStore';
 import { getAllUtilityMetersServices } from './services';
 import { convertToMac } from './utils';
 
@@ -51,7 +50,6 @@ const UtilityMeters = () => {
     const [sortBy, setSortBy] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [utilityMetersData, setUtilityMetersData] = useState([]);
-    const utilityMetersDataList = UtilityMetersStore.useState((s) => s.utilityMetersList);
 
     const renderDeviceStatus = (row) => {
         return (
@@ -132,12 +130,6 @@ const UtilityMeters = () => {
         });
     };
 
-    const updateUtilityMetersList = (value) => {
-        UtilityMetersStore.update((s) => {
-            s.utilityMetersList = value;
-        });
-    };
-
     const fetchUtilityMetersWithFilter = async () => {
         setUtilityMetersData([]);
         setIsDataFetching(true);
@@ -182,11 +174,7 @@ const UtilityMeters = () => {
                         </div>
                         {userPermission?.user_role === 'admin' ||
                         userPermission?.permissions?.permissions?.advanced_passive_device_permission?.create ? (
-                            <CreateUtilityMeters
-                                bldgId={bldgId}
-                                utilityMetersDataList={utilityMetersDataList}
-                                updateUtilityMetersList={updateUtilityMetersList}
-                            />
+                            <CreateUtilityMeters bldgId={bldgId} />
                         ) : null}
                     </div>
                 </Col>
