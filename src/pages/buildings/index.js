@@ -22,7 +22,6 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { buildingData } from '../../store/globalState';
 import BuildingKPIs from './BuildingKPIs';
-import Brick from '../../sharedComponents/brick';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import HourlyAvgConsumption from './HourlyAvgConsumption';
 import TopConsumptionWidget from '../../sharedComponents/topConsumptionWidget/TopConsumptionWidget';
@@ -32,12 +31,11 @@ import EquipChartModal from '../chartModal/EquipChartModal';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
 import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
-import { equipTypeEnergyData, spaceTypeEnergyData } from './energy-consumption/mock';
+import './style.css';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -94,9 +92,15 @@ const BuildingOverview = () => {
     const heatMapChartHeight = 125;
     const [energyConsumption, setEnergyConsumption] = useState([]);
     const [topEnergyConsumptionData, setTopEnergyConsumptionData] = useState([]);
+    const [topEnergyDataFetching, setTopEnergyDataFetching] = useState(false);
 
     const [weatherData, setWeatherData] = useState(null);
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
+
+    const [equipTypeData, setEquipTypeData] = useState([]);
+    const [isFetchingEquipType, setFetchingEquipType] = useState(false);
+    const [spaceTypeData, setSpaceTypeData] = useState([]);
+    const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
 
     //EquipChartModel
     const [equipmentFilter, setEquipmentFilter] = useState({});
@@ -142,6 +146,8 @@ const BuildingOverview = () => {
 
     const builidingEquipmentsData = async (timeZone) => {
         const payload = apiRequestBody(startDate, endDate, timeZone);
+        setTopEnergyDataFetching(true);
+
         await fetchBuildingEquipments(bldgId, payload)
             .then((res) => {
                 let response = res.data[0].top_contributors;
@@ -162,8 +168,11 @@ const BuildingOverview = () => {
                     topEnergyData.push(obj);
                 });
                 setTopEnergyConsumptionData(topEnergyData);
+                setTopEnergyDataFetching(false);
             })
-            .catch((error) => {});
+            .catch((error) => {
+                setTopEnergyDataFetching(false);
+            });
     };
 
     const buildingOverallData = async (time_zone) => {
@@ -365,6 +374,7 @@ const BuildingOverview = () => {
     };
 
     const fetchEnergyConsumptionByType = async (time_zone) => {
+        setFetchingEquipType(true);
         const payload = {
             bldg_id: bldgId,
             date_from: encodeURIComponent(new Date(startDate).toISOString()),
@@ -373,9 +383,17 @@ const BuildingOverview = () => {
         };
         await getEnergyConsumptionByType(payload)
             .then((res) => {
-                console.log('SSR res => ', res);
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    let data = response?.data;
+                    data.sort((a, b) => b.on_hours_usage.new - a.on_hours_usage.new);
+                    setEquipTypeData(response?.data);
+                }
+                setFetchingEquipType(false);
             })
-            .catch(() => {});
+            .catch(() => {
+                setFetchingEquipType(false);
+            });
     };
 
     useEffect(() => {
@@ -518,14 +536,16 @@ const BuildingOverview = () => {
                                     <EnergyConsumptionChart
                                         title="Energy Consumption by Space Type"
                                         subTitle="Office-Hours and After-Hours Energy Used"
-                                        rows={spaceTypeEnergyData}
+                                        isFetching={isFetchingEquipType}
+                                        rows={spaceTypeData}
                                     />
                                 </Col>
                                 <Col xl={6}>
                                     <EnergyConsumptionChart
                                         title="Energy Consumption by Equipment Type"
                                         subTitle="Office-Hours and After-Hours Energy Used"
-                                        rows={equipTypeEnergyData}
+                                        isFetching={isFetchingEquipType}
+                                        rows={equipTypeData}
                                     />
                                 </Col>
                             </Row>
@@ -587,20 +607,23 @@ const BuildingOverview = () => {
                             handleClick={handleClick}
                             widgetType="TopEnergyConsumersWidget"
                             tableStyle={{ width: '75%' }}
+                            isFetching={topEnergyDataFetching}
                         />
                     </div>
                     <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Space Type"
                             subTitle="Office-Hours and After-Hours Energy Used"
-                            rows={spaceTypeEnergyData}
+                            isFetching={isFetchingEquipType}
+                            rows={spaceTypeData}
                         />
                     </div>
                     <div className="mt-4">
                         <EnergyConsumptionChart
                             title="Energy Consumption by Equipment Type"
                             subTitle="Office-Hours and After-Hours Energy Used"
-                            rows={equipTypeEnergyData}
+                            isFetching={isFetchingEquipType}
+                            rows={equipTypeData}
                         />
                     </div>
                 </div>
