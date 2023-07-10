@@ -74,6 +74,13 @@ const CreateUtilityMeters = (props) => {
         });
     };
 
+    const handleClose = () => {
+        setIsProcessing(false);
+        setUtilityData(defaultObj);
+        setUtilityError(defaultError);
+        handleModalClose();
+    };
+
     const saveUtilityMeter = async () => {
         let alertObj = Object.assign({}, utilityError);
 
@@ -105,7 +112,10 @@ const CreateUtilityMeters = (props) => {
                             s.notificationMessage = response?.message;
                             s.notificationType = 'success';
                         });
-                        // redirectUserToUtilityMeterPage(utilityData?.id);
+                        if (response?.data?.device_id) {
+                            handleClose();
+                            redirectUserToUtilityMeterPage(response?.data?.device_id);
+                        }
                     } else {
                         UserStore.update((s) => {
                             s.showNotification = true;
@@ -116,17 +126,11 @@ const CreateUtilityMeters = (props) => {
                                 : 'Unable to create Utility Meter due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
+                        handleClose();
                     }
-                    setUtilityData(defaultObj);
-                    setUtilityError(defaultError);
-                    handleModalClose();
-                    setIsProcessing(false);
                 })
                 .catch((e) => {
-                    setIsProcessing(false);
-                    handleModalClose();
-                    setUtilityData(defaultObj);
-                    setUtilityError(defaultError);
+                    handleClose();
                 });
         }
     };

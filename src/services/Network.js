@@ -97,6 +97,7 @@ export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments
 // utility-meters
 export const createUtilityMeter = '/api/v2/devices/utility/create';
 export const getUtilityMeters = '/api/v2/devices/utility/get';
+export const deleteUtilityMeters = '/api/v2/devices/utility/delete';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';

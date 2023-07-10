@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Row, Col } from 'reactstrap';
+import { Link, useParams } from 'react-router-dom';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Brick from '../../../sharedComponents/brick';
 import { pageListSizes } from '../../../helpers/helpers';
@@ -13,8 +14,9 @@ import { userPermissionData } from '../../../store/globalState';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
-import { Link, useParams } from 'react-router-dom';
 import { UtilityMetersStore } from '../../../store/UtilityMetersStore';
+import { getAllUtilityMetersServices } from './services';
+import { convertToMac } from './utils';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -48,7 +50,7 @@ const UtilityMeters = () => {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
-    const [renderList, setRenderList] = useState([]);
+    const [utilityMetersData, setUtilityMetersData] = useState([]);
     const utilityMetersDataList = UtilityMetersStore.useState((s) => s.utilityMetersList);
 
     const renderDeviceStatus = (row) => {
@@ -69,18 +71,18 @@ const UtilityMeters = () => {
                     pathname: `/settings/utility-meters/single/${bldgId}/${row?.id}`,
                 }}>
                 <div size={Typography.Sizes.md} className="typography-wrapper link mouse-pointer">
-                    {row?.device_id}
+                    {row?.mac_address ? convertToMac(row?.mac_address) : ''}
                 </div>
             </Link>
         );
     };
 
     const renderModbus = (row) => {
-        return <Typography.Body size={Typography.Sizes.md}>{row?.modbus}</Typography.Body>;
+        return <Typography.Body size={Typography.Sizes.md}>{row?.modbus_address}</Typography.Body>;
     };
 
     const renderModel = (row) => {
-        return <Typography.Body size={Typography.Sizes.md}>{row?.model_name}</Typography.Body>;
+        return <Typography.Body size={Typography.Sizes.md}>{row?.model}</Typography.Body>;
     };
 
     const headerProps = [
@@ -92,13 +94,13 @@ const UtilityMeters = () => {
         },
         {
             name: 'Device ID',
-            accessor: 'device_id',
+            accessor: 'mac_address',
             callbackValue: renderDeviceId,
             onSort: (method, name) => setSortBy({ method, name }),
         },
         {
             name: 'Modbus',
-            accessor: 'modbus',
+            accessor: 'modbus_address',
             callbackValue: renderModbus,
             onSort: (method, name) => setSortBy({ method, name }),
         },
@@ -111,7 +113,23 @@ const UtilityMeters = () => {
     ];
 
     const currentRow = () => {
-        return renderList;
+        return utilityMetersData;
+    };
+
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Utility Meters',
+                    path: '/settings/utility-meters',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'building-settings';
+        });
     };
 
     const updateUtilityMetersList = (value) => {
@@ -120,38 +138,37 @@ const UtilityMeters = () => {
         });
     };
 
-    useEffect(() => {
-        if (utilityMetersDataList.length === 0) return;
+    const fetchUtilityMetersWithFilter = async () => {
+        setUtilityMetersData([]);
+        setIsDataFetching(true);
 
-        if (deviceStatus === 0) setRenderList([...utilityMetersDataList]);
-        if (deviceStatus === 1) {
-            let newArray = [];
-            utilityMetersDataList.forEach((el) => (el?.status ? newArray.push(el) : null));
-            setRenderList(newArray);
-        }
-        if (deviceStatus === 2) {
-            let newArray = [];
-            utilityMetersDataList.forEach((el) => (el?.status ? null : newArray.push(el)));
-            setRenderList(newArray);
-        }
-    }, [deviceStatus, utilityMetersDataList]);
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        await getAllUtilityMetersServices(bldgId, search, pageNo, pageSize, {
+            ...sorting,
+        })
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    setUtilityMetersData(response?.data);
+                    setTotalItems(response?.data.length);
+                }
+                setIsDataFetching(false);
+            })
+            .catch(() => {
+                setIsDataFetching(false);
+            });
+    };
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Utility Meters',
-                        path: '/settings/utility-meters',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
-        };
+        fetchUtilityMetersWithFilter();
+    }, [bldgId, search, pageNo, pageSize, sortBy]);
+
+    useEffect(() => {
         updateBreadcrumbStore();
     }, []);
 
@@ -180,9 +197,9 @@ const UtilityMeters = () => {
             <Row>
                 <Col lg={12}>
                     <DataTableWidget
+                        id="utility_meters_list"
                         isLoading={isDataFetching}
                         isLoadingComponent={<SkeletonLoading />}
-                        id="utility_meters_list"
                         onSearch={(query) => {
                             setPageNo(1);
                             setSearch(query);
