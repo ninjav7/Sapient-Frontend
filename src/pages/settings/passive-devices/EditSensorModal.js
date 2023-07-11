@@ -10,13 +10,8 @@ import { getSensorsCts, updateSensorData } from './services';
 import { UserStore } from '../../../store/UserStore';
 import './style.css';
 
-const EditSensorModal = ({
-    showModal,
-    closeModal,
-    currentSensorObj,
-    setCurrentSensorObj,
-    fetchPassiveDeviceSensorData,
-}) => {
+const EditSensorModal = (props) => {
+    const { showModal, closeModal, currentSensorObj, fetchPassiveDeviceSensorData } = props;
     const [errorObj, setErrorObj] = useState(null);
     const [isProcessing, setProcessing] = useState(false);
 
@@ -93,7 +88,6 @@ const EditSensorModal = ({
                 }
                 setProcessing(false);
                 closeModal();
-                setCurrentSensorObj(null);
                 setErrorObj(null);
                 setCTSensorObj(null);
                 setCTSensorsList([]);
@@ -150,7 +144,7 @@ const EditSensorModal = ({
                     <Select
                         placeholder="Select Sensor Model"
                         options={ctSensorsList}
-                        currentValue={ctSensorsList.filter((option) => option?.value === ctSensorObj?._id)}
+                        currentValue={ctSensorsList.find((option) => option?.value === ctSensorObj?._id)}
                         onChange={(e) => handleChange('_id', e.value)}
                         isSearchable={true}
                     />
@@ -240,7 +234,6 @@ const EditSensorModal = ({
                         className="w-100"
                         onClick={() => {
                             closeModal();
-                            setCurrentSensorObj(null);
                             setErrorObj(null);
                         }}
                     />
