@@ -1337,8 +1337,8 @@ const PlugRule = () => {
                 isChangedSockets && reassignSensorsToRule(),
                 isChangedRuleDetails && updatePlugRuleData(),
             ]).then((value) => {
-                setRulesToLink({ ruleId: '', socket_id: [] });
-                setRulesToUnLink({ ruleId: '', socket_id: [] });
+                setRulesToLink({ ruleId: '', sensor_id: [] });
+                setRulesToUnLink({ ruleId: '', sensor_id: [] });
                 openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
                 setIsChangedRuleDetails(false);
                 setIsChangedSockets(false);
