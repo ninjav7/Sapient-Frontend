@@ -21,6 +21,7 @@ import { deleteUtilityMeterData, getSingleUtilityMeter, updateUtilityMeterServic
 import { convertToAlphaNumeric, convertToMac } from './utils';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import DeleteModal from './AlertModals';
+import EditUtilitySensor from './EditUtilitySensor';
 import './styles.scss';
 
 const DeleteUtility = (props) => {
@@ -103,7 +104,27 @@ const DeleteUtility = (props) => {
 };
 
 const Sensors = (props) => {
-    const { data, userPermission, handleChartShow, fetchPassiveDeviceSensorData } = props;
+    const { data } = props;
+
+    const [editModal, setEditModal] = useState(false);
+    const closeEditModal = () => setEditModal(false);
+    const showEditModal = () => setEditModal(true);
+
+    const [activeTab, setActiveTab] = useState('configure');
+    const [selectedSensorObj, setSelectedSensorObj] = useState(null);
+
+    const handleModalOpen = (record, type) => {
+        setSelectedSensorObj(record);
+        setActiveTab(type);
+        showEditModal();
+    };
+
+    useEffect(() => {
+        if (!editModal) {
+            setActiveTab('configure');
+            setSelectedSensorObj(null);
+        }
+    }, [editModal]);
 
     return (
         <>
@@ -142,14 +163,14 @@ const Sensors = (props) => {
                             <div className="d-flex align-items-center">
                                 <Button
                                     className="breaker-action-btn"
-                                    onClick={() => handleChartShow(record?.id)}
+                                    onClick={() => handleModalOpen(record, 'metrics')}
                                     type={Button.Type.secondaryGrey}
                                     label=""
                                     icon={<ChartSVG width={16} />}
                                 />
                                 <Button
                                     className="breaker-action-btn ml-2"
-                                    // onClick={openModal}
+                                    onClick={() => handleModalOpen(record, 'configure')}
                                     type={Button.Type.secondaryGrey}
                                     label=""
                                     icon={<PenSVG width={15} />}
@@ -159,6 +180,16 @@ const Sensors = (props) => {
                     </div>
                 );
             })}
+
+            {/* Sensor Modal */}
+            <EditUtilitySensor
+                showModal={editModal}
+                closeModal={closeEditModal}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                selectedSensorObj={selectedSensorObj}
+                {...props}
+            />
         </>
     );
 };
@@ -392,7 +423,7 @@ const EditUtilityMeter = (props) => {
     );
 };
 
-const DeviceDetails = (props) => {
+export const DeviceDetails = (props) => {
     const { utilityMeterObj, userPermission } = props;
 
     const [editUtilityModal, setEditUtilityModal] = useState(false);
@@ -401,8 +432,6 @@ const DeviceDetails = (props) => {
 
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
-            <Brick sizeInRem={1} />
             <div className="device-detail-container">
                 <div className="d-flex">
                     <div className="mr-3">
@@ -468,7 +497,7 @@ const DeviceDetails = (props) => {
 };
 
 const DeviceSensors = (props) => {
-    const { utilityMeterObj, userPermission } = props;
+    const { utilityMeterObj } = props;
 
     return (
         <>
@@ -494,12 +523,7 @@ const DeviceSensors = (props) => {
 
             <Brick sizeInRem={0.25} />
 
-            <Sensors
-                data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []}
-                userPermission={userPermission}
-                handleChartShow={() => {}}
-                fetchPassiveDeviceSensorData={() => {}}
-            />
+            <Sensors data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []} {...props} />
         </>
     );
 };
@@ -554,7 +578,7 @@ const IndividualUtilityMeter = () => {
     }, [deviceId]);
 
     useEffect(() => {
-        if (utilityMeterObj?.id) updateBreadcrumbStore(utilityMeterObj?.mac_address);
+        if (utilityMeterObj?.id) updateBreadcrumbStore(convertToMac(utilityMeterObj?.mac_address));
     }, [utilityMeterObj]);
 
     useEffect(() => {
@@ -575,6 +599,8 @@ const IndividualUtilityMeter = () => {
 
             <Row className="passive-container">
                 <Col lg={4}>
+                    <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
+                    <Brick sizeInRem={1} />
                     <DeviceDetails
                         utilityMeterObj={utilityMeterObj}
                         userPermission={userPermission}
