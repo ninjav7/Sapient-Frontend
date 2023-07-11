@@ -19,11 +19,15 @@ import { Badge } from '../../../sharedComponents/badge';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import { deleteUtilityMeterData, getSingleUtilityMeter, updateUtilityMeterServices } from './services';
 import { convertToAlphaNumeric, convertToMac } from './utils';
-import './styles.scss';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import DeleteModal from './AlertModals';
+import EditUtilitySensor from './EditUtilitySensor';
+import './styles.scss';
 
 const DeleteUtility = (props) => {
     const { utilityMeterObj, redirectToMainPage } = props;
+
+    const [deleteId, setDeleteId] = useState(null);
 
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
@@ -31,9 +35,11 @@ const DeleteUtility = (props) => {
 
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const deleteUtilityMeter = async (id) => {
+    const deleteUtilityMeter = async () => {
+        if (!deleteId) return;
+
         setIsDeleting(true);
-        const params = `?device_id=${id}`;
+        const params = `?device_id=${deleteId}`;
 
         await deleteUtilityMeterData(params)
             .then((res) => {
@@ -58,9 +64,11 @@ const DeleteUtility = (props) => {
                     });
                 }
                 closeDeleteAlert();
+                setDeleteId(null);
             })
             .catch(() => {
                 closeDeleteAlert();
+                setDeleteId(null);
                 setIsDeleting(false);
                 UserStore.update((s) => {
                     s.showNotification = true;
@@ -78,42 +86,45 @@ const DeleteUtility = (props) => {
                         title="Danger Zone"
                         labelButton="Delete Utility Meter"
                         iconButton={<DeleteSVG />}
-                        onClickButton={showDeleteAlert}
+                        onClickButton={() => {
+                            setDeleteId(utilityMeterObj?.id);
+                            showDeleteAlert();
+                        }}
                     />
                 </Col>
             </Row>
-            <Modal show={showDeleteModal} onHide={closeDeleteAlert} centered backdrop="static" keyboard={false}>
-                <Modal.Body className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>Delete Utility Meter</Typography.Header>
-                    <Brick sizeInRem={1.5} />
-                    <Typography.Body size={Typography.Sizes.lg}>
-                        Are you sure you want to delete the Utility Meter?
-                    </Typography.Body>
-                </Modal.Body>
-                <Modal.Footer className="pb-4 pr-4">
-                    <Button
-                        label="Cancel"
-                        size={Button.Sizes.lg}
-                        type={Button.Type.secondaryGrey}
-                        onClick={closeDeleteAlert}
-                    />
-                    <Button
-                        label={isDeleting ? 'Deleting' : 'Delete'}
-                        size={Button.Sizes.lg}
-                        type={Button.Type.primaryDistructive}
-                        disabled={isDeleting}
-                        onClick={() => {
-                            deleteUtilityMeter(utilityMeterObj?.id);
-                        }}
-                    />
-                </Modal.Footer>
-            </Modal>
+            <DeleteModal
+                showModal={showDeleteModal}
+                closeModal={closeDeleteAlert}
+                onDeleteClick={deleteUtilityMeter}
+                onDeleting={isDeleting}
+            />
         </>
     );
 };
 
 const Sensors = (props) => {
-    const { data, userPermission, handleChartShow, fetchPassiveDeviceSensorData } = props;
+    const { data } = props;
+
+    const [editModal, setEditModal] = useState(false);
+    const closeEditModal = () => setEditModal(false);
+    const showEditModal = () => setEditModal(true);
+
+    const [activeTab, setActiveTab] = useState('configure');
+    const [selectedSensorObj, setSelectedSensorObj] = useState(null);
+
+    const handleModalOpen = (record, type) => {
+        setSelectedSensorObj(record);
+        setActiveTab(type);
+        showEditModal();
+    };
+
+    useEffect(() => {
+        if (!editModal) {
+            setActiveTab('configure');
+            setSelectedSensorObj(null);
+        }
+    }, [editModal]);
 
     return (
         <>
@@ -152,14 +163,14 @@ const Sensors = (props) => {
                             <div className="d-flex align-items-center">
                                 <Button
                                     className="breaker-action-btn"
-                                    onClick={() => handleChartShow(record?.id)}
+                                    onClick={() => handleModalOpen(record, 'metrics')}
                                     type={Button.Type.secondaryGrey}
                                     label=""
                                     icon={<ChartSVG width={16} />}
                                 />
                                 <Button
                                     className="breaker-action-btn ml-2"
-                                    // onClick={openModal}
+                                    onClick={() => handleModalOpen(record, 'configure')}
                                     type={Button.Type.secondaryGrey}
                                     label=""
                                     icon={<PenSVG width={15} />}
@@ -169,6 +180,16 @@ const Sensors = (props) => {
                     </div>
                 );
             })}
+
+            {/* Sensor Modal */}
+            <EditUtilitySensor
+                showModal={editModal}
+                closeModal={closeEditModal}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                selectedSensorObj={selectedSensorObj}
+                {...props}
+            />
         </>
     );
 };
@@ -296,9 +317,11 @@ const EditUtilityMeter = (props) => {
                             s.notificationType = 'error';
                         });
                     }
+                    setUpdating(false);
                     handleModalClose();
                 })
                 .catch((e) => {
+                    setUpdating(false);
                     handleModalClose();
                 });
         }
@@ -400,7 +423,7 @@ const EditUtilityMeter = (props) => {
     );
 };
 
-const DeviceDetails = (props) => {
+export const DeviceDetails = (props) => {
     const { utilityMeterObj, userPermission } = props;
 
     const [editUtilityModal, setEditUtilityModal] = useState(false);
@@ -409,8 +432,6 @@ const DeviceDetails = (props) => {
 
     return (
         <>
-            <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
-            <Brick sizeInRem={1} />
             <div className="device-detail-container">
                 <div className="d-flex">
                     <div className="mr-3">
@@ -476,7 +497,7 @@ const DeviceDetails = (props) => {
 };
 
 const DeviceSensors = (props) => {
-    const { utilityMeterObj, userPermission } = props;
+    const { utilityMeterObj } = props;
 
     return (
         <>
@@ -502,12 +523,7 @@ const DeviceSensors = (props) => {
 
             <Brick sizeInRem={0.25} />
 
-            <Sensors
-                data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []}
-                userPermission={userPermission}
-                handleChartShow={() => {}}
-                fetchPassiveDeviceSensorData={() => {}}
-            />
+            <Sensors data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []} {...props} />
         </>
     );
 };
@@ -562,7 +578,7 @@ const IndividualUtilityMeter = () => {
     }, [deviceId]);
 
     useEffect(() => {
-        if (utilityMeterObj?.id) updateBreadcrumbStore(utilityMeterObj?.mac_address);
+        if (utilityMeterObj?.id) updateBreadcrumbStore(convertToMac(utilityMeterObj?.mac_address));
     }, [utilityMeterObj]);
 
     useEffect(() => {
@@ -583,6 +599,8 @@ const IndividualUtilityMeter = () => {
 
             <Row className="passive-container">
                 <Col lg={4}>
+                    <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
+                    <Brick sizeInRem={1} />
                     <DeviceDetails
                         utilityMeterObj={utilityMeterObj}
                         userPermission={userPermission}

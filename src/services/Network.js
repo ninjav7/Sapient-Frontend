@@ -186,8 +186,8 @@ export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
-export const listCts = '/api/config/sensor/get_cts';
-export const updateSensor = '/api/config/sensor/update_sensor';
+export const listCts = '/api/v2/sensor/get_cts';
+export const updateSensor = '/api/v2/sensor/update_sensor';
 
 // plug rules
 export const listPlugRules = '/api/energy/plug_rule/all-plug-rules';

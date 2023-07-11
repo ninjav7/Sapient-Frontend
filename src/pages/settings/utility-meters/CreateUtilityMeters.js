@@ -101,7 +101,6 @@ const CreateUtilityMeters = (props) => {
                 deviceIdentifier: utilityData?.device_id,
                 modbus_address: utilityData?.modbus,
             };
-            console.log('SSR reqObj => ', reqObj);
             await createUtilityMeterServices(reqObj)
                 .then((res) => {
                     const response = res?.data;
