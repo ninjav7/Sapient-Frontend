@@ -7,11 +7,36 @@ import Brick from '../../../sharedComponents/brick';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import { DeviceDetails } from './IndividualUtilityMeter';
-
+import LineChart from '../../../sharedComponents/lineChart/LineChart';
+import Select from '../../../sharedComponents/form/select';
+import { fetchDateRange } from '../../../helpers/formattedChartData';
+import Header from '../../../components/Header';
+import { DateRangeStore } from '../../../store/DateRangeStore';
+import { deviceData } from './utils';
 import './styles.scss';
 
 const MetricsTab = (props) => {
     const { utilityMeterObj } = props;
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
+    const [metric, setMetric] = useState([
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
+        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
+    ]);
+
+    const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
+    const [selectedConsumption, setConsumption] = useState(metric[2].value);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
+
+    const handleUnitChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedUnit(obj.unit);
+        setSelectedConsumptionLabel(obj.Consumption);
+    };
 
     return (
         <React.Fragment>
@@ -51,7 +76,43 @@ const MetricsTab = (props) => {
                 </Col>
 
                 <Col lg={8}>
-                    <div></div>
+                    <div>
+                        <div className="model-sensor-filters-v2 mb-3" style={{ padding: '0rem' }}>
+                            <div className="d-flex">
+                                <div className="mr-2">
+                                    <Select
+                                        defaultValue={selectedConsumption}
+                                        options={metric}
+                                        onChange={(e) => {
+                                            if (e.value === 'passive-power') {
+                                                return;
+                                            }
+                                            setConsumption(e.value);
+                                            handleUnitChange(e.value);
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div
+                                className="btn-group custom-button-group header-widget-styling"
+                                role="group"
+                                aria-label="Basic example">
+                                <Header type="modal" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <LineChart
+                                title={''}
+                                subTitle={''}
+                                tooltipUnit={selectedUnit}
+                                tooltipLabel={selectedConsumptionLabel}
+                                data={deviceData}
+                                dateRange={fetchDateRange(startDate, endDate)}
+                            />
+                        </div>
+                    </div>
                 </Col>
             </Row>
         </React.Fragment>
