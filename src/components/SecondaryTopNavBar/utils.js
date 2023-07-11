@@ -11,6 +11,7 @@ export const configChildRoutes = [
     '/settings/panels/edit-panel',
     '/settings/active-devices/single/',
     '/settings/smart-meters/single/',
+    '/settings/utility-meters/single/',
     '/settings/active-devices/provision',
 ];
 

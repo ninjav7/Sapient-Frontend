@@ -24,6 +24,7 @@ export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
 export const builidingEquipments = '/api/energy/building/equipment';
+export const buildingEnergyConsumption = '/api/v2/metrics/equipmenttype';
 
 // time of day
 export const builidingHourly = '/api/energy/time_of_day/hourly';
@@ -92,6 +93,12 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 //search active and Smart Meter
 export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
+
+// utility-meters
+export const createUtilityMeter = '/api/v2/devices/utility/create';
+export const getUtilityMeters = '/api/v2/devices/utility/get';
+export const updateUtilityMeters = '/api/v2/devices/utility/update';
+export const deleteUtilityMeters = '/api/v2/devices/utility/delete';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';

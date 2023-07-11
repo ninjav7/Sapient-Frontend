@@ -22,6 +22,15 @@ const HorizontalLayout = (props) => {
     const notificationMessage = UserStore.useState((s) => s.notificationMessage);
     const notificationType = UserStore.useState((s) => s.notificationType);
     const componentType = UserStore.useState((s) => s.componentType);
+
+    const deviceRouteList = [
+        '/settings/active-devices/single',
+        '/settings/smart-meters/single',
+        '/settings/utility-meters/single',
+    ];
+
+    const isDeviceRoute = deviceRouteList.some((route) => location.pathname.includes(route));
+
     useEffect(() => {
         if (!location.pathname.includes('/super-user/')) {
             setShowTopNav(true);
@@ -53,8 +62,6 @@ const HorizontalLayout = (props) => {
         });
     };
 
-    const deviceRouteList = ['/settings/active-devices/single', '/settings/smart-meters/single'];
-
     return (
         <React.Fragment>
             <div id="wrapper">
@@ -73,11 +80,7 @@ const HorizontalLayout = (props) => {
                         <div
                             className="energy-page-content"
                             style={{
-                                padding:
-                                    location.pathname.includes(deviceRouteList[0]) ||
-                                    location.pathname.includes(deviceRouteList[1])
-                                        ? '0rem'
-                                        : '2rem',
+                                padding: isDeviceRoute ? '0rem' : '2rem',
                             }}>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>

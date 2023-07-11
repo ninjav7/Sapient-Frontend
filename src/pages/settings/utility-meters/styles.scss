@@ -1,0 +1,25 @@
+@import '../../../assets/scss/colors';
+
+.device-detail-container {
+    padding: 1rem;
+    display: inline-block;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.device-detail-body {
+    padding: 1rem;
+    display: inline-block;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.utility-meter-badge {
+    color: $primary-indigo-600 !important;
+    background: $primary-indigo-100 !important;
+    border: 0.0625rem solid $primary-indigo-50 !important;
+}

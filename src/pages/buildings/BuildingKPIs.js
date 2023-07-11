@@ -12,10 +12,10 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
         <div className={`portfolioKPIs-wrapper`}>
             <KPILabeled
                 title="Total Consumption"
-                value={formatConsumptionValue(overalldata?.total_consumption.now / 1000, 0)}
+                value={formatConsumptionValue(overalldata?.total_consumption?.now / 1000, 0)}
                 badgePrecentage={percentageHandler(
-                    overalldata?.total_consumption.now,
-                    overalldata?.total_consumption.old
+                    overalldata?.total_consumption?.now,
+                    overalldata?.total_consumption?.old
                 )}
                 unit={KPI_UNITS.KWH}
                 tooltipText={
@@ -25,7 +25,7 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
                 }
                 tooltipId="total-bld-cnsmp"
                 type={
-                    overalldata?.total_consumption.now >= overalldata?.total_consumption.old
+                    overalldata?.total_consumption?.now >= overalldata?.total_consumption?.old
                         ? TRENDS_BADGE_TYPES.UPWARD_TREND
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }
@@ -33,10 +33,10 @@ const BuildingKPIs = ({ overalldata = {}, daysCount = 0 }) => {
 
             <KPILabeled
                 title="Average Consumption / sq. ft."
-                value={formatConsumptionValue(overalldata?.average_energy_density.now / 1000, 2)}
+                value={formatConsumptionValue(overalldata?.average_energy_density?.now / 1000, 2)}
                 badgePrecentage={percentageHandler(
-                    overalldata?.average_energy_density.now,
-                    overalldata?.average_energy_density.old
+                    overalldata?.average_energy_density?.now,
+                    overalldata?.average_energy_density?.old
                 )}
                 unit={KPI_UNITS.KWH_SQ_FT}
                 tooltipText={
