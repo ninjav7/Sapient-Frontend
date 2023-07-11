@@ -146,11 +146,13 @@ export function getUnlinkedSocketRules(
     assignedRuleFilterString,
     tagsFilterString,
     withPagination,
-    getParams
+    getParams,
+    isGetOnlyLinked,
+    plugRuleId
 ) {
     let params = '';
     if (withPagination) {
-        params = `?building_id=${activeBuildingId}&page_size=${pageSize}&page_no=${pageNo}`;
+        params = `?building_id=${activeBuildingId}&plug_rule_id=${plugRuleId}&page_size=${pageSize}&page_no=${pageNo}`;
     } else {
         params = `?building_id=${activeBuildingId}`;
     }
@@ -188,6 +190,8 @@ export function getUnlinkedSocketRules(
                     sensor_number: sensorTypeFilterString
                         ? encodeURI(sensorTypeFilterString?.join('+'))
                         : sensorTypeFilterString,
+                    assigned_rule: isGetOnlyLinked ? plugRuleId : 'other',
+                    plug_rule_id: isGetOnlyLinked ? plugRuleId : null,
                     ...getParams,
                 },
                 _.identity
