@@ -4,6 +4,7 @@ import { Row, Col } from 'reactstrap';
 import { Link, useParams } from 'react-router-dom';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import Brick from '../../../sharedComponents/brick';
+import { UserStore } from '../../../store/UserStore';
 import { pageListSizes } from '../../../helpers/helpers';
 import Typography from '../../../sharedComponents/typography';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -14,12 +15,17 @@ import { userPermissionData } from '../../../store/globalState';
 import { DataTableWidget } from '../../../sharedComponents/dataTableWidget';
 import { StatusBadge } from '../../../sharedComponents/statusBadge';
 import CreateUtilityMeters from './CreateUtilityMeters';
-import { getAllUtilityMetersServices } from './services';
+import { deleteUtilityMeterData, getAllUtilityMetersServices } from './services';
 import { convertToMac } from './utils';
+import DeleteModal from './AlertModals';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
         <tr>
+            <th>
+                <Skeleton count={10} />
+            </th>
+
             <th>
                 <Skeleton count={10} />
             </th>
@@ -50,6 +56,82 @@ const UtilityMeters = () => {
     const [sortBy, setSortBy] = useState({});
     const [isDataFetching, setIsDataFetching] = useState(false);
     const [utilityMetersData, setUtilityMetersData] = useState([]);
+
+    // For Delete Utility Meter
+    const [deleteId, setDeleteId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteModal, setShowDelete] = useState(false);
+    const closeDeleteAlert = () => setShowDelete(false);
+    const showDeleteAlert = () => setShowDelete(true);
+
+    const fetchUtilityMetersWithFilter = async () => {
+        setUtilityMetersData([]);
+        setIsDataFetching(true);
+
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+
+        await getAllUtilityMetersServices(bldgId, search, pageNo, pageSize, deviceStatus, {
+            ...sorting,
+        })
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    setUtilityMetersData(response?.data);
+                    setTotalItems(response?.data.length);
+                }
+                setIsDataFetching(false);
+            })
+            .catch(() => {
+                setIsDataFetching(false);
+            });
+    };
+
+    const deleteUtilityMeter = async () => {
+        if (!deleteId) return;
+
+        setIsDeleting(true);
+        const params = `?device_id=${deleteId}`;
+
+        await deleteUtilityMeterData(params)
+            .then((res) => {
+                const response = res?.data;
+                setIsDeleting(false);
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                    fetchUtilityMetersWithFilter();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to delete Utility Meter.'
+                            : 'Unable to delete Utility Meter due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+                closeDeleteAlert();
+                setDeleteId(null);
+            })
+            .catch(() => {
+                closeDeleteAlert();
+                setDeleteId(null);
+                setIsDeleting(false);
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to delete Utility Meter.';
+                    s.notificationType = 'error';
+                });
+            });
+    };
 
     const renderDeviceStatus = (row) => {
         return (
@@ -114,6 +196,15 @@ const UtilityMeters = () => {
         return utilityMetersData;
     };
 
+    const handleDeviceDelete = (record) => {
+        setDeleteId(record?.id);
+        showDeleteAlert();
+    };
+
+    const handleAbleToDeleteRow = (row) => {
+        return true;
+    };
+
     const updateBreadcrumbStore = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
@@ -130,35 +221,9 @@ const UtilityMeters = () => {
         });
     };
 
-    const fetchUtilityMetersWithFilter = async () => {
-        setUtilityMetersData([]);
-        setIsDataFetching(true);
-
-        const sorting = sortBy.method &&
-            sortBy.name && {
-                order_by: sortBy.name,
-                sort_by: sortBy.method,
-            };
-
-        await getAllUtilityMetersServices(bldgId, search, pageNo, pageSize, {
-            ...sorting,
-        })
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    setUtilityMetersData(response?.data);
-                    setTotalItems(response?.data.length);
-                }
-                setIsDataFetching(false);
-            })
-            .catch(() => {
-                setIsDataFetching(false);
-            });
-    };
-
     useEffect(() => {
         fetchUtilityMetersWithFilter();
-    }, [bldgId, search, pageNo, pageSize, sortBy]);
+    }, [bldgId, search, pageNo, pageSize, sortBy, deviceStatus]);
 
     useEffect(() => {
         updateBreadcrumbStore();
@@ -205,12 +270,26 @@ const UtilityMeters = () => {
                         pageSize={pageSize}
                         onPageSize={setPageSize}
                         pageListSizes={pageListSizes}
+                        onDeleteRow={
+                            userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.edit
+                                ? (record, id, row) => handleDeviceDelete(row)
+                                : null
+                        }
+                        isDeletable={(row) => handleAbleToDeleteRow(row)}
                         totalCount={(() => {
                             return totalItems;
                         })()}
                     />
                 </Col>
             </Row>
+
+            <DeleteModal
+                showModal={showDeleteModal}
+                closeModal={closeDeleteAlert}
+                onDeleteClick={deleteUtilityMeter}
+                onDeleting={isDeleting}
+            />
         </React.Fragment>
     );
 };

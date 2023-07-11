@@ -19,11 +19,14 @@ import { Badge } from '../../../sharedComponents/badge';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
 import { deleteUtilityMeterData, getSingleUtilityMeter, updateUtilityMeterServices } from './services';
 import { convertToAlphaNumeric, convertToMac } from './utils';
-import './styles.scss';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
+import DeleteModal from './AlertModals';
+import './styles.scss';
 
 const DeleteUtility = (props) => {
     const { utilityMeterObj, redirectToMainPage } = props;
+
+    const [deleteId, setDeleteId] = useState(null);
 
     const [showDeleteModal, setShowDelete] = useState(false);
     const closeDeleteAlert = () => setShowDelete(false);
@@ -31,9 +34,11 @@ const DeleteUtility = (props) => {
 
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const deleteUtilityMeter = async (id) => {
+    const deleteUtilityMeter = async () => {
+        if (!deleteId) return;
+
         setIsDeleting(true);
-        const params = `?device_id=${id}`;
+        const params = `?device_id=${deleteId}`;
 
         await deleteUtilityMeterData(params)
             .then((res) => {
@@ -58,9 +63,11 @@ const DeleteUtility = (props) => {
                     });
                 }
                 closeDeleteAlert();
+                setDeleteId(null);
             })
             .catch(() => {
                 closeDeleteAlert();
+                setDeleteId(null);
                 setIsDeleting(false);
                 UserStore.update((s) => {
                     s.showNotification = true;
@@ -78,36 +85,19 @@ const DeleteUtility = (props) => {
                         title="Danger Zone"
                         labelButton="Delete Utility Meter"
                         iconButton={<DeleteSVG />}
-                        onClickButton={showDeleteAlert}
+                        onClickButton={() => {
+                            setDeleteId(utilityMeterObj?.id);
+                            showDeleteAlert();
+                        }}
                     />
                 </Col>
             </Row>
-            <Modal show={showDeleteModal} onHide={closeDeleteAlert} centered backdrop="static" keyboard={false}>
-                <Modal.Body className="p-4">
-                    <Typography.Header size={Typography.Sizes.lg}>Delete Utility Meter</Typography.Header>
-                    <Brick sizeInRem={1.5} />
-                    <Typography.Body size={Typography.Sizes.lg}>
-                        Are you sure you want to delete the Utility Meter?
-                    </Typography.Body>
-                </Modal.Body>
-                <Modal.Footer className="pb-4 pr-4">
-                    <Button
-                        label="Cancel"
-                        size={Button.Sizes.lg}
-                        type={Button.Type.secondaryGrey}
-                        onClick={closeDeleteAlert}
-                    />
-                    <Button
-                        label={isDeleting ? 'Deleting' : 'Delete'}
-                        size={Button.Sizes.lg}
-                        type={Button.Type.primaryDistructive}
-                        disabled={isDeleting}
-                        onClick={() => {
-                            deleteUtilityMeter(utilityMeterObj?.id);
-                        }}
-                    />
-                </Modal.Footer>
-            </Modal>
+            <DeleteModal
+                showModal={showDeleteModal}
+                closeModal={closeDeleteAlert}
+                onDeleteClick={deleteUtilityMeter}
+                onDeleting={isDeleting}
+            />
         </>
     );
 };
