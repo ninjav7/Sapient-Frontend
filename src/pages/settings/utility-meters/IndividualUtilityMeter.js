@@ -459,7 +459,7 @@ const DeviceDetails = (props) => {
                         <div
                             className="d-flex justify-content-between align-items-start mouse-pointer"
                             onClick={handleModalOpen}>
-                            <PenSVG className="mr-2" style={{ marginTop: '0.1rem' }} />
+                            <PenSVG className="mr-1" style={{ marginTop: '0.1rem' }} />
                             <Typography.Subheader size={Typography.Sizes.sm}>Edit</Typography.Subheader>
                         </div>
                     ) : null}
