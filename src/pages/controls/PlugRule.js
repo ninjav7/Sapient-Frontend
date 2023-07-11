@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { BuildingStore } from '../../store/BuildingStore';
 import LineChart from '../../sharedComponents/lineChart/LineChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ButtonGroup } from '../../sharedComponents/buttonGroup';
 import { ComponentStore } from '../../store/ComponentStore';
 import Button from '../../sharedComponents/button/Button';
 import { Spinner } from 'reactstrap';
@@ -144,6 +145,8 @@ const notificationUpdatedData = {
 };
 
 const PlugRule = () => {
+    const isLoadingLinkedRef = useRef(false);
+    const isLoadingUnlinkedRef = useRef(false);
     const isLoadingRef = useRef(false);
     const { ruleId } = useParams();
     const { download } = useCSVDownload();
@@ -154,6 +157,7 @@ const PlugRule = () => {
     const [isChangedRuleDetails, setIsChangedRuleDetails] = useState(false);
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSockets, setIsChangedSockets] = useState(false);
+    const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
     const [equipmentTypeFilterString, setEquipmentTypeFilterString] = useState('');
@@ -164,6 +168,11 @@ const PlugRule = () => {
         rule_id: '',
         sensor_id: [],
     });
+    const [rulesToLink, setRulesToLink] = useState({
+        rule_id: '',
+        sensor_id: [],
+    });
+
     const [userPermission] = useAtom(userPermissionData);
     const isViewer = userPermission?.user_role === 'member';
 
@@ -190,10 +199,6 @@ const PlugRule = () => {
     const [showDeleteConditionModal, setShowDeleteConditionModal] = useState(false);
     const [currentScheduleIdToDelete, setCurrentScheduleIdToDelete] = useState();
 
-    const [rulesToLink, setRulesToLink] = useState({
-        rule_id: '',
-        sensor_id: [],
-    });
     const [socketsToReassign, setSocketsToReassign] = useState({});
     const [checkedAllReassignSockets, setCheckedAllReassignSockets] = useState(false);
     const [buildingError, setBuildingError] = useState({ text: '' });
@@ -210,14 +215,19 @@ const PlugRule = () => {
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allSensors, setAllSensors] = useState([]);
-    const [allUnlinkedRuleAdded, setAllUnlinkedRuleAdded] = useState([]);
+    const [socketsTab, setSocketsTab] = useState(0);
+    const [linkedSocketsTabData, setLinkedSocketsTabData] = useState([]);
+    const [unlinkedSocketsTabData, setUnlinkedSocketsTabData] = useState([]);
+
     const [isDeletting, setIsDeletting] = useState(false);
     const [allData, setAllData] = useState([]);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
+    const [pageNoLinked, setPageNoLinked] = useState(1);
     const [totalSocket, setTotalSocket] = useState(0);
-    const [checkedAll, setCheckedAll] = useState(false);
+    const [checkedAllToUnlink, setCheckedToUnlinkAll] = useState(false);
+    const [checkedAllToLink, setCheckedToLinkAll] = useState(false);
     const [options, setOptions] = useState([]);
     const [macOptions, setMacOptions] = useState([]);
     const [locationOptions, setLocationOptions] = useState([]);
@@ -269,7 +279,11 @@ const PlugRule = () => {
     const initialSortingState = { name: '', method: 'ace' };
     const [hoursNew, setHoursNew] = useState([]);
 
-    const [selectedIds, setSelectedIds] = useState([]);
+    const [selectedInitialyIds, setSelectedInitialyIds] = useState([]);
+    const [selectedIdsToUnlink, setSelectedIdsToUnlink] = useState([]);
+    const [selectedIdsToLink, setSelectedIdsToLink] = useState([]);
+    const [showConfirmSelectionToUnlink, setShowConfirmSelectionToUnlink] = useState(false);
+    const [showConfirmSelectionToLink, setShowConfirmSelectionToLink] = useState(false);
     const [fetchedSelectedIds, setFetchedSelectedIds] = useState([]);
     const [sortBy, setSortBy] = useState(initialSortingState);
 
@@ -296,7 +310,7 @@ const PlugRule = () => {
         }
 
         setConditionDisabledDays(disabledDays);
-        if (selectedIds.length) {
+        if (selectedInitialyIds.length) {
             fetchEstimateSensorSavings();
         }
     }, [preparedScheduleData]);
@@ -456,10 +470,9 @@ const PlugRule = () => {
     };
 
     const [lineChartData, setLineChartData] = useState(initialLineChartData());
-
     const getGraphData = async () => {
-        if (selectedIds.length) {
-            await getGraphDataRequest(selectedIds, currentData.id).then((res) => {
+        if (selectedInitialyIds.length) {
+            await getGraphDataRequest(selectedInitialyIds, currentData.id).then((res) => {
                 if (res && res?.data.length) {
                     const formattedData = formatAverageData(res.data);
                     let response = [{ name: `Average Energy demand`, data: formattedData }];
@@ -486,6 +499,8 @@ const PlugRule = () => {
     const [spaceTypeTypeFilterString, setSpaceTypeTypeFilterString] = useState('');
 
     const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+    const [countUnlinkedSockets, setCountUnlinkedSockets] = useState(0);
+    const [countLinkedSockets, setCountLinkedSockets] = useState(0);
     const [assignedRuleFilterString, setAssignedRuleFilterString] = useState('');
     const [tagsFilterString, setTagsFilterString] = useState('');
     const [lastUsedDataFilterString, setLastUsedDataFilterString] = useState('');
@@ -493,13 +508,25 @@ const PlugRule = () => {
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
     const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false);
+
     useEffect(() => {
-        if (selectedIds.length) {
+        if (selectedInitialyIds.length) {
             getGraphData();
             fetchEstimateSensorSavings();
         }
-    }, [selectedIds]);
+    }, [selectedInitialyIds]);
 
+    useEffect(() => {
+        if (selectedIdsToUnlink.length) {
+            setShowConfirmSelectionToUnlink(true);
+        }
+    }, [selectedIdsToUnlink]);
+
+    useEffect(() => {
+        if (selectedIdsToLink.length) {
+            setShowConfirmSelectionToLink(true);
+        }
+    }, [selectedIdsToLink]);
     const handleSwitchChange = () => {
         let obj = currentData;
         obj.is_active = !currentData.is_active;
@@ -507,7 +534,7 @@ const PlugRule = () => {
         setIsChangedRuleDetails(true);
     };
     useEffect(() => {
-        if (isChangedSockets || isChangedRuleDetails) {
+        if (isChangedRuleDetails) {
             setIsDisabledSaveButton(false);
         } else {
             setIsDisabledSaveButton(true);
@@ -639,7 +666,13 @@ const PlugRule = () => {
                 return listToRemoveForReassign.indexOf(val) == -1;
             });
         } else {
-            listOfsocketsToReassign = rulesToLink.sensor_id;
+            // change here
+            const data = linkedSocketsTabData
+                .filter((el) => {
+                    return !selectedIdsToUnlink.includes(el.id);
+                })
+                .map((el) => el.id);
+            listOfsocketsToReassign = [...rulesToLink.sensor_id, ...data];
         }
 
         listOfsocketsToReassign &&
@@ -726,53 +759,76 @@ const PlugRule = () => {
         setSocketsToReassign(newSocketsToReassign);
     };
 
-    const handleRuleStateChange = (value, rule) => {
-        if (value === 'true') {
-            if (checkedAll) {
-                setCheckedAll(false);
-            }
-            let linkedData = [...linkedRuleData];
-            let unLinkedData = [...unLinkedRuleData];
-            let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
-            rule.linked_rule = false;
-            unLinkedData.push(rule);
-            setLinkedRuleData(newLinkedData);
-            setUnLinkedRuleData(unLinkedData);
+    const handleClickConfirmSelection = () => {
+        handleSaveClicked();
+        setIsUnsavedChanges(false);
+    };
+    const handleClickConfirmSelectionToUnlink = () => {
+        handleSaveClicked();
+        setIsUnsavedChanges(true);
+        setShowConfirmSelectionToUnlink(false);
+    };
 
-            let recordToUnLink = rulesToUnLink;
-            recordToUnLink.rule_id = currentData.id;
-            recordToUnLink.sensor_id.push(rule.id);
-            setRulesToUnLink(recordToUnLink);
-            let recordToLink = rulesToLink;
-            let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
-            recordToLink.sensor_id = newRecordToLink;
+    const handleClickConfirmSelectionToLink = () => {
+        handleSaveClicked();
+        setIsUnsavedChanges(true);
+        setShowConfirmSelectionToLink(false);
+    };
+
+    const handleRuleLinkStateChange = (value, rule) => {
+        if (value === 'false') {
+            if (checkedAllToLink) {
+                setCheckedToLinkAll(false);
+            }
+            let recordToLink = { ...rulesToLink };
+            recordToLink.rule_id = currentData.id;
+            recordToLink.sensor_id = [...recordToLink.sensor_id, rule.id];
+            setRulesToLink(recordToLink);
+            setTotalSocket((totalCount) => ++totalCount);
+        }
+
+        if (value === 'true') {
+            if (allSensors.length - selectedInitialyIds.length == 0) {
+                setCheckedToUnlinkAll(true);
+            }
+
+            let recordToLink = { ...rulesToLink };
+            recordToLink.rule_id = currentData.id;
+            recordToLink.sensor_id.filter((el) => el.id !== rule.id);
+
             setRulesToLink(recordToLink);
 
             setTotalSocket((totalCount) => --totalCount);
         }
 
+        const isAdding = value === 'false';
+
+        setSelectedIdsToLink((prevState) => {
+            return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
+        });
+
+        setIsChangedSockets(true);
+    };
+    const handleRuleStateChange = (value, rule) => {
+        if (value === 'true') {
+            if (checkedAllToUnlink) {
+                setCheckedToUnlinkAll(false);
+            }
+            let recordToUnLink = { ...rulesToUnLink };
+            recordToUnLink.rule_id = currentData.id;
+            recordToUnLink.sensor_id.push(rule.id);
+            setRulesToUnLink(recordToUnLink);
+            setTotalSocket((totalCount) => --totalCount);
+        }
+
         if (value === 'false') {
-            if (allSensors.length - selectedIds.length == 0) {
-                setCheckedAll(true);
+            if (allSensors.length - selectedInitialyIds.length == 0) {
+                setCheckedToUnlinkAll(true);
             }
 
-            let linkedData = [...linkedRuleData];
-            let unLinkedData = [...unLinkedRuleData];
-            let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
-            rule.linked_rule = true;
-            linkedData.push(rule);
-            setLinkedRuleData(linkedData);
-            setUnLinkedRuleData(newUnLinkedData);
-
-            let recordToLink = rulesToLink;
-            recordToLink.rule_id = currentData.id;
-            recordToLink.sensor_id.push(rule.id);
-
-            setRulesToLink(recordToLink);
-
             let recordToUnLink = rulesToUnLink;
-            let newRecordToUnLink = recordToUnLink.sensor_id.filter((el) => el !== rule.id);
-            recordToUnLink.sensor_id = newRecordToUnLink;
+            recordToUnLink.rule_id = currentData.id;
+            recordToUnLink.sensor_id.push(rule.id);
 
             setRulesToUnLink(recordToUnLink);
 
@@ -781,8 +837,8 @@ const PlugRule = () => {
 
         const isAdding = value === 'false';
 
-        setSelectedIds((prevState) => {
-            return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
+        setSelectedIdsToUnlink((prevState) => {
+            return isAdding ? prevState.filter((sensorId) => sensorId !== rule.id) : [...prevState, rule.id];
         });
         setIsChangedSockets(true);
     };
@@ -820,7 +876,7 @@ const PlugRule = () => {
             return { action_time, action_type, action_days: preparedActionDays };
         });
 
-        await getEstimateSensorSavingsRequst(formattedSchedule, selectedIds, ruleId).then((res) => {
+        await getEstimateSensorSavingsRequst(formattedSchedule, selectedInitialyIds, ruleId).then((res) => {
             setEstimatedEnergySavings(res.data);
         });
     };
@@ -937,7 +993,6 @@ const PlugRule = () => {
     useEffect(() => {
         removeMacDuplicates();
     }, [macOptions]);
-
     const fetchUnLinkedSocketRules = async () => {
         const sorting = sortBy.method &&
             sortBy.name && {
@@ -945,7 +1000,7 @@ const PlugRule = () => {
                 sort_by: sortBy.method,
             };
 
-        isLoadingRef.current = true;
+        isLoadingUnlinkedRef.current = true;
 
         activeBuildingId &&
             (await getUnlinkedSocketRules(
@@ -964,9 +1019,11 @@ const PlugRule = () => {
                 true,
                 {
                     ...sorting,
-                }
+                },
+                false,
+                ruleId
             ).then((res) => {
-                isLoadingRef.current = false;
+                isLoadingUnlinkedRef.current = false;
 
                 let response = res.data;
                 setAllSensors(response?.data);
@@ -974,13 +1031,9 @@ const PlugRule = () => {
                 setUnlinkedSocketRuleSuccess(res.status);
 
                 let unLinkedData = [];
-                _.uniqBy(response, 'id').forEach((record) => {
-                    record.linked_rule = false;
-                    unLinkedData.push(record);
-                });
+                setCountUnlinkedSockets(response.total_data);
 
-                setUnLinkedRuleData(unLinkedData);
-                setAllUnlinkedRuleAdded((el) => [...el, '1']);
+                setUnlinkedSocketsTabData(response.data);
                 setTotalItems(response?.total_data);
             }));
     };
@@ -1021,41 +1074,56 @@ const PlugRule = () => {
     };
 
     const fetchLinkedSocketRules = async () => {
-        await listLinkSocketRulesRequest(ruleId, currentData.building_id, sortBy)
-            .then((res) => {
-                let response = res.data;
-                let linkedData = [];
+        const sorting = sortBy.method &&
+            sortBy.name && {
+                order_by: sortBy.name,
+                sort_by: sortBy.method,
+            };
+        isLoadingLinkedRef.current = true;
 
-                if (res.statusText === 'OK') {
-                    Array.isArray(res.data.data.sensor_id) && setTotalSocket(res.data.data.sensor_id.length);
+        await getUnlinkedSocketRules(
+            pageSize,
+            pageNo,
+            activeBuildingId,
+            equpimentTypeFilterString,
+            macTypeFilterString,
+            locationTypeFilterString,
+            sensorTypeFilterString,
+            floorTypeFilterString,
+            spaceTypeFilterString,
+            spaceTypeTypeFilterString,
+            assignedRuleFilterString,
+            tagsFilterString,
+            true,
+            {
+                ...sorting,
+            },
+            true,
+            ruleId
+        )
+            .then((res) => {
+                isLoadingLinkedRef.current = false;
+                let response = res.data;
+                let linkedIds = [];
+
+                if (res.success) {
+                    Array.isArray(res.data.data) && setTotalSocket(res.data.data.length);
                 }
 
-                setSelectedIds(response.data.sensor_id || []);
-                setFetchedSelectedIds(response.data.sensor_id || []);
-
-                response.data.sensor_id.forEach((record) => {
-                    record.linked_rule = true;
-                    linkedData.push(record);
+                response.data.forEach((record) => {
+                    linkedIds.push(record.id);
                 });
-
-                setLinkedRuleData(linkedData);
+                setSelectedInitialyIds(linkedIds || []);
+                setLinkedSocketsTabData(response.data);
+                setCountLinkedSockets(response.total_data);
             })
             .catch((error) => {});
     };
 
     useEffect(() => {
-        const selectedSensors = [...selectedIds]
-            .map((id) => allSensors.find((sensor) => sensor.id === id))
-            .map((sensor) => ({ ...sensor, linked_rule: true }));
-
-        setRulesToLink((prevState) => ({ ...prevState, sensor_id: selectedIds }));
-        setLinkedRuleData(selectedSensors);
-    }, [allData.length, allSensors?.length]);
-
-    useEffect(() => {
         unLinkedRuleData.length > 0 &&
-            setUnLinkedRuleData((olState) => olState.filter((sensor) => !selectedIds.includes(sensor.id)));
-    }, [selectedIds.length, selectedIds.length, unLinkedRuleData.length]);
+            setUnLinkedRuleData((olState) => olState.filter((sensor) => !selectedInitialyIds.includes(sensor.id)));
+    }, [selectedInitialyIds.length, selectedInitialyIds.length, unLinkedRuleData.length]);
 
     useEffect(() => {
         if (ruleId === null) {
@@ -1097,33 +1165,15 @@ const PlugRule = () => {
 
         setAllLinkedRuleData(allRuleData);
     }, [linkedRuleData, unLinkedRuleData]);
-    const currentRow = () => {
-        if (selectedRuleFilter === 0) {
-            return allSensors;
-        }
-        if (selectedRuleFilter === 1) {
-            //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
-            // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
-                const foundSelectedSensor = allSensors.find((sensor) => sensor.id === id);
-                if (foundSelectedSensor) {
-                    acc.push(foundSelectedSensor);
-                }
-                return acc;
-            }, []);
-        }
 
-        return allSensors.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
-    };
-
-    const selectAllRowsSensors = async (checkedAll) => {
+    const selectAllRowsSensors = async (checkedAllToUnlink) => {
         const sorting = sortBy.method &&
             sortBy.name && {
                 order_by: sortBy.name,
                 sort_by: sortBy.method,
             };
 
-        if (checkedAll) {
+        if (checkedAllToUnlink) {
             activeBuildingId &&
                 (await getUnlinkedSocketRules(
                     pageSize,
@@ -1164,11 +1214,11 @@ const PlugRule = () => {
             });
             setRulesToUnLink({ rule_id: ruleId, sensor_id: idOfSelectedSockets });
             setRulesToLink([]);
-            setSelectedIds([]);
+            setSelectedInitialyIds([]);
             setTotalSocket(0);
         }
         setIsChangedSockets(true);
-        setCheckedAll(checkedAll);
+        setCheckedToUnlinkAll(checkedAllToUnlink);
     };
 
     const currentRowSearched = () => {
@@ -1178,7 +1228,7 @@ const PlugRule = () => {
         if (selectedRuleFilter === 1) {
             //@TODO Here should be all the data, stored somewhere, const selectedItems = [{} .... {}];
             // and show when user selected but switched page
-            return selectedIds.reduce((acc, id) => {
+            return selectedInitialyIds.reduce((acc, id) => {
                 const foundSelectedSensor = allSearchData.find((sensor) => sensor.id === id);
                 if (foundSelectedSensor) {
                     acc.push(foundSelectedSensor);
@@ -1187,7 +1237,7 @@ const PlugRule = () => {
             }, []);
         }
 
-        return allSearchData.filter(({ id }) => !selectedIds.find((sensorId) => sensorId === id));
+        return allSearchData.filter(({ id }) => !selectedInitialyIds.find((sensorId) => sensorId === id));
     };
 
     const renderTagCell = (row) => {
@@ -1287,15 +1337,19 @@ const PlugRule = () => {
                 isChangedSockets && reassignSensorsToRule(),
                 isChangedRuleDetails && updatePlugRuleData(),
             ]).then((value) => {
+                setRulesToLink({ ruleId: '', socket_id: [] });
+                setRulesToUnLink({ ruleId: '', socket_id: [] });
                 openSnackbar({ ...notificationUpdatedData, type: Notification.Types.success, duration: 5000 });
                 setIsChangedRuleDetails(false);
                 setIsChangedSockets(false);
                 fetchUnLinkedSocketRules();
+                fetchLinkedSocketRules();
                 fetchFiltersForSensors();
                 fetchLinkedSocketRules();
                 fetchPlugRuleDetail();
             });
         }
+        setIsUnsavedChanges(false);
     };
 
     const renderAssignRule = useCallback(
@@ -1766,6 +1820,7 @@ const PlugRule = () => {
         }
         return dateArray;
     }
+
     const checkIfDayInOffRange = (day, result) => {
         let offDayArray = [];
         result.forEach((el) => {
@@ -1806,6 +1861,11 @@ const PlugRule = () => {
         });
         setOffHoursPlots(offPeriods);
     };
+
+    const handlerClick = useCallback((id) => {
+        setSocketsTab(id);
+    }, []);
+
     const buildingIdProps = {
         label: 'Choose building',
         defaultValue: currentData.building_id || localStorage.getItem('buildingId'),
@@ -1831,10 +1891,7 @@ const PlugRule = () => {
                         </div>
                         <div>
                             <span className="plug-rule-device-name">{currentData.name}</span>
-                            <span className="plug-rule-device-timezone">
-                                {' '}
-                                TimeZone- {bldgTimeZone}
-                            </span>
+                            <span className="plug-rule-device-timezone"> TimeZone- {bldgTimeZone}</span>
                         </div>
                     </div>
                     <div className="plug-rule-right-flex">
@@ -2052,110 +2109,247 @@ const PlugRule = () => {
                     )}
                 </>
             )}
-
             {selectedTab === 1 && (
                 <div className="plug-rule-body">
-                    {currentData.building_id ? (
-                        <DataTableWidget
-                            isLoading={isLoadingRef.current}
-                            isLoadingComponent={<SkeletonLoading />}
-                            id="sockets-plug-rules"
-                            onSearch={(query) => {
-                                setPageNo(1);
-                                setSearch(query);
-                            }}
-                            filterOptions={filterOptions}
-                            buttonGroupFilterOptions={[
-                                { label: 'All' },
-                                { label: 'Selected' },
-                                { label: 'Unselected' },
+                    <div className="plug-rule-body-header">
+                        <ButtonGroup
+                            noPadding={true}
+                            currentButtonId={socketsTab}
+                            buttons={[
+                                { label: `Linked (${countLinkedSockets})` },
+                                { label: `Unlinked (${countUnlinkedSockets})` },
                             ]}
-                            onDownload={() => handleDownloadCsv()}
-                            onStatus={setSelectedRuleFilter}
-                            rows={currentRow()}
-                            searchResultRows={currentRowSearched()}
-                            filterOptions={filterOptions}
-                            headers={[
-                                {
-                                    name: 'Equipment Type',
-                                    accessor: 'equipment_type_name',
-                                    callbackValue: renderEquipType,
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'Location',
-                                    accessor: 'equipment_link_location',
-                                    callbackValue: renderLocation,
-                                },
-                                {
-                                    name: 'Space Type',
-                                    accessor: 'space_type',
-                                    onSort: (method, name) => setSortBy({ method, name }),
-                                },
-                                {
-                                    name: 'MAC Address',
-                                    accessor: 'device_link',
-                                },
-                                {
-                                    name: 'Sensors',
-                                    accessor: 'sensor_count',
-                                },
-                                {
-                                    name: 'Assigned Rule',
-                                    accessor: 'assigned_rule',
-                                    callbackValue: renderAssignRule,
-                                },
-                                {
-                                    name: 'Tags',
-                                    accessor: 'tags',
-                                    callbackValue: renderTagCell,
-                                },
-                                {
-                                    name: 'Last Data',
-                                    accessor: 'last_data',
-                                    callbackValue: renderLastUsedCell,
-                                },
-                            ]}
-                            onCheckboxRow={alert}
-                            customCheckAll={() => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="vehicle1"
-                                    name="vehicle1"
-                                    checked={checkedAll}
-                                    onChange={() => selectAllRowsSensors(!checkedAll)}
-                                />
-                            )}
-                            customCheckboxForCell={(record) => (
-                                <Checkbox
-                                    label=""
-                                    type="checkbox"
-                                    id="socket_rule"
-                                    name="socket_rule"
-                                    checked={selectedIds.includes(record?.id) || checkedAll}
-                                    value={selectedIds.includes(record?.id) || checkedAll ? true : false}
-                                    onChange={(e) => {
-                                        setSensorIdNow(record?.id);
-                                        handleRuleStateChange(e.target.value, record);
-                                    }}
-                                />
-                            )}
-                            onPageSize={setPageSize}
-                            onChangePage={setPageNo}
-                            pageSize={pageSize}
-                            currentPage={pageNo}
-                            totalCount={(() => {
-                                if (search) {
-                                    return totalItemsSearched;
-                                }
-                                if (selectedRuleFilter === 0) {
-                                    return totalItems;
-                                }
-
-                                return 0;
-                            })()}
+                            handleButtonClick={handlerClick}
                         />
+                        <Button
+                            onClick={() => handleClickConfirmSelection()}
+                            className="sub-button"
+                            label={'Confirm selection'}
+                            disabled={!isChangedSockets}
+                            size={Button.Sizes.lg}
+                            type={Button.Type.primary}>
+                            Confirm selection
+                        </Button>
+                    </div>
+                    {currentData.building_id ? (
+                        <div>
+                            {socketsTab == 0 && (
+                                <DataTableWidget
+                                    isLoading={isLoadingLinkedRef.current}
+                                    isLoadingComponent={<SkeletonLoading />}
+                                    id="sockets-plug-rules"
+                                    onSearch={(query) => {
+                                        setPageNo(1);
+                                        setSearch(query);
+                                    }}
+                                    hideStatusFilter={true}
+                                    filterOptions={filterOptions}
+                                    buttonGroupFilterOptions={[
+                                        { label: 'All' },
+                                        { label: 'Selected' },
+                                        { label: 'Unselected' },
+                                    ]}
+                                    onDownload={() => handleDownloadCsv()}
+                                    onStatus={setSelectedRuleFilter}
+                                    rows={linkedSocketsTabData}
+                                    searchResultRows={currentRowSearched()}
+                                    headers={[
+                                        {
+                                            name: 'Equipment Type',
+                                            accessor: 'equipment_type_name',
+                                            callbackValue: renderEquipType,
+                                            onSort: (method, name) => setSortBy({ method, name }),
+                                        },
+                                        {
+                                            name: 'Location',
+                                            accessor: 'equipment_link_location',
+                                            callbackValue: renderLocation,
+                                        },
+                                        {
+                                            name: 'Space Type',
+                                            accessor: 'space_type',
+                                            onSort: (method, name) => setSortBy({ method, name }),
+                                        },
+                                        {
+                                            name: 'MAC Address',
+                                            accessor: 'device_link',
+                                        },
+                                        {
+                                            name: 'Sensors',
+                                            accessor: 'sensor_count',
+                                        },
+                                        {
+                                            name: 'Assigned Rule',
+                                            accessor: 'assigned_rule',
+                                            callbackValue: renderAssignRule,
+                                        },
+                                        {
+                                            name: 'Tags',
+                                            accessor: 'tags',
+                                            callbackValue: renderTagCell,
+                                        },
+                                        {
+                                            name: 'Last Data',
+                                            accessor: 'last_data',
+                                            callbackValue: renderLastUsedCell,
+                                        },
+                                    ]}
+                                    onCheckboxRow={alert}
+                                    customCheckAll={() => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="vehicle1"
+                                            name="vehicle1"
+                                            checked={checkedAllToUnlink}
+                                            onChange={() => selectAllRowsSensors(!checkedAllToUnlink)}
+                                        />
+                                    )}
+                                    customCheckboxForCell={(record) => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="socket_rule"
+                                            name="socket_rule"
+                                            checked={!selectedIdsToUnlink.includes(record?.id) || checkedAllToUnlink}
+                                            value={
+                                                !selectedIdsToUnlink.includes(record?.id) || checkedAllToUnlink
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={(e) => {
+                                                setSensorIdNow(record?.id);
+                                                handleRuleStateChange(e.target.value, record);
+                                            }}
+                                        />
+                                    )}
+                                    onPageSize={setPageSize}
+                                    onChangePage={setPageNo}
+                                    pageSize={pageSize}
+                                    currentPage={pageNoLinked}
+                                    totalCount={(() => {
+                                        if (search) {
+                                            return totalItemsSearched;
+                                        }
+                                        if (selectedRuleFilter === 0) {
+                                            return totalItems;
+                                        }
+
+                                        return 0;
+                                    })()}
+                                />
+                            )}
+
+                            {socketsTab == 1 && (
+                                <DataTableWidget
+                                    isLoading={isLoadingUnlinkedRef.current}
+                                    isLoadingComponent={<SkeletonLoading />}
+                                    id="sockets-plug-rules"
+                                    onSearch={(query) => {
+                                        setPageNo(1);
+                                        setSearch(query);
+                                    }}
+                                    hideStatusFilter={true}
+                                    // handleClickComfirmSelection={() => handleClickConfirmSelectionToLink()}
+                                    // showConfirmSelection={true}
+                                    // disableConfirmSelection={!isChangedSockets}
+                                    filterOptions={filterOptions}
+                                    buttonGroupFilterOptions={[
+                                        { label: 'All' },
+                                        { label: 'Selected' },
+                                        { label: 'Unselected' },
+                                    ]}
+                                    onDownload={() => handleDownloadCsv()}
+                                    onStatus={setSelectedRuleFilter}
+                                    rows={unlinkedSocketsTabData}
+                                    searchResultRows={currentRowSearched()}
+                                    headers={[
+                                        {
+                                            name: 'Equipment Type',
+                                            accessor: 'equipment_type_name',
+                                            callbackValue: renderEquipType,
+                                            onSort: (method, name) => setSortBy({ method, name }),
+                                        },
+                                        {
+                                            name: 'Location',
+                                            accessor: 'equipment_link_location',
+                                            callbackValue: renderLocation,
+                                        },
+                                        {
+                                            name: 'Space Type',
+                                            accessor: 'space_type',
+                                            onSort: (method, name) => setSortBy({ method, name }),
+                                        },
+                                        {
+                                            name: 'MAC Address',
+                                            accessor: 'device_link',
+                                        },
+                                        {
+                                            name: 'Sensors',
+                                            accessor: 'sensor_count',
+                                        },
+                                        {
+                                            name: 'Assigned Rule',
+                                            accessor: 'assigned_rule',
+                                            callbackValue: renderAssignRule,
+                                        },
+                                        {
+                                            name: 'Tags',
+                                            accessor: 'tags',
+                                            callbackValue: renderTagCell,
+                                        },
+                                        {
+                                            name: 'Last Data',
+                                            accessor: 'last_data',
+                                            callbackValue: renderLastUsedCell,
+                                        },
+                                    ]}
+                                    onCheckboxRow={alert}
+                                    customCheckAll={() => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="vehicle1"
+                                            name="vehicle1"
+                                            checked={setCheckedToLinkAll}
+                                            onChange={() => selectAllRowsSensors(!setCheckedToLinkAll)}
+                                        />
+                                    )}
+                                    customCheckboxForCell={(record) => (
+                                        <Checkbox
+                                            label=""
+                                            type="checkbox"
+                                            id="socket_rule"
+                                            name="socket_rule"
+                                            checked={selectedIdsToLink.includes(record?.id) || checkedAllToLink}
+                                            value={
+                                                selectedIdsToLink.includes(record?.id) || checkedAllToLink
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={(e) => {
+                                                setSensorIdNow(record?.id);
+                                                handleRuleLinkStateChange(e.target.value, record);
+                                            }}
+                                        />
+                                    )}
+                                    onPageSize={setPageSize}
+                                    onChangePage={setPageNo}
+                                    pageSize={pageSize}
+                                    currentPage={pageNo}
+                                    totalCount={(() => {
+                                        if (search) {
+                                            return totalItemsSearched;
+                                        }
+                                        if (selectedRuleFilter === 0) {
+                                            return totalItems;
+                                        }
+
+                                        return 0;
+                                    })()}
+                                />
+                            )}
+                        </div>
                     ) : (
                         <div className="sockets-no-selected-building">
                             <Typography.Subheader size={Typography.Sizes.md}>
@@ -2199,7 +2393,6 @@ const PlugRule = () => {
                     />
                 </Modal.Footer>
             </Modal>
-
             <Modal
                 show={showDeleteConditionModal}
                 onHide={() => setShowDeleteConditionModal(false)}
@@ -2233,7 +2426,6 @@ const PlugRule = () => {
                     />
                 </Modal.Footer>
             </Modal>
-
             <Modal
                 show={showSocketsModal}
                 onHide={() => handleCloseSocketsModal()}

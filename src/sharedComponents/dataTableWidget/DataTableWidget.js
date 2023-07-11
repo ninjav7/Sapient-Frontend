@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-
+import {Button} from '../button';
 import { Table } from '../table';
 import { DropDownIcon } from '../dropDowns/dropDownButton';
 import Typography from '../typography';
@@ -248,6 +248,7 @@ const DataTableWidget = (props) => {
             <div className="data-table-widget-wrapper">
                 <div className="table-filter-widget-wrapper d-flex">
                     <Filters
+                        hideStatusFilter={props?.hideStatusFilter}
                         selectedFiltersValues={selectedFiltersValues}
                         onChangeFilterValue={setSelectedFiltersValues}
                         onChange={setSelectedFilters}
@@ -298,7 +299,8 @@ const DataTableWidget = (props) => {
                                     //@TODO Needs to be refactored
                                     let isEditable = props?.isEditable && props?.isEditable(row);
                                     let isDeletable = props?.isDeletable && props?.isDeletable(row);
-                                    const isActionButtonShown = props.onEditRow && isEditable || props.onDeleteRow && isDeletable;
+                                    const isActionButtonShown =
+                                        (props.onEditRow && isEditable) || (props.onDeleteRow && isDeletable);
 
                                     const menuListPerRowProps = {};
                                     if (props.onEditRow && isEditable) {
@@ -310,7 +312,7 @@ const DataTableWidget = (props) => {
                                             props.onDeleteRow(event, row.id, row, props);
                                     }
                                     /********/
-                                    
+
                                     return (
                                         <Table.Row {...(row.rowProps || {})} key={generateID()}>
                                             {props.onCheckboxRow &&
@@ -345,9 +347,11 @@ const DataTableWidget = (props) => {
                                             {isActionsAvailable && (
                                                 <Table.Cell align="center" width={36}>
                                                     <div className="d-flex justify-content-center">
-                                                        {isActionButtonShown && <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
-                                                            <MenuListPerRow {...menuListPerRowProps} />
-                                                        </DropDownIcon>}
+                                                        {isActionButtonShown && (
+                                                            <DropDownIcon classNameMenu="data-table-widget-drop-down-button-menu">
+                                                                <MenuListPerRow {...menuListPerRowProps} />
+                                                            </DropDownIcon>
+                                                        )}
                                                     </div>
                                                 </Table.Cell>
                                             )}
