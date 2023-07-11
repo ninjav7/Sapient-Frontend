@@ -12,7 +12,7 @@ import Select from '../../../sharedComponents/form/select';
 import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
-import { deviceData } from './utils';
+import { lineChartMock } from './mock';
 import './styles.scss';
 
 const MetricsTab = (props) => {
@@ -108,7 +108,7 @@ const MetricsTab = (props) => {
                                 subTitle={''}
                                 tooltipUnit={selectedUnit}
                                 tooltipLabel={selectedConsumptionLabel}
-                                data={deviceData}
+                                data={lineChartMock}
                                 dateRange={fetchDateRange(startDate, endDate)}
                             />
                         </div>

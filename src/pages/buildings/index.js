@@ -530,25 +530,6 @@ const BuildingOverview = () => {
                                 handleRouteChange={() => handleRouteChange('/energy/time-of-day')}
                                 showRouteBtn={true}
                             />
-
-                            <Row className="container-gap">
-                                <Col xl={6}>
-                                    <EnergyConsumptionChart
-                                        title="Energy Consumption by Space Type"
-                                        subTitle="Office-Hours and After-Hours Energy Used"
-                                        isFetching={isFetchingEquipType}
-                                        rows={spaceTypeData}
-                                    />
-                                </Col>
-                                <Col xl={6}>
-                                    <EnergyConsumptionChart
-                                        title="Energy Consumption by Equipment Type"
-                                        subTitle="Office-Hours and After-Hours Energy Used"
-                                        isFetching={isFetchingEquipType}
-                                        rows={equipTypeData}
-                                    />
-                                </Col>
-                            </Row>
                         </>
                     ) : (
                         <>
@@ -612,20 +593,21 @@ const BuildingOverview = () => {
                     </div>
                     <div className="mt-4">
                         <EnergyConsumptionChart
-                            title="Energy Consumption by Space Type"
-                            subTitle="Office-Hours and After-Hours Energy Used"
-                            isFetching={isFetchingEquipType}
-                            rows={spaceTypeData}
-                        />
-                    </div>
-                    <div className="mt-4">
-                        <EnergyConsumptionChart
                             title="Energy Consumption by Equipment Type"
                             subTitle="Office-Hours and After-Hours Energy Used"
                             isFetching={isFetchingEquipType}
                             rows={equipTypeData}
                         />
                     </div>
+                    {/* Commented below component as part of ticket PLT-1083 */}
+                    {/* <div className="mt-4">
+                        <EnergyConsumptionChart
+                            title="Energy Consumption by Space Type"
+                            subTitle="Office-Hours and After-Hours Energy Used"
+                            isFetching={isFetchingEquipType}
+                            rows={spaceTypeData}
+                        />
+                    </div> */}
                 </div>
             </div>
 

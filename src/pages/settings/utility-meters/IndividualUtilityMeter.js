@@ -442,7 +442,7 @@ export const DeviceDetails = (props) => {
                     </div>
                 </div>
                 <hr />
-                <div className="device-detail-body d-flex justify-content-between">
+                <div className="d-flex justify-content-between">
                     <div>
                         <div>
                             <Typography.Subheader size={Typography.Sizes.sm}>Gateway</Typography.Subheader>
