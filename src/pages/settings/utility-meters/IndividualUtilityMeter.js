@@ -286,9 +286,11 @@ const EditUtilityMeter = (props) => {
                             s.notificationType = 'error';
                         });
                     }
+                    setUpdating(false);
                     handleModalClose();
                 })
                 .catch((e) => {
+                    setUpdating(false);
                     handleModalClose();
                 });
         }
