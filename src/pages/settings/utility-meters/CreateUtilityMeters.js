@@ -22,7 +22,7 @@ const CreateUtilityMeters = (props) => {
         status: true,
         device_id: '',
         model: 'pulse counter',
-        model_name: 'Sapient Pulse (CLSM-1001)',
+        model_name: 'Sapient Pulse',
         modbus: '',
     };
 
@@ -35,7 +35,7 @@ const CreateUtilityMeters = (props) => {
     const utilityMeterModel = [
         {
             value: 'pulse counter',
-            label: 'Sapient Pulse (CLSM-1001)',
+            label: 'Sapient Pulse',
         },
     ];
 
