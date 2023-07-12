@@ -1,3 +1,22 @@
+export const utilityMeterModel = [
+    {
+        value: 'pulse counter',
+        label: 'Sapient Pulse',
+    },
+    {
+        value: 'shadow-50',
+        label: 'Sapient Shadow 50',
+    },
+    {
+        value: 'shadow-100',
+        label: 'Sapient Shadow 100',
+    },
+    {
+        value: 'shadow-250',
+        label: 'Sapient Shadow 250',
+    },
+];
+
 // Convert to Alpha Numeric
 export const convertToAlphaNumeric = (input) => {
     const sanitizedInput = input.replace(/[^a-zA-Z0-9]/g, '');

@@ -209,7 +209,9 @@ const DeviceHeader = (props) => {
                     </Typography.Header>
                     {utilityMeterObj?.sensors && (
                         <Typography.Subheader size={Typography.Sizes.md} className="d-flex align-items-center mt-1">
-                            {`${utilityMeterObj?.sensors.length} Pulse Counters`}
+                            {utilityMeterObj?.model.includes('Shadow')
+                                ? `Shadow Meter`
+                                : `${utilityMeterObj?.sensors.length} Pulse Counters`}
                         </Typography.Subheader>
                     )}
                 </div>
@@ -453,7 +455,13 @@ export const DeviceDetails = (props) => {
                         <div>
                             <Typography.Subheader size={Typography.Sizes.sm}>Modbus Device Name</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
-                            <Typography.Subheader size={Typography.Sizes.md}>A8832</Typography.Subheader>
+                            {utilityMeterObj?.model && (
+                                <Typography.Subheader size={Typography.Sizes.md}>
+                                    {utilityMeterObj?.model.includes('Shadow')
+                                        ? `Shark` + utilityMeterObj?.model.split('Sapient Shadow ')[1]
+                                        : `A8832`}
+                                </Typography.Subheader>
+                            )}
                         </div>
                     </div>
 
@@ -544,7 +552,11 @@ const IndividualUtilityMeter = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success && response?.data.length === 1) {
-                    setUtilityMeterObj(response?.data[0]);
+                    let fetchedData = response?.data[0];
+                    if (fetchedData?.model.includes('Shadow')) {
+                        fetchedData.sensors = [fetchedData.sensors[0]];
+                    }
+                    setUtilityMeterObj(fetchedData);
                 }
             })
             .catch(() => {});
