@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { Row, Col } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
 import Modal from 'react-bootstrap/Modal';
 import { UserStore } from '../../../store/UserStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -320,19 +321,24 @@ const EditUtilityMeter = (props) => {
                             s.notificationType = 'success';
                         });
                         fetchUtilityMeter(bldg_id, device_id);
+                        handleModalClose();
                     } else {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = response?.message
-                                ? response?.message
-                                : res
-                                ? 'Unable to update Utility Meter.'
-                                : 'Unable to update Utility Meter due to Internal Server Error!.';
-                            s.notificationType = 'error';
-                        });
+                        if (!response?.success && response?.message.includes('identifier already exists')) {
+                            alertObj.mac_address = 'Device ID with given name already exists.';
+                            setUtilityError(alertObj);
+                        } else {
+                            UserStore.update((s) => {
+                                s.showNotification = true;
+                                s.notificationMessage = response?.message
+                                    ? response?.message
+                                    : res
+                                    ? 'Unable to update Utility Meter.'
+                                    : 'Unable to update Utility Meter due to Internal Server Error!.';
+                                s.notificationType = 'error';
+                            });
+                        }
                     }
                     setUpdating(false);
-                    handleModalClose();
                 })
                 .catch((e) => {
                     setUpdating(false);
@@ -368,7 +374,7 @@ const EditUtilityMeter = (props) => {
                         placeholder="Enter Device ID"
                         onChange={(e) => {
                             handleChange('mac_address', e.target.value.trim().toUpperCase());
-                            setUtilityError({ ...utilityError, device_id: null });
+                            setUtilityError({ ...utilityError, mac_address: null });
                         }}
                         error={utilityError?.mac_address}
                         labelSize={Typography.Sizes.md}
@@ -513,12 +519,12 @@ export const DeviceDetails = (props) => {
 };
 
 const DeviceSensors = (props) => {
-    const { utilityMeterObj, sensorsList } = props;
+    const { utilityMeterObj, sensorsList, isFetchingSensors } = props;
 
     return (
         <>
             <Typography.Subheader size={Typography.Sizes.md}>
-                {`Sensors (${utilityMeterObj?.sensor_count})`}
+                {`Sensors ${utilityMeterObj?.sensor_count ? `(${utilityMeterObj?.sensor_count})` : ''}`}
             </Typography.Subheader>
 
             <Brick sizeInRem={0.5} />
@@ -539,7 +545,13 @@ const DeviceSensors = (props) => {
 
             <Brick sizeInRem={0.25} />
 
-            <Sensors data={sensorsList} {...props} />
+            {isFetchingSensors ? (
+                <div className="mt-2">
+                    <Skeleton count={8} height={40} />
+                </div>
+            ) : (
+                <Sensors data={sensorsList} {...props} />
+            )}
         </>
     );
 };
@@ -554,7 +566,6 @@ const IndividualUtilityMeter = () => {
     const [sensorsList, setSensorsList] = useState([]);
     const [locationsList, setLocationsList] = useState([]);
 
-    const [isFetchingUtilityMeter, setFetchingUtilityMeter] = useState(false);
     const [isFetchingSensors, setFetchingSensors] = useState(false);
 
     const redirectToMainPage = () => {
@@ -680,6 +691,7 @@ const IndividualUtilityMeter = () => {
                         setLocationsList={setLocationsList}
                         fetchLocationsList={fetchLocationsList}
                         fetchUtilityMeterSensors={fetchUtilityMeterSensors}
+                        isFetchingSensors={isFetchingSensors}
                     />
                 </Col>
             </Row>
