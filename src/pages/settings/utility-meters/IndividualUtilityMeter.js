@@ -27,8 +27,9 @@ import { convertToAlphaNumeric, convertToMac } from './utils';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import DeleteModal from './AlertModals';
 import EditUtilitySensor from './EditUtilitySensor';
-import './styles.scss';
 import { getLocationData } from '../passive-devices/services';
+import { convertNullToSingleQuotes } from './helper';
+import './styles.scss';
 
 const DeleteUtility = (props) => {
     const { utilityMeterObj, redirectToMainPage } = props;
@@ -120,7 +121,8 @@ const Sensors = (props) => {
     const [selectedSensorObj, setSelectedSensorObj] = useState(null);
 
     const handleModalOpen = (record, type) => {
-        setSelectedSensorObj(record);
+        const convertedObj = convertNullToSingleQuotes(record);
+        setSelectedSensorObj(convertedObj);
         setActiveTab(type);
         showEditModal();
     };
@@ -671,11 +673,13 @@ const IndividualUtilityMeter = () => {
                 <Col lg={8}>
                     <DeviceSensors
                         bldgId={bldgId}
+                        deviceId={deviceId}
                         utilityMeterObj={utilityMeterObj}
                         sensorsList={sensorsList}
                         locationsList={locationsList}
                         setLocationsList={setLocationsList}
                         fetchLocationsList={fetchLocationsList}
+                        fetchUtilityMeterSensors={fetchUtilityMeterSensors}
                     />
                 </Col>
             </Row>

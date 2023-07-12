@@ -16,6 +16,9 @@ import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { lineChartMock } from './mock';
 import { convertToMac } from './utils';
+import { compareObjData } from '../../../helpers/helpers';
+import { updateUtilitySensorServices } from './services';
+import { UserStore } from '../../../store/UserStore';
 import './styles.scss';
 
 const MetricsTab = (props) => {
@@ -213,12 +216,7 @@ const ConfigureTab = (props) => {
 
             <div className="d-flex w-100 form-gap">
                 <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>
-                        {`Building`}
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>{`Building`}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <InputTooltip
                         placeholder="Enter building name"
@@ -229,12 +227,7 @@ const ConfigureTab = (props) => {
                 </div>
 
                 <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>
-                        Submeter Location
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select Location"
@@ -272,14 +265,76 @@ const ConfigureTab = (props) => {
 };
 
 const EditUtilitySensor = (props) => {
-    const { showModal, closeModal, activeTab, setActiveTab, selectedSensorObj, utilityMeterObj } = props;
+    const {
+        showModal,
+        closeModal,
+        activeTab,
+        setActiveTab,
+        selectedSensorObj,
+        utilityMeterObj,
+        fetchUtilityMeterSensors,
+        bldgId,
+        deviceId,
+    } = props;
+
+    const defaultSensorError = {
+        utility_provider: null,
+        utility_meter_serial_number: null,
+        pulse_weight: null,
+    };
 
     const [sensorObj, setSensorObj] = useState(null);
+    const [sensorErrorObj, setSensorErrorObj] = useState(defaultSensorError);
+    const [isSensorUpdating, setSensorUpdating] = useState(false);
 
     const handleConfigChange = (key, value) => {
         let obj = Object.assign({}, sensorObj);
         obj[key] = value;
         setSensorObj(obj);
+    };
+
+    const updateUtilitySensorData = async () => {
+        setSensorUpdating(true);
+
+        const payload = {
+            pulse_weight: sensorObj?.pulse_weight,
+            utility_provider: sensorObj?.utility_provider,
+            utility_meter_make: sensorObj?.utility_meter_make,
+            utility_meter_model: sensorObj?.utility_meter_model,
+            utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
+            service_location: sensorObj?.service_location,
+        };
+
+        const params = `?sensor_id=${sensorObj?.id}`;
+
+        await updateUtilitySensorServices(params, payload)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message;
+                        s.notificationType = 'success';
+                    });
+                    fetchUtilityMeterSensors(bldgId, deviceId);
+                    closeModal();
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to update utility meter sensor.'
+                            : 'Unable to utility meter sensor due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+                setSensorUpdating(false);
+            })
+            .catch((e) => {
+                setSensorUpdating(false);
+                closeModal();
+            });
     };
 
     useEffect(() => {
@@ -338,12 +393,12 @@ const EditUtilitySensor = (props) => {
 
                             <div>
                                 <Button
-                                    label={'Save'}
+                                    label={isSensorUpdating ? `Saving ...` : `Save`}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={closeModal}
+                                    onClick={updateUtilitySensorData}
                                     className="ml-2"
-                                    disabled={true}
+                                    disabled={compareObjData(selectedSensorObj, sensorObj) || isSensorUpdating}
                                 />
                             </div>
                         </div>

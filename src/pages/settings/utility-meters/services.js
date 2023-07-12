@@ -4,6 +4,7 @@ import {
     deleteUtilityMeters,
     getUtilityMeters,
     getUtilityMeterSensor,
+    updateSensorV2,
     updateUtilityMeters,
 } from '../../../services/Network';
 
@@ -40,4 +41,8 @@ export function deleteUtilityMeterData(params) {
 export function getUtilitySensorsList(bldgId, deviceId) {
     const params = `?building_id=${bldgId}&device_id=${deviceId}`;
     return axiosInstance.get(`${getUtilityMeterSensor}${params}`).then((res) => res);
+}
+
+export function updateUtilitySensorServices(params, payload) {
+    return axiosInstance.post(`${updateSensorV2}${params}`, payload).then((res) => res);
 }
