@@ -95,10 +95,10 @@ export const searchDevices = '/api/config/devices/search_by_devices';
 export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 
 // utility-meters
-export const createUtilityMeter = '/api/v2/devices/utility/create';
-export const getUtilityMeters = '/api/v2/devices/utility/get';
-export const updateUtilityMeters = '/api/v2/devices/utility/update';
-export const deleteUtilityMeters = '/api/v2/devices/utility/delete';
+export const createUtilityMeter = '/api/v2/config/device/utility/create';
+export const getUtilityMeters = '/api/v2/config/device/utility/get';
+export const updateUtilityMeters = '/api/v2/config/device/utility/update';
+export const deleteUtilityMeters = '/api/v2/config/device/utility/delete';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
@@ -186,7 +186,6 @@ export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
-export const listCts = '/api/v2/sensor/get_cts';
 export const updateSensor = '/api/v2/sensor/update_sensor';
 
 // plug rules
@@ -210,3 +209,8 @@ export const linkSocket = '/api/user_role/plug_rule/link_socket';
 
 // weather api
 export const getWeather = '/api/weather/';
+
+// sensor v2
+export const listCts = '/api/v2/config/sensor/get-cts';
+export const getUtilityMeterSensor = '/api/v2/config/sensor/update';
+export const updateSensorV2 = '/api/v2/config/sensor/update';
