@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
+import { Spinner } from 'reactstrap';
 import { buildingData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
@@ -15,34 +16,58 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { lineChartMock } from './mock';
-import { convertToMac } from './utils';
-import { compareObjData } from '../../../helpers/helpers';
+import { convertToMac, utilityMeterChartMetrics } from './utils';
+import { apiRequestBody, compareObjData } from '../../../helpers/helpers';
 import { updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
+import { getSensorGraphData } from '../passive-devices/services';
+import { BuildingStore } from '../../../store/BuildingStore';
 import './styles.scss';
 
 const MetricsTab = (props) => {
-    const { utilityMeterObj } = props;
+    const { utilityMeterObj, sensorObj, bldgId } = props;
+
+    console.log('SSR sensorObj => ', sensorObj);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
-    const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
-        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
-        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-    ]);
+    const [metric, setMetric] = useState(utilityMeterChartMetrics);
+    const [fetchingChartData, setFetchingChartData] = useState(false);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
-    const [selectedConsumption, setConsumption] = useState(metric[2].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
 
     const handleUnitChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedUnit(obj.unit);
-        setSelectedConsumptionLabel(obj.Consumption);
+        setConsumption(value);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
+        setSelectedConsumptionLabel(obj?.Consumption);
     };
+
+    const fetchSensorsChartData = async (selected_consmption, start_date, end_date, sensor_obj) => {
+        if (!sensor_obj?.id) return;
+
+        setFetchingChartData(true);
+
+        const payload = apiRequestBody(start_date, end_date, timeZone);
+        const params = `?sensor_id=${sensor_obj?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+
+        await getSensorGraphData(params, payload)
+            .then((res) => {
+                console.log('SSR res => ', res);
+                setFetchingChartData(false);
+            })
+            .catch(() => {
+                setFetchingChartData(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchSensorsChartData(selectedConsumption, startDate, endDate, sensorObj);
+    }, [startDate, endDate, selectedConsumption, sensorObj]);
 
     return (
         <React.Fragment>
@@ -90,10 +115,6 @@ const MetricsTab = (props) => {
                                         defaultValue={selectedConsumption}
                                         options={metric}
                                         onChange={(e) => {
-                                            if (e.value === 'passive-power') {
-                                                return;
-                                            }
-                                            setConsumption(e.value);
                                             handleUnitChange(e.value);
                                         }}
                                     />
@@ -108,16 +129,22 @@ const MetricsTab = (props) => {
                             </div>
                         </div>
 
-                        <div>
-                            <LineChart
-                                title={''}
-                                subTitle={''}
-                                tooltipUnit={selectedUnit}
-                                tooltipLabel={selectedConsumptionLabel}
-                                data={lineChartMock}
-                                dateRange={fetchDateRange(startDate, endDate)}
-                            />
-                        </div>
+                        {fetchingChartData ? (
+                            <div className="chart-custom-loader">
+                                <Spinner color="primary" />
+                            </div>
+                        ) : (
+                            <div>
+                                <LineChart
+                                    title={''}
+                                    subTitle={''}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    data={lineChartMock}
+                                    dateRange={fetchDateRange(startDate, endDate)}
+                                />
+                            </div>
+                        )}
                     </div>
                 </Col>
             </Row>
@@ -441,7 +468,9 @@ const EditUtilitySensor = (props) => {
                     </div>
 
                     <div className="p-default">
-                        {activeTab === 'metrics' && <MetricsTab utilityMeterObj={utilityMeterObj} />}
+                        {activeTab === 'metrics' && (
+                            <MetricsTab utilityMeterObj={utilityMeterObj} sensorObj={sensorObj} {...props} />
+                        )}
 
                         {activeTab === 'configure' && (
                             <ConfigureTab
