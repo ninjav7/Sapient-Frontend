@@ -126,7 +126,7 @@ const MetricsTab = (props) => {
 };
 
 const ConfigureTab = (props) => {
-    const { sensorObj, handleChange, locationsList } = props;
+    const { sensorObj, handleChange, locationsList, sensorErrorObj } = props;
     const [buildingListData] = useAtom(buildingData);
     const [bldgName, setBldgName] = useState('');
 
@@ -153,6 +153,7 @@ const ConfigureTab = (props) => {
                         }}
                         labelSize={Typography.Sizes.md}
                         value={sensorObj?.utility_provider}
+                        error={sensorErrorObj?.utility_provider}
                     />
                 </div>
 
@@ -172,6 +173,7 @@ const ConfigureTab = (props) => {
                         }}
                         labelSize={Typography.Sizes.md}
                         value={sensorObj?.utility_meter_serial_number}
+                        error={sensorErrorObj?.utility_meter_serial_number}
                     />
                 </div>
             </div>
@@ -195,6 +197,7 @@ const ConfigureTab = (props) => {
                         }}
                         labelSize={Typography.Sizes.md}
                         value={sensorObj?.pulse_weight}
+                        error={sensorErrorObj?.pulse_weight}
                     />
                 </div>
 
@@ -289,56 +292,80 @@ const EditUtilitySensor = (props) => {
 
     const handleConfigChange = (key, value) => {
         let obj = Object.assign({}, sensorObj);
+        let errorObj = Object.assign({}, sensorErrorObj);
         obj[key] = value;
+        errorObj[key] = null;
         setSensorObj(obj);
+        setSensorErrorObj(errorObj);
     };
 
     const updateUtilitySensorData = async () => {
-        setSensorUpdating(true);
+        let alertObj = Object.assign({}, sensorErrorObj);
 
-        const payload = {
-            pulse_weight: sensorObj?.pulse_weight,
-            utility_provider: sensorObj?.utility_provider,
-            utility_meter_make: sensorObj?.utility_meter_make,
-            utility_meter_model: sensorObj?.utility_meter_model,
-            utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
-            service_location: sensorObj?.service_location,
-        };
+        if (sensorObj?.utility_provider.length === 0) {
+            alertObj.utility_provider = 'Please enter utility provider. It cannot be empty.';
+        }
 
-        const params = `?sensor_id=${sensorObj?.id}`;
+        if (sensorObj?.utility_meter_serial_number.length === 0) {
+            alertObj.utility_meter_serial_number = 'Please enter serial number for utility meter. It cannot be empty.';
+        }
 
-        await updateUtilitySensorServices(params, payload)
-            .then((res) => {
-                const response = res?.data;
-                if (response?.success) {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message;
-                        s.notificationType = 'success';
-                    });
-                    fetchUtilityMeterSensors(bldgId, deviceId);
+        if (sensorObj?.pulse_weight.length === 0) {
+            alertObj.pulse_weight = 'Please enter pulse weight. It cannot be empty.';
+        }
+
+        setSensorErrorObj(alertObj);
+
+        if (!alertObj.utility_provider && !alertObj.utility_meter_serial_number && !alertObj.pulse_weight) {
+            setSensorUpdating(true);
+
+            const payload = {
+                pulse_weight: sensorObj?.pulse_weight,
+                utility_provider: sensorObj?.utility_provider,
+                utility_meter_make: sensorObj?.utility_meter_make,
+                utility_meter_model: sensorObj?.utility_meter_model,
+                utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
+                service_location: sensorObj?.service_location,
+            };
+
+            const params = `?sensor_id=${sensorObj?.id}`;
+
+            await updateUtilitySensorServices(params, payload)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                        fetchUtilityMeterSensors(bldgId, deviceId);
+                        closeModal();
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update utility meter sensor.'
+                                : 'Unable to utility meter sensor due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    setSensorUpdating(false);
+                })
+                .catch((e) => {
+                    setSensorUpdating(false);
                     closeModal();
-                } else {
-                    UserStore.update((s) => {
-                        s.showNotification = true;
-                        s.notificationMessage = response?.message
-                            ? response?.message
-                            : res
-                            ? 'Unable to update utility meter sensor.'
-                            : 'Unable to utility meter sensor due to Internal Server Error!.';
-                        s.notificationType = 'error';
-                    });
-                }
-                setSensorUpdating(false);
-            })
-            .catch((e) => {
-                setSensorUpdating(false);
-                closeModal();
-            });
+                });
+        }
     };
 
     useEffect(() => {
-        if (!showModal) setSensorObj(null);
+        if (!showModal) {
+            setSensorObj(null);
+            setSensorErrorObj(defaultSensorError);
+        }
     }, [showModal]);
 
     useEffect(() => {
@@ -408,7 +435,12 @@ const EditUtilitySensor = (props) => {
                         {activeTab === 'metrics' && <MetricsTab utilityMeterObj={utilityMeterObj} />}
 
                         {activeTab === 'configure' && (
-                            <ConfigureTab sensorObj={sensorObj} handleChange={handleConfigChange} {...props} />
+                            <ConfigureTab
+                                sensorObj={sensorObj}
+                                handleChange={handleConfigChange}
+                                sensorErrorObj={sensorErrorObj}
+                                {...props}
+                            />
                         )}
                     </div>
                 </div>
