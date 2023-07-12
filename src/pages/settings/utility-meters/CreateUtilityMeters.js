@@ -4,12 +4,11 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import { Button } from '../../../sharedComponents/button';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
-import { BuildingStore } from '../../../store/BuildingStore';
 import Select from '../../../sharedComponents/form/select';
 import { useHistory } from 'react-router-dom';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
-import { convertToAlphaNumeric } from './utils';
+import { convertToAlphaNumeric, utilityMeterModel } from './utils';
 import { UserStore } from '../../../store/UserStore';
 import { createUtilityMeterServices } from './services';
 
@@ -31,13 +30,6 @@ const CreateUtilityMeters = (props) => {
         model: null,
         modbus: null,
     };
-
-    const utilityMeterModel = [
-        {
-            value: 'pulse counter',
-            label: 'Sapient Pulse',
-        },
-    ];
 
     const [modal, setModal] = useState(false);
     const handleModalOpen = () => setModal(true);
@@ -115,19 +107,25 @@ const CreateUtilityMeters = (props) => {
                             redirectUserToUtilityMeterPage(response?.data?.device_id);
                         }
                     } else {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = response?.message
-                                ? response?.message
-                                : res
-                                ? 'Unable to create Utility Meter.'
-                                : 'Unable to create Utility Meter due to Internal Server Error!.';
-                            s.notificationType = 'error';
-                        });
-                        handleClose();
+                        if (!response?.success && response?.message.includes('identifier already exists')) {
+                            alertObj.device_id = 'Device ID with given name already exists.';
+                            setUtilityError(alertObj);
+                        } else {
+                            UserStore.update((s) => {
+                                s.showNotification = true;
+                                s.notificationMessage = response?.message
+                                    ? response?.message
+                                    : res
+                                    ? 'Unable to create Utility Meter.'
+                                    : 'Unable to create Utility Meter due to Internal Server Error!.';
+                                s.notificationType = 'error';
+                            });
+                        }
                     }
+                    setIsProcessing(false);
                 })
                 .catch((e) => {
+                    setIsProcessing(false);
                     handleClose();
                 });
         }
@@ -137,10 +135,11 @@ const CreateUtilityMeters = (props) => {
         <>
             <div className="d-flex">
                 <Button
-                    label={'Add Utility Meter'}
+                    label={isProcessing ? 'Adding Utility Meter ...' : 'Add Utility Meter'}
                     size={Button.Sizes.md}
                     type={Button.Type.primary}
                     icon={<PlusSVG />}
+                    disabled={isProcessing}
                     onClick={handleModalOpen}
                 />
             </div>
@@ -167,7 +166,7 @@ const CreateUtilityMeters = (props) => {
                                 setUtilityError({ ...utilityError, model: null });
                             }}
                             error={utilityError?.model}
-                            isSearchable={false}
+                            isSearchable={true}
                         />
                     </div>
 
@@ -192,7 +191,7 @@ const CreateUtilityMeters = (props) => {
                             value={utilityData?.device_id}
                         />
                         <Brick sizeInRem={0.25} />
-                        {!utilityError.mac_address && (
+                        {!utilityError.device_id && (
                             <Typography.Body size={Typography.Sizes.sm}>Enter MAC address of A8810.</Typography.Body>
                         )}
                     </div>
