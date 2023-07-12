@@ -17,12 +17,18 @@ import Brick from '../../../sharedComponents/brick';
 import colorPalette from '../../../assets/scss/_colors.scss';
 import { Badge } from '../../../sharedComponents/badge';
 import { DangerZone } from '../../../sharedComponents/dangerZone';
-import { deleteUtilityMeterData, getSingleUtilityMeter, updateUtilityMeterServices } from './services';
+import {
+    deleteUtilityMeterData,
+    getSingleUtilityMeter,
+    getUtilitySensorsList,
+    updateUtilityMeterServices,
+} from './services';
 import { convertToAlphaNumeric, convertToMac } from './utils';
 import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import DeleteModal from './AlertModals';
 import EditUtilitySensor from './EditUtilitySensor';
 import './styles.scss';
+import { getLocationData } from '../passive-devices/services';
 
 const DeleteUtility = (props) => {
     const { utilityMeterObj, redirectToMainPage } = props;
@@ -104,7 +110,7 @@ const DeleteUtility = (props) => {
 };
 
 const Sensors = (props) => {
-    const { data } = props;
+    const { data, fetchLocationsList, bldgId, setLocationsList } = props;
 
     const [editModal, setEditModal] = useState(false);
     const closeEditModal = () => setEditModal(false);
@@ -120,9 +126,14 @@ const Sensors = (props) => {
     };
 
     useEffect(() => {
+        // When Edit Cnnfiguration Modal open
+        if (editModal) fetchLocationsList(bldgId);
+
+        // When Edit Cnnfiguration Modal close
         if (!editModal) {
             setActiveTab('configure');
             setSelectedSensorObj(null);
+            setLocationsList([]);
         }
     }, [editModal]);
 
@@ -130,7 +141,7 @@ const Sensors = (props) => {
         <>
             {data.map((record, index) => {
                 return (
-                    <div key={index}>
+                    <div key={record?.id}>
                         <Brick sizeInRem={0.75} />
 
                         <div
@@ -139,7 +150,7 @@ const Sensors = (props) => {
                             }`}>
                             <div className="d-flex align-items-center mouse-pointer">
                                 <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
-                                    {record?.sensor_name}
+                                    {index + 1}
                                 </Typography.Subheader>
 
                                 {record?.device_id ? (
@@ -207,11 +218,11 @@ const DeviceHeader = (props) => {
                     <Typography.Header size={Typography.Sizes.md} className="mr-2">
                         {utilityMeterObj?.mac_address && convertToMac(utilityMeterObj?.mac_address)}
                     </Typography.Header>
-                    {utilityMeterObj?.sensors && (
+                    {utilityMeterObj?.model && (
                         <Typography.Subheader size={Typography.Sizes.md} className="d-flex align-items-center mt-1">
                             {utilityMeterObj?.model.includes('Shadow')
                                 ? `Shadow Meter`
-                                : `${utilityMeterObj?.sensors.length} Pulse Counters`}
+                                : `${utilityMeterObj?.sensor_count} Pulse Counters`}
                         </Typography.Subheader>
                     )}
                 </div>
@@ -234,11 +245,10 @@ const DeviceHeader = (props) => {
                     {userPermission?.user_role === 'admin' ||
                     userPermission?.permissions?.permissions?.advanced_passive_device_permission?.edit ? (
                         <Button
-                            // label={isProcessing ? 'Saving' : 'Save'}
                             label={'Save'}
                             size={Button.Sizes.md}
                             type={Button.Type.primary}
-                            // onClick={updatePassiveDeviceData}
+                            onClick={redirectToMainPage}
                             className="ml-2"
                         />
                     ) : null}
@@ -447,18 +457,19 @@ export const DeviceDetails = (props) => {
                 <div className="d-flex justify-content-between">
                     <div>
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.sm}>Gateway</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm}>{`Gateway`}</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
-                            <Typography.Subheader size={Typography.Sizes.md}>A8810</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.md}>{`A8810`}</Typography.Subheader>
                         </div>
                         <Brick sizeInRem={1.5} />
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.sm}>Modbus Device Name</Typography.Subheader>
+                            <Typography.Subheader
+                                size={Typography.Sizes.sm}>{`Modbus Device Name`}</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             {utilityMeterObj?.model && (
                                 <Typography.Subheader size={Typography.Sizes.md}>
                                     {utilityMeterObj?.model.includes('Shadow')
-                                        ? `Shark` + utilityMeterObj?.model.split('Sapient Shadow ')[1]
+                                        ? `Shark` + utilityMeterObj?.model.split(`Sapient Shadow `)[1]
                                         : `A8832`}
                                 </Typography.Subheader>
                             )}
@@ -467,7 +478,7 @@ export const DeviceDetails = (props) => {
 
                     <div>
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.sm}>Device ID</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm}>{`Device ID`}</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 {utilityMeterObj?.mac_address && convertToMac(utilityMeterObj?.mac_address)}
@@ -475,7 +486,7 @@ export const DeviceDetails = (props) => {
                         </div>
                         <Brick sizeInRem={1.5} />
                         <div>
-                            <Typography.Subheader size={Typography.Sizes.sm}>Modbus Address</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.sm}>{`Modbus Address`}</Typography.Subheader>
                             <Brick sizeInRem={0.25} />
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 {utilityMeterObj?.modbus_address}
@@ -494,27 +505,22 @@ export const DeviceDetails = (props) => {
                     ) : null}
                 </div>
             </div>
-            <EditUtilityMeter
-                editUtilityModal={editUtilityModal}
-                handleModalClose={handleModalClose}
-                utilityMeterObj={utilityMeterObj}
-                {...props}
-            />
+            <EditUtilityMeter editUtilityModal={editUtilityModal} handleModalClose={handleModalClose} {...props} />
         </>
     );
 };
 
 const DeviceSensors = (props) => {
-    const { utilityMeterObj } = props;
+    const { utilityMeterObj, sensorsList } = props;
 
     return (
         <>
-            {utilityMeterObj?.sensors && (
-                <Typography.Subheader size={Typography.Sizes.md}>
-                    {`Sensors (${utilityMeterObj?.sensors.length})`}
-                </Typography.Subheader>
-            )}
+            <Typography.Subheader size={Typography.Sizes.md}>
+                {`Sensors (${utilityMeterObj?.sensor_count})`}
+            </Typography.Subheader>
+
             <Brick sizeInRem={0.5} />
+
             <div className="active-sensor-header">
                 <div className="search-container mr-2">
                     <SearchSVG className="mb-1" />
@@ -531,7 +537,7 @@ const DeviceSensors = (props) => {
 
             <Brick sizeInRem={0.25} />
 
-            <Sensors data={utilityMeterObj?.sensors ? utilityMeterObj?.sensors : []} {...props} />
+            <Sensors data={sensorsList} {...props} />
         </>
     );
 };
@@ -539,8 +545,15 @@ const DeviceSensors = (props) => {
 const IndividualUtilityMeter = () => {
     const history = useHistory();
     const { bldgId, deviceId } = useParams();
+
     const [userPermission] = useAtom(userPermissionData);
+
     const [utilityMeterObj, setUtilityMeterObj] = useState({});
+    const [sensorsList, setSensorsList] = useState([]);
+    const [locationsList, setLocationsList] = useState([]);
+
+    const [isFetchingUtilityMeter, setFetchingUtilityMeter] = useState(false);
+    const [isFetchingSensors, setFetchingSensors] = useState(false);
 
     const redirectToMainPage = () => {
         history.push({ pathname: `/settings/utility-meters/${bldgId}` });
@@ -552,14 +565,45 @@ const IndividualUtilityMeter = () => {
             .then((res) => {
                 const response = res?.data;
                 if (response?.success && response?.data.length === 1) {
-                    let fetchedData = response?.data[0];
-                    if (fetchedData?.model.includes('Shadow')) {
-                        fetchedData.sensors = [fetchedData.sensors[0]];
-                    }
-                    setUtilityMeterObj(fetchedData);
+                    setUtilityMeterObj(response?.data[0]);
                 }
             })
             .catch(() => {});
+    };
+
+    const fetchLocationsList = async (bldg_id) => {
+        const response = await getLocationData(`/${bldg_id}`);
+        if (response?.data.length === 0) {
+            setLocationsList([]);
+            return;
+        }
+        let data = [];
+        response.data.sort((a, b) => {
+            return a.location_name.localeCompare(b.location_name);
+        });
+        response.data.forEach((record) => {
+            data.push({
+                label: record?.location_name,
+                value: record?.location_id,
+            });
+        });
+        setLocationsList(data);
+    };
+
+    const fetchUtilityMeterSensors = async (bldg_id, device_id) => {
+        setSensorsList([]);
+        setFetchingSensors(true);
+        await getUtilitySensorsList(bldg_id, device_id)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success && response?.data.length !== 0) {
+                    setSensorsList(response?.data);
+                }
+                setFetchingSensors(false);
+            })
+            .catch(() => {
+                setFetchingSensors(false);
+            });
     };
 
     const updateBreadcrumbStore = (device_name) => {
@@ -586,7 +630,10 @@ const IndividualUtilityMeter = () => {
     };
 
     useEffect(() => {
-        if (deviceId) fetchUtilityMeter(bldgId, deviceId);
+        if (deviceId) {
+            fetchUtilityMeter(bldgId, deviceId);
+            fetchUtilityMeterSensors(bldgId, deviceId);
+        }
     }, [deviceId]);
 
     useEffect(() => {
@@ -611,18 +658,25 @@ const IndividualUtilityMeter = () => {
 
             <Row className="passive-container">
                 <Col lg={4}>
-                    <Typography.Subheader size={Typography.Sizes.md}>Device Details</Typography.Subheader>
+                    <Typography.Subheader size={Typography.Sizes.md}>{`Device Details`}</Typography.Subheader>
                     <Brick sizeInRem={1} />
                     <DeviceDetails
+                        bldgId={bldgId}
                         utilityMeterObj={utilityMeterObj}
                         userPermission={userPermission}
                         fetchUtilityMeter={fetchUtilityMeter}
-                        bldgId={bldgId}
                     />
                 </Col>
 
                 <Col lg={8}>
-                    <DeviceSensors utilityMeterObj={utilityMeterObj} />
+                    <DeviceSensors
+                        bldgId={bldgId}
+                        utilityMeterObj={utilityMeterObj}
+                        sensorsList={sensorsList}
+                        locationsList={locationsList}
+                        setLocationsList={setLocationsList}
+                        fetchLocationsList={fetchLocationsList}
+                    />
                 </Col>
             </Row>
 

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import { useAtom } from 'jotai';
+import { buildingData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
@@ -13,6 +15,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { lineChartMock } from './mock';
+import { convertToMac } from './utils';
 import './styles.scss';
 
 const MetricsTab = (props) => {
@@ -120,7 +123,14 @@ const MetricsTab = (props) => {
 };
 
 const ConfigureTab = (props) => {
-    const { utilityMeterConfig, handleChange } = props;
+    const { sensorObj, handleChange, locationsList } = props;
+    const [buildingListData] = useAtom(buildingData);
+    const [bldgName, setBldgName] = useState('');
+
+    useEffect(() => {
+        const obj = buildingListData.find((el) => el?.building_id === sensorObj?.building_id);
+        if (obj?.building_id) setBldgName(obj?.building_name);
+    }, [buildingListData, sensorObj]);
 
     return (
         <React.Fragment>
@@ -139,7 +149,7 @@ const ConfigureTab = (props) => {
                             handleChange('utility_provider', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_provider}
+                        value={sensorObj?.utility_provider}
                     />
                 </div>
 
@@ -155,10 +165,10 @@ const ConfigureTab = (props) => {
                         type="number"
                         placeholder="Enter serial number for utility meter"
                         onChange={(e) => {
-                            handleChange('serial_number', e.target.value);
+                            handleChange('utility_meter_serial_number', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.serial_number}
+                        value={sensorObj?.utility_meter_serial_number}
                     />
                 </div>
             </div>
@@ -181,7 +191,7 @@ const ConfigureTab = (props) => {
                             handleChange('pulse_weight', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.pulse_weight}
+                        value={sensorObj?.pulse_weight}
                     />
                 </div>
 
@@ -191,10 +201,49 @@ const ConfigureTab = (props) => {
                     <InputTooltip
                         placeholder="Enter utility meter make"
                         onChange={(e) => {
-                            handleChange('utility_make', e.target.value);
+                            handleChange('utility_meter_make', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_make}
+                        value={sensorObj?.utility_meter_make}
+                    />
+                </div>
+            </div>
+
+            <Brick sizeInRem={2} />
+
+            <div className="d-flex w-100 form-gap">
+                <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>
+                        {`Building`}
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter building name"
+                        labelSize={Typography.Sizes.md}
+                        value={bldgName}
+                        disabled={true}
+                    />
+                </div>
+
+                <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>
+                        Submeter Location
+                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                            *
+                        </span>
+                    </Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <Select
+                        placeholder="Select Location"
+                        options={locationsList}
+                        defaultValue={locationsList.filter((option) => option.value === sensorObj?.service_location)}
+                        onChange={(e) => {
+                            handleChange('service_location', e.value);
+                        }}
+                        isSearchable={true}
                     />
                 </div>
             </div>
@@ -208,10 +257,10 @@ const ConfigureTab = (props) => {
                     <InputTooltip
                         placeholder="Enter utility meter modal"
                         onChange={(e) => {
-                            handleChange('utility_model', e.target.value);
+                            handleChange('utility_meter_model', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_model}
+                        value={sensorObj?.utility_meter_model}
                     />
                 </div>
                 <div className="w-100" />
@@ -225,32 +274,20 @@ const ConfigureTab = (props) => {
 const EditUtilitySensor = (props) => {
     const { showModal, closeModal, activeTab, setActiveTab, selectedSensorObj, utilityMeterObj } = props;
 
-    const defaultUtilityMeterConfig = {
-        utility_provider: '',
-        serial_number: '',
-        pulse_weight: '',
-        utility_make: '',
-        utility_model: '',
-    };
-
     const [sensorObj, setSensorObj] = useState(null);
-    const [utilityMeterConfig, setUtilityMeterConfig] = useState(defaultUtilityMeterConfig);
 
     const handleConfigChange = (key, value) => {
-        let obj = Object.assign({}, utilityMeterConfig);
+        let obj = Object.assign({}, sensorObj);
         obj[key] = value;
-        setUtilityMeterConfig(obj);
+        setSensorObj(obj);
     };
 
     useEffect(() => {
-        if (!showModal) {
-            setUtilityMeterConfig(defaultUtilityMeterConfig);
-            setSensorObj(null);
-        }
+        if (!showModal) setSensorObj(null);
     }, [showModal]);
 
     useEffect(() => {
-        if (selectedSensorObj?.sensor_id) setSensorObj(selectedSensorObj);
+        if (selectedSensorObj?.id) setSensorObj(selectedSensorObj);
     }, [selectedSensorObj]);
 
     return (
@@ -261,9 +298,11 @@ const EditUtilitySensor = (props) => {
                         className="passive-header-wrapper d-flex justify-content-between"
                         style={{ background: 'none' }}>
                         <div className="d-flex flex-column justify-content-between">
-                            <Typography.Subheader size={Typography.Sizes.sm}>
-                                {`Sapient Pulse - CD:12:CD:12:CD:12`}
-                            </Typography.Subheader>
+                            {utilityMeterObj?.mac_address && (
+                                <Typography.Subheader size={Typography.Sizes.sm}>
+                                    {`${utilityMeterObj?.model} - ${convertToMac(utilityMeterObj?.mac_address)}`}
+                                </Typography.Subheader>
+                            )}
                             <Typography.Header size={Typography.Sizes.md}>
                                 {activeTab === 'metrics' ? `TECO - 54632136854 - 1.2 kWH/pulse` : `Sensor Details`}
                             </Typography.Header>
@@ -314,7 +353,7 @@ const EditUtilitySensor = (props) => {
                         {activeTab === 'metrics' && <MetricsTab utilityMeterObj={utilityMeterObj} />}
 
                         {activeTab === 'configure' && (
-                            <ConfigureTab utilityMeterConfig={utilityMeterConfig} handleChange={handleConfigChange} />
+                            <ConfigureTab sensorObj={sensorObj} handleChange={handleConfigChange} {...props} />
                         )}
                     </div>
                 </div>

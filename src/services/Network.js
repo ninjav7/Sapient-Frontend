@@ -212,5 +212,5 @@ export const getWeather = '/api/weather/';
 
 // sensor v2
 export const listCts = '/api/v2/config/sensor/get-cts';
-export const getUtilityMeterSensor = '/api/v2/config/sensor/update';
+export const getUtilityMeterSensor = '/api/v2/config/sensor/get';
 export const updateSensorV2 = '/api/v2/config/sensor/update';

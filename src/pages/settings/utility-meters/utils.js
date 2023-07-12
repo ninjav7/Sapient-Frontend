@@ -4,15 +4,15 @@ export const utilityMeterModel = [
         label: 'Sapient Pulse',
     },
     {
-        value: 'shadow-50',
+        value: 'shadow_50',
         label: 'Sapient Shadow 50',
     },
     {
-        value: 'shadow-100',
+        value: 'shadow_100',
         label: 'Sapient Shadow 100',
     },
     {
-        value: 'shadow-250',
+        value: 'shadow_250',
         label: 'Sapient Shadow 250',
     },
 ];
