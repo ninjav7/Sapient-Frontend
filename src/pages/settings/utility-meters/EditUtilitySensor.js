@@ -352,6 +352,15 @@ const EditUtilitySensor = (props) => {
                             s.notificationType = 'error';
                         });
                     }
+                    if (res?.status === 200) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = 'Sensor updated successfully.';
+                            s.notificationType = 'success';
+                        });
+                        fetchUtilityMeterSensors(bldgId, deviceId);
+                        closeModal();
+                    }
                     setSensorUpdating(false);
                 })
                 .catch((e) => {

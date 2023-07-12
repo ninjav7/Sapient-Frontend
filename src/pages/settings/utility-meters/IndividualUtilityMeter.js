@@ -149,16 +149,20 @@ const Sensors = (props) => {
 
                         <div
                             className={`d-flex justify-content-between sensor-container ${
-                                record?.device_id ? '' : 'sensor-unattach'
+                                record?.utility_provider && record?.utility_meter_serial_number && record?.pulse_weight
+                                    ? ''
+                                    : 'sensor-unattach'
                             }`}>
                             <div className="d-flex align-items-center mouse-pointer">
                                 <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
                                     {index + 1}
                                 </Typography.Subheader>
 
-                                {record?.device_id ? (
+                                {record?.utility_provider &&
+                                record?.utility_meter_serial_number &&
+                                record?.pulse_weight ? (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                        {record?.device_id}
+                                        {`${record?.utility_provider} - ${record?.utility_meter_make} ${record?.utility_meter_model} - ${record?.utility_meter_serial_number}`}
                                     </Typography.Subheader>
                                 ) : (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
@@ -166,9 +170,9 @@ const Sensors = (props) => {
                                     </Typography.Subheader>
                                 )}
 
-                                {record?.sensor_badge !== '' && record?.device_id && (
+                                {record?.pulse_weight && (
                                     <Badge
-                                        text={record?.sensor_badge}
+                                        text={`${record?.pulse_weight} Pulse Weight`}
                                         className="utility-meter-badge font-weight-bold"
                                         typographyClassName="utility-meter-badge"
                                     />
