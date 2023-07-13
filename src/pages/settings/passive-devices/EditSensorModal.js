@@ -76,13 +76,13 @@ const EditSensorModal = (props) => {
                     fetchPassiveDeviceSensorData();
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Sensor Modal updated successfully.';
+                        s.notificationMessage = 'Sensor updated successfully.';
                         s.notificationType = 'success';
                     });
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Unable to update Sensor Modal due to internal server error.';
+                        s.notificationMessage = 'Unable to update Sensor due to internal server error.';
                         s.notificationType = 'error';
                     });
                 }
@@ -92,7 +92,15 @@ const EditSensorModal = (props) => {
                 setCTSensorObj(null);
                 setCTSensorsList([]);
             })
-            .catch(() => {});
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update Sensor.';
+                    s.notificationType = 'error';
+                });
+                setProcessing(false);
+                closeModal();
+            });
     };
 
     const fetchCTSList = async () => {
@@ -134,12 +142,12 @@ const EditSensorModal = (props) => {
     return (
         <Modal show={showModal} onHide={closeModal} backdrop="static" size={'md'} keyboard={false} centered>
             <div className="p-4">
-                <Typography.Header size={Typography.Sizes.lg}>Edit Sensor Modal</Typography.Header>
+                <Typography.Header size={Typography.Sizes.lg}>Edit Sensor</Typography.Header>
 
                 <Brick sizeInRem={2} />
 
                 <div className="w-100 mr-2">
-                    <Typography.Body size={Typography.Sizes.md}>Sensor Model</Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>Sensor</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <Select
                         placeholder="Select Sensor Model"
