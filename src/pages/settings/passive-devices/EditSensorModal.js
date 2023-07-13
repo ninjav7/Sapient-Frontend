@@ -9,6 +9,7 @@ import { Button } from '../../../sharedComponents/button';
 import { getSensorsCts, updateSensorData } from './services';
 import { UserStore } from '../../../store/UserStore';
 import './style.css';
+import './styles.scss';
 
 const EditSensorModal = (props) => {
     const { showModal, closeModal, currentSensorObj, fetchPassiveDeviceSensorData } = props;
@@ -82,7 +83,7 @@ const EditSensorModal = (props) => {
                 } else {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'Unable to update Sensor due to internal server error.';
+                        s.notificationMessage = 'Unable to update sensor due to internal server error.';
                         s.notificationType = 'error';
                     });
                 }
@@ -200,6 +201,7 @@ const EditSensorModal = (props) => {
                         value={ctSensorObj?.rated_amps}
                         disabled={!(ctSensorObj?.model === 'Custom')}
                         error={errorObj?.rated_amps}
+                        inputClassName={'custom-input-field'}
                     />
                 </div>
 
@@ -228,6 +230,7 @@ const EditSensorModal = (props) => {
                             value={ctSensorObj?.amp_multiplier}
                             disabled={!(ctSensorObj?.model === 'Custom')}
                             error={errorObj?.amp_multiplier}
+                            inputClassName={'custom-input-field'}
                         />
                     </div>
                 </div>
