@@ -129,10 +129,8 @@ const Sensors = (props) => {
     };
 
     useEffect(() => {
-        // When Edit Cnnfiguration Modal open
         if (editModal) fetchLocationsList(bldgId);
 
-        // When Edit Cnnfiguration Modal close
         if (!editModal) {
             setActiveTab('configure');
             setSelectedSensorObj(null);
@@ -571,6 +569,7 @@ const IndividualUtilityMeter = () => {
     const [locationsList, setLocationsList] = useState([]);
 
     const [isFetchingSensors, setFetchingSensors] = useState(false);
+    const [isFetchingLocations, setFetchingLocations] = useState(false);
 
     const redirectToMainPage = () => {
         history.push({ pathname: `/settings/utility-meters/${bldgId}` });
@@ -589,6 +588,7 @@ const IndividualUtilityMeter = () => {
     };
 
     const fetchLocationsList = async (bldg_id) => {
+        setFetchingLocations(true);
         const response = await getLocationData(`/${bldg_id}`);
         if (response?.data.length === 0) {
             setLocationsList([]);
@@ -605,6 +605,7 @@ const IndividualUtilityMeter = () => {
             });
         });
         setLocationsList(data);
+        setFetchingLocations(false);
     };
 
     const fetchUtilityMeterSensors = async (bldg_id, device_id) => {
@@ -696,6 +697,7 @@ const IndividualUtilityMeter = () => {
                         fetchLocationsList={fetchLocationsList}
                         fetchUtilityMeterSensors={fetchUtilityMeterSensors}
                         isFetchingSensors={isFetchingSensors}
+                        isFetchingLocations={isFetchingLocations}
                     />
                 </Col>
             </Row>

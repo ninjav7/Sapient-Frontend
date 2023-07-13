@@ -3,6 +3,7 @@ import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 import { Spinner } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
 import { buildingData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
@@ -26,8 +27,6 @@ import './styles.scss';
 
 const MetricsTab = (props) => {
     const { utilityMeterObj, sensorObj, bldgId } = props;
-
-    console.log('SSR sensorObj => ', sensorObj);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
@@ -57,7 +56,6 @@ const MetricsTab = (props) => {
 
         await getSensorGraphData(params, payload)
             .then((res) => {
-                console.log('SSR res => ', res);
                 setFetchingChartData(false);
             })
             .catch(() => {
@@ -153,7 +151,7 @@ const MetricsTab = (props) => {
 };
 
 const ConfigureTab = (props) => {
-    const { sensorObj, handleChange, locationsList, sensorErrorObj } = props;
+    const { sensorObj, handleChange, locationsList, sensorErrorObj, isFetchingLocations } = props;
     const [buildingListData] = useAtom(buildingData);
     const [bldgName, setBldgName] = useState('');
 
@@ -259,15 +257,21 @@ const ConfigureTab = (props) => {
                 <div className="w-100">
                     <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
                     <Brick sizeInRem={0.25} />
-                    <Select
-                        placeholder="Select Location"
-                        options={locationsList}
-                        defaultValue={locationsList.filter((option) => option.value === sensorObj?.service_location)}
-                        onChange={(e) => {
-                            handleChange('service_location', e.value);
-                        }}
-                        isSearchable={true}
-                    />
+                    {isFetchingLocations ? (
+                        <Skeleton count={1} height={35} />
+                    ) : (
+                        <Select
+                            placeholder="Select Location"
+                            options={locationsList}
+                            currentValue={locationsList.filter(
+                                (option) => option.value === sensorObj?.service_location
+                            )}
+                            onChange={(e) => {
+                                handleChange('service_location', e.value);
+                            }}
+                            isSearchable={true}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -352,8 +356,9 @@ const EditUtilitySensor = (props) => {
                 utility_meter_make: sensorObj?.utility_meter_make,
                 utility_meter_model: sensorObj?.utility_meter_model,
                 utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
-                service_location: sensorObj?.service_location,
             };
+
+            if (sensorObj?.service_location !== '') payload.service_location = sensorObj?.service_location;
 
             const params = `?sensor_id=${sensorObj?.id}`;
 
@@ -378,15 +383,6 @@ const EditUtilitySensor = (props) => {
                                 : 'Unable to utility meter sensor due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
-                    }
-                    if (res?.status === 200) {
-                        UserStore.update((s) => {
-                            s.showNotification = true;
-                            s.notificationMessage = 'Sensor updated successfully.';
-                            s.notificationType = 'success';
-                        });
-                        fetchUtilityMeterSensors(bldgId, deviceId);
-                        closeModal();
                     }
                     setSensorUpdating(false);
                 })
