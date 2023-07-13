@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
-import { Spinner } from 'reactstrap';
+import { Spinner, UncontrolledTooltip } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
 import { buildingData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
@@ -23,6 +23,7 @@ import { updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { BuildingStore } from '../../../store/BuildingStore';
+import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
 import './styles.scss';
 
 const MetricsTab = (props) => {
@@ -156,9 +157,23 @@ const MetricsTab = (props) => {
 };
 
 const ConfigureTab = (props) => {
-    const { sensorObj, handleChange, locationsList, sensorErrorObj, isFetchingLocations } = props;
+    const { sensorObj, handleChange, locationsList, sensorErrorObj, isFetchingLocations, utilityMeterObj } = props;
     const [buildingListData] = useAtom(buildingData);
     const [bldgName, setBldgName] = useState('');
+
+    const LocationToolTip = () => {
+        return (
+            <div>
+                <UncontrolledTooltip placement="bottom" target={'tooltip-for-location'}>
+                    {`This is Location selector`}
+                </UncontrolledTooltip>
+
+                <button type="button" className="tooltip-button" id={'tooltip-for-location'}>
+                    <TooltipIcon className="tooltip-icon" />
+                </button>
+            </div>
+        );
+    };
 
     useEffect(() => {
         const obj = buildingListData.find((el) => el?.building_id === sensorObj?.building_id);
@@ -200,93 +215,168 @@ const ConfigureTab = (props) => {
 
             <Brick sizeInRem={2} />
 
-            <div className="d-flex w-100 form-gap">
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>
-                        {`Pulse Weight`}
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        type="number"
-                        placeholder="Enter pulse weight"
-                        onChange={(e) => {
-                            handleChange('pulse_weight', e.target.value);
-                        }}
-                        labelSize={Typography.Sizes.md}
-                        value={sensorObj?.pulse_weight}
-                        error={sensorErrorObj?.pulse_weight}
-                    />
-                </div>
+            {utilityMeterObj?.device_type === 'pulse counter' ? (
+                <>
+                    <div className="d-flex w-100 form-gap">
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>
+                                {`Pulse Weight`}
+                                <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
+                                    *
+                                </span>
+                            </Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                type="number"
+                                placeholder="Enter pulse weight"
+                                onChange={(e) => {
+                                    handleChange('pulse_weight', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={sensorObj?.pulse_weight}
+                                error={sensorErrorObj?.pulse_weight}
+                            />
+                        </div>
 
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Make`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter utility meter make"
-                        onChange={(e) => {
-                            handleChange('utility_meter_make', e.target.value);
-                        }}
-                        labelSize={Typography.Sizes.md}
-                        value={sensorObj?.utility_meter_make}
-                    />
-                </div>
-            </div>
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Make`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter utility meter make"
+                                onChange={(e) => {
+                                    handleChange('utility_meter_make', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={sensorObj?.utility_meter_make}
+                            />
+                        </div>
+                    </div>
 
-            <Brick sizeInRem={2} />
+                    <Brick sizeInRem={2} />
 
-            <div className="d-flex w-100 form-gap">
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>{`Building`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter building name"
-                        labelSize={Typography.Sizes.md}
-                        value={bldgName}
-                        disabled={true}
-                    />
-                </div>
+                    <div className="d-flex w-100 form-gap">
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Building`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter building name"
+                                labelSize={Typography.Sizes.md}
+                                value={bldgName}
+                                disabled={true}
+                            />
+                        </div>
 
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter utility meter modal"
-                        onChange={(e) => {
-                            handleChange('utility_meter_model', e.target.value);
-                        }}
-                        labelSize={Typography.Sizes.md}
-                        value={sensorObj?.utility_meter_model}
-                    />
-                </div>
-            </div>
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter utility meter modal"
+                                onChange={(e) => {
+                                    handleChange('utility_meter_model', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={sensorObj?.utility_meter_model}
+                            />
+                        </div>
+                    </div>
 
-            <Brick sizeInRem={2} />
+                    <Brick sizeInRem={2} />
 
-            <div className="d-flex form-gap">
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    {isFetchingLocations ? (
-                        <Skeleton count={1} height={35} />
-                    ) : (
-                        <Select
-                            placeholder="Select Location"
-                            options={locationsList}
-                            currentValue={locationsList.filter(
-                                (option) => option.value === sensorObj?.service_location
+                    <div className="d-flex form-gap">
+                        <div className="w-100">
+                            <div className="d-flex">
+                                <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
+                                <LocationToolTip />
+                            </div>
+                            <Brick sizeInRem={0.25} />
+                            {isFetchingLocations ? (
+                                <Skeleton count={1} height={35} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Location"
+                                    options={locationsList}
+                                    currentValue={locationsList.filter(
+                                        (option) => option.value === sensorObj?.service_location
+                                    )}
+                                    onChange={(e) => {
+                                        handleChange('service_location', e.value);
+                                    }}
+                                    isSearchable={true}
+                                />
                             )}
-                            onChange={(e) => {
-                                handleChange('service_location', e.value);
-                            }}
-                            isSearchable={true}
-                        />
-                    )}
-                </div>
-                <div className="w-100" />
-            </div>
+                        </div>
+                        <div className="w-100" />
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="d-flex w-100 form-gap">
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Make`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter utility meter make"
+                                onChange={(e) => {
+                                    handleChange('utility_meter_make', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={sensorObj?.utility_meter_make}
+                            />
+                        </div>
+
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter utility meter modal"
+                                onChange={(e) => {
+                                    handleChange('utility_meter_model', e.target.value);
+                                }}
+                                labelSize={Typography.Sizes.md}
+                                value={sensorObj?.utility_meter_model}
+                            />
+                        </div>
+                    </div>
+
+                    <Brick sizeInRem={2} />
+
+                    <div className="d-flex w-100 form-gap">
+                        <div className="w-100">
+                            <Typography.Body size={Typography.Sizes.md}>{`Building`}</Typography.Body>
+                            <Brick sizeInRem={0.25} />
+                            <InputTooltip
+                                placeholder="Enter building name"
+                                labelSize={Typography.Sizes.md}
+                                value={bldgName}
+                                disabled={true}
+                            />
+                        </div>
+
+                        <div className="w-100">
+                            <div className="d-flex">
+                                <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
+                                <LocationToolTip />
+                            </div>
+                            <Brick sizeInRem={0.25} />
+                            {isFetchingLocations ? (
+                                <Skeleton count={1} height={35} />
+                            ) : (
+                                <Select
+                                    placeholder="Select Location"
+                                    options={locationsList}
+                                    currentValue={locationsList.filter(
+                                        (option) => option.value === sensorObj?.service_location
+                                    )}
+                                    onChange={(e) => {
+                                        handleChange('service_location', e.value);
+                                    }}
+                                    isSearchable={true}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
 
             <Brick sizeInRem={2} />
         </React.Fragment>
@@ -328,17 +418,16 @@ const EditUtilitySensor = (props) => {
     const updateUtilitySensorData = async () => {
         let alertObj = Object.assign({}, sensorErrorObj);
 
-        if (sensorObj?.pulse_weight.length === 0) {
+        if (utilityMeterObj?.device_type === 'pulse counter' && sensorObj?.pulse_weight.length === 0) {
             alertObj.pulse_weight = 'Please enter pulse weight. It cannot be empty.';
         }
 
         setSensorErrorObj(alertObj);
 
-        if (!alertObj.utility_provider && !alertObj.utility_meter_serial_number && !alertObj.pulse_weight) {
+        if (!alertObj.pulse_weight) {
             setSensorUpdating(true);
 
             const payload = {
-                pulse_weight: sensorObj?.pulse_weight,
                 utility_provider: sensorObj?.utility_provider,
                 utility_meter_make: sensorObj?.utility_meter_make,
                 utility_meter_model: sensorObj?.utility_meter_model,
@@ -346,6 +435,7 @@ const EditUtilitySensor = (props) => {
             };
 
             if (sensorObj?.service_location !== '') payload.service_location = sensorObj?.service_location;
+            if (utilityMeterObj?.device_type === 'pulse counter') payload.pulse_weight = sensorObj?.pulse_weight;
 
             const params = `?sensor_id=${sensorObj?.id}`;
 

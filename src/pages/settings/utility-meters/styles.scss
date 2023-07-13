@@ -34,3 +34,26 @@
     align-items: center;
     justify-content: center;
 }
+
+.tooltip-button {
+    padding: 0;
+    background: none;
+    outline: none;
+    box-shadow: none;
+    border: 0;
+    margin: 0 0 0 0.25rem;
+    cursor: pointer;
+    height: 100%;
+
+    svg {
+        margin-top: -0.4375rem;
+    }
+}
+
+.tooltip-icon {
+    &:hover {
+        path {
+            fill: $primary-gray-800;
+        }
+    }
+}
