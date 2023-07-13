@@ -17,7 +17,7 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { lineChartMock } from './mock';
-import { convertToMac, utilityMeterChartMetrics } from './utils';
+import { convertToMac, shadowChartMetrics, pulseChartMetrics } from './utils';
 import { apiRequestBody, compareObjData } from '../../../helpers/helpers';
 import { updateUtilitySensorServices } from './services';
 import { UserStore } from '../../../store/UserStore';
@@ -31,13 +31,13 @@ const MetricsTab = (props) => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
-    const [metric, setMetric] = useState(utilityMeterChartMetrics);
+    const [metric, setMetric] = useState(pulseChartMetrics);
     const [fetchingChartData, setFetchingChartData] = useState(false);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
+    const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[0].Consumption);
 
     const handleUnitChange = (value) => {
         setConsumption(value);
@@ -66,6 +66,11 @@ const MetricsTab = (props) => {
     useEffect(() => {
         fetchSensorsChartData(selectedConsumption, startDate, endDate, sensorObj);
     }, [startDate, endDate, selectedConsumption, sensorObj]);
+
+    useEffect(() => {
+        if (!utilityMeterObj?.id) return;
+        utilityMeterObj?.device_type === 'pulse counter' ? setMetric(pulseChartMetrics) : setMetric(shadowChartMetrics);
+    }, [utilityMeterObj]);
 
     return (
         <React.Fragment>
@@ -164,12 +169,7 @@ const ConfigureTab = (props) => {
         <React.Fragment>
             <div className="d-flex w-100 form-gap">
                 <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>
-                        {`Utility Provider`}
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>{`Utility Provider`}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <InputTooltip
                         placeholder="Enter utility provider"
@@ -183,12 +183,7 @@ const ConfigureTab = (props) => {
                 </div>
 
                 <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>
-                        {`Utility Meter S/N`}
-                        <span style={{ color: colorPalette.error600 }} className="font-weight-bold ml-1">
-                            *
-                        </span>
-                    </Typography.Body>
+                    <Typography.Body size={Typography.Sizes.md}>{`Utility Meter S/N`}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <InputTooltip
                         type="number"
@@ -255,6 +250,23 @@ const ConfigureTab = (props) => {
                 </div>
 
                 <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter utility meter modal"
+                        onChange={(e) => {
+                            handleChange('utility_meter_model', e.target.value);
+                        }}
+                        labelSize={Typography.Sizes.md}
+                        value={sensorObj?.utility_meter_model}
+                    />
+                </div>
+            </div>
+
+            <Brick sizeInRem={2} />
+
+            <div className="d-flex form-gap">
+                <div className="w-100">
                     <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     {isFetchingLocations ? (
@@ -272,23 +284,6 @@ const ConfigureTab = (props) => {
                             isSearchable={true}
                         />
                     )}
-                </div>
-            </div>
-
-            <Brick sizeInRem={2} />
-
-            <div className="d-flex form-gap">
-                <div className="w-100">
-                    <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
-                    <Brick sizeInRem={0.25} />
-                    <InputTooltip
-                        placeholder="Enter utility meter modal"
-                        onChange={(e) => {
-                            handleChange('utility_meter_model', e.target.value);
-                        }}
-                        labelSize={Typography.Sizes.md}
-                        value={sensorObj?.utility_meter_model}
-                    />
                 </div>
                 <div className="w-100" />
             </div>
@@ -332,14 +327,6 @@ const EditUtilitySensor = (props) => {
 
     const updateUtilitySensorData = async () => {
         let alertObj = Object.assign({}, sensorErrorObj);
-
-        if (sensorObj?.utility_provider.length === 0) {
-            alertObj.utility_provider = 'Please enter utility provider. It cannot be empty.';
-        }
-
-        if (sensorObj?.utility_meter_serial_number.length === 0) {
-            alertObj.utility_meter_serial_number = 'Please enter serial number for utility meter. It cannot be empty.';
-        }
 
         if (sensorObj?.pulse_weight.length === 0) {
             alertObj.pulse_weight = 'Please enter pulse weight. It cannot be empty.';
@@ -418,7 +405,11 @@ const EditUtilitySensor = (props) => {
                                 </Typography.Subheader>
                             )}
                             <Typography.Header size={Typography.Sizes.md}>
-                                {activeTab === 'metrics' ? `TECO - 54632136854 - 1.2 kWH/pulse` : `Sensor Details`}
+                                {activeTab === 'metrics'
+                                    ? utilityMeterObj?.device_type === 'pulse counter'
+                                        ? `${selectedSensorObj?.utility_provider} - ${selectedSensorObj?.utility_meter_serial_number} - ${selectedSensorObj?.pulse_weight}  kWH/pulse`
+                                        : `${selectedSensorObj?.utility_provider} - ${selectedSensorObj?.utility_meter_serial_number}`
+                                    : `Sensor Details`}
                             </Typography.Header>
                             <div className="d-flex justify-content-start mouse-pointer ">
                                 <Typography.Subheader

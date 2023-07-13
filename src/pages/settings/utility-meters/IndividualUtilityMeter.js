@@ -112,7 +112,7 @@ const DeleteUtility = (props) => {
 };
 
 const Sensors = (props) => {
-    const { data, fetchLocationsList, bldgId, setLocationsList } = props;
+    const { data, fetchLocationsList, bldgId, setLocationsList, utilityMeterObj } = props;
 
     const [editModal, setEditModal] = useState(false);
     const closeEditModal = () => setEditModal(false);
@@ -156,9 +156,7 @@ const Sensors = (props) => {
                                     {index + 1}
                                 </Typography.Subheader>
 
-                                {record?.utility_provider &&
-                                record?.utility_meter_serial_number &&
-                                record?.pulse_weight ? (
+                                {record?.utility_provider && record?.utility_meter_serial_number ? (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
                                         {`${record?.utility_provider} - ${record?.utility_meter_make} ${record?.utility_meter_model} - ${record?.utility_meter_serial_number}`}
                                     </Typography.Subheader>
@@ -168,7 +166,7 @@ const Sensors = (props) => {
                                     </Typography.Subheader>
                                 )}
 
-                                {record?.pulse_weight && (
+                                {utilityMeterObj?.device_type === 'pulse counter' && record?.pulse_weight && (
                                     <Badge
                                         text={`${record?.pulse_weight} Pulse Weight`}
                                         className="utility-meter-badge font-weight-bold"
