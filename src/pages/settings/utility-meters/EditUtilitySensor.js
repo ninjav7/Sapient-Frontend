@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import { useAtom } from 'jotai';
+import { Spinner } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
+import { buildingData } from '../../../store/globalState';
 import { Button } from '../../../sharedComponents/button';
 import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
@@ -13,30 +17,55 @@ import { fetchDateRange } from '../../../helpers/formattedChartData';
 import Header from '../../../components/Header';
 import { DateRangeStore } from '../../../store/DateRangeStore';
 import { lineChartMock } from './mock';
+import { convertToMac, utilityMeterChartMetrics } from './utils';
+import { apiRequestBody, compareObjData } from '../../../helpers/helpers';
+import { updateUtilitySensorServices } from './services';
+import { UserStore } from '../../../store/UserStore';
+import { getSensorGraphData } from '../passive-devices/services';
+import { BuildingStore } from '../../../store/BuildingStore';
 import './styles.scss';
 
 const MetricsTab = (props) => {
-    const { utilityMeterObj } = props;
+    const { utilityMeterObj, sensorObj, bldgId } = props;
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
-    const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA', Consumption: 'Minimum Current' },
-        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA', Consumption: 'Maximum Current' },
-        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA', Consumption: 'RMS Current' },
-        { value: 'power', label: 'Power (W)', unit: 'W', Consumption: 'Power' },
-    ]);
+    const [metric, setMetric] = useState(utilityMeterChartMetrics);
+    const [fetchingChartData, setFetchingChartData] = useState(false);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
-    const [selectedUnit, setSelectedUnit] = useState(metric[2].unit);
-    const [selectedConsumption, setConsumption] = useState(metric[2].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [selectedConsumptionLabel, setSelectedConsumptionLabel] = useState(metric[2].Consumption);
 
     const handleUnitChange = (value) => {
-        let obj = metric.find((record) => record.value === value);
-        setSelectedUnit(obj.unit);
-        setSelectedConsumptionLabel(obj.Consumption);
+        setConsumption(value);
+        const obj = metric.find((record) => record?.value === value);
+        setSelectedUnit(obj?.unit);
+        setSelectedConsumptionLabel(obj?.Consumption);
     };
+
+    const fetchSensorsChartData = async (selected_consmption, start_date, end_date, sensor_obj) => {
+        if (!sensor_obj?.id) return;
+
+        setFetchingChartData(true);
+
+        const payload = apiRequestBody(start_date, end_date, timeZone);
+        const params = `?sensor_id=${sensor_obj?.id}&consumption=${selected_consmption}&building_id=${bldgId}`;
+
+        await getSensorGraphData(params, payload)
+            .then((res) => {
+                setFetchingChartData(false);
+            })
+            .catch(() => {
+                setFetchingChartData(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchSensorsChartData(selectedConsumption, startDate, endDate, sensorObj);
+    }, [startDate, endDate, selectedConsumption, sensorObj]);
 
     return (
         <React.Fragment>
@@ -84,10 +113,6 @@ const MetricsTab = (props) => {
                                         defaultValue={selectedConsumption}
                                         options={metric}
                                         onChange={(e) => {
-                                            if (e.value === 'passive-power') {
-                                                return;
-                                            }
-                                            setConsumption(e.value);
                                             handleUnitChange(e.value);
                                         }}
                                     />
@@ -102,16 +127,22 @@ const MetricsTab = (props) => {
                             </div>
                         </div>
 
-                        <div>
-                            <LineChart
-                                title={''}
-                                subTitle={''}
-                                tooltipUnit={selectedUnit}
-                                tooltipLabel={selectedConsumptionLabel}
-                                data={lineChartMock}
-                                dateRange={fetchDateRange(startDate, endDate)}
-                            />
-                        </div>
+                        {fetchingChartData ? (
+                            <div className="chart-custom-loader">
+                                <Spinner color="primary" />
+                            </div>
+                        ) : (
+                            <div>
+                                <LineChart
+                                    title={''}
+                                    subTitle={''}
+                                    tooltipUnit={selectedUnit}
+                                    tooltipLabel={selectedConsumptionLabel}
+                                    data={lineChartMock}
+                                    dateRange={fetchDateRange(startDate, endDate)}
+                                />
+                            </div>
+                        )}
                     </div>
                 </Col>
             </Row>
@@ -120,7 +151,14 @@ const MetricsTab = (props) => {
 };
 
 const ConfigureTab = (props) => {
-    const { utilityMeterConfig, handleChange } = props;
+    const { sensorObj, handleChange, locationsList, sensorErrorObj, isFetchingLocations } = props;
+    const [buildingListData] = useAtom(buildingData);
+    const [bldgName, setBldgName] = useState('');
+
+    useEffect(() => {
+        const obj = buildingListData.find((el) => el?.building_id === sensorObj?.building_id);
+        if (obj?.building_id) setBldgName(obj?.building_name);
+    }, [buildingListData, sensorObj]);
 
     return (
         <React.Fragment>
@@ -139,7 +177,8 @@ const ConfigureTab = (props) => {
                             handleChange('utility_provider', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_provider}
+                        value={sensorObj?.utility_provider}
+                        error={sensorErrorObj?.utility_provider}
                     />
                 </div>
 
@@ -155,10 +194,11 @@ const ConfigureTab = (props) => {
                         type="number"
                         placeholder="Enter serial number for utility meter"
                         onChange={(e) => {
-                            handleChange('serial_number', e.target.value);
+                            handleChange('utility_meter_serial_number', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.serial_number}
+                        value={sensorObj?.utility_meter_serial_number}
+                        error={sensorErrorObj?.utility_meter_serial_number}
                     />
                 </div>
             </div>
@@ -181,7 +221,8 @@ const ConfigureTab = (props) => {
                             handleChange('pulse_weight', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.pulse_weight}
+                        value={sensorObj?.pulse_weight}
+                        error={sensorErrorObj?.pulse_weight}
                     />
                 </div>
 
@@ -191,11 +232,46 @@ const ConfigureTab = (props) => {
                     <InputTooltip
                         placeholder="Enter utility meter make"
                         onChange={(e) => {
-                            handleChange('utility_make', e.target.value);
+                            handleChange('utility_meter_make', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_make}
+                        value={sensorObj?.utility_meter_make}
                     />
+                </div>
+            </div>
+
+            <Brick sizeInRem={2} />
+
+            <div className="d-flex w-100 form-gap">
+                <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>{`Building`}</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    <InputTooltip
+                        placeholder="Enter building name"
+                        labelSize={Typography.Sizes.md}
+                        value={bldgName}
+                        disabled={true}
+                    />
+                </div>
+
+                <div className="w-100">
+                    <Typography.Body size={Typography.Sizes.md}>Submeter Location</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                    {isFetchingLocations ? (
+                        <Skeleton count={1} height={35} />
+                    ) : (
+                        <Select
+                            placeholder="Select Location"
+                            options={locationsList}
+                            currentValue={locationsList.filter(
+                                (option) => option.value === sensorObj?.service_location
+                            )}
+                            onChange={(e) => {
+                                handleChange('service_location', e.value);
+                            }}
+                            isSearchable={true}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -208,10 +284,10 @@ const ConfigureTab = (props) => {
                     <InputTooltip
                         placeholder="Enter utility meter modal"
                         onChange={(e) => {
-                            handleChange('utility_model', e.target.value);
+                            handleChange('utility_meter_model', e.target.value);
                         }}
                         labelSize={Typography.Sizes.md}
-                        value={utilityMeterConfig?.utility_model}
+                        value={sensorObj?.utility_meter_model}
                     />
                 </div>
                 <div className="w-100" />
@@ -223,34 +299,109 @@ const ConfigureTab = (props) => {
 };
 
 const EditUtilitySensor = (props) => {
-    const { showModal, closeModal, activeTab, setActiveTab, selectedSensorObj, utilityMeterObj } = props;
+    const {
+        showModal,
+        closeModal,
+        activeTab,
+        setActiveTab,
+        selectedSensorObj,
+        utilityMeterObj,
+        fetchUtilityMeterSensors,
+        bldgId,
+        deviceId,
+    } = props;
 
-    const defaultUtilityMeterConfig = {
-        utility_provider: '',
-        serial_number: '',
-        pulse_weight: '',
-        utility_make: '',
-        utility_model: '',
+    const defaultSensorError = {
+        utility_provider: null,
+        utility_meter_serial_number: null,
+        pulse_weight: null,
     };
 
     const [sensorObj, setSensorObj] = useState(null);
-    const [utilityMeterConfig, setUtilityMeterConfig] = useState(defaultUtilityMeterConfig);
+    const [sensorErrorObj, setSensorErrorObj] = useState(defaultSensorError);
+    const [isSensorUpdating, setSensorUpdating] = useState(false);
 
     const handleConfigChange = (key, value) => {
-        let obj = Object.assign({}, utilityMeterConfig);
+        let obj = Object.assign({}, sensorObj);
+        let errorObj = Object.assign({}, sensorErrorObj);
         obj[key] = value;
-        setUtilityMeterConfig(obj);
+        errorObj[key] = null;
+        setSensorObj(obj);
+        setSensorErrorObj(errorObj);
+    };
+
+    const updateUtilitySensorData = async () => {
+        let alertObj = Object.assign({}, sensorErrorObj);
+
+        if (sensorObj?.utility_provider.length === 0) {
+            alertObj.utility_provider = 'Please enter utility provider. It cannot be empty.';
+        }
+
+        if (sensorObj?.utility_meter_serial_number.length === 0) {
+            alertObj.utility_meter_serial_number = 'Please enter serial number for utility meter. It cannot be empty.';
+        }
+
+        if (sensorObj?.pulse_weight.length === 0) {
+            alertObj.pulse_weight = 'Please enter pulse weight. It cannot be empty.';
+        }
+
+        setSensorErrorObj(alertObj);
+
+        if (!alertObj.utility_provider && !alertObj.utility_meter_serial_number && !alertObj.pulse_weight) {
+            setSensorUpdating(true);
+
+            const payload = {
+                pulse_weight: sensorObj?.pulse_weight,
+                utility_provider: sensorObj?.utility_provider,
+                utility_meter_make: sensorObj?.utility_meter_make,
+                utility_meter_model: sensorObj?.utility_meter_model,
+                utility_meter_serial_number: sensorObj?.utility_meter_serial_number,
+            };
+
+            if (sensorObj?.service_location !== '') payload.service_location = sensorObj?.service_location;
+
+            const params = `?sensor_id=${sensorObj?.id}`;
+
+            await updateUtilitySensorServices(params, payload)
+                .then((res) => {
+                    const response = res?.data;
+                    if (response?.success) {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message;
+                            s.notificationType = 'success';
+                        });
+                        fetchUtilityMeterSensors(bldgId, deviceId);
+                        closeModal();
+                    } else {
+                        UserStore.update((s) => {
+                            s.showNotification = true;
+                            s.notificationMessage = response?.message
+                                ? response?.message
+                                : res
+                                ? 'Unable to update utility meter sensor.'
+                                : 'Unable to utility meter sensor due to Internal Server Error!.';
+                            s.notificationType = 'error';
+                        });
+                    }
+                    setSensorUpdating(false);
+                })
+                .catch((e) => {
+                    setSensorUpdating(false);
+                    closeModal();
+                });
+        }
     };
 
     useEffect(() => {
         if (!showModal) {
-            setUtilityMeterConfig(defaultUtilityMeterConfig);
             setSensorObj(null);
+            setSensorErrorObj(defaultSensorError);
         }
     }, [showModal]);
 
     useEffect(() => {
-        if (selectedSensorObj?.sensor_id) setSensorObj(selectedSensorObj);
+        if (selectedSensorObj?.id) setSensorObj(selectedSensorObj);
     }, [selectedSensorObj]);
 
     return (
@@ -261,9 +412,11 @@ const EditUtilitySensor = (props) => {
                         className="passive-header-wrapper d-flex justify-content-between"
                         style={{ background: 'none' }}>
                         <div className="d-flex flex-column justify-content-between">
-                            <Typography.Subheader size={Typography.Sizes.sm}>
-                                {`Sapient Pulse - CD:12:CD:12:CD:12`}
-                            </Typography.Subheader>
+                            {utilityMeterObj?.mac_address && (
+                                <Typography.Subheader size={Typography.Sizes.sm}>
+                                    {`${utilityMeterObj?.model} - ${convertToMac(utilityMeterObj?.mac_address)}`}
+                                </Typography.Subheader>
+                            )}
                             <Typography.Header size={Typography.Sizes.md}>
                                 {activeTab === 'metrics' ? `TECO - 54632136854 - 1.2 kWH/pulse` : `Sensor Details`}
                             </Typography.Header>
@@ -299,22 +452,29 @@ const EditUtilitySensor = (props) => {
 
                             <div>
                                 <Button
-                                    label={'Save'}
+                                    label={isSensorUpdating ? `Saving ...` : `Save`}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
-                                    onClick={closeModal}
+                                    onClick={updateUtilitySensorData}
                                     className="ml-2"
-                                    disabled={true}
+                                    disabled={compareObjData(selectedSensorObj, sensorObj) || isSensorUpdating}
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div className="p-default">
-                        {activeTab === 'metrics' && <MetricsTab utilityMeterObj={utilityMeterObj} />}
+                        {activeTab === 'metrics' && (
+                            <MetricsTab utilityMeterObj={utilityMeterObj} sensorObj={sensorObj} {...props} />
+                        )}
 
                         {activeTab === 'configure' && (
-                            <ConfigureTab utilityMeterConfig={utilityMeterConfig} handleChange={handleConfigChange} />
+                            <ConfigureTab
+                                sensorObj={sensorObj}
+                                handleChange={handleConfigChange}
+                                sensorErrorObj={sensorErrorObj}
+                                {...props}
+                            />
                         )}
                     </div>
                 </div>

@@ -1,3 +1,22 @@
+export const utilityMeterModel = [
+    {
+        value: 'pulse counter',
+        label: 'Sapient Pulse',
+    },
+    {
+        value: 'shadow_50',
+        label: 'Sapient Shadow 50',
+    },
+    {
+        value: 'shadow_100',
+        label: 'Sapient Shadow 100',
+    },
+    {
+        value: 'shadow_250',
+        label: 'Sapient Shadow 250',
+    },
+];
+
 // Convert to Alpha Numeric
 export const convertToAlphaNumeric = (input) => {
     const sanitizedInput = input.replace(/[^a-zA-Z0-9]/g, '');
@@ -2704,4 +2723,15 @@ export const deviceData = [
         ],
         name: 'RMS Current (mA)',
     },
+];
+
+export const utilityMeterChartMetrics = [
+    { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+    { value: 'power', label: 'Power (kW)', unit: 'kW', Consumption: 'Power' },
+    { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+    { value: 'voltage', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
+    { value: 'apparent_power', label: 'Apparent Power (kVA)', unit: 'kVA', Consumption: 'Apparent Power' },
+    { value: 'reactive_power', label: 'Reactive Power (kVAR)', unit: 'kVAR', Consumption: 'Reactive Power' },
+    { value: 'frequency', label: 'Frequency (Hz)', unit: 'Hz', Consumption: 'Frequency' },
+    { value: 'power_factor', label: 'Power Factor (%)', unit: '%', Consumption: 'Power Factor' },
 ];

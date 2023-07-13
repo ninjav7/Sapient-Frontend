@@ -5,6 +5,7 @@ export const configRoutes = [
     '/settings/panels',
     '/settings/active-devices',
     '/settings/smart-meters',
+    '/settings/utility-meters',
 ];
 
 export const configChildRoutes = [

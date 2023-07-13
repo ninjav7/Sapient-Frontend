@@ -27,3 +27,10 @@
 .form-gap {
     gap: 1.5rem;
 }
+
+.chart-custom-loader {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
