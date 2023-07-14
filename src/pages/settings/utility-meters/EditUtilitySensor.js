@@ -165,7 +165,7 @@ const ConfigureTab = (props) => {
         return (
             <div>
                 <UncontrolledTooltip placement="bottom" target={'tooltip-for-location'}>
-                    {`This is Location selector`}
+                    {`To view data overall for Building, keep Submeter Location unselected or reset if already set.`}
                 </UncontrolledTooltip>
 
                 <button type="button" className="tooltip-button" id={'tooltip-for-location'}>
@@ -173,6 +173,10 @@ const ConfigureTab = (props) => {
                 </button>
             </div>
         );
+    };
+
+    const resetLocationforSensor = () => {
+        handleChange('service_location', null);
     };
 
     useEffect(() => {
@@ -292,17 +296,30 @@ const ConfigureTab = (props) => {
                             {isFetchingLocations ? (
                                 <Skeleton count={1} height={35} />
                             ) : (
-                                <Select
-                                    placeholder="Select Location"
-                                    options={locationsList}
-                                    currentValue={locationsList.filter(
-                                        (option) => option.value === sensorObj?.service_location
-                                    )}
-                                    onChange={(e) => {
-                                        handleChange('service_location', e.value);
-                                    }}
-                                    isSearchable={true}
-                                />
+                                <>
+                                    <Select
+                                        placeholder="Select Location"
+                                        options={locationsList}
+                                        currentValue={locationsList.filter(
+                                            (option) => option.value === sensorObj?.service_location
+                                        )}
+                                        onChange={(e) => {
+                                            handleChange('service_location', e.value);
+                                        }}
+                                        isSearchable={true}
+                                    />
+                                    {sensorObj?.service_location ? (
+                                        <>
+                                            <Brick sizeInRem={0.25} />
+                                            <Typography.Body
+                                                size={Typography.Sizes.xs}
+                                                className="input-error-label text-primary font-bold float-right mouse-pointer"
+                                                onClick={resetLocationforSensor}>
+                                                {`Reset Submeter Location`}
+                                            </Typography.Body>
+                                        </>
+                                    ) : null}
+                                </>
                             )}
                         </div>
                         <div className="w-100" />
@@ -361,17 +378,30 @@ const ConfigureTab = (props) => {
                             {isFetchingLocations ? (
                                 <Skeleton count={1} height={35} />
                             ) : (
-                                <Select
-                                    placeholder="Select Location"
-                                    options={locationsList}
-                                    currentValue={locationsList.filter(
-                                        (option) => option.value === sensorObj?.service_location
-                                    )}
-                                    onChange={(e) => {
-                                        handleChange('service_location', e.value);
-                                    }}
-                                    isSearchable={true}
-                                />
+                                <>
+                                    <Select
+                                        placeholder="Select Location"
+                                        options={locationsList}
+                                        currentValue={locationsList.filter(
+                                            (option) => option.value === sensorObj?.service_location
+                                        )}
+                                        onChange={(e) => {
+                                            handleChange('service_location', e.value);
+                                        }}
+                                        isSearchable={true}
+                                    />
+                                    {sensorObj?.service_location ? (
+                                        <>
+                                            <Brick sizeInRem={0.25} />
+                                            <Typography.Body
+                                                size={Typography.Sizes.xs}
+                                                className="input-error-label text-primary font-bold float-right mouse-pointer"
+                                                onClick={resetLocationforSensor}>
+                                                {`Reset Submeter Location`}
+                                            </Typography.Body>
+                                        </>
+                                    ) : null}
+                                </>
                             )}
                         </div>
                     </div>
