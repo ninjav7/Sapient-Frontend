@@ -8,7 +8,6 @@ import Select from '../../../sharedComponents/form/select';
 import { Button } from '../../../sharedComponents/button';
 import { getSensorsCts, updateSensorData } from './services';
 import { UserStore } from '../../../store/UserStore';
-import './style.css';
 import './styles.scss';
 
 const EditSensorModal = (props) => {
