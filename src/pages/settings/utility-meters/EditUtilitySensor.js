@@ -165,7 +165,7 @@ const ConfigureTab = (props) => {
         return (
             <div>
                 <UncontrolledTooltip placement="bottom" target={'tooltip-for-location'}>
-                    {`To view data overall for Building, keep Submeter Location unselected or reset if already set.`}
+                    {`Utility meters are associated with the building by default. If this is a sub-meter or tenant metering application, please select a location from the dropdown.`}
                 </UncontrolledTooltip>
 
                 <button type="button" className="tooltip-button" id={'tooltip-for-location'}>
@@ -176,7 +176,7 @@ const ConfigureTab = (props) => {
     };
 
     const resetLocationforSensor = () => {
-        handleChange('service_location', null);
+        handleChange('service_location', 'null');
     };
 
     useEffect(() => {
