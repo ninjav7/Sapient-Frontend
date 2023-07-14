@@ -524,7 +524,7 @@ const DeviceSensors = (props) => {
     return (
         <>
             <Typography.Subheader size={Typography.Sizes.md}>
-                {`Sensors ${utilityMeterObj?.sensor_count ? `(${utilityMeterObj?.sensor_count})` : ''}`}
+                {`Sensors ${sensorsList ? `(${sensorsList.length})` : ''}`}
             </Typography.Subheader>
 
             <Brick sizeInRem={0.5} />
