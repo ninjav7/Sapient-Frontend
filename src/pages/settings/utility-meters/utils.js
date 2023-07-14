@@ -17,6 +17,23 @@ export const utilityMeterModel = [
     },
 ];
 
+export const shadowChartMetrics = [
+    { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+    { value: 'power', label: 'Power (kW)', unit: 'kW', Consumption: 'Power' },
+    { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
+    { value: 'voltage', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
+    { value: 'apparent_power', label: 'Apparent Power (kVA)', unit: 'kVA', Consumption: 'Apparent Power' },
+    { value: 'reactive_power', label: 'Reactive Power (kVAR)', unit: 'kVAR', Consumption: 'Reactive Power' },
+    { value: 'frequency', label: 'Frequency (Hz)', unit: 'Hz', Consumption: 'Frequency' },
+    { value: 'power_factor', label: 'Power Factor (%)', unit: '%', Consumption: 'Power Factor' },
+];
+
+export const pulseChartMetrics = [
+    { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
+    { value: 'pulse_count', label: 'Pulse Count', unit: 'pulse_count', Consumption: 'Pulse Count' },
+    { value: 'total_pulse', label: 'Total Pulses', unit: 'total_pulse', Consumption: 'Total Pulses' },
+];
+
 // Convert to Alpha Numeric
 export const convertToAlphaNumeric = (input) => {
     const sanitizedInput = input.replace(/[^a-zA-Z0-9]/g, '');
@@ -2723,15 +2740,4 @@ export const deviceData = [
         ],
         name: 'RMS Current (mA)',
     },
-];
-
-export const utilityMeterChartMetrics = [
-    { value: 'energy', label: 'Energy (kWh)', unit: 'kWh', Consumption: 'Energy' },
-    { value: 'power', label: 'Power (kW)', unit: 'kW', Consumption: 'Power' },
-    { value: 'current', label: 'Current (A)', unit: 'A', Consumption: 'Current' },
-    { value: 'voltage', label: 'Voltage (V)', unit: 'V', Consumption: 'Voltage' },
-    { value: 'apparent_power', label: 'Apparent Power (kVA)', unit: 'kVA', Consumption: 'Apparent Power' },
-    { value: 'reactive_power', label: 'Reactive Power (kVAR)', unit: 'kVAR', Consumption: 'Reactive Power' },
-    { value: 'frequency', label: 'Frequency (Hz)', unit: 'Hz', Consumption: 'Frequency' },
-    { value: 'power_factor', label: 'Power Factor (%)', unit: '%', Consumption: 'Power Factor' },
 ];

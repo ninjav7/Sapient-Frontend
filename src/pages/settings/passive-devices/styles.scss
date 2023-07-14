@@ -43,6 +43,11 @@
     border: 0.0625rem solid $primary-gray-200;
 }
 
+.custom-input-field::-webkit-outer-spin-button,
+.custom-input-field::-webkit-inner-spin-button {
+    display: none;
+}
+
 .sensor-index {
     color: $primary-gray-450 !important;
 }
