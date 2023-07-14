@@ -36,3 +36,22 @@ export const formatSensorHeading = (sensorObj, sensorType) => {
     }
     return title;
 };
+
+export const formatSensorList = (sensorObj) => {
+    let title = '';
+    let str1;
+    let str2;
+    let str3;
+    if (sensorObj?.utility_provider) str1 = `${sensorObj?.utility_provider}`;
+    if (sensorObj?.utility_meter_make || sensorObj?.utility_meter_model)
+        str2 = `${sensorObj?.utility_meter_make} ${sensorObj?.utility_meter_model}`;
+    if (sensorObj?.utility_meter_serial_number) str3 = `${sensorObj?.utility_meter_serial_number}`;
+    if (str1 && str2 && str3) title = `${str1} - ${str2} - ${str3}`;
+    if (str1 && str2 && !str3) title = `${str1} - ${str2}`;
+    if (str1 && !str2 && str3) title = `${str1} - ${str3}`;
+    if (!str1 && str2 && str3) title = `${str2} - ${str3}`;
+    if (str1 && !str2 && !str3) title = `${str1}`;
+    if (!str1 && str2 && !str3) title = `${str2}`;
+    if (!str1 && !str2 && str3) title = `${str3}`;
+    return title;
+};

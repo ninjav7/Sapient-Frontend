@@ -29,7 +29,7 @@ import InputTooltip from '../../../sharedComponents/form/input/InputTooltip';
 import DeleteModal from './AlertModals';
 import EditUtilitySensor from './EditUtilitySensor';
 import { getLocationData } from '../passive-devices/services';
-import { convertNullToSingleQuotes } from './helper';
+import { convertNullToSingleQuotes, formatSensorList } from './helper';
 import './styles.scss';
 
 const DeleteUtility = (props) => {
@@ -141,32 +141,42 @@ const Sensors = (props) => {
     return (
         <>
             {data.map((record, index) => {
+                const sensorNo = index + 1;
+                const sensorData = formatSensorList(record);
+                const isPulseWeightVisible = utilityMeterObj?.device_type === 'pulse counter' && record?.pulse_weight;
+                const isSensorConfigured =
+                    record?.utility_provider || record?.utility_meter_serial_number || record?.pulse_weight;
+                const isSensorAttached =
+                    record?.utility_provider || record?.utility_meter_serial_number || record?.pulse_weight;
+
                 return (
                     <div key={record?.id}>
                         <Brick sizeInRem={0.75} />
 
                         <div
                             className={`d-flex justify-content-between sensor-container ${
-                                record?.utility_provider && record?.utility_meter_serial_number && record?.pulse_weight
-                                    ? ''
-                                    : 'sensor-unattach'
+                                isSensorAttached ? '' : 'sensor-unattach'
                             }`}>
                             <div className="d-flex align-items-center mouse-pointer">
                                 <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
-                                    {index + 1}
+                                    {sensorNo}
                                 </Typography.Subheader>
 
-                                {record?.utility_provider && record?.utility_meter_serial_number ? (
-                                    <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
-                                        {`${record?.utility_provider} - ${record?.utility_meter_make} ${record?.utility_meter_model} - ${record?.utility_meter_serial_number}`}
-                                    </Typography.Subheader>
+                                {isSensorConfigured ? (
+                                    <>
+                                        {sensorData !== '' && (
+                                            <Typography.Subheader size={Typography.Sizes.md} className="mr-4">
+                                                {sensorData}
+                                            </Typography.Subheader>
+                                        )}
+                                    </>
                                 ) : (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
-                                        Not Attached
+                                        {`Not Attached`}
                                     </Typography.Subheader>
                                 )}
 
-                                {utilityMeterObj?.device_type === 'pulse counter' && record?.pulse_weight && (
+                                {isPulseWeightVisible && (
                                     <Badge
                                         text={`${record?.pulse_weight} Pulse Weight`}
                                         className="utility-meter-badge font-weight-bold"
@@ -519,7 +529,7 @@ export const DeviceDetails = (props) => {
 };
 
 const DeviceSensors = (props) => {
-    const { utilityMeterObj, sensorsList, isFetchingSensors } = props;
+    const { sensorsList, isFetchingSensors } = props;
 
     return (
         <>
