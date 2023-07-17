@@ -35,6 +35,7 @@ import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
 import EnergyConsumptionChart from './energy-consumption/EnergyConsumptionChart';
+import { UserStore } from '../../store/UserStore';
 import './style.css';
 
 const BuildingOverview = () => {
@@ -66,6 +67,7 @@ const BuildingOverview = () => {
     });
 
     const [dateFormat, setDateFormat] = useState('MM/DD HH:00');
+    const timeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [xAxisObj, setXAxisObj] = useState({
         xAxis: {
@@ -404,7 +406,7 @@ const BuildingOverview = () => {
         };
 
         const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+            const date_format = xaxisLabelsFormat(days_count, timeFormat);
             setDateFormat(date_format);
         };
 

@@ -23,6 +23,7 @@ import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 import { LOW_MED_HIGH_TYPES } from '../../sharedComponents/common/charts/modules/contants';
 import { getWeatherData } from '../../services/weather';
+import { UserStore } from '../../store/UserStore';
 
 const EndUseType = () => {
     const { endUseType } = useParams();
@@ -32,6 +33,7 @@ const EndUseType = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
+    const timeFormat = UserStore.useState((s) => s.timeFormat);
     const [buildingListData] = useAtom(buildingData);
     const [isPlugOnly, setIsPlugOnly] = useState(false);
 
@@ -202,7 +204,7 @@ const EndUseType = () => {
         };
 
         const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count);
+            const date_format = xaxisLabelsFormat(days_count, timeFormat);
             setDateFormat(date_format);
         };
 

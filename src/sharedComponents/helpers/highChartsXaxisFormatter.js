@@ -59,15 +59,15 @@ export const xaxisLabelsCount = (daysCount) => {
     }
 };
 
-export const xaxisLabelsFormat = (daysCount) => {
+export const xaxisLabelsFormat = (daysCount, timeFormat) => {
     // Up to and including 1 day
     if (daysCount === 1) return 'HH:00';
 
     // Up to and including 3 days
-    if (daysCount >= 2 && daysCount <= 3) return 'MM/DD HH:00';
+    if (daysCount >= 2 && daysCount <= 3) return `MM/DD ${timeFormat === '12h' ? `HH` : `hh`}:00`;
 
     // Up to and including 7 days
-    if (daysCount >= 4 && daysCount <= 7) return 'MM/DD HH:00';
+    if (daysCount >= 4 && daysCount <= 7) return `MM/DD ${timeFormat === '12h' ? `HH` : `hh`}:00`;
 
     // Up to and including 14 days
     if (daysCount >= 8 && daysCount <= 14) return 'MM/DD';
