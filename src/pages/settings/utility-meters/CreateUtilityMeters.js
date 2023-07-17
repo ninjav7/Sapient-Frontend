@@ -88,7 +88,7 @@ const CreateUtilityMeters = (props) => {
             setIsProcessing(true);
             const reqObj = {
                 building_id: bldgId,
-                device_type: utilityData?.model,
+                device_type: utilityData?.model.includes(`shadow`) ? 'shadow meter' : utilityData?.model,
                 model: utilityData?.model_name,
                 deviceIdentifier: utilityData?.device_id,
                 modbus_address: utilityData?.modbus,
