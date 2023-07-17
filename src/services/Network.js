@@ -210,7 +210,8 @@ export const linkSocket = '/api/user_role/plug_rule/link_socket';
 // weather api
 export const getWeather = '/api/weather/';
 
-// sensor v2
+// V2 API's
 export const listCts = '/api/v2/config/sensor/get-cts';
 export const getUtilityMeterSensor = '/api/v2/config/sensor/get';
 export const updateSensorV2 = '/api/v2/config/sensor/update';
+export const signinV2 = '/api/v2/user/user/signin';
