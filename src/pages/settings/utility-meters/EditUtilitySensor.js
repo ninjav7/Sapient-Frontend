@@ -24,6 +24,7 @@ import { UserStore } from '../../../store/UserStore';
 import { getSensorGraphData } from '../passive-devices/services';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { ReactComponent as TooltipIcon } from '../../../sharedComponents/assets/icons/tooltip.svg';
+import { formatSensorHeading } from './helper';
 import './styles.scss';
 
 const MetricsTab = (props) => {
@@ -165,7 +166,7 @@ const ConfigureTab = (props) => {
         return (
             <div>
                 <UncontrolledTooltip placement="bottom" target={'tooltip-for-location'}>
-                    {`To view data overall for Building, keep Submeter Location unselected or reset if already set.`}
+                    {`Utility meters are associated with the building by default. If this is a sub-meter or tenant metering application, please select a location from the dropdown.`}
                 </UncontrolledTooltip>
 
                 <button type="button" className="tooltip-button" id={'tooltip-for-location'}>
@@ -176,7 +177,7 @@ const ConfigureTab = (props) => {
     };
 
     const resetLocationforSensor = () => {
-        handleChange('service_location', null);
+        handleChange('service_location', 'null');
     };
 
     useEffect(() => {
@@ -527,8 +528,8 @@ const EditUtilitySensor = (props) => {
                             <Typography.Header size={Typography.Sizes.md}>
                                 {activeTab === 'metrics'
                                     ? utilityMeterObj?.device_type === 'pulse counter'
-                                        ? `${selectedSensorObj?.utility_provider} - ${selectedSensorObj?.utility_meter_serial_number} - ${selectedSensorObj?.pulse_weight}  kWH/pulse`
-                                        : `${selectedSensorObj?.utility_provider} - ${selectedSensorObj?.utility_meter_serial_number}`
+                                        ? formatSensorHeading(selectedSensorObj, 'pulse')
+                                        : formatSensorHeading(selectedSensorObj, 'shadow')
                                     : `Sensor Details`}
                             </Typography.Header>
                             <div className="d-flex justify-content-start mouse-pointer ">
