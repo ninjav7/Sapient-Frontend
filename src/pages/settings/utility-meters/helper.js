@@ -8,67 +8,50 @@ export const convertNullToSingleQuotes = (obj) => {
 
 export const formatSensorHeading = (sensorObj, sensorType) => {
     let title = '';
-
-    const { utility_provider, utility_meter_serial_number, pulse_weight } = sensorObj;
-
     if (sensorType === 'pulse') {
-        if (utility_provider && utility_meter_serial_number && pulse_weight) {
-            title = `${utility_provider} - ${utility_meter_serial_number} - ${pulse_weight} kWH/pulse`;
-        } else if (utility_provider && utility_meter_serial_number) {
-            title = `${utility_provider} - ${utility_meter_serial_number}`;
-        } else if (utility_provider && pulse_weight) {
-            title = `${utility_provider} - ${pulse_weight} kWH/pulse`;
-        } else if (utility_meter_serial_number && pulse_weight) {
-            title = `${utility_meter_serial_number} - ${pulse_weight} kWH/pulse`;
-        } else if (utility_provider) {
-            title = utility_provider;
-        } else if (utility_meter_serial_number) {
-            title = utility_meter_serial_number;
-        } else if (pulse_weight) {
-            title = `${pulse_weight} kWH/pulse`;
-        } else {
-            title = 'Sapient Pulse';
-        }
+        let str1;
+        let str2;
+        let str3;
+        if (sensorObj?.utility_provider) str1 = `${sensorObj?.utility_provider}`;
+        if (sensorObj?.utility_meter_serial_number) str2 = `${sensorObj?.utility_meter_serial_number}`;
+        if (sensorObj?.pulse_weight) str3 = `${sensorObj?.pulse_weight} kWH/pulse`;
+        if (str1 && str2 && str3) title = `${str1} - ${str2} - ${str3}`;
+        if (str1 && str2 && !str3) title = `${str1} - ${str2}`;
+        if (str1 && !str2 && str3) title = `${str1} - ${str3}`;
+        if (!str1 && str2 && str3) title = `${str2} - ${str3}`;
+        if (str1 && !str2 && !str3) title = `${str1}`;
+        if (!str1 && str2 && !str3) title = `${str2}`;
+        if (!str1 && !str2 && str3) title = `${str3}`;
+        if (title === '') title = 'Sapient Pulse';
     }
-
     if (sensorType === 'shadow') {
-        if (utility_provider && utility_meter_serial_number) {
-            title = `${utility_provider} - ${utility_meter_serial_number}`;
-        } else if (utility_provider) {
-            title = utility_provider;
-        } else if (utility_meter_serial_number) {
-            title = utility_meter_serial_number;
-        } else {
-            title = 'Sapient Shadow';
-        }
+        let str1;
+        let str2;
+        if (sensorObj?.utility_provider) str1 = `${sensorObj?.utility_provider}`;
+        if (sensorObj?.utility_meter_serial_number) str2 = `${sensorObj?.utility_meter_serial_number}`;
+        if (str1 && str2) title = `${str1} - ${str2}`;
+        if (str1 && !str2) title = `${str1}`;
+        if (!str1 && str2) title = `${str2}`;
+        if (title === '') title = 'Sapient Shadow';
     }
-
     return title;
 };
 
 export const formatSensorList = (sensorObj) => {
-    const { utility_provider, utility_meter_make, utility_meter_model, utility_meter_serial_number } = sensorObj;
-
     let title = '';
-    let str1 = utility_provider || '';
-    let str2 = utility_meter_make && utility_meter_model ? `${utility_meter_make} ${utility_meter_model}` : '';
-    let str3 = utility_meter_serial_number || '';
-
-    if (str1 && str2 && str3) {
-        title = `${str1} - ${str2} - ${str3}`;
-    } else if (str1 && str2) {
-        title = `${str1} - ${str2}`;
-    } else if (str1 && str3) {
-        title = `${str1} - ${str3}`;
-    } else if (str2 && str3) {
-        title = `${str2} - ${str3}`;
-    } else if (str1) {
-        title = str1;
-    } else if (str2) {
-        title = str2;
-    } else if (str3) {
-        title = str3;
-    }
-
+    let str1;
+    let str2;
+    let str3;
+    if (sensorObj?.utility_provider) str1 = `${sensorObj?.utility_provider}`;
+    if (sensorObj?.utility_meter_make || sensorObj?.utility_meter_model)
+        str2 = `${sensorObj?.utility_meter_make} ${sensorObj?.utility_meter_model}`;
+    if (sensorObj?.utility_meter_serial_number) str3 = `${sensorObj?.utility_meter_serial_number}`;
+    if (str1 && str2 && str3) title = `${str1} - ${str2} - ${str3}`;
+    if (str1 && str2 && !str3) title = `${str1} - ${str2}`;
+    if (str1 && !str2 && str3) title = `${str1} - ${str3}`;
+    if (!str1 && str2 && str3) title = `${str2} - ${str3}`;
+    if (str1 && !str2 && !str3) title = `${str1}`;
+    if (!str1 && str2 && !str3) title = `${str2}`;
+    if (!str1 && !str2 && str3) title = `${str3}`;
     return title;
 };
