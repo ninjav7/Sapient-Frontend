@@ -24,6 +24,7 @@ export const accountRoutes = [
     '/settings/users',
     '/settings/roles',
     '/settings/equipment-types',
+    '/settings/user-preference',
 ];
 
 export const accountChildRoutes = ['/users/user-profile/single'];

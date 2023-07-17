@@ -24,8 +24,11 @@ import { UserStore } from '../../store/UserStore';
 const setSession = (user) => {
     let cookies = new Cookies();
     if (user) {
+        console.log('SSR user => ', user);
         localStorage.setItem('vendorName', user?.vendor_name);
-        localStorage.setItem('vendorId', user?.vendor_id);
+        localStorage.setItem('date_format', user?.date_format);
+        localStorage.setItem('time_format', user?.time_format);
+        localStorage.setItem('unit', user?.unit);
         cookies.set('user', JSON.stringify(user), { path: '/' });
     } else cookies.remove('user', { path: '/' });
 };
