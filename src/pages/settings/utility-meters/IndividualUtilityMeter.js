@@ -263,6 +263,7 @@ const DeviceHeader = (props) => {
                             type={Button.Type.primary}
                             onClick={redirectToMainPage}
                             className="ml-2"
+                            disabled={true}
                         />
                     ) : null}
                 </div>
