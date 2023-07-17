@@ -10,28 +10,75 @@ import colorPalette from '../../../assets/scss/_colors.scss';
 import Select from '../../../sharedComponents/form/select';
 import { dateFormatsList, timeFormatsList, untitsList } from './utils.js';
 import { UserStore } from '../../../store/UserStore';
+import { compareObjData } from '../../../helpers/helpers';
+import { updateUserPreferences } from './services';
+import { saveUserPreference } from '../../../helpers/saveUserPreference';
 
 const UserPreference = () => {
     const cookies = new Cookies();
     const user = cookies.get('user');
 
-    const dateFormat = UserStore.useState((s) => s.dateFormat);
-    const timeFormat = UserStore.useState((s) => s.timeFormat);
-    const unit = UserStore.useState((s) => s.unit);
-
-    console.log('SSR Sudhanshu dateFormat => ', dateFormat);
-    console.log('SSR Sudhanshu timeFormat => ', timeFormat);
-    console.log('SSR Sudhanshu unit => ', unit);
-    console.log('SSR Sudhanshu userPrefObj => ', userPrefObj);
-    console.log('SSR Sudhanshu userPrefObj => ', user);
+    const { dateFormat, timeFormat, unit } = UserStore.useState((s) => ({
+        dateFormat: s.dateFormat,
+        timeFormat: s.timeFormat,
+        unit: s.unit,
+    }));
 
     const [userPrefObj, setUserPrefObj] = useState(null);
+    const [previousUserPref, setPreviousUserPref] = useState(null);
     const [isProcessing, setProcessing] = useState(false);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, userPrefObj);
         obj[key] = value;
         setUserPrefObj(obj);
+    };
+
+    const restoreDefaultPreferences = () => {
+        let obj = Object.assign({}, previousUserPref);
+        setUserPrefObj(obj);
+    };
+
+    const handleUserPreferenceSave = async () => {
+        if (!user?.user_id || !userPrefObj) return;
+
+        setProcessing(true);
+        const params = `?user_id=${user?.user_id}`;
+
+        await updateUserPreferences(params, userPrefObj)
+            .then((res) => {
+                const response = res?.data;
+                if (response?.success) {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = 'User Preference updated successfully.';
+                        s.notificationType = 'success';
+                    });
+                    setUserPrefObj(null);
+                    setPreviousUserPref(null);
+                    saveUserPreference(userPrefObj?.date_format, userPrefObj?.time_format, userPrefObj?.unit);
+                } else {
+                    UserStore.update((s) => {
+                        s.showNotification = true;
+                        s.notificationMessage = response?.message
+                            ? response?.message
+                            : res
+                            ? 'Unable to update User Preference.'
+                            : 'Unable to update User Preference due to Internal Server Error!.';
+                        s.notificationType = 'error';
+                    });
+                }
+            })
+            .catch(() => {
+                UserStore.update((s) => {
+                    s.showNotification = true;
+                    s.notificationMessage = 'Unable to update User Preference.';
+                    s.notificationType = 'error';
+                });
+            })
+            .finally(() => {
+                setProcessing(false);
+            });
     };
 
     const updateBreadcrumbStore = () => {
@@ -51,12 +98,13 @@ const UserPreference = () => {
     };
 
     useEffect(() => {
-        let obj = {
+        const obj = {
             date_format: dateFormat ? dateFormat : null,
             time_format: timeFormat ? timeFormat : null,
             unit: unit ? unit : null,
         };
         setUserPrefObj(obj);
+        setPreviousUserPref(obj);
     }, [dateFormat, timeFormat, unit]);
 
     useEffect(() => {
@@ -86,13 +134,19 @@ const UserPreference = () => {
                         </div>
                         <div>
                             <div className="d-flex">
-                                <Button label="Cancel" size={Button.Sizes.md} type={Button.Type.secondaryGrey} />
                                 <Button
-                                    label={'Save'}
+                                    label="Cancel"
+                                    size={Button.Sizes.md}
+                                    type={Button.Type.secondaryGrey}
+                                    onClick={restoreDefaultPreferences}
+                                />
+                                <Button
+                                    label={isProcessing ? 'Saving...' : 'Save'}
                                     size={Button.Sizes.md}
                                     type={Button.Type.primary}
                                     className="ml-2"
-                                    disabled={isProcessing}
+                                    onClick={handleUserPreferenceSave}
+                                    disabled={isProcessing || compareObjData(previousUserPref, userPrefObj)}
                                 />
                             </div>
                         </div>
