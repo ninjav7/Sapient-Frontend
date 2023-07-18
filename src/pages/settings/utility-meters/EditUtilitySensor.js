@@ -271,10 +271,10 @@ const ConfigureTab = (props) => {
                         </div>
 
                         <div className="w-100">
-                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Model`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <InputTooltip
-                                placeholder="Enter utility meter modal"
+                                placeholder="Enter utility meter model"
                                 onChange={(e) => {
                                     handleChange('utility_meter_model', e.target.value);
                                 }}
@@ -342,10 +342,10 @@ const ConfigureTab = (props) => {
                         </div>
 
                         <div className="w-100">
-                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Model`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <InputTooltip
-                                placeholder="Enter utility meter modal"
+                                placeholder="Enter utility meter model"
                                 onChange={(e) => {
                                     handleChange('utility_meter_model', e.target.value);
                                 }}
