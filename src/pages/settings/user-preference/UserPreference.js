@@ -51,7 +51,7 @@ const UserPreference = () => {
                 if (response?.success) {
                     UserStore.update((s) => {
                         s.showNotification = true;
-                        s.notificationMessage = 'User Preference updated successfully.';
+                        s.notificationMessage = 'Preference updated successfully.';
                         s.notificationType = 'success';
                     });
                     setUserPrefObj(null);
@@ -63,8 +63,8 @@ const UserPreference = () => {
                         s.notificationMessage = response?.message
                             ? response?.message
                             : res
-                            ? 'Unable to update User Preference.'
-                            : 'Unable to update User Preference due to Internal Server Error!.';
+                            ? 'Unable to update Preference.'
+                            : 'Unable to update Preference due to Internal Server Error!.';
                         s.notificationType = 'error';
                     });
                 }
@@ -72,7 +72,7 @@ const UserPreference = () => {
             .catch(() => {
                 UserStore.update((s) => {
                     s.showNotification = true;
-                    s.notificationMessage = 'Unable to update User Preference.';
+                    s.notificationMessage = 'Unable to update Preference.';
                     s.notificationType = 'error';
                 });
             })
@@ -85,8 +85,8 @@ const UserPreference = () => {
         BreadcrumbStore.update((bs) => {
             let newList = [
                 {
-                    label: 'User Preference',
-                    path: '/settings/user-preference',
+                    label: 'Preference',
+                    path: '/settings/preference',
                     active: true,
                 },
             ];
@@ -117,7 +117,7 @@ const UserPreference = () => {
                 <Col lg={12}>
                     <div className="d-flex justify-content-between align-items-center">
                         <div>
-                            <Typography.Header size={Typography.Sizes.lg}>{`User Preference`}</Typography.Header>
+                            <Typography.Header size={Typography.Sizes.lg}>{`Preference`}</Typography.Header>
                         </div>
                     </div>
                 </Col>
@@ -163,7 +163,7 @@ const UserPreference = () => {
                             <Typography.Subheader
                                 size={Typography.Sizes.md}
                                 style={{ color: colorPalette.primaryGray550 }}>
-                                {`User Profile`}
+                                {`User Preference`}
                             </Typography.Subheader>
                         </CardHeader>
 

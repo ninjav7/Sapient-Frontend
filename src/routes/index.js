@@ -336,8 +336,8 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/user-preference',
-            name: 'User Preference',
+            path: '/settings/preference',
+            name: 'Preference',
             component: UserPreference,
             route: PrivateRoute,
             visibility: true,
