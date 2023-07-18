@@ -206,7 +206,6 @@ const ConfigureTab = (props) => {
                     <Typography.Body size={Typography.Sizes.md}>{`Utility Meter S/N`}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <InputTooltip
-                        type="number"
                         placeholder="Enter serial number for utility meter"
                         onChange={(e) => {
                             handleChange('utility_meter_serial_number', e.target.value);
