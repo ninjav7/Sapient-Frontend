@@ -52,6 +52,7 @@ const Confirm = (props) => {
     const [alreadyLogin, setAlreadyLogin] = useState(false);
     const [userDetails, setUserDetails] = useState({});
     const [errorCount, setErrorCount] = useState(0);
+    const [isTermsAccepted, setTermsAcceptance] = useState(false);
 
     // Terms and Condition Modal
     const [showModal, setModalShow] = useState(false);
@@ -60,6 +61,7 @@ const Confirm = (props) => {
 
     useEffect(() => {
         set_isMounted(true);
+        setTermsAcceptance(false);
         document.body.classList.add('authentication-bg');
         const isAuthTknValid = isUserAuthenticated();
         const user = getLoggedInUser();
@@ -148,6 +150,11 @@ const Confirm = (props) => {
         } else {
             return;
         }
+    };
+
+    const handleAcceptClick = () => {
+        setTermsAcceptance(true);
+        handleModalClose();
     };
 
     useEffect(() => {
@@ -581,8 +588,12 @@ const Confirm = (props) => {
                                                         <Checkbox
                                                             label="Accept Terms and Condition."
                                                             size={Checkbox.Sizes.md}
-                                                            checked={false}
-                                                            onClick={handleModalOpen}
+                                                            checked={isTermsAccepted}
+                                                            onClick={() => {
+                                                                isTermsAccepted
+                                                                    ? setTermsAcceptance(!isTermsAccepted)
+                                                                    : handleModalOpen();
+                                                            }}
                                                         />
                                                     </div>
 
@@ -599,7 +610,8 @@ const Confirm = (props) => {
                                                                 lowerCaseErr === 'success' &&
                                                                 upperCaseErr === 'success' &&
                                                                 specialCharErr === 'success' &&
-                                                                numberErr === 'success'
+                                                                numberErr === 'success' &&
+                                                                isTermsAccepted
                                                                     ? false
                                                                     : true
                                                             }></Button>
@@ -671,7 +683,11 @@ const Confirm = (props) => {
                 </Modal.Footer>
             </Modal>
 
-            <TermsAndConditions showModal={showModal} handleModalClose={handleModalClose} />
+            <TermsAndConditions
+                showModal={showModal}
+                closeModal={handleModalClose}
+                handleAcceptClick={handleAcceptClick}
+            />
         </React.Fragment>
     );
 };
