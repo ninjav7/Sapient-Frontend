@@ -263,6 +263,7 @@ const DeviceHeader = (props) => {
                             type={Button.Type.primary}
                             onClick={redirectToMainPage}
                             className="ml-2"
+                            disabled={true}
                         />
                     ) : null}
                 </div>
@@ -417,6 +418,7 @@ const EditUtilityMeter = (props) => {
                         error={utilityError?.modbus_address}
                         labelSize={Typography.Sizes.md}
                         value={meterObj?.modbus_address}
+                        inputClassName={'custom-input-field'}
                     />
                 </div>
 
