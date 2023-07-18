@@ -586,7 +586,7 @@ const Confirm = (props) => {
                                                     {/* Terms and Condition  */}
                                                     <div className="mt-4">
                                                         <Checkbox
-                                                            label="Accept Terms and Condition."
+                                                            label="Accept Terms and Conditions."
                                                             size={Checkbox.Sizes.md}
                                                             checked={isTermsAccepted}
                                                             onClick={() => {

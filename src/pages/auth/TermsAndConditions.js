@@ -1,8 +1,15 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
-import { TermsAndConditionDescription } from './utils';
 import Typography from '../../sharedComponents/typography';
 import Button from '../../sharedComponents/button/Button';
+import {
+    TermsAndConditionDescription1,
+    TermsAndConditionDescription2,
+    TermsAndConditionDescription3,
+    TermsAndConditionDescription4,
+    TermsAndConditionDescription5,
+} from './utils';
+import Brick from '../../sharedComponents/brick';
 
 const TermsAndConditions = (props) => {
     const { showModal, closeModal, handleAcceptClick } = props;
@@ -11,10 +18,18 @@ const TermsAndConditions = (props) => {
         <React.Fragment>
             <Modal show={showModal} onHide={closeModal} size="lg" centered backdrop="static" keyboard={false}>
                 <Modal.Header style={{ padding: '1.5rem' }}>
-                    <Typography.Header size={Typography.Sizes.lg}>Accept Terms and Condition</Typography.Header>
+                    <Typography.Header size={Typography.Sizes.lg}>Accept Terms and Conditions</Typography.Header>
                 </Modal.Header>
-                <Modal.Body style={{ padding: '1.5rem' }}>
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription}`}</Typography.Body>
+                <Modal.Body style={{ padding: '1.5rem', maxHeight: '20rem', overflowY: 'auto' }}>
+                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription1}`}</Typography.Body>
+                    <Brick sizeInRem={1} />
+                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription2}`}</Typography.Body>
+                    <Brick sizeInRem={1} />
+                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription3}`}</Typography.Body>
+                    <Brick sizeInRem={1} />
+                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription4}`}</Typography.Body>
+                    <Brick sizeInRem={1} />
+                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription5}`}</Typography.Body>
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem' }}>
                     <Button
