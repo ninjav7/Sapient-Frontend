@@ -206,7 +206,6 @@ const ConfigureTab = (props) => {
                     <Typography.Body size={Typography.Sizes.md}>{`Utility Meter S/N`}</Typography.Body>
                     <Brick sizeInRem={0.25} />
                     <InputTooltip
-                        type="number"
                         placeholder="Enter serial number for utility meter"
                         onChange={(e) => {
                             handleChange('utility_meter_serial_number', e.target.value);
@@ -240,6 +239,7 @@ const ConfigureTab = (props) => {
                                 labelSize={Typography.Sizes.md}
                                 value={sensorObj?.pulse_weight}
                                 error={sensorErrorObj?.pulse_weight}
+                                inputClassName={'custom-input-field'}
                             />
                         </div>
 
@@ -272,10 +272,10 @@ const ConfigureTab = (props) => {
                         </div>
 
                         <div className="w-100">
-                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Model`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <InputTooltip
-                                placeholder="Enter utility meter modal"
+                                placeholder="Enter utility meter model"
                                 onChange={(e) => {
                                     handleChange('utility_meter_model', e.target.value);
                                 }}
@@ -343,10 +343,10 @@ const ConfigureTab = (props) => {
                         </div>
 
                         <div className="w-100">
-                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Modal`}</Typography.Body>
+                            <Typography.Body size={Typography.Sizes.md}>{`Utility Meter Model`}</Typography.Body>
                             <Brick sizeInRem={0.25} />
                             <InputTooltip
-                                placeholder="Enter utility meter modal"
+                                placeholder="Enter utility meter model"
                                 onChange={(e) => {
                                     handleChange('utility_meter_model', e.target.value);
                                 }}

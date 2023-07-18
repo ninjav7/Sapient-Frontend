@@ -418,6 +418,7 @@ const EditUtilityMeter = (props) => {
                         error={utilityError?.modbus_address}
                         labelSize={Typography.Sizes.md}
                         value={meterObj?.modbus_address}
+                        inputClassName={'custom-input-field'}
                     />
                 </div>
 
