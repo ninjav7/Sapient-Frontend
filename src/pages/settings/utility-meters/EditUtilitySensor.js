@@ -239,6 +239,7 @@ const ConfigureTab = (props) => {
                                 labelSize={Typography.Sizes.md}
                                 value={sensorObj?.pulse_weight}
                                 error={sensorErrorObj?.pulse_weight}
+                                inputClassName={'custom-input-field'}
                             />
                         </div>
 

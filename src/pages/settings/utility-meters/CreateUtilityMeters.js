@@ -217,6 +217,7 @@ const CreateUtilityMeters = (props) => {
                             error={utilityError?.modbus}
                             labelSize={Typography.Sizes.md}
                             value={utilityData?.modbus}
+                            inputClassName={'custom-input-field'}
                         />
                     </div>
 
