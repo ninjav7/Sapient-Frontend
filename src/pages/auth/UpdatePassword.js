@@ -24,6 +24,8 @@ import { ComponentStore } from '../../store/ComponentStore';
 import Brick from '../../sharedComponents/brick';
 import Modal from 'react-bootstrap/Modal';
 import Button from '../../sharedComponents/button/Button';
+import { Checkbox } from '../../sharedComponents/form/checkbox';
+import TermsAndConditions from './TermsAndConditions';
 
 const Confirm = (props) => {
     const cookies = new Cookies();
@@ -50,6 +52,11 @@ const Confirm = (props) => {
     const [alreadyLogin, setAlreadyLogin] = useState(false);
     const [userDetails, setUserDetails] = useState({});
     const [errorCount, setErrorCount] = useState(0);
+
+    // Terms and Condition Modal
+    const [showModal, setModalShow] = useState(false);
+    const handleModalClose = () => setModalShow(false);
+    const handleModalOpen = () => setModalShow(true);
 
     useEffect(() => {
         set_isMounted(true);
@@ -554,23 +561,32 @@ const Confirm = (props) => {
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                {matchErr === 'error' ? (
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        className="text-mute-error mt-2">
-                                                                        Error: Password must match
-                                                                    </Typography.Subheader>
-                                                                ) : (
-                                                                    <Typography.Subheader
-                                                                        size={Typography.Sizes.md}
-                                                                        className="text-mute mt-2">
-                                                                        Password must match
-                                                                    </Typography.Subheader>
-                                                                )}
+                                                                <Typography.Subheader
+                                                                    size={Typography.Sizes.md}
+                                                                    className={`mt-2 ${
+                                                                        matchErr === 'error'
+                                                                            ? `text-mute-error`
+                                                                            : `text-mute`
+                                                                    }`}>
+                                                                    {matchErr === 'error'
+                                                                        ? `Error: Password must match`
+                                                                        : `Password must match`}
+                                                                </Typography.Subheader>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <FormGroup className="mb-3 pt-5">
+
+                                                    {/* Terms and Condition  */}
+                                                    <div className="mt-4">
+                                                        <Checkbox
+                                                            label="Accept Terms and Condition."
+                                                            size={Checkbox.Sizes.md}
+                                                            checked={false}
+                                                            onClick={handleModalOpen}
+                                                        />
+                                                    </div>
+
+                                                    <FormGroup className="mb-3 mt-4">
                                                         <Button
                                                             className="sub-button"
                                                             label={'Set Password'}
@@ -654,6 +670,8 @@ const Confirm = (props) => {
                     />
                 </Modal.Footer>
             </Modal>
+
+            <TermsAndConditions showModal={showModal} handleModalClose={handleModalClose} />
         </React.Fragment>
     );
 };
