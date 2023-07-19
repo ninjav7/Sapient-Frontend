@@ -2,14 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Typography from '../../sharedComponents/typography';
 import Button from '../../sharedComponents/button/Button';
-import {
-    TermsAndConditionDescription1,
-    TermsAndConditionDescription2,
-    TermsAndConditionDescription3,
-    TermsAndConditionDescription4,
-    TermsAndConditionDescription5,
-} from './utils';
-import Brick from '../../sharedComponents/brick';
+import TermsAndConditionContent from './terms-conditions/TermsAndConditionContent';
 
 const TermsAndConditions = (props) => {
     const { showModal, closeModal, handleAccept, handleDecline } = props;
@@ -17,8 +10,13 @@ const TermsAndConditions = (props) => {
     const modalBodyRef = useRef(null);
 
     const handleScroll = () => {
-        const { scrollTop, scrollHeight, clientHeight } = modalBodyRef.current;
-        const isBottom = scrollTop + clientHeight >= scrollHeight;
+        const modalBody = modalBodyRef.current;
+
+        const scrollPosition = Math.round(modalBody.scrollTop);
+        const contentHeight = Math.round(modalBody.scrollHeight);
+        const clientHeight = Math.round(modalBody.clientHeight);
+
+        const isBottom = scrollPosition + clientHeight >= contentHeight;
         setIsScrolledToBottom(isBottom);
     };
 
@@ -28,25 +26,26 @@ const TermsAndConditions = (props) => {
         if (!showModal) setIsScrolledToBottom(false);
     }, [showModal]);
 
+    useEffect(() => {
+        const handleResize = () => handleScroll();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
         <React.Fragment>
-            <Modal show={showModal} onHide={closeModal} size="lg" centered backdrop="static" keyboard={false}>
+            <Modal show={showModal} onHide={closeModal} size="xl" centered backdrop="static" keyboard={false}>
                 <Modal.Header style={{ padding: '1.5rem' }}>
                     <Typography.Header size={Typography.Sizes.lg}>Accept Terms and Conditions</Typography.Header>
                 </Modal.Header>
                 <Modal.Body
-                    style={{ padding: '1.5rem', maxHeight: '20rem', overflowY: 'auto' }}
+                    style={{ padding: '2.5rem', height: '30rem', maxHeight: '30rem', overflowY: 'auto' }}
                     ref={modalBodyRef}
                     onScroll={handleScroll}>
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription1}`}</Typography.Body>
-                    <Brick sizeInRem={1} />
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription2}`}</Typography.Body>
-                    <Brick sizeInRem={1} />
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription3}`}</Typography.Body>
-                    <Brick sizeInRem={1} />
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription4}`}</Typography.Body>
-                    <Brick sizeInRem={1} />
-                    <Typography.Body size={Typography.Sizes.md}>{`${TermsAndConditionDescription5}`}</Typography.Body>
+                    <TermsAndConditionContent />
                 </Modal.Body>
                 <Modal.Footer style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem' }}>
                     <Button
