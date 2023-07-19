@@ -13,20 +13,23 @@ const Sensors = (props) => {
     return (
         <>
             {data.map((record, index) => {
+                const isSensorNotConfigured = record?.equipment_id === '' && record?.breaker_id === '';
+                const isSensorFlagged = record?.breaker_rated_amps > record?.rated_amps;
+
                 return (
                     <div key={index} data-testid={record?.name}>
                         <Brick sizeInRem={0.75} />
 
                         <div
-                            className={`d-flex justify-content-between sensor-container ${
-                                record?.equipment_id === '' && record?.breaker_id === '' ? 'sensor-unattach' : ''
-                            }`}>
+                            className={`d-flex justify-content-between sensor-container sensor-wrapper ${
+                                isSensorNotConfigured ? `sensor-unattach` : ``
+                            } ${isSensorFlagged ? `partially-configured` : ``} `}>
                             <div className="d-flex align-items-center mouse-pointer">
                                 <Typography.Subheader size={Typography.Sizes.md} className="sensor-index mr-4">
                                     {record?.index}
                                 </Typography.Subheader>
 
-                                {record?.equipment_id === '' && record?.breaker_id === '' ? (
+                                {isSensorNotConfigured ? (
                                     <Typography.Subheader size={Typography.Sizes.md} className="mr-4 sensor-index">
                                         Not Attached
                                     </Typography.Subheader>
