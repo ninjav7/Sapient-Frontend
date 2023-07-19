@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Cookies } from 'react-cookie';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -14,8 +15,6 @@ import { ReactComponent as CheckXmark } from '../../assets/icon/circle-xmark.svg
 import { ReactComponent as CheckMinusMark } from '../../assets/icon/circle-minusmark.svg';
 import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as Exclamation } from '../../assets/icon/circleExclamation.svg';
-import './auth.scss';
-import axios from 'axios';
 import { BaseUrl, checkLinkValidity, UpdateUserPassword } from '../../services/Network';
 import { isUserAuthenticated, getLoggedInUser } from '../../helpers/authUtils';
 import Input from '../../sharedComponents/form/input/Input';
@@ -26,6 +25,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from '../../sharedComponents/button/Button';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import TermsAndConditions from './TermsAndConditions';
+import './auth.scss';
 
 const Confirm = (props) => {
     const cookies = new Cookies();
@@ -53,6 +53,7 @@ const Confirm = (props) => {
     const [userDetails, setUserDetails] = useState({});
     const [errorCount, setErrorCount] = useState(0);
     const [isTermsAccepted, setTermsAcceptance] = useState(false);
+    const [isTermsRead, setTermsRead] = useState(false);
 
     // Terms and Condition Modal
     const [showModal, setModalShow] = useState(false);
@@ -61,6 +62,7 @@ const Confirm = (props) => {
 
     useEffect(() => {
         set_isMounted(true);
+        setTermsRead(false);
         setTermsAcceptance(false);
         document.body.classList.add('authentication-bg');
         const isAuthTknValid = isUserAuthenticated();
@@ -152,8 +154,14 @@ const Confirm = (props) => {
         }
     };
 
-    const handleAcceptClick = () => {
-        setTermsAcceptance(true);
+    const handleAccept = () => {
+        setTermsRead(true);
+        handleModalClose();
+    };
+
+    const handleDecline = () => {
+        setTermsAcceptance(false);
+        setTermsRead(false);
         handleModalClose();
     };
 
@@ -584,17 +592,28 @@ const Confirm = (props) => {
                                                     </div>
 
                                                     {/* Terms and Condition  */}
-                                                    <div className="mt-4">
+                                                    <div className="mt-4 d-flex align-items-center">
                                                         <Checkbox
-                                                            label="Accept Terms and Conditions."
+                                                            label=""
                                                             size={Checkbox.Sizes.md}
                                                             checked={isTermsAccepted}
                                                             onClick={() => {
-                                                                isTermsAccepted
-                                                                    ? setTermsAcceptance(!isTermsAccepted)
-                                                                    : handleModalOpen();
+                                                                setTermsAcceptance(!isTermsAccepted);
                                                             }}
+                                                            disabled={!isTermsRead}
                                                         />
+                                                        <Typography.Body size={Typography.Sizes.lg}>
+                                                            <div
+                                                                className="d-flex align-items-center"
+                                                                style={{ gap: '0.2rem' }}>
+                                                                <div>{`I have read and agree to the`}</div>
+                                                                <div
+                                                                    className="model-text-style mouse-pointer"
+                                                                    onClick={
+                                                                        handleModalOpen
+                                                                    }>{`terms of service.`}</div>
+                                                            </div>
+                                                        </Typography.Body>
                                                     </div>
 
                                                     <FormGroup className="mb-3 mt-4">
@@ -686,7 +705,8 @@ const Confirm = (props) => {
             <TermsAndConditions
                 showModal={showModal}
                 closeModal={handleModalClose}
-                handleAcceptClick={handleAcceptClick}
+                handleAccept={handleAccept}
+                handleDecline={handleDecline}
             />
         </React.Fragment>
     );
