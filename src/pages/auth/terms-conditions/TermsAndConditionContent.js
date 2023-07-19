@@ -8,7 +8,7 @@ const ContentHeader = (props) => {
     return (
         <>
             <Typography.Header size={Typography.Sizes.xl}>{title}</Typography.Header>
-            <Brick sizeInRem={2} />
+            <Brick sizeInRem={1.5} />
         </>
     );
 };

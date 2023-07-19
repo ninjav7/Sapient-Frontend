@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Typography from '../../sharedComponents/typography';
-import Button from '../../sharedComponents/button/Button';
-import TermsAndConditionContent from './terms-conditions/TermsAndConditionContent';
+import Typography from '../../../sharedComponents/typography';
+import Button from '../../../sharedComponents/button/Button';
+import TermsAndConditionContent from './TermsAndConditionContent';
 
 const TermsAndConditions = (props) => {
     const { showModal, closeModal, handleAccept, handleDecline } = props;
@@ -42,7 +42,12 @@ const TermsAndConditions = (props) => {
                     <Typography.Header size={Typography.Sizes.lg}>Accept Terms and Conditions</Typography.Header>
                 </Modal.Header>
                 <Modal.Body
-                    style={{ padding: '2.5rem', height: '30rem', maxHeight: '30rem', overflowY: 'auto' }}
+                    style={{
+                        padding: '2.5rem',
+                        maxHeight: '30rem',
+                        overflowY: 'auto',
+                        paddingTop: '1.5rem',
+                    }}
                     ref={modalBodyRef}
                     onScroll={handleScroll}>
                     <TermsAndConditionContent />

@@ -10,7 +10,6 @@ import { ReactComponent as LogoSVG } from '../../assets/icon/Logo1.svg';
 import { ReactComponent as CircleCheckSVG } from '../../assets/icon/circle-check.svg';
 import InputTooltip from '../../sharedComponents/form/input/InputTooltip';
 import { forgotPassword } from './service';
-import { UserStore } from '../../store/UserStore';
 
 const ForgetPassword = () => {
     const history = useHistory();

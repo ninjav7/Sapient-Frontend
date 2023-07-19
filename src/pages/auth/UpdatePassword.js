@@ -24,7 +24,7 @@ import Brick from '../../sharedComponents/brick';
 import Modal from 'react-bootstrap/Modal';
 import Button from '../../sharedComponents/button/Button';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
-import TermsAndConditions from './TermsAndConditions';
+import TermsAndConditions from './terms-conditions/TermsAndConditions';
 import './auth.scss';
 
 const Confirm = (props) => {
