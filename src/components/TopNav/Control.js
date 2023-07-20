@@ -4,11 +4,14 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
+import { ReactComponent as BarsSolid } from '../../assets/icon/bars-solid.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
+import Typography from '../../sharedComponents/typography';
+import { DropDownIcon } from '../../sharedComponents/dropDowns/dropDownButton';
 
 const Control = () => {
     const location = useLocation();
@@ -80,6 +83,29 @@ const Control = () => {
         history.push({
             pathname: `${pathName}`,
         });
+    };
+
+    const MenuListForSettings = () => {
+        return (
+            <div>
+                <button
+                    className="reset-styles d-block w-100"
+                    onClick={() => {
+                        alert('User Preference Model with Popup.');
+                    }}>
+                    <div className="dropdown-list-item d-flex align-items-center borders-bottom">
+                        <LogoutIcon className="mr-3 error-600" />
+                        <Typography.Body size={Typography.Sizes.lg}>{`User Preference`}</Typography.Body>
+                    </div>
+                </button>
+                <button className="reset-styles d-block w-100" onClick={handleLogout}>
+                    <div className="dropdown-list-item d-flex align-items-center">
+                        <LogoutIcon className="mr-3 error-600" />
+                        <Typography.Body size={Typography.Sizes.lg}>{`Sign out`}</Typography.Body>
+                    </div>
+                </button>
+            </div>
+        );
     };
 
     useEffect(() => {
@@ -288,10 +314,11 @@ const Control = () => {
                 </div>
             </div>
 
-            <button className="btn topbar-logout-btn" onClick={handleLogout}>
-                <LogoutIcon />
-                Sign Out
-            </button>
+            <div className="d-flex align-items-center mr-3 z-3 position-relative ml-3">
+                <DropDownIcon triggerButtonIcon={<BarsSolid width={16} height={16} style={{ fill: 'white' }} />}>
+                    <MenuListForSettings />
+                </DropDownIcon>
+            </div>
         </>
     );
 };

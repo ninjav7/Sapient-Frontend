@@ -3,19 +3,17 @@
 .buidling-switcher-container {
     border-bottom: 0.0625rem solid $primary-gray-200;
     background: $base-white;
-    
-    .react-select-option-icon{
+
+    .react-select-option-icon {
         padding: 0 !important;
     }
 }
 
-.building-switcher{
+.building-switcher {
     width: 20.75rem !important;
 }
 
 .secondary-nav-style {
-    position: fixed;
-    z-index: 100;
     left: 0;
     top: 2.8125rem;
     height: 2.75rem;

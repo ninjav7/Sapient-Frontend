@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
-import './style.css';
 import { changeLayout } from '../redux/actions';
 import SideNav from '../components/SideNav/SideNav';
 import TopNav from '../components/TopNav/TopNav';
@@ -10,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
 import { UserStore } from '../store/UserStore';
+import './style.css';
 
 const loading = () => <div className="text-center"></div>;
 
@@ -93,6 +93,7 @@ const HorizontalLayout = (props) => {
                             </Suspense>
                         </div>
                     )}
+
                     {showNotification ? (
                         <div className="notification-alignment">
                             <Notification

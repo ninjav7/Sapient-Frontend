@@ -208,7 +208,7 @@ const SecondaryTopNavBar = () => {
 
     return (
         <React.Fragment>
-            <div className="buidling-switcher-container w-100 secondary-nav-style">
+            <div className="buidling-switcher-container secondary-nav-style w-100 position-relative z-2">
                 <SecondaryNavBar
                     onChangeBuilding={(e) => handleBldgSwitcherChange(e.value)}
                     buildings={buildingsList}
