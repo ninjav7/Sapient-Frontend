@@ -128,6 +128,7 @@ const Confirm = (props) => {
                         {
                             password: password,
                             confirm_password: cpassword,
+                            accept_terms: isTermsAccepted,
                         },
                         { headers }
                     )
