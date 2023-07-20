@@ -12,9 +12,9 @@ const TermsAndConditions = (props) => {
     const handleScroll = () => {
         const modalBody = modalBodyRef.current;
 
-        const scrollPosition = Math.round(modalBody.scrollTop);
-        const contentHeight = Math.round(modalBody.scrollHeight);
-        const clientHeight = Math.round(modalBody.clientHeight);
+        const scrollPosition = Math.round(modalBody?.scrollTop);
+        const contentHeight = Math.round(modalBody?.scrollHeight);
+        const clientHeight = Math.round(modalBody?.clientHeight);
 
         const isBottom = scrollPosition + clientHeight >= contentHeight;
         setIsScrolledToBottom(isBottom);
