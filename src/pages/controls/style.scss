@@ -32,8 +32,8 @@
         overflow-y: scroll;
     }
 }
-.unsaved-changes{
-    color:#b42318!important;
+.unsaved-changes {
+    color: #b42318 !important;
 }
 
 .spacing {
@@ -272,6 +272,9 @@
 
 .plug-rule-body {
     padding: 12px 45px;
+    .isHide {
+        display: none;
+    }
     .plug-rule-body-header {
         display: flex;
         justify-content: space-between;

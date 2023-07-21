@@ -123,6 +123,8 @@ export function getFiltersForSensorsRequest(args) {
                     space_type_id: args.spaceTypeTypeFilterString
                         ? encodeURI(args.spaceTypeTypeFilterString?.join('+'))
                         : args.spaceTypeTypeFilterString,
+                    assigned_rule: args?.isGetOnlyLinked ? args?.plugRuleId : 'other',
+                    plug_rule_id: !args?.isGetOnlyLinked ? args?.plugRuleId : null,
                 },
                 _.identity
             ),
@@ -148,11 +150,12 @@ export function getUnlinkedSocketRules(
     withPagination,
     getParams,
     isGetOnlyLinked,
-    plugRuleId
+    plugRuleId,
+    sensor_search
 ) {
     let params = '';
     if (withPagination) {
-        params = `?building_id=${activeBuildingId}&plug_rule_id=${plugRuleId}&page_size=${pageSize}&page_no=${pageNo}`;
+        params = `?building_id=${activeBuildingId}&page_size=${pageSize}&page_no=${pageNo}`;
     } else {
         params = `?building_id=${activeBuildingId}`;
     }
@@ -167,6 +170,7 @@ export function getUnlinkedSocketRules(
         .get(`${getListSensorsForBuildings}${params}`, {
             params: _.pickBy(
                 {
+                    sensor_search: sensor_search,
                     floor_id: floorTypeFilterString
                         ? encodeURI(floorTypeFilterString?.join('+'))
                         : floorTypeFilterString,
@@ -191,7 +195,7 @@ export function getUnlinkedSocketRules(
                         ? encodeURI(sensorTypeFilterString?.join('+'))
                         : sensorTypeFilterString,
                     assigned_rule: isGetOnlyLinked ? plugRuleId : 'other',
-                    plug_rule_id: isGetOnlyLinked ? plugRuleId : null,
+                    plug_rule_id: !isGetOnlyLinked ? plugRuleId : null,
                     ...getParams,
                 },
                 _.identity
