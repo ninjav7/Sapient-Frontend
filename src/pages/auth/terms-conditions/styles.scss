@@ -51,7 +51,7 @@
     width: 3.125rem;
     height: 3.125rem;
     border-radius: 50%;
-    background-color: $dataviz-blue-400;
+    background-color: $dataviz-blue-500;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -62,7 +62,7 @@
 }
 
 .circle-container:hover {
-    background-color: $dataviz-blue-600;
+    background-color: $dataviz-blue-700;
 }
 
 .circle-icon {
