@@ -10,6 +10,7 @@ import { userPermissionData, buildingData } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { configChildRoutes } from '../SecondaryTopNavBar/utils';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
+import './styles.scss';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -232,7 +233,7 @@ const NavLinks = () => {
     }, [userPermission]);
 
     return (
-        <div className="top-nav-routes-list">
+        <div className="top-nav-routes-list d-flex align-items-center">
             {authProtectedRoutes
                 .filter(
                     (item) =>
@@ -254,28 +255,28 @@ const NavLinks = () => {
                     return (
                         <div
                             key={index}
-                            className={`navbar-head-container mouse-pointer ${className}`}
+                            className={`d-flex align-items-center mouse-pointer navbar-head-container ${className}`}
                             onClick={() => {
                                 handleSideNavChange(item.name);
                                 handlePathChange(item.path);
                             }}>
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Circlebolt />
+                                    <div>
+                                        <Circlebolt className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Control' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Toggleon />
+                                    <div>
+                                        <Toggleon className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
                                 {item.name === 'Explore' && (
-                                    <div className={`font-icon-style ${className}`}>
-                                        <Telescope />
+                                    <div>
+                                        <Telescope className={`navbar-icons-style ${className}`} />
                                     </div>
                                 )}
-                                <div className={`navbar-heading ${className}`}>{item.name}</div>
+                                <div className={`navbar-heading ml-2 ${className}`}>{item.name}</div>
                             </div>
                         </div>
                     );

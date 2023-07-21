@@ -9,7 +9,7 @@ import { BuildingListStore } from '../../store/BuildingStore';
 import { fetchBuildingsList } from '../../services/buildings';
 import { fetchPermissions } from '../../services/permissions';
 import { accountChildRoutes, accountRoutes, configChildRoutes, configRoutes } from '../SecondaryTopNavBar/utils';
-import '../style.css';
+import './styles.scss';
 
 const TopNav = () => {
     const location = useLocation();
@@ -85,7 +85,7 @@ const TopNav = () => {
     }, []);
 
     return (
-        <div className="energy-top-nav">
+        <div className="top-nav-bar d-flex w-100">
             <Logo />
             <div className="energy-top-nav__vertical-separator" />
             <NavLinks />

@@ -1,0 +1,92 @@
+@import '../../assets/scss/colors';
+
+.top-nav-bar {
+    position: fixed;
+    background: $primary-gray-900;
+    height: 2.8125rem;
+    width: 100%;
+}
+
+.logo-style {
+    padding: 0 0.75rem;
+}
+
+.top-nav-routes-list {
+    gap: 1.5rem;
+}
+
+.navbar-head-container {
+    height: 100%;
+    border-bottom: 0.125rem solid transparent;
+    border-top: 0.125rem solid transparent;
+}
+
+.navbar-head-container:hover {
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+    border-bottom: 0.125rem solid $primary-indigo-600;
+}
+
+.navbar-head-container.active {
+    border-bottom: 0.125rem solid $primary-indigo-600 !important;
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+}
+
+.navbar-heading {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+    color: $primary-gray-400;
+}
+
+.navbar-heading.active {
+    color: $base-white;
+}
+
+.navbar-icons-style {
+    path {
+        fill: $primary-gray-400;
+    }
+}
+
+.navbar-icons-style.active {
+    path {
+        fill: $base-white;
+    }
+}
+
+.navbar-head-container:hover,
+.navbar-head-container:hover .navbar-heading,
+.navbar-head-container:hover .navbar-icons-style path {
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+    color: $base-white;
+    fill: $base-white;
+}
+
+.profile-container {
+    padding: 0.3rem;
+    background-color: $primary-gray-400;
+    border-radius: 0.5rem;
+}
+
+.profile-photo {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    path {
+        fill: $base-white;
+    }
+}
+
+.user-profile-container {
+    display: flex;
+    flex-direction: row;
+    min-width: 5rem;
+    align-items: center;
+}
+
+.user-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: $base-white;
+}

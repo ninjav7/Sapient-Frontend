@@ -4,20 +4,21 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
-import { ReactComponent as BarsSolid } from '../../assets/icon/bars-solid.svg';
+import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
-import Typography from '../../sharedComponents/typography';
-import { DropDownIcon } from '../../sharedComponents/dropDowns/dropDownButton';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import UserPreferences from './user-preference/UserPreferences';
+import './styles.scss';
 
 const Control = () => {
     const location = useLocation();
     const history = useHistory();
     const cookies = new Cookies();
+    const user = cookies.get('user');
 
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -27,7 +28,10 @@ const Control = () => {
     const handleModalOpen = () => setModalStatus(true);
     const handleModalClose = () => setModalStatus(false);
 
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     const [pageType, setPageType] = useState('');
+    const [userName, setUserName] = useState('');
 
     const [accountRoutes, setAccountRoutes] = useState([
         '/settings/account',
@@ -45,6 +49,8 @@ const Control = () => {
         '/settings/active-devices',
     ]);
 
+    const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
+
     const handleLogout = () => {
         ComponentStore.update((s) => {
             s.parent = '';
@@ -52,6 +58,15 @@ const Control = () => {
         localStorage.clear();
         cookies.remove('user', { path: '/' });
         window.location.reload();
+    };
+
+    const handleSettingsClick = () => {
+        handleRouteChange();
+        handleSideNavChange();
+    };
+
+    const dropdownMenuStyle = {
+        zIndex: 2000,
     };
 
     const handleSideNavChange = () => {
@@ -92,24 +107,11 @@ const Control = () => {
         });
     };
 
-    const MenuListForSettings = () => {
-        return (
-            <div>
-                <button className="reset-styles d-block w-100" onClick={handleModalOpen}>
-                    <div className="dropdown-list-item d-flex align-items-center borders-bottom">
-                        <LogoutIcon className="mr-3 error-600" />
-                        <Typography.Body size={Typography.Sizes.lg}>{`User Preference`}</Typography.Body>
-                    </div>
-                </button>
-                <button className="reset-styles d-block w-100" onClick={handleLogout}>
-                    <div className="dropdown-list-item d-flex align-items-center">
-                        <LogoutIcon className="mr-3 error-600" />
-                        <Typography.Body size={Typography.Sizes.lg}>{`Sign out`}</Typography.Body>
-                    </div>
-                </button>
-            </div>
-        );
-    };
+    useEffect(() => {
+        if (user?.user_id) {
+            user?.name ? setUserName(user?.name) : setUserName(`User`);
+        }
+    }, [user]);
 
     useEffect(() => {
         if (userPermission?.user_role !== 'admin') {
@@ -298,29 +300,39 @@ const Control = () => {
     return (
         <>
             <div className="topbar-buttons-wrapper">
-                <div className="topbar-buttons">
+                <div className="d-flex align-items-center">
                     <div
-                        className={`float-right h-100 ${
-                            pageType === 'settings' ? 'navbar-icon-container-active ' : 'navbar-icon-container'
+                        className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
+                            pageType === 'settings' ? 'active ' : ''
                         }`}>
-                        <button
-                            className={`btn btn-sm float-right ${
-                                pageType === 'settings' ? 'other-font-icon-style-active' : 'other-font-icon-style'
-                            }`}
-                            onClick={() => {
-                                handleSideNavChange();
-                                handleRouteChange();
-                            }}>
-                            <Gear />
+                        <button className="btn btn-sm" onClick={handleSettingsClick}>
+                            <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
                         </button>
                     </div>
-                </div>
-            </div>
 
-            <div className="d-flex align-items-center mr-3 z-3 position-relative ml-3">
-                <DropDownIcon triggerButtonIcon={<BarsSolid width={16} height={16} style={{ fill: 'white' }} />}>
-                    <MenuListForSettings />
-                </DropDownIcon>
+                    <Dropdown
+                        isOpen={dropdownOpen}
+                        toggle={toggleDropdown}
+                        className="mouse-pointer navbar-head-container user-profile-container">
+                        <DropdownToggle tag="div" className=" mr-3 user-profile-container">
+                            <div className="profile-container mr-2">
+                                <ProfilePhoto className="profile-photo" />
+                            </div>
+                            <div className="user-name">{userName}</div>
+                        </DropdownToggle>
+                        <DropdownMenu right className="mr-2 mt-2" style={dropdownMenuStyle}>
+                            <DropdownItem onClick={handleModalOpen}>
+                                <LogoutIcon className="mr-3 error-600" />
+                                {`User Preference`}
+                            </DropdownItem>
+                            <hr className="m-0 p-0" />
+                            <DropdownItem onClick={handleLogout}>
+                                <LogoutIcon className="mr-3 error-600" />
+                                {`Sign out`}
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </div>
             </div>
 
             <UserPreferences isModalOpen={isModalOpen} closeModal={handleModalClose} />
