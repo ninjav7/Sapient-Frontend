@@ -1,3 +1,72 @@
+@import '../../../assets/scss/colors';
+
 .terms-text {
     white-space: pre-line;
+}
+
+.terms-service-modal {
+    padding: 2.5rem;
+    max-height: 80vh;
+    overflow: auto;
+    padding-top: 2.5rem;
+    padding-right: 3rem;
+}
+
+/* Customize the scrollbar track */
+.terms-service-modal::-webkit-scrollbar {
+    width: 0.525rem;
+}
+
+.terms-service-modal::-webkit-scrollbar-track {
+    background-color: $success-25;
+}
+
+/* Customize the scrollbar thumb */
+.terms-service-modal::-webkit-scrollbar-thumb {
+    background-color: $primary-gray-400;
+    border-radius: 0.3125rem;
+}
+
+/* On hover, customize the scrollbar thumb */
+.terms-service-modal::-webkit-scrollbar-thumb:hover {
+    background-color: $primary-gray-500;
+}
+
+/* On active, customize the scrollbar thumb */
+.terms-service-modal::-webkit-scrollbar-thumb:active {
+    background-color: $primary-gray-600;
+}
+
+.terms-service-footer {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-content-container {
+    position: relative;
+}
+
+.circle-container {
+    width: 3.125rem;
+    height: 3.125rem;
+    border-radius: 50%;
+    background-color: $dataviz-blue-400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 1050;
+}
+
+.circle-container:hover {
+    background-color: $dataviz-blue-600;
+}
+
+.circle-icon {
+    width: 1.5625rem;
+    height: 1.5625rem;
+    fill: $base-white;
 }
