@@ -26,7 +26,6 @@ import UserProfile from '../pages/settings/users/UserProfile';
 import SingleRole from '../pages/settings/roles/SingleRole';
 import SingleRoleNew from '../pages/settings/roles/SingleRoleNew';
 import IndividualUtilityMeter from '../pages/settings/utility-meters/IndividualUtilityMeter';
-import UserPreference from '../pages/settings/user-preference/UserPreference';
 
 // controls
 const PlugRule = React.lazy(() => import('../pages/controls/PlugRule'));
@@ -333,14 +332,6 @@ const settingsRoutes = {
             component: SingleRoleNew,
             route: PrivateRoute,
             visibility: false,
-            parent: 'account',
-        },
-        {
-            path: '/settings/preference',
-            name: 'Preference',
-            component: UserPreference,
-            route: PrivateRoute,
-            visibility: true,
             parent: 'account',
         },
         {

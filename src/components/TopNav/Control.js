@@ -12,6 +12,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
 import Typography from '../../sharedComponents/typography';
 import { DropDownIcon } from '../../sharedComponents/dropDowns/dropDownButton';
+import UserPreferences from './user-preference/UserPreferences';
 
 const Control = () => {
     const location = useLocation();
@@ -20,6 +21,12 @@ const Control = () => {
 
     const [userPermission] = useAtom(userPermissionData);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    // User Preference Modal
+    const [isModalOpen, setModalStatus] = useState(false);
+    const handleModalOpen = () => setModalStatus(true);
+    const handleModalClose = () => setModalStatus(false);
+
     const [pageType, setPageType] = useState('');
 
     const [accountRoutes, setAccountRoutes] = useState([
@@ -88,11 +95,7 @@ const Control = () => {
     const MenuListForSettings = () => {
         return (
             <div>
-                <button
-                    className="reset-styles d-block w-100"
-                    onClick={() => {
-                        alert('User Preference Model with Popup.');
-                    }}>
+                <button className="reset-styles d-block w-100" onClick={handleModalOpen}>
                     <div className="dropdown-list-item d-flex align-items-center borders-bottom">
                         <LogoutIcon className="mr-3 error-600" />
                         <Typography.Body size={Typography.Sizes.lg}>{`User Preference`}</Typography.Body>
@@ -319,6 +322,8 @@ const Control = () => {
                     <MenuListForSettings />
                 </DropDownIcon>
             </div>
+
+            <UserPreferences isModalOpen={isModalOpen} closeModal={handleModalClose} />
         </>
     );
 };
