@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from 'react-bootstrap/Modal';
-import Typography from '../../../sharedComponents/typography';
 import Button from '../../../sharedComponents/button/Button';
 import TermsAndConditionContent from './TermsAndConditionContent';
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Typography from '../../../sharedComponents/typography';
+import { ReactComponent as DownArrowSVG } from '../../../assets/icon/terms-service/down-arrow.svg';
+import './styles.scss';
 
 const TermsAndConditions = (props) => {
     const { showModal, closeModal, handleAccept, handleDecline } = props;
-    const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+
     const modalBodyRef = useRef(null);
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
+    const acceptButtonDisabled = !isScrolledToBottom;
 
     const handleScroll = () => {
         const modalBody = modalBodyRef.current;
@@ -20,7 +26,12 @@ const TermsAndConditions = (props) => {
         setIsScrolledToBottom(isBottom);
     };
 
-    const acceptButtonDisabled = !isScrolledToBottom;
+    const scrollToBottom = () => {
+        const modalBody = modalBodyRef.current;
+        if (modalBody) {
+            modalBody.scrollTop = modalBody.scrollHeight;
+        }
+    };
 
     useEffect(() => {
         if (!showModal) setIsScrolledToBottom(false);
@@ -38,21 +49,28 @@ const TermsAndConditions = (props) => {
     return (
         <React.Fragment>
             <Modal show={showModal} onHide={closeModal} size="xl" centered backdrop="static" keyboard={false}>
-                <Modal.Header style={{ padding: '1.5rem' }}>
-                    <Typography.Header size={Typography.Sizes.lg}>Accept Terms and Conditions</Typography.Header>
-                </Modal.Header>
-                <Modal.Body
-                    style={{
-                        padding: '2.5rem',
-                        maxHeight: '30rem',
-                        overflowY: 'auto',
-                        paddingTop: '1.5rem',
-                    }}
-                    ref={modalBodyRef}
-                    onScroll={handleScroll}>
-                    <TermsAndConditionContent />
-                </Modal.Body>
-                <Modal.Footer style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem' }}>
+                <div className="modal-content-container">
+                    <Modal.Header style={{ padding: '2rem', paddingBottom: '1rem' }}>
+                        <Typography.Header size={Typography.Sizes.lg}>{`Terms of Service`}</Typography.Header>
+                    </Modal.Header>
+                    <Modal.Body className="terms-service-modal" ref={modalBodyRef} onScroll={handleScroll}>
+                        <TermsAndConditionContent />
+                    </Modal.Body>
+
+                    {!isScrolledToBottom && (
+                        <OverlayTrigger
+                            placement="left"
+                            overlay={
+                                <Tooltip id="scrollToBottomTooltip">{`Scroll down to bottom of terms of service.`}</Tooltip>
+                            }>
+                            <div className="circle-container mouse-pointer" onClick={scrollToBottom}>
+                                <DownArrowSVG className="circle-icon" />
+                            </div>
+                        </OverlayTrigger>
+                    )}
+                </div>
+
+                <Modal.Footer className="terms-service-footer">
                     <Button
                         label="Acknowledge"
                         size={Button.Sizes.md}

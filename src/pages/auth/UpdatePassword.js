@@ -23,6 +23,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import Brick from '../../sharedComponents/brick';
 import Modal from 'react-bootstrap/Modal';
 import Button from '../../sharedComponents/button/Button';
+import colorPalette from '../../assets/scss/_colors.scss';
 import { Checkbox } from '../../sharedComponents/form/checkbox';
 import TermsAndConditions from './terms-conditions/TermsAndConditions';
 import './auth.scss';
@@ -59,6 +60,14 @@ const Confirm = (props) => {
     const [showModal, setModalShow] = useState(false);
     const handleModalClose = () => setModalShow(false);
     const handleModalOpen = () => setModalShow(true);
+
+    const RequiredFieldUI = ({ className = '' }) => {
+        return (
+            <span style={{ color: colorPalette.error600 }} className={`font-weight-bold ${className}`}>
+                *
+            </span>
+        );
+    };
 
     useEffect(() => {
         set_isMounted(true);
@@ -297,12 +306,14 @@ const Confirm = (props) => {
                                             <>
                                                 <form className="authentication-form">
                                                     <FormGroup className="mb-3 pt-2">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            className="text-mute mb-1">
-                                                            Password
-                                                        </Typography.Subheader>
-
+                                                        <div className="d-flex">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mb-1">
+                                                                Password
+                                                            </Typography.Subheader>
+                                                            <RequiredFieldUI className="ml-1" />
+                                                        </div>
                                                         <Input
                                                             placeholder="Enter your password"
                                                             type={passwordType}
@@ -512,12 +523,14 @@ const Confirm = (props) => {
                                                         </div>
                                                     </div>
                                                     <FormGroup className="mb-3 pt-5">
-                                                        <Typography.Subheader
-                                                            size={Typography.Sizes.md}
-                                                            className="text-mute mb-1">
-                                                            Confirm Password
-                                                        </Typography.Subheader>
-
+                                                        <div className="d-flex">
+                                                            <Typography.Subheader
+                                                                size={Typography.Sizes.md}
+                                                                className="text-mute mb-1">
+                                                                Confirm Password
+                                                            </Typography.Subheader>
+                                                            <RequiredFieldUI className="ml-1" />
+                                                        </div>
                                                         <Input
                                                             placeholder="Enter your password"
                                                             disabled={
@@ -607,6 +620,7 @@ const Confirm = (props) => {
                                                             <div
                                                                 className="d-flex align-items-center"
                                                                 style={{ gap: '0.2rem' }}>
+                                                                <RequiredFieldUI />
                                                                 <div>{`I have read and agree to the`}</div>
                                                                 <div
                                                                     className="model-text-style mouse-pointer"
