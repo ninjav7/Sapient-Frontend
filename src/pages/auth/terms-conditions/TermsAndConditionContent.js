@@ -3,17 +3,6 @@ import Typography from '../../../sharedComponents/typography';
 import Brick from '../../../sharedComponents/brick';
 import './styles.scss';
 
-const ContentHeader = (props) => {
-    const { title } = props;
-    return (
-        <>
-            <Brick sizeInRem={1} />
-            <Typography.Header size={Typography.Sizes.xl}>{title}</Typography.Header>
-            <Brick sizeInRem={2} />
-        </>
-    );
-};
-
 const ContentBody = (props) => {
     const { header, content, noBottomSpacing = true } = props;
     return (
@@ -31,7 +20,6 @@ const ContentBody = (props) => {
 const TermsAndConditionContent = (props) => {
     return (
         <div>
-            <ContentHeader title={`Terms of Service`} />
             <ContentBody
                 header={`Agreement between User and sapient.industries`}
                 content={`Welcome to sapient.industries. The sapient.industries website (the "Site") is comprised of various web pages operated by Sapient Industries, Inc. ("Sapient"). sapient.industries is offered to you conditioned on your acceptance without modification of the terms, conditions, and notices contained herein (the "Terms"). Your use of sapient.industries constitutes your agreement to all such Terms. Please read these terms carefully, and keep a copy of them for your reference.sapient.industries is a News and Information Site.The purpose of this website is to provide information about Sapient products and services, as well as provide a point of contact for customers.`}

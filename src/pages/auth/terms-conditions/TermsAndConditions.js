@@ -4,7 +4,7 @@ import Button from '../../../sharedComponents/button/Button';
 import TermsAndConditionContent from './TermsAndConditionContent';
 import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-
+import Typography from '../../../sharedComponents/typography';
 import { ReactComponent as DownArrowSVG } from '../../../assets/icon/terms-service/down-arrow.svg';
 import './styles.scss';
 
@@ -50,6 +50,9 @@ const TermsAndConditions = (props) => {
         <React.Fragment>
             <Modal show={showModal} onHide={closeModal} size="xl" centered backdrop="static" keyboard={false}>
                 <div className="modal-content-container">
+                    <Modal.Header style={{ padding: '2rem', paddingBottom: '1rem' }}>
+                        <Typography.Header size={Typography.Sizes.lg}>{`Terms of Service`}</Typography.Header>
+                    </Modal.Header>
                     <Modal.Body className="terms-service-modal" ref={modalBodyRef} onScroll={handleScroll}>
                         <TermsAndConditionContent />
                     </Modal.Body>
