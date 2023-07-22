@@ -320,7 +320,7 @@ const Control = () => {
                             </div>
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>
-                        <DropdownMenu right className="mr-2 mt-2" style={dropdownMenuStyle}>
+                        <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
                             <DropdownItem onClick={handleModalOpen}>
                                 <LogoutIcon className="mr-3 error-600" />
                                 {`User Preference`}
