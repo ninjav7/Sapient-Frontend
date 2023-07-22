@@ -161,7 +161,7 @@ const SideNav = () => {
     ]);
 
     return (
-        <div className="side-nav position-relative">
+        <div className="side-nav">
             {activeRoute.map((item, index) => {
                 if (item.path.includes(':bldgId')) {
                     item.path = item.path.split(':')[0].concat(bldgId);

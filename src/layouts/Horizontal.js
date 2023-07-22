@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
 import { UserStore } from '../store/UserStore';
-import './style.css';
+import './styles.scss';
 
 const loading = () => <div className="text-center"></div>;
 
@@ -65,9 +65,10 @@ const HorizontalLayout = (props) => {
     return (
         <React.Fragment>
             <div id="wrapper">
-                <div>{showTopNav ? <TopNav /> : <AdminNav />}</div>
-
-                <div>{showTopNav ? <SecondaryTopNavBar /> : null}</div>
+                <div className="position-relative">
+                    {showTopNav ? <TopNav /> : <AdminNav />}
+                    {showTopNav ? <SecondaryTopNavBar /> : null}
+                </div>
 
                 <div>
                     {showSideNav && (
@@ -76,23 +77,15 @@ const HorizontalLayout = (props) => {
                         </div>
                     )}
 
-                    {showSideNav ? (
-                        <div
-                            className="energy-page-content"
-                            style={{
-                                padding: isDeviceRoute ? '0rem' : '2rem',
-                            }}>
-                            <Suspense fallback={loading()}>
-                                <Card className="energy-page-content-card shadow-none">{children}</Card>
-                            </Suspense>
-                        </div>
-                    ) : (
-                        <div className="energy-page-content-full-screen">
-                            <Suspense fallback={loading()}>
-                                <Card className="energy-page-content-card shadow-none">{children}</Card>
-                            </Suspense>
-                        </div>
-                    )}
+                    <div
+                        className="energy-page-content"
+                        style={{
+                            padding: isDeviceRoute ? '0rem' : '2rem',
+                        }}>
+                        <Suspense fallback={loading()}>
+                            <Card className="energy-page-content-card shadow-none">{children}</Card>
+                        </Suspense>
+                    </div>
 
                     {showNotification ? (
                         <div className="notification-alignment">
@@ -125,4 +118,5 @@ const mapStateToProps = (state) => {
         user: state.Auth.user,
     };
 };
+
 export default connect(mapStateToProps, { changeLayout })(HorizontalLayout);
