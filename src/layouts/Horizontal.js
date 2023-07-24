@@ -1,16 +1,19 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
 import { changeLayout } from '../redux/actions';
-import SideNav from '../components/SideNav/SideNav';
+
 import TopNav from '../components/TopNav/TopNav';
-import { useLocation } from 'react-router-dom';
+import SideNav from '../components/SideNav/SideNav';
+
+import { UserStore } from '../store/UserStore';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
 import { Notification } from '../sharedComponents/notification/Notification';
-import { UserStore } from '../store/UserStore';
+import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
+
 import '../components/style.css';
 import './styles.scss';
-import { deviceConfigRoutes, secondaryNavBarNotRequiredRoutes, sideNavNotBarRequiredRoutes } from './utils';
 
 const loading = () => <div className="text-center"></div>;
 
@@ -19,6 +22,7 @@ const HorizontalLayout = (props) => {
     const children = props.children || null;
 
     const [showSideNav, setShowSideNav] = useState(true);
+    const [showTopNav, setShowTopNav] = useState(true);
     const [showSecondaryNav, setShowSecondaryNav] = useState(true);
 
     const componentType = UserStore.useState((s) => s.componentType);
@@ -41,13 +45,15 @@ const HorizontalLayout = (props) => {
 
         const isSecondaryNavReq = secondaryNavBarNotRequiredRoutes.some((route) => location.pathname.includes(route));
         setShowSecondaryNav(!isSecondaryNavReq);
+
+        location.pathname.includes('/login') ? setShowTopNav(false) : setShowTopNav(true);
     }, [location.pathname]);
 
     return (
         <React.Fragment>
             <div id="wrapper">
                 <div className="position-relative">
-                    <TopNav />
+                    {showTopNav && <TopNav />}
                     {showSecondaryNav && <SecondaryTopNavBar />}
                 </div>
 
