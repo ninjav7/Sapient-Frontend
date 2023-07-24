@@ -337,6 +337,9 @@ div.navbar-head-container:hover .font-icon-style {
 div.navbar-head-container:hover .navbar-heading {
     color: white !important;
 }
+div.navbar-head-container:hover svg path{
+    fill: white !important;  
+}
 
 .navbar-icon-container-active {
     display: flex !important;
@@ -402,10 +405,16 @@ div.navbar-icon-container:hover .other-font-icon-style {
 .font-icon-style.active {
     color: white !important;
 }
+.font-icon-style.active svg path  {
+    fill: white !important;
+}
 
 .font-icon-style {
     color: grey !important;
     margin-right: 0.4375rem;
+}
+.font-icon-style svg path {
+    fill:grey !important;
 }
 .font-icon-style svg {
     font-size: 0.9375rem;
