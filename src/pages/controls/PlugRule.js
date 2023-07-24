@@ -168,6 +168,7 @@ const PlugRule = () => {
     const [estimatedEnergySavings, setEstimatedEnergySavings] = useState(0);
     const [isChangedSocketsLinked, setIsChangedSocketsLinked] = useState(false);
     const [isChangedSocketsUnlinked, setIsChangedSocketsUnlinked] = useState(false);
+    const [listSocketsIds, setListSocketsIds] = useState([]);
     const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
     const [isDisabledSaveButton, setIsDisabledSaveButton] = useState(true);
     const [isFetchedPlugRulesData, setIsFetchedPlugRulesData] = useState(false);
@@ -504,6 +505,7 @@ const PlugRule = () => {
         if (currentData?.building_id?.length && currentData?.building_id !== 'create-plug-rule') {
             setActiveBuildingId(currentData.building_id);
             fetchLinkedSocketRules();
+            fetchLinkedSocketIds();
         }
     }, [currentData.building_id]);
 
@@ -693,12 +695,7 @@ const PlugRule = () => {
                 return listToRemoveForReassign.indexOf(val) == -1;
             });
         } else {
-            const data = linkedSocketsTabData
-                .filter((el) => {
-                    return !selectedIdsToUnlink.includes(el.id);
-                })
-                .map((el) => el.id);
-            listOfsocketsToReassign = [...rulesToLink.sensor_id, ...data];
+            listOfsocketsToReassign = [...rulesToLink.sensor_id, ...listSocketsIds];
         }
         listOfsocketsToReassign &&
             (await reassignSensorsToRuleRequest({
@@ -726,6 +723,8 @@ const PlugRule = () => {
 
                 openSnackbar({ ...snackbarTitle, type: Notification.Types.success, duration: 5000 });
                 fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
+                fetchUnLinkedSocketRules();
             })
             .catch((error) => {});
 
@@ -847,8 +846,7 @@ const PlugRule = () => {
         setSelectedIdsToLink((prevState) => {
             return isAdding ? [...prevState, rule.id] : prevState.filter((sensorId) => sensorId !== rule.id);
         });
-
-        setIsChangedSocketsLinked(true);
+        setIsChangedSocketsUnlinked(true);
     };
     const handleRuleStateChangeUnlink = (value, rule) => {
         if (value === 'true') {
@@ -1081,6 +1079,15 @@ const PlugRule = () => {
     useEffect(() => {
         removeMacDuplicates();
     }, [macOptions]);
+
+    const fetchLinkedSocketIds = async () => {
+        activeBuildingId &&
+            listLinkSocketRulesRequest(ruleId, activeBuildingId).then((res) => {
+                const { sensor_id } = res.data.data;
+                setListSocketsIds(sensor_id);
+            });
+    };
+
     const fetchUnLinkedSocketRules = async () => {
         const sorting = sortByUnlinkedTab.method &&
             sortByUnlinkedTab.name && {
@@ -1202,12 +1209,12 @@ const PlugRule = () => {
             })
             .catch((error) => {});
     };
-useEffect(()=>{
-    fetchLinkedSocketRules();
-},[searchLinked]);
-useEffect(()=>{
-    fetchUnLinkedSocketRules();
-},[searchUnlinked]);
+    useEffect(() => {
+        fetchLinkedSocketRules();
+    }, [searchLinked]);
+    useEffect(() => {
+        fetchUnLinkedSocketRules();
+    }, [searchUnlinked]);
 
     const fetchLinkedSocketRules = async () => {
         const sorting = sortByLinkedTab.method &&
@@ -1381,15 +1388,9 @@ useEffect(()=>{
                     setTotalSocket(response.total_data);
                 }));
         } else {
-            const idOfSelectedSockets = [];
-            linkedSocketsTabData.forEach((socket) => {
-                if (!selectedIdsToUnlink.includes(socket.id)) {
-                    idOfSelectedSockets.push(socket.id);
-                }
-            });
-            setRulesToUnLink({ rule_id: ruleId, sensor_id: idOfSelectedSockets });
+            setRulesToUnLink({ rule_id: ruleId, sensor_id: listSocketsIds });
             setTotalSocket(0);
-            setSelectedIdsToUnlink(idOfSelectedSockets);
+            setSelectedIdsToUnlink(listSocketsIds);
             isLoadingLinkedRef.current = false;
         }
         setIsChangedSocketsLinked(true);
@@ -1505,6 +1506,7 @@ useEffect(()=>{
             fetchFiltersForSensorsUnlinked();
             fetchFiltersForSensorsLinked();
             fetchLinkedSocketRules();
+            fetchLinkedSocketIds();
             fetchPlugRuleDetail();
             setIsChangedRuleDetails(false);
             setIsChangedSocketsUnlinked(false);
@@ -1578,9 +1580,9 @@ useEffect(()=>{
                 setIsChangedSocketsLinked(false);
                 fetchUnLinkedSocketRules();
                 fetchLinkedSocketRules();
+                fetchLinkedSocketIds();
                 fetchFiltersForSensorsUnlinked();
                 fetchFiltersForSensorsLinked();
-                fetchLinkedSocketRules();
                 fetchPlugRuleDetail();
             });
         }

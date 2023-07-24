@@ -170,7 +170,7 @@ export function getUnlinkedSocketRules(
         .get(`${getListSensorsForBuildings}${params}`, {
             params: _.pickBy(
                 {
-                    sensor_search: sensor_search,
+                    sensor_search: encodeURI(sensor_search),
                     floor_id: floorTypeFilterString
                         ? encodeURI(floorTypeFilterString?.join('+'))
                         : floorTypeFilterString,
