@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom } from 'jotai';
 import { Cookies } from 'react-cookie';
 import { useLocation, useHistory } from 'react-router-dom';
-import { ComponentStore } from '../../store/ComponentStore';
-import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
+import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+
 import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
 import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
-import { useAtom } from 'jotai';
+import { ReactComponent as Preferences } from '../../assets/icon/top-nav/preferences.svg';
+import { ReactComponent as Logout } from '../../assets/icon/top-nav/logout.svg';
+
+import { ComponentStore } from '../../store/ComponentStore';
 import { userPermissionData } from '../../store/globalState';
-import { routesForAccountSettings } from './utils';
 import { BuildingStore } from '../../store/BuildingStore';
+
+import { routesForAccountSettings } from './utils';
 import { accountChildRoutes } from '../SecondaryTopNavBar/utils';
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+
 import UserPreferences from './user-preference/UserPreferences';
+
 import './styles.scss';
 
 const Control = () => {
@@ -326,15 +332,15 @@ const Control = () => {
                         <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
                             {pageType !== 'super-user' && (
                                 <>
-                                    <DropdownItem onClick={handleModalOpen}>
-                                        <LogoutIcon className="mr-3 error-600" />
+                                    <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
+                                        <Preferences className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                         {`User Preference`}
                                     </DropdownItem>
                                     <hr className="m-0 p-0" />
                                 </>
                             )}
-                            <DropdownItem onClick={handleLogout}>
-                                <LogoutIcon className="mr-3 error-600" />
+                            <DropdownItem onClick={handleLogout} className="pt-2 pl-3 pr-3">
+                                <Logout className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                 {`Sign out`}
                             </DropdownItem>
                         </DropdownMenu>
