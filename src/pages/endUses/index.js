@@ -20,7 +20,6 @@ import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/help
 import { buildingData } from '../../store/globalState';
 import './style.css';
 import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { UserStore } from '../../store/UserStore';
 
 const EndUsesPage = () => {
     const history = useHistory();
@@ -32,7 +31,6 @@ const EndUsesPage = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-    const timeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [endUsesData, setEndUsesData] = useState([]);
     const [topEndUsesData, setTopEndUsesData] = useState([]);
@@ -215,7 +213,7 @@ const EndUsesPage = () => {
         };
 
         const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count, timeFormat);
+            const date_format = xaxisLabelsFormat(days_count);
             setDateFormat(date_format);
         };
 

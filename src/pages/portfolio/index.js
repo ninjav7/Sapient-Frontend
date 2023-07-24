@@ -17,15 +17,15 @@ import PortfolioKPIs from './PortfolioKPIs';
 import EnergyConsumptionByEndUse from '../../sharedComponents/energyConsumptionByEndUse';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import './style.scss';
 import { apiRequestBody } from '../../helpers/helpers';
-import { updateBuildingStore } from '../../helpers/updateBuildingStore';
-import { UserStore } from '../../store/UserStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import Brick from '../../sharedComponents/brick';
 import ColumnChart from '../../sharedComponents/columnChart/ColumnChart';
 import colors from '../../assets/scss/_colors.scss';
 import { UNITS } from '../../constants/units';
 import { xaxisLabelsCount, xaxisLabelsFormat } from '../../sharedComponents/helpers/highChartsXaxisFormatter';
-import './style.scss';
+import { updateBuildingStore } from '../../helpers/updateBuildingStore';
 
 const PortfolioOverview = () => {
     const [userPermission] = useAtom(userPermissionData);
@@ -37,9 +37,6 @@ const PortfolioOverview = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const daysCount = DateRangeStore.useState((s) => +s.daysCount);
-
-    const dateFormatPred = UserStore.useState((s) => s.dateFormat);
-    const timeFormat = UserStore.useState((s) => s.timeFormat);
 
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
@@ -82,8 +79,7 @@ const PortfolioOverview = () => {
     };
 
     const toolTipFormatter = ({ value }) => {
-        const formattedDate = `${dateFormatPred} @ ${timeFormat === `12h` ? `hh:mm A` : `HH:mm`}`;
-        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(formattedDate);
+        return daysCount >= 182 ? moment.utc(value).format(`MMM 'YY`) : moment.utc(value).format(`MMM D 'YY @ hh:mm A`);
     };
 
     useEffect(() => {
@@ -94,7 +90,7 @@ const PortfolioOverview = () => {
         };
 
         const getFormattedChartDates = (days_count) => {
-            const date_format = xaxisLabelsFormat(days_count, timeFormat);
+            const date_format = xaxisLabelsFormat(days_count);
             setDateFormat(date_format);
         };
 
