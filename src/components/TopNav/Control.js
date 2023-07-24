@@ -301,14 +301,17 @@ const Control = () => {
         <>
             <div className="topbar-buttons-wrapper">
                 <div className="d-flex align-items-center">
-                    <div
-                        className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
-                            pageType === 'settings' ? 'active ' : ''
-                        }`}>
-                        <button className="btn btn-sm" onClick={handleSettingsClick}>
-                            <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
-                        </button>
-                    </div>
+                    {/* Portfolio / Building Settings are not for super-user  */}
+                    {pageType !== 'super-user' && (
+                        <div
+                            className={`float-right h-100 mr-3 navbar-head-container d-flex align-items-center ${
+                                pageType === 'settings' ? 'active ' : ''
+                            }`}>
+                            <button className="btn btn-sm" onClick={handleSettingsClick}>
+                                <Gear className={`navbar-icons-style ${pageType === 'settings' ? 'active' : ''}`} />
+                            </button>
+                        </div>
+                    )}
 
                     <Dropdown
                         isOpen={dropdownOpen}
@@ -321,11 +324,15 @@ const Control = () => {
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>
                         <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
-                            <DropdownItem onClick={handleModalOpen}>
-                                <LogoutIcon className="mr-3 error-600" />
-                                {`User Preference`}
-                            </DropdownItem>
-                            <hr className="m-0 p-0" />
+                            {pageType !== 'super-user' && (
+                                <>
+                                    <DropdownItem onClick={handleModalOpen}>
+                                        <LogoutIcon className="mr-3 error-600" />
+                                        {`User Preference`}
+                                    </DropdownItem>
+                                    <hr className="m-0 p-0" />
+                                </>
+                            )}
                             <DropdownItem onClick={handleLogout}>
                                 <LogoutIcon className="mr-3 error-600" />
                                 {`Sign out`}

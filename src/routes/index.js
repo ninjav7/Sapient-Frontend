@@ -495,7 +495,7 @@ const authRoutes = {
 
 // admin
 const adminRoutes = {
-    path: '/super-user',
+    path: '/super-user/accounts',
     name: 'Admin',
     visibility: true,
     children: [
@@ -525,7 +525,7 @@ const flattenRoutes = (routes) => {
 // All routes
 const allRoutes = [rootRoute, portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes, authRoutes];
 
-const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes];
+const authProtectedRoutes = [portfolioRoutes, settingsRoutes, controlRoutes, exploreRoutes, adminRoutes];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

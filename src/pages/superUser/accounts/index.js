@@ -14,13 +14,14 @@ import { ReactComponent as PlusSVG } from '../../../assets/icon/plus.svg';
 import { ReactComponent as InactiveSVG } from '../../../assets/icon/ban.svg';
 import { ReactComponent as ActiveSVG } from '../../../assets/icon/circle-check.svg';
 import { TrendsBadge } from '../../../sharedComponents/trendsBadge';
-import AddCustomer from './addCustomer';
 import { fetchCustomerList, fetchSelectedCustomer, fetchOfflineDevices } from './services';
 import useCSVDownload from '../../../sharedComponents/hooks/useCSVDownload';
 import { getCustomerListCSVExport } from '../../../utils/tablesExport';
-import './style.scss';
 import 'moment-timezone';
 import { timeZone } from '../../../utils/helper';
+import AddCustomer from './addCustomer';
+import Brick from '../../../sharedComponents/brick';
+import './style.scss';
 
 const SkeletonLoading = () => (
     <SkeletonTheme color="$primary-gray-1000" height={35}>
@@ -374,28 +375,31 @@ const Accounts = () => {
     ];
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style">Accounts</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+            <Row>
+                <Col lg={12}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                            <Typography.Header size={Typography.Sizes.lg}>Accounts</Typography.Header>
+                        </div>
+                        <div className="d-flex">
                             <Button
-                                label="Add Customer"
-                                size={Button.Sizes.lg}
+                                label={'Add Customer'}
+                                size={Button.Sizes.md}
                                 type={Button.Type.primary}
-                                icon={<PlusSVG />}
-                                iconAlignment={Button.IconAlignment.left}
                                 onClick={() => {
                                     setOpenCustomer(true);
                                 }}
+                                icon={<PlusSVG />}
                             />
                         </div>
                     </div>
                 </Col>
             </Row>
+
+            <Brick sizeInRem={2} />
+
             <Row>
-                <Col lg={12} className="mt-4">
+                <Col lg={12}>
                     <DataTableWidget
                         isLoading={isUserDataFetched}
                         isLoadingComponent={<SkeletonLoading />}
@@ -425,6 +429,7 @@ const Accounts = () => {
                     />
                 </Col>
             </Row>
+
             <AddCustomer
                 isAddCustomerOpen={openCustomer}
                 closeAddCustomerModal={closeAddCustomer}
