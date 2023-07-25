@@ -58,11 +58,11 @@ const Control = () => {
     const toggleDropdown = () => setDropdownOpen((prevState) => !prevState);
 
     const handleLogout = () => {
+        localStorage.clear();
+        cookies.remove('user', { path: '/' });
         ComponentStore.update((s) => {
             s.parent = '';
         });
-        localStorage.clear();
-        cookies.remove('user', { path: '/' });
         window.location.reload();
     };
 
