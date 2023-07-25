@@ -6,8 +6,8 @@ import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap
 
 import { ReactComponent as Gear } from '../../assets/icon/gear.svg';
 import { ReactComponent as ProfilePhoto } from '../../assets/icon/user.svg';
-import { ReactComponent as Preferences } from '../../assets/icon/top-nav/preferences.svg';
-import { ReactComponent as Logout } from '../../assets/icon/top-nav/logout.svg';
+import { ReactComponent as PreferencesSVG } from '../../assets/icon/top-nav/preferences.svg';
+import { ReactComponent as LogoutSVG } from '../../assets/icon/top-nav/logout.svg';
 
 import { ComponentStore } from '../../store/ComponentStore';
 import { userPermissionData } from '../../store/globalState';
@@ -322,7 +322,7 @@ const Control = () => {
                     <Dropdown
                         isOpen={dropdownOpen}
                         toggle={toggleDropdown}
-                        className="mouse-pointer navbar-head-container user-profile-container">
+                        className="mouse-pointer navbar-head-container ">
                         <DropdownToggle tag="div" className=" mr-3 user-profile-container">
                             <div className="profile-container mr-2">
                                 <ProfilePhoto className="profile-photo" />
@@ -333,14 +333,14 @@ const Control = () => {
                             {pageType !== 'super-user' && (
                                 <>
                                     <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
-                                        <Preferences className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                        <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                         {`User Preference`}
                                     </DropdownItem>
                                     <hr className="m-0 p-0" />
                                 </>
                             )}
                             <DropdownItem onClick={handleLogout} className="pt-2 pl-3 pr-3">
-                                <Logout className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                <LogoutSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                 {`Sign out`}
                             </DropdownItem>
                         </DropdownMenu>

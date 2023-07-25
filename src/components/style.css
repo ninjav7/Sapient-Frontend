@@ -318,16 +318,6 @@
     border-bottom: 0.125rem solid #6172f3;
 }
 
-div.navbar-head-container:hover .font-icon-style {
-    color: white !important;
-}
-div.navbar-head-container:hover .navbar-heading {
-    color: white !important;
-}
-div.navbar-head-container:hover svg path {
-    fill: white !important;
-}
-
 .navbar-icon-container-active {
     display: flex !important;
     justify-content: center;
