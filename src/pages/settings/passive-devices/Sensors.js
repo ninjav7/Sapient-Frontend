@@ -61,7 +61,7 @@ const Sensors = (props) => {
                             </div>
                             <div className="d-flex align-items-center">
                                 <Typography.Body size={Typography.Sizes.xxl} className="gray-500 mouse-pointer mr-3">
-                                    {`${record?.rated_amps}A`}
+                                    {record?.rated_amps && `${record?.rated_amps}A`}
                                 </Typography.Body>
                                 <Button
                                     className="breaker-action-btn"
