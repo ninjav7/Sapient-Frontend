@@ -390,9 +390,9 @@ const BuildingOverview = () => {
                 if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
                     setEquipTypeData(response?.data?.equipment_type_usage);
                 }
+                setFetchingEquipType(false);
             })
-            .catch(() => {})
-            .finally(() => {
+            .catch(() => {
                 setFetchingEquipType(false);
             });
     };
