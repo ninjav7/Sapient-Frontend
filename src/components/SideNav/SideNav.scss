@@ -1,7 +1,10 @@
 @import '../../assets/scss/colors';
-.side-nav {
-    margin-top: 1.0625rem;
+
+.side-nav-container {
+    width: 14.7rem;
+    height: 100%;
 }
+
 .side-nav-content {
     padding: 0.375rem 0.375rem 0.375rem 0.9375rem;
     width: 100%;
@@ -41,14 +44,4 @@
             background: none;
         }
     }
-}
-
-.energy-side-nav {
-    position: fixed;
-    left: 0;
-    top: 5.5625rem;
-    width: 14.70rem;
-    height: 100%;
-    padding-left: 1.5em;
-    border-right: 0.0625rem solid $primary-gray-200;
 }

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
-import './style.css';
+import './styles.scss';
 import { changeLayout } from '../redux/actions';
 import AdminNav from '../components/AdminNav/AdminNav';
 import SecondaryTopNavBar from '../components/SecondaryTopNavBar';
-
 
 const loading = () => <div className="text-center"></div>;
 
@@ -24,11 +23,11 @@ const AdminLayout = (props) => {
                 </div> */}
 
                 <div>
-                        <div className="energy-page-content-full-screen">
-                            <Suspense fallback={loading()}>
-                                <Card className="energy-page-content-card shadow-none">{children}</Card>
-                            </Suspense>
-                        </div>
+                    <div className="energy-page-content-full-screen">
+                        <Suspense fallback={loading()}>
+                            <Card className="energy-page-content-card shadow-none">{children}</Card>
+                        </Suspense>
+                    </div>
                 </div>
             </div>
         </React.Fragment>

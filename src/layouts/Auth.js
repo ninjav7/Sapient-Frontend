@@ -2,7 +2,7 @@ import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { Notification } from '../sharedComponents/notification/Notification';
 import { UserStore } from '../store/UserStore';
-import './style.css';
+import './styles.scss';
 const loading = () => <div className="text-center"></div>;
 
 const AuthLayout = (props) => {
