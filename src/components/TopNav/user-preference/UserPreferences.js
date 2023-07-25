@@ -101,7 +101,7 @@ const UserPreferences = (props) => {
             <div className="p-4">
                 <Typography.Header size={Typography.Sizes.lg}>{`User Preferences`}</Typography.Header>
 
-                <Brick sizeInRem={2} />
+                <Brick sizeInRem={1.5} />
 
                 <div>
                     <Typography.Body size={Typography.Sizes.md}>{`Date Format`}</Typography.Body>

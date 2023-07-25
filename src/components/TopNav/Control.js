@@ -330,15 +330,11 @@ const Control = () => {
                             <div className="user-name">{userName}</div>
                         </DropdownToggle>
                         <DropdownMenu right className="mr-2" style={dropdownMenuStyle}>
-                            {pageType !== 'super-user' && (
-                                <>
-                                    <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
-                                        <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
-                                        {`User Preference`}
-                                    </DropdownItem>
-                                    <hr className="m-0 p-0" />
-                                </>
-                            )}
+                            <DropdownItem onClick={handleModalOpen} className="pb-3 pl-3 pr-3">
+                                <PreferencesSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
+                                {`User Preferences`}
+                            </DropdownItem>
+                            <hr className="m-0 p-0" />
                             <DropdownItem onClick={handleLogout} className="pt-2 pl-3 pr-3">
                                 <LogoutSVG className="mr-3 topnav-dropdown-style topnav-icon-color" />
                                 {`Sign out`}
