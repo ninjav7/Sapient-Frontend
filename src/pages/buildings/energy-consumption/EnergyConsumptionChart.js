@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { Progress } from 'reactstrap';
@@ -11,16 +11,12 @@ import { percentageHandler } from '../../../utils/helper';
 import './styles.scss';
 
 const EnergyConsumptionChart = (props) => {
-    const { title = '', subTitle = '', style = {}, rows = [], unit = 'kWh', isFetching } = props;
+    const { title = '', subTitle = '', style = {}, rows = [], unit = 'kWh', isFetching, totalBldgUsage = 0 } = props;
 
-    const [totalVal, setTotalVal] = useState(0);
-
-    useEffect(() => {
-        if (rows.length !== 0) {
-            rows.sort((a, b) => b?.onHour - a?.onHour);
-            setTotalVal(rows[0]?.onHour + rows[0]?.offHour);
-        }
-    }, [rows]);
+    const calculatePercentage = (newVal, totalVal) => {
+        if (totalVal === 0) return 0;
+        return Math.round((newVal / totalVal) * 100);
+    };
 
     return (
         <div className="energy-usage-chart-wrapper" style={style}>
@@ -46,7 +42,7 @@ const EnergyConsumptionChart = (props) => {
                                     {rows?.length !== 0 ? (
                                         <>
                                             {rows.map((record, index) => (
-                                                <tr key={index}>
+                                                <tr key={record?._id}>
                                                     <td width="25%">
                                                         <Typography.Subheader size={Typography.Sizes.md}>
                                                             {record?.name}
@@ -57,26 +53,29 @@ const EnergyConsumptionChart = (props) => {
                                                             <Progress
                                                                 bar
                                                                 value={record?.on_hours_usage?.new}
-                                                                max={totalVal}
+                                                                max={totalBldgUsage}
                                                                 barClassName="custom-on-hour"
                                                             />
                                                             <Progress
                                                                 bar
                                                                 value={record?.off_hours_usage}
-                                                                max={totalVal}
+                                                                max={totalBldgUsage}
                                                                 barClassName="custom-off-hour"
                                                             />
                                                         </Progress>
                                                     </td>
                                                     <td width="20%">
                                                         <div className="energy-usage-chart-value">{`${formatConsumptionValue(
-                                                            record?.on_hours_usage?.new
+                                                            formatConsumptionValue(
+                                                                record?.on_hours_usage?.new / 1000,
+                                                                2
+                                                            )
                                                         )} ${unit}`}</div>
                                                     </td>
                                                     <td width="10%">
-                                                        <div className="energy-usage-chart-value">{`${percentageHandler(
-                                                            record?.total_energy_consumed,
-                                                            record?.on_hours_usage?.new
+                                                        <div className="energy-usage-chart-value">{`${calculatePercentage(
+                                                            record?.on_hours_usage?.new,
+                                                            totalBldgUsage
                                                         )}%`}</div>
                                                     </td>
                                                     <td width="5%">

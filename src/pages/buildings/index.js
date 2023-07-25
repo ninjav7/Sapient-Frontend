@@ -98,6 +98,8 @@ const BuildingOverview = () => {
     const [isWeatherChartVisible, setWeatherChartVisibility] = useState(false);
 
     const [equipTypeData, setEquipTypeData] = useState([]);
+    const [totalBldgUsage, setTotalBldgUsage] = useState(0);
+
     const [isFetchingEquipType, setFetchingEquipType] = useState(false);
     const [spaceTypeData, setSpaceTypeData] = useState([]);
     const [isFetchingSpaceType, setFetchingSpaceType] = useState(false);
@@ -384,10 +386,9 @@ const BuildingOverview = () => {
         await getEnergyConsumptionByType(payload)
             .then((res) => {
                 const response = res?.data;
-                if (response?.success && response?.data.length !== 0) {
-                    let data = response?.data;
-                    data.sort((a, b) => b.on_hours_usage.new - a.on_hours_usage.new);
-                    setEquipTypeData(response?.data);
+                if (response?.data?.total_building_usage) setTotalBldgUsage(response?.data?.total_building_usage);
+                if (response?.success && response?.data?.equipment_type_usage.length !== 0) {
+                    setEquipTypeData(response?.data?.equipment_type_usage);
                 }
                 setFetchingEquipType(false);
             })
@@ -597,6 +598,7 @@ const BuildingOverview = () => {
                             subTitle="Office-Hours and After-Hours Energy Used"
                             isFetching={isFetchingEquipType}
                             rows={equipTypeData}
+                            totalBldgUsage={totalBldgUsage}
                         />
                     </div>
                     {/* Commented below component as part of ticket PLT-1083 */}
