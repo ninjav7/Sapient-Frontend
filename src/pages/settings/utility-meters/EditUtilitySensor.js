@@ -487,8 +487,8 @@ const EditUtilitySensor = (props) => {
                             s.notificationMessage = response?.message
                                 ? response?.message
                                 : res
-                                ? 'Unable to update Utility Meter sensor.'
-                                : 'Unable to Utility Meter sensor due to Internal Server Error!.';
+                                ? 'Unable to update Utility Monitor sensor.'
+                                : 'Unable to Utility Monitor sensor due to Internal Server Error!.';
                             s.notificationType = 'error';
                         });
                     }
